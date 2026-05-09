@@ -1,4 +1,4 @@
-// netlify/functions/_brain/response.js
+// netlify/functions/_share/response.js
 // ============================================================
 // TheWing.ai • Response Helpers
 // v1.0.0
