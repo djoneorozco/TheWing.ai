@@ -1,7 +1,7 @@
 // netlify/functions/verify-code.js
 // ============================================================
 // TheWing.ai • verify-code
-// v1.0.0
+// v1.0.1
 //
 // PURPOSE:
 // - Accepts POST { email, code }
@@ -19,11 +19,7 @@
 //          email_verified_at = now()
 //          status = "active"
 //          updated_at = now()
-//     2) Returns the canonical profile
-//
-// COMPATIBLE WITH:
-// - TheWing.ai send-code.js v1.0.0
-// - Existing PCSUnited verify-account page pattern
+//     2) Returns canonical profile
 //
 // FRONTEND ENDPOINT:
 // - POST /api/verify-code
@@ -37,11 +33,11 @@
 // EXPECTED email_codes TABLE FIELDS:
 // - email text
 // - code_hash text
-// - attempts int
+// - attempts int4
 // - created_at timestamptz
 // - expires_at timestamptz
 //
-// RECOMMENDED profiles TABLE FIELDS:
+// EXPECTED profiles TABLE FIELDS:
 // - email text
 // - status text
 // - email_verified boolean
@@ -54,7 +50,7 @@
 const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
 
-const FUNCTION_VERSION = "thewing-verify-code-1.0.0";
+const FUNCTION_VERSION = "thewing-verify-code-1.0.1";
 const MAX_ATTEMPTS = 5;
 
 const ALLOWED_ORIGINS = new Set([
@@ -63,11 +59,11 @@ const ALLOWED_ORIGINS = new Set([
   "https://pcsunited.netlify.app",
   "https://pcs-united.webflow.io",
   "https://pcsu.webflow.io",
+  "https://pcsunited-com-28346d.webflow.io",
 
   "https://thewing.ai",
   "https://www.thewing.ai",
-  "https://thewing-ai.netlify.app",
-  "https://thewingai.netlify.app",
+  "https://thewing.netlify.app",
 
   "http://localhost:3000",
   "http://127.0.0.1:3000",
@@ -162,8 +158,14 @@ function isExpired(expiresAt) {
   return Date.now() > exp;
 }
 
-function publicProfile(row) {
-  if (!row || typeof row !== "object") return null;
+function publicProfile(row, emailFallback) {
+  if (!row || typeof row !== "object") {
+    return {
+      email: emailFallback || "",
+      status: "",
+      email_verified: false
+    };
+  }
 
   const projectedHomePrice = toNumberOrNull(row.projected_home_price);
   const downpayment = toNumberOrNull(row.downpayment);
@@ -174,7 +176,7 @@ function publicProfile(row) {
     id: row.id || null,
     profiles_user_id_unique: row.profiles_user_id_unique || null,
 
-    email: row.email || "",
+    email: row.email || emailFallback || "",
     first_name: row.first_name || "",
     last_name: row.last_name || "",
     full_name: row.full_name || "",
@@ -201,10 +203,13 @@ function publicProfile(row) {
 
     price: projectedHomePrice,
     homePrice: projectedHomePrice,
+
     expenses: monthlyExpenses,
     monthlyExpenses,
+
     dpAmt: downpayment,
     downPayment: downpayment,
+
     creditScore,
 
     pcs_base: row.base || "",
@@ -217,41 +222,15 @@ function publicProfile(row) {
   };
 }
 
-async function fetchProfileByEmail(supabase, email) {
+async function fetchLatestCodeRecord(supabase, email) {
   const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
+    .from("email_codes")
+    .select("email, code_hash, attempts, expires_at, created_at")
     .eq("email", email)
+    .order("created_at", { ascending: false })
     .limit(1);
 
-  if (error) {
-    throw error;
-  }
-
-  return firstRow(data);
-}
-
-async function updateProfileVerified(supabase, email) {
-  const now = new Date().toISOString();
-
-  const updatePayload = {
-    status: "active",
-    email_verified: true,
-    email_verified_at: now,
-    updated_at: now
-  };
-
-  const { data, error } = await supabase
-    .from("profiles")
-    .update(updatePayload)
-    .eq("email", email)
-    .select("*")
-    .limit(1);
-
-  if (error) {
-    throw error;
-  }
-
+  if (error) throw error;
   return firstRow(data);
 }
 
@@ -267,6 +246,36 @@ async function incrementAttempts(supabase, record, attempts) {
   if (error) {
     console.error("TheWing verify-code attempt update error:", error);
   }
+}
+
+async function fetchProfileByEmail(supabase, email) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("email", email)
+    .limit(1);
+
+  if (error) throw error;
+  return firstRow(data);
+}
+
+async function updateProfileVerified(supabase, email) {
+  const nowIso = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({
+      status: "active",
+      email_verified: true,
+      email_verified_at: nowIso,
+      updated_at: nowIso
+    })
+    .eq("email", email)
+    .select("*")
+    .limit(1);
+
+  if (error) throw error;
+  return firstRow(data);
 }
 
 exports.handler = async function handler(event) {
@@ -340,25 +349,7 @@ exports.handler = async function handler(event) {
   });
 
   try {
-    const { data: rows, error: fetchError } = await supabase
-      .from("email_codes")
-      .select("email, code_hash, attempts, expires_at, created_at")
-      .eq("email", email)
-      .order("created_at", { ascending: false })
-      .limit(1);
-
-    if (fetchError) {
-      console.error("TheWing verify-code lookup error:", fetchError);
-
-      return respond(event, 500, {
-        ok: false,
-        error: "Verification code lookup failed.",
-        details: fetchError.message || null,
-        version: FUNCTION_VERSION
-      });
-    }
-
-    const record = firstRow(rows);
+    const record = await fetchLatestCodeRecord(supabase, email);
 
     if (!record) {
       return respond(event, 400, {
@@ -400,26 +391,19 @@ exports.handler = async function handler(event) {
     }
 
     let profileRow = null;
+    let profileUpdateWarning = null;
 
     try {
       profileRow = await updateProfileVerified(supabase, email);
     } catch (profileUpdateError) {
       console.error("TheWing verify-code profile update error:", profileUpdateError);
+      profileUpdateWarning = profileUpdateError?.message || "Profile verification update failed.";
 
       try {
         profileRow = await fetchProfileByEmail(supabase, email);
       } catch (profileFetchError) {
         console.error("TheWing verify-code profile fallback fetch error:", profileFetchError);
       }
-
-      return respond(event, 200, {
-        ok: true,
-        warning: true,
-        message: "Code verified, but profile verification status could not be updated.",
-        profile: publicProfile(profileRow) || { email },
-        details: profileUpdateError.message || null,
-        version: FUNCTION_VERSION
-      });
     }
 
     if (!profileRow) {
@@ -432,13 +416,13 @@ exports.handler = async function handler(event) {
 
     return respond(event, 200, {
       ok: true,
-      message: "Code verified. Account is active.",
+      message: profileUpdateWarning
+        ? "Code verified, but profile verification status could not be updated."
+        : "Code verified. Account is active.",
+      warning: profileUpdateWarning ? true : false,
+      warning_detail: profileUpdateWarning,
       email,
-      profile: publicProfile(profileRow) || {
-        email,
-        status: "active",
-        email_verified: true
-      },
+      profile: publicProfile(profileRow, email),
       session: {
         auth_ok: true,
         email
