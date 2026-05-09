@@ -1,7 +1,7 @@
 // netlify/functions/send-code.js
 // ============================================================
 // TheWing.ai • send-code
-// v1.0.1
+// v1.0.2
 //
 // PURPOSE:
 // - Accepts POST { email, rank, lastName, phone, full_name, first_name, last_name }
@@ -9,7 +9,7 @@
 // - Hashes the code before saving
 // - Inserts row into public.email_codes
 // - Sends verification email through Resend
-// - Compatible with verify-code.js below
+// - Uses PCSUnited sender branding
 //
 // FRONTEND ENDPOINT:
 // - POST /api/send-code
@@ -21,12 +21,14 @@
 //   or SUPABASE_SERVICE_ROLE_KEY
 // - RESEND_API_KEY
 //
-// OPTIONAL ENV:
-// - EMAIL_FROM
-// - FROM_EMAIL
+// REQUIRED / RECOMMENDED ENV FOR PCSUNITED BRANDING:
+// - EMAIL_FROM=PCS United <concierge@pcsunited.com>
+// - FROM_EMAIL=PCS United <concierge@pcsunited.com>
 //
-// RECOMMENDED TEMP SENDER:
-// - EMAIL_FROM=PCS United <noreply@theorozcorealty.com>
+// IMPORTANT:
+// - pcsunited.com must be verified in Resend before sending from @pcsunited.com.
+// - Cloudflare Email Routing only receives/forwards email.
+// - Resend controls which domains can send outbound email.
 //
 // EXPECTED email_codes TABLE FIELDS:
 // - email text
@@ -41,7 +43,7 @@
 const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
 
-const FUNCTION_VERSION = "thewing-send-code-1.0.1";
+const FUNCTION_VERSION = "thewing-send-code-1.0.2";
 
 const ALLOWED_ORIGINS = new Set([
   "https://pcsunited.com",
@@ -141,7 +143,7 @@ function getFromAddress() {
   return cleanString(
     process.env.EMAIL_FROM ||
     process.env.FROM_EMAIL ||
-    "PCS United <noreply@theorozcorealty.com>"
+    "PCS United <concierge@pcsunited.com>"
   );
 }
 
@@ -349,6 +351,14 @@ exports.handler = async function handler(event) {
     });
   }
 
+  const from = getFromAddress();
+
+  if (!from || !/@pcsunited\.com>/i.test(from)) {
+    console.warn("TheWing send-code warning: EMAIL_FROM is not using @pcsunited.com.", {
+      from
+    });
+  }
+
   const code = makeSixDigitCode();
   const code_hash = hashCode(code);
   const created_at = new Date().toISOString();
@@ -385,7 +395,6 @@ exports.handler = async function handler(event) {
       });
     }
 
-    const from = getFromAddress();
     const subject = "PCS United • Your 6-Digit Verification Code";
 
     const text = buildTextEmail({
@@ -412,6 +421,7 @@ exports.handler = async function handler(event) {
       ok: true,
       message: "Verification code created, stored, and queued for delivery.",
       email,
+      from,
       emailId: emailResult?.id || null,
       expires_at,
       version: FUNCTION_VERSION
@@ -423,6 +433,7 @@ exports.handler = async function handler(event) {
       ok: false,
       error: error?.message || "Verification email could not be sent.",
       details: error?.response || null,
+      from,
       version: FUNCTION_VERSION
     });
   }
