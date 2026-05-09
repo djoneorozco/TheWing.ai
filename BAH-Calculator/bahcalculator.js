@@ -53,11 +53,18 @@
     };
 
     //#3) API
-    // For GitHub Pages or static hosting, use the live PCSUnited function by default.
-    // You can override this before bahcalculator.js loads:
-    // window.PCSU_API_ORIGIN = "https://your-domain.com";
-    const API_ORIGIN = window.PCSU_API_ORIGIN || "https://pcsunited.netlify.app";
-    const ENDPOINT = API_ORIGIN + "/.netlify/functions/opensource-brain";
+    // PCSUnited owns the public page.
+    // TheWing.ai powers the software / calculation layer.
+    //
+    // Optional override before this file loads:
+    // window.PCSU_THEWING_API_ORIGIN = "https://thewing.netlify.app";
+    // window.PCSU_API_ORIGIN = "https://thewing.netlify.app";
+    const API_ORIGIN =
+      window.PCSU_THEWING_API_ORIGIN ||
+      window.PCSU_API_ORIGIN ||
+      "https://thewing.netlify.app";
+
+    const ENDPOINT = API_ORIGIN.replace(/\/+$/, "") + "/api/brain";
 
     //#4) FORMATTERS
     function money0(value) {
@@ -108,6 +115,34 @@
       els.scoreRing.style.setProperty("--pct", String(pct.toFixed(2)));
     }
 
+    function firstFiniteNumber() {
+      for (let i = 0; i < arguments.length; i += 1) {
+        const n = Number(arguments[i]);
+        if (Number.isFinite(n)) return n;
+      }
+      return 0;
+    }
+
+    function firstString() {
+      for (let i = 0; i < arguments.length; i += 1) {
+        const s = String(arguments[i] == null ? "" : arguments[i]).trim();
+        if (s) return s;
+      }
+      return "";
+    }
+
+    function getPath(obj, path) {
+      if (!obj || !path) return undefined;
+      return String(path)
+        .split(".")
+        .reduce((acc, key) => {
+          if (acc && Object.prototype.hasOwnProperty.call(acc, key)) {
+            return acc[key];
+          }
+          return undefined;
+        }, obj);
+    }
+
     //#5) NORMALIZERS
     function parseYearsOfService(raw) {
       const n = parseInt(String(raw || "").replace(/[^\d]/g, ""), 10);
@@ -124,21 +159,50 @@
     function normalizeBase(rawBase) {
       const raw = String(rawBase || "").trim();
 
+      const compact = raw.toLowerCase().replace(/[^a-z0-9]/g, "");
+
       const aliasMap = {
-        "JBSA-Lackland": "Lackland AFB",
-        "JBSA Lackland": "Lackland AFB",
-        "JBSA-Randolph": "Randolph AFB",
-        "JBSA Randolph": "Randolph AFB",
-        "JBSA-Fort Sam Houston": "Fort-Sam-Houston AFB",
-        "JBSA-Fort-Sam-Houston": "Fort-Sam-Houston AFB"
+        jbsalackland: "Lackland AFB",
+        lackland: "Lackland AFB",
+        lacklandafb: "Lackland AFB",
+
+        jbsarandolph: "Randolph AFB",
+        randolph: "Randolph AFB",
+        randolphafb: "Randolph AFB",
+
+        jbsafortsamhouston: "Fort-Sam-Houston AFB",
+        fortsamhouston: "Fort-Sam-Houston AFB",
+        fortsamhoustonafb: "Fort-Sam-Houston AFB",
+
+        davismonthan: "Davis-Monthan AFB",
+        davismonthanafb: "Davis-Monthan AFB",
+        dmafb: "Davis-Monthan AFB",
+
+        fewarren: "F.E-Warren AFB",
+        fewarrenafb: "F.E-Warren AFB",
+        fewarrenairforcebase: "F.E-Warren AFB",
+        francisewarren: "F.E-Warren AFB",
+
+        littlerock: "Little-Rock AFB",
+        littlerockafb: "Little-Rock AFB",
+
+        mountainhome: "Mountain-Home AFB",
+        mountainhomeafb: "Mountain-Home AFB",
+
+        seymourjohnson: "Seymour-Johnson AFB",
+        seymourjohnsonafb: "Seymour-Johnson AFB",
+
+        wrightpatterson: "Wright-Patterson AFB",
+        wrightpattersonafb: "Wright-Patterson AFB",
+        wpafb: "Wright-Patterson AFB"
       };
 
-      return aliasMap[raw] || raw;
+      return aliasMap[compact] || raw;
     }
 
     function normalizeDependents(raw) {
       const s = String(raw || "").toLowerCase();
-      return s.includes("without") ? "without" : "with";
+      return s.includes("without") || s.includes("no") ? "without" : "with";
     }
 
     function rankTitle(rank) {
@@ -168,7 +232,165 @@
       return map[rank] || rank;
     }
 
-    //#6) INSIGHTS
+    //#6) THEWING RESPONSE NORMALIZER
+    function normalizeTheWingResponse(payload, data) {
+      const source =
+        data?.data ||
+        data?.payload ||
+        data?.result ||
+        data ||
+        {};
+
+      const profile =
+        source.profile ||
+        source.user ||
+        source.normalizedProfile ||
+        data?.payload?.profile ||
+        {};
+
+      const compensation =
+        source.compensation ||
+        source.pay ||
+        source.income ||
+        source.monthlyIncome ||
+        data?.payload?.compensation ||
+        {};
+
+      const monthly =
+        compensation.monthly ||
+        source.monthly ||
+        source.paySummary ||
+        source.summary ||
+        {};
+
+      const detail =
+        compensation.detail ||
+        source.detail ||
+        source.details ||
+        {};
+
+      const bahRecord =
+        detail.bahRecord ||
+        source.bahRecord ||
+        compensation.bahRecord ||
+        source.officialBah ||
+        {};
+
+      const payRecord =
+        detail.payRecord ||
+        source.payRecord ||
+        compensation.payRecord ||
+        source.officialPay ||
+        {};
+
+      const bah = firstFiniteNumber(
+        monthly.bah,
+        monthly.bahMonthly,
+        monthly.monthlyBAH,
+        compensation.bah,
+        compensation.bahMonthly,
+        source.bah,
+        source.monthlyBAH,
+        bahRecord.bah,
+        bahRecord.monthlyBAH,
+        data?.bah,
+        data?.monthlyBAH
+      );
+
+      const basePay = firstFiniteNumber(
+        monthly.basicPay,
+        monthly.basePay,
+        monthly.basicPayMonthly,
+        monthly.basePayMonthly,
+        compensation.basicPay,
+        compensation.basePay,
+        compensation.basicPayMonthly,
+        source.basicPay,
+        source.basePay,
+        payRecord.basicPayMonthly,
+        data?.basicPay,
+        data?.basePay
+      );
+
+      const bas = firstFiniteNumber(
+        monthly.bas,
+        monthly.basMonthly,
+        compensation.bas,
+        compensation.basMonthly,
+        source.bas,
+        source.basMonthly,
+        payRecord.basMonthly,
+        data?.bas
+      );
+
+      const total = firstFiniteNumber(
+        monthly.grossMonthlyComp,
+        monthly.combinedMonthlyGross,
+        monthly.totalMilitaryIncome,
+        monthly.militaryIncome,
+        monthly.householdIncome,
+        monthly.totalMonthly,
+        compensation.grossMonthlyComp,
+        compensation.combinedMonthlyGross,
+        compensation.totalMonthly,
+        source.totalMonthly,
+        source.totalMilitaryIncomeMonthly,
+        source.totalHouseholdIncomeMonthly,
+        data?.totalMonthly,
+        bah + basePay + bas
+      );
+
+      const displayBase = firstString(
+        profile.currentBase,
+        profile.base,
+        source.base,
+        source.canonicalBase,
+        bahRecord.base,
+        bahRecord.canonicalBase,
+        payload.base
+      );
+
+      const displayZip = firstString(
+        bahRecord.dutyZip,
+        source.dutyZip,
+        detail.dutyZip
+      );
+
+      const displayMha = firstString(
+        bahRecord.mhaName,
+        compensation.mhaName,
+        source.mhaName
+      );
+
+      const sourceVersion = firstString(
+        source.sourceVersion,
+        source.rateVersion,
+        bahRecord.rateVersion,
+        payRecord.sourceVersion,
+        compensation.sourceVersion,
+        data?.sourceVersion,
+        "TheWing.ai"
+      );
+
+      return {
+        profile,
+        compensation,
+        monthly,
+        detail,
+        bahRecord,
+        payRecord,
+        bah,
+        basePay,
+        bas,
+        total,
+        displayBase,
+        displayZip,
+        displayMha,
+        sourceVersion
+      };
+    }
+
+    //#7) INSIGHTS
     function paintInsights(lines) {
       if (!els.insightList) return;
 
@@ -183,18 +405,28 @@
       }).join("");
     }
 
-    //#7) INPUT READER
+    //#8) INPUT READER
     function readInputs() {
+      const rank = normalizeRank(els.paygrade && els.paygrade.value);
+      const yos = parseYearsOfService(els.yos && els.yos.value);
+      const base = normalizeBase(els.location && els.location.value);
+      const dependents = normalizeDependents(els.dependents && els.dependents.value);
+
       return {
         mode: "ACTIVE_DUTY",
-        rank: normalizeRank(els.paygrade && els.paygrade.value),
-        yos: parseYearsOfService(els.yos && els.yos.value),
-        base: normalizeBase(els.location && els.location.value),
-        dependents: normalizeDependents(els.dependents && els.dependents.value)
+        rank,
+        rank_paygrade: rank,
+        paygrade: rank,
+        yos,
+        yearsOfService: yos,
+        base,
+        dependents,
+        hasDependents: dependents === "with",
+        basType: ""
       };
     }
 
-    //#8) LOADING STATE
+    //#9) LOADING STATE
     function paintLoading(payload) {
       setText(els.totalHeroLabel, "Total Monthly Military Pay");
       setText(els.totalHeroValue, "Calculating...");
@@ -213,7 +445,7 @@
       setText(els.basLabel, "Estimated Monthly BAS");
       setText(els.basAmount, "...");
       setText(els.totalAmount, "...");
-      setText(els.totalNote, "Using PCSUnited Basic Calculator flow");
+      setText(els.totalNote, "Powered by TheWing.ai");
 
       setText(els.breakdownBah, "BAH Component");
       setText(els.breakdownBasePay, "Base Pay Component");
@@ -229,18 +461,18 @@
       setRing(4500);
 
       paintInsights([
-        "This calculator uses the PCSUnited Basic Calculator flow through opensource-brain.js.",
-        "opensource-brain.js should route into comp-engine.js, then official-pay.js and official-bah.js.",
-        "That keeps this calculator aligned with the rest of PCSUnited."
+        "PCSUnited owns this public calculator page; TheWing.ai powers the calculation layer.",
+        "TheWing uses official-pay.js and official-bah.js as source-truth modules.",
+        "This keeps the public tool fast while aligning the numbers with the Financial Dashboard."
       ]);
 
       setText(
         els.footerNote,
-        "Running Basic Calculator flow: GitHub UI → opensource-brain.js → comp-engine.js → official-pay / official-bah."
+        "Running TheWing.ai flow: public calculator → /api/brain → official-pay.js + official-bah.js."
       );
     }
 
-    //#9) ERROR STATE
+    //#10) ERROR STATE
     function paintError(message, payload) {
       setText(els.totalHeroLabel, "Total Monthly Military Pay");
       setText(els.totalHeroValue, "$0");
@@ -277,49 +509,28 @@
 
       paintInsights([
         message || "We could not calculate this estimate.",
-        "This calculator uses the backend flow, so check opensource-brain.js first.",
-        "Then confirm opensource-brain.js is routing correctly into comp-engine.js and the official modules."
+        "Confirm TheWing /api/brain is deployed and importing official-pay.js and official-bah.js correctly.",
+        "If /api/brain is not built yet, create the endpoint before switching this public calculator fully to TheWing."
       ]);
 
       setText(
         els.footerNote,
-        "Calculator unavailable. Check PCSUnited Basic Calculator flow."
+        "Calculator unavailable. Check TheWing.ai /api/brain and shared official modules."
       );
     }
 
-    //#10) SUCCESS STATE
+    //#11) SUCCESS STATE
     function paintSuccess(payload, data) {
-      const responsePayload = (data && data.payload) || {};
-      const profile = responsePayload.profile || {};
-      const compensation = responsePayload.compensation || {};
-      const monthly = compensation.monthly || {};
-      const detail = compensation.detail || {};
-      const bahRecord = detail.bahRecord || {};
+      const normalized = normalizeTheWingResponse(payload, data);
 
-      const bah = Number(monthly.bah || 0);
-      const basePay = Number(monthly.basicPay || 0);
-      const bas = Number(monthly.bas || 0);
-      const total = Number(
-        monthly.grossMonthlyComp ||
-        monthly.combinedMonthlyGross ||
-        (bah + basePay + bas)
-      );
+      const bah = Number(normalized.bah || 0);
+      const basePay = Number(normalized.basePay || 0);
+      const bas = Number(normalized.bas || 0);
+      const total = Number(normalized.total || bah + basePay + bas);
 
-      const displayBase =
-        profile.currentBase ||
-        profile.base ||
-        bahRecord.base ||
-        payload.base;
-
-      const displayZip =
-        bahRecord.dutyZip ||
-        detail.dutyZip ||
-        "";
-
-      const displayMha =
-        bahRecord.mhaName ||
-        compensation.mhaName ||
-        "";
+      const displayBase = normalized.displayBase || payload.base;
+      const displayZip = normalized.displayZip || "";
+      const displayMha = normalized.displayMha || "";
 
       setText(els.totalHeroLabel, "Total Monthly Military Pay");
       setText(els.totalHeroValue, money2(total));
@@ -342,7 +553,7 @@
       setText(els.basAmount, money2(bas));
 
       setText(els.totalAmount, money2(total));
-      setText(els.totalNote, "Base Pay + BAH + BAS");
+      setText(els.totalNote, "Base Pay + BAH + BAS • Powered by TheWing.ai");
 
       setText(els.breakdownBah, "BAH Component");
       setText(els.breakdownBasePay, "Base Pay Component");
@@ -365,12 +576,15 @@
 
       setText(
         els.footerNote,
-        "Estimate generated using PCSUnited Basic Calculator flow through opensource-brain.js and comp-engine.js."
+        "Estimate generated by TheWing.ai using official-pay.js and official-bah.js. PCSUnited owns the public calculator page."
       );
     }
 
-    //#11) MAIN RUNNER
+    //#12) MAIN RUNNER
+    let runSeq = 0;
+
     async function run() {
+      const seq = ++runSeq;
       const payload = readInputs();
       paintLoading(payload);
 
@@ -379,22 +593,28 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tool: "PCS_SNAPSHOT",
+            tool: "BAH_CALCULATOR",
+            source: "PCSUnited",
+            poweredBy: "TheWing.ai",
             input: payload
           })
         });
 
-        const data = await res.json();
+        const data = await res.json().catch(() => null);
+
+        if (seq !== runSeq) return;
 
         if (!res.ok || !data || data.ok === false) {
           throw new Error(
             (data && (data.error || data.message)) ||
-            "Function error."
+            "TheWing.ai function error."
           );
         }
 
         paintSuccess(payload, data);
       } catch (err) {
+        if (seq !== runSeq) return;
+
         paintError(
           err && err.message ? err.message : "Unable to calculate estimate.",
           payload
@@ -402,7 +622,7 @@
       }
     }
 
-    //#12) BIND EVENTS
+    //#13) BIND EVENTS
     function bind() {
       ["paygrade", "yos", "location", "dependents"].forEach(function (key) {
         const el = els[key];
@@ -413,17 +633,19 @@
       });
     }
 
-    //#13) INIT
+    //#14) INIT
     bind();
     run();
 
     window.PCSU_AURORA_BAH = {
       run: run,
-      endpoint: ENDPOINT
+      endpoint: ENDPOINT,
+      apiOrigin: API_ORIGIN,
+      poweredBy: "TheWing.ai"
     };
   }
 
-  //#14) DOM READY
+  //#15) DOM READY
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bootPCSUBAHRuntime, { once: true });
   } else {
