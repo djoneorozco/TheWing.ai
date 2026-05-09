@@ -1,0 +1,29 @@
+# TheWing.ai
+
+TheWing.ai is the SaaS intelligence layer for PCSUnited.
+
+PCSUnited is the public military resource hub for PCS, pay, PT, housing, VA loans, base intelligence, and military family guidance.
+
+TheWing.ai powers the advanced decision tools inside PCSUnited, including financial dashboards, AI guidance, housing intelligence, BuyerBrief workflows, readiness scoring, and future realtor-by-base intelligence.
+
+## Brand Role
+
+PCSUnited gets the eyes.  
+TheWing.ai powers the decisions.
+
+## Core Modules
+
+- Financial Analysis Dashboard
+- Housing Intelligence Dashboard
+- Ask Amy AI Guidance
+- BuyerBrief Engine
+- Affordability Scoring
+- Realtor-by-Base Intelligence
+- Saved User Profile Tools
+- Advanced PCS Decision Briefs
+
+## Build Rule
+
+This repository is not a rebrand rabbit hole.
+
+Its purpose is to house the advanced software layer for PCSUnited so the public PCSU site can remain clean, useful, and SEO-focused.
