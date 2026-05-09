@@ -1,4 +1,4 @@
-// netlify/functions/_brain/profile-normalizer.js
+// netlify/functions/_share/profile-normalizer.js
 // ============================================================
 // TheWing.ai • Profile Normalizer
 // v1.0.0
