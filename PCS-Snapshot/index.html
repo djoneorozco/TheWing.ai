@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- #1) META -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>PCS Snapshot | TheWing.ai</title>
+
+  <meta
+    name="description"
+    content="PCS Snapshot helps military families compare pay, BAH, housing affordability, and living strategy for a new duty station."
+  />
+
+  <!-- #2) FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- #3) LIBRARIES -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+  <!-- #4) SNAPSHOT CSS -->
+  <link rel="stylesheet" href="./snapshot.css" />
+</head>
+
+<body>
+  <!-- =========================================================
+    PCS SNAPSHOT v5.1.0
+    THEWING.AI SPLIT VERSION
+    FILE: index.html
+
+    IMPORTANT:
+    - Runtime IDs preserved.
+    - CSS moved to snapshot.css.
+    - JS moved to snapshot.js.
+  ========================================================== -->
+
+  <main id="pcs-snapshot-shell">
+    <div id="pcs-snapshot-wrap">
+
+      <!-- =====================================================
+        #4.1) TOP STRIP
+      ====================================================== -->
+      <section class="pcs-top">
+        <div class="pcs-top-head">
+          <h1 class="pcs-title">Permanent Change of Duty Station PCS Snapshot</h1>
+          <span id="pcs-city-line">
+            San Antonio, TX <span class="pcs-dot"></span> Quick PCS Snapshot
+          </span>
+        </div>
+
+        <div class="pts-grid">
+
+          <!-- MONTHLY INCOME -->
+          <article class="pts-card pts-card-income">
+            <div class="pts-top">
+              <div class="pts-icon" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none">
+                  <text x="14" y="42" font-size="28" font-weight="900" fill="currentColor" font-family="Georgia, serif">A</text>
+                  <text x="30" y="52" font-size="28" font-weight="900" fill="currentColor" font-family="Georgia, serif">F</text>
+                </svg>
+              </div>
+
+              <div class="pts-copy">
+                <p class="pts-kicker">Monthly Income</p>
+                <div class="pts-bigline">
+                  <p class="pts-value" id="pcs-income-main">$8,259</p>
+                  <span class="pts-unit">/ month</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pts-body">
+              <p class="pts-income-breakdown" id="pcs-income-breakdown">
+                Base Pay: $5,621, BAH $2,172,<br />BAS $466
+              </p>
+            </div>
+
+            <div class="pts-meta" id="pts-income-meta">
+              True disposable baseline before housing
+            </div>
+          </article>
+
+          <!-- BAH COMPARISON -->
+          <article class="pts-card pts-card-bah">
+            <div class="pts-top">
+              <div class="pts-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M8 4v16M8 4l-3 3M8 4l3 3" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M16 20V4M16 20l-3-3M16 20l3-3" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M3 12h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".35"/>
+                  <path d="M4.5 9.5h7M12.5 14.5h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".35"/>
+                </svg>
+              </div>
+
+              <div class="pts-copy">
+                <p class="pts-kicker">BAH Comparison</p>
+                <div class="pts-bigline">
+                  <p class="pts-value" id="pts-bah-delta">+$350</p>
+                  <span class="pts-unit">/ month</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pts-body">
+              <p class="pts-body-copy" id="pts-bah-copy">
+                Compared with your previous duty station housing allowance.
+              </p>
+            </div>
+
+            <div class="pts-meta" id="pts-bah-meta">
+              vs. Previous Duty Station
+            </div>
+          </article>
+
+          <!-- MARKET SIGNAL -->
+          <article class="pts-card pts-card-market">
+            <div class="pts-top">
+              <div class="pts-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M4 10.5 12 5l8 5.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  <path d="M9 20v-5h6v5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  <path d="M8 11h.01M12 11h.01M16 11h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                </svg>
+              </div>
+
+              <div class="pts-copy">
+                <p class="pts-kicker">Market Signal</p>
+                <div class="pts-bigline">
+                  <p class="pts-value" id="pts-market-signal">Buyer-Friendly</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="pts-body">
+              <p class="pts-body-copy" id="pts-market-copy">
+                Inventory elevated • Softer prices • Better leverage
+              </p>
+            </div>
+
+            <div class="pts-meta" id="pts-market-meta">
+              Current market condition
+            </div>
+          </article>
+
+          <!-- PURCHASE POWER -->
+          <article class="pts-card pts-card-power">
+            <div class="pts-top">
+              <div class="pts-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M8.5 8.5a4.5 4.5 0 1 1 5.7 6.9L12 18l-2.2-2.1A4.5 4.5 0 0 1 8.5 8.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  <path d="M15 6.5h3.5a2.5 2.5 0 0 1 0 5H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M5.5 17.5H4a2.5 2.5 0 0 1 0-5h1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M9.7 11.6h4.6M12 9.3v4.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+
+              <div class="pts-copy">
+                <p class="pts-kicker">Purchase Power</p>
+                <div class="pts-power-row">
+                  <span class="pts-power-score" id="pts-power-score">4.5</span>
+                  <span class="pts-stars" id="pts-power-stars">★★★★★</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pts-body">
+              <p class="pts-body-copy" id="pts-power-copy">
+                Based on total income &amp; housing market
+              </p>
+            </div>
+
+            <div class="pts-meta" id="pts-power-meta">
+              Overall affordability signal
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- =====================================================
+        #4.2) MAIN GRID
+      ====================================================== -->
+      <section class="pcs-main">
+
+        <!-- LEFT STACK -->
+        <div class="pcs-stack">
+
+          <!-- CURRENT DUTY STATION -->
+          <section class="pcs-current-panel pcs-card">
+            <div class="pcs-current-shell">
+              <h2 class="pcs-current-title">PCS City Intelligence Brief</h2>
+
+              <div class="pcs-current-grid">
+                <div class="pcs-image-card">
+                  <img id="img-current" src="" alt="Current location image" />
+                  <div class="pcs-image-chip">PCS Snapshot</div>
+                  <div class="pcs-image-overlay">
+                    <span class="pcs-image-city" id="pcs-current-city">San Antonio, TX</span>
+                    <span class="pcs-image-tagline" id="pcs-current-tagline">
+                      “Military Metropolis with Affordable Expansion”
+                    </span>
+                  </div>
+                </div>
+
+                <div class="pcs-info-card pcs-subcard">
+
+                  <div class="pcs-brief-banner">
+                    <div class="pcs-brief-banner-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M7 12.5l3.2 3.2L17.5 8.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+
+                    <div class="pcs-brief-banner-copy">
+                      <p class="pcs-brief-banner-head" id="pcs-current-bluf-headline">
+                        Buyer-Leaning Market
+                      </p>
+                      <p class="pcs-brief-banner-sub" id="pcs-current-bluf-summary">
+                        Softening prices and extended inventory create strong opportunity for negotiation below asking.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="pcs-mini-section">
+                    <div class="pcs-mini-head">
+                      <div class="pcs-mini-head-icon" aria-hidden="true"></div>
+                      <h3 class="pcs-mini-head-title">Snapshot</h3>
+                    </div>
+
+                    <div class="pcs-mini-grid">
+                      <div class="pcs-mini-stat">
+                        <div class="pcs-mini-label">Population</div>
+                        <div class="pcs-mini-value" id="pcs-cur-population-city">1.5M</div>
+                        <div class="pcs-mini-sub" id="pcs-cur-population-metro">Metro: 2.6M</div>
+                      </div>
+
+                      <div class="pcs-mini-stat">
+                        <div class="pcs-mini-label">Income</div>
+                        <div class="pcs-mini-value" id="pcs-cur-median-income">$69,906</div>
+                      </div>
+
+                      <div class="pcs-mini-stat">
+                        <div class="pcs-mini-label">Trend</div>
+                        <div class="pcs-mini-value" id="pcs-cur-market-trend">-3.2% YoY</div>
+                      </div>
+
+                      <div class="pcs-mini-stat">
+                        <div class="pcs-mini-label">Median Home</div>
+                        <div class="pcs-mini-value" id="pcs-cur-median-home">$288K</div>
+                      </div>
+
+                      <div class="pcs-mini-stat">
+                        <div class="pcs-mini-label">Traffic</div>
+                        <div class="pcs-mini-value" id="pcs-cur-traffic-level">Moderate</div>
+                      </div>
+
+                      <div class="pcs-mini-stat">
+                        <div class="pcs-mini-label">Employment</div>
+                        <div class="pcs-mini-value" id="pcs-cur-employment-status">Stable</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pcs-mini-section">
+                    <div class="pcs-mini-head">
+                      <div class="pcs-mini-head-icon" aria-hidden="true"></div>
+                      <h3 class="pcs-mini-head-title">Lifestyle</h3>
+                    </div>
+
+                    <ul class="pcs-mini-list" id="pcs-cur-lifestyle-list">
+                      <li class="pcs-mini-item">
+                        <span class="pcs-mini-dot"></span>
+                        <span>Hot summers, mild winters, low snow risk</span>
+                      </li>
+                      <li class="pcs-mini-item">
+                        <span class="pcs-mini-dot"></span>
+                        <span>Strong military presence and family-heavy suburbs</span>
+                      </li>
+                      <li class="pcs-mini-item">
+                        <span class="pcs-mini-dot"></span>
+                        <span>Moderate congestion with typical 20–35 min commute</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div class="pcs-fin-box">
+                    <div class="pcs-fin-top">
+                      <span class="pcs-fin-dot"></span>
+                      <p class="pcs-fin-head" id="pcs-cur-financial-headline">
+                        Strategic Buy Window
+                      </p>
+                    </div>
+                    <p class="pcs-fin-copy" id="pcs-cur-financial-summary">
+                      Favorable pricing and elevated inventory create opportunity for below-market acquisition.
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- HOUSING AFFORDABILITY BREAKDOWN -->
+          <section class="pcs-afford-panel pcs-card">
+            <div class="pcs-afford-head">
+              <h2 class="pcs-afford-title">Housing Affordability Breakdown</h2>
+
+              <div class="pcs-afford-kicker">
+                <div class="pcs-bedroom-left">
+                  <div id="pcs-bedroom-value">3</div>
+                  <div class="pcs-bedroom-label">Bedroom</div>
+                </div>
+
+                <div class="pcs-bedroom-right">
+                  <button id="pcs-bedroom-up" class="pcs-bedroom-btn" type="button" aria-label="Increase bedroom">▲</button>
+                  <button id="pcs-bedroom-down" class="pcs-bedroom-btn" type="button" aria-label="Decrease bedroom">▼</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="pcs-afford-grid">
+              <div class="pcs-afford-copy">
+                <div id="pcs-afford-headline">$25 <span>Monthly Buffer</span></div>
+                <div id="pcs-afford-subline">
+                  BAH covers <strong>101%</strong> of a typical mortgage stack
+                </div>
+
+                <div class="pcs-checklist">
+                  <div class="pcs-check">
+                    <span class="pcs-check-mark">✓</span>
+                    <span>Average Home Price <strong id="pcs-afford-home-price">$302,500</strong></span>
+                  </div>
+
+                  <div class="pcs-check">
+                    <span class="pcs-check-mark">✓</span>
+                    <span>Mortgage (P&amp;I) <strong id="pcs-afford-mortgage">$1,912</strong></span>
+                  </div>
+
+                  <div class="pcs-check">
+                    <span class="pcs-check-mark">✓</span>
+                    <span>Taxes <strong id="pcs-afford-taxes">$0</strong> • Insurance <strong id="pcs-afford-insurance">$0</strong></span>
+                  </div>
+
+                  <div class="pcs-check">
+                    <span class="pcs-check-mark">✓</span>
+                    <span>HOA <strong id="pcs-afford-hoa">$0</strong> • Utilities <strong id="pcs-afford-utilities">$235</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pcs-donut-zone">
+                <div class="pcs-donut-wrap">
+                  <div class="pcs-donut" id="pcs-afford-donut"></div>
+
+                  <div class="pcs-donut-center">
+                    <div class="pcs-donut-center-inner">
+                      <div id="pcs-donut-buffer">+25</div>
+                      <div id="pcs-donut-buffer-label">Monthly Buffer</div>
+                    </div>
+                  </div>
+
+                  <div class="pcs-donut-amount" id="pcs-amt-mortgage">$1,912</div>
+                  <div class="pcs-donut-amount" id="pcs-amt-taxes">$0</div>
+                  <div class="pcs-donut-amount" id="pcs-amt-insurance">$0</div>
+                  <div class="pcs-donut-amount" id="pcs-amt-hoa">$0</div>
+                  <div class="pcs-donut-amount" id="pcs-amt-utilities">$235</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pcs-afford-footer" id="pcs-afford-footer">
+              Based on BAH only, ownership is still being evaluated for this market.
+            </div>
+          </section>
+        </div>
+
+        <!-- RIGHT STACK -->
+        <div class="pcs-stack">
+
+          <!-- 12-MONTH HOUSING TREND -->
+          <section class="pcs-trend-panel pcs-card">
+            <h2 class="pcs-trend-title">12-Month Housing Trend</h2>
+            <div class="pcs-trend-sub">Median home price (interactive trend)</div>
+
+            <div class="trend-toggle">
+              <button class="trend-btn active" id="btn-1yr" type="button">1 Year</button>
+              <button class="trend-btn" id="btn-3yr" type="button">3 Years</button>
+            </div>
+
+            <div id="pcs-trend-chart-apex"></div>
+
+            <div id="pcs-trend-summary">
+              12-month change: -3.2% • Balanced to buyer-friendly with elevated inventory and moderate price stability
+            </div>
+          </section>
+
+          <!-- YOUR LIVING STRATEGY -->
+          <section class="pcs-ls-panel pcs-card">
+            <h2 class="pcs-own-title">Your Living Strategy</h2>
+
+            <div class="pcs-ls-tabs">
+              <button class="pcs-ls-tab active" type="button" data-mode="buy">Buy</button>
+              <button class="pcs-ls-tab" type="button" data-mode="rent">Rent</button>
+              <button class="pcs-ls-tab" type="button" data-mode="base">Base Housing</button>
+            </div>
+
+            <div id="pcs-ls-status" class="pcs-ls-status">
+              Wealth Building · Higher Cost
+            </div>
+
+            <div class="pcs-ls-chart-wrap">
+              <canvas id="pcs-ls-chart"></canvas>
+            </div>
+
+            <div class="pcs-ls-stats">
+              <div class="pcs-ls-main">
+                <div id="pcs-ls-main">$0</div>
+                <div id="pcs-ls-sub">vs BAH</div>
+                <div id="pcs-ls-equity">$0 equity</div>
+                <div id="pcs-ls-bluf">Living strategy summary will appear here.</div>
+              </div>
+
+              <div class="pcs-ls-side">
+                <div><span>12M Cost</span><b id="pcs-ls-annual">$0</b></div>
+                <div><span>vs BAH</span><b id="pcs-ls-vs">$0</b></div>
+                <div><span>Monthly Gap</span><b id="pcs-ls-gap">$0</b></div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </section>
+
+      <!-- =====================================================
+        #4.3) HIDDEN LEGACY / RUNTIME TARGETS
+        Keep these. JS still references some of them.
+      ====================================================== -->
+      <div class="pcs-hidden-runtime">
+        <div id="pcs-compare-block"></div>
+        <div id="pcsc-frame"></div>
+        <div id="pcsc-grid"></div>
+        <div id="side-current"></div>
+        <div id="side-upcoming"></div>
+        <div id="pcsc-status"></div>
+
+        <img id="img-upcoming" alt="Upcoming location image" />
+        <div id="loc-upcoming">—</div>
+        <div id="bah-upcoming">$0</div>
+        <div id="price-upcoming">—</div>
+        <div id="yoy-upcoming">—</div>
+        <div id="dom-upcoming">—</div>
+        <div id="facts-upcoming"></div>
+
+        <canvas id="chart-current"></canvas>
+        <canvas id="chart-upcoming"></canvas>
+        <div id="rating-current"></div>
+        <div id="rating-upcoming"></div>
+        <div id="stars-current"></div>
+        <div id="stars-upcoming"></div>
+
+        <div id="pcs-qf-block"></div>
+        <div id="pcs-quickfacts"></div>
+        <div id="pcs-qf-poverty">14.4%</div>
+        <div id="pcs-qf-home">$288,700</div>
+        <div id="pcs-qf-dom">83</div>
+
+        <canvas id="pcs-income-chart"></canvas>
+        <canvas id="pcs-bah-chart"></canvas>
+        <div id="pcs-income-summary"></div>
+        <div id="pcs-bah-summary"></div>
+
+        <div id="pcs-leg-mortgage">$1,912</div>
+        <div id="pcs-leg-taxes">$0</div>
+        <div id="pcs-leg-insurance">$0</div>
+        <div id="pcs-leg-hoa">$0</div>
+        <div id="pcs-leg-utilities">$235</div>
+
+        <div id="pcs-own-gap-note">Your price range is still loading…</div>
+        <div id="pcs-own-right-text">Comparing low vs high market entry</div>
+        <div id="pcs-own-y1">$450K</div>
+        <div id="pcs-own-y2">$350K</div>
+        <div id="pcs-own-y3">$250K</div>
+        <div id="pcs-own-y4">$150K</div>
+        <div id="pcs-own-low-value">$0</div>
+        <div id="pcs-own-high-value">$0</div>
+        <div id="pcs-own-bar-low"></div>
+        <div id="pcs-own-bar-high"></div>
+        <div id="pcs-own-high-tag"></div>
+        <div id="pcs-own-chip-median"></div>
+        <div id="pcs-own-chip-gap-low"></div>
+        <div id="pcs-own-chip-gap-high"></div>
+        <canvas id="pcs-afford-chart"></canvas>
+        <div id="pcs-afford-summary"></div>
+        <canvas id="pcs-pricebreak-chart"></canvas>
+        <div id="pcs-pricebreak-note"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- #5) SNAPSHOT JS -->
+  <script src="./snapshot.js"></script>
+</body>
+</html>
