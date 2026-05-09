@@ -1,29 +1,29 @@
 // netlify/functions/brain.js
 // ============================================================
 // TheWing.ai • Central Brain
-// v1.0.2 SAFE IMPORT VERSION
+// v1.0.3 NETLIFY-SAFE COMMONJS HANDLER
 //
 // PURPOSE
-// - Fixes 502 Bad Gateway caused by top-level module import crashes
-// - Uses dynamic imports inside the handler
-// - Supports public BAH Calculator with NO email required
-// - Returns readable JSON errors instead of Netlify 502 when a shared file fails
-//
-// REQUIRED FILES
-// - netlify/functions/_share/official-pay.js
-// - netlify/functions/_share/official-bah.js
+// - Fixes Netlify runtime error: "handler is not a function"
+// - Uses CommonJS exports.handler because Netlify classic functions expect it
+// - Dynamically imports ES module shared files:
+//   - ./_share/official-pay.js
+//   - ./_share/official-bah.js
+// - Supports PCSUnited public BAH Calculator with NO email required
 //
 // ROUTES
 // - /.netlify/functions/brain
 // - /api/brain through Netlify redirect
 // ============================================================
 
+"use strict";
+
 // ============================================================
 // //#1) CONFIG
 // ============================================================
 
 const APP_NAME = "TheWing.ai";
-const SCHEMA_VERSION = "thewing-brain-1.0.2";
+const SCHEMA_VERSION = "thewing-brain-1.0.3";
 
 const ALLOWED_ORIGINS = new Set([
   "https://pcsunited.com",
@@ -51,8 +51,7 @@ const ALLOWED_ORIGINS = new Set([
 
 function buildCorsHeaders(event) {
   const origin =
-    event?.headers?.origin ||
-    event?.headers?.Origin ||
+    (event && event.headers && (event.headers.origin || event.headers.Origin)) ||
     "";
 
   const allowOrigin = ALLOWED_ORIGINS.has(origin)
@@ -77,13 +76,13 @@ function respond(event, statusCode, obj) {
   };
 }
 
-function fail(event, statusCode, message, extra = {}) {
+function fail(event, statusCode, message, extra) {
   return respond(event, statusCode, {
     ok: false,
     app: APP_NAME,
     schemaVersion: SCHEMA_VERSION,
     error: String(message || "Request failed."),
-    ...extra
+    ...(extra || {})
   });
 }
 
@@ -92,34 +91,41 @@ function fail(event, statusCode, message, extra = {}) {
 // ============================================================
 
 function normalizeString(value) {
-  return String(value ?? "").trim();
+  return String(value == null ? "" : value).trim();
 }
 
 function lower(value) {
   return normalizeString(value).toLowerCase();
 }
 
-function toNumber(value, fallback = 0) {
+function toNumber(value, fallback) {
   const n = Number(value);
-  return Number.isFinite(n) ? n : fallback;
+  return Number.isFinite(n) ? n : (fallback == null ? 0 : fallback);
 }
 
 function money(value) {
   return Math.round(toNumber(value, 0) * 100) / 100;
 }
 
-function firstDefined(...values) {
-  for (const value of values) {
-    if (value !== undefined && value !== null && value !== "") return value;
+function firstDefined() {
+  for (let i = 0; i < arguments.length; i += 1) {
+    const value = arguments[i];
+
+    if (value !== undefined && value !== null && value !== "") {
+      return value;
+    }
   }
+
   return null;
 }
 
-function firstString(...values) {
-  for (const value of values) {
-    const s = normalizeString(value);
+function firstString() {
+  for (let i = 0; i < arguments.length; i += 1) {
+    const s = normalizeString(arguments[i]);
+
     if (s) return s;
   }
+
   return "";
 }
 
@@ -144,17 +150,17 @@ function normalizeRank(rank) {
   return raw.replace(/\s+/g, "");
 }
 
-function normalizeDependents(value, input = {}) {
+function normalizeDependents(value, input) {
   const explicit = firstDefined(
     value,
-    input.dependents,
-    input.dependentStatus,
-    input.dependent_status,
-    input.family,
-    input.familySize,
-    input.family_size,
-    input.hasDependents,
-    input.has_dependents
+    input && input.dependents,
+    input && input.dependentStatus,
+    input && input.dependent_status,
+    input && input.family,
+    input && input.familySize,
+    input && input.family_size,
+    input && input.hasDependents,
+    input && input.has_dependents
   );
 
   if (typeof explicit === "boolean") {
@@ -251,7 +257,7 @@ function formatMoney(value) {
 }
 
 function parseBody(event) {
-  if (!event?.body) return {};
+  if (!event || !event.body) return {};
 
   try {
     return JSON.parse(event.body);
@@ -289,7 +295,7 @@ async function loadSharedModules() {
     return SHARED_CACHE;
   } catch (error) {
     throw new Error(
-      `Shared module load failed: ${error?.message || String(error)}`
+      `Shared module load failed: ${error && error.message ? error.message : String(error)}`
     );
   }
 }
@@ -298,14 +304,14 @@ async function loadSharedModules() {
 // //#5) INPUT NORMALIZATION
 // ============================================================
 
-function extractInput(body = {}) {
+function extractInput(body) {
   const directInput =
-    body.input && typeof body.input === "object"
+    body && body.input && typeof body.input === "object"
       ? body.input
       : {};
 
   const overrides =
-    body.overrides && typeof body.overrides === "object"
+    body && body.overrides && typeof body.overrides === "object"
       ? body.overrides
       : {};
 
@@ -313,13 +319,15 @@ function extractInput(body = {}) {
     ...directInput,
     ...overrides,
 
-    tool: normalizeTool(firstDefined(body.tool, directInput.tool, "BRAIN")),
-    source: firstDefined(body.source, directInput.source, "PCSUnited"),
-    poweredBy: firstDefined(body.poweredBy, directInput.poweredBy, APP_NAME)
+    tool: normalizeTool(firstDefined(body && body.tool, directInput.tool, "BRAIN")),
+    source: firstDefined(body && body.source, directInput.source, "PCSUnited"),
+    poweredBy: firstDefined(body && body.poweredBy, directInput.poweredBy, APP_NAME)
   };
 }
 
-function normalizeCompensationInput(input = {}) {
+function normalizeCompensationInput(input) {
+  input = input || {};
+
   const rank = normalizeRank(firstString(
     input.rank_paygrade,
     input.rankPaygrade,
@@ -379,8 +387,10 @@ function normalizeCompensationInput(input = {}) {
 // //#6) COMPENSATION CALCULATION
 // ============================================================
 
-async function calculateActiveDutyCompensation(input = {}) {
-  const { officialPay, officialBah } = await loadSharedModules();
+async function calculateActiveDutyCompensation(input) {
+  const shared = await loadSharedModules();
+  const officialPay = shared.officialPay;
+  const officialBah = shared.officialBah;
 
   const normalized = normalizeCompensationInput(input);
 
@@ -498,27 +508,27 @@ async function calculateActiveDutyCompensation(input = {}) {
   };
 }
 
-async function handlePublicCalculator(input = {}, meta = {}) {
+async function handlePublicCalculator(input, meta) {
   const result = await calculateActiveDutyCompensation(input);
 
   const displayBase =
-    result?.bahRecord?.base ||
-    result?.profile?.base ||
+    (result && result.bahRecord && result.bahRecord.base) ||
+    (result && result.profile && result.profile.base) ||
     input.base;
 
   const displayZip =
-    result?.bahRecord?.dutyZip ||
+    (result && result.bahRecord && result.bahRecord.dutyZip) ||
     "";
 
   const displayMha =
-    result?.bahRecord?.mhaName ||
+    (result && result.bahRecord && result.bahRecord.mhaName) ||
     "";
 
   return {
     ...result,
 
-    tool: meta.tool || "BAH_CALCULATOR",
-    source: meta.source || "PCSUnited",
+    tool: (meta && meta.tool) || "BAH_CALCULATOR",
+    source: (meta && meta.source) || "PCSUnited",
     poweredBy: APP_NAME,
 
     bluf: `${result.profile.rank} at ${result.profile.yearsOfService} years of service receives an estimated ${formatMoney(result.monthly.grossMonthlyComp)} monthly total from Basic Pay, BAH, and BAS for ${displayBase}.`,
@@ -550,7 +560,7 @@ async function handlePublicCalculator(input = {}, meta = {}) {
 // //#7) NETLIFY HANDLER
 // ============================================================
 
-export async function handler(event) {
+exports.handler = async function handler(event) {
   try {
     if (event.httpMethod === "OPTIONS") {
       return {
@@ -568,17 +578,17 @@ export async function handler(event) {
       };
 
       try {
-        const { officialPay, officialBah } = await loadSharedModules();
+        const shared = await loadSharedModules();
 
         moduleStatus = {
           ok: true,
-          officialPay: officialPay.RATE_VERSION || "loaded",
-          officialBah: officialBah.RATE_VERSION || "loaded"
+          officialPay: shared.officialPay.RATE_VERSION || "loaded",
+          officialBah: shared.officialBah.RATE_VERSION || "loaded"
         };
       } catch (error) {
         moduleStatus = {
           ok: false,
-          error: error?.message || String(error),
+          error: error && error.message ? error.message : String(error),
           officialPay: "check_failed",
           officialBah: "check_failed"
         };
@@ -659,7 +669,7 @@ export async function handler(event) {
       payload: finalPayload
     });
   } catch (error) {
-    return fail(event, 500, error?.message || "TheWing brain failed.", {
+    return fail(event, 500, error && error.message ? error.message : "TheWing brain failed.", {
       meta: {
         app: APP_NAME,
         schemaVersion: SCHEMA_VERSION,
@@ -667,8 +677,4 @@ export async function handler(event) {
       }
     });
   }
-}
-
-export default {
-  handler
 };
