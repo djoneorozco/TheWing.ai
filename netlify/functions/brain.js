@@ -1,13 +1,13 @@
 // netlify/functions/brain.js
 // ============================================================
 // TheWing.ai • Central Brain
-// v1.0.1
+// v1.0.2 SAFE IMPORT VERSION
 //
 // PURPOSE
-// - Public API coordinator for TheWing.ai
-// - Supports PCSUnited public BAH Calculator with NO email required
-// - Uses deterministic official modules from _share/
-// - Keeps response shape compatible with PCSUnited frontend widgets
+// - Fixes 502 Bad Gateway caused by top-level module import crashes
+// - Uses dynamic imports inside the handler
+// - Supports public BAH Calculator with NO email required
+// - Returns readable JSON errors instead of Netlify 502 when a shared file fails
 //
 // REQUIRED FILES
 // - netlify/functions/_share/official-pay.js
@@ -18,22 +18,12 @@
 // - /api/brain through Netlify redirect
 // ============================================================
 
-import {
-  RATE_VERSION as OFFICIAL_PAY_RATE_VERSION,
-  getPayRecord2026
-} from "./_share/official-pay.js";
-
-import {
-  RATE_VERSION as OFFICIAL_BAH_RATE_VERSION,
-  getBahRecord
-} from "./_share/official-bah.js";
-
 // ============================================================
 // //#1) CONFIG
 // ============================================================
 
 const APP_NAME = "TheWing.ai";
-const SCHEMA_VERSION = "thewing-brain-1.0.1";
+const SCHEMA_VERSION = "thewing-brain-1.0.2";
 
 const ALLOWED_ORIGINS = new Set([
   "https://pcsunited.com",
@@ -98,7 +88,7 @@ function fail(event, statusCode, message, extra = {}) {
 }
 
 // ============================================================
-// //#3) HELPERS
+// //#3) BASIC HELPERS
 // ============================================================
 
 function normalizeString(value) {
@@ -253,6 +243,13 @@ function getRankTitle(rank) {
   return map[rank] || rank;
 }
 
+function formatMoney(value) {
+  return "$" + money(value).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
 function parseBody(event) {
   if (!event?.body) return {};
 
@@ -263,15 +260,42 @@ function parseBody(event) {
   }
 }
 
-function formatMoney(value) {
-  return "$" + money(value).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+// ============================================================
+// //#4) DYNAMIC MODULE LOADER
+// ============================================================
+
+let SHARED_CACHE = null;
+
+async function loadSharedModules() {
+  if (SHARED_CACHE) return SHARED_CACHE;
+
+  try {
+    const officialPay = await import("./_share/official-pay.js");
+    const officialBah = await import("./_share/official-bah.js");
+
+    if (typeof officialPay.getPayRecord2026 !== "function") {
+      throw new Error("official-pay.js is missing getPayRecord2026 export.");
+    }
+
+    if (typeof officialBah.getBahRecord !== "function") {
+      throw new Error("official-bah.js is missing getBahRecord export.");
+    }
+
+    SHARED_CACHE = {
+      officialPay,
+      officialBah
+    };
+
+    return SHARED_CACHE;
+  } catch (error) {
+    throw new Error(
+      `Shared module load failed: ${error?.message || String(error)}`
+    );
+  }
 }
 
 // ============================================================
-// //#4) INPUT NORMALIZATION
+// //#5) INPUT NORMALIZATION
 // ============================================================
 
 function extractInput(body = {}) {
@@ -352,10 +376,12 @@ function normalizeCompensationInput(input = {}) {
 }
 
 // ============================================================
-// //#5) COMPENSATION CALCULATION
+// //#6) COMPENSATION CALCULATION
 // ============================================================
 
-function calculateActiveDutyCompensation(input = {}) {
+async function calculateActiveDutyCompensation(input = {}) {
+  const { officialPay, officialBah } = await loadSharedModules();
+
   const normalized = normalizeCompensationInput(input);
 
   if (!normalized.rank) {
@@ -366,7 +392,7 @@ function calculateActiveDutyCompensation(input = {}) {
     throw new Error("Missing base/location.");
   }
 
-  const payRecord = getPayRecord2026(
+  const payRecord = officialPay.getPayRecord2026(
     normalized.rank,
     normalized.yearsOfService,
     {
@@ -374,7 +400,7 @@ function calculateActiveDutyCompensation(input = {}) {
     }
   );
 
-  const bahRecord = getBahRecord(
+  const bahRecord = officialBah.getBahRecord(
     normalized.base,
     normalized.rank,
     normalized.dependents
@@ -422,11 +448,11 @@ function calculateActiveDutyCompensation(input = {}) {
         bahRecord,
         rankTitle,
         sourceModules: {
-          officialPay: OFFICIAL_PAY_RATE_VERSION,
-          officialBah: OFFICIAL_BAH_RATE_VERSION
+          officialPay: officialPay.RATE_VERSION || "official-pay",
+          officialBah: officialBah.RATE_VERSION || "official-bah"
         }
       },
-      sourceVersion: `${OFFICIAL_PAY_RATE_VERSION}+${OFFICIAL_BAH_RATE_VERSION}`
+      sourceVersion: `${officialPay.RATE_VERSION || "official-pay"}+${officialBah.RATE_VERSION || "official-bah"}`
     },
 
     pay: {
@@ -464,16 +490,16 @@ function calculateActiveDutyCompensation(input = {}) {
     bahRecord,
     payRecord,
 
-    sourceVersion: `${OFFICIAL_PAY_RATE_VERSION}+${OFFICIAL_BAH_RATE_VERSION}`,
+    sourceVersion: `${officialPay.RATE_VERSION || "official-pay"}+${officialBah.RATE_VERSION || "official-bah"}`,
     rateVersion: {
-      officialPay: OFFICIAL_PAY_RATE_VERSION,
-      officialBah: OFFICIAL_BAH_RATE_VERSION
+      officialPay: officialPay.RATE_VERSION || "official-pay",
+      officialBah: officialBah.RATE_VERSION || "official-bah"
     }
   };
 }
 
-function handlePublicCalculator(input = {}, meta = {}) {
-  const result = calculateActiveDutyCompensation(input);
+async function handlePublicCalculator(input = {}, meta = {}) {
+  const result = await calculateActiveDutyCompensation(input);
 
   const displayBase =
     result?.bahRecord?.base ||
@@ -521,7 +547,7 @@ function handlePublicCalculator(input = {}, meta = {}) {
 }
 
 // ============================================================
-// //#6) NETLIFY HANDLER
+// //#7) NETLIFY HANDLER
 // ============================================================
 
 export async function handler(event) {
@@ -535,6 +561,29 @@ export async function handler(event) {
     }
 
     if (event.httpMethod === "GET") {
+      let moduleStatus = {
+        ok: false,
+        officialPay: "not_checked",
+        officialBah: "not_checked"
+      };
+
+      try {
+        const { officialPay, officialBah } = await loadSharedModules();
+
+        moduleStatus = {
+          ok: true,
+          officialPay: officialPay.RATE_VERSION || "loaded",
+          officialBah: officialBah.RATE_VERSION || "loaded"
+        };
+      } catch (error) {
+        moduleStatus = {
+          ok: false,
+          error: error?.message || String(error),
+          officialPay: "check_failed",
+          officialBah: "check_failed"
+        };
+      }
+
       return respond(event, 200, {
         ok: true,
         app: APP_NAME,
@@ -542,6 +591,7 @@ export async function handler(event) {
         status: "online",
         role: "PCSUnited SaaS intelligence layer",
         route: "/api/brain",
+        moduleStatus,
         supportedTools: [
           "BAH_CALCULATOR",
           "PCS_SNAPSHOT",
@@ -559,10 +609,6 @@ export async function handler(event) {
               dependents: "with"
             }
           }
-        },
-        versions: {
-          officialPay: OFFICIAL_PAY_RATE_VERSION,
-          officialBah: OFFICIAL_BAH_RATE_VERSION
         }
       });
     }
@@ -575,27 +621,10 @@ export async function handler(event) {
     const input = extractInput(body);
     const tool = normalizeTool(firstDefined(body.tool, input.tool, "BAH_CALCULATOR"));
 
-    let responsePayload;
-
-    if (
-      [
-        "BAH_CALCULATOR",
-        "PCS_SNAPSHOT",
-        "PUBLIC_COMPENSATION",
-        "OPEN_COMPENSATION",
-        "BRAIN"
-      ].includes(tool)
-    ) {
-      responsePayload = handlePublicCalculator(input, {
-        tool,
-        source: firstString(body.source, input.source, "PCSUnited")
-      });
-    } else {
-      responsePayload = handlePublicCalculator(input, {
-        tool,
-        source: firstString(body.source, input.source, "PCSUnited")
-      });
-    }
+    const responsePayload = await handlePublicCalculator(input, {
+      tool,
+      source: firstString(body.source, input.source, "PCSUnited")
+    });
 
     const finalPayload = {
       ok: true,
@@ -620,10 +649,7 @@ export async function handler(event) {
         schemaVersion: SCHEMA_VERSION,
         tool,
         generatedAt: new Date().toISOString(),
-        versions: {
-          officialPay: OFFICIAL_PAY_RATE_VERSION,
-          officialBah: OFFICIAL_BAH_RATE_VERSION
-        }
+        version: SCHEMA_VERSION
       }
     };
 
