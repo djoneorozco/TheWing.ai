@@ -1,7 +1,7 @@
 // netlify/functions/send-code.js
 // ============================================================
 // TheWing.ai • send-code
-// v1.0.0
+// v1.0.1
 //
 // PURPOSE:
 // - Accepts POST { email, rank, lastName, phone, full_name, first_name, last_name }
@@ -9,7 +9,7 @@
 // - Hashes the code before saving
 // - Inserts row into public.email_codes
 // - Sends verification email through Resend
-// - Compatible with existing PCSUnited verify-code.js pattern
+// - Compatible with verify-code.js below
 //
 // FRONTEND ENDPOINT:
 // - POST /api/send-code
@@ -25,10 +25,13 @@
 // - EMAIL_FROM
 // - FROM_EMAIL
 //
+// RECOMMENDED TEMP SENDER:
+// - EMAIL_FROM=PCS United <noreply@theorozcorealty.com>
+//
 // EXPECTED email_codes TABLE FIELDS:
 // - email text
 // - code_hash text
-// - attempts int
+// - attempts int4
 // - created_at timestamptz
 // - expires_at timestamptz
 // ============================================================
@@ -38,7 +41,7 @@
 const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
 
-const FUNCTION_VERSION = "thewing-send-code-1.0.0";
+const FUNCTION_VERSION = "thewing-send-code-1.0.1";
 
 const ALLOWED_ORIGINS = new Set([
   "https://pcsunited.com",
@@ -46,11 +49,11 @@ const ALLOWED_ORIGINS = new Set([
   "https://pcsunited.netlify.app",
   "https://pcs-united.webflow.io",
   "https://pcsu.webflow.io",
+  "https://pcsunited-com-28346d.webflow.io",
 
   "https://thewing.ai",
   "https://www.thewing.ai",
-  "https://thewing-ai.netlify.app",
-  "https://thewingai.netlify.app",
+  "https://thewing.netlify.app",
 
   "http://localhost:3000",
   "http://127.0.0.1:3000",
@@ -138,7 +141,7 @@ function getFromAddress() {
   return cleanString(
     process.env.EMAIL_FROM ||
     process.env.FROM_EMAIL ||
-    "TheWing.ai <noreply@thewing.ai>"
+    "PCS United <noreply@theorozcorealty.com>"
   );
 }
 
@@ -166,13 +169,13 @@ function buildGreeting(body) {
 function buildTextEmail({ greeting, code }) {
   return `Hi ${greeting},
 
-Your TheWing.ai verification code is: ${code}
+Your PCS United verification code is: ${code}
 
 This code expires in 15 minutes.
 
 If you did not request this code, you can ignore this email.
 
-— TheWing.ai`;
+— PCS United`;
 }
 
 function buildHtmlEmail({ greeting, code, phone }) {
@@ -185,7 +188,7 @@ function buildHtmlEmail({ greeting, code, phone }) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>TheWing.ai Verification Code</title>
+  <title>PCS United Verification Code</title>
 </head>
 <body style="margin:0;padding:0;background:#080b12;font-family:Inter,Arial,sans-serif;color:#f4f7ff;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#080b12;padding:28px 16px;">
@@ -195,7 +198,7 @@ function buildHtmlEmail({ greeting, code, phone }) {
           <tr>
             <td style="padding:28px 28px 18px;">
               <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#8ef3c5;font-weight:800;">
-                TheWing.ai Verification
+                PCS United Verification
               </div>
 
               <h1 style="margin:12px 0 8px;font-size:28px;line-height:1.1;color:#ffffff;">
@@ -236,7 +239,7 @@ function buildHtmlEmail({ greeting, code, phone }) {
               }
 
               <p style="margin:22px 0 0;color:#cbd3ee;font-size:14px;line-height:1.6;">
-                — TheWing.ai
+                — PCS United
               </p>
             </td>
           </tr>
@@ -293,7 +296,8 @@ exports.handler = async function handler(event) {
   if (event.httpMethod !== "POST") {
     return respond(event, 405, {
       ok: false,
-      error: "Method not allowed. Use POST."
+      error: "Method not allowed. Use POST.",
+      version: FUNCTION_VERSION
     });
   }
 
@@ -304,7 +308,8 @@ exports.handler = async function handler(event) {
   } catch (_) {
     return respond(event, 400, {
       ok: false,
-      error: "Invalid JSON body."
+      error: "Invalid JSON body.",
+      version: FUNCTION_VERSION
     });
   }
 
@@ -315,7 +320,8 @@ exports.handler = async function handler(event) {
   if (!email || !isValidEmail(email)) {
     return respond(event, 400, {
       ok: false,
-      error: "Valid email required."
+      error: "Valid email required.",
+      version: FUNCTION_VERSION
     });
   }
 
@@ -330,14 +336,16 @@ exports.handler = async function handler(event) {
       missing: {
         SUPABASE_URL: !SUPABASE_URL,
         SUPABASE_SERVICE_ROLE_KEY_or_SERVICE_KEY: !SERVICE_KEY
-      }
+      },
+      version: FUNCTION_VERSION
     });
   }
 
   if (!RESEND_API_KEY) {
     return respond(event, 500, {
       ok: false,
-      error: "Email service is not configured. Missing RESEND_API_KEY."
+      error: "Email service is not configured. Missing RESEND_API_KEY.",
+      version: FUNCTION_VERSION
     });
   }
 
@@ -378,7 +386,7 @@ exports.handler = async function handler(event) {
     }
 
     const from = getFromAddress();
-    const subject = "TheWing.ai • Your 6-Digit Verification Code";
+    const subject = "PCS United • Your 6-Digit Verification Code";
 
     const text = buildTextEmail({
       greeting,
@@ -414,6 +422,7 @@ exports.handler = async function handler(event) {
     return respond(event, 500, {
       ok: false,
       error: error?.message || "Verification email could not be sent.",
+      details: error?.response || null,
       version: FUNCTION_VERSION
     });
   }
