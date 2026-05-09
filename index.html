@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TheWing.ai | SaaS Intelligence Layer for PCSUnited</title>
+  <meta name="description" content="TheWing.ai powers the advanced SaaS intelligence layer inside PCSUnited, including military housing intelligence, financial readiness dashboards, AI guidance, and BuyerBrief decision tools." />
+  <style>
+    :root{
+      --bg:#090d10;
+      --panel:#111820;
+      --line:rgba(255,255,255,.12);
+      --text:#f3f6f8;
+      --muted:#aab3bd;
+      --silver:#d9e0e6;
+      --accent:#c7ccd2;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.08), transparent 28%),
+        linear-gradient(135deg, #050708, var(--bg) 48%, #10161b);
+      color:var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .shell{
+      width:min(980px, calc(100% - 32px));
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:44px;
+      background:linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      box-shadow:0 30px 90px rgba(0,0,0,.42);
+      backdrop-filter: blur(18px);
+    }
+
+    .eyebrow{
+      margin:0 0 18px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.22em;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(42px, 8vw, 92px);
+      line-height:.92;
+      letter-spacing:-.07em;
+      color:var(--silver);
+    }
+
+    h1 span{
+      color:#fff;
+    }
+
+    .lead{
+      max-width:760px;
+      margin:28px 0 0;
+      font-size:clamp(18px, 2.2vw, 26px);
+      line-height:1.45;
+      color:var(--muted);
+    }
+
+    .rule{
+      height:1px;
+      margin:34px 0;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:14px;
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px;
+      background:rgba(0,0,0,.18);
+    }
+
+    .card strong{
+      display:block;
+      margin-bottom:8px;
+      color:#fff;
+      font-size:14px;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+    }
+
+    .card p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.45;
+      font-size:14px;
+    }
+
+    .footer{
+      margin-top:28px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    @media(max-width:720px){
+      .shell{padding:28px}
+      .grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <p class="eyebrow">PCSUnited Intelligence Layer</p>
+    <h1>TheWing<span>.ai</span></h1>
+    <p class="lead">
+      TheWing.ai powers the advanced SaaS layer inside PCSUnited — military housing intelligence,
+      financial readiness, AI guidance, BuyerBrief workflows, and decision tools.
+    </p>
+
+    <div class="rule"></div>
+
+    <section class="grid" aria-label="Core role">
+      <article class="card">
+        <strong>PCSUnited</strong>
+        <p>The public military resource hub for PCS, pay, PT, housing, VA loans, base intelligence, and family guidance.</p>
+      </article>
+
+      <article class="card">
+        <strong>TheWing.ai</strong>
+        <p>The software intelligence layer powering advanced dashboards, scoring, AI guidance, and decision briefs.</p>
+      </article>
+
+      <article class="card">
+        <strong>Mission</strong>
+        <p>PCSUnited gets the eyes. TheWing.ai powers the decisions.</p>
+      </article>
+    </section>
+
+    <p class="footer">Status: Initial SaaS shell deployment.</p>
+  </main>
+</body>
+</html>
