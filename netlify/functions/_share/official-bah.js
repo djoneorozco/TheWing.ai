@@ -1,47 +1,29 @@
 // official-bah.js
 // ============================================================
-// PCSUnited • Official BAH Engine
+// TheWing.ai • Official BAH Source
 // v1.0.0
+//
+// FILE
+// - netlify/functions/_share/official-bah.js
 //
 // PURPOSE
 // - Single source of truth for 2026 official BAH
-// - PCSUnited base scope only (44 supported bases)
+// - PCSUnited base scope only
 // - Uses canonical base aliases + duty ZIP normalization
 // - Returns exact with / without dependent BAH by rank
 //
-// LOOKUP RULE
-// - user/base alias
-// - -> canonical PCSUnited base
-// - -> duty ZIP
-// - -> official BAH base record
-// - -> rank
-// - -> with / without dependents
-// - -> exact monthly BAH
-//
-// NOTES
-// - This file does NOT calculate pay.
-// - This file does NOT calculate BAS.
-// - This file does NOT calculate VA or retirement.
-// - This file is BAH authority only.
+// MODULE STYLE
+// - ES Module exports for Netlify Functions with "type": "module"
 // ============================================================
 
-(function (root, factory) {
-  if (typeof module === "object" && module.exports) {
-    module.exports = factory();
-  } else {
-    root.PCSU_OFFICIAL_BAH = factory();
-  }
-})(typeof self !== "undefined" ? self : this, function () {
-  "use strict";
+export const RATE_VERSION = "official-bah-2026.1";
 
-  const RATE_VERSION = "official-bah-2026.1";
-
-  const SUPPORTED_RANKS = Object.freeze([
-    "E-1","E-2","E-3","E-4","E-5","E-6","E-7","E-8","E-9",
-    "W-1","W-2","W-3","W-4","W-5",
-    "O-1E","O-2E","O-3E",
-    "O-1","O-2","O-3","O-4","O-5","O-6","O-7"
-  ]);
+export const SUPPORTED_RANKS = Object.freeze([
+  "E-1","E-2","E-3","E-4","E-5","E-6","E-7","E-8","E-9",
+  "W-1","W-2","W-3","W-4","W-5",
+  "O-1E","O-2E","O-3E",
+  "O-1","O-2","O-3","O-4","O-5","O-6","O-7"
+]);
 
   // ============================================================
   // //#1) HELPERS
