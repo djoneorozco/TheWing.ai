@@ -39,6 +39,7 @@
   <!-- //#4) STYLESHEET -->
   <link rel="stylesheet" href="./vacalculator.css" />
 </head>
+
 <body>
   <!-- //#5) ROOT -->
   <div id="pcsu-retire-va-shell">
@@ -165,6 +166,7 @@
 
         <!-- //#10) MAIN GRID -->
         <div class="main-grid">
+
           <!-- //#10A) LEFT PANEL -->
           <section class="panel glass">
             <h2 class="panel-title">Input Information</h2>
@@ -230,6 +232,7 @@
           <!-- //#10B) RIGHT PANEL -->
           <section class="panel glass">
             <div class="chart-zone">
+
               <div class="calc-card pay-estimate-card">
                 <div class="calc-left">
                   <div class="calc-title" id="rv-retirement-label">Estimated Retirement Pay</div>
@@ -258,7 +261,7 @@
                     <div id="rv-bar-retirement" class="bar-fill bar-aqua" style="height:59%;"></div>
                   </div>
                   <div class="bar-label">Retirement</div>
-                  <div class="bar-value">$3,214</div>
+                  <div class="bar-value" id="rv-bar-retirement-value">$3,214</div>
                 </div>
 
                 <div class="bar-col">
@@ -266,7 +269,7 @@
                     <div id="rv-bar-va" class="bar-fill bar-peach" style="height:41%;"></div>
                   </div>
                   <div class="bar-label">VA Disability</div>
-                  <div class="bar-value">$2,268</div>
+                  <div class="bar-value" id="rv-bar-va-value">$2,268</div>
                 </div>
 
                 <div class="bar-col">
@@ -322,10 +325,14 @@
 
         <!-- //#12) FOOTER NOTE -->
         <div class="footer-note">
-          Demo shell only. Runtime logic can connect this page to PCSUnited retirement and VA compensation engines later.
+          Powered by TheWing.ai through the public open-source calculator brain.
         </div>
+
       </div>
     </div>
   </div>
+
+  <!-- //#13) SCRIPT -->
+  <script src="./vacalculator.js?v=20260509-1" defer></script>
 </body>
 </html>
