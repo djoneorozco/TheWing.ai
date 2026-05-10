@@ -1,7 +1,7 @@
 // netlify/functions/ask-amy.js
 // ============================================================
 // TheWing.ai • PCSUnited AI Concierge — Ask Amy
-// v1.3.0 • ES MODULE FULL REPLACEMENT
+// v1.3.1 • ES MODULE + VA LOAN ENGINE
 //
 // PURPOSE
 // - Member-facing PCSUnited AI Concierge endpoint
@@ -10,6 +10,7 @@
 // - Enriches from Supabase when email exists
 // - Uses _share/compensation-context.js for Base Pay + BAS + BAH + VA
 // - Uses _share/mortgage-engine.js for mortgage math when available
+// - Uses _share/va-loans.js for VA Loan education + strategy guidance
 // - Uses OpenAI only as the conversational explanation layer
 //
 // CLIENT
@@ -35,12 +36,13 @@
 import { createClient } from "@supabase/supabase-js";
 import * as compensationContext from "./_share/compensation-context.js";
 import * as mortgageEngine from "./_share/mortgage-engine.js";
+import * as vaLoans from "./_share/va-loans.js";
 
 // ============================================================
 // //#2 CONFIG
 // ============================================================
 
-const VERSION = "1.3.0";
+const VERSION = "1.3.1";
 const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const DEFAULT_RESPONSE_MODE = "member_guidance";
 const MAX_MESSAGE_LENGTH = 5000;
@@ -413,7 +415,9 @@ function boolish(value, fallback = false) {
       "with dependents",
       "with_dependents",
       "family",
-      "married"
+      "married",
+      "exempt",
+      "eligible"
     ].includes(s)
   ) {
     return true;
@@ -429,7 +433,9 @@ function boolish(value, fallback = false) {
       "single",
       "none",
       "without dependents",
-      "without_dependents"
+      "without_dependents",
+      "not exempt",
+      "not eligible"
     ].includes(s)
   ) {
     return false;
@@ -881,6 +887,19 @@ function normalizeSupabaseBridge(raw) {
     va_disability: pickFirst(safe.va_disability, safe.vaDisability, safe.va),
     vaDisability: pickFirst(safe.vaDisability, safe.va_disability, safe.va),
 
+    funding_fee_exempt: pickFirst(
+      safe.funding_fee_exempt,
+      safe.fundingFeeExempt,
+      safe.va_funding_fee_exempt,
+      safe.vaFundingFeeExempt
+    ),
+    fundingFeeExempt: pickFirst(
+      safe.fundingFeeExempt,
+      safe.funding_fee_exempt,
+      safe.vaFundingFeeExempt,
+      safe.va_funding_fee_exempt
+    ),
+
     projected_home_price: projectedHomePrice,
     projectedHomePrice,
     homePrice: projectedHomePrice,
@@ -995,6 +1014,17 @@ function normalizeProfileFallback(raw = {}) {
     raw.hasDependents
   );
 
+  const vaDisability = num(
+    pickFirst(raw.va_disability, raw.vaDisability, raw.va, raw.disability)
+  );
+
+  const explicitFundingFeeExempt = pickFirst(
+    raw.funding_fee_exempt,
+    raw.fundingFeeExempt,
+    raw.va_funding_fee_exempt,
+    raw.vaFundingFeeExempt
+  );
+
   const profile = {
     email,
     full_name: fullName,
@@ -1023,9 +1053,14 @@ function normalizeProfileFallback(raw = {}) {
     base,
     zip,
 
-    va_disability: num(
-      pickFirst(raw.va_disability, raw.vaDisability, raw.va, raw.disability)
-    ),
+    va_disability: vaDisability,
+
+    funding_fee_exempt:
+      explicitFundingFeeExempt !== null
+        ? boolish(explicitFundingFeeExempt, false)
+        : vaDisability && vaDisability > 0
+          ? true
+          : undefined,
 
     retired_rank: normalizePaygrade(
       pickFirst(
@@ -1123,6 +1158,32 @@ function normalizeProfileFallback(raw = {}) {
 
     loanType: safeStr(pickFirst(raw.loanType, raw.loan_type, "va")),
     termYears: num(pickFirst(raw.termYears, raw.term_years, 30)),
+
+    priorUse: pickFirst(
+      raw.priorUse,
+      raw.prior_use,
+      raw.vaPriorUse,
+      raw.va_prior_use,
+      raw.usedVaBefore,
+      raw.used_va_before
+    ),
+    occupancyIntent: pickFirst(
+      raw.occupancyIntent,
+      raw.occupancy_intent,
+      raw.occupancy,
+      raw.primaryResidence,
+      raw.primary_residence
+    ),
+    fullEntitlement: pickFirst(raw.fullEntitlement, raw.full_entitlement),
+    entitlementUsed: num(pickFirst(raw.entitlementUsed, raw.entitlement_used)),
+    sellerCredit: num(pickFirst(raw.sellerCredit, raw.seller_credit)),
+    pcsTimelineMonths: num(
+      pickFirst(raw.pcsTimelineMonths, raw.pcs_timeline_months)
+    ),
+    expectedHoldMonths: num(
+      pickFirst(raw.expectedHoldMonths, raw.expected_hold_months)
+    ),
+
     notes: safeStr(pickFirst(raw.notes, raw.comments))
   };
 
@@ -1225,6 +1286,12 @@ function detectIntent(message) {
   }
 
   if (
+    /\bva loan\b|\bva mortgage\b|\bva-backed\b|\bva backed\b|\bcoe\b|\bcertificate of eligibility\b|\bfunding fee\b|\bva funding fee\b|\bva appraisal\b|\bva inspection\b|\bentitlement\b|\bfull entitlement\b|\bpartial entitlement\b|\bseller concession\b|\bseller concessions\b|\bseller credit\b|\bseller credits\b|\bzero down\b|\b0 down\b|\bno down payment\b|\bno pmi\b|\boccupancy\b|\bprimary residence\b|\bva closing costs\b|\bva close costs\b|\bva purchase\b|\bva home loan\b|\bva backed loan\b/.test(t)
+  ) {
+    return "va_loan";
+  }
+
+  if (
     /\bwhat can you do\b|\bhow can you help\b|\bwhat do you do\b|\bwho are you\b|\bhelp me\b|\bare you working\b/.test(t)
   ) {
     return "capabilities";
@@ -1281,6 +1348,11 @@ function shouldUseOpenAI(message, intent, deterministic) {
 
   const t = safeStr(message);
 
+  if (intent === "va_loan") {
+    if (t.length > 160) return true;
+    return false;
+  }
+
   if (t.length > 120) return true;
 
   if (
@@ -1323,6 +1395,7 @@ async function buildTruthPacket({
       profile: Boolean(Object.keys(normalizedProfile || {}).length),
       compensation: false,
       housing: false,
+      va_loan: false,
       dashboard: Boolean(
         Object.keys(mergedContext?.fad || {}).length ||
           Object.keys(mergedContext?.kpi_overrides || {}).length
@@ -1330,7 +1403,8 @@ async function buildTruthPacket({
       supabase: Boolean(mergedContext?.supabase_loaded),
       shared_engines: {
         compensation_context: Boolean(compensationContext),
-        mortgage_engine: Boolean(mortgageEngine)
+        mortgage_engine: Boolean(mortgageEngine),
+        va_loans: Boolean(vaLoans)
       }
     },
     internal: {},
@@ -1341,6 +1415,7 @@ async function buildTruthPacket({
       mortgage: null,
       affordability: null,
       verdict: null,
+      va_loan: null,
       next_action: null,
       missing_inputs: []
     },
@@ -1407,6 +1482,20 @@ async function buildTruthPacket({
     truth.public.verdict = verdict;
   }
 
+  const vaLoan = await buildVaLoanContextSafe({
+    message,
+    normalizedProfile,
+    scenario,
+    compensation,
+    mortgage,
+    affordability
+  });
+
+  if (vaLoan) {
+    truth.context_used.va_loan = true;
+    truth.public.va_loan = vaLoan;
+  }
+
   truth.public.missing_inputs = listMissingInputs({
     normalizedProfile,
     scenario,
@@ -1421,7 +1510,8 @@ async function buildTruthPacket({
     verdict,
     compensation,
     mortgage,
-    affordability
+    affordability,
+    vaLoan
   });
 
   if (debug) {
@@ -1432,6 +1522,7 @@ async function buildTruthPacket({
       normalized_profile_keys: Object.keys(normalizedProfile || {}),
       compensation_loaded: Boolean(compensation),
       mortgage_loaded: Boolean(mortgage),
+      va_loan_loaded: Boolean(vaLoan),
       supabase_loaded: Boolean(mergedContext?.supabase_loaded)
     };
   }
@@ -1639,6 +1730,49 @@ function buildScenario({ message, mergedContext, normalizedProfile }) {
     mode: normalizeMode(pickFirst(profile.mode, bridge.mode, fad.mode, "active")),
     va_disability: num(
       pickFirst(profile.va_disability, bridge.va_disability, fad.va_disability)
+    ),
+    fundingFeeExempt: boolish(
+      pickFirst(
+        profile.funding_fee_exempt,
+        profile.fundingFeeExempt,
+        bridge.funding_fee_exempt,
+        bridge.fundingFeeExempt,
+        fad.funding_fee_exempt,
+        fad.fundingFeeExempt
+      ),
+      num(
+        pickFirst(profile.va_disability, bridge.va_disability, fad.va_disability)
+      ) > 0
+    ),
+    priorUse: pickFirst(
+      profile.priorUse,
+      bridge.priorUse,
+      fad.priorUse,
+      profile.va_prior_use,
+      bridge.va_prior_use,
+      fad.va_prior_use
+    ),
+    occupancyIntent: pickFirst(
+      profile.occupancyIntent,
+      bridge.occupancyIntent,
+      fad.occupancyIntent,
+      "primary_residence"
+    ),
+    fullEntitlement: boolish(
+      pickFirst(profile.fullEntitlement, bridge.fullEntitlement, fad.fullEntitlement),
+      true
+    ),
+    entitlementUsed: num(
+      pickFirst(profile.entitlementUsed, bridge.entitlementUsed, fad.entitlementUsed)
+    ),
+    sellerCredit: num(
+      pickFirst(profile.sellerCredit, bridge.sellerCredit, fad.sellerCredit)
+    ),
+    pcsTimelineMonths: num(
+      pickFirst(profile.pcsTimelineMonths, bridge.pcsTimelineMonths, fad.pcsTimelineMonths)
+    ),
+    expectedHoldMonths: num(
+      pickFirst(profile.expectedHoldMonths, bridge.expectedHoldMonths, fad.expectedHoldMonths)
     ),
     bedrooms: num(pickFirst(profile.bedrooms, bridge.bedrooms, fad.bedrooms)),
     cityKey: safeStr(pickFirst(profile.cityKey, bridge.cityKey, fad.cityKey)),
@@ -2289,6 +2423,600 @@ function computeVerdictFallback({ compensation, mortgage, affordability }) {
   };
 }
 
+// ============================================================
+// //#14 VA LOAN ENGINE
+// ============================================================
+
+async function buildVaLoanContextSafe({
+  message,
+  normalizedProfile,
+  scenario,
+  compensation,
+  mortgage,
+  affordability
+}) {
+  const fromShared = await trySharedVaLoans({
+    message,
+    profile: normalizedProfile,
+    scenario,
+    compensation,
+    mortgage,
+    affordability
+  });
+
+  if (fromShared) return normalizeVaLoanPacket(fromShared);
+
+  return buildVaLoanFallbackPacket({
+    message,
+    normalizedProfile,
+    scenario,
+    compensation,
+    mortgage,
+    affordability
+  });
+}
+
+async function trySharedVaLoans(input) {
+  const fn =
+    vaLoans.buildVaLoanTruthPacket ||
+    vaLoans.analyzeVaLoanQuestion ||
+    vaLoans.getVaLoanGuidance ||
+    vaLoans.default?.buildVaLoanTruthPacket ||
+    vaLoans.default?.analyzeVaLoanQuestion ||
+    vaLoans.default?.getVaLoanGuidance;
+
+  if (typeof fn !== "function") return null;
+
+  try {
+    const result = await fn(input);
+    if (result && typeof result === "object") return result;
+    return null;
+  } catch (err) {
+    console.warn("va-loans failed:", err?.message || err);
+    return null;
+  }
+}
+
+function normalizeVaLoanPacket(raw) {
+  if (!raw || typeof raw !== "object") return null;
+
+  return stripEmpty({
+    ...raw,
+    source: safeStr(pickFirst(raw.source, raw._source, "TheWing va-loans.js")),
+    topic: safeStr(pickFirst(raw.topic, raw.intent, raw.category)),
+    title: safeStr(pickFirst(raw.title, raw.topic_title, raw.guidance?.title)),
+    bluf: safeStr(pickFirst(raw.bluf, raw.summary, raw.guidance?.bluf)),
+    key_points: Array.isArray(raw.key_points)
+      ? raw.key_points
+      : Array.isArray(raw.keyPoints)
+        ? raw.keyPoints
+        : Array.isArray(raw.guidance?.key_points)
+          ? raw.guidance.key_points
+          : undefined,
+    risks: Array.isArray(raw.risks)
+      ? raw.risks
+      : Array.isArray(raw.guidance?.risks)
+        ? raw.guidance.risks
+        : undefined,
+    next_steps: Array.isArray(raw.next_steps)
+      ? raw.next_steps
+      : Array.isArray(raw.nextSteps)
+        ? raw.nextSteps
+        : Array.isArray(raw.guidance?.next_steps)
+          ? raw.guidance.next_steps
+          : undefined
+  });
+}
+
+function buildVaLoanFallbackPacket({
+  message,
+  normalizedProfile,
+  scenario,
+  compensation,
+  mortgage,
+  affordability
+}) {
+  const t = safeStr(message).toLowerCase();
+
+  let topic = "overview";
+
+  if (/\bcoe\b|\bcertificate of eligibility\b|\beligib|\bqualify\b|\bqualified\b/.test(t)) {
+    topic = "eligibility";
+  } else if (/\bfunding fee\b|\bexempt\b|\bexemption\b|\bdisabled veteran\b|\bva disability\b/.test(t)) {
+    topic = "funding_fee";
+  } else if (/\bzero down\b|\b0 down\b|\bno down\b|\bdown payment\b|\bdownpayment\b/.test(t)) {
+    topic = "zero_down";
+  } else if (/\bno pmi\b|\bpmi\b|\bprivate mortgage insurance\b/.test(t)) {
+    topic = "no_pmi";
+  } else if (/\bappraisal\b|\binspection\b|\bminimum property\b/.test(t)) {
+    topic = "appraisal";
+  } else if (/\boccupancy\b|\bprimary residence\b|\bowner occupy\b/.test(t)) {
+    topic = "occupancy";
+  } else if (/\bseller concession\b|\bseller credit\b|\bseller concessions\b|\bseller credits\b/.test(t)) {
+    topic = "seller_concessions";
+  } else if (/\bentitlement\b|\bfull entitlement\b|\bpartial entitlement\b/.test(t)) {
+    topic = "entitlement";
+  } else if (/\bclosing cost\b|\bclosing costs\b|\bcash to close\b/.test(t)) {
+    topic = "closing_costs";
+  } else if (/\bpcs\b|\brent vs buy\b|\bshould i buy\b|\bshould i rent\b/.test(t)) {
+    topic = "pcs_strategy";
+  } else if (/\bnot buy\b|\bwhen not\b|\bbad idea\b|\btoo risky\b/.test(t)) {
+    topic = "when_not_to_buy";
+  }
+
+  const guidance = getFallbackVaGuidance(topic);
+
+  const price = num(pickFirst(scenario?.price, normalizedProfile?.projected_home_price));
+  const downpayment = Math.max(
+    0,
+    num(pickFirst(scenario?.downpayment, normalizedProfile?.downpayment)) || 0
+  );
+  const vaDisability = num(
+    pickFirst(scenario?.va_disability, normalizedProfile?.va_disability)
+  );
+  const fundingFeeExempt = boolish(
+    pickFirst(
+      scenario?.fundingFeeExempt,
+      normalizedProfile?.funding_fee_exempt,
+      normalizedProfile?.fundingFeeExempt
+    ),
+    vaDisability > 0
+  );
+
+  const priorUse = normalizePriorVaUse(
+    pickFirst(scenario?.priorUse, normalizedProfile?.priorUse)
+  );
+
+  const fundingFee = estimateVaFundingFeeFallback({
+    price,
+    downpayment,
+    priorUse,
+    fundingFeeExempt
+  });
+
+  return stripEmpty({
+    ok: true,
+    source: "ask-amy fallback VA Loan guidance",
+    topic,
+    title: guidance.title,
+    bluf: guidance.bluf,
+    key_points: guidance.key_points,
+    risks: guidance.risks,
+    next_steps: guidance.next_steps,
+    profile_signals: {
+      va_disability: vaDisability,
+      likely_funding_fee_exempt: fundingFeeExempt,
+      base: normalizedProfile?.base || scenario?.base || null,
+      rank: normalizedProfile?.rank_paygrade || scenario?.rank_paygrade || null
+    },
+    rules: {
+      zero_down_possible: true,
+      no_monthly_pmi: true,
+      purchase_funding_fee_can_be_financed: true,
+      purchase_closing_costs_can_be_financed: false,
+      seller_concession_cap_pct: 0.04,
+      standard_occupancy_days: 60
+    },
+    funding_fee: fundingFee,
+    purchase_scenario: price
+      ? {
+          price: roundMoney(price),
+          downpayment: roundMoney(downpayment),
+          downPaymentPct: price > 0 ? round2(downpayment / price) : 0,
+          priorUse,
+          fundingFeeExempt,
+          loan: {
+            baseLoanAmount: roundMoney(Math.max(0, price - downpayment)),
+            fundingFee: fundingFee ? roundMoney(fundingFee.amount) : 0,
+            fundingFeePct: fundingFee ? fundingFee.feePct : 0,
+            estimatedLoanWithFinancedFundingFee: fundingFee
+              ? roundMoney(Math.max(0, price - downpayment) + fundingFee.amount)
+              : roundMoney(Math.max(0, price - downpayment))
+          }
+        }
+      : null,
+    mortgage_context: mortgage || null,
+    affordability_context: affordability || null,
+    compensation_context: compensation || null,
+    disclaimer:
+      "VA Loan guidance is educational. COE eligibility, entitlement, funding-fee exemption, underwriting approval, appraisal, and closing details must be confirmed with the lender and official VA documentation."
+  });
+}
+
+function normalizePriorVaUse(value) {
+  if (value === true) return "subsequent_use";
+  if (value === false) return "first_use";
+
+  const s = safeStr(value).toLowerCase();
+
+  if (
+    ["subsequent", "subsequent_use", "used", "yes", "true", "1", "again", "second"].includes(s)
+  ) {
+    return "subsequent_use";
+  }
+
+  return "first_use";
+}
+
+function estimateVaFundingFeeFallback({
+  price,
+  downpayment,
+  priorUse,
+  fundingFeeExempt
+}) {
+  const p = Number(price);
+  if (!Number.isFinite(p) || p <= 0) return null;
+
+  const down = Math.max(0, Number(downpayment) || 0);
+  const baseLoan = Math.max(0, p - down);
+
+  if (fundingFeeExempt) {
+    return {
+      exempt: true,
+      feePct: 0,
+      amount: 0,
+      label:
+        "Likely funding-fee exempt based on provided profile signals. Confirm with COE/lender."
+    };
+  }
+
+  const downPct = p > 0 ? (down / p) * 100 : 0;
+  const use = priorUse === "subsequent_use" ? "subsequent_use" : "first_use";
+
+  let feePct = use === "subsequent_use" ? 0.033 : 0.0215;
+  let label =
+    use === "subsequent_use"
+      ? "Subsequent use, less than 5% down"
+      : "First use, less than 5% down";
+
+  if (downPct >= 10) {
+    feePct = 0.0125;
+    label = `${use === "subsequent_use" ? "Subsequent" : "First"} use, 10% or more down`;
+  } else if (downPct >= 5) {
+    feePct = 0.015;
+    label = `${use === "subsequent_use" ? "Subsequent" : "First"} use, 5% to 9.99% down`;
+  }
+
+  return {
+    exempt: false,
+    priorUse: use,
+    downPaymentPct: round2(down / p),
+    feePct,
+    amount: roundMoney(baseLoan * feePct),
+    label
+  };
+}
+
+function getFallbackVaGuidance(topic) {
+  const topics = {
+    overview: {
+      title: "VA Loan Overview",
+      bluf:
+        "A VA Loan can be one of the strongest military home-buying tools when the payment, PCS timeline, and market risk still make sense.",
+      key_points: [
+        "Eligible borrowers may be able to buy with $0 down.",
+        "VA Loans do not require monthly PMI.",
+        "The lender still decides approval using income, credit, debt, assets, residual income, and property rules.",
+        "The home generally must be intended as a primary residence."
+      ],
+      risks: [
+        "Low down payment can mean low equity if you PCS quickly.",
+        "Approval does not mean the decision is financially smart.",
+        "Funding fee, closing costs, taxes, insurance, and maintenance still matter."
+      ],
+      next_steps: [
+        "Confirm COE eligibility.",
+        "Estimate the full all-in monthly payment.",
+        "Compare payment to BAH, income, expenses, and PCS timeline."
+      ]
+    },
+    eligibility: {
+      title: "VA Loan Eligibility",
+      bluf:
+        "Eligibility starts with service history and a Certificate of Eligibility, but approval still depends on lender underwriting.",
+      key_points: [
+        "A COE helps show the lender that the borrower qualifies for the VA home loan benefit.",
+        "Active-duty service members, Veterans, Guard/Reserve members, and some surviving spouses may qualify.",
+        "A COE is not the same as loan approval."
+      ],
+      risks: [
+        "Prior VA loan usage can affect entitlement.",
+        "Partial entitlement may change the down payment requirement."
+      ],
+      next_steps: [
+        "Request or confirm the COE.",
+        "Ask the lender whether entitlement is full or partial.",
+        "Compare at least two VA-experienced lenders."
+      ]
+    },
+    funding_fee: {
+      title: "VA Funding Fee",
+      bluf:
+        "The VA funding fee is a one-time cost for many VA borrowers, but some borrowers are exempt.",
+      key_points: [
+        "The fee depends on loan type, prior VA usage, down payment tier, and exemption status.",
+        "The funding fee may often be financed into the loan on a purchase.",
+        "Borrowers receiving VA disability compensation are commonly exempt."
+      ],
+      risks: [
+        "Financing the fee increases the loan balance.",
+        "Exemption status should be confirmed before closing.",
+        "The funding fee is separate from lender fees, title fees, taxes, insurance, and prepaids."
+      ],
+      next_steps: [
+        "Confirm funding-fee exemption on the COE or with the lender.",
+        "Calculate the funding fee as paid upfront and financed.",
+        "Compare first-use versus subsequent-use fee status."
+      ]
+    },
+    zero_down: {
+      title: "Zero Down",
+      bluf:
+        "$0 down is often possible for eligible VA borrowers with sufficient entitlement, but it should be treated as a tool, not a green light.",
+      key_points: [
+        "$0 down does not mean zero cash needed.",
+        "Closing costs, inspections, reserves, moving costs, and maintenance still matter.",
+        "A down payment may reduce the funding fee and monthly payment."
+      ],
+      risks: [
+        "Low equity can be risky if orders change quickly.",
+        "Rolling the funding fee into the loan increases the balance."
+      ],
+      next_steps: [
+        "Compare $0 down and with-down-payment scenarios.",
+        "Review cash reserves after closing.",
+        "Check whether a down payment changes the funding-fee tier."
+      ]
+    },
+    no_pmi: {
+      title: "No Monthly PMI",
+      bluf:
+        "One of the strongest VA Loan advantages is that it does not require monthly private mortgage insurance.",
+      key_points: [
+        "VA Loans do not require monthly PMI, even with $0 down.",
+        "The funding fee is separate from PMI.",
+        "No PMI can improve monthly affordability versus low-down-payment conventional loans."
+      ],
+      risks: [
+        "No PMI does not make the payment automatically safe.",
+        "Taxes, insurance, HOA, maintenance, and utilities still matter."
+      ],
+      next_steps: [
+        "Compare VA all-in payment against conventional with PMI.",
+        "Evaluate affordability from all-in payment, not principal and interest only."
+      ]
+    },
+    appraisal: {
+      title: "VA Appraisal",
+      bluf:
+        "The VA appraisal checks value and minimum property requirements; it is not a substitute for a home inspection.",
+      key_points: [
+        "The appraisal helps establish value and property acceptability.",
+        "A home inspection is for the buyer’s understanding of condition.",
+        "VA appraisal conditions can require repairs before closing."
+      ],
+      risks: [
+        "Skipping inspection can hide expensive issues.",
+        "Appraisal repairs can slow or complicate the deal."
+      ],
+      next_steps: [
+        "Order an independent home inspection.",
+        "Ask the agent and lender how likely the property is to clear VA appraisal.",
+        "Budget for repairs and maintenance."
+      ]
+    },
+    occupancy: {
+      title: "Occupancy",
+      bluf:
+        "A VA Loan is generally for a primary residence, not a pure investment property.",
+      key_points: [
+        "The borrower generally certifies intent to occupy as a primary residence.",
+        "PCS, deployment, and spouse occupancy situations should be discussed with the lender.",
+        "Do not treat VA financing as a disguised investment-loan shortcut."
+      ],
+      risks: [
+        "Incorrect occupancy assumptions can create compliance problems.",
+        "PCS timing must be disclosed and documented."
+      ],
+      next_steps: [
+        "Tell the lender the actual PCS/deployment timeline.",
+        "Document who will occupy the home and when.",
+        "Ask the lender before assuming an exception applies."
+      ]
+    },
+    seller_concessions: {
+      title: "Seller Concessions",
+      bluf:
+        "VA can be powerful in negotiations because sellers may help with closing costs, but concessions have rules.",
+      key_points: [
+        "Sellers/builders may offer credits to cover some buyer costs.",
+        "VA seller concessions are generally capped at 4% of reasonable value.",
+        "Credits must be structured correctly with the lender and contract."
+      ],
+      risks: [
+        "Poorly structured credits can be rejected or reduced.",
+        "The appraisal value can limit what the transaction supports."
+      ],
+      next_steps: [
+        "Ask the lender how much seller credit can be used before writing the offer.",
+        "Have the agent structure concession language clearly.",
+        "Use credits to reduce cash-to-close, not to hide an unaffordable payment."
+      ]
+    },
+    entitlement: {
+      title: "Entitlement",
+      bluf:
+        "Full entitlement usually means no VA loan limit, but it does not replace lender affordability or appraisal requirements.",
+      key_points: [
+        "The COE shows entitlement information.",
+        "Prior VA loan usage can reduce available entitlement.",
+        "Partial entitlement may create a down payment requirement."
+      ],
+      risks: [
+        "Entitlement is often confused with affordability.",
+        "County loan limits matter more when entitlement is not full."
+      ],
+      next_steps: [
+        "Review the COE for entitlement status.",
+        "Tell the lender about any prior VA loan still charged to entitlement.",
+        "Calculate whether remaining entitlement supports the target loan."
+      ]
+    },
+    closing_costs: {
+      title: "Closing Costs",
+      bluf:
+        "VA does not mean zero cash to close. The funding fee may be financed, but most other purchase closing costs need buyer funds, seller credits, or lender credits.",
+      key_points: [
+        "Closing costs vary by lender, location, property, taxes, insurance, and prepaids.",
+        "Seller credits may cover eligible closing costs.",
+        "The funding fee is separate from normal closing costs."
+      ],
+      risks: [
+        "A buyer can be approved but short on cash to close.",
+        "Escrows and prepaids can surprise first-time buyers."
+      ],
+      next_steps: [
+        "Request a Loan Estimate.",
+        "Ask for estimated cash to close, not just monthly payment.",
+        "Stress test reserves after closing."
+      ]
+    },
+    pcs_strategy: {
+      title: "PCS Housing Strategy",
+      bluf:
+        "The VA Loan is a tool. The PCS decision still has to pass timeline, cash-flow, exit-strategy, and market-risk tests.",
+      key_points: [
+        "Buying can make sense when payment is safe and the timeline is long enough.",
+        "Renting can be smarter when the PCS timeline is short or reserves are thin.",
+        "BAH should not be treated as permission to max out housing."
+      ],
+      risks: [
+        "Short holding period plus low equity can create negative-sale risk.",
+        "Maintenance and vacancy can turn a good payment into a bad plan."
+      ],
+      next_steps: [
+        "Compare rent vs buy using expected time on station.",
+        "Estimate resale break-even and rental fallback.",
+        "Keep emergency reserves separate from down payment."
+      ]
+    },
+    when_not_to_buy: {
+      title: "When Not To Buy",
+      bluf:
+        "A VA Loan should help you buy well, not help you force a risky purchase.",
+      key_points: [
+        "Do not buy just because $0 down is available.",
+        "Do not buy if the all-in payment leaves no monthly buffer.",
+        "Do not buy if the PCS timeline is too short for transaction costs and market movement."
+      ],
+      risks: [
+        "Negative equity risk after a short stay.",
+        "House-poor cash flow.",
+        "Maintenance, tenant, or forced-sale stress."
+      ],
+      next_steps: [
+        "Lower the target price.",
+        "Increase cash reserves.",
+        "Rent first if the market or timeline is unclear.",
+        "Re-run the scenario with conservative assumptions."
+      ]
+    }
+  };
+
+  return topics[topic] || topics.overview;
+}
+
+function buildDirectVaLoanReply({ packet }) {
+  if (!packet) return "";
+
+  const lines = [];
+
+  const bluf = safeStr(
+    packet.bluf ||
+      "A VA Loan can be powerful, but it still needs a payment, PCS timeline, reserve, and exit-strategy test."
+  );
+
+  lines.push(`BLUF: ${bluf}`);
+
+  const title = safeStr(packet.title || packet.topic);
+  if (title) lines.push(`Topic: ${title}.`);
+
+  const fundingFee = pickFirst(
+    packet.funding_fee,
+    packet.fundingFee,
+    packet.purchase_scenario?.loan?.fundingFee,
+    packet.purchase_scenario?.loan?.funding_fee
+  );
+
+  if (fundingFee) {
+    if (typeof fundingFee === "object") {
+      const feeAmount = pickFirst(fundingFee.amount, fundingFee.fundingFee);
+      const feePct = pickFirst(fundingFee.feePct, fundingFee.fee_pct);
+      const exempt = fundingFee.exempt === true;
+
+      lines.push(
+        exempt
+          ? "Numbers: VA funding fee looks likely exempt based on the profile signals I have, but that must be confirmed on the COE or by the lender."
+          : `Numbers: estimated VA funding fee is ${money(feeAmount)}${feePct ? ` (${pct(feePct)})` : ""}.`
+      );
+
+      if (packet.purchase_scenario?.loan?.estimatedLoanWithFinancedFundingFee) {
+        lines.push(
+          `If financed, estimated loan balance becomes ${money(
+            packet.purchase_scenario.loan.estimatedLoanWithFinancedFundingFee
+          )}.`
+        );
+      }
+    } else {
+      lines.push(`Numbers: estimated VA funding fee is ${money(fundingFee)}.`);
+    }
+  }
+
+  const keyPoints = Array.isArray(packet.key_points)
+    ? packet.key_points
+    : Array.isArray(packet.keyPoints)
+      ? packet.keyPoints
+      : [];
+
+  if (keyPoints.length) {
+    lines.push(`Why: ${keyPoints.slice(0, 3).join(" ")}`);
+  } else {
+    lines.push(
+      "Why: eligible VA borrowers can often use $0 down and VA Loans do not require monthly PMI, but closing costs, funding-fee status, property condition, appraisal, and occupancy still matter."
+    );
+  }
+
+  const risks = Array.isArray(packet.risks) ? packet.risks : [];
+
+  if (risks.length) {
+    lines.push(`Risk: ${risks.slice(0, 2).join(" ")}`);
+  } else {
+    lines.push(
+      "Risk: approval does not mean the decision is good. The plan still needs to survive PCS timeline, reserves, resale/rent-out fallback, and monthly cash flow."
+    );
+  }
+
+  const nextSteps = Array.isArray(packet.next_steps)
+    ? packet.next_steps
+    : Array.isArray(packet.nextSteps)
+      ? packet.nextSteps
+      : [];
+
+  if (nextSteps.length) {
+    lines.push(`Next move: ${nextSteps.slice(0, 3).join(" ")}`);
+  } else {
+    lines.push(
+      "Next move: confirm COE and funding-fee status, estimate all-in payment and cash-to-close, then compare the payment against BAH, income, expenses, reserves, and PCS timeline."
+    );
+  }
+
+  return lines.join(" ");
+}
+
+// ============================================================
+// //#15 MISSING INPUTS / NEXT ACTION
+// ============================================================
+
 function listMissingInputs({
   normalizedProfile,
   scenario,
@@ -2341,10 +3069,52 @@ function listMissingInputs({
     }
   }
 
+  if (intent === "va_loan") {
+    if (
+      normalizedProfile?.funding_fee_exempt === undefined &&
+      !normalizedProfile?.va_disability
+    ) {
+      missing.push("funding fee exemption status");
+    }
+
+    if (!scenario?.priorUse && !normalizedProfile?.priorUse) {
+      missing.push("first or subsequent VA loan use");
+    }
+  }
+
   return [...new Set(missing)];
 }
 
-function buildNextAction({ intent, missing, verdict, compensation, mortgage }) {
+function buildNextAction({
+  intent,
+  missing,
+  verdict,
+  compensation,
+  mortgage,
+  vaLoan
+}) {
+  if (intent === "va_loan") {
+    const exempt =
+      vaLoan?.funding_fee?.exempt === true ||
+      vaLoan?.profile_signals?.likely_funding_fee_exempt === true;
+
+    if (exempt) {
+      return {
+        type: "va_payment_compare",
+        label: "Compare VA payment",
+        message:
+          "Next move: compare the VA payment against BAH, monthly expenses, cash reserves, and PCS timeline."
+      };
+    }
+
+    return {
+      type: "va_funding_fee_review",
+      label: "Confirm VA funding fee",
+      message:
+        "Next move: confirm COE and funding-fee status, then estimate all-in VA payment and cash-to-close."
+    };
+  }
+
   if (missing?.length) {
     const top = missing.slice(0, 3).join(", ");
 
@@ -2404,12 +3174,12 @@ function buildNextAction({ intent, missing, verdict, compensation, mortgage }) {
   return {
     type: "continue",
     label: "Continue",
-    message: "Ask Amy a specific housing, PCS, pay, or dashboard question."
+    message: "Ask Amy a specific housing, PCS, pay, VA Loan, or dashboard question."
   };
 }
 
 // ============================================================
-// //#14 DIRECT REPLIES
+// //#16 DIRECT REPLIES
 // ============================================================
 
 function buildDirectDeterministicReply({
@@ -2423,13 +3193,14 @@ function buildDirectDeterministicReply({
   const mortgage = packet.mortgage;
   const affordability = packet.affordability;
   const verdict = packet.verdict;
+  const vaLoan = packet.va_loan;
 
   if (intent === "greeting") {
     const name = firstName(p.full_name);
 
     return [
       `Hey${name ? ` ${name}` : ""} — I’m Amy, your PCSUnited AI Concierge powered by TheWing.ai.`,
-      "I can help explain your pay, BAH, housing affordability, PCS strategy, mortgage numbers, and dashboard readiness in plain English."
+      "I can help explain your pay, BAH, housing affordability, VA Loan strategy, PCS strategy, mortgage numbers, and dashboard readiness in plain English."
     ].join(" ");
   }
 
@@ -2445,7 +3216,7 @@ function buildDirectDeterministicReply({
 
     return [
       `Yes${name ? ` ${name}` : ""} — I’m working.`,
-      "I can help with pay, BAH, affordability, mortgage estimates, rent vs. buy, PCS housing strategy, and dashboard readiness.",
+      "I can help with pay, BAH, VA Loan guidance, affordability, mortgage estimates, rent vs. buy, PCS housing strategy, and dashboard readiness.",
       profileLine
     ]
       .filter(Boolean)
@@ -2494,6 +3265,10 @@ function buildDirectDeterministicReply({
     ]
       .filter(Boolean)
       .join(" ");
+  }
+
+  if (intent === "va_loan" && vaLoan) {
+    return buildDirectVaLoanReply({ packet: vaLoan });
   }
 
   if (
@@ -2554,7 +3329,7 @@ function firstName(fullName) {
 }
 
 // ============================================================
-// //#15 OPENAI
+// //#17 OPENAI
 // ============================================================
 
 function buildSystemPrompt({ profileSummary, deterministic }) {
@@ -2566,11 +3341,23 @@ function buildSystemPrompt({ profileSummary, deterministic }) {
     "TheWing.ai is the software intelligence layer behind calculations, profile loading, decision logic, and concierge guidance.",
     "",
     "Your job:",
-    "- Help military members understand pay, BAH, BAS, VA disability, retirement, affordability, mortgage estimates, PCS housing strategy, dashboard readiness, and next steps.",
+    "- Help military members understand pay, BAH, BAS, VA disability, retirement, affordability, mortgage estimates, VA Loan strategy, PCS housing strategy, dashboard readiness, and next steps.",
     "- Be BLUF-first.",
     "- Explain numbers clearly.",
     "- Recommend practical next steps.",
     "- Do not sound like generic ChatGPT.",
+    "",
+    "VA Loan rules:",
+    "- VA Loans are part of your job.",
+    "- Use the VA Loan packet when present.",
+    "- Never invent VA Loan eligibility.",
+    "- Never invent COE status.",
+    "- Never invent funding fee exemption.",
+    "- Never invent loan approval.",
+    "- Never invent entitlement status.",
+    "- Never say the member is approved for a VA Loan.",
+    "- If VA funding-fee exemption appears likely from disability or packet data, say it must still be confirmed by COE/lender.",
+    "- Explain that VA Loans may allow $0 down and no monthly PMI for eligible borrowers, but closing costs, funding fee, occupancy, appraisal/property condition, cash reserves, and PCS timeline still matter.",
     "",
     "Style:",
     "- Calm, confident, military-aware, practical, warm.",
@@ -2580,6 +3367,7 @@ function buildSystemPrompt({ profileSummary, deterministic }) {
     "- Do not be salesy.",
     "",
     "Hard rules:",
+    "- Never invent or change the member’s name.",
     "- Never invent pay, BAH, mortgage, approval, or affordability numbers.",
     "- If a deterministic truth packet is provided, trust it over your own math.",
     "- Do not perform legal, tax, or lending approval advice.",
@@ -2597,7 +3385,10 @@ function buildSystemPrompt({ profileSummary, deterministic }) {
     profileSummary || "No profile summary available.",
     "",
     "Truth packet available:",
-    JSON.stringify(packet || {}, null, 2)
+    JSON.stringify(packet || {}, null, 2),
+    "",
+    "VA Loan packet available:",
+    JSON.stringify(packet?.va_loan || {}, null, 2)
   ].join("\n");
 }
 
@@ -2622,12 +3413,18 @@ function buildUserPayload({
     behavior_rules: {
       bluf_first: true,
       use_truth_packet_over_model_math: true,
+      use_va_loan_packet_for_va_questions: true,
+      do_not_invent_or_change_member_name: true,
       do_not_fabricate_numbers: true,
+      do_not_invent_va_loan_eligibility: true,
+      do_not_invent_funding_fee_exemption: true,
+      do_not_claim_loan_approval: true,
       concise_by_default: true,
       explain_numbers_plainly: true
     },
     member_profile: stripSensitiveProfile(normalizedProfile),
     truth_packet: deterministic?.public || null,
+    va_loan_packet: deterministic?.public?.va_loan || null,
     dashboard_context_present: Boolean(
       Object.keys(mergedContext?.fad || {}).length ||
         Object.keys(mergedContext?.kpi_overrides || {}).length
@@ -2686,13 +3483,25 @@ async function callOpenAI({ systemPrompt, userPayload, model }) {
 }
 
 // ============================================================
-// //#16 FALLBACK REPLIES
+// //#18 FALLBACK REPLIES
 // ============================================================
 
 function buildFallbackReply({ intent, normalizedProfile, deterministic }) {
   const packet = deterministic?.public || {};
   const missing = packet.missing_inputs || [];
   const name = firstName(normalizedProfile?.full_name);
+
+  if (intent === "va_loan") {
+    return [
+      "BLUF: A VA Loan can be powerful, but it still needs a payment, timeline, reserve, and exit-strategy test.",
+      "",
+      "Why: eligible borrowers can often use $0 down and VA Loans do not require monthly PMI, but closing costs, funding-fee status, property condition, appraisal, and occupancy rules still matter.",
+      "",
+      "Risk: approval does not mean the decision is good. A PCS timeline, thin reserves, high payment, or weak exit plan can turn a technically approved loan into a bad move.",
+      "",
+      "Next move: confirm COE and funding-fee status, estimate the all-in payment, then compare it to BAH, total income, monthly expenses, cash reserves, and expected time on station."
+    ].join("\n");
+  }
 
   if (intent === "compensation") {
     if (missing.length) {
@@ -2716,13 +3525,13 @@ function buildFallbackReply({ intent, normalizedProfile, deterministic }) {
 
   return [
     `I’m working${name ? `, ${name}` : ""}.`,
-    "I can help with PCS housing strategy, military pay, BAH, mortgage estimates, dashboard readiness, and rent-vs-buy decisions.",
+    "I can help with PCS housing strategy, military pay, BAH, VA Loan strategy, mortgage estimates, dashboard readiness, and rent-vs-buy decisions.",
     "Ask me something like: “What is my Base Pay, BAS, BAH, and total monthly compensation?”"
   ].join(" ");
 }
 
 // ============================================================
-// //#17 STRUCTURED ANSWER
+// //#19 STRUCTURED ANSWER
 // ============================================================
 
 function buildStructuredAnswerFromText({
@@ -2737,6 +3546,7 @@ function buildStructuredAnswerFromText({
   const affordability = packet.affordability || null;
   const verdict = packet.verdict || null;
   const nextAction = packet.next_action || null;
+  const vaLoan = packet.va_loan || null;
 
   const numbers = [];
 
@@ -2810,6 +3620,50 @@ function buildStructuredAnswerFromText({
     });
   }
 
+  const vaFundingFee = pickFirst(
+    vaLoan?.funding_fee,
+    vaLoan?.fundingFee,
+    vaLoan?.purchase_scenario?.loan?.fundingFee,
+    vaLoan?.purchase_scenario?.loan?.funding_fee
+  );
+
+  if (vaFundingFee) {
+    if (typeof vaFundingFee === "object") {
+      numbers.push({
+        label: "VA Funding Fee",
+        value:
+          vaFundingFee.exempt === true
+            ? "Likely exempt; confirm with COE/lender"
+            : money(pickFirst(vaFundingFee.amount, vaFundingFee.fundingFee)),
+        raw: pickFirst(vaFundingFee.amount, vaFundingFee.fundingFee, 0)
+      });
+
+      if (vaFundingFee.feePct !== undefined || vaFundingFee.fee_pct !== undefined) {
+        numbers.push({
+          label: "VA Funding Fee Rate",
+          value: pct(pickFirst(vaFundingFee.feePct, vaFundingFee.fee_pct)),
+          raw: pickFirst(vaFundingFee.feePct, vaFundingFee.fee_pct)
+        });
+      }
+    } else {
+      numbers.push({
+        label: "VA Funding Fee",
+        value: money(vaFundingFee),
+        raw: vaFundingFee
+      });
+    }
+  }
+
+  const financedVaLoan = vaLoan?.purchase_scenario?.loan?.estimatedLoanWithFinancedFundingFee;
+
+  if (financedVaLoan) {
+    numbers.push({
+      label: "Estimated Loan With Financed VA Funding Fee",
+      value: money(financedVaLoan),
+      raw: financedVaLoan
+    });
+  }
+
   const risks = [];
 
   if (verdict?.status === "CAUTION") {
@@ -2820,11 +3674,29 @@ function buildStructuredAnswerFromText({
     risks.push("The current housing scenario appears too aggressive for the loaded numbers.");
   }
 
+  if (Array.isArray(vaLoan?.risks)) {
+    risks.push(...vaLoan.risks.slice(0, 4));
+  }
+
   if (packet.missing_inputs?.length) {
     risks.push(`Missing inputs: ${packet.missing_inputs.slice(0, 4).join(", ")}.`);
   }
 
   const recommendations = [];
+
+  if (intent === "va_loan") {
+    if (Array.isArray(vaLoan?.next_steps)) {
+      recommendations.push(...vaLoan.next_steps.slice(0, 4));
+    } else if (Array.isArray(vaLoan?.nextSteps)) {
+      recommendations.push(...vaLoan.nextSteps.slice(0, 4));
+    } else {
+      recommendations.push(
+        "Confirm COE and funding-fee status.",
+        "Estimate all-in VA payment and cash-to-close.",
+        "Compare payment to BAH, total income, monthly expenses, cash reserves, and PCS timeline."
+      );
+    }
+  }
 
   if (nextAction?.message) recommendations.push(nextAction.message);
 
@@ -2842,6 +3714,7 @@ function buildStructuredAnswerFromText({
 
   return {
     bluf:
+      vaLoan?.bluf ||
       verdict?.bluf ||
       firstSentence(reply) ||
       "Amy has a first-pass recommendation.",
@@ -2849,13 +3722,15 @@ function buildStructuredAnswerFromText({
     status: verdict?.status || null,
     grade: verdict?.grade || null,
     numbers,
-    risks,
-    recommendations,
-    next_steps: recommendations.slice(0, 3),
+    risks: [...new Set(risks)].slice(0, 8),
+    recommendations: [...new Set(recommendations)].slice(0, 8),
+    next_steps: [...new Set(recommendations)].slice(0, 3),
     follow_up_question: buildFollowUpQuestion({
       intent,
       missing: packet.missing_inputs || [],
-      mortgage
+      mortgage,
+      vaLoan,
+      normalizedProfile
     }),
     profile_used: stripSensitiveProfile(normalizedProfile)
   };
@@ -2868,7 +3743,27 @@ function firstSentence(text) {
   return match ? match[1] : s.slice(0, 180);
 }
 
-function buildFollowUpQuestion({ intent, missing, mortgage }) {
+function buildFollowUpQuestion({
+  intent,
+  missing,
+  mortgage,
+  vaLoan,
+  normalizedProfile
+}) {
+  if (intent === "va_loan") {
+    const exempt =
+      vaLoan?.funding_fee?.exempt === true ||
+      vaLoan?.profile_signals?.likely_funding_fee_exempt === true ||
+      normalizedProfile?.funding_fee_exempt === true ||
+      normalizedProfile?.va_disability > 0;
+
+    if (exempt) {
+      return "Want me to compare the VA payment against your BAH and PCS timeline?";
+    }
+
+    return "Want me to estimate the VA funding fee and show how it changes the loan balance?";
+  }
+
   if (missing?.length) {
     return `Want to add ${missing[0]} so I can tighten the answer?`;
   }
@@ -2885,7 +3780,7 @@ function buildFollowUpQuestion({ intent, missing, mortgage }) {
 }
 
 // ============================================================
-// //#18 PROFILE / OUTPUT HELPERS
+// //#20 PROFILE / OUTPUT HELPERS
 // ============================================================
 
 function buildProfileSummary(profile, deterministic) {
@@ -2910,6 +3805,10 @@ function buildProfileSummary(profile, deterministic) {
 
   if (p.va_disability !== undefined) {
     parts.push(`VA Disability: ${p.va_disability}%`);
+  }
+
+  if (p.funding_fee_exempt !== undefined) {
+    parts.push(`VA Funding Fee Exempt Signal: ${p.funding_fee_exempt ? "Likely Yes" : "No/Unknown"}`);
   }
 
   if (p.projected_home_price) {
@@ -2963,6 +3862,7 @@ function stripSensitiveProfile(profile) {
     base: p.base,
     zip: p.zip,
     va_disability: p.va_disability,
+    funding_fee_exempt: p.funding_fee_exempt,
     projected_home_price: p.projected_home_price,
     monthly_expenses: p.monthly_expenses,
     income: p.income,
@@ -2971,6 +3871,13 @@ function stripSensitiveProfile(profile) {
     savings: p.savings,
     credit_score: p.credit_score,
     bedrooms: p.bedrooms,
-    cityKey: p.cityKey
+    cityKey: p.cityKey,
+    priorUse: p.priorUse,
+    occupancyIntent: p.occupancyIntent,
+    fullEntitlement: p.fullEntitlement,
+    entitlementUsed: p.entitlementUsed,
+    sellerCredit: p.sellerCredit,
+    pcsTimelineMonths: p.pcsTimelineMonths,
+    expectedHoldMonths: p.expectedHoldMonths
   });
 }
