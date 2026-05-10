@@ -1,20 +1,20 @@
 // netlify/functions/_share/agent-registry.js
 // ============================================================
 // TheWing.ai • Agent Registry
-// v1.0.0
+// v1.1.0
 //
 // PURPOSE
 // - Central intelligence switchboard for Ask Amy and future agents
-// - Lets ask-amy.js call one registry instead of importing every
-//   future _share module directly
+// - Lets agent-amy.js / ask-amy.js call one registry instead of
+//   importing every future _share module directly
 // - Loads approved shared tools defensively
 // - Builds deterministic tool packets
 // - Builds direct replies when a tool can answer without OpenAI
 //
 // WHY THIS EXISTS
-// - ask-amy.js should stay stable
+// - agent-amy.js should stay stable
 // - new intelligence modules should be added here, not hardwired
-//   into Ask Amy every time
+//   into Amy every time
 //
 // CURRENT SUPPORTED TOOLS
 // - compensation_context
@@ -23,21 +23,17 @@
 // - decision_rules
 // - va_loans
 //
-// FUTURE TOOL PATTERN
-// Add a new object to TOOL_DEFINITIONS:
-// {
-//   name: "base_schools",
-//   path: "./base-schools.js",
-//   intents: ["base_schools", "pcs_housing_strategy"],
-//   contextFunctions: ["buildBaseSchoolsPacket", "analyzeBaseSchools"],
-//   replyFunctions: ["buildDirectReply"],
-//   normalize: normalizeGenericPacket
-// }
-//
-// NETLIFY NOTE
+// IMPORTANT NETLIFY NOTE
 // Make sure netlify.toml includes:
 // [functions]
 //   included_files = ["netlify/functions/_share/**"]
+//
+// DESIGN NOTE
+// - This registry intentionally sends both:
+//   1) rich nested input: { profile, scenario, compensation, mortgage }
+//   2) flattened compatibility input: rank, yos, zip, price, etc.
+// - That keeps older modules working while allowing newer modules
+//   to use clean structured objects.
 // ============================================================
 
 /* eslint-disable no-console */
@@ -46,7 +42,7 @@
 // //#1 REGISTRY CONFIG
 // ============================================================
 
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 
 const MODULE_CACHE = new Map();
 
@@ -55,12 +51,21 @@ const TOOL_DEFINITIONS = [
     name: "compensation_context",
     label: "Compensation Context",
     path: "./compensation-context.js",
-    intents: ["compensation", "housing_affordability", "dashboard_interpretation", "pcs_housing_strategy"],
+    intents: [
+      "compensation",
+      "housing_affordability",
+      "dashboard_interpretation",
+      "pcs_housing_strategy",
+      "mortgage_explanation",
+      "rent_vs_buy",
+      "general_guidance"
+    ],
     contextFunctions: [
       "safeBuildCompensationContext",
       "buildCompensationContext",
       "calculateCompensation",
-      "getCompensation"
+      "getCompensation",
+      "computeCompensation"
     ],
     replyFunctions: [],
     normalize: normalizeCompensationPacket
@@ -69,13 +74,22 @@ const TOOL_DEFINITIONS = [
     name: "mortgage_engine",
     label: "Mortgage Engine",
     path: "./mortgage-engine.js",
-    intents: ["mortgage_explanation", "housing_affordability", "dashboard_interpretation", "va_loan"],
+    intents: [
+      "mortgage_explanation",
+      "housing_affordability",
+      "dashboard_interpretation",
+      "va_loan",
+      "rent_vs_buy",
+      "pcs_housing_strategy",
+      "general_guidance"
+    ],
     contextFunctions: [
       "safeCalculateMortgage",
       "calculateMortgage",
       "computeMortgage",
       "buildMortgage",
-      "getMortgage"
+      "getMortgage",
+      "mortgageEngine"
     ],
     replyFunctions: [],
     normalize: normalizeMortgagePacket
@@ -84,7 +98,14 @@ const TOOL_DEFINITIONS = [
     name: "affordability_engine",
     label: "Affordability Engine",
     path: "./affordability-engine.js",
-    intents: ["housing_affordability", "dashboard_interpretation", "rent_vs_buy", "pcs_housing_strategy"],
+    intents: [
+      "housing_affordability",
+      "dashboard_interpretation",
+      "rent_vs_buy",
+      "pcs_housing_strategy",
+      "mortgage_explanation",
+      "general_guidance"
+    ],
     contextFunctions: [
       "computeAffordability",
       "calculateAffordability",
@@ -99,7 +120,14 @@ const TOOL_DEFINITIONS = [
     name: "decision_rules",
     label: "Decision Rules",
     path: "./decision-rules.js",
-    intents: ["housing_affordability", "dashboard_interpretation", "rent_vs_buy", "pcs_housing_strategy"],
+    intents: [
+      "housing_affordability",
+      "dashboard_interpretation",
+      "rent_vs_buy",
+      "pcs_housing_strategy",
+      "mortgage_explanation",
+      "general_guidance"
+    ],
     contextFunctions: [
       "computeVerdict",
       "getVerdict",
@@ -115,7 +143,13 @@ const TOOL_DEFINITIONS = [
     name: "va_loans",
     label: "VA Loans",
     path: "./va-loans.js",
-    intents: ["va_loan", "mortgage_explanation", "pcs_housing_strategy"],
+    intents: [
+      "va_loan",
+      "mortgage_explanation",
+      "pcs_housing_strategy",
+      "housing_affordability",
+      "general_guidance"
+    ],
     contextFunctions: [
       "buildVaLoanTruthPacket",
       "analyzeVaLoanQuestion",
@@ -179,6 +213,57 @@ export async function loadTool(name) {
   };
 }
 
+export async function getAgentTools() {
+  const loaded = {};
+
+  for (const def of TOOL_DEFINITIONS) {
+    const tool = await loadTool(def.name);
+
+    loaded[def.name] = {
+      ok: tool.ok,
+      name: tool.name,
+      label: tool.label,
+      path: tool.path,
+      module: tool.module || null,
+      definition: tool.definition || def,
+      error: tool.error || null
+    };
+  }
+
+  return {
+    ok: true,
+    version: VERSION,
+
+    compensation: loaded.compensation_context || null,
+    compensationContext: loaded.compensation_context || null,
+    compensation_context: loaded.compensation_context || null,
+
+    mortgage: loaded.mortgage_engine || null,
+    mortgageEngine: loaded.mortgage_engine || null,
+    mortgage_engine: loaded.mortgage_engine || null,
+
+    affordability: loaded.affordability_engine || null,
+    affordabilityEngine: loaded.affordability_engine || null,
+    affordability_engine: loaded.affordability_engine || null,
+
+    decisionRules: loaded.decision_rules || null,
+    decision_rules: loaded.decision_rules || null,
+
+    vaLoans: loaded.va_loans || null,
+    va_loans: loaded.va_loans || null,
+
+    tools: loaded
+  };
+}
+
+export async function loadAgentTools() {
+  return getAgentTools();
+}
+
+export async function buildAgentRegistry() {
+  return getAgentTools();
+}
+
 export async function buildToolPackets(input = {}) {
   const normalizedInput = normalizeRegistryInput(input);
   const activeTools = getToolsForIntent(normalizedInput.intent);
@@ -216,8 +301,11 @@ export async function buildToolPackets(input = {}) {
     }
 
     try {
-      const raw = await fn(buildToolInput(normalizedInput, def));
-      const normalized = def.normalize ? def.normalize(raw, normalizedInput) : normalizeGenericPacket(raw, def);
+      const toolInput = buildToolInput(normalizedInput, def);
+      const raw = await fn(toolInput);
+      const normalized = def.normalize
+        ? def.normalize(raw, normalizedInput)
+        : normalizeGenericPacket(raw, def);
 
       if (normalized) {
         packets[def.name] = normalized;
@@ -286,7 +374,10 @@ export async function buildDirectToolReply(input = {}) {
         }
       }
     } catch (err) {
-      console.warn(`agent-registry direct reply ${def.name} failed:`, err?.message || err);
+      console.warn(
+        `agent-registry direct reply ${def.name} failed:`,
+        err?.message || err
+      );
     }
   }
 
@@ -330,7 +421,9 @@ export async function runTool(name, input = {}) {
 
   try {
     const raw = await fn(buildToolInput(normalizedInput, def));
-    const packet = def.normalize ? def.normalize(raw, normalizedInput) : normalizeGenericPacket(raw, def);
+    const packet = def.normalize
+      ? def.normalize(raw, normalizedInput)
+      : normalizeGenericPacket(raw, def);
 
     return {
       ok: true,
@@ -353,8 +446,8 @@ export async function runTool(name, input = {}) {
 function getToolsForIntent(intent) {
   const cleanIntent = safeStr(intent) || "general_guidance";
 
-  const exact = TOOL_DEFINITIONS.filter((tool) =>
-    Array.isArray(tool.intents) && tool.intents.includes(cleanIntent)
+  const exact = TOOL_DEFINITIONS.filter(
+    (tool) => Array.isArray(tool.intents) && tool.intents.includes(cleanIntent)
   );
 
   if (exact.length) return exact;
@@ -366,7 +459,12 @@ function getToolsForIntent(intent) {
   }
 
   return TOOL_DEFINITIONS.filter((tool) =>
-    ["compensation_context", "mortgage_engine", "affordability_engine", "decision_rules"].includes(tool.name)
+    [
+      "compensation_context",
+      "mortgage_engine",
+      "affordability_engine",
+      "decision_rules"
+    ].includes(tool.name)
   );
 }
 
@@ -390,7 +488,10 @@ async function safeLoadModule(path) {
     MODULE_CACHE.set(cleanPath, unwrapped);
     return unwrapped;
   } catch (err) {
-    console.warn(`agent-registry import failed for ${cleanPath}:`, err?.message || err);
+    console.warn(
+      `agent-registry import failed for ${cleanPath}:`,
+      err?.message || err
+    );
     MODULE_CACHE.set(cleanPath, null);
     return null;
   }
@@ -432,7 +533,8 @@ function getExportedFunction(mod, names = []) {
 // ============================================================
 
 function normalizeRegistryInput(input = {}) {
-  const context = input.context && typeof input.context === "object" ? input.context : {};
+  const context =
+    input.context && typeof input.context === "object" ? input.context : {};
 
   const profile = mergeDeep(
     {},
@@ -475,7 +577,9 @@ function normalizeRegistryInput(input = {}) {
 
   return {
     message: safeStr(input.message || input.question || input.prompt || ""),
-    intent: safeStr(input.intent || context.intent || detectIntentFallback(input.message || "")),
+    intent: safeStr(
+      input.intent || context.intent || detectIntentFallback(input.message || "")
+    ),
     email: normalizeEmail(input.email || profile.email || context.email || ""),
     profile,
     scenario,
@@ -488,29 +592,347 @@ function normalizeRegistryInput(input = {}) {
 }
 
 function buildToolInput(input, def) {
-  return {
+  const profile = input.profile || {};
+  const scenario = input.scenario || {};
+  const compensation = input.compensation || {};
+  const mortgage = input.mortgage || {};
+  const affordability = input.affordability || {};
+  const verdict = input.verdict || {};
+
+  const rank = pickFirst(
+    scenario.rank,
+    scenario.rank_paygrade,
+    scenario.paygrade,
+    profile.rank,
+    profile.rank_paygrade,
+    profile.paygrade
+  );
+
+  const rankPaygrade = pickFirst(
+    scenario.rank_paygrade,
+    scenario.paygrade,
+    scenario.rank,
+    profile.rank_paygrade,
+    profile.paygrade,
+    profile.rank
+  );
+
+  const yos = pickFirst(
+    scenario.yos,
+    scenario.yearsOfService,
+    scenario.years_of_service,
+    profile.yos,
+    profile.yearsOfService,
+    profile.years_of_service
+  );
+
+  const family = pickFirst(
+    scenario.family,
+    scenario.withDependents,
+    scenario.with_dependents,
+    profile.family,
+    profile.withDependents,
+    profile.with_dependents,
+    profile.dependents
+  );
+
+  const base = pickFirst(
+    scenario.base,
+    scenario.pcsBase,
+    scenario.pcs_base,
+    profile.base,
+    profile.pcsBase,
+    profile.pcs_base,
+    profile.installation,
+    profile.duty_station
+  );
+
+  const zip = pickFirst(
+    scenario.zip,
+    scenario.bahZip,
+    scenario.bah_zip,
+    scenario.baseZip,
+    scenario.base_zip,
+    profile.zip,
+    profile.bahZip,
+    profile.bah_zip,
+    profile.baseZip,
+    profile.base_zip
+  );
+
+  const price = pickFirst(
+    scenario.price,
+    scenario.homePrice,
+    scenario.home_price,
+    scenario.purchasePrice,
+    scenario.purchase_price,
+    profile.projected_home_price,
+    profile.homePrice,
+    profile.home_price,
+    profile.price
+  );
+
+  const downpayment = pickFirst(
+    scenario.downpayment,
+    scenario.downPayment,
+    scenario.down_payment,
+    scenario.dpAmt,
+    profile.downpayment,
+    profile.downPayment,
+    profile.down_payment,
+    profile.dpAmt,
+    profile.savings
+  );
+
+  const creditScore = pickFirst(
+    scenario.creditScore,
+    scenario.credit_score,
+    profile.creditScore,
+    profile.credit_score,
+    profile.fico,
+    profile.score
+  );
+
+  const income = pickFirst(
+    compensation.total_monthly,
+    compensation.totalMonthly,
+    compensation.total,
+    scenario.income,
+    scenario.monthlyIncome,
+    profile.income,
+    profile.monthly_income,
+    profile.monthlyIncome,
+    profile.total_monthly_income,
+    profile.totalMonthlyIncome
+  );
+
+  const expenses = pickFirst(
+    scenario.expenses,
+    scenario.monthly_expenses,
+    scenario.monthlyExpenses,
+    profile.monthly_expenses,
+    profile.monthlyExpenses,
+    profile.expenses
+  );
+
+  const debt = pickFirst(
+    scenario.debt,
+    scenario.monthly_debt,
+    scenario.monthlyDebt,
+    profile.debt,
+    profile.monthly_debt,
+    profile.monthlyDebt
+  );
+
+  const termYears = pickFirst(
+    scenario.termYears,
+    scenario.term_years,
+    profile.termYears,
+    profile.term_years,
+    30
+  );
+
+  const loanType = safeStr(
+    pickFirst(
+      scenario.loanType,
+      scenario.loan_type,
+      profile.loanType,
+      profile.loan_type,
+      "va"
+    )
+  ).toLowerCase();
+
+  const vaDisability = pickFirst(
+    scenario.va_disability,
+    scenario.vaDisability,
+    profile.va_disability,
+    profile.vaDisability,
+    profile.va
+  );
+
+  const fundingFeeExempt = pickFirst(
+    scenario.fundingFeeExempt,
+    scenario.funding_fee_exempt,
+    profile.fundingFeeExempt,
+    profile.funding_fee_exempt
+  );
+
+  const priorUse = pickFirst(
+    scenario.priorUse,
+    scenario.prior_use,
+    scenario.vaPriorUse,
+    scenario.va_prior_use,
+    profile.priorUse,
+    profile.prior_use,
+    profile.vaPriorUse,
+    profile.va_prior_use
+  );
+
+  const occupancyIntent = pickFirst(
+    scenario.occupancyIntent,
+    scenario.occupancy_intent,
+    scenario.occupancy,
+    profile.occupancyIntent,
+    profile.occupancy_intent,
+    profile.occupancy,
+    "primary_residence"
+  );
+
+  const fullEntitlement = pickFirst(
+    scenario.fullEntitlement,
+    scenario.full_entitlement,
+    profile.fullEntitlement,
+    profile.full_entitlement
+  );
+
+  const entitlementUsed = pickFirst(
+    scenario.entitlementUsed,
+    scenario.entitlement_used,
+    profile.entitlementUsed,
+    profile.entitlement_used
+  );
+
+  const sellerCredit = pickFirst(
+    scenario.sellerCredit,
+    scenario.seller_credit,
+    profile.sellerCredit,
+    profile.seller_credit
+  );
+
+  const cityKey = pickFirst(
+    scenario.cityKey,
+    scenario.city_key,
+    profile.cityKey,
+    profile.city_key,
+    profile.market,
+    profile.marketSlug
+  );
+
+  const flattened = stripEmpty({
     message: input.message,
     intent: input.intent,
     email: input.email,
-    profile: input.profile,
-    normalizedProfile: input.profile,
-    scenario: input.scenario,
-    compensation: input.compensation,
-    mortgage: input.mortgage,
-    affordability: input.affordability,
-    verdict: input.verdict,
+
+    mode: pickFirst(scenario.mode, profile.mode, profile.military_status, "active"),
+    military_status: pickFirst(
+      scenario.military_status,
+      profile.military_status,
+      profile.mode,
+      "active"
+    ),
+
+    rank,
+    paygrade: rankPaygrade,
+    rank_paygrade: rankPaygrade,
+    rankPaygrade,
+
+    yos,
+    yearsOfService: yos,
+    years_of_service: yos,
+
+    family,
+    dependents: family,
+    withDependents: family,
+    with_dependents: family,
+
+    base,
+    pcsBase: base,
+    pcs_base: base,
+
+    zip,
+    bahZip: zip,
+    bah_zip: zip,
+    baseZip: zip,
+    base_zip: zip,
+
+    va_disability: vaDisability,
+    vaDisability,
+
+    fundingFeeExempt,
+    funding_fee_exempt: fundingFeeExempt,
+
+    priorUse,
+    prior_use: priorUse,
+    vaPriorUse: priorUse,
+    va_prior_use: priorUse,
+
+    occupancyIntent,
+    occupancy_intent: occupancyIntent,
+
+    fullEntitlement,
+    full_entitlement: fullEntitlement,
+
+    entitlementUsed,
+    entitlement_used: entitlementUsed,
+
+    sellerCredit,
+    seller_credit: sellerCredit,
+
+    price,
+    homePrice: price,
+    home_price: price,
+    purchasePrice: price,
+    purchase_price: price,
+
+    downpayment,
+    downPayment: downpayment,
+    down_payment: downpayment,
+    dpAmt: downpayment,
+
+    creditScore,
+    credit_score: creditScore,
+
+    income,
+    monthlyIncome: income,
+    monthly_income: income,
+
+    expenses,
+    monthlyExpenses: expenses,
+    monthly_expenses: expenses,
+
+    debt,
+    monthlyDebt: debt,
+    monthly_debt: debt,
+
+    termYears,
+    term_years: termYears,
+
+    loanType,
+    loan_type: loanType,
+
+    cityKey,
+    city_key: cityKey,
+
+    compensation,
+    mortgage,
+    affordability,
+    verdict
+  });
+
+  return {
+    ...flattened,
+
+    profile,
+    normalizedProfile: profile,
+    scenario,
+    compensation,
+    mortgage,
+    affordability,
+    verdict,
+
     tool: {
       name: def.name,
       label: def.label,
       path: def.path
     },
+
     context: {
-      profile: input.profile,
-      scenario: input.scenario,
-      compensation: input.compensation,
-      mortgage: input.mortgage,
-      affordability: input.affordability,
-      verdict: input.verdict
+      profile,
+      scenario,
+      compensation,
+      mortgage,
+      affordability,
+      verdict
     }
   };
 }
@@ -593,6 +1015,43 @@ function normalizeCompensationPacket(raw) {
     )
   );
 
+  const specialPay = num(
+    pickFirst(
+      raw.specialPay,
+      raw.specialPayMonthly,
+      raw.monthly?.specialPay
+    )
+  );
+
+  const spouseIncome = num(
+    pickFirst(
+      raw.spouseIncome,
+      raw.spouseIncomeMonthly,
+      raw.monthly?.spouseIncome
+    )
+  );
+
+  const additionalIncome = num(
+    pickFirst(
+      raw.additionalIncome,
+      raw.additionalIncomeMonthly,
+      raw.monthly?.additionalIncome
+    )
+  );
+
+  const computedTotal = [
+    basePay,
+    bas,
+    bah,
+    va,
+    retirement,
+    specialPay,
+    spouseIncome,
+    additionalIncome
+  ]
+    .filter((x) => Number.isFinite(x))
+    .reduce((a, b) => a + b, 0);
+
   const total = num(
     pickFirst(
       raw.total,
@@ -604,39 +1063,80 @@ function normalizeCompensationPacket(raw) {
       raw.monthly?.total,
       raw.monthly?.householdIncome,
       raw.monthly?.militaryIncome,
-      [basePay, bas, bah, va, retirement]
-        .filter((x) => Number.isFinite(x))
-        .reduce((a, b) => a + b, 0)
+      raw.totalMonthlyMilitaryIncome,
+      raw.totalHouseholdIncomeMonthly,
+      computedTotal
     )
   );
 
-  if (![basePay, bas, bah, va, retirement, total].some((x) => Number.isFinite(x) && x > 0)) {
-    return normalizeGenericPacket(raw, { name: "compensation_context", label: "Compensation Context" });
+  if (
+    ![
+      basePay,
+      bas,
+      bah,
+      va,
+      retirement,
+      specialPay,
+      spouseIncome,
+      additionalIncome,
+      total
+    ].some((x) => Number.isFinite(x) && x > 0)
+  ) {
+    return normalizeGenericPacket(raw, {
+      name: "compensation_context",
+      label: "Compensation Context"
+    });
   }
 
   return stripEmpty({
     ok: raw.ok !== false,
+
     rank_paygrade: safeStr(
-      pickFirst(raw.rank_paygrade, raw.paygrade, raw.rank, raw.profile?.rank_paygrade)
+      pickFirst(
+        raw.rank_paygrade,
+        raw.paygrade,
+        raw.rank,
+        raw.profile?.rank_paygrade
+      )
+    ),
+    rank: safeStr(
+      pickFirst(raw.rank, raw.rank_paygrade, raw.paygrade, raw.profile?.rank)
     ),
     yos: num(pickFirst(raw.yos, raw.yearsOfService, raw.profile?.yos)),
+
     base: safeStr(
-      pickFirst(raw.resolvedBase, raw.canonicalBase, raw.base, raw.profile?.base)
+      pickFirst(
+        raw.resolvedBase,
+        raw.canonicalBase,
+        raw.base,
+        raw.profile?.base
+      )
     ),
     zip: safeStr(
       pickFirst(raw.resolvedZip, raw.dutyZip, raw.zip, raw.profile?.zip)
     ),
+
+    mha_code: safeStr(pickFirst(raw.mhaCode, raw.profile?.mhaCode)),
+    mha_name: safeStr(pickFirst(raw.mhaName, raw.profile?.mhaName)),
+
     with_dependents: pickFirst(
       raw.with_dependents,
+      raw.withDependents,
       raw.profile?.hasDependents,
       raw.profile?.withDependents
     ),
+    dependents: pickFirst(raw.dependents, raw.profile?.dependents),
+
     base_pay: roundMoney(basePay),
     bas: roundMoney(bas),
     bah: roundMoney(bah),
     va_disability_pay: roundMoney(va),
     retirement_pay: roundMoney(retirement),
+    special_pay: roundMoney(specialPay),
+    spouse_income: roundMoney(spouseIncome),
+    additional_income: roundMoney(additionalIncome),
     total_monthly: roundMoney(total),
+
     source: safeStr(
       pickFirst(raw.source, raw.sourceVersion, "TheWing compensation-context")
     ),
@@ -648,8 +1148,7 @@ function normalizeCompensationPacket(raw) {
         raw.reason
       )
     ),
-    warnings: Array.isArray(raw.warnings) ? raw.warnings : undefined,
-    raw: raw.includeRaw === true ? raw : undefined
+    warnings: Array.isArray(raw.warnings) ? raw.warnings : undefined
   });
 }
 
@@ -691,9 +1190,7 @@ function normalizeMortgagePacket(raw, input = {}) {
     pickFirst(raw.hoa, raw.hoa_monthly, raw.hoaMonthly, raw.breakdown?.hoa)
   );
 
-  const pmi = num(
-    pickFirst(raw.pmi, raw.PMI, raw.breakdown?.pmi)
-  );
+  const pmi = num(pickFirst(raw.pmi, raw.PMI, raw.breakdown?.pmi));
 
   const allIn = num(
     pickFirst(
@@ -713,13 +1210,20 @@ function normalizeMortgagePacket(raw, input = {}) {
   );
 
   if (!allIn || allIn <= 0) {
-    return normalizeGenericPacket(raw, { name: "mortgage_engine", label: "Mortgage Engine" });
+    return normalizeGenericPacket(raw, {
+      name: "mortgage_engine",
+      label: "Mortgage Engine"
+    });
   }
 
   return stripEmpty({
     ok: raw.ok !== false,
-    price: roundMoney(pickFirst(raw.price, input?.scenario?.price)),
-    downpayment: roundMoney(pickFirst(raw.downpayment, input?.scenario?.downpayment)),
+    price: roundMoney(
+      pickFirst(raw.price, raw.homePrice, input?.scenario?.price)
+    ),
+    downpayment: roundMoney(
+      pickFirst(raw.downpayment, raw.downPayment, input?.scenario?.downpayment)
+    ),
     loan_amount: roundMoney(
       pickFirst(raw.loan_amount, raw.loanAmount, raw.baseLoanAmount)
     ),
@@ -753,9 +1257,9 @@ function normalizeAffordabilityPacket(raw, input = {}) {
     )
   );
 
-  const expenses = num(
-    pickFirst(raw.expenses, raw.monthlyExpenses, input?.scenario?.expenses)
-  );
+  const expenses =
+    num(pickFirst(raw.expenses, raw.monthlyExpenses, input?.scenario?.expenses)) ||
+    0;
 
   const housingRatio = num(
     pickFirst(
@@ -769,7 +1273,7 @@ function normalizeAffordabilityPacket(raw, input = {}) {
     pickFirst(
       raw.backend_ratio,
       raw.backEndRatio,
-      income && housingAllIn ? (housingAllIn + (expenses || 0)) / income : null
+      income && housingAllIn ? (housingAllIn + expenses) / income : null
     )
   );
 
@@ -786,7 +1290,7 @@ function normalizeAffordabilityPacket(raw, input = {}) {
       pickFirst(
         raw.residual_income,
         raw.residual,
-        income && housingAllIn ? income - housingAllIn - (expenses || 0) : null
+        income && housingAllIn ? income - housingAllIn - expenses : null
       )
     ),
     score: pickFirst(raw.score, raw.grade, null),
@@ -823,7 +1327,8 @@ function normalizeVaLoanPacket(raw) {
   if (!raw || typeof raw !== "object") return null;
   if (raw.ok === false) return null;
 
-  const guidance = raw.guidance && typeof raw.guidance === "object" ? raw.guidance : {};
+  const guidance =
+    raw.guidance && typeof raw.guidance === "object" ? raw.guidance : {};
 
   const keyPoints = Array.isArray(raw.key_points)
     ? raw.key_points
@@ -861,7 +1366,11 @@ function normalizeVaLoanPacket(raw) {
     key_points: keyPoints,
     risks,
     next_steps: nextSteps,
-    funding_fee: pickFirst(raw.funding_fee, raw.fundingFee, raw.purchase_scenario?.loan?.fundingFee),
+    funding_fee: pickFirst(
+      raw.funding_fee,
+      raw.fundingFee,
+      raw.purchase_scenario?.loan?.fundingFee
+    ),
     purchase_scenario: raw.purchase_scenario || raw.purchaseScenario,
     profile_signals: raw.profile_signals || raw.profileSignals
   });
@@ -1030,11 +1539,18 @@ function stripEmpty(obj) {
   return out;
 }
 
+// ============================================================
+// //#9 DEFAULT EXPORT
+// ============================================================
+
 export default {
   version: VERSION,
   getAgentRegistryInfo,
   listToolDefinitions,
   loadTool,
+  getAgentTools,
+  loadAgentTools,
+  buildAgentRegistry,
   runTool,
   buildToolPackets,
   buildDirectToolReply
