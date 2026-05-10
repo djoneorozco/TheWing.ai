@@ -35,6 +35,7 @@
 import { createClient } from "@supabase/supabase-js";
 import * as compensationContext from "./_share/compensation-context.js";
 import * as mortgageEngine from "./_share/mortgage-engine.js";
+import * as vaLoans from "./_share/va-loans.js";
 
 // ============================================================
 // //#2 CONFIG
