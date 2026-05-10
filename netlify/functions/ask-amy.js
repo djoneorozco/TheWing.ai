@@ -1,23 +1,25 @@
 // netlify/functions/ask-amy.js
 // ============================================================
 // TheWing.ai • PCSUnited AI Concierge — Ask Amy
-// v1.3.0 • ES MODULE FULL REPLACEMENT
+// v1.2.1 • COMMONJS STABLE + VA LOAN SHARED ENGINE
 //
 // PURPOSE
 // - Member-facing PCSUnited AI Concierge endpoint
-// - Compatible with package.json: { "type": "module" }
+// - Stable CommonJS-style Netlify function
 // - Reads PCSUnited profile/bridge/dashboard context from frontend
 // - Enriches from Supabase when email exists
 // - Uses _share/compensation-context.js for Base Pay + BAS + BAH + VA
 // - Uses _share/mortgage-engine.js for mortgage math when available
-// - Uses OpenAI only as the conversational explanation layer
+// - Uses _share/affordability-engine.js and _share/decision-rules.js when available
+// - Uses _share/va-loans.js for deterministic VA Loan education + strategy
+// - Uses OpenAI only as the conversational explanation layer when needed
 //
 // CLIENT
 // - POST https://thewing.netlify.app/api/ask-amy
 // - POST /.netlify/functions/ask-amy
 //
 // REQUIRED ENV
-// - OPENAI_API_KEY
+// - OPENAI_API_KEY optional, only needed for conversational AI expansion
 //
 // OPTIONAL ENV
 // - SUPABASE_URL
@@ -29,18 +31,87 @@
 /* eslint-disable no-console */
 
 // ============================================================
-// //#1 IMPORTS — ES MODULE ONLY
+// //#1 SAFE MODULE LOADING
 // ============================================================
 
-import { createClient } from "@supabase/supabase-js";
-import * as compensationContext from "./_share/compensation-context.js";
-import * as mortgageEngine from "./_share/mortgage-engine.js";
+let createClient = null;
+
+try {
+  ({ createClient } = require("@supabase/supabase-js"));
+} catch (_) {
+  createClient = null;
+}
+
+function safeRequire(path) {
+  try {
+    return require(path);
+  } catch (err) {
+    console.warn(`[ask-amy] safeRequire failed for ${path}:`, err?.message || err);
+    return null;
+  }
+}
+
+async function safeImport(path) {
+  try {
+    return await import(path);
+  } catch (err) {
+    console.warn(`[ask-amy] safeImport failed for ${path}:`, err?.message || err);
+    return null;
+  }
+}
+
+function unwrapModule(mod) {
+  if (!mod) return null;
+  if (mod.default && typeof mod.default === "object") {
+    return { ...mod.default, ...mod };
+  }
+  return mod;
+}
+
+function getExportedFunction(mod, names = []) {
+  const unwrapped = unwrapModule(mod);
+  if (!unwrapped) return null;
+
+  for (const name of names) {
+    if (typeof unwrapped[name] === "function") return unwrapped[name];
+  }
+
+  if (typeof unwrapped === "function") return unwrapped;
+
+  return null;
+}
+
+const shared = {
+  compensationContext: safeRequire("./_share/compensation-context.js"),
+  compensationContextPath: "./_share/compensation-context.js",
+
+  profileNormalizer: safeRequire("./_share/profile-normalizer.js"),
+  profileNormalizerPath: "./_share/profile-normalizer.js",
+
+  payEngine: safeRequire("./_share/pay-engine.js"),
+  payEnginePath: "./_share/pay-engine.js",
+
+  mortgageEngine: safeRequire("./_share/mortgage-engine.js"),
+  mortgageEnginePath: "./_share/mortgage-engine.js",
+
+  affordabilityEngine: safeRequire("./_share/affordability-engine.js"),
+  affordabilityEnginePath: "./_share/affordability-engine.js",
+
+  decisionRules: safeRequire("./_share/decision-rules.js"),
+  decisionRulesPath: "./_share/decision-rules.js",
+
+  response: safeRequire("./_share/response.js"),
+  responsePath: "./_share/response.js",
+
+  vaLoans: safeRequire("./_share/va-loans.js"),
+  vaLoansPath: "./_share/va-loans.js"
+};
 
 // ============================================================
 // //#2 CONFIG
 // ============================================================
 
-const VERSION = "1.3.0";
+const VERSION = "1.2.1-va-loans";
 const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const DEFAULT_RESPONSE_MODE = "member_guidance";
 const MAX_MESSAGE_LENGTH = 5000;
@@ -79,10 +150,10 @@ const ALLOW_ORIGINS = [
 ];
 
 // ============================================================
-// //#3 NETLIFY HANDLER — ES MODULE EXPORT
+// //#3 NETLIFY HANDLER
 // ============================================================
 
-export async function handler(event) {
+exports.handler = async function handler(event) {
   const origin = getHeader(event, "origin");
 
   if (event.httpMethod === "OPTIONS") {
@@ -317,7 +388,7 @@ export async function handler(event) {
       origin
     );
   }
-}
+};
 
 // ============================================================
 // //#4 RESPONSE / CORS HELPERS
@@ -413,7 +484,9 @@ function boolish(value, fallback = false) {
       "with dependents",
       "with_dependents",
       "family",
-      "married"
+      "married",
+      "exempt",
+      "eligible"
     ].includes(s)
   ) {
     return true;
@@ -429,7 +502,9 @@ function boolish(value, fallback = false) {
       "single",
       "none",
       "without dependents",
-      "without_dependents"
+      "without_dependents",
+      "not exempt",
+      "ineligible"
     ].includes(s)
   ) {
     return false;
@@ -571,11 +646,7 @@ function collectClientContext(body) {
     body?.user || {}
   );
 
-  const bridge = mergeDeep(
-    {},
-    body?.bridge || {},
-    context?.bridge || {}
-  );
+  const bridge = mergeDeep({}, body?.bridge || {}, context?.bridge || {});
 
   const identity = mergeDeep(
     {},
@@ -632,7 +703,7 @@ function collectClientContext(body) {
 // ============================================================
 
 async function loadSupabaseMemberContext(email) {
-  if (!email || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  if (!email || !SUPABASE_URL || !SUPABASE_SERVICE_KEY || !createClient) {
     return null;
   }
 
@@ -935,6 +1006,21 @@ function normalizeSupabaseBridge(raw) {
 // ============================================================
 
 function normalizeProfileUniversal(ctx) {
+  const sharedNormalize = getExportedFunction(shared.profileNormalizer, [
+    "normalizeProfile",
+    "normalizeMemberProfile",
+    "normalizeProfileUniversal"
+  ]);
+
+  if (sharedNormalize) {
+    try {
+      const result = sharedNormalize(ctx);
+      if (result && typeof result === "object") return stripEmpty(result);
+    } catch (err) {
+      console.warn("profile-normalizer failed:", err?.message || err);
+    }
+  }
+
   const profileRaw = mergeDeep(
     {},
     ctx?.identity || {},
@@ -998,7 +1084,7 @@ function normalizeProfileFallback(raw = {}) {
   const profile = {
     email,
     full_name: fullName,
-    first_name: safeStr(pickFirst(raw.first_name, raw.firstName)),
+    first_name: safeStr(pickFirst(raw.first_name, raw.firstName, deriveFirstName(fullName))),
     last_name: safeStr(
       pickFirst(raw.last_name, raw.lastName, deriveLastName(fullName))
     ),
@@ -1025,6 +1111,16 @@ function normalizeProfileFallback(raw = {}) {
 
     va_disability: num(
       pickFirst(raw.va_disability, raw.vaDisability, raw.va, raw.disability)
+    ),
+
+    funding_fee_exempt: boolish(
+      pickFirst(
+        raw.funding_fee_exempt,
+        raw.fundingFeeExempt,
+        raw.va_funding_fee_exempt,
+        raw.vaFundingFeeExempt
+      ),
+      num(pickFirst(raw.va_disability, raw.vaDisability, raw.va, raw.disability)) > 0
     ),
 
     retired_rank: normalizePaygrade(
@@ -1129,6 +1225,11 @@ function normalizeProfileFallback(raw = {}) {
   return stripEmpty(profile);
 }
 
+function deriveFirstName(fullName) {
+  const parts = safeStr(fullName).split(/\s+/).filter(Boolean);
+  return parts.length ? parts[0] : "";
+}
+
 function deriveLastName(fullName) {
   const parts = safeStr(fullName).split(/\s+/).filter(Boolean);
   return parts.length ? parts[parts.length - 1] : "";
@@ -1225,6 +1326,12 @@ function detectIntent(message) {
   }
 
   if (
+    /\bva loan\b|\bva mortgage\b|\bva-backed\b|\bva backed\b|\bcoe\b|\bcertificate of eligibility\b|\bfunding fee\b|\bva funding fee\b|\bva appraisal\b|\bva inspection\b|\bentitlement\b|\bfull entitlement\b|\bpartial entitlement\b|\bseller concession\b|\bseller concessions\b|\bseller credit\b|\bseller credits\b|\bzero down\b|\b0 down\b|\bno down payment\b|\bno pmi\b|\boccupancy\b|\bprimary residence\b|\bva closing costs\b|\bva close costs\b|\bva purchase\b|\bva home loan\b/.test(t)
+  ) {
+    return "va_loan";
+  }
+
+  if (
     /\bwhat can you do\b|\bhow can you help\b|\bwhat do you do\b|\bwho are you\b|\bhelp me\b|\bare you working\b/.test(t)
   ) {
     return "capabilities";
@@ -1281,6 +1388,11 @@ function shouldUseOpenAI(message, intent, deterministic) {
 
   const t = safeStr(message);
 
+  if (intent === "va_loan") {
+    if (t.length > 140) return true;
+    return false;
+  }
+
   if (t.length > 120) return true;
 
   if (
@@ -1328,9 +1440,15 @@ async function buildTruthPacket({
           Object.keys(mergedContext?.kpi_overrides || {}).length
       ),
       supabase: Boolean(mergedContext?.supabase_loaded),
+      va_loan: false,
       shared_engines: {
-        compensation_context: Boolean(compensationContext),
-        mortgage_engine: Boolean(mortgageEngine)
+        compensation_context: Boolean(shared.compensationContext),
+        pay_engine: Boolean(shared.payEngine),
+        mortgage_engine: Boolean(shared.mortgageEngine),
+        affordability_engine: Boolean(shared.affordabilityEngine),
+        decision_rules: Boolean(shared.decisionRules),
+        response: Boolean(shared.response),
+        va_loans: Boolean(shared.vaLoans)
       }
     },
     internal: {},
@@ -1341,6 +1459,7 @@ async function buildTruthPacket({
       mortgage: null,
       affordability: null,
       verdict: null,
+      va_loan: null,
       next_action: null,
       missing_inputs: []
     },
@@ -1397,14 +1516,30 @@ async function buildTruthPacket({
     truth.public.affordability = affordability;
   }
 
-  const verdict = computeVerdictFallback({
+  const verdict = computeVerdictSafe({
+    compensation,
+    mortgage,
+    affordability,
+    scenario,
+    normalizedProfile
+  });
+
+  if (verdict) {
+    truth.public.verdict = verdict;
+  }
+
+  const vaLoan = await buildVaLoanContextSafe({
+    message,
+    normalizedProfile,
+    scenario,
     compensation,
     mortgage,
     affordability
   });
 
-  if (verdict) {
-    truth.public.verdict = verdict;
+  if (vaLoan) {
+    truth.context_used.va_loan = true;
+    truth.public.va_loan = vaLoan;
   }
 
   truth.public.missing_inputs = listMissingInputs({
@@ -1421,7 +1556,8 @@ async function buildTruthPacket({
     verdict,
     compensation,
     mortgage,
-    affordability
+    affordability,
+    vaLoan
   });
 
   if (debug) {
@@ -1432,6 +1568,9 @@ async function buildTruthPacket({
       normalized_profile_keys: Object.keys(normalizedProfile || {}),
       compensation_loaded: Boolean(compensation),
       mortgage_loaded: Boolean(mortgage),
+      affordability_loaded: Boolean(affordability),
+      verdict_loaded: Boolean(verdict),
+      va_loan_loaded: Boolean(vaLoan),
       supabase_loaded: Boolean(mergedContext?.supabase_loaded)
     };
   }
@@ -1595,567 +1734,435 @@ function buildScenario({ message, mergedContext, normalizedProfile }) {
       profile.rank,
       bridge.rank_paygrade,
       bridge.rank,
-      fad.rank_paygrade,
-      fad.rank
+      intake.rank_paygrade,
+      userFinancial.rank_paygrade
     )
   );
 
-  const yos = num(pickFirst(profile.yos, bridge.yos, fad.yos, intake.yos));
-
   const base = safeStr(
-    pickFirst(profile.base, bridge.base, fad.base, intake.base)
+    pickFirst(profile.base, bridge.base, intake.base, userFinancial.base)
   );
 
   const zip = safeStr(
-    pickFirst(profile.zip, bridge.zip, bridge.bahZip, fad.zip, fad.baseZip)
+    pickFirst(profile.zip, bridge.zip, intake.zip, userFinancial.zip)
   );
 
-  const family = pickFirst(
-    profile.family,
-    bridge.family,
-    bridge.withDependents,
-    fad.family,
-    fad.withDependents
+  const family = pickFirst(profile.family, bridge.family, intake.family);
+  const vaDisability = num(
+    pickFirst(profile.va_disability, bridge.va_disability, intake.va_disability)
   );
 
-  return {
+  const bedrooms = num(
+    pickFirst(
+      profile.bedrooms,
+      bridge.bedrooms,
+      aiou.bedrooms,
+      fad.bedrooms,
+      intake.bedrooms
+    )
+  );
+
+  const cityKey = safeStr(
+    pickFirst(
+      profile.cityKey,
+      bridge.cityKey,
+      fad.cityKey,
+      intake.cityKey,
+      userFinancial.cityKey
+    )
+  );
+
+  return stripEmpty({
     message,
     price,
     expenses,
     downpayment,
-    creditScore: creditScore ? clamp(Math.round(creditScore), 300, 850) : null,
-    creditScoreSource: hypotheticalCreditScore
-      ? "question_hypothetical"
-      : "profile_or_dashboard",
-    termYears: termYears || 30,
-    loanType: loanType || "va",
+    creditScore,
     income,
     debt,
-    rank_paygrade: rankPaygrade,
-    yos,
+    termYears: termYears || 30,
+    loanType,
+    rankPaygrade,
+    rank: rankPaygrade,
+    yos: num(pickFirst(profile.yos, bridge.yos, intake.yos)),
     base,
     zip,
     family: family === null ? null : boolish(family, false),
-    mode: normalizeMode(pickFirst(profile.mode, bridge.mode, fad.mode, "active")),
-    va_disability: num(
-      pickFirst(profile.va_disability, bridge.va_disability, fad.va_disability)
+    family_size: num(pickFirst(profile.family_size, bridge.family_size)),
+    vaDisability,
+    va_disability: vaDisability,
+    fundingFeeExempt: boolish(
+      pickFirst(
+        profile.funding_fee_exempt,
+        profile.fundingFeeExempt,
+        bridge.funding_fee_exempt,
+        bridge.fundingFeeExempt
+      ),
+      vaDisability > 0
     ),
-    bedrooms: num(pickFirst(profile.bedrooms, bridge.bedrooms, fad.bedrooms)),
-    cityKey: safeStr(pickFirst(profile.cityKey, bridge.cityKey, fad.cityKey)),
-    aiou
-  };
+    bedrooms,
+    cityKey,
+    apr: num(pickFirst(fad.apr, intake.apr, userFinancial.apr, bridge.apr)),
+    propertyTaxAnnual: num(
+      pickFirst(
+        fad.taxAnnual,
+        fad.propertyTaxAnnual,
+        intake.property_tax_annual,
+        userFinancial.property_tax_annual
+      )
+    ),
+    insuranceAnnual: num(
+      pickFirst(
+        fad.insAnnual,
+        fad.insuranceAnnual,
+        intake.insurance_annual,
+        userFinancial.insurance_annual
+      )
+    ),
+    hoa: num(pickFirst(fad.hoa, intake.hoa, userFinancial.hoa, bridge.hoa)),
+    pmi: num(pickFirst(fad.pmi, intake.pmi, userFinancial.pmi, bridge.pmi)),
+    priorUse: pickFirst(
+      fad.priorUse,
+      fad.va_prior_use,
+      intake.priorUse,
+      profile.priorUse,
+      bridge.priorUse
+    ),
+    occupancyIntent: pickFirst(
+      fad.occupancyIntent,
+      profile.occupancyIntent,
+      bridge.occupancyIntent,
+      "primary_residence"
+    ),
+    pcsTimelineMonths: num(
+      pickFirst(
+        fad.pcsTimelineMonths,
+        profile.pcsTimelineMonths,
+        bridge.pcsTimelineMonths
+      )
+    ),
+    expectedHoldMonths: num(
+      pickFirst(
+        fad.expectedHoldMonths,
+        profile.expectedHoldMonths,
+        bridge.expectedHoldMonths
+      )
+    ),
+    sellerCredit: num(
+      pickFirst(fad.sellerCredit, profile.sellerCredit, bridge.sellerCredit)
+    ),
+    fullEntitlement: boolish(
+      pickFirst(profile.fullEntitlement, bridge.fullEntitlement),
+      true
+    ),
+    entitlementUsed: num(
+      pickFirst(profile.entitlementUsed, bridge.entitlementUsed)
+    )
+  });
 }
 
 function parseHypotheticalCreditScore(message) {
   const t = safeStr(message).toLowerCase();
-  if (!t) return null;
+  const m =
+    t.match(/\b(?:credit|score|fico)\D{0,12}(\d{3})\b/) ||
+    t.match(/\b(\d{3})\D{0,12}(?:credit|score|fico)\b/);
 
-  const looksHypothetical =
-    /\bif\b|\bwent up\b|\braise\b|\bbump\b|\bincrease\b|\bimprove\b|\bup to\b|\bto\s+\d{3}\b/.test(
-      t
-    );
+  if (!m) return null;
 
-  if (!looksHypothetical) return null;
-
-  const match =
-    t.match(/(?:credit\s*score|fico)\D{0,16}(\d{3})\b/) ||
-    t.match(/\bto\D{0,4}(\d{3})\b/);
-
-  if (!match) return null;
-
-  const score = Number(match[1]);
-
-  if (!Number.isFinite(score) || score < 300 || score > 850) return null;
-
-  return Math.round(score);
+  const score = Number(m[1]);
+  return score >= 300 && score <= 850 ? score : null;
 }
 
 // ============================================================
-// //#11 COMPENSATION ENGINE
+// //#11 COMPENSATION
 // ============================================================
 
-async function computeCompensationSafe(profile, scenario) {
-  const input = {
-    mode: scenario.mode || profile.mode || "active",
-    rank: scenario.rank_paygrade || profile.rank_paygrade || profile.rank,
-    paygrade: scenario.rank_paygrade || profile.rank_paygrade || profile.rank,
-    rank_paygrade:
-      scenario.rank_paygrade || profile.rank_paygrade || profile.rank,
-    yos: scenario.yos ?? profile.yos,
-    yearsOfService: scenario.yos ?? profile.yos,
-    family: scenario.family ?? profile.family,
-    withDependents: scenario.family ?? profile.family,
-    base: scenario.base || profile.base,
-    zip: scenario.zip || profile.zip,
-    bahZip: scenario.zip || profile.zip,
-    va_disability: scenario.va_disability ?? profile.va_disability
-  };
+async function computeCompensationSafe(normalizedProfile, scenario) {
+  const fromCompContext = await trySharedCompensationContext(
+    normalizedProfile,
+    scenario
+  );
+  if (fromCompContext) return normalizeCompensation(fromCompContext);
 
-  const fn =
-    compensationContext.safeBuildCompensationContext ||
-    compensationContext.buildCompensationContext ||
-    compensationContext.default?.safeBuildCompensationContext ||
-    compensationContext.default?.buildCompensationContext;
+  const fromPayEngine = await trySharedPayEngine(normalizedProfile, scenario);
+  if (fromPayEngine) return normalizeCompensation(fromPayEngine);
 
-  if (typeof fn === "function") {
-    try {
-      const result = await fn(input);
-      if (result && typeof result === "object" && result.ok !== false) {
-        return normalizeCompensation(result, input);
-      }
-    } catch (err) {
-      console.warn("compensation-context failed:", err?.message || err);
-    }
+  return computeCompensationFallback(normalizedProfile, scenario);
+}
+
+async function trySharedCompensationContext(normalizedProfile, scenario) {
+  let mod = shared.compensationContext;
+
+  if (!mod) {
+    mod = await safeImport(shared.compensationContextPath || "./_share/compensation-context.js");
   }
 
-  const fallbackIncome = num(
-    pickFirst(
-      profile.total_monthly,
-      profile.totalMonthly,
-      profile.total_monthly_income,
-      profile.totalMonthlyIncome,
-      profile.monthly_income,
-      profile.monthlyIncome,
-      profile.income,
-      scenario.income
-    )
-  );
+  const fn = getExportedFunction(mod, [
+    "buildCompensationContext",
+    "getCompensationContext",
+    "calculateCompensation",
+    "buildCompensationTruthPacket",
+    "getMilitaryCompensation"
+  ]);
 
-  if (fallbackIncome && fallbackIncome > 0) {
-    return stripEmpty({
-      ok: true,
-      rank_paygrade: normalizePaygrade(input.rank_paygrade),
-      rank_short: rankShort(input.rank_paygrade),
-      yos: num(input.yos),
-      base: safeStr(input.base),
-      zip: safeStr(input.zip),
-      with_dependents: input.withDependents ?? input.family,
-      total_monthly: roundMoney(fallbackIncome),
-      source: "Supabase/member profile income fallback",
-      note:
-        "Compensation context did not return a breakdown, so Amy used saved monthly income from the member profile."
+  if (!fn) return null;
+
+  try {
+    return await fn({
+      profile: normalizedProfile,
+      scenario,
+      rank: scenario?.rankPaygrade || normalizedProfile?.rank_paygrade,
+      yos: scenario?.yos || normalizedProfile?.yos,
+      zip: scenario?.zip || normalizedProfile?.zip,
+      base: scenario?.base || normalizedProfile?.base,
+      family: scenario?.family ?? normalizedProfile?.family,
+      va_disability: scenario?.vaDisability ?? normalizedProfile?.va_disability
     });
-  }
-
-  return null;
-}
-
-function normalizeCompensation(result, input) {
-  const basePay = num(
-    pickFirst(
-      result.basePay,
-      result.base_pay,
-      result.basicPay,
-      result.monthly_base_pay,
-      result.monthly?.basePay,
-      result.monthly?.basicPay,
-      result.basicPayMonthly,
-      result.monthly?.basic_pay
-    )
-  );
-
-  const bas = num(
-    pickFirst(
-      result.bas,
-      result.BAS,
-      result.basic_allowance_subsistence,
-      result.monthly?.bas,
-      result.basMonthly
-    )
-  );
-
-  const bah = num(
-    pickFirst(
-      result.bah,
-      result.BAH,
-      result.bahMonthly,
-      result.monthlyBah,
-      result.housing_allowance,
-      result.monthly?.bah,
-      result.components?.bah?.bahMonthly
-    )
-  );
-
-  const va = num(
-    pickFirst(
-      result.va,
-      result.va_disability_pay,
-      result.vaCompensation,
-      result.vaMonthly,
-      result.disability,
-      result.monthly?.vaDisability,
-      result.components?.va?.vaMonthly
-    )
-  );
-
-  const retirement = num(
-    pickFirst(
-      result.retirement,
-      result.retired_pay,
-      result.retirement_pay,
-      result.retirementMonthly,
-      result.monthly?.retirement,
-      result.components?.retirement?.retirementMonthly
-    )
-  );
-
-  const specialPay = num(
-    pickFirst(
-      result.specialPay,
-      result.specialPayMonthly,
-      result.monthly?.specialPay
-    )
-  );
-
-  const spouseIncome = num(
-    pickFirst(
-      result.spouseIncome,
-      result.spouseIncomeMonthly,
-      result.monthly?.spouseIncome
-    )
-  );
-
-  const additionalIncome = num(
-    pickFirst(
-      result.additionalIncome,
-      result.additionalIncomeMonthly,
-      result.monthly?.additionalIncome
-    )
-  );
-
-  const computedTotal = [
-    basePay,
-    bas,
-    bah,
-    va,
-    retirement,
-    specialPay,
-    spouseIncome,
-    additionalIncome
-  ]
-    .filter((x) => Number.isFinite(x))
-    .reduce((a, b) => a + b, 0);
-
-  const total = num(
-    pickFirst(
-      result.total,
-      result.totalMonthly,
-      result.total_monthly,
-      result.monthly_total,
-      result.householdIncomeMonthly,
-      result.militaryIncomeMonthly,
-      result.monthly?.total,
-      result.monthly?.householdIncome,
-      result.monthly?.militaryIncome,
-      result.totalMonthlyMilitaryIncome,
-      result.totalHouseholdIncomeMonthly,
-      computedTotal
-    )
-  );
-
-  if (
-    ![
-      basePay,
-      bas,
-      bah,
-      va,
-      retirement,
-      specialPay,
-      spouseIncome,
-      additionalIncome,
-      total
-    ].some((x) => Number.isFinite(x) && x > 0)
-  ) {
+  } catch (err) {
+    console.warn("compensation-context failed:", err?.message || err);
     return null;
   }
-
-  return stripEmpty({
-    ok: result.ok !== false,
-
-    rank_paygrade: normalizePaygrade(
-      pickFirst(
-        result.rank_paygrade,
-        result.paygrade,
-        result.rank,
-        result.profile?.rank_paygrade,
-        input.rank_paygrade
-      )
-    ),
-    rank_short: rankShort(
-      pickFirst(
-        result.rank_paygrade,
-        result.paygrade,
-        result.rank,
-        result.profile?.rank_paygrade,
-        input.rank_paygrade
-      )
-    ),
-    yos: num(
-      pickFirst(
-        result.yos,
-        result.yearsOfService,
-        result.profile?.yos,
-        result.profile?.yearsOfService,
-        input.yos
-      )
-    ),
-
-    base: safeStr(
-      pickFirst(
-        result.resolvedBase,
-        result.canonicalBase,
-        result.base,
-        result.profile?.base,
-        input.base
-      )
-    ),
-    zip: safeStr(
-      pickFirst(
-        result.resolvedZip,
-        result.dutyZip,
-        result.zip,
-        result.profile?.zip,
-        result.profile?.dutyZip,
-        input.zip
-      )
-    ),
-    mha_code: safeStr(pickFirst(result.mhaCode, result.profile?.mhaCode)),
-    mha_name: safeStr(pickFirst(result.mhaName, result.profile?.mhaName)),
-
-    with_dependents: pickFirst(
-      result.with_dependents,
-      result.profile?.hasDependents,
-      input.withDependents,
-      input.family
-    ),
-    dependents: pickFirst(result.dependents, result.profile?.dependents),
-
-    base_pay: roundMoney(basePay),
-    bas: roundMoney(bas),
-    bah: roundMoney(bah),
-    va_disability_pay: roundMoney(va),
-    retirement_pay: roundMoney(retirement),
-    special_pay: roundMoney(specialPay),
-    spouse_income: roundMoney(spouseIncome),
-    additional_income: roundMoney(additionalIncome),
-    total_monthly: roundMoney(total),
-
-    source: safeStr(
-      pickFirst(
-        result.source,
-        result.sourceVersion,
-        "TheWing compensation-context"
-      )
-    ),
-    note: safeStr(
-      pickFirst(
-        result.note,
-        Array.isArray(result.notes) ? result.notes.join(" ") : "",
-        result.bahNote,
-        result.reason
-      )
-    ),
-    warnings: Array.isArray(result.warnings) ? result.warnings : undefined
-  });
 }
 
-// ============================================================
-// //#12 MORTGAGE ENGINE
-// ============================================================
+async function trySharedPayEngine(normalizedProfile, scenario) {
+  let mod = shared.payEngine;
 
-async function computeMortgageSafe(profile, scenario, compensation) {
-  const price = num(scenario.price);
-  if (!price || price <= 0) return null;
-
-  const downpayment = num(scenario.downpayment) || 0;
-  const creditScore = num(scenario.creditScore);
-  const termYears = num(scenario.termYears) || 30;
-  const loanType = scenario.loanType || "va";
-
-  const input = {
-    price,
-    homePrice: price,
-    purchasePrice: price,
-    downpayment,
-    downPayment: downpayment,
-    creditScore,
-    credit_score: creditScore,
-    termYears,
-    term_years: termYears,
-    loanType,
-    loan_type: loanType,
-    income: compensation?.total_monthly || null,
-    monthlyIncome: compensation?.total_monthly || null,
-    base: scenario.base || profile.base,
-    zip: scenario.zip || profile.zip,
-    cityKey: scenario.cityKey || profile.cityKey
-  };
-
-  const fn =
-    mortgageEngine.safeCalculateMortgage ||
-    mortgageEngine.calculateMortgage ||
-    mortgageEngine.default?.safeCalculateMortgage ||
-    mortgageEngine.default?.calculateMortgage;
-
-  if (typeof fn === "function") {
-    try {
-      const result = await fn(input);
-      if (result && typeof result === "object" && result.ok !== false) {
-        return normalizeMortgage(result, input);
-      }
-    } catch (err) {
-      console.warn("mortgage-engine failed:", err?.message || err);
-    }
+  if (!mod) {
+    mod = await safeImport(shared.payEnginePath || "./_share/pay-engine.js");
   }
 
-  return computeMortgageFallback(input);
+  const fn = getExportedFunction(mod, [
+    "calculatePay",
+    "calculateMilitaryPay",
+    "buildPayPacket",
+    "getPayContext"
+  ]);
+
+  if (!fn) return null;
+
+  try {
+    return await fn({
+      profile: normalizedProfile,
+      scenario,
+      rank: scenario?.rankPaygrade || normalizedProfile?.rank_paygrade,
+      yos: scenario?.yos || normalizedProfile?.yos,
+      zip: scenario?.zip || normalizedProfile?.zip,
+      family: scenario?.family ?? normalizedProfile?.family,
+      va_disability: scenario?.vaDisability ?? normalizedProfile?.va_disability
+    });
+  } catch (err) {
+    console.warn("pay-engine failed:", err?.message || err);
+    return null;
+  }
 }
 
-function normalizeMortgage(result, input) {
-  const principalInterest = num(
+function normalizeCompensation(raw) {
+  if (!raw || typeof raw !== "object") return null;
+
+  const totalMonthly = num(
     pickFirst(
-      result.principal_interest,
-      result.principalInterest,
-      result.pi,
-      result.p_and_i,
-      result.monthlyPI,
-      result.breakdown?.principalInterest
+      raw.totalMonthly,
+      raw.total_monthly,
+      raw.monthlyTotal,
+      raw.monthly_total,
+      raw.total,
+      raw.totalPay,
+      raw.total_pay,
+      raw.compensation?.totalMonthly,
+      raw.compensation?.total_monthly
     )
   );
 
-  const taxes = num(
+  const basePay = num(
+    pickFirst(raw.basePay, raw.base_pay, raw.base, raw.pay?.basePay)
+  );
+
+  const bah = num(pickFirst(raw.bah, raw.BAH, raw.allowances?.bah));
+  const bas = num(pickFirst(raw.bas, raw.BAS, raw.allowances?.bas));
+  const va = num(
     pickFirst(
-      result.taxes,
-      result.tax,
-      result.property_tax,
-      result.propertyTax,
-      result.breakdown?.taxes
+      raw.va,
+      raw.vaDisability,
+      raw.va_disability,
+      raw.disability,
+      raw.allowances?.va
     )
   );
 
-  const insurance = num(
-    pickFirst(
-      result.insurance,
-      result.home_insurance,
-      result.homeownersInsurance,
-      result.breakdown?.insurance
-    )
-  );
-
-  const hoa = num(
-    pickFirst(result.hoa, result.hoa_monthly, result.hoaMonthly, result.breakdown?.hoa)
-  );
-
-  const pmi = num(
-    pickFirst(result.pmi, result.PMI, result.breakdown?.pmi)
-  );
-
-  const allIn = num(
-    pickFirst(
-      result.all_in,
-      result.allIn,
-      result.total,
-      result.total_monthly,
-      result.monthly_total,
-      result.payment,
-      result.monthlyPayment,
-      result.allInMonthly,
-      result.breakdown?.allIn,
-      [principalInterest, taxes, insurance, hoa, pmi]
-        .filter((x) => Number.isFinite(x))
-        .reduce((a, b) => a + b, 0)
-    )
-  );
-
-  if (!allIn || allIn <= 0) return null;
+  const resolvedTotal =
+    totalMonthly ||
+    [basePay, bah, bas, va].reduce((sum, n) => sum + (Number(n) || 0), 0) ||
+    null;
 
   return stripEmpty({
-    ok: result.ok !== false,
-    price: roundMoney(pickFirst(result.price, input.price)),
-    downpayment: roundMoney(pickFirst(result.downpayment, input.downpayment)),
-    loan_amount: roundMoney(
-      pickFirst(result.loan_amount, result.loanAmount, input.price - input.downpayment)
-    ),
-    apr: num(pickFirst(result.apr, result.rate, result.apr_percent, result.aprPct)),
-    term_years: num(pickFirst(result.term_years, result.termYears, input.termYears)),
-    principal_interest: roundMoney(principalInterest),
-    taxes: roundMoney(taxes),
-    insurance: roundMoney(insurance),
-    hoa: roundMoney(hoa),
-    pmi: roundMoney(pmi),
-    all_in_monthly: roundMoney(allIn),
-    source: safeStr(pickFirst(result.source, "TheWing mortgage-engine")),
-    note: safeStr(pickFirst(result.note, result.reason))
+    source: raw.source || raw._source || "shared_engine",
+    rank: pickFirst(raw.rank, raw.rank_paygrade, raw.paygrade),
+    yos: pickFirst(raw.yos, raw.years_of_service),
+    zip: pickFirst(raw.zip, raw.bah_zip, raw.base_zip),
+    basePay: roundMoney(basePay),
+    bas: roundMoney(bas),
+    bah: roundMoney(bah),
+    va: roundMoney(va),
+    totalMonthly: roundMoney(resolvedTotal),
+    annualized: roundMoney(resolvedTotal ? resolvedTotal * 12 : null),
+    raw: raw.raw ? undefined : undefined
   });
 }
 
-function computeMortgageFallback(input) {
-  const price = num(input.price);
-  if (!price || price <= 0) return null;
+function computeCompensationFallback(normalizedProfile, scenario) {
+  const income = num(pickFirst(scenario?.income, normalizedProfile?.income));
+  if (!income) return null;
 
-  const downpayment = Math.max(0, num(input.downpayment) || 0);
-  const loanAmount = Math.max(0, price - downpayment);
+  return stripEmpty({
+    source: "profile_income_fallback",
+    totalMonthly: roundMoney(income),
+    annualized: roundMoney(income * 12)
+  });
+}
 
-  const apr = aprFromCreditScore(input.creditScore);
-  const termYears = num(input.termYears) || 30;
+// ============================================================
+// //#12 MORTGAGE
+// ============================================================
 
-  const principalInterest = monthlyPaymentPI(loanAmount, apr, termYears);
+async function computeMortgageSafe(normalizedProfile, scenario, compensation) {
+  const fromShared = await trySharedMortgageEngine(
+    normalizedProfile,
+    scenario,
+    compensation
+  );
 
-  const taxes = price * 0.0125 / 12;
-  const insurance = price * 0.004 / 12;
-  const hoa = 0;
+  if (fromShared) return normalizeMortgage(fromShared);
 
-  const isVA = String(input.loanType || "").toLowerCase() === "va";
-  const ltv = loanAmount / price;
-  const pmi = !isVA && ltv > 0.8 ? price * 0.006 / 12 : 0;
+  return computeMortgageFallback(normalizedProfile, scenario);
+}
 
-  const allIn = principalInterest + taxes + insurance + hoa + pmi;
+async function trySharedMortgageEngine(normalizedProfile, scenario, compensation) {
+  let mod = shared.mortgageEngine;
 
-  return {
-    ok: true,
+  if (!mod) {
+    mod = await safeImport(shared.mortgageEnginePath || "./_share/mortgage-engine.js");
+  }
+
+  const fn = getExportedFunction(mod, [
+    "calculateMortgage",
+    "calculateMortgagePayment",
+    "buildMortgagePacket",
+    "getMortgageContext"
+  ]);
+
+  if (!fn) return null;
+
+  try {
+    return await fn({
+      profile: normalizedProfile,
+      scenario,
+      compensation,
+      price: scenario?.price,
+      down: scenario?.downpayment,
+      downpayment: scenario?.downpayment,
+      apr: scenario?.apr,
+      termYears: scenario?.termYears || 30,
+      taxAnnual: scenario?.propertyTaxAnnual,
+      insAnnual: scenario?.insuranceAnnual,
+      hoa: scenario?.hoa,
+      pmi: scenario?.pmi,
+      loanType: scenario?.loanType || "va"
+    });
+  } catch (err) {
+    console.warn("mortgage-engine failed:", err?.message || err);
+    return null;
+  }
+}
+
+function normalizeMortgage(raw) {
+  if (!raw || typeof raw !== "object") return null;
+
+  const monthly = num(
+    pickFirst(
+      raw.allIn,
+      raw.all_in,
+      raw.monthly,
+      raw.monthlyPayment,
+      raw.monthly_payment,
+      raw.totalMonthly,
+      raw.total_monthly,
+      raw.payment,
+      raw.breakdown?.allIn
+    )
+  );
+
+  return stripEmpty({
+    source: raw.source || raw._source || "mortgage_engine",
+    price: roundMoney(pickFirst(raw.price, raw.homePrice, raw.purchasePrice)),
+    loan: roundMoney(pickFirst(raw.loan, raw.loanAmount, raw.loan_amount)),
+    downpayment: roundMoney(
+      pickFirst(raw.downpayment, raw.downPayment, raw.down)
+    ),
+    apr: num(pickFirst(raw.apr, raw.rate, raw.interestRate)),
+    termYears: num(pickFirst(raw.termYears, raw.term_years, raw.years)),
+    pi: roundMoney(pickFirst(raw.pi, raw.principalInterest, raw.principal_interest)),
+    taxes: roundMoney(pickFirst(raw.taxes, raw.taxMonthly, raw.propertyTaxes)),
+    insurance: roundMoney(pickFirst(raw.insurance, raw.ins, raw.insuranceMonthly)),
+    hoa: roundMoney(raw.hoa),
+    pmi: roundMoney(raw.pmi),
+    allIn: roundMoney(monthly),
+    monthly: roundMoney(monthly)
+  });
+}
+
+function computeMortgageFallback(normalizedProfile, scenario) {
+  const price = num(pickFirst(scenario?.price, normalizedProfile?.projected_home_price));
+  if (!price) return null;
+
+  const down = Math.max(0, num(scenario?.downpayment) || 0);
+  const apr = num(scenario?.apr) || 6.75;
+  const years = num(scenario?.termYears) || 30;
+  const loan = Math.max(0, price - down);
+
+  const pi = pmtPI(loan, apr, years);
+  const taxes = num(scenario?.propertyTaxAnnual) ? num(scenario.propertyTaxAnnual) / 12 : price * 0.0125 / 12;
+  const insurance = num(scenario?.insuranceAnnual) ? num(scenario.insuranceAnnual) / 12 : price * 0.0035 / 12;
+  const hoa = num(scenario?.hoa) || 0;
+  const pmi = scenario?.loanType === "va" ? 0 : num(scenario?.pmi) || 0;
+  const allIn = pi + taxes + insurance + hoa + pmi;
+
+  return stripEmpty({
+    source: "fallback_mortgage_estimate",
     price: roundMoney(price),
-    downpayment: roundMoney(downpayment),
-    loan_amount: roundMoney(loanAmount),
+    loan: roundMoney(loan),
+    downpayment: roundMoney(down),
     apr,
-    term_years: termYears,
-    principal_interest: roundMoney(principalInterest),
+    termYears: years,
+    pi: roundMoney(pi),
     taxes: roundMoney(taxes),
     insurance: roundMoney(insurance),
     hoa: roundMoney(hoa),
     pmi: roundMoney(pmi),
-    all_in_monthly: roundMoney(allIn),
-    source: "ask-amy fallback mortgage math",
-    note:
-      "Fallback estimate only. The shared mortgage-engine should be treated as source of truth when available."
-  };
+    allIn: roundMoney(allIn),
+    monthly: roundMoney(allIn)
+  });
 }
 
-function aprFromCreditScore(score) {
-  const s = num(score);
+function pmtPI(loanAmount, aprPctValue, years) {
+  const principal = Number(loanAmount) || 0;
+  const annualRate = Number(aprPctValue) || 0;
+  const months = (Number(years) || 30) * 12;
 
-  if (!s) return 0.07;
-  if (s >= 780) return 0.0625;
-  if (s >= 740) return 0.0675;
-  if (s >= 700) return 0.0725;
-  if (s >= 660) return 0.08;
+  if (principal <= 0 || months <= 0) return 0;
 
-  return 0.09;
-}
+  const monthlyRate = annualRate / 100 / 12;
 
-function monthlyPaymentPI(principal, apr, termYears) {
-  const P = Number(principal);
-  const r = Number(apr) / 12;
-  const n = Math.round((Number(termYears) || 30) * 12);
+  if (monthlyRate <= 0) return principal / months;
 
-  if (!Number.isFinite(P) || P <= 0 || !Number.isFinite(n) || n <= 0) return 0;
-  if (!Number.isFinite(r) || r <= 0) return P / n;
-
-  const pow = Math.pow(1 + r, n);
-  return P * ((r * pow) / (pow - 1));
+  return (
+    principal *
+    (monthlyRate * Math.pow(1 + monthlyRate, months)) /
+    (Math.pow(1 + monthlyRate, months) - 1)
+  );
 }
 
 // ============================================================
-// //#13 AFFORDABILITY + VERDICT
+// //#13 AFFORDABILITY / VERDICT
 // ============================================================
 
 function computeAffordabilitySafe({
@@ -2164,130 +2171,690 @@ function computeAffordabilitySafe({
   compensation,
   mortgage
 }) {
-  const income =
-    num(compensation?.total_monthly) ||
-    num(scenario.income) ||
-    num(normalizedProfile.income);
+  const fromShared = trySharedAffordabilityEngine({
+    normalizedProfile,
+    scenario,
+    compensation,
+    mortgage
+  });
 
-  if (!income || income <= 0) return null;
+  if (fromShared) return normalizeAffordability(fromShared);
 
-  const expenses =
-    num(scenario.expenses) ||
-    num(normalizedProfile.monthly_expenses) ||
-    num(scenario.debt) ||
-    num(normalizedProfile.debt) ||
-    0;
+  const income = num(
+    pickFirst(
+      compensation?.totalMonthly,
+      scenario?.income,
+      normalizedProfile?.income
+    )
+  );
 
-  const housingAllIn = num(mortgage?.all_in_monthly);
+  const monthlyHousing = num(
+    pickFirst(mortgage?.allIn, mortgage?.monthly, mortgage?.monthlyPayment)
+  );
 
-  const housingCap = income * 0.3;
-  const residual = housingAllIn ? income - housingAllIn - expenses : null;
-  const housingRatio = housingAllIn ? housingAllIn / income : null;
-  const expenseRatio = expenses ? expenses / income : null;
-  const backendRatio = housingAllIn ? (housingAllIn + expenses) / income : null;
+  const expenses = num(
+    pickFirst(scenario?.expenses, normalizedProfile?.monthly_expenses)
+  );
 
-  let status = "INSUFFICIENT";
-  let score = "N/A";
+  if (!income || !monthlyHousing) return null;
 
-  if (housingRatio !== null) {
-    if (housingRatio <= 0.3 && backendRatio <= 0.43) {
-      status = "GREEN";
-      score = "A";
-    } else if (housingRatio <= 0.35 && backendRatio <= 0.5) {
-      status = "CAUTION";
-      score = "B-/C+";
-    } else {
-      status = "NO-GO";
-      score = "D";
-    }
+  const housingRatio = monthlyHousing / income;
+  const totalOutflow = monthlyHousing + (expenses || 0);
+  const residual = income - totalOutflow;
+  const residualRatio = residual / income;
+
+  let grade = "B";
+  let status = "watch";
+  let bluf = "This looks workable, but Amy would still stress test reserves, PCS timeline, and exit strategy.";
+
+  if (housingRatio <= 0.25 && residualRatio >= 0.3) {
+    grade = "A";
+    status = "strong";
+    bluf = "This looks financially strong on the monthly-payment side.";
+  } else if (housingRatio > 0.35 || residualRatio < 0.15) {
+    grade = "C";
+    status = "caution";
+    bluf = "This may be tight. Approval is not the same as a smart PCS decision.";
   }
 
-  return {
-    ok: true,
+  return stripEmpty({
+    source: "fallback_affordability",
     income: roundMoney(income),
-    housing_cap_30: roundMoney(housingCap),
-    housing_ratio: housingRatio,
-    expense_ratio: expenseRatio,
-    backend_ratio: backendRatio,
-    residual_income: roundMoney(residual),
-    score,
+    housingMonthly: roundMoney(monthlyHousing),
+    expenses: roundMoney(expenses),
+    totalOutflow: roundMoney(totalOutflow),
+    residual: roundMoney(residual),
+    housingRatio: round2(housingRatio),
+    residualRatio: round2(residualRatio),
+    grade,
     status,
-    source: "ask-amy deterministic affordability math"
-  };
+    bluf
+  });
+}
+
+function trySharedAffordabilityEngine({
+  normalizedProfile,
+  scenario,
+  compensation,
+  mortgage
+}) {
+  const fn = getExportedFunction(shared.affordabilityEngine, [
+    "calculateAffordability",
+    "buildAffordabilityPacket",
+    "scoreAffordability",
+    "analyzeAffordability"
+  ]);
+
+  if (!fn) return null;
+
+  try {
+    return fn({
+      profile: normalizedProfile,
+      scenario,
+      compensation,
+      mortgage
+    });
+  } catch (err) {
+    console.warn("affordability-engine failed:", err?.message || err);
+    return null;
+  }
+}
+
+function normalizeAffordability(raw) {
+  if (!raw || typeof raw !== "object") return null;
+
+  return stripEmpty({
+    source: raw.source || raw._source || "affordability_engine",
+    income: roundMoney(pickFirst(raw.income, raw.monthlyIncome)),
+    housingMonthly: roundMoney(
+      pickFirst(raw.housingMonthly, raw.housing_monthly, raw.payment)
+    ),
+    expenses: roundMoney(pickFirst(raw.expenses, raw.monthlyExpenses)),
+    residual: roundMoney(pickFirst(raw.residual, raw.monthlyResidual)),
+    housingRatio: num(pickFirst(raw.housingRatio, raw.housing_ratio)),
+    residualRatio: num(pickFirst(raw.residualRatio, raw.residual_ratio)),
+    dti: num(pickFirst(raw.dti, raw.debtToIncome)),
+    grade: safeStr(pickFirst(raw.grade, raw.scoreGrade)),
+    status: safeStr(pickFirst(raw.status, raw.verdictStatus)),
+    bluf: safeStr(pickFirst(raw.bluf, raw.summary))
+  });
+}
+
+function computeVerdictSafe({
+  compensation,
+  mortgage,
+  affordability,
+  scenario,
+  normalizedProfile
+}) {
+  const fromShared = trySharedDecisionRules({
+    compensation,
+    mortgage,
+    affordability,
+    scenario,
+    normalizedProfile
+  });
+
+  if (fromShared) return normalizeVerdict(fromShared);
+
+  return computeVerdictFallback({
+    compensation,
+    mortgage,
+    affordability
+  });
+}
+
+function trySharedDecisionRules({
+  compensation,
+  mortgage,
+  affordability,
+  scenario,
+  normalizedProfile
+}) {
+  const fn = getExportedFunction(shared.decisionRules, [
+    "buildDecisionVerdict",
+    "calculateDecisionVerdict",
+    "getDecisionRules",
+    "scoreDecision"
+  ]);
+
+  if (!fn) return null;
+
+  try {
+    return fn({
+      profile: normalizedProfile,
+      scenario,
+      compensation,
+      mortgage,
+      affordability
+    });
+  } catch (err) {
+    console.warn("decision-rules failed:", err?.message || err);
+    return null;
+  }
+}
+
+function normalizeVerdict(raw) {
+  if (!raw || typeof raw !== "object") return null;
+
+  return stripEmpty({
+    source: raw.source || raw._source || "decision_rules",
+    grade: safeStr(pickFirst(raw.grade, raw.score, raw.rating)),
+    status: safeStr(pickFirst(raw.status, raw.verdict, raw.level)),
+    bluf: safeStr(pickFirst(raw.bluf, raw.summary, raw.message)),
+    risks: Array.isArray(raw.risks) ? raw.risks : [],
+    strengths: Array.isArray(raw.strengths) ? raw.strengths : [],
+    next_steps: Array.isArray(raw.next_steps) ? raw.next_steps : raw.nextSteps || []
+  });
 }
 
 function computeVerdictFallback({ compensation, mortgage, affordability }) {
-  const income = num(compensation?.total_monthly) || num(affordability?.income);
-  const housing = num(mortgage?.all_in_monthly);
-  const housingRatio = num(affordability?.housing_ratio);
-  const backendRatio = num(affordability?.backend_ratio);
+  if (!compensation && !mortgage && !affordability) return null;
 
-  if (!income) {
+  const grade = affordability?.grade || "B";
+  const status = affordability?.status || "review";
+  const bluf =
+    affordability?.bluf ||
+    "Amy can make a stronger call once income, expenses, projected price, and payment are all loaded.";
+
+  const risks = [];
+  const strengths = [];
+
+  if (compensation?.totalMonthly) {
+    strengths.push(`Monthly compensation context is loaded at about ${money(compensation.totalMonthly)}.`);
+  }
+
+  if (mortgage?.allIn || mortgage?.monthly) {
+    strengths.push(`Estimated housing payment is loaded at about ${money(mortgage.allIn || mortgage.monthly)}.`);
+  }
+
+  if (affordability?.housingRatio && affordability.housingRatio > 0.35) {
+    risks.push("Housing payment may be high compared with monthly income.");
+  }
+
+  if (affordability?.residual && affordability.residual < 1000) {
+    risks.push("Residual monthly buffer may be thin after housing and expenses.");
+  }
+
+  if (!risks.length) {
+    risks.push("PCS timeline, cash reserves, maintenance, and exit strategy still need to be tested.");
+  }
+
+  return stripEmpty({
+    source: "fallback_verdict",
+    grade,
+    status,
+    bluf,
+    risks,
+    strengths,
+    next_steps: [
+      "Confirm all-in housing payment.",
+      "Compare payment to BAH and total monthly income.",
+      "Stress test cash reserves and PCS timeline."
+    ]
+  });
+}
+
+// ============================================================
+// //#14 VA LOAN CONTEXT
+// ============================================================
+
+async function buildVaLoanContextSafe({
+  message,
+  normalizedProfile,
+  scenario,
+  compensation,
+  mortgage,
+  affordability
+}) {
+  const packet = await trySharedVaLoans({
+    message,
+    profile: normalizedProfile,
+    scenario,
+    compensation,
+    mortgage,
+    affordability
+  });
+
+  if (packet) return packet;
+
+  return buildVaLoanFallbackPacket({
+    message,
+    normalizedProfile,
+    scenario,
+    compensation,
+    mortgage,
+    affordability
+  });
+}
+
+async function trySharedVaLoans(input) {
+  let mod = shared.vaLoans;
+
+  if (!mod) {
+    mod = await safeImport(shared.vaLoansPath || "./_share/va-loans.js");
+  }
+
+  const fn = getExportedFunction(mod, [
+    "buildVaLoanTruthPacket",
+    "analyzeVaLoanQuestion",
+    "getVaLoanGuidance"
+  ]);
+
+  if (!fn) return null;
+
+  try {
+    const result = await fn(input);
+    if (result && typeof result === "object") {
+      return stripEmpty({
+        source: result.source || result._source || "va-loans.js",
+        ...result
+      });
+    }
+    return result || null;
+  } catch (err) {
+    console.warn("va-loans shared engine failed:", err?.message || err);
+    return null;
+  }
+}
+
+function buildVaLoanFallbackPacket({
+  message,
+  normalizedProfile,
+  scenario,
+  compensation,
+  mortgage,
+  affordability
+}) {
+  const t = safeStr(message).toLowerCase();
+  const price = num(pickFirst(scenario?.price, normalizedProfile?.projected_home_price));
+  const downpayment = Math.max(0, num(pickFirst(scenario?.downpayment, normalizedProfile?.downpayment)) || 0);
+  const vaDisability = num(pickFirst(normalizedProfile?.va_disability, scenario?.vaDisability));
+  const fundingFeeExempt = boolish(
+    pickFirst(
+      normalizedProfile?.funding_fee_exempt,
+      normalizedProfile?.fundingFeeExempt,
+      scenario?.fundingFeeExempt
+    ),
+    vaDisability > 0
+  );
+
+  const priorUse = normalizePriorVaUse(scenario?.priorUse);
+  const downPct = price > 0 ? downpayment / price : 0;
+  const fundingFee = estimateVaFundingFeeFallback({
+    price,
+    downpayment,
+    priorUse,
+    fundingFeeExempt
+  });
+
+  let topic = "overview";
+
+  if (/\bcoe\b|\bcertificate of eligibility\b|\beligib|\bqualify\b/.test(t)) topic = "eligibility";
+  if (/\bfunding fee\b|\bexempt\b|\bexemption\b|\bdisabled veteran\b|\bva disability\b/.test(t)) topic = "funding_fee";
+  if (/\bzero down\b|\b0 down\b|\bno down\b|\bdown payment\b|\bdownpayment\b/.test(t)) topic = "zero_down";
+  if (/\bno pmi\b|\bpmi\b|\bprivate mortgage insurance\b/.test(t)) topic = "no_pmi";
+  if (/\bappraisal\b|\binspection\b|\bminimum property\b/.test(t)) topic = "appraisal";
+  if (/\boccupancy\b|\bprimary residence\b|\bowner occupy\b/.test(t)) topic = "occupancy";
+  if (/\bseller concession\b|\bseller credit\b|\bseller concessions\b|\bseller credits\b/.test(t)) topic = "seller_concessions";
+  if (/\bentitlement\b|\bfull entitlement\b|\bpartial entitlement\b/.test(t)) topic = "entitlement";
+  if (/\bclosing cost\b|\bclosing costs\b|\bcash to close\b/.test(t)) topic = "closing_costs";
+  if (/\bpcs\b|\brent vs buy\b|\bshould i buy\b|\bshould i rent\b/.test(t)) topic = "pcs_strategy";
+  if (/\bnot buy\b|\bwhen not\b|\bbad idea\b|\btoo risky\b/.test(t)) topic = "when_not_to_buy";
+
+  const topicGuidance = getFallbackVaTopic(topic);
+
+  return stripEmpty({
+    source: "fallback_va_loan_guidance",
+    topic,
+    title: topicGuidance.title,
+    bluf: topicGuidance.bluf,
+    key_points: topicGuidance.key_points,
+    risks: topicGuidance.risks,
+    next_steps: topicGuidance.next_steps,
+    rules: {
+      zero_down_possible: true,
+      no_monthly_pmi: true,
+      purchase_funding_fee_can_be_financed: true,
+      purchase_closing_costs_can_be_financed: false,
+      seller_concession_cap_pct: 0.04,
+      standard_occupancy_days: 60
+    },
+    profile_signals: {
+      va_disability: vaDisability,
+      likely_funding_fee_exempt: fundingFeeExempt,
+      base: normalizedProfile?.base || scenario?.base || null,
+      rank: normalizedProfile?.rank_paygrade || scenario?.rankPaygrade || null
+    },
+    purchase_scenario: price
+      ? {
+          price: roundMoney(price),
+          downpayment: roundMoney(downpayment),
+          downPaymentPct: round2(downPct),
+          priorUse,
+          fundingFeeExempt,
+          loan: {
+            baseLoanAmount: roundMoney(Math.max(0, price - downpayment)),
+            fundingFee: fundingFee ? roundMoney(fundingFee.amount) : 0,
+            fundingFeePct: fundingFee ? fundingFee.feePct : 0,
+            estimatedLoanWithFinancedFundingFee: fundingFee
+              ? roundMoney(Math.max(0, price - downpayment) + fundingFee.amount)
+              : roundMoney(Math.max(0, price - downpayment))
+          }
+        }
+      : null,
+    funding_fee: fundingFee,
+    mortgage_context: mortgage || null,
+    affordability_context: affordability || null,
+    compensation_context: compensation || null,
+    disclaimer:
+      "VA Loan guidance is educational. Eligibility, funding fee exemption, approval, appraisal, and closing details must be confirmed with the lender, COE, and official VA/lender documentation."
+  });
+}
+
+function normalizePriorVaUse(value) {
+  if (value === true) return "subsequent_use";
+  if (value === false) return "first_use";
+
+  const s = safeStr(value).toLowerCase();
+
+  if (["subsequent", "subsequent_use", "used", "yes", "true", "1", "again"].includes(s)) {
+    return "subsequent_use";
+  }
+
+  return "first_use";
+}
+
+function estimateVaFundingFeeFallback({
+  price,
+  downpayment,
+  priorUse,
+  fundingFeeExempt
+}) {
+  const p = Number(price);
+  if (!Number.isFinite(p) || p <= 0) return null;
+
+  const down = Math.max(0, Number(downpayment) || 0);
+  const baseLoan = Math.max(0, p - down);
+
+  if (fundingFeeExempt) {
     return {
-      status: "INSUFFICIENT",
-      grade: "N/A",
-      label: "Missing income",
-      bluf:
-        "I need income or compensation data before I can give a clean readiness verdict.",
-      reasons: ["Missing total monthly income."],
-      source: "ask-amy fallback decision rules"
+      exempt: true,
+      feePct: 0,
+      amount: 0,
+      label: "Likely exempt based on provided profile signals"
     };
   }
 
-  if (!housing) {
-    return {
-      status: "PARTIAL",
-      grade: "N/A",
-      label: "Income loaded",
-      bluf:
-        "Your income is loaded, but I need a home price or mortgage estimate to judge housing readiness.",
-      reasons: ["Missing housing payment or target home price."],
-      source: "ask-amy fallback decision rules"
-    };
-  }
+  const downPct = p > 0 ? (down / p) * 100 : 0;
+  const use = priorUse === "subsequent_use" ? "subsequent_use" : "first_use";
 
-  if (housingRatio <= 0.3 && backendRatio <= 0.43) {
-    return {
-      status: "GREEN",
-      grade: "A",
-      label: "Strong range",
-      bluf:
-        "This looks workable based on the current income, debt, and housing estimate.",
-      reasons: [
-        `Housing ratio is about ${pct(housingRatio)}.`,
-        `Back-end ratio is about ${pct(backendRatio)}.`
-      ],
-      source: "ask-amy fallback decision rules"
-    };
-  }
+  let feePct = use === "subsequent_use" ? 0.033 : 0.0215;
+  let label =
+    use === "subsequent_use"
+      ? "Subsequent use, less than 5% down"
+      : "First use, less than 5% down";
 
-  if (housingRatio <= 0.35 && backendRatio <= 0.5) {
-    return {
-      status: "CAUTION",
-      grade: "B-/C+",
-      label: "Caution range",
-      bluf: "This may be possible, but the buffer is getting tight.",
-      reasons: [
-        `Housing ratio is about ${pct(housingRatio)}.`,
-        `Back-end ratio is about ${pct(backendRatio)}.`
-      ],
-      source: "ask-amy fallback decision rules"
-    };
+  if (downPct >= 10) {
+    feePct = 0.0125;
+    label = `${use === "subsequent_use" ? "Subsequent" : "First"} use, 10% or more down`;
+  } else if (downPct >= 5) {
+    feePct = 0.015;
+    label = `${use === "subsequent_use" ? "Subsequent" : "First"} use, 5% to 9.99% down`;
   }
 
   return {
-    status: "NO-GO",
-    grade: "D",
-    label: "High-risk range",
-    bluf:
-      "This looks too tight unless income rises, expenses drop, price comes down, or cash reserves improve.",
-    reasons: [
-      `Housing ratio is about ${pct(housingRatio)}.`,
-      `Back-end ratio is about ${pct(backendRatio)}.`
-    ],
-    source: "ask-amy fallback decision rules"
+    exempt: false,
+    priorUse: use,
+    downPaymentPct: round2(down / p),
+    feePct,
+    amount: roundMoney(baseLoan * feePct),
+    label
   };
 }
+
+function getFallbackVaTopic(topic) {
+  const topics = {
+    overview: {
+      title: "VA Loan Overview",
+      bluf:
+        "A VA Loan can be one of the strongest military home-buying tools when the payment, PCS timeline, and market risk still make sense.",
+      key_points: [
+        "Eligible borrowers may be able to buy with $0 down.",
+        "VA Loans do not require monthly PMI.",
+        "The lender still decides approval using income, credit, debt, assets, residual income, and property rules.",
+        "The home generally must be intended as a primary residence."
+      ],
+      risks: [
+        "Low down payment can mean low equity if you PCS quickly.",
+        "Approval does not mean the decision is financially smart.",
+        "Funding fee, closing costs, taxes, insurance, and maintenance still matter."
+      ],
+      next_steps: [
+        "Confirm COE eligibility.",
+        "Estimate the full all-in monthly payment.",
+        "Compare payment to BAH, income, expenses, and PCS timeline."
+      ]
+    },
+    eligibility: {
+      title: "VA Loan Eligibility",
+      bluf:
+        "Eligibility starts with service history and a Certificate of Eligibility, but approval still depends on lender underwriting.",
+      key_points: [
+        "A COE helps show the lender that the borrower qualifies for the VA home loan benefit.",
+        "Active-duty service members, Veterans, Guard/Reserve members, and some surviving spouses may qualify.",
+        "A COE is not the same as loan approval."
+      ],
+      risks: [
+        "Prior VA loan usage can affect entitlement.",
+        "Partial entitlement may change the down payment requirement."
+      ],
+      next_steps: [
+        "Request or confirm the COE.",
+        "Ask the lender whether entitlement is full or partial.",
+        "Compare at least two VA-experienced lenders."
+      ]
+    },
+    funding_fee: {
+      title: "VA Funding Fee",
+      bluf:
+        "The VA funding fee is a one-time cost for many VA borrowers, but some borrowers are exempt.",
+      key_points: [
+        "The fee depends on loan type, prior VA usage, down payment tier, and exemption status.",
+        "The funding fee may often be financed into the loan on a purchase.",
+        "Borrowers receiving VA disability compensation are commonly exempt."
+      ],
+      risks: [
+        "Financing the fee increases the loan balance.",
+        "Exemption status should be confirmed before closing.",
+        "The funding fee is separate from lender fees, title fees, taxes, insurance, and prepaids."
+      ],
+      next_steps: [
+        "Confirm funding-fee exemption on the COE or with the lender.",
+        "Calculate the funding fee as paid upfront and financed.",
+        "Compare first-use versus subsequent-use fee status."
+      ]
+    },
+    zero_down: {
+      title: "Zero Down",
+      bluf:
+        "$0 down is often possible for eligible VA borrowers with sufficient entitlement, but it should be treated as a tool, not a green light.",
+      key_points: [
+        "$0 down does not mean zero cash needed.",
+        "Closing costs, inspections, reserves, moving costs, and maintenance still matter.",
+        "A down payment may reduce the funding fee and monthly payment."
+      ],
+      risks: [
+        "Low equity can be risky if orders change quickly.",
+        "Rolling the funding fee into the loan increases the balance."
+      ],
+      next_steps: [
+        "Compare $0 down and with-down-payment scenarios.",
+        "Review cash reserves after closing.",
+        "Check whether a down payment changes the funding-fee tier."
+      ]
+    },
+    no_pmi: {
+      title: "No Monthly PMI",
+      bluf:
+        "One of the strongest VA Loan advantages is that it does not require monthly private mortgage insurance.",
+      key_points: [
+        "VA Loans do not require monthly PMI, even with $0 down.",
+        "The funding fee is separate from PMI.",
+        "No PMI can improve monthly affordability versus low-down-payment conventional loans."
+      ],
+      risks: [
+        "No PMI does not make the payment automatically safe.",
+        "Taxes, insurance, HOA, maintenance, and utilities still matter."
+      ],
+      next_steps: [
+        "Compare VA all-in payment against conventional with PMI.",
+        "Evaluate affordability from all-in payment, not principal and interest only."
+      ]
+    },
+    appraisal: {
+      title: "VA Appraisal",
+      bluf:
+        "The VA appraisal checks value and minimum property requirements; it is not a substitute for a home inspection.",
+      key_points: [
+        "The appraisal helps establish value and property acceptability.",
+        "A home inspection is for the buyer’s understanding of condition.",
+        "VA appraisal conditions can require repairs before closing."
+      ],
+      risks: [
+        "Skipping inspection can hide expensive issues.",
+        "Appraisal repairs can slow or complicate the deal."
+      ],
+      next_steps: [
+        "Order an independent home inspection.",
+        "Ask the agent and lender how likely the property is to clear VA appraisal.",
+        "Budget for repairs and maintenance."
+      ]
+    },
+    occupancy: {
+      title: "Occupancy",
+      bluf:
+        "A VA Loan is generally for a primary residence, not a pure investment property.",
+      key_points: [
+        "The borrower generally certifies intent to occupy as a primary residence.",
+        "PCS, deployment, and spouse occupancy situations should be discussed with the lender.",
+        "Do not treat VA financing as a disguised investment-loan shortcut."
+      ],
+      risks: [
+        "Incorrect occupancy assumptions can create compliance problems.",
+        "PCS timing must be disclosed and documented."
+      ],
+      next_steps: [
+        "Tell the lender the actual PCS/deployment timeline.",
+        "Document who will occupy the home and when.",
+        "Ask the lender before assuming an exception applies."
+      ]
+    },
+    seller_concessions: {
+      title: "Seller Concessions",
+      bluf:
+        "VA can be powerful in negotiations because sellers may help with closing costs, but concessions have rules.",
+      key_points: [
+        "Sellers/builders may offer credits to cover some buyer costs.",
+        "VA seller concessions are generally capped at 4% of reasonable value.",
+        "Credits must be structured correctly with the lender and contract."
+      ],
+      risks: [
+        "Poorly structured credits can be rejected or reduced.",
+        "The appraisal value can limit what the transaction supports."
+      ],
+      next_steps: [
+        "Ask the lender how much seller credit can be used before writing the offer.",
+        "Have the agent structure concession language clearly.",
+        "Use credits to reduce cash-to-close, not to hide an unaffordable payment."
+      ]
+    },
+    entitlement: {
+      title: "Entitlement",
+      bluf:
+        "Full entitlement usually means no VA loan limit, but it does not replace lender affordability or appraisal requirements.",
+      key_points: [
+        "The COE shows entitlement information.",
+        "Prior VA loan usage can reduce available entitlement.",
+        "Partial entitlement may create a down payment requirement."
+      ],
+      risks: [
+        "Entitlement is often confused with affordability.",
+        "County loan limits matter more when entitlement is not full."
+      ],
+      next_steps: [
+        "Review the COE for entitlement status.",
+        "Tell the lender about any prior VA loan still charged to entitlement.",
+        "Calculate whether remaining entitlement supports the target loan."
+      ]
+    },
+    closing_costs: {
+      title: "Closing Costs",
+      bluf:
+        "VA does not mean zero cash to close. The funding fee may be financed, but most other purchase closing costs need buyer funds, seller credits, or lender credits.",
+      key_points: [
+        "Closing costs vary by lender, location, property, taxes, insurance, and prepaids.",
+        "Seller credits may cover eligible closing costs.",
+        "The funding fee is separate from normal closing costs."
+      ],
+      risks: [
+        "A buyer can be approved but short on cash to close.",
+        "Escrows and prepaids can surprise first-time buyers."
+      ],
+      next_steps: [
+        "Request a Loan Estimate.",
+        "Ask for estimated cash to close, not just monthly payment.",
+        "Stress test reserves after closing."
+      ]
+    },
+    pcs_strategy: {
+      title: "PCS Housing Strategy",
+      bluf:
+        "The VA Loan is a tool. The PCS decision still has to pass timeline, cash-flow, exit-strategy, and market-risk tests.",
+      key_points: [
+        "Buying can make sense when payment is safe and the timeline is long enough.",
+        "Renting can be smarter when the PCS timeline is short or reserves are thin.",
+        "BAH should not be treated as permission to max out housing."
+      ],
+      risks: [
+        "Short holding period plus low equity can create negative-sale risk.",
+        "Maintenance and vacancy can turn a good payment into a bad plan."
+      ],
+      next_steps: [
+        "Compare rent vs buy using expected time on station.",
+        "Estimate resale break-even and rental fallback.",
+        "Keep emergency reserves separate from down payment."
+      ]
+    },
+    when_not_to_buy: {
+      title: "When Not To Buy",
+      bluf:
+        "A VA Loan should help you buy well, not help you force a risky purchase.",
+      key_points: [
+        "Do not buy just because $0 down is available.",
+        "Do not buy if the all-in payment leaves no monthly buffer.",
+        "Do not buy if the PCS timeline is too short for transaction costs and market movement."
+      ],
+      risks: [
+        "Negative equity risk after a short stay.",
+        "House-poor cash flow.",
+        "Maintenance, tenant, or forced-sale stress."
+      ],
+      next_steps: [
+        "Lower the target price.",
+        "Increase cash reserves.",
+        "Rent first if the market or timeline is unclear.",
+        "Re-run the scenario with conservative assumptions."
+      ]
+    }
+  };
+
+  return topics[topic] || topics.overview;
+}
+
+// ============================================================
+// //#15 MISSING INPUTS / NEXT ACTION
+// ============================================================
 
 function listMissingInputs({
   normalizedProfile,
@@ -2297,307 +2864,523 @@ function listMissingInputs({
   intent
 }) {
   const missing = [];
-  const isCompOnly = intent === "compensation" || intent === "profile_question";
 
-  if (!normalizedProfile?.rank_paygrade && !scenario?.rank_paygrade) {
-    missing.push("rank/paygrade");
-  }
-
-  if (scenario?.yos === null || scenario?.yos === undefined) {
-    missing.push("years of service");
-  }
-
-  if (!scenario?.base && !scenario?.zip) {
-    missing.push("base or BAH ZIP");
+  if (!normalizedProfile?.full_name && !normalizedProfile?.first_name) {
+    missing.push("name");
   }
 
   if (
-    !compensation?.total_monthly &&
-    !scenario?.income &&
-    !normalizedProfile?.income
+    ["compensation", "housing_affordability", "rent_vs_buy", "pcs_housing_strategy"].includes(intent)
   ) {
-    missing.push("total monthly compensation");
+    if (!scenario?.rankPaygrade && !normalizedProfile?.rank_paygrade) missing.push("rank");
+    if (!scenario?.yos && !normalizedProfile?.yos) missing.push("years_of_service");
+    if (!scenario?.zip && !scenario?.base && !normalizedProfile?.zip && !normalizedProfile?.base) {
+      missing.push("base_or_bah_zip");
+    }
   }
 
-  if (!isCompOnly) {
-    if (!scenario?.price && !mortgage?.all_in_monthly) {
-      missing.push("target home price");
-    }
+  if (
+    ["housing_affordability", "mortgage_explanation", "rent_vs_buy", "va_loan"].includes(intent)
+  ) {
+    if (!scenario?.price && !normalizedProfile?.projected_home_price) missing.push("home_price");
+    if (!scenario?.creditScore && !normalizedProfile?.credit_score) missing.push("credit_score");
+    if (!scenario?.expenses && !normalizedProfile?.monthly_expenses) missing.push("monthly_expenses");
+  }
 
-    if (!scenario?.creditScore) {
-      missing.push("credit score");
+  if (intent === "va_loan") {
+    if (normalizedProfile?.funding_fee_exempt === undefined && !normalizedProfile?.va_disability) {
+      missing.push("funding_fee_exemption_status");
     }
+    if (!scenario?.priorUse) missing.push("first_or_subsequent_va_use");
+  }
 
-    if (scenario?.downpayment === null || scenario?.downpayment === undefined) {
-      missing.push("down payment/savings");
-    }
+  if (!compensation && intent === "compensation") {
+    missing.push("compensation_context");
+  }
 
-    if (
-      !scenario?.expenses &&
-      !normalizedProfile?.monthly_expenses &&
-      !scenario?.debt
-    ) {
-      missing.push("monthly expenses");
-    }
+  if (!mortgage && intent === "mortgage_explanation") {
+    missing.push("mortgage_context");
   }
 
   return [...new Set(missing)];
 }
 
-function buildNextAction({ intent, missing, verdict, compensation, mortgage }) {
-  if (missing?.length) {
-    const top = missing.slice(0, 3).join(", ");
+function buildNextAction({
+  intent,
+  missing,
+  verdict,
+  compensation,
+  mortgage,
+  affordability,
+  vaLoan
+}) {
+  if (intent === "va_loan") {
+    if (vaLoan?.profile_signals?.likely_funding_fee_exempt || vaLoan?.funding_fee?.exempt) {
+      return "Next move: compare the VA payment against BAH, monthly expenses, cash reserves, and PCS timeline.";
+    }
 
-    return {
-      type: "collect_missing_inputs",
-      label: "Tighten the profile",
-      message: `To give a sharper answer, I need: ${top}.`,
-      missing: missing.slice(0, 5)
-    };
+    return "Next move: confirm COE and funding-fee status, then estimate all-in VA payment and cash-to-close.";
   }
 
-  if (verdict?.status === "GREEN") {
-    return {
-      type: "proceed_with_guardrails",
-      label: "Proceed carefully",
-      message:
-        "Next move: compare the target payment against BAH, emergency savings, and commute/market risk before you commit."
-    };
+  if (missing && missing.length) {
+    return `Next move: add ${missing.slice(0, 3).join(", ")} so Amy can sharpen the answer.`;
   }
 
-  if (verdict?.status === "CAUTION") {
-    return {
-      type: "reduce_risk",
-      label: "Create more buffer",
-      message:
-        "Next move: lower the target price, increase down payment, reduce monthly debt, or compare renting before buying."
-    };
+  if (verdict?.next_steps?.length) return verdict.next_steps[0];
+
+  if (affordability?.status === "caution") {
+    return "Next move: lower the target price or increase cash buffer before treating this as ready-to-buy.";
   }
 
-  if (verdict?.status === "NO-GO") {
-    return {
-      type: "pause_or_rework",
-      label: "Rework the plan",
-      message:
-        "Next move: avoid forcing the purchase. Rebuild the scenario with a lower price, lower debt, or stronger savings."
-    };
+  if (mortgage && compensation) {
+    return "Next move: compare the payment against BAH, income, expenses, and PCS timeline.";
   }
 
-  if (intent === "compensation" && compensation?.total_monthly) {
-    return {
-      type: "review_housing_cap",
-      label: "Review housing cap",
-      message:
-        "Next move: use this income to set a safe monthly housing cap before choosing a price range."
-    };
-  }
-
-  if (mortgage?.all_in_monthly) {
-    return {
-      type: "review_payment",
-      label: "Review payment",
-      message:
-        "Next move: compare this all-in payment against BAH and your monthly expense load."
-    };
-  }
-
-  return {
-    type: "continue",
-    label: "Continue",
-    message: "Ask Amy a specific housing, PCS, pay, or dashboard question."
-  };
+  return "Next move: load profile, pay, housing price, and expenses for a stronger Amy recommendation.";
 }
 
 // ============================================================
-// //#14 DIRECT REPLIES
+// //#16 DIRECT REPLIES
 // ============================================================
 
 function buildDirectDeterministicReply({
+  message,
   intent,
   normalizedProfile,
   deterministic
 }) {
-  const p = normalizedProfile || {};
   const packet = deterministic?.public || {};
-  const comp = packet.compensation;
-  const mortgage = packet.mortgage;
-  const affordability = packet.affordability;
-  const verdict = packet.verdict;
+  const profile = normalizedProfile || {};
+  const firstName = safeStr(profile.first_name || deriveFirstName(profile.full_name));
 
   if (intent === "greeting") {
-    const name = firstName(p.full_name);
-
-    return [
-      `Hey${name ? ` ${name}` : ""} — I’m Amy, your PCSUnited AI Concierge powered by TheWing.ai.`,
-      "I can help explain your pay, BAH, housing affordability, PCS strategy, mortgage numbers, and dashboard readiness in plain English."
-    ].join(" ");
+    return `Hey${firstName ? ` ${firstName}` : ""} — Amy is online. I can help you understand pay, BAH, BAS, VA disability context, VA Loan strategy, mortgage estimates, affordability, PCS rent-vs-buy decisions, and your Financial Dashboard.`;
   }
 
   if (intent === "capabilities") {
-    const name = firstName(p.full_name);
-
-    const profileLine =
-      p.rank_paygrade || p.base
-        ? ` I have ${[p.rank_paygrade || p.rank, p.base, p.zip]
-            .filter(Boolean)
-            .join(" • ")} loaded.`
-        : "";
-
     return [
-      `Yes${name ? ` ${name}` : ""} — I’m working.`,
-      "I can help with pay, BAH, affordability, mortgage estimates, rent vs. buy, PCS housing strategy, and dashboard readiness.",
-      profileLine
-    ]
-      .filter(Boolean)
-      .join(" ");
+      "BLUF: I’m Amy, PCSUnited’s AI Concierge powered by TheWing.ai.",
+      "",
+      "I can help with military compensation, BAH/BAS, VA disability context, VA Loan questions, mortgage estimates, affordability, rent-vs-buy strategy, PCS housing decisions, and dashboard interpretation.",
+      "",
+      "The sharper the profile data, the sharper the answer."
+    ].join("\n");
   }
 
   if (intent === "profile_question") {
-    const pieces = [];
-
-    if (p.full_name) pieces.push(`Name: ${p.full_name}`);
-    if (p.rank_paygrade || p.rank) pieces.push(`Rank: ${p.rank_paygrade || p.rank}`);
-    if (p.yos !== undefined) pieces.push(`YOS: ${p.yos}`);
-    if (p.base) pieces.push(`Base: ${p.base}`);
-    if (p.zip) pieces.push(`ZIP: ${p.zip}`);
-    if (p.email) pieces.push(`Email: ${p.email}`);
-    if (p.income) pieces.push(`Saved Income: ${money(p.income)}`);
-    if (p.monthly_expenses) {
-      pieces.push(`Monthly Expenses: ${money(p.monthly_expenses)}`);
-    }
-    if (p.projected_home_price) {
-      pieces.push(`Target Home Price: ${money(p.projected_home_price)}`);
-    }
-
-    if (!pieces.length) {
-      return "I do not have enough saved profile details loaded yet. Once you log in or pass the PCSUnited profile context, I can answer from your actual member profile.";
-    }
-
-    return `Here’s what I have loaded from your member profile: ${pieces.join(" • ")}.`;
+    return buildProfileQuestionReply(profile, packet);
   }
 
-  if (intent === "compensation" && comp?.total_monthly) {
-    return [
-      `BLUF: Your estimated monthly compensation is ${money(comp.total_monthly)}.`,
-      comp.base_pay || comp.bas || comp.bah
-        ? `That breaks down as Base Pay ${money(comp.base_pay)}, BAS ${money(comp.bas)}, and BAH ${money(comp.bah)}.`
-        : "I do not have the full pay breakdown, but I do have a saved monthly income value from your member profile.",
-      comp.va_disability_pay
-        ? `VA disability compensation loaded: ${money(comp.va_disability_pay)} monthly.`
-        : "",
-      comp.base || comp.zip
-        ? `I’m using ${[comp.rank_paygrade, comp.base, comp.zip]
-            .filter(Boolean)
-            .join(" • ")}.`
-        : "",
-      comp.note ? `Note: ${comp.note}` : ""
-    ]
-      .filter(Boolean)
-      .join(" ");
+  if (intent === "compensation" && packet.compensation) {
+    return buildCompensationReply(packet.compensation, profile);
   }
 
-  if (
-    ["housing_affordability", "mortgage_explanation", "dashboard_interpretation"].includes(intent) &&
-    verdict &&
-    (mortgage || affordability)
-  ) {
-    const lines = [];
-
-    lines.push(
-      `BLUF: ${
-        verdict.bluf || "I have enough data to give you a first-pass housing read."
-      }`
-    );
-
-    if (comp?.total_monthly) {
-      lines.push(`Income loaded: ${money(comp.total_monthly)} monthly.`);
-    }
-
-    if (mortgage?.all_in_monthly) {
-      lines.push(
-        `Estimated all-in housing payment: ${money(mortgage.all_in_monthly)} monthly.`
-      );
-    }
-
-    if (
-      affordability?.housing_ratio !== undefined &&
-      affordability?.housing_ratio !== null
-    ) {
-      lines.push(`Housing ratio: about ${pct(affordability.housing_ratio)}.`);
-    }
-
-    if (
-      affordability?.backend_ratio !== undefined &&
-      affordability?.backend_ratio !== null
-    ) {
-      lines.push(`Back-end ratio: about ${pct(affordability.backend_ratio)}.`);
-    }
-
-    lines.push(
-      `Readiness: ${verdict.status}${verdict.grade ? ` (${verdict.grade})` : ""}.`
-    );
-
-    if (packet.next_action?.message) {
-      lines.push(packet.next_action.message);
-    }
-
-    return lines.join(" ");
+  if (intent === "va_loan" && packet.va_loan) {
+    return buildDirectVaLoanReply({ packet: packet.va_loan });
   }
 
   return "";
 }
 
-function firstName(fullName) {
-  const s = safeStr(fullName);
-  if (!s) return "";
-  return s.split(/\s+/)[0] || "";
+function buildProfileQuestionReply(profile, packet) {
+  const lines = [];
+
+  lines.push("BLUF: Here is what I can safely see from your PCSUnited profile context.");
+
+  if (profile.full_name || profile.first_name) {
+    lines.push(`Name: ${profile.full_name || profile.first_name}`);
+  }
+
+  if (profile.rank_paygrade || profile.rank) {
+    lines.push(`Rank: ${rankShort(profile.rank_paygrade || profile.rank) || profile.rank_paygrade || profile.rank}`);
+  }
+
+  if (profile.base) {
+    lines.push(`Base / duty station: ${profile.base}`);
+  }
+
+  if (profile.zip) {
+    lines.push(`BAH ZIP / location ZIP: ${profile.zip}`);
+  }
+
+  if (profile.yos !== undefined) {
+    lines.push(`Years of service: ${profile.yos}`);
+  }
+
+  if (packet?.compensation?.totalMonthly) {
+    lines.push(`Estimated monthly compensation loaded: ${money(packet.compensation.totalMonthly)}`);
+  }
+
+  if (lines.length === 1) {
+    lines.push("I do not have enough member profile data loaded yet.");
+  }
+
+  return lines.join("\n");
+}
+
+function buildCompensationReply(comp, profile) {
+  const name = safeStr(profile?.first_name || deriveFirstName(profile?.full_name));
+  const rank = rankShort(comp.rank || profile?.rank_paygrade || profile?.rank);
+
+  return [
+    `BLUF: ${name ? `${name}, ` : ""}${rank ? `for ${rank}, ` : ""}your estimated monthly compensation context is ${money(comp.totalMonthly)}.`,
+    "",
+    `Base Pay: ${money(comp.basePay)}`,
+    `BAH: ${money(comp.bah)}`,
+    `BAS: ${money(comp.bas)}`,
+    `VA / disability context: ${money(comp.va)}`,
+    `Total Monthly: ${money(comp.totalMonthly)}`,
+    "",
+    "Use this as a planning estimate, then compare it against housing payment, expenses, savings, and PCS timeline."
+  ].join("\n");
+}
+
+function buildDirectVaLoanReply({ packet }) {
+  if (!packet) return "";
+
+  const title = safeStr(packet.title || packet.topic || "VA Loan");
+  const bluf = safeStr(
+    packet.bluf ||
+      "A VA Loan can be powerful, but it still needs a payment, timeline, reserve, and exit-strategy test."
+  );
+
+  const lines = [];
+
+  lines.push(`BLUF: ${bluf}`);
+  lines.push("");
+
+  if (title) {
+    lines.push(`Topic: ${title}`);
+    lines.push("");
+  }
+
+  const fundingFee = pickFirst(
+    packet.funding_fee,
+    packet.fundingFee,
+    packet.purchase_scenario?.loan?.fundingFee,
+    packet.purchase_scenario?.loan?.funding_fee
+  );
+
+  if (fundingFee) {
+    if (typeof fundingFee === "object") {
+      const feeAmount = pickFirst(fundingFee.amount, fundingFee.fundingFee);
+      const feePct = pickFirst(fundingFee.feePct, fundingFee.fee_pct);
+      const exempt = fundingFee.exempt === true;
+
+      lines.push("Numbers:");
+      lines.push(
+        exempt
+          ? "- VA funding fee: likely exempt based on provided profile signals, but confirm with COE/lender."
+          : `- Estimated VA funding fee: ${money(feeAmount)}${feePct ? ` (${pct(feePct)})` : ""}.`
+      );
+
+      if (packet.purchase_scenario?.loan?.estimatedLoanWithFinancedFundingFee) {
+        lines.push(
+          `- Estimated loan if financed: ${money(packet.purchase_scenario.loan.estimatedLoanWithFinancedFundingFee)}.`
+        );
+      }
+
+      lines.push("");
+    } else {
+      lines.push("Numbers:");
+      lines.push(`- VA funding fee: ${money(fundingFee)}.`);
+      lines.push("");
+    }
+  }
+
+  const keyPoints = Array.isArray(packet.key_points)
+    ? packet.key_points
+    : Array.isArray(packet.keyPoints)
+      ? packet.keyPoints
+      : [];
+
+  if (keyPoints.length) {
+    lines.push("Why it matters:");
+    keyPoints.slice(0, 4).forEach((point) => {
+      lines.push(`- ${point}`);
+    });
+    lines.push("");
+  } else {
+    lines.push("Why it matters:");
+    lines.push("- Eligible VA borrowers can often buy with $0 down.");
+    lines.push("- VA Loans do not require monthly PMI.");
+    lines.push("- Closing costs, funding-fee status, appraisal/property condition, and occupancy still matter.");
+    lines.push("");
+  }
+
+  const risks = Array.isArray(packet.risks) ? packet.risks : [];
+  if (risks.length) {
+    lines.push("Risks:");
+    risks.slice(0, 4).forEach((risk) => {
+      lines.push(`- ${risk}`);
+    });
+    lines.push("");
+  } else {
+    lines.push("Risk:");
+    lines.push("- Approval does not mean the decision is good. The plan still has to survive PCS timeline, reserves, resale/rent-out fallback, and monthly cash flow.");
+    lines.push("");
+  }
+
+  const nextSteps = Array.isArray(packet.next_steps)
+    ? packet.next_steps
+    : Array.isArray(packet.nextSteps)
+      ? packet.nextSteps
+      : [];
+
+  lines.push("Next move:");
+  if (nextSteps.length) {
+    nextSteps.slice(0, 3).forEach((step) => {
+      lines.push(`- ${step}`);
+    });
+  } else {
+    lines.push("- Confirm COE and funding-fee status.");
+    lines.push("- Estimate all-in payment and cash-to-close.");
+    lines.push("- Compare payment to BAH, income, expenses, reserves, and PCS timeline.");
+  }
+
+  return lines.join("\n");
 }
 
 // ============================================================
-// //#15 OPENAI
+// //#17 FALLBACK REPLIES
+// ============================================================
+
+function buildFallbackReply({ intent, normalizedProfile, deterministic }) {
+  const packet = deterministic?.public || {};
+  const firstName = safeStr(
+    normalizedProfile?.first_name || deriveFirstName(normalizedProfile?.full_name)
+  );
+
+  if (intent === "va_loan") {
+    return [
+      "BLUF: A VA Loan can be powerful, but it still needs a payment, timeline, reserve, and exit-strategy test.",
+      "",
+      "Why: eligible borrowers can often use $0 down and VA Loans do not require monthly PMI, but closing costs, funding-fee status, property condition, appraisal, and occupancy rules still matter.",
+      "",
+      "Risk: approval does not mean the decision is good. A PCS timeline, thin reserves, high payment, or weak exit plan can turn a technically approved loan into a bad move.",
+      "",
+      "Next move: confirm COE and funding-fee status, estimate the all-in payment, then compare it to BAH, total income, monthly expenses, cash reserves, and expected time on station."
+    ].join("\n");
+  }
+
+  if (intent === "compensation") {
+    return [
+      `BLUF: ${firstName ? `${firstName}, ` : ""}I need rank, years of service, dependent status, and BAH ZIP/base to calculate the compensation picture cleanly.`,
+      "",
+      "Once those are loaded, I can estimate Base Pay, BAS, BAH, VA disability context, and total monthly planning income."
+    ].join("\n");
+  }
+
+  if (intent === "mortgage_explanation") {
+    return [
+      "BLUF: I can estimate the mortgage once I have price, down payment, APR, term, taxes, insurance, HOA, and loan type.",
+      "",
+      "For PCS planning, the all-in monthly payment matters more than principal and interest alone."
+    ].join("\n");
+  }
+
+  if (intent === "housing_affordability" || intent === "rent_vs_buy") {
+    return [
+      "BLUF: Buying power is not just what a lender approves. The better test is payment versus BAH, income, expenses, reserves, PCS timeline, and exit strategy.",
+      "",
+      "Next move: load income, projected price, expenses, savings/down payment, credit score, and expected time on station."
+    ].join("\n");
+  }
+
+  if (packet?.verdict?.bluf) {
+    return packet.verdict.bluf;
+  }
+
+  return [
+    "BLUF: Amy is online, but I need a little more context to give the sharp answer.",
+    "",
+    "I can help with military compensation, VA Loan strategy, mortgage estimates, affordability, PCS rent-vs-buy decisions, and dashboard interpretation."
+  ].join("\n");
+}
+
+// ============================================================
+// //#18 STRUCTURED ANSWER
+// ============================================================
+
+function buildStructuredAnswerFromText({
+  reply,
+  deterministic,
+  normalizedProfile,
+  intent
+}) {
+  const packet = deterministic?.public || {};
+  const vaLoan = packet.va_loan || null;
+
+  const numbers = {};
+
+  if (packet.compensation?.totalMonthly) {
+    numbers.total_monthly_compensation = packet.compensation.totalMonthly;
+  }
+
+  if (packet.compensation?.basePay) numbers.base_pay = packet.compensation.basePay;
+  if (packet.compensation?.bah) numbers.bah = packet.compensation.bah;
+  if (packet.compensation?.bas) numbers.bas = packet.compensation.bas;
+  if (packet.compensation?.va) numbers.va_disability_context = packet.compensation.va;
+
+  if (packet.mortgage?.allIn || packet.mortgage?.monthly) {
+    numbers.estimated_housing_payment = packet.mortgage.allIn || packet.mortgage.monthly;
+  }
+
+  if (packet.affordability?.housingRatio !== undefined) {
+    numbers.housing_ratio = packet.affordability.housingRatio;
+  }
+
+  if (packet.affordability?.residual !== undefined) {
+    numbers.monthly_residual = packet.affordability.residual;
+  }
+
+  const vaFundingFee = pickFirst(
+    vaLoan?.funding_fee,
+    vaLoan?.fundingFee,
+    vaLoan?.purchase_scenario?.loan?.fundingFee,
+    vaLoan?.purchase_scenario?.loan?.funding_fee
+  );
+
+  if (vaFundingFee) {
+    if (typeof vaFundingFee === "object") {
+      numbers.va_funding_fee = pickFirst(
+        vaFundingFee.amount,
+        vaFundingFee.fundingFee,
+        vaFundingFee.fee
+      );
+      numbers.va_funding_fee_pct = pickFirst(
+        vaFundingFee.feePct,
+        vaFundingFee.fee_pct,
+        vaFundingFee.percent
+      );
+      numbers.va_funding_fee_exempt = vaFundingFee.exempt === true;
+    } else {
+      numbers.va_funding_fee = vaFundingFee;
+    }
+  }
+
+  const warnings = [];
+
+  if (Array.isArray(packet.verdict?.risks)) {
+    warnings.push(...packet.verdict.risks);
+  }
+
+  if (Array.isArray(vaLoan?.risks)) {
+    warnings.push(...vaLoan.risks);
+  }
+
+  const nextSteps = [];
+
+  if (intent === "va_loan") {
+    if (Array.isArray(vaLoan?.next_steps)) {
+      nextSteps.push(...vaLoan.next_steps);
+    } else if (Array.isArray(vaLoan?.nextSteps)) {
+      nextSteps.push(...vaLoan.nextSteps);
+    }
+
+    if (!nextSteps.length) {
+      nextSteps.push(
+        "Confirm COE and funding-fee status.",
+        "Estimate all-in payment and cash-to-close.",
+        "Compare payment against BAH, income, expenses, reserves, and PCS timeline."
+      );
+    }
+  } else if (Array.isArray(packet.verdict?.next_steps)) {
+    nextSteps.push(...packet.verdict.next_steps);
+  } else if (packet.next_action) {
+    nextSteps.push(packet.next_action);
+  }
+
+  const followUp = buildFollowUpQuestion({
+    intent,
+    packet,
+    normalizedProfile
+  });
+
+  return stripEmpty({
+    summary: safeStr(reply),
+    numbers,
+    warnings: [...new Set(warnings)].slice(0, 6),
+    next_steps: [...new Set(nextSteps)].slice(0, 6),
+    follow_up_question: followUp,
+    intent,
+    profile_name: normalizedProfile?.full_name || normalizedProfile?.first_name || null
+  });
+}
+
+function buildFollowUpQuestion({ intent, packet, normalizedProfile }) {
+  if (intent === "va_loan") {
+    const vaLoan = packet?.va_loan || {};
+    const exempt =
+      vaLoan?.funding_fee?.exempt === true ||
+      vaLoan?.profile_signals?.likely_funding_fee_exempt === true ||
+      normalizedProfile?.funding_fee_exempt === true ||
+      normalizedProfile?.va_disability > 0;
+
+    if (exempt) {
+      return "Want me to compare the VA payment against your BAH, monthly expenses, and PCS timeline?";
+    }
+
+    return "Want me to estimate the VA funding fee and show how it changes your loan balance?";
+  }
+
+  if (intent === "compensation") {
+    return "Want me to compare this monthly compensation against a target home payment?";
+  }
+
+  if (intent === "housing_affordability") {
+    return "Want me to turn this into a safer target home-price range?";
+  }
+
+  if (intent === "rent_vs_buy") {
+    return "Want me to run this as a PCS rent-vs-buy decision using your expected time on station?";
+  }
+
+  return "Want me to run the numbers against your PCS timeline and housing budget?";
+}
+
+// ============================================================
+// //#19 OPENAI PROMPTS
 // ============================================================
 
 function buildSystemPrompt({ profileSummary, deterministic }) {
   const packet = deterministic?.public || {};
 
   return [
-    "You are Amy, PCSUnited’s AI Concierge, powered by TheWing.ai.",
-    "PCSUnited is the trusted military PCS, housing, and financial-readiness brand.",
-    "TheWing.ai is the software intelligence layer behind calculations, profile loading, decision logic, and concierge guidance.",
+    "You are Amy, the PCSUnited AI Concierge powered by TheWing.ai.",
     "",
     "Your job:",
-    "- Help military members understand pay, BAH, BAS, VA disability, retirement, affordability, mortgage estimates, PCS housing strategy, dashboard readiness, and next steps.",
-    "- Be BLUF-first.",
-    "- Explain numbers clearly.",
-    "- Recommend practical next steps.",
-    "- Do not sound like generic ChatGPT.",
-    "",
-    "Style:",
-    "- Calm, confident, military-aware, practical, warm.",
-    "- Short paragraphs.",
-    "- No fluff.",
-    "- Do not over-disclaim.",
-    "- Do not be salesy.",
+    "- Help military members and families understand PCS housing decisions.",
+    "- Explain military compensation, BAH, BAS, VA disability context, mortgage estimates, affordability, rent-vs-buy decisions, VA Loan strategy, and PCS risk.",
+    "- Keep answers practical, concise, and member-safe.",
     "",
     "Hard rules:",
-    "- Never invent pay, BAH, mortgage, approval, or affordability numbers.",
-    "- If a deterministic truth packet is provided, trust it over your own math.",
-    "- Do not perform legal, tax, or lending approval advice.",
-    "- Do not guarantee loan approval, appreciation, rent growth, or investment outcomes.",
-    "- If data is missing, say exactly what is missing and ask for the smallest next input.",
-    "- If the user asks about their profile, answer only from verified/profile context.",
+    "- Never invent or change the member’s name.",
+    "- Never invent rank, pay, BAH, VA disability, funding-fee exemption, eligibility, approval, entitlement, or loan terms.",
+    "- Never claim the user is approved for a loan.",
+    "- Never claim the user is eligible for a VA Loan unless the deterministic packet clearly supports that.",
+    "- Never claim funding-fee exemption is guaranteed. Say it must be confirmed on COE/lender documentation.",
+    "- Use deterministic packets as the source of truth.",
+    "- If data is missing, say what is missing and what to do next.",
+    "- Do not give legal, tax, underwriting, or lender approval as fact.",
     "",
-    "Preferred answer shape:",
-    "BLUF: one clear recommendation.",
-    "Why: explain the most important numbers.",
-    "Risk: identify the biggest risk.",
-    "Next move: one practical action.",
+    "Tone:",
+    "- Clear, confident, warm, and direct.",
+    "- Use BLUF first.",
+    "- Avoid generic fluff.",
+    "- Explain risk like a smart PCS advisor.",
     "",
-    "Profile summary available:",
-    profileSummary || "No profile summary available.",
+    `Profile summary:\n${JSON.stringify(profileSummary || {}, null, 2)}`,
     "",
-    "Truth packet available:",
-    JSON.stringify(packet || {}, null, 2)
+    `Compensation packet available:\n${JSON.stringify(packet?.compensation || {}, null, 2)}`,
+    "",
+    `Mortgage packet available:\n${JSON.stringify(packet?.mortgage || {}, null, 2)}`,
+    "",
+    `Affordability packet available:\n${JSON.stringify(packet?.affordability || {}, null, 2)}`,
+    "",
+    `VA Loan packet available:\n${JSON.stringify(packet?.va_loan || {}, null, 2)}`,
+    "",
+    `Verdict packet available:\n${JSON.stringify(packet?.verdict || {}, null, 2)}`
   ].join("\n");
 }
 
@@ -2610,41 +3393,32 @@ function buildUserPayload({
   mergedContext
 }) {
   return {
-    user_message: message,
-    email: email || null,
+    message,
+    email,
     intent,
-    agent: {
-      name: "Amy",
-      display_name: "PCSUnited AI Concierge",
-      brand: "PCSUnited",
-      powered_by: "TheWing.ai"
-    },
+    profile: stripSensitiveProfile(normalizedProfile),
+    truth_packet: deterministic?.public || {},
+    va_loan_packet: deterministic?.public?.va_loan || null,
+    context_used: deterministic?.context_used || {},
     behavior_rules: {
-      bluf_first: true,
-      use_truth_packet_over_model_math: true,
-      do_not_fabricate_numbers: true,
-      concise_by_default: true,
-      explain_numbers_plainly: true
+      use_truth_packet_first: true,
+      use_va_loan_packet_for_va_questions: true,
+      do_not_invent_or_change_member_name: true,
+      do_not_invent_compensation: true,
+      do_not_invent_va_loan_eligibility: true,
+      do_not_invent_funding_fee_exemption: true,
+      do_not_claim_loan_approval: true,
+      ask_for_missing_inputs_when_needed: true
     },
-    member_profile: stripSensitiveProfile(normalizedProfile),
-    truth_packet: deterministic?.public || null,
-    dashboard_context_present: Boolean(
-      Object.keys(mergedContext?.fad || {}).length ||
-        Object.keys(mergedContext?.kpi_overrides || {}).length
-    ),
-    output_request:
-      "Return a polished conversational answer only. Do not return JSON unless the user explicitly asks for JSON."
+    context_keys: Object.keys(mergedContext || {})
   };
 }
 
 async function callOpenAI({ systemPrompt, userPayload, model }) {
   if (!OPENAI_API_KEY) return "";
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25000);
-
   try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
@@ -2653,7 +3427,7 @@ async function callOpenAI({ systemPrompt, userPayload, model }) {
       body: JSON.stringify({
         model,
         temperature: 0.35,
-        max_tokens: 850,
+        max_tokens: 900,
         messages: [
           {
             role: "system",
@@ -2661,308 +3435,77 @@ async function callOpenAI({ systemPrompt, userPayload, model }) {
           },
           {
             role: "user",
-            content: JSON.stringify(userPayload)
+            content: JSON.stringify(userPayload, null, 2)
           }
         ]
-      }),
-      signal: controller.signal
+      })
     });
 
-    const text = await res.text();
-    const data = safeJsonParse(text);
-
-    if (!res.ok) {
-      console.warn("OpenAI call failed:", res.status, text);
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      console.warn("OpenAI call failed:", response.status, text);
       return "";
     }
 
+    const data = await response.json();
     return safeStr(data?.choices?.[0]?.message?.content);
   } catch (err) {
-    console.warn("OpenAI exception:", err?.message || err);
+    console.warn("OpenAI call failed:", err?.message || err);
     return "";
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
 // ============================================================
-// //#16 FALLBACK REPLIES
+// //#20 PROFILE SUMMARY / PRIVACY
 // ============================================================
 
-function buildFallbackReply({ intent, normalizedProfile, deterministic }) {
-  const packet = deterministic?.public || {};
-  const missing = packet.missing_inputs || [];
-  const name = firstName(normalizedProfile?.full_name);
-
-  if (intent === "compensation") {
-    if (missing.length) {
-      return `I can explain your PCSUnited compensation${name ? `, ${name}` : ""}, but I’m missing ${missing
-        .slice(0, 3)
-        .join(", ")}. Once those are loaded, I can calculate Base Pay, BAS, BAH, and total monthly income.`;
-    }
-
-    return "I can help explain Base Pay, BAS, BAH, VA disability, retirement pay, and total monthly compensation once your member profile is loaded.";
-  }
-
-  if (intent === "housing_affordability") {
-    if (missing.length) {
-      return `BLUF: I need a few more inputs before I can give a reliable affordability read. The biggest missing pieces are ${missing
-        .slice(0, 3)
-        .join(", ")}.`;
-    }
-
-    return "BLUF: I can help judge affordability by comparing your total monthly income, BAH, monthly expenses, target home price, down payment, and estimated mortgage payment.";
-  }
-
-  return [
-    `I’m working${name ? `, ${name}` : ""}.`,
-    "I can help with PCS housing strategy, military pay, BAH, mortgage estimates, dashboard readiness, and rent-vs-buy decisions.",
-    "Ask me something like: “What is my Base Pay, BAS, BAH, and total monthly compensation?”"
-  ].join(" ");
-}
-
-// ============================================================
-// //#17 STRUCTURED ANSWER
-// ============================================================
-
-function buildStructuredAnswerFromText({
-  reply,
-  deterministic,
-  normalizedProfile,
-  intent
-}) {
-  const packet = deterministic?.public || {};
-  const comp = packet.compensation || null;
-  const mortgage = packet.mortgage || null;
-  const affordability = packet.affordability || null;
-  const verdict = packet.verdict || null;
-  const nextAction = packet.next_action || null;
-
-  const numbers = [];
-
-  if (comp?.total_monthly) {
-    numbers.push({
-      label: "Total Monthly Compensation",
-      value: money(comp.total_monthly),
-      raw: comp.total_monthly
-    });
-  }
-
-  if (comp?.base_pay) {
-    numbers.push({
-      label: "Base Pay",
-      value: money(comp.base_pay),
-      raw: comp.base_pay
-    });
-  }
-
-  if (comp?.bas) {
-    numbers.push({
-      label: "BAS",
-      value: money(comp.bas),
-      raw: comp.bas
-    });
-  }
-
-  if (comp?.bah) {
-    numbers.push({
-      label: "BAH",
-      value: money(comp.bah),
-      raw: comp.bah
-    });
-  }
-
-  if (comp?.va_disability_pay) {
-    numbers.push({
-      label: "VA Disability",
-      value: money(comp.va_disability_pay),
-      raw: comp.va_disability_pay
-    });
-  }
-
-  if (mortgage?.all_in_monthly) {
-    numbers.push({
-      label: "Estimated All-In Housing Payment",
-      value: money(mortgage.all_in_monthly),
-      raw: mortgage.all_in_monthly
-    });
-  }
-
-  if (
-    affordability?.housing_ratio !== undefined &&
-    affordability?.housing_ratio !== null
-  ) {
-    numbers.push({
-      label: "Housing Ratio",
-      value: pct(affordability.housing_ratio),
-      raw: affordability.housing_ratio
-    });
-  }
-
-  if (
-    affordability?.backend_ratio !== undefined &&
-    affordability?.backend_ratio !== null
-  ) {
-    numbers.push({
-      label: "Back-End Ratio",
-      value: pct(affordability.backend_ratio),
-      raw: affordability.backend_ratio
-    });
-  }
-
-  const risks = [];
-
-  if (verdict?.status === "CAUTION") {
-    risks.push("The plan may work, but the monthly buffer is tight.");
-  }
-
-  if (verdict?.status === "NO-GO") {
-    risks.push("The current housing scenario appears too aggressive for the loaded numbers.");
-  }
-
-  if (packet.missing_inputs?.length) {
-    risks.push(`Missing inputs: ${packet.missing_inputs.slice(0, 4).join(", ")}.`);
-  }
-
-  const recommendations = [];
-
-  if (nextAction?.message) recommendations.push(nextAction.message);
-
-  if (intent === "housing_affordability" && !mortgage?.all_in_monthly) {
-    recommendations.push(
-      "Add a target home price to generate a sharper mortgage and readiness estimate."
-    );
-  }
-
-  if (intent === "compensation" && comp?.total_monthly) {
-    recommendations.push(
-      "Use this income as the baseline before choosing a safe housing cap."
-    );
-  }
-
-  return {
-    bluf:
-      verdict?.bluf ||
-      firstSentence(reply) ||
-      "Amy has a first-pass recommendation.",
-    summary: reply,
-    status: verdict?.status || null,
-    grade: verdict?.grade || null,
-    numbers,
-    risks,
-    recommendations,
-    next_steps: recommendations.slice(0, 3),
-    follow_up_question: buildFollowUpQuestion({
-      intent,
-      missing: packet.missing_inputs || [],
-      mortgage
-    }),
-    profile_used: stripSensitiveProfile(normalizedProfile)
-  };
-}
-
-function firstSentence(text) {
-  const s = safeStr(text);
-  if (!s) return "";
-  const match = s.match(/^(.+?[.!?])(\s|$)/);
-  return match ? match[1] : s.slice(0, 180);
-}
-
-function buildFollowUpQuestion({ intent, missing, mortgage }) {
-  if (missing?.length) {
-    return `Want to add ${missing[0]} so I can tighten the answer?`;
-  }
-
-  if (intent === "housing_affordability" && mortgage?.all_in_monthly) {
-    return "Want me to compare this payment against your BAH and monthly expenses?";
-  }
-
-  if (intent === "compensation") {
-    return "Want me to turn this income into a safe housing price range?";
-  }
-
-  return "Want me to turn this into a clear next-step plan?";
-}
-
-// ============================================================
-// //#18 PROFILE / OUTPUT HELPERS
-// ============================================================
-
-function buildProfileSummary(profile, deterministic) {
-  const p = profile || {};
+function buildProfileSummary(normalizedProfile, deterministic) {
+  const p = normalizedProfile || {};
   const comp = deterministic?.public?.compensation || null;
+  const mortgage = deterministic?.public?.mortgage || null;
+  const affordability = deterministic?.public?.affordability || null;
 
-  const parts = [];
-
-  if (p.full_name) parts.push(`Name: ${p.full_name}`);
-  if (p.email) parts.push(`Email: ${p.email}`);
-  if (p.mode) parts.push(`Status: ${p.mode}`);
-  if (p.rank_paygrade || p.rank) parts.push(`Rank: ${p.rank_paygrade || p.rank}`);
-  if (p.yos !== undefined) parts.push(`YOS: ${p.yos}`);
-
-  if (p.family !== undefined) {
-    parts.push(`Dependents: ${p.family ? "Yes" : "No"}`);
-  }
-
-  if (p.family_size !== undefined) parts.push(`Family Size: ${p.family_size}`);
-  if (p.base) parts.push(`Base: ${p.base}`);
-  if (p.zip) parts.push(`ZIP: ${p.zip}`);
-
-  if (p.va_disability !== undefined) {
-    parts.push(`VA Disability: ${p.va_disability}%`);
-  }
-
-  if (p.projected_home_price) {
-    parts.push(`Target Home Price: ${money(p.projected_home_price)}`);
-  }
-
-  if (p.monthly_expenses) {
-    parts.push(`Monthly Expenses: ${money(p.monthly_expenses)}`);
-  }
-
-  if (p.income) {
-    parts.push(`Saved Monthly Income: ${money(p.income)}`);
-  }
-
-  if (p.debt) {
-    parts.push(`Saved Monthly Debt: ${money(p.debt)}`);
-  }
-
-  if (p.downpayment) {
-    parts.push(`Down Payment: ${money(p.downpayment)}`);
-  }
-
-  if (p.credit_score) {
-    parts.push(`Credit Score: ${p.credit_score}`);
-  }
-
-  if (p.bedrooms) {
-    parts.push(`Bedrooms: ${p.bedrooms}`);
-  }
-
-  if (comp?.total_monthly) {
-    parts.push(`Calculated Monthly Compensation: ${money(comp.total_monthly)}`);
-  }
-
-  return [...new Set(parts)].join(" | ");
+  return stripEmpty({
+    name: p.full_name || p.first_name || null,
+    first_name: p.first_name || deriveFirstName(p.full_name),
+    rank: rankShort(p.rank_paygrade || p.rank) || p.rank_paygrade || p.rank,
+    paygrade: p.rank_paygrade || null,
+    years_of_service: p.yos,
+    base: p.base,
+    zip: p.zip,
+    family: p.family,
+    family_size: p.family_size,
+    military_status: p.mode || p.military_status,
+    va_disability: p.va_disability,
+    likely_funding_fee_exempt: p.funding_fee_exempt,
+    projected_home_price: p.projected_home_price,
+    monthly_expenses: p.monthly_expenses,
+    credit_score: p.credit_score,
+    compensation_total_monthly: comp?.totalMonthly,
+    estimated_housing_payment: mortgage?.allIn || mortgage?.monthly,
+    affordability_grade: affordability?.grade,
+    affordability_status: affordability?.status
+  });
 }
 
 function stripSensitiveProfile(profile) {
   const p = profile || {};
 
   return stripEmpty({
+    email: p.email ? maskEmail(p.email) : undefined,
     full_name: p.full_name,
-    first_name: firstName(p.full_name),
-    mode: p.mode,
-    military_status: p.military_status,
+    first_name: p.first_name,
     rank: p.rank,
     rank_paygrade: p.rank_paygrade,
     yos: p.yos,
-    family: p.family,
-    family_size: p.family_size,
+    mode: p.mode,
+    military_status: p.military_status,
     base: p.base,
     zip: p.zip,
+    family: p.family,
+    family_size: p.family_size,
     va_disability: p.va_disability,
+    funding_fee_exempt: p.funding_fee_exempt,
     projected_home_price: p.projected_home_price,
     monthly_expenses: p.monthly_expenses,
     income: p.income,
@@ -2971,6 +3514,18 @@ function stripSensitiveProfile(profile) {
     savings: p.savings,
     credit_score: p.credit_score,
     bedrooms: p.bedrooms,
-    cityKey: p.cityKey
+    bathrooms: p.bathrooms,
+    cityKey: p.cityKey,
+    loanType: p.loanType,
+    termYears: p.termYears
   });
+}
+
+function maskEmail(email) {
+  const e = normalizeEmail(email);
+  if (!e) return "";
+  const [local, domain] = e.split("@");
+  if (!local || !domain) return e;
+  const visible = local.length <= 2 ? local[0] || "" : local.slice(0, 2);
+  return `${visible}${"*".repeat(Math.max(1, local.length - visible.length))}@${domain}`;
 }
