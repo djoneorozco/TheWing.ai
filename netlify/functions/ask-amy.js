@@ -1,22 +1,25 @@
 // netlify/functions/ask-amy.js
 // ============================================================
 // TheWing.ai • PCSUnited AI Concierge — Ask Amy
-// v1.4.0 • ES MODULE FULL REPLACEMENT
+// v1.2.0
 //
 // PURPOSE
 // - Member-facing PCSUnited AI Concierge endpoint
-// - Compatible with package.json: { "type": "module" }
-// - Reads PCSUnited profile/bridge/dashboard context from frontend
-// - Enriches from Supabase when email exists
-// - Uses _share/compensation-context.js for Base Pay + BAS + BAH + VA
-// - Uses _share/mortgage-engine.js for mortgage math when available
-// - Uses _share/va-loans.js for VA Loan education, funding-fee guidance,
-//   entitlement logic, appraisal/inspection guidance, and PCS buyer strategy
-// - Uses OpenAI only as the conversational explanation layer
+// - Powered by TheWing.ai intelligence layer
+// - Reads profile/bridge/dashboard context from PCSUnited frontend
+// - ALWAYS enriches from Supabase when email exists
+// - Uses deterministic engines when available
+// - Uses compensation-context.js for Base Pay + BAS + BAH + VA
+// - Uses OpenAI only as explanation/conversation layer
+//
+// CORE IDEA
+// - PCSUnited = trusted public military brand
+// - TheWing.ai = private software intelligence layer
+// - Amy = PCSUnited AI Concierge powered by TheWing.ai
 //
 // CLIENT
-// - POST https://thewing.netlify.app/api/ask-amy
-// - POST /.netlify/functions/ask-amy
+// POST https://thewing.netlify.app/api/ask-amy
+// POST /.netlify/functions/ask-amy
 //
 // REQUIRED ENV
 // - OPENAI_API_KEY
@@ -25,25 +28,72 @@
 // - SUPABASE_URL
 // - SUPABASE_SERVICE_KEY
 // - SUPABASE_SERVICE_ROLE_KEY
-// - OPENAI_MODEL
+//
 // ============================================================
 
 /* eslint-disable no-console */
 
 // ============================================================
-// //#1 IMPORTS — ES MODULE ONLY
+// //#1 IMPORTS
 // ============================================================
 
-import { createClient } from "@supabase/supabase-js";
-import * as compensationContext from "./_share/compensation-context.js";
-import * as mortgageEngine from "./_share/mortgage-engine.js";
-import * as vaLoans from "./_share/va-loans.js";
+let createClient = null;
+
+try {
+  ({ createClient } = require("@supabase/supabase-js"));
+} catch (_) {
+  createClient = null;
+}
+
+let pathToFileURL = null;
+let nodePath = null;
+
+try {
+  ({ pathToFileURL } = require("url"));
+  nodePath = require("path");
+} catch (_) {
+  pathToFileURL = null;
+  nodePath = null;
+}
+
+const asyncModuleCache = new Map();
+
+const shared = {
+  compensationContext: safeRequire("./_share/compensation-context.js"),
+  compensationContextPath: "./_share/compensation-context.js",
+  profileNormalizer: safeRequire("./_share/profile-normalizer.js"),
+  payEngine: safeRequire("./_share/pay-engine.js"),
+  mortgageEngine: safeRequire("./_share/mortgage-engine.js"),
+  affordabilityEngine: safeRequire("./_share/affordability-engine.js"),
+  decisionRules: safeRequire("./_share/decision-rules.js"),
+  response: safeRequire("./_share/response.js"),
+};
 
 // ============================================================
 // //#2 CONFIG
 // ============================================================
 
-const VERSION = "1.4.0";
+const VERSION = "1.2.0";
+
+const ALLOW_ORIGINS = [
+  "https://pcsunited.com",
+  "https://www.pcsunited.com",
+  "https://pcsunited.netlify.app",
+  "https://www.pcsunited.netlify.app",
+  "https://pcsunited-com-28346d.webflow.io",
+  "https://www.pcsunited-com-28346d.webflow.io",
+  "https://pcsunited.webflow.io",
+  "https://www.pcsunited.webflow.io",
+  "https://thewing.ai",
+  "https://www.thewing.ai",
+  "https://thewing.netlify.app",
+  "https://www.thewing.netlify.app",
+  "http://localhost:8888",
+  "http://localhost:3000",
+  "http://127.0.0.1:8888",
+  "http://127.0.0.1:3000",
+];
+
 const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const DEFAULT_RESPONSE_MODE = "member_guidance";
 const MAX_MESSAGE_LENGTH = 5000;
@@ -56,40 +106,15 @@ const SUPABASE_SERVICE_KEY =
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 
-const ALLOW_ORIGINS = [
-  "https://pcsunited.com",
-  "https://www.pcsunited.com",
-
-  "https://pcsunited.netlify.app",
-  "https://www.pcsunited.netlify.app",
-
-  "https://pcsunited-com-28346d.webflow.io",
-  "https://www.pcsunited-com-28346d.webflow.io",
-
-  "https://pcsunited.webflow.io",
-  "https://www.pcsunited.webflow.io",
-
-  "https://thewing.ai",
-  "https://www.thewing.ai",
-
-  "https://thewing.netlify.app",
-  "https://www.thewing.netlify.app",
-
-  "http://localhost:8888",
-  "http://localhost:3000",
-  "http://127.0.0.1:8888",
-  "http://127.0.0.1:3000"
-];
-
 // ============================================================
-// //#3 NETLIFY HANDLER — ES MODULE EXPORT
+// //#3 NETLIFY HANDLER
 // ============================================================
 
-export async function handler(event) {
+exports.handler = async function handler(event) {
   const origin = getHeader(event, "origin");
 
   if (event.httpMethod === "OPTIONS") {
-    return respond(200, { ok: true, version: VERSION }, origin);
+    return respond(200, { ok: true }, origin);
   }
 
   if (event.httpMethod !== "POST") {
@@ -98,7 +123,7 @@ export async function handler(event) {
       {
         ok: false,
         error: "Method not allowed. Use POST.",
-        version: VERSION
+        version: VERSION,
       },
       origin
     );
@@ -124,51 +149,53 @@ export async function handler(event) {
         {
           ok: false,
           error: "Missing message.",
-          version: VERSION
+          version: VERSION,
         },
         origin
       );
     }
 
     const email = getEmailFromPayload(body);
+
     const clientContext = collectClientContext(body);
+
     const supabaseContext = await loadSupabaseMemberContext(email);
 
     const mergedContext = mergeDeep(
       {},
-      clientContext || {},
+      clientContext,
       supabaseContext || {},
       {
         profile: mergeDeep(
           {},
-          clientContext?.profile || {},
-          supabaseContext?.profile || {}
+          supabaseContext?.profile || {},
+          clientContext?.profile || {}
         ),
         bridge: mergeDeep(
           {},
-          clientContext?.bridge || {},
-          supabaseContext?.bridge || {}
+          supabaseContext?.bridge || {},
+          clientContext?.bridge || {}
         ),
         financial_intake: mergeDeep(
           {},
-          clientContext?.financial_intake || {},
-          supabaseContext?.financial_intake || {}
+          supabaseContext?.financial_intake || {},
+          clientContext?.financial_intake || {}
         ),
         kpi_overrides: mergeDeep(
           {},
-          clientContext?.kpi_overrides || {},
-          supabaseContext?.kpi_overrides || {}
+          supabaseContext?.kpi_overrides || {},
+          clientContext?.kpi_overrides || {}
         ),
         user_financial_inputs: mergeDeep(
           {},
-          clientContext?.user_financial_inputs || {},
-          supabaseContext?.user_financial_inputs || {}
+          supabaseContext?.user_financial_inputs || {},
+          clientContext?.user_financial_inputs || {}
         ),
         user_aiou_inputs: mergeDeep(
           {},
-          clientContext?.user_aiou_inputs || {},
-          supabaseContext?.user_aiou_inputs || {}
-        )
+          supabaseContext?.user_aiou_inputs || {},
+          clientContext?.user_aiou_inputs || {}
+        ),
       }
     );
 
@@ -181,7 +208,7 @@ export async function handler(event) {
       email,
       mergedContext,
       normalizedProfile,
-      debug
+      debug,
     });
 
     const profileSummary = buildProfileSummary(normalizedProfile, deterministic);
@@ -190,15 +217,15 @@ export async function handler(event) {
       message,
       intent,
       normalizedProfile,
-      deterministic
+      deterministic,
     });
 
     if (directReply && !shouldUseOpenAI(message, intent, deterministic)) {
-      const answer = buildStructuredAnswerFromText({
+      const structured = buildStructuredAnswerFromText({
         reply: directReply,
         deterministic,
         normalizedProfile,
-        intent
+        intent,
       });
 
       return respond(
@@ -213,20 +240,12 @@ export async function handler(event) {
           mode: DEFAULT_RESPONSE_MODE,
           intent,
           reply: directReply,
-          answer,
+          answer: structured,
           profile_used: stripSensitiveProfile(normalizedProfile),
           truth_packet: deterministic.public,
           context_used: deterministic.context_used,
           latency_ms: Date.now() - startedAt,
-          ...(debug
-            ? {
-                debug: {
-                  ...deterministic.debug,
-                  used_openai: false,
-                  supabase_loaded: Boolean(supabaseContext?.supabase_loaded)
-                }
-              }
-            : {})
+          ...(debug ? { debug: deterministic.debug } : {}),
         },
         origin
       );
@@ -237,7 +256,7 @@ export async function handler(event) {
     if (OPENAI_API_KEY) {
       const systemPrompt = buildSystemPrompt({
         profileSummary,
-        deterministic
+        deterministic,
       });
 
       const userPayload = buildUserPayload({
@@ -246,13 +265,13 @@ export async function handler(event) {
         intent,
         normalizedProfile,
         deterministic,
-        mergedContext
+        mergedContext,
       });
 
       aiReply = await callOpenAI({
         systemPrompt,
         userPayload,
-        model: DEFAULT_MODEL
+        model: DEFAULT_MODEL,
       });
     }
 
@@ -260,9 +279,10 @@ export async function handler(event) {
       aiReply =
         directReply ||
         buildFallbackReply({
+          message,
           intent,
           normalizedProfile,
-          deterministic
+          deterministic,
         });
     }
 
@@ -270,7 +290,7 @@ export async function handler(event) {
       reply: aiReply,
       deterministic,
       normalizedProfile,
-      intent
+      intent,
     });
 
     return respond(
@@ -295,11 +315,11 @@ export async function handler(event) {
               debug: {
                 ...deterministic.debug,
                 model: OPENAI_API_KEY ? DEFAULT_MODEL : null,
-                used_openai: Boolean(OPENAI_API_KEY && aiReply),
-                supabase_loaded: Boolean(supabaseContext?.supabase_loaded)
-              }
+                used_openai: Boolean(OPENAI_API_KEY),
+                supabase_loaded: Boolean(supabaseContext?.supabase_loaded),
+              },
             }
-          : {})
+          : {}),
       },
       origin
     );
@@ -315,12 +335,12 @@ export async function handler(event) {
           process.env.NODE_ENV === "development"
             ? String(err?.message || err)
             : undefined,
-        version: VERSION
+        version: VERSION,
       },
       origin
     );
   }
-}
+};
 
 // ============================================================
 // //#4 RESPONSE / CORS HELPERS
@@ -336,7 +356,7 @@ function corsHeaders(origin) {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Max-Age": "86400",
     "Content-Type": "application/json",
-    Vary: "Origin"
+    Vary: "Origin",
   };
 }
 
@@ -344,24 +364,79 @@ function respond(statusCode, payload, origin) {
   return {
     statusCode,
     headers: corsHeaders(origin),
-    body: JSON.stringify(payload || {})
+    body: JSON.stringify(payload || {}),
   };
 }
 
 function getHeader(event, name) {
   const headers = event?.headers || {};
-  const target = String(name || "").toLowerCase();
+  const lower = String(name || "").toLowerCase();
 
-  for (const [key, value] of Object.entries(headers)) {
-    if (String(key).toLowerCase() === target) return value;
+  for (const [k, v] of Object.entries(headers)) {
+    if (String(k).toLowerCase() === lower) return v;
   }
 
   return "";
 }
 
 // ============================================================
-// //#5 GENERAL HELPERS
+// //#5 SAFE UTILS
 // ============================================================
+
+function safeRequire(relPath) {
+  try {
+    return require(relPath);
+  } catch (_) {
+    return null;
+  }
+}
+
+async function safeImport(relPath) {
+  if (!relPath) return null;
+
+  if (asyncModuleCache.has(relPath)) {
+    return asyncModuleCache.get(relPath);
+  }
+
+  try {
+    if (!pathToFileURL || !nodePath || typeof __dirname === "undefined") {
+      asyncModuleCache.set(relPath, null);
+      return null;
+    }
+
+    const absPath = nodePath.join(__dirname, relPath);
+    const mod = await import(pathToFileURL(absPath).href);
+    asyncModuleCache.set(relPath, mod);
+    return mod;
+  } catch (err) {
+    console.warn(`safeImport(${relPath}) failed:`, err?.message || err);
+    asyncModuleCache.set(relPath, null);
+    return null;
+  }
+}
+
+function getExportedFunction(mod, names = []) {
+  if (!mod) return null;
+
+  for (const name of names) {
+    if (typeof mod[name] === "function") return mod[name];
+    if (mod.default && typeof mod.default[name] === "function") {
+      return mod.default[name];
+    }
+  }
+
+  if (typeof mod === "function") return mod;
+  if (typeof mod.default === "function") return mod.default;
+
+  return null;
+}
+
+function unwrapModule(mod) {
+  if (!mod) return null;
+  return mod.default && typeof mod.default === "object"
+    ? { ...mod.default, ...mod }
+    : mod;
+}
 
 function safeJsonParse(raw) {
   try {
@@ -373,36 +448,32 @@ function safeJsonParse(raw) {
   }
 }
 
-function safeStr(value) {
-  return String(value ?? "").trim();
+function safeStr(x) {
+  return String(x ?? "").trim();
 }
 
-function normalizeEmail(value) {
-  const email = safeStr(value).toLowerCase();
+function normalizeEmail(x) {
+  const email = safeStr(x).toLowerCase();
   return email.includes("@") ? email : "";
 }
 
-function clean(value) {
-  return String(value ?? "").trim();
-}
+function num(x) {
+  if (x === null || x === undefined || x === "") return null;
 
-function num(value) {
-  if (value === null || value === undefined || value === "") return null;
-
-  if (typeof value === "string") {
-    const cleaned = value.replace(/[$,%\s,]/g, "");
+  if (typeof x === "string") {
+    const cleaned = x.replace(/[$,%\s,]/g, "");
     const n = Number(cleaned);
     return Number.isFinite(n) ? n : null;
   }
 
-  const n = Number(value);
+  const n = Number(x);
   return Number.isFinite(n) ? n : null;
 }
 
-function boolish(value, fallback = false) {
-  if (value === true || value === false) return value;
+function boolish(x) {
+  if (x === true || x === false) return x;
 
-  const s = safeStr(value).toLowerCase();
+  const s = safeStr(x).toLowerCase();
 
   if (
     [
@@ -414,9 +485,6 @@ function boolish(value, fallback = false) {
       "dependent",
       "dependents",
       "with dependents",
-      "with_dependents",
-      "family",
-      "married"
     ].includes(s)
   ) {
     return true;
@@ -430,64 +498,60 @@ function boolish(value, fallback = false) {
       "0",
       "without",
       "single",
-      "none",
       "without dependents",
-      "without_dependents"
     ].includes(s)
   ) {
     return false;
   }
 
-  if (typeof value === "number") return value > 0;
-
-  return fallback;
+  return Boolean(x);
 }
 
-function pickFirst(...values) {
-  for (const value of values) {
+function pickFirst(...vals) {
+  for (const v of vals) {
     if (
-      value !== undefined &&
-      value !== null &&
-      value !== "" &&
-      !(typeof value === "number" && !Number.isFinite(value))
+      v !== undefined &&
+      v !== null &&
+      v !== "" &&
+      !(typeof v === "number" && !Number.isFinite(v))
     ) {
-      return value;
+      return v;
     }
   }
 
   return null;
 }
 
-function money(value) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return "—";
+function money(n) {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return "—";
 
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0
-  }).format(n);
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(x);
+  } catch (_) {
+    return "$" + Math.round(x).toLocaleString("en-US");
+  }
 }
 
-function pct(value) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return "—";
-  return `${(n * 100).toFixed(1)}%`;
+function pct(n) {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return "—";
+  return `${(x * 100).toFixed(1)}%`;
 }
 
-function roundMoney(value) {
-  const n = Number(value);
-  return Number.isFinite(n) ? Math.round(n) : null;
+function roundMoney(n) {
+  const x = Number(n);
+  return Number.isFinite(x) ? Math.round(x) : null;
 }
 
-function round2(value) {
-  return Math.round((Number(value) || 0) * 100) / 100;
-}
-
-function clamp(value, min, max) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return null;
-  return Math.max(min, Math.min(max, n));
+function clamp(n, min, max) {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return null;
+  return Math.max(min, Math.min(max, x));
 }
 
 function nowIso() {
@@ -495,7 +559,7 @@ function nowIso() {
 }
 
 function mergeDeep(target, ...sources) {
-  const out = target && typeof target === "object" ? target : {};
+  const out = target || {};
 
   for (const src of sources) {
     if (!src || typeof src !== "object") continue;
@@ -522,21 +586,21 @@ function stripEmpty(obj) {
 
   const out = {};
 
-  for (const [key, value] of Object.entries(obj)) {
-    if (value === undefined || value === null || value === "") continue;
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === undefined || v === null || v === "") continue;
 
-    if (Array.isArray(value)) {
-      if (value.length) out[key] = value;
+    if (Array.isArray(v)) {
+      if (v.length) out[k] = v;
       continue;
     }
 
-    if (typeof value === "object") {
-      const nested = stripEmpty(value);
-      if (nested && Object.keys(nested).length) out[key] = nested;
+    if (typeof v === "object") {
+      const nested = stripEmpty(v);
+      if (nested && Object.keys(nested).length) out[k] = nested;
       continue;
     }
 
-    out[key] = value;
+    out[k] = v;
   }
 
   return out;
@@ -574,11 +638,7 @@ function collectClientContext(body) {
     body?.user || {}
   );
 
-  const bridge = mergeDeep(
-    {},
-    body?.bridge || {},
-    context?.bridge || {}
-  );
+  const bridge = mergeDeep({}, body?.bridge || {}, context?.bridge || {});
 
   const identity = mergeDeep(
     {},
@@ -619,83 +679,64 @@ function collectClientContext(body) {
     financial_intake: financialIntake,
     kpi_overrides: kpiOverrides,
     user_financial_inputs:
-      body?.user_financial_inputs ||
-      context?.user_financial_inputs ||
-      {},
-    user_aiou_inputs:
-      body?.user_aiou_inputs ||
-      context?.user_aiou_inputs ||
-      {},
-    raw_context: context
+      body?.user_financial_inputs || context?.user_financial_inputs || {},
+    user_aiou_inputs: body?.user_aiou_inputs || context?.user_aiou_inputs || {},
+    raw_context: context,
   };
 }
 
 // ============================================================
-// //#7 SUPABASE CONTEXT ENRICHMENT
+// //#7 SUPABASE MEMBER CONTEXT ENRICHMENT
 // ============================================================
 
 async function loadSupabaseMemberContext(email) {
-  if (!email || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  if (!email || !SUPABASE_URL || !SUPABASE_SERVICE_KEY || !createClient) {
     return null;
   }
 
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-      auth: { persistSession: false }
+      auth: { persistSession: false },
     });
 
-    const profilePromise = supabase
-      .from("profiles")
-      .select("*")
-      .eq("email", email)
-      .maybeSingle();
+    const [profileRes, financialInputsRes, financialIntakesRes, aiouRes] =
+      await Promise.all([
+        supabase.from("profiles").select("*").eq("email", email).maybeSingle(),
 
-    const financialInputsPromise = supabase
-      .from("user_financial_inputs")
-      .select("*")
-      .eq("email", email)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+        supabase
+          .from("user_financial_inputs")
+          .select("*")
+          .eq("email", email)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
 
-    const financialIntakesPromise = supabase
-      .from("financial_intakes")
-      .select("*")
-      .eq("email", email)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+        supabase
+          .from("financial_intakes")
+          .select("*")
+          .eq("email", email)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
 
-    const aiouPromise = supabase
-      .from("user_aiou_inputs")
-      .select("*")
-      .eq("email", email)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+        supabase
+          .from("user_aiou_inputs")
+          .select("*")
+          .eq("email", email)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
 
-    const [
-      profileRes,
-      financialInputsRes,
-      financialIntakesRes,
-      aiouRes
-    ] = await Promise.allSettled([
-      profilePromise,
-      financialInputsPromise,
-      financialIntakesPromise,
-      aiouPromise
-    ]);
+    logSupabaseSoftError("profiles", profileRes?.error);
+    logSupabaseSoftError("user_financial_inputs", financialInputsRes?.error);
+    logSupabaseSoftError("financial_intakes", financialIntakesRes?.error);
+    logSupabaseSoftError("user_aiou_inputs", aiouRes?.error);
 
-    const profile = unwrapSupabaseResult(profileRes, "profiles");
-    const financialInputs = unwrapSupabaseResult(
-      financialInputsRes,
-      "user_financial_inputs"
-    );
-    const financialIntake = unwrapSupabaseResult(
-      financialIntakesRes,
-      "financial_intakes"
-    );
-    const aiou = unwrapSupabaseResult(aiouRes, "user_aiou_inputs");
+    const profile = profileRes?.data || {};
+    const financialInputs = financialInputsRes?.data || {};
+    const financialIntake = financialIntakesRes?.data || {};
+    const aiou = aiouRes?.data || {};
 
     const hasAnyData = [profile, financialInputs, financialIntake, aiou].some(
       (x) => x && typeof x === "object" && Object.keys(x).length
@@ -705,19 +746,21 @@ async function loadSupabaseMemberContext(email) {
 
     const mergedProfile = mergeDeep(
       {},
-      profile || {},
-      financialInputs || {},
-      financialIntake || {},
-      aiou || {}
+      profile,
+      financialInputs,
+      financialIntake,
+      aiou
     );
+
+    const bridge = normalizeSupabaseBridge(mergedProfile);
 
     return {
       profile: mergedProfile,
-      bridge: normalizeSupabaseBridge(mergedProfile),
-      financial_intake: financialIntake || {},
-      user_financial_inputs: financialInputs || {},
-      user_aiou_inputs: aiou || {},
-      supabase_loaded: true
+      bridge,
+      financial_intake: financialIntake,
+      user_financial_inputs: financialInputs,
+      user_aiou_inputs: aiou,
+      supabase_loaded: true,
     };
   } catch (err) {
     console.warn("Supabase member context load failed:", err?.message || err);
@@ -725,20 +768,9 @@ async function loadSupabaseMemberContext(email) {
   }
 }
 
-function unwrapSupabaseResult(settledResult, label) {
-  if (!settledResult || settledResult.status !== "fulfilled") {
-    console.warn(`Supabase ${label} query failed.`);
-    return {};
-  }
-
-  const value = settledResult.value;
-
-  if (value?.error) {
-    console.warn(`Supabase ${label} warning:`, value.error.message || value.error);
-    return {};
-  }
-
-  return value?.data || {};
+function logSupabaseSoftError(table, error) {
+  if (!error) return;
+  console.warn(`Supabase ${table} load warning:`, error.message || error);
 }
 
 function normalizeSupabaseBridge(raw) {
@@ -921,15 +953,10 @@ function normalizeSupabaseBridge(raw) {
     bathrooms: pickFirst(safe.bathrooms, safe.baths),
     sqft: safe.sqft,
 
-    cityKey: pickFirst(
-      safe.cityKey,
-      safe.city_key,
-      safe.market,
-      safe.marketSlug
-    ),
+    cityKey: pickFirst(safe.cityKey, safe.city_key, safe.market, safe.marketSlug),
 
     _source: "thewing.supabase.member-context",
-    _loadedAt: nowIso()
+    _loadedAt: new Date().toISOString(),
   });
 }
 
@@ -950,16 +977,50 @@ function normalizeProfileUniversal(ctx) {
     ctx?.kpi_overrides || {}
   );
 
+  if (shared.profileNormalizer) {
+    const candidates = [
+      "normalizeProfile",
+      "normalize",
+      "profileNormalizer",
+      "normalizeMemberProfile",
+      "normalizePCSProfile",
+    ];
+
+    for (const name of candidates) {
+      if (typeof shared.profileNormalizer[name] === "function") {
+        try {
+          const result = shared.profileNormalizer[name](profileRaw);
+          if (result && typeof result === "object") {
+            return normalizeProfileFallback(result);
+          }
+        } catch (_) {}
+      }
+    }
+
+    if (typeof shared.profileNormalizer === "function") {
+      try {
+        const result = shared.profileNormalizer(profileRaw);
+        if (result && typeof result === "object") {
+          return normalizeProfileFallback(result);
+        }
+      } catch (_) {}
+    }
+  }
+
   return normalizeProfileFallback(profileRaw);
 }
 
-function normalizeProfileFallback(raw = {}) {
+function normalizeProfileFallback(raw) {
   const email = normalizeEmail(
     pickFirst(raw.email, raw.user_email, raw.member_email)
   );
 
   const fullName = safeStr(
     pickFirst(raw.full_name, raw.fullName, raw.name, raw.displayName)
+  );
+
+  const lastName = safeStr(
+    pickFirst(raw.last_name, raw.lastName, deriveLastName(fullName))
   );
 
   const rankPaygrade = normalizePaygrade(
@@ -998,30 +1059,28 @@ function normalizeProfileFallback(raw = {}) {
     raw.hasDependents
   );
 
+  const familySize = num(
+    pickFirst(
+      raw.family_size,
+      raw.familySize,
+      raw.household_size,
+      raw.householdSize
+    )
+  );
+
   const profile = {
     email,
     full_name: fullName,
-    first_name: safeStr(pickFirst(raw.first_name, raw.firstName)),
-    last_name: safeStr(
-      pickFirst(raw.last_name, raw.lastName, deriveLastName(fullName))
-    ),
+    last_name: lastName,
     phone: safeStr(pickFirst(raw.phone, raw.phone_number, raw.phoneNumber)),
 
     mode,
     military_status: mode,
     rank,
     rank_paygrade: rankPaygrade,
-
     yos: num(pickFirst(raw.yos, raw.years_of_service, raw.yearsOfService)),
-    family: familyRaw === null ? null : boolish(familyRaw, false),
-    family_size: num(
-      pickFirst(
-        raw.family_size,
-        raw.familySize,
-        raw.household_size,
-        raw.householdSize
-      )
-    ),
+    family: familyRaw === null ? null : boolish(familyRaw),
+    family_size: familySize,
 
     base,
     zip,
@@ -1031,20 +1090,10 @@ function normalizeProfileFallback(raw = {}) {
     ),
 
     retired_rank: normalizePaygrade(
-      pickFirst(
-        raw.retired_rank,
-        raw.retiredRank,
-        raw.retire_rank,
-        raw.retireRank
-      )
+      pickFirst(raw.retired_rank, raw.retiredRank, raw.retire_rank, raw.retireRank)
     ),
     retire_yos: num(
-      pickFirst(
-        raw.retire_yos,
-        raw.retireYos,
-        raw.retirement_yos,
-        raw.retirementYos
-      )
+      pickFirst(raw.retire_yos, raw.retireYos, raw.retirement_yos, raw.retirementYos)
     ),
     retirement_system: safeStr(
       pickFirst(raw.retirement_system, raw.retirementSystem, raw.brs, raw.high3)
@@ -1118,18 +1167,19 @@ function normalizeProfileFallback(raw = {}) {
 
     bedrooms: num(pickFirst(raw.bedrooms, raw.beds)),
     bathrooms: num(pickFirst(raw.bathrooms, raw.baths)),
-    sqft: num(raw.sqft),
-
     cityKey: safeStr(
       pickFirst(raw.cityKey, raw.city_key, raw.market, raw.marketSlug)
     ),
-
-    loanType: safeStr(pickFirst(raw.loanType, raw.loan_type, "va")),
-    termYears: num(pickFirst(raw.termYears, raw.term_years, 30)),
-    notes: safeStr(pickFirst(raw.notes, raw.comments))
+    notes: safeStr(pickFirst(raw.notes, raw.comments)),
   };
 
-  return stripEmpty(profile);
+  const out = {};
+
+  for (const [k, v] of Object.entries(profile)) {
+    if (v !== null && v !== undefined && v !== "") out[k] = v;
+  }
+
+  return out;
 }
 
 function deriveLastName(fullName) {
@@ -1137,8 +1187,8 @@ function deriveLastName(fullName) {
   return parts.length ? parts[parts.length - 1] : "";
 }
 
-function normalizeMode(value) {
-  const s = safeStr(value).toLowerCase();
+function normalizeMode(x) {
+  const s = safeStr(x).toLowerCase();
 
   if (
     ["ad", "active", "active_duty", "active duty", "servicemember"].includes(s)
@@ -1157,14 +1207,14 @@ function normalizeMode(value) {
   return s || "active";
 }
 
-function normalizePaygrade(value) {
-  const raw = safeStr(value).toUpperCase().replace(/\s+/g, "");
-
+function normalizePaygrade(x) {
+  const raw = safeStr(x).toUpperCase().replace(/\s+/g, "");
   if (!raw) return "";
-  if (/^[EOW]-\d{1,2}E?$/.test(raw)) return raw;
-  if (/^[EOW]\d{1,2}E?$/.test(raw)) return `${raw[0]}-${raw.slice(1)}`;
 
-  const map = {
+  if (/^[EOW]-\d{1,2}$/.test(raw)) return raw;
+  if (/^[EOW]\d{1,2}$/.test(raw)) return `${raw[0]}-${raw.slice(1)}`;
+
+  const rankMap = {
     AB: "E-1",
     AMN: "E-2",
     A1C: "E-3",
@@ -1179,14 +1229,14 @@ function normalizePaygrade(value) {
     CAPT: "O-3",
     MAJ: "O-4",
     LTCOL: "O-5",
-    COL: "O-6"
+    COL: "O-6",
   };
 
-  return map[raw] || raw;
+  return rankMap[raw] || raw;
 }
 
-function rankShort(value) {
-  const p = normalizePaygrade(value);
+function rankShort(paygradeOrRank) {
+  const p = normalizePaygrade(paygradeOrRank);
 
   const map = {
     "E-1": "AB",
@@ -1208,7 +1258,11 @@ function rankShort(value) {
     "O-3": "Capt",
     "O-4": "Maj",
     "O-5": "Lt Col",
-    "O-6": "Col"
+    "O-6": "Col",
+    "O-7": "Brig Gen",
+    "O-8": "Maj Gen",
+    "O-9": "Lt Gen",
+    "O-10": "Gen",
   };
 
   return map[p] || p || "";
@@ -1237,12 +1291,6 @@ function detectIntent(message) {
     /\bmy name\b|\bwho am i\b|\bmy profile\b|\bwhat do you know about me\b|\bmy rank\b|\bmy base\b|\bmy email\b/.test(t)
   ) {
     return "profile_question";
-  }
-
-  if (
-    /\bva loan\b|\bva mortgage\b|\bva-backed\b|\bva backed\b|\bcertificate of eligibility\b|\bcoe\b|\bfunding fee\b|\bva funding fee\b|\bva appraisal\b|\bva inspection\b|\bva entitlement\b|\bfull entitlement\b|\bpartial entitlement\b|\bseller concession\b|\bseller credit\b|\bzero down\b|\b0 down\b|\bno down payment\b|\bno pmi\b|\boccupancy\b|\bprimary residence\b|\bva closing costs\b/.test(t)
-  ) {
-    return "va_loan";
   }
 
   if (
@@ -1286,10 +1334,10 @@ function detectIntent(message) {
 
 function shouldUseOpenAI(message, intent, deterministic) {
   if (!OPENAI_API_KEY) return false;
+
   if (intent === "greeting" || intent === "capabilities") return false;
 
   const t = safeStr(message);
-
   if (t.length > 120) return true;
 
   if (
@@ -1300,7 +1348,6 @@ function shouldUseOpenAI(message, intent, deterministic) {
       "pcs_housing_strategy",
       "dashboard_interpretation",
       "general_guidance",
-      "va_loan"
     ].includes(intent)
   ) {
     return true;
@@ -1323,7 +1370,7 @@ async function buildTruthPacket({
   email,
   mergedContext,
   normalizedProfile,
-  debug
+  debug,
 }) {
   const truth = {
     ok: true,
@@ -1333,17 +1380,20 @@ async function buildTruthPacket({
       profile: Boolean(Object.keys(normalizedProfile || {}).length),
       compensation: false,
       housing: false,
-      va_loan: false,
       dashboard: Boolean(
         Object.keys(mergedContext?.fad || {}).length ||
           Object.keys(mergedContext?.kpi_overrides || {}).length
       ),
       supabase: Boolean(mergedContext?.supabase_loaded),
       shared_engines: {
-        compensation_context: Boolean(compensationContext),
-        mortgage_engine: Boolean(mortgageEngine),
-        va_loans: Boolean(vaLoans)
-      }
+        compensation_context: Boolean(shared.compensationContext),
+        profile_normalizer: Boolean(shared.profileNormalizer),
+        pay_engine: Boolean(shared.payEngine),
+        mortgage_engine: Boolean(shared.mortgageEngine),
+        affordability_engine: Boolean(shared.affordabilityEngine),
+        decision_rules: Boolean(shared.decisionRules),
+        response: Boolean(shared.response),
+      },
     },
     internal: {},
     public: {
@@ -1352,18 +1402,17 @@ async function buildTruthPacket({
       housing_inputs: null,
       mortgage: null,
       affordability: null,
-      va_loan: null,
       verdict: null,
       next_action: null,
-      missing_inputs: []
+      missing_inputs: [],
     },
-    debug: debug ? {} : undefined
+    debug: debug ? {} : undefined,
   };
 
   const scenario = buildScenario({
     message,
     mergedContext,
-    normalizedProfile
+    normalizedProfile,
   });
 
   truth.internal.scenario = scenario;
@@ -1377,7 +1426,7 @@ async function buildTruthPacket({
     bedrooms: scenario.bedrooms,
     cityKey: scenario.cityKey,
     base: scenario.base,
-    zip: scenario.zip
+    zip: scenario.zip,
   });
 
   const compensation = await computeCompensationSafe(normalizedProfile, scenario);
@@ -1398,11 +1447,11 @@ async function buildTruthPacket({
     truth.public.mortgage = mortgage;
   }
 
-  const affordability = computeAffordabilitySafe({
+  const affordability = await computeAffordabilitySafe({
     normalizedProfile,
     scenario,
     compensation,
-    mortgage
+    mortgage,
   });
 
   if (affordability) {
@@ -1410,24 +1459,12 @@ async function buildTruthPacket({
     truth.public.affordability = affordability;
   }
 
-  const vaLoan = buildVaLoanContextSafe({
-    message,
+  const verdict = computeVerdictSafe({
     normalizedProfile,
     scenario,
     compensation,
     mortgage,
-    affordability
-  });
-
-  if (vaLoan) {
-    truth.context_used.va_loan = true;
-    truth.public.va_loan = vaLoan;
-  }
-
-  const verdict = computeVerdictFallback({
-    compensation,
-    mortgage,
-    affordability
+    affordability,
   });
 
   if (verdict) {
@@ -1439,7 +1476,7 @@ async function buildTruthPacket({
     scenario,
     compensation,
     mortgage,
-    intent
+    intent,
   });
 
   truth.public.next_action = buildNextAction({
@@ -1448,19 +1485,17 @@ async function buildTruthPacket({
     verdict,
     compensation,
     mortgage,
-    affordability
+    affordability,
   });
 
   if (debug) {
     truth.debug = {
       email,
       scenario,
+      shared_loaded: truth.context_used.shared_engines,
       merged_context_keys: Object.keys(mergedContext || {}),
       normalized_profile_keys: Object.keys(normalizedProfile || {}),
-      compensation_loaded: Boolean(compensation),
-      mortgage_loaded: Boolean(mortgage),
-      va_loan_loaded: Boolean(vaLoan),
-      supabase_loaded: Boolean(mergedContext?.supabase_loaded)
+      supabase_loaded: Boolean(mergedContext?.supabase_loaded),
     };
   }
 
@@ -1663,14 +1698,14 @@ function buildScenario({ message, mergedContext, normalizedProfile }) {
     yos,
     base,
     zip,
-    family: family === null ? null : boolish(family, false),
+    family: family === null ? null : boolish(family),
     mode: normalizeMode(pickFirst(profile.mode, bridge.mode, fad.mode, "active")),
     va_disability: num(
       pickFirst(profile.va_disability, bridge.va_disability, fad.va_disability)
     ),
     bedrooms: num(pickFirst(profile.bedrooms, bridge.bedrooms, fad.bedrooms)),
     cityKey: safeStr(pickFirst(profile.cityKey, bridge.cityKey, fad.cityKey)),
-    aiou
+    aiou,
   };
 }
 
@@ -1707,8 +1742,7 @@ async function computeCompensationSafe(profile, scenario) {
     mode: scenario.mode || profile.mode || "active",
     rank: scenario.rank_paygrade || profile.rank_paygrade || profile.rank,
     paygrade: scenario.rank_paygrade || profile.rank_paygrade || profile.rank,
-    rank_paygrade:
-      scenario.rank_paygrade || profile.rank_paygrade || profile.rank,
+    rank_paygrade: scenario.rank_paygrade || profile.rank_paygrade || profile.rank,
     yos: scenario.yos ?? profile.yos,
     yearsOfService: scenario.yos ?? profile.yos,
     family: scenario.family ?? profile.family,
@@ -1716,25 +1750,12 @@ async function computeCompensationSafe(profile, scenario) {
     base: scenario.base || profile.base,
     zip: scenario.zip || profile.zip,
     bahZip: scenario.zip || profile.zip,
-    va_disability: scenario.va_disability ?? profile.va_disability
+    va_disability: scenario.va_disability ?? profile.va_disability,
   };
 
-  const fn =
-    compensationContext.safeBuildCompensationContext ||
-    compensationContext.buildCompensationContext ||
-    compensationContext.default?.safeBuildCompensationContext ||
-    compensationContext.default?.buildCompensationContext;
+  const engineResult = await trySharedPayEngine(input);
 
-  if (typeof fn === "function") {
-    try {
-      const result = await fn(input);
-      if (result && typeof result === "object" && result.ok !== false) {
-        return normalizeCompensation(result, input);
-      }
-    } catch (err) {
-      console.warn("compensation-context failed:", err?.message || err);
-    }
-  }
+  if (engineResult) return normalizeCompensation(engineResult, input);
 
   const fallbackIncome = num(
     pickFirst(
@@ -1761,8 +1782,78 @@ async function computeCompensationSafe(profile, scenario) {
       total_monthly: roundMoney(fallbackIncome),
       source: "Supabase/member profile income fallback",
       note:
-        "Compensation context did not return a breakdown, so Amy used saved monthly income from the member profile."
+        "Pay engine did not return a breakdown, so Amy used saved monthly income from the member profile.",
     });
+  }
+
+  return null;
+}
+
+async function trySharedPayEngine(input) {
+  const compensationCandidates = [
+    shared.compensationContext,
+    await safeImport(shared.compensationContextPath || "./_share/compensation-context.js"),
+  ]
+    .map(unwrapModule)
+    .filter(Boolean);
+
+  for (const comp of compensationCandidates) {
+    const fn = getExportedFunction(comp, [
+      "buildCompensationContext",
+      "safeBuildCompensationContext",
+    ]);
+
+    if (typeof fn === "function") {
+      try {
+        const result = await fn(input);
+        if (result && typeof result === "object" && result.ok !== false) {
+          return result;
+        }
+      } catch (err) {
+        console.warn("compensation-context failed:", err?.message || err);
+      }
+    }
+  }
+
+  const payCandidates = [
+    shared.payEngine,
+    await safeImport("./_share/pay-engine.js"),
+  ]
+    .map(unwrapModule)
+    .filter(Boolean);
+
+  const functionNames = [
+    "computePay",
+    "computePayBasics",
+    "calculatePay",
+    "calculateCompensation",
+    "getCompensation",
+    "payEngine",
+    "calculateMonthlyMilitaryIncome",
+    "calculatePaySummary",
+    "safeCalculateMonthlyMilitaryIncome",
+  ];
+
+  for (const mod of payCandidates) {
+    for (const name of functionNames) {
+      if (typeof mod[name] === "function") {
+        try {
+          const result = await mod[name](input);
+          if (result && typeof result === "object") return result;
+        } catch (err) {
+          console.warn(`pay-engine.${name} failed:`, err?.message || err);
+        }
+      }
+    }
+
+    if (typeof mod === "function") {
+      try {
+        const result = await mod(input);
+        if (result && typeof result === "object") return result;
+      } catch (err) {
+        console.warn("pay-engine default function failed:", err?.message || err);
+      }
+    }
   }
 
   return null;
@@ -1828,41 +1919,16 @@ function normalizeCompensation(result, input) {
   );
 
   const specialPay = num(
-    pickFirst(
-      result.specialPay,
-      result.specialPayMonthly,
-      result.monthly?.specialPay
-    )
+    pickFirst(result.specialPay, result.specialPayMonthly, result.monthly?.specialPay)
   );
 
   const spouseIncome = num(
-    pickFirst(
-      result.spouseIncome,
-      result.spouseIncomeMonthly,
-      result.monthly?.spouseIncome
-    )
+    pickFirst(result.spouseIncome, result.spouseIncomeMonthly, result.monthly?.spouseIncome)
   );
 
   const additionalIncome = num(
-    pickFirst(
-      result.additionalIncome,
-      result.additionalIncomeMonthly,
-      result.monthly?.additionalIncome
-    )
+    pickFirst(result.additionalIncome, result.additionalIncomeMonthly, result.monthly?.additionalIncome)
   );
-
-  const computedTotal = [
-    basePay,
-    bas,
-    bah,
-    va,
-    retirement,
-    specialPay,
-    spouseIncome,
-    additionalIncome
-  ]
-    .filter((x) => Number.isFinite(x))
-    .reduce((a, b) => a + b, 0);
 
   const total = num(
     pickFirst(
@@ -1877,7 +1943,18 @@ function normalizeCompensation(result, input) {
       result.monthly?.militaryIncome,
       result.totalMonthlyMilitaryIncome,
       result.totalHouseholdIncomeMonthly,
-      computedTotal
+      [
+        basePay,
+        bas,
+        bah,
+        va,
+        retirement,
+        specialPay,
+        spouseIncome,
+        additionalIncome,
+      ]
+        .filter((x) => Number.isFinite(x))
+        .reduce((a, b) => a + b, 0)
     )
   );
 
@@ -1891,7 +1968,7 @@ function normalizeCompensation(result, input) {
       specialPay,
       spouseIncome,
       additionalIncome,
-      total
+      total,
     ].some((x) => Number.isFinite(x) && x > 0)
   ) {
     return null;
@@ -1899,7 +1976,6 @@ function normalizeCompensation(result, input) {
 
   return stripEmpty({
     ok: result.ok !== false,
-
     rank_paygrade: normalizePaygrade(
       pickFirst(
         result.rank_paygrade,
@@ -1927,7 +2003,6 @@ function normalizeCompensation(result, input) {
         input.yos
       )
     ),
-
     base: safeStr(
       pickFirst(
         result.resolvedBase,
@@ -1949,7 +2024,6 @@ function normalizeCompensation(result, input) {
     ),
     mha_code: safeStr(pickFirst(result.mhaCode, result.profile?.mhaCode)),
     mha_name: safeStr(pickFirst(result.mhaName, result.profile?.mhaName)),
-
     with_dependents: pickFirst(
       result.with_dependents,
       result.profile?.hasDependents,
@@ -1969,11 +2043,7 @@ function normalizeCompensation(result, input) {
     total_monthly: roundMoney(total),
 
     source: safeStr(
-      pickFirst(
-        result.source,
-        result.sourceVersion,
-        "TheWing compensation-context"
-      )
+      pickFirst(result.source, result.sourceVersion, "TheWing compensation-context/pay-engine")
     ),
     note: safeStr(
       pickFirst(
@@ -1983,7 +2053,7 @@ function normalizeCompensation(result, input) {
         result.reason
       )
     ),
-    warnings: Array.isArray(result.warnings) ? result.warnings : undefined
+    warnings: Array.isArray(result.warnings) ? result.warnings : undefined,
   });
 }
 
@@ -2016,27 +2086,56 @@ async function computeMortgageSafe(profile, scenario, compensation) {
     monthlyIncome: compensation?.total_monthly || null,
     base: scenario.base || profile.base,
     zip: scenario.zip || profile.zip,
-    cityKey: scenario.cityKey || profile.cityKey
+    cityKey: scenario.cityKey || profile.cityKey,
   };
 
-  const fn =
-    mortgageEngine.safeCalculateMortgage ||
-    mortgageEngine.calculateMortgage ||
-    mortgageEngine.default?.safeCalculateMortgage ||
-    mortgageEngine.default?.calculateMortgage;
+  const engineResult = await trySharedMortgageEngine(input);
 
-  if (typeof fn === "function") {
-    try {
-      const result = await fn(input);
-      if (result && typeof result === "object" && result.ok !== false) {
-        return normalizeMortgage(result, input);
+  if (engineResult) return normalizeMortgage(engineResult, input);
+
+  return computeMortgageFallback(input);
+}
+
+async function trySharedMortgageEngine(input) {
+  const mortgageCandidates = [
+    shared.mortgageEngine,
+    await safeImport("./_share/mortgage-engine.js"),
+  ]
+    .map(unwrapModule)
+    .filter(Boolean);
+
+  const functionNames = [
+    "computeMortgage",
+    "calculateMortgage",
+    "safeCalculateMortgage",
+    "mortgageEngine",
+    "getMortgage",
+    "buildMortgage",
+  ];
+
+  for (const mod of mortgageCandidates) {
+    for (const name of functionNames) {
+      if (typeof mod[name] === "function") {
+        try {
+          const result = await mod[name](input);
+          if (result && typeof result === "object") return result;
+        } catch (err) {
+          console.warn(`mortgage-engine.${name} failed:`, err?.message || err);
+        }
       }
-    } catch (err) {
-      console.warn("mortgage-engine failed:", err?.message || err);
+    }
+
+    if (typeof mod === "function") {
+      try {
+        const result = await mod(input);
+        if (result && typeof result === "object") return result;
+      } catch (err) {
+        console.warn("mortgage-engine default function failed:", err?.message || err);
+      }
     }
   }
 
-  return computeMortgageFallback(input);
+  return null;
 }
 
 function normalizeMortgage(result, input) {
@@ -2046,37 +2145,20 @@ function normalizeMortgage(result, input) {
       result.principalInterest,
       result.pi,
       result.p_and_i,
-      result.monthlyPI,
-      result.breakdown?.principalInterest
+      result.monthlyPI
     )
   );
 
   const taxes = num(
-    pickFirst(
-      result.taxes,
-      result.tax,
-      result.property_tax,
-      result.propertyTax,
-      result.breakdown?.taxes
-    )
+    pickFirst(result.taxes, result.tax, result.property_tax, result.propertyTax)
   );
 
   const insurance = num(
-    pickFirst(
-      result.insurance,
-      result.home_insurance,
-      result.homeownersInsurance,
-      result.breakdown?.insurance
-    )
+    pickFirst(result.insurance, result.home_insurance, result.homeownersInsurance)
   );
 
-  const hoa = num(
-    pickFirst(result.hoa, result.hoa_monthly, result.hoaMonthly, result.breakdown?.hoa)
-  );
-
-  const pmi = num(
-    pickFirst(result.pmi, result.PMI, result.breakdown?.pmi)
-  );
+  const hoa = num(pickFirst(result.hoa, result.hoa_monthly, result.hoaMonthly));
+  const pmi = num(pickFirst(result.pmi, result.PMI));
 
   const allIn = num(
     pickFirst(
@@ -2087,9 +2169,13 @@ function normalizeMortgage(result, input) {
       result.monthly_total,
       result.payment,
       result.monthlyPayment,
-      result.allInMonthly,
-      result.breakdown?.allIn,
-      [principalInterest, taxes, insurance, hoa, pmi]
+      [
+        principalInterest,
+        taxes,
+        insurance,
+        hoa,
+        pmi,
+      ]
         .filter((x) => Number.isFinite(x))
         .reduce((a, b) => a + b, 0)
     )
@@ -2104,7 +2190,7 @@ function normalizeMortgage(result, input) {
     loan_amount: roundMoney(
       pickFirst(result.loan_amount, result.loanAmount, input.price - input.downpayment)
     ),
-    apr: num(pickFirst(result.apr, result.rate, result.apr_percent, result.aprPct)),
+    apr: num(pickFirst(result.apr, result.rate, result.apr_percent)),
     term_years: num(pickFirst(result.term_years, result.termYears, input.termYears)),
     principal_interest: roundMoney(principalInterest),
     taxes: roundMoney(taxes),
@@ -2113,7 +2199,7 @@ function normalizeMortgage(result, input) {
     pmi: roundMoney(pmi),
     all_in_monthly: roundMoney(allIn),
     source: safeStr(pickFirst(result.source, "TheWing mortgage-engine")),
-    note: safeStr(pickFirst(result.note, result.reason))
+    note: safeStr(pickFirst(result.note, result.reason)),
   });
 }
 
@@ -2154,7 +2240,7 @@ function computeMortgageFallback(input) {
     all_in_monthly: roundMoney(allIn),
     source: "ask-amy fallback mortgage math",
     note:
-      "Fallback estimate only. The shared mortgage-engine should be treated as source of truth when available."
+      "Fallback estimate only. The shared mortgage-engine should be treated as source of truth when available.",
   };
 }
 
@@ -2183,88 +2269,14 @@ function monthlyPaymentPI(principal, apr, termYears) {
 }
 
 // ============================================================
-// //#12B VA LOAN ENGINE
+// //#13 AFFORDABILITY ENGINE
 // ============================================================
 
-function buildVaLoanContextSafe({
-  message,
+async function computeAffordabilitySafe({
   normalizedProfile,
   scenario,
   compensation,
   mortgage,
-  affordability
-}) {
-  try {
-    const fn =
-      vaLoans.buildVaLoanTruthPacket ||
-      vaLoans.default?.buildVaLoanTruthPacket;
-
-    if (typeof fn !== "function") return null;
-
-    const packet = fn({
-      message,
-      profile: normalizedProfile || {},
-      scenario: scenario || {},
-      compensation: compensation || {},
-      mortgage: mortgage || {},
-      affordability: affordability || {}
-    });
-
-    if (!packet || packet.ok === false) return null;
-
-    return packet;
-  } catch (err) {
-    console.warn("va-loans.js failed:", err?.message || err);
-    return null;
-  }
-}
-
-function buildDirectVaLoanReply({ packet }) {
-  if (!packet || packet.ok === false) return "";
-
-  const lines = [];
-
-  if (packet.bluf) {
-    lines.push(packet.bluf.startsWith("BLUF:") ? packet.bluf : `BLUF: ${packet.bluf}`);
-  }
-
-  const fundingFee = packet.funding_fee || packet.purchase_scenario?.loan?.fundingFee;
-
-  if (fundingFee) {
-    if (fundingFee.exempt) {
-      lines.push(
-        "Funding fee: Your profile suggests you may be exempt from the VA funding fee, but your lender or COE should confirm that before you rely on it."
-      );
-    } else if (fundingFee.feeAmount !== undefined && fundingFee.feeAmount !== null) {
-      lines.push(
-        `Funding fee: Estimated at ${money(fundingFee.feeAmount)}${fundingFee.feePctDisplay ? ` (${fundingFee.feePctDisplay})` : ""} unless you qualify for an exemption.`
-      );
-    }
-  }
-
-  if (Array.isArray(packet.guidance?.key_points) && packet.guidance.key_points.length) {
-    lines.push(`Why: ${packet.guidance.key_points.slice(0, 3).join(" ")}`);
-  }
-
-  if (Array.isArray(packet.guidance?.risks) && packet.guidance.risks.length) {
-    lines.push(`Risk: ${packet.guidance.risks.slice(0, 2).join(" ")}`);
-  }
-
-  if (Array.isArray(packet.guidance?.next_steps) && packet.guidance.next_steps.length) {
-    lines.push(`Next move: ${packet.guidance.next_steps[0]}`);
-  }
-
-  return lines.filter(Boolean).join("\n\n");
-}
-// ============================================================
-// //#13 AFFORDABILITY + VERDICT
-// ============================================================
-
-function computeAffordabilitySafe({
-  normalizedProfile,
-  scenario,
-  compensation,
-  mortgage
 }) {
   const income =
     num(compensation?.total_monthly) ||
@@ -2281,9 +2293,128 @@ function computeAffordabilitySafe({
     0;
 
   const housingAllIn = num(mortgage?.all_in_monthly);
+  const price = num(scenario.price);
+  const downpayment = num(scenario.downpayment) || 0;
+
+  const input = {
+    income,
+    monthlyIncome: income,
+    expenses,
+    monthlyExpenses: expenses,
+    housingAllIn,
+    mortgage: housingAllIn,
+    price,
+    homePrice: price,
+    downpayment,
+    creditScore: scenario.creditScore,
+  };
+
+  const engineResult = await trySharedAffordabilityEngine(input);
+
+  if (engineResult) return normalizeAffordability(engineResult, input);
+
+  return computeAffordabilityFallback(input);
+}
+
+async function trySharedAffordabilityEngine(input) {
+  const mod =
+    unwrapModule(shared.affordabilityEngine) ||
+    unwrapModule(await safeImport("./_share/affordability-engine.js"));
+
+  if (!mod) return null;
+
+  const functionNames = [
+    "computeAffordability",
+    "calculateAffordability",
+    "affordabilityEngine",
+    "scoreAffordability",
+    "buildAffordability",
+  ];
+
+  for (const name of functionNames) {
+    if (typeof mod[name] === "function") {
+      try {
+        const result = await mod[name](input);
+        if (result && typeof result === "object") return result;
+      } catch (err) {
+        console.warn(`affordability-engine.${name} failed:`, err?.message || err);
+      }
+    }
+  }
+
+  if (typeof mod === "function") {
+    try {
+      const result = await mod(input);
+      if (result && typeof result === "object") return result;
+    } catch (err) {
+      console.warn("affordability-engine default function failed:", err?.message || err);
+    }
+  }
+
+  return null;
+}
+
+function normalizeAffordability(result, input) {
+  const income = num(pickFirst(result.income, result.monthlyIncome, input.income));
+
+  const housingAllIn = num(
+    pickFirst(result.housingAllIn, result.housing_all_in, result.mortgage, input.housingAllIn)
+  );
+
+  const expenses =
+    num(pickFirst(result.expenses, result.monthlyExpenses, input.expenses)) || 0;
+
+  return stripEmpty({
+    ok: result.ok !== false,
+    income: roundMoney(income),
+    housing_cap_30: roundMoney(
+      pickFirst(result.housing_cap_30, result.housingCap, income * 0.3)
+    ),
+    housing_ratio: num(
+      pickFirst(
+        result.housing_ratio,
+        result.housingRatio,
+        income && housingAllIn ? housingAllIn / income : null
+      )
+    ),
+    expense_ratio: num(
+      pickFirst(
+        result.expense_ratio,
+        result.expenseRatio,
+        income && expenses ? expenses / income : null
+      )
+    ),
+    backend_ratio: num(
+      pickFirst(
+        result.backend_ratio,
+        result.backEndRatio,
+        income && housingAllIn ? (housingAllIn + expenses) / income : null
+      )
+    ),
+    residual_income: roundMoney(
+      pickFirst(
+        result.residual_income,
+        result.residual,
+        income && housingAllIn ? income - housingAllIn - expenses : null
+      )
+    ),
+    score: pickFirst(result.score, result.grade, null),
+    status: pickFirst(result.status, result.verdict, null),
+    source: safeStr(pickFirst(result.source, "TheWing affordability-engine")),
+    note: safeStr(pickFirst(result.note, result.reason)),
+  });
+}
+
+function computeAffordabilityFallback(input) {
+  const income = num(input.income);
+  if (!income || income <= 0) return null;
+
+  const expenses = num(input.expenses) || 0;
+  const housingAllIn = num(input.housingAllIn) || null;
 
   const housingCap = income * 0.3;
   const residual = housingAllIn ? income - housingAllIn - expenses : null;
+
   const housingRatio = housingAllIn ? housingAllIn / income : null;
   const expenseRatio = expenses ? expenses / income : null;
   const backendRatio = housingAllIn ? (housingAllIn + expenses) / income : null;
@@ -2314,8 +2445,91 @@ function computeAffordabilitySafe({
     residual_income: roundMoney(residual),
     score,
     status,
-    source: "ask-amy deterministic affordability math"
+    source: "ask-amy fallback affordability math",
   };
+}
+
+// ============================================================
+// //#14 VERDICT / DECISION RULES
+// ============================================================
+
+function computeVerdictSafe({
+  normalizedProfile,
+  scenario,
+  compensation,
+  mortgage,
+  affordability,
+}) {
+  const engineResult = trySharedDecisionRules({
+    normalizedProfile,
+    scenario,
+    compensation,
+    mortgage,
+    affordability,
+  });
+
+  if (engineResult) return normalizeVerdict(engineResult);
+
+  return computeVerdictFallback({
+    compensation,
+    mortgage,
+    affordability,
+  });
+}
+
+function trySharedDecisionRules(input) {
+  const mod = shared.decisionRules;
+  if (!mod) return null;
+
+  const functionNames = [
+    "computeVerdict",
+    "getVerdict",
+    "scoreDecision",
+    "decisionRules",
+    "buildDecision",
+    "evaluate",
+  ];
+
+  for (const name of functionNames) {
+    if (typeof mod[name] === "function") {
+      try {
+        const result = mod[name](input);
+        if (result && typeof result === "object") return result;
+      } catch (err) {
+        console.warn(`decision-rules.${name} failed:`, err?.message || err);
+      }
+    }
+  }
+
+  if (typeof mod === "function") {
+    try {
+      const result = mod(input);
+      if (result && typeof result === "object") return result;
+    } catch (err) {
+      console.warn("decision-rules default function failed:", err?.message || err);
+    }
+  }
+
+  return null;
+}
+
+function normalizeVerdict(result) {
+  const status = safeStr(
+    pickFirst(result.status, result.verdict, result.label, result.decision)
+  ).toUpperCase();
+
+  return stripEmpty({
+    status: status || null,
+    grade: pickFirst(result.grade, result.score, null),
+    label: pickFirst(result.label, status || null),
+    bluf: safeStr(pickFirst(result.bluf, result.summary, result.message)),
+    reasons: Array.isArray(result.reasons)
+      ? result.reasons
+      : Array.isArray(result.notes)
+      ? result.notes
+      : [],
+    source: safeStr(pickFirst(result.source, "TheWing decision-rules")),
+  });
 }
 
 function computeVerdictFallback({ compensation, mortgage, affordability }) {
@@ -2332,7 +2546,7 @@ function computeVerdictFallback({ compensation, mortgage, affordability }) {
       bluf:
         "I need income or compensation data before I can give a clean readiness verdict.",
       reasons: ["Missing total monthly income."],
-      source: "ask-amy fallback decision rules"
+      source: "ask-amy fallback decision rules",
     };
   }
 
@@ -2344,7 +2558,7 @@ function computeVerdictFallback({ compensation, mortgage, affordability }) {
       bluf:
         "Your income is loaded, but I need a home price or mortgage estimate to judge housing readiness.",
       reasons: ["Missing housing payment or target home price."],
-      source: "ask-amy fallback decision rules"
+      source: "ask-amy fallback decision rules",
     };
   }
 
@@ -2357,9 +2571,9 @@ function computeVerdictFallback({ compensation, mortgage, affordability }) {
         "This looks workable based on the current income, debt, and housing estimate.",
       reasons: [
         `Housing ratio is about ${pct(housingRatio)}.`,
-        `Back-end ratio is about ${pct(backendRatio)}.`
+        `Back-end ratio is about ${pct(backendRatio)}.`,
       ],
-      source: "ask-amy fallback decision rules"
+      source: "ask-amy fallback decision rules",
     };
   }
 
@@ -2371,9 +2585,9 @@ function computeVerdictFallback({ compensation, mortgage, affordability }) {
       bluf: "This may be possible, but the buffer is getting tight.",
       reasons: [
         `Housing ratio is about ${pct(housingRatio)}.`,
-        `Back-end ratio is about ${pct(backendRatio)}.`
+        `Back-end ratio is about ${pct(backendRatio)}.`,
       ],
-      source: "ask-amy fallback decision rules"
+      source: "ask-amy fallback decision rules",
     };
   }
 
@@ -2385,9 +2599,9 @@ function computeVerdictFallback({ compensation, mortgage, affordability }) {
       "This looks too tight unless income rises, expenses drop, price comes down, or cash reserves improve.",
     reasons: [
       `Housing ratio is about ${pct(housingRatio)}.`,
-      `Back-end ratio is about ${pct(backendRatio)}.`
+      `Back-end ratio is about ${pct(backendRatio)}.`,
     ],
-    source: "ask-amy fallback decision rules"
+    source: "ask-amy fallback decision rules",
   };
 }
 
@@ -2396,13 +2610,11 @@ function listMissingInputs({
   scenario,
   compensation,
   mortgage,
-  intent
+  intent,
 }) {
   const missing = [];
-  const isCompOnly =
-    intent === "compensation" ||
-    intent === "profile_question" ||
-    intent === "va_loan";
+
+  const isCompOnly = intent === "compensation" || intent === "profile_question";
 
   if (!normalizedProfile?.rank_paygrade && !scenario?.rank_paygrade) {
     missing.push("rank/paygrade");
@@ -2416,11 +2628,7 @@ function listMissingInputs({
     missing.push("base or BAH ZIP");
   }
 
-  if (
-    !compensation?.total_monthly &&
-    !scenario?.income &&
-    !normalizedProfile?.income
-  ) {
+  if (!compensation?.total_monthly && !scenario?.income && !normalizedProfile?.income) {
     missing.push("total monthly compensation");
   }
 
@@ -2437,11 +2645,7 @@ function listMissingInputs({
       missing.push("down payment/savings");
     }
 
-    if (
-      !scenario?.expenses &&
-      !normalizedProfile?.monthly_expenses &&
-      !scenario?.debt
-    ) {
+    if (!scenario?.expenses && !normalizedProfile?.monthly_expenses && !scenario?.debt) {
       missing.push("monthly expenses");
     }
   }
@@ -2449,23 +2653,7 @@ function listMissingInputs({
   return [...new Set(missing)];
 }
 
-function buildNextAction({
-  intent,
-  missing,
-  verdict,
-  compensation,
-  mortgage,
-  affordability
-}) {
-  if (intent === "va_loan") {
-    return {
-      type: "va_loan_review",
-      label: "Review VA Loan fit",
-      message:
-        "Next move: confirm COE/funding-fee status, compare the all-in payment against BAH and income, then stress test the plan against PCS timeline and cash reserves."
-    };
-  }
-
+function buildNextAction({ intent, missing, verdict, compensation, mortgage }) {
   if (missing?.length) {
     const top = missing.slice(0, 3).join(", ");
 
@@ -2473,7 +2661,7 @@ function buildNextAction({
       type: "collect_missing_inputs",
       label: "Tighten the profile",
       message: `To give a sharper answer, I need: ${top}.`,
-      missing: missing.slice(0, 5)
+      missing: missing.slice(0, 5),
     };
   }
 
@@ -2482,7 +2670,7 @@ function buildNextAction({
       type: "proceed_with_guardrails",
       label: "Proceed carefully",
       message:
-        "Next move: compare the target payment against BAH, emergency savings, and commute/market risk before you commit."
+        "Next move: compare the target payment against BAH, emergency savings, and commute/market risk before you commit.",
     };
   }
 
@@ -2491,7 +2679,7 @@ function buildNextAction({
       type: "reduce_risk",
       label: "Create more buffer",
       message:
-        "Next move: lower the target price, increase down payment, reduce monthly debt, or compare renting before buying."
+        "Next move: lower the target price, increase down payment, reduce monthly debt, or compare renting before buying.",
     };
   }
 
@@ -2500,7 +2688,7 @@ function buildNextAction({
       type: "pause_or_rework",
       label: "Rework the plan",
       message:
-        "Next move: avoid forcing the purchase. Rebuild the scenario with a lower price, lower debt, or stronger savings."
+        "Next move: avoid forcing the purchase. Rebuild the scenario with a lower price, lower debt, or stronger savings.",
     };
   }
 
@@ -2509,7 +2697,7 @@ function buildNextAction({
       type: "review_housing_cap",
       label: "Review housing cap",
       message:
-        "Next move: use this income to set a safe monthly housing cap before choosing a price range."
+        "Next move: use this income to set a safe monthly housing cap before choosing a price range.",
     };
   }
 
@@ -2518,34 +2706,26 @@ function buildNextAction({
       type: "review_payment",
       label: "Review payment",
       message:
-        "Next move: compare this all-in payment against BAH and your monthly expense load."
-    };
-  }
-
-  if (affordability?.status) {
-    return {
-      type: "review_affordability",
-      label: "Review affordability",
-      message:
-        "Next move: use the affordability status as a checkpoint, then pressure-test the plan with rent-vs-buy and PCS timeline."
+        "Next move: compare this all-in payment against BAH and your monthly expense load.",
     };
   }
 
   return {
     type: "continue",
     label: "Continue",
-    message: "Ask Amy a specific housing, PCS, pay, VA Loan, or dashboard question."
+    message: "Ask Amy a specific housing, PCS, pay, or dashboard question.",
   };
 }
 
 // ============================================================
-// //#14 DIRECT REPLIES
+// //#15 DIRECT REPLIES
 // ============================================================
 
 function buildDirectDeterministicReply({
+  message,
   intent,
   normalizedProfile,
-  deterministic
+  deterministic,
 }) {
   const p = normalizedProfile || {};
   const packet = deterministic?.public || {};
@@ -2553,14 +2733,13 @@ function buildDirectDeterministicReply({
   const mortgage = packet.mortgage;
   const affordability = packet.affordability;
   const verdict = packet.verdict;
-  const vaLoan = packet.va_loan;
 
   if (intent === "greeting") {
     const name = firstName(p.full_name);
 
     return [
       `Hey${name ? ` ${name}` : ""} — I’m Amy, your PCSUnited AI Concierge powered by TheWing.ai.`,
-      "I can help explain your pay, BAH, housing affordability, PCS strategy, mortgage numbers, VA Loan questions, and dashboard readiness in plain English."
+      "I can help explain your pay, BAH, housing affordability, PCS strategy, mortgage numbers, and dashboard readiness in plain English.",
     ].join(" ");
   }
 
@@ -2569,15 +2748,19 @@ function buildDirectDeterministicReply({
 
     const profileLine =
       p.rank_paygrade || p.base
-        ? ` I have ${[p.rank_paygrade || p.rank, p.base, p.zip]
+        ? ` I have ${[
+            p.rank_paygrade || p.rank,
+            p.base,
+            p.zip,
+          ]
             .filter(Boolean)
             .join(" • ")} loaded.`
         : "";
 
     return [
       `Yes${name ? ` ${name}` : ""} — I’m working.`,
-      "I can help with pay, BAH, affordability, mortgage estimates, VA Loan basics, funding-fee guidance, rent vs. buy, PCS housing strategy, and dashboard readiness.",
-      profileLine
+      "I can help with pay, BAH, affordability, mortgage estimates, rent vs. buy, PCS housing strategy, and dashboard readiness.",
+      profileLine,
     ]
       .filter(Boolean)
       .join(" ");
@@ -2607,27 +2790,22 @@ function buildDirectDeterministicReply({
     return `Here’s what I have loaded from your member profile: ${pieces.join(" • ")}.`;
   }
 
-  if (intent === "va_loan" && vaLoan) {
-    const reply = buildDirectVaLoanReply({ packet: vaLoan });
-
-    if (reply) return reply;
-  }
-
   if (intent === "compensation" && comp?.total_monthly) {
     return [
       `BLUF: Your estimated monthly compensation is ${money(comp.total_monthly)}.`,
       comp.base_pay || comp.bas || comp.bah
         ? `That breaks down as Base Pay ${money(comp.base_pay)}, BAS ${money(comp.bas)}, and BAH ${money(comp.bah)}.`
         : "I do not have the full pay breakdown, but I do have a saved monthly income value from your member profile.",
-      comp.va_disability_pay
-        ? `VA disability compensation loaded: ${money(comp.va_disability_pay)} monthly.`
-        : "",
       comp.base || comp.zip
-        ? `I’m using ${[comp.rank_paygrade, comp.base, comp.zip]
+        ? `I’m using ${[
+            comp.rank_paygrade,
+            comp.base,
+            comp.zip,
+          ]
             .filter(Boolean)
             .join(" • ")}.`
         : "",
-      comp.note ? `Note: ${comp.note}` : ""
+      comp.note ? `Note: ${comp.note}` : "",
     ]
       .filter(Boolean)
       .join(" ");
@@ -2691,7 +2869,7 @@ function firstName(fullName) {
 }
 
 // ============================================================
-// //#15 OPENAI
+// //#16 OPENAI
 // ============================================================
 
 function buildSystemPrompt({ profileSummary, deterministic }) {
@@ -2703,7 +2881,8 @@ function buildSystemPrompt({ profileSummary, deterministic }) {
     "TheWing.ai is the software intelligence layer behind calculations, profile loading, decision logic, and concierge guidance.",
     "",
     "Your job:",
-    "- Help military members understand pay, BAH, BAS, VA disability, retirement, affordability, mortgage estimates, VA Loans, PCS housing strategy, dashboard readiness, and next steps.",
+    "- Help military members understand pay, BAH, BAS, VA disability, retirement, affordability, mortgage estimates, PCS housing strategy, dashboard readiness, and next steps.",
+    "- Be useful immediately.",
     "- Be BLUF-first.",
     "- Explain numbers clearly.",
     "- Recommend practical next steps.",
@@ -2715,16 +2894,16 @@ function buildSystemPrompt({ profileSummary, deterministic }) {
     "- No fluff.",
     "- Do not over-disclaim.",
     "- Do not be salesy.",
+    "- Keep the answer concise unless the user asks for depth.",
     "",
     "Hard rules:",
-    "- Never invent pay, BAH, mortgage, approval, VA Loan eligibility, funding fee, or affordability numbers.",
-    "- Never infer or change the member's name. Use only the exact full_name or first_name from the member_profile/truth_packet. If no name is present, do not invent one.",
+    "- Never invent pay, BAH, mortgage, approval, or affordability numbers.",
     "- If a deterministic truth packet is provided, trust it over your own math.",
-    "- If a VA Loan packet is provided, use it for VA Loan answers.",
     "- Do not perform legal, tax, or lending approval advice.",
     "- Do not guarantee loan approval, appreciation, rent growth, or investment outcomes.",
     "- If data is missing, say exactly what is missing and ask for the smallest next input.",
     "- If the user asks about their profile, answer only from verified/profile context.",
+    "- If the user asks about affordability, use the provided compensation, mortgage, affordability, and verdict packets.",
     "",
     "Preferred answer shape:",
     "BLUF: one clear recommendation.",
@@ -2737,9 +2916,6 @@ function buildSystemPrompt({ profileSummary, deterministic }) {
     "",
     "Truth packet available:",
     JSON.stringify(packet || {}, null, 2),
-    "",
-    "VA Loan packet available:",
-    JSON.stringify(packet?.va_loan || {}, null, 2)
   ].join("\n");
 }
 
@@ -2749,7 +2925,7 @@ function buildUserPayload({
   intent,
   normalizedProfile,
   deterministic,
-  mergedContext
+  mergedContext,
 }) {
   return {
     user_message: message,
@@ -2759,26 +2935,23 @@ function buildUserPayload({
       name: "Amy",
       display_name: "PCSUnited AI Concierge",
       brand: "PCSUnited",
-      powered_by: "TheWing.ai"
+      powered_by: "TheWing.ai",
     },
     behavior_rules: {
       bluf_first: true,
       use_truth_packet_over_model_math: true,
-      use_va_loan_packet_for_va_questions: true,
       do_not_fabricate_numbers: true,
-      do_not_invent_or_change_member_name: true,
       concise_by_default: true,
-      explain_numbers_plainly: true
+      explain_numbers_plainly: true,
     },
     member_profile: stripSensitiveProfile(normalizedProfile),
     truth_packet: deterministic?.public || null,
-    va_loan_packet: deterministic?.public?.va_loan || null,
     dashboard_context_present: Boolean(
       Object.keys(mergedContext?.fad || {}).length ||
         Object.keys(mergedContext?.kpi_overrides || {}).length
     ),
     output_request:
-      "Return a polished conversational answer only. Do not return JSON unless the user explicitly asks for JSON."
+      "Return a polished conversational answer only. Do not return JSON unless the user explicitly asks for JSON.",
   };
 }
 
@@ -2793,7 +2966,7 @@ async function callOpenAI({ systemPrompt, userPayload, model }) {
       method: "POST",
       headers: {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         model,
@@ -2802,15 +2975,15 @@ async function callOpenAI({ systemPrompt, userPayload, model }) {
         messages: [
           {
             role: "system",
-            content: systemPrompt
+            content: systemPrompt,
           },
           {
             role: "user",
-            content: JSON.stringify(userPayload)
-          }
-        ]
+            content: JSON.stringify(userPayload),
+          },
+        ],
       }),
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     const text = await res.text();
@@ -2831,27 +3004,13 @@ async function callOpenAI({ systemPrompt, userPayload, model }) {
 }
 
 // ============================================================
-// //#16 FALLBACK REPLIES
+// //#17 FALLBACK REPLIES
 // ============================================================
 
 function buildFallbackReply({ intent, normalizedProfile, deterministic }) {
   const packet = deterministic?.public || {};
   const missing = packet.missing_inputs || [];
   const name = firstName(normalizedProfile?.full_name);
-
-  if (intent === "va_loan") {
-    const vaLoan = packet.va_loan;
-    const vaReply = buildDirectVaLoanReply({ packet: vaLoan });
-
-    if (vaReply) return vaReply;
-
-    return [
-      `BLUF: A VA Loan can be a strong PCS buying tool${name ? `, ${name}` : ""}, but it still has to pass the payment, timeline, cash-reserve, and exit-strategy test.`,
-      "Why: Eligible borrowers can often use $0 down and avoid monthly PMI, but closing costs, funding fee status, property condition, appraisal, and occupancy rules still matter.",
-      "Risk: Do not treat VA approval as automatic permission to buy. A short PCS timeline or thin reserves can turn a good loan into a bad plan.",
-      "Next move: confirm COE/funding-fee status, estimate the full all-in payment, then compare it against BAH, total income, and monthly expenses."
-    ].join("\n\n");
-  }
 
   if (intent === "compensation") {
     if (missing.length) {
@@ -2875,20 +3034,20 @@ function buildFallbackReply({ intent, normalizedProfile, deterministic }) {
 
   return [
     `I’m working${name ? `, ${name}` : ""}.`,
-    "I can help with PCS housing strategy, military pay, BAH, VA Loans, mortgage estimates, dashboard readiness, and rent-vs-buy decisions.",
-    "Ask me something like: “What is my Base Pay, BAS, BAH, and total monthly compensation?” or “Can you explain the VA Loan for my situation?”"
+    "I can help with PCS housing strategy, military pay, BAH, mortgage estimates, dashboard readiness, and rent-vs-buy decisions.",
+    "Ask me something like: “What is my Base Pay, BAS, BAH, and total monthly compensation?”",
   ].join(" ");
 }
 
 // ============================================================
-// //#17 STRUCTURED ANSWER
+// //#18 STRUCTURED ANSWER
 // ============================================================
 
 function buildStructuredAnswerFromText({
   reply,
   deterministic,
   normalizedProfile,
-  intent
+  intent,
 }) {
   const packet = deterministic?.public || {};
   const comp = packet.compensation || null;
@@ -2896,7 +3055,6 @@ function buildStructuredAnswerFromText({
   const affordability = packet.affordability || null;
   const verdict = packet.verdict || null;
   const nextAction = packet.next_action || null;
-  const vaLoan = packet.va_loan || null;
 
   const numbers = [];
 
@@ -2904,7 +3062,7 @@ function buildStructuredAnswerFromText({
     numbers.push({
       label: "Total Monthly Compensation",
       value: money(comp.total_monthly),
-      raw: comp.total_monthly
+      raw: comp.total_monthly,
     });
   }
 
@@ -2912,7 +3070,7 @@ function buildStructuredAnswerFromText({
     numbers.push({
       label: "Base Pay",
       value: money(comp.base_pay),
-      raw: comp.base_pay
+      raw: comp.base_pay,
     });
   }
 
@@ -2920,7 +3078,7 @@ function buildStructuredAnswerFromText({
     numbers.push({
       label: "BAS",
       value: money(comp.bas),
-      raw: comp.bas
+      raw: comp.bas,
     });
   }
 
@@ -2928,15 +3086,7 @@ function buildStructuredAnswerFromText({
     numbers.push({
       label: "BAH",
       value: money(comp.bah),
-      raw: comp.bah
-    });
-  }
-
-  if (comp?.va_disability_pay) {
-    numbers.push({
-      label: "VA Disability",
-      value: money(comp.va_disability_pay),
-      raw: comp.va_disability_pay
+      raw: comp.bah,
     });
   }
 
@@ -2944,28 +3094,7 @@ function buildStructuredAnswerFromText({
     numbers.push({
       label: "Estimated All-In Housing Payment",
       value: money(mortgage.all_in_monthly),
-      raw: mortgage.all_in_monthly
-    });
-  }
-
-  const vaFundingFee =
-    vaLoan?.funding_fee ||
-    vaLoan?.purchase_scenario?.loan?.fundingFee ||
-    null;
-
-  if (vaFundingFee?.feeAmount !== undefined && vaFundingFee?.feeAmount !== null) {
-    numbers.push({
-      label: "Estimated VA Funding Fee",
-      value: money(vaFundingFee.feeAmount),
-      raw: vaFundingFee.feeAmount
-    });
-  }
-
-  if (vaFundingFee?.feePctDisplay) {
-    numbers.push({
-      label: "VA Funding Fee Rate",
-      value: vaFundingFee.feePctDisplay,
-      raw: vaFundingFee.feePct
+      raw: mortgage.all_in_monthly,
     });
   }
 
@@ -2976,7 +3105,7 @@ function buildStructuredAnswerFromText({
     numbers.push({
       label: "Housing Ratio",
       value: pct(affordability.housing_ratio),
-      raw: affordability.housing_ratio
+      raw: affordability.housing_ratio,
     });
   }
 
@@ -2987,7 +3116,7 @@ function buildStructuredAnswerFromText({
     numbers.push({
       label: "Back-End Ratio",
       value: pct(affordability.backend_ratio),
-      raw: affordability.backend_ratio
+      raw: affordability.backend_ratio,
     });
   }
 
@@ -3003,14 +3132,6 @@ function buildStructuredAnswerFromText({
 
   if (packet.missing_inputs?.length) {
     risks.push(`Missing inputs: ${packet.missing_inputs.slice(0, 4).join(", ")}.`);
-  }
-
-  if (Array.isArray(vaLoan?.warnings) && vaLoan.warnings.length) {
-    risks.push(...vaLoan.warnings.slice(0, 2));
-  }
-
-  if (Array.isArray(vaLoan?.guidance?.risks) && vaLoan.guidance.risks.length) {
-    risks.push(...vaLoan.guidance.risks.slice(0, 2));
   }
 
   const recommendations = [];
@@ -3029,16 +3150,8 @@ function buildStructuredAnswerFromText({
     );
   }
 
-  if (intent === "va_loan" && Array.isArray(vaLoan?.guidance?.next_steps)) {
-    recommendations.push(...vaLoan.guidance.next_steps.slice(0, 2));
-  }
-
   return {
-    bluf:
-      verdict?.bluf ||
-      vaLoan?.bluf ||
-      firstSentence(reply) ||
-      "Amy has a first-pass recommendation.",
+    bluf: verdict?.bluf || firstSentence(reply) || "Amy has a first-pass recommendation.",
     summary: reply,
     status: verdict?.status || null,
     grade: verdict?.grade || null,
@@ -3050,9 +3163,9 @@ function buildStructuredAnswerFromText({
       intent,
       missing: packet.missing_inputs || [],
       mortgage,
-      vaLoan
+      affordability,
     }),
-    profile_used: stripSensitiveProfile(normalizedProfile)
+    profile_used: stripSensitiveProfile(normalizedProfile),
   };
 }
 
@@ -3063,17 +3176,9 @@ function firstSentence(text) {
   return match ? match[1] : s.slice(0, 180);
 }
 
-function buildFollowUpQuestion({ intent, missing, mortgage, vaLoan }) {
-  if (missing?.length && intent !== "va_loan") {
+function buildFollowUpQuestion({ intent, missing, mortgage }) {
+  if (missing?.length) {
     return `Want to add ${missing[0]} so I can tighten the answer?`;
-  }
-
-  if (intent === "va_loan") {
-    if (vaLoan?.funding_fee?.exempt) {
-      return "Want me to compare the VA Loan payment against your BAH and PCS timeline?";
-    }
-
-    return "Want me to estimate the VA funding fee and show how it affects the loan balance?";
   }
 
   if (intent === "housing_affordability" && mortgage?.all_in_monthly) {
@@ -3088,7 +3193,7 @@ function buildFollowUpQuestion({ intent, missing, mortgage, vaLoan }) {
 }
 
 // ============================================================
-// //#18 PROFILE / OUTPUT HELPERS
+// //#19 PROFILE / OUTPUT HELPERS
 // ============================================================
 
 function buildProfileSummary(profile, deterministic) {
@@ -3174,6 +3279,6 @@ function stripSensitiveProfile(profile) {
     savings: p.savings,
     credit_score: p.credit_score,
     bedrooms: p.bedrooms,
-    cityKey: p.cityKey
+    cityKey: p.cityKey,
   });
 }
