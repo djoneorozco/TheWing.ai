@@ -1,7 +1,7 @@
 // netlify/functions/_share/compensation-context.js
 // ============================================================
 // TheWing.ai • Compensation Context Adapter
-// v1.0.0
+// v1.0.1
 //
 // FILE
 // - netlify/functions/_share/compensation-context.js
@@ -25,6 +25,10 @@
 // - NO OpenAI dependency
 // - NO localStorage dependency
 // - Safe, reusable shared module
+//
+// BUILD FIX v1.0.1
+// - Removed top-level await because Netlify bundling can emit CJS output
+// - Uses static ESM import for official-retirement.js
 //
 // MAIN EXPORTS
 // - buildCompensationContext(input)
@@ -61,19 +65,13 @@ import {
   PAY_ENGINE_VERSION
 } from "./pay-engine.js";
 
-let retirementModule = null;
-
-try {
-  retirementModule = await import("./official-retirement.js");
-} catch (_) {
-  retirementModule = null;
-}
+import * as retirementModule from "./official-retirement.js";
 
 // ============================================================
 // //#2) VERSION
 // ============================================================
 
-export const COMPENSATION_CONTEXT_VERSION = "compensation-context-2026.1";
+export const COMPENSATION_CONTEXT_VERSION = "compensation-context-2026.1.1";
 
 // ============================================================
 // //#3) SMALL HELPERS
@@ -331,11 +329,6 @@ function normalizeMode(value) {
 function isVeteranLike(mode) {
   const s = normalizeMode(mode);
   return s === "veteran" || s === "retired";
-}
-
-function isActiveLike(mode) {
-  const s = normalizeMode(mode);
-  return s === "active_duty" || s === "active" || s === "reserve" || s === "guard";
 }
 
 // ============================================================
@@ -663,23 +656,24 @@ function resolveBah(normalized) {
     };
   }
 
-  if (!base) {
+  if (!base && !normalized.zip) {
     return {
       ok: false,
-      error: "Missing base for BAH.",
+      error: "Missing base or ZIP for BAH.",
       bahMonthly: 0
     };
   }
 
   try {
-    const record = getBahRecord(base, rank, dependents);
+    const locationInput = base || normalized.zip;
+    const record = getBahRecord(locationInput, rank, dependents);
 
     return {
       ok: true,
       base: record.base,
       canonicalBase: record.canonicalBase || record.base,
-      dutyZip: record.dutyZip,
-      zip: record.dutyZip,
+      dutyZip: record.dutyZip || normalized.zip,
+      zip: record.dutyZip || normalized.zip,
       mhaCode: record.mhaCode,
       mhaName: record.mhaName,
       rank: record.rank,
@@ -688,18 +682,22 @@ function resolveBah(normalized) {
       rateVersion: record.rateVersion || OFFICIAL_BAH_RATE_VERSION
     };
   } catch (error) {
-    let dutyZip = "";
+    let dutyZip = normalized.zip || "";
 
-    try {
-      dutyZip = getDutyZip(base);
-    } catch (_) {}
+    if (base) {
+      try {
+        dutyZip = getDutyZip(base);
+      } catch (_) {}
+    }
 
     let canonicalBase = "";
 
-    try {
-      canonicalBase = canonicalizeBase(base);
-    } catch (_) {
-      canonicalBase = base;
+    if (base) {
+      try {
+        canonicalBase = canonicalizeBase(base);
+      } catch (_) {
+        canonicalBase = base;
+      }
     }
 
     return {
@@ -962,7 +960,7 @@ export function buildCompensationContext(input = {}) {
 
   if (bah.ok) {
     notes.push(
-      `BAH resolved from ${bah.canonicalBase || bah.base} / ${bah.dutyZip} using ${bah.dependents} dependents.`
+      `BAH resolved from ${bah.canonicalBase || bah.base || normalized.base || normalized.zip} / ${bah.dutyZip || normalized.zip} using ${bah.dependents} dependents.`
     );
   }
 
@@ -1034,7 +1032,6 @@ export function buildCompensationContext(input = {}) {
       payEngine: payEngineResult
     },
 
-    // ask-amy.js normalizeCompensation compatibility
     rank: normalized.rank,
     rank_paygrade: normalized.rank,
     paygrade: normalized.rank,
