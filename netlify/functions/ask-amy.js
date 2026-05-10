@@ -1,17 +1,21 @@
 // netlify/functions/ask-amy.js
 // ============================================================
 // TheWing.ai • PCSUnited AI Concierge — Ask Amy
-// v1.3.1 • ES MODULE + VA LOAN ENGINE
+// v1.4.0 • ES MODULE + AGENT REGISTRY
 //
 // PURPOSE
 // - Member-facing PCSUnited AI Concierge endpoint
 // - Compatible with package.json: { "type": "module" }
 // - Reads PCSUnited profile/bridge/dashboard context from frontend
 // - Enriches from Supabase when email exists
-// - Uses _share/compensation-context.js for Base Pay + BAS + BAH + VA
-// - Uses _share/mortgage-engine.js for mortgage math when available
-// - Uses _share/va-loans.js for VA Loan education + strategy guidance
+// - Uses _share/agent-registry.js as the shared intelligence switchboard
+// - Keeps Ask Amy stable while future _share tools are added to registry
 // - Uses OpenAI only as the conversational explanation layer
+//
+// CURRENT FLOW
+// PCSUnited Login → TheWing /api/login → Supabase profile
+// → localStorage bridge → Ask Amy widget → /api/ask-amy
+// → agent-registry.js → shared tools → Amy response
 //
 // CLIENT
 // - POST https://thewing.netlify.app/api/ask-amy
@@ -34,15 +38,13 @@
 // ============================================================
 
 import { createClient } from "@supabase/supabase-js";
-import * as compensationContext from "./_share/compensation-context.js";
-import * as mortgageEngine from "./_share/mortgage-engine.js";
-import * as vaLoans from "./_share/va-loans.js";
+import * as agentRegistry from "./_share/agent-registry.js";
 
 // ============================================================
 // //#2 CONFIG
 // ============================================================
 
-const VERSION = "1.3.1";
+const VERSION = "1.4.0";
 const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const DEFAULT_RESPONSE_MODE = "member_guidance";
 const MAX_MESSAGE_LENGTH = 5000;
@@ -186,7 +188,6 @@ export async function handler(event) {
     const profileSummary = buildProfileSummary(normalizedProfile, deterministic);
 
     const directReply = buildDirectDeterministicReply({
-      message,
       intent,
       normalizedProfile,
       deterministic
@@ -381,10 +382,6 @@ function normalizeEmail(value) {
   return email.includes("@") ? email : "";
 }
 
-function clean(value) {
-  return String(value ?? "").trim();
-}
-
 function num(value) {
   if (value === null || value === undefined || value === "") return null;
 
@@ -483,10 +480,6 @@ function roundMoney(value) {
   return Number.isFinite(n) ? Math.round(n) : null;
 }
 
-function round2(value) {
-  return Math.round((Number(value) || 0) * 100) / 100;
-}
-
 function clamp(value, min, max) {
   const n = Number(value);
   if (!Number.isFinite(n)) return null;
@@ -545,6 +538,24 @@ function stripEmpty(obj) {
   return out;
 }
 
+function getExportedFunction(mod, names = []) {
+  if (!mod) return null;
+
+  for (const name of names) {
+    if (typeof mod[name] === "function") return mod[name];
+
+    if (mod.default && typeof mod.default[name] === "function") {
+      return mod.default[name];
+    }
+  }
+
+  if (typeof mod === "function") return mod;
+
+  if (typeof mod.default === "function") return mod.default;
+
+  return null;
+}
+
 // ============================================================
 // //#6 PAYLOAD / CONTEXT INGEST
 // ============================================================
@@ -577,11 +588,7 @@ function collectClientContext(body) {
     body?.user || {}
   );
 
-  const bridge = mergeDeep(
-    {},
-    body?.bridge || {},
-    context?.bridge || {}
-  );
+  const bridge = mergeDeep({}, body?.bridge || {}, context?.bridge || {});
 
   const identity = mergeDeep(
     {},
@@ -1387,6 +1394,11 @@ async function buildTruthPacket({
   normalizedProfile,
   debug
 }) {
+  const registryInfo =
+    typeof agentRegistry.getAgentRegistryInfo === "function"
+      ? agentRegistry.getAgentRegistryInfo()
+      : { tools: [] };
+
   const truth = {
     ok: true,
     ts: nowIso(),
@@ -1401,11 +1413,9 @@ async function buildTruthPacket({
           Object.keys(mergedContext?.kpi_overrides || {}).length
       ),
       supabase: Boolean(mergedContext?.supabase_loaded),
-      shared_engines: {
-        compensation_context: Boolean(compensationContext),
-        mortgage_engine: Boolean(mortgageEngine),
-        va_loans: Boolean(vaLoans)
-      }
+      agent_registry: Boolean(agentRegistry),
+      registry_version: registryInfo?.version || null,
+      shared_engines: buildRegistryEngineMap(registryInfo)
     },
     internal: {},
     public: {
@@ -1416,6 +1426,7 @@ async function buildTruthPacket({
       affordability: null,
       verdict: null,
       va_loan: null,
+      registry_packets: null,
       next_action: null,
       missing_inputs: []
     },
@@ -1460,7 +1471,7 @@ async function buildTruthPacket({
     truth.public.mortgage = mortgage;
   }
 
-  const affordability = computeAffordabilitySafe({
+  const affordability = await computeAffordabilitySafe({
     normalizedProfile,
     scenario,
     compensation,
@@ -1472,7 +1483,9 @@ async function buildTruthPacket({
     truth.public.affordability = affordability;
   }
 
-  const verdict = computeVerdictFallback({
+  const verdict = await computeVerdictSafe({
+    normalizedProfile,
+    scenario,
     compensation,
     mortgage,
     affordability
@@ -1488,7 +1501,8 @@ async function buildTruthPacket({
     scenario,
     compensation,
     mortgage,
-    affordability
+    affordability,
+    verdict
   });
 
   if (vaLoan) {
@@ -1496,22 +1510,68 @@ async function buildTruthPacket({
     truth.public.va_loan = vaLoan;
   }
 
-  truth.public.missing_inputs = listMissingInputs({
+  const registryPackets = await buildRegistryPacketsSafe({
+    message,
+    intent,
+    email,
     normalizedProfile,
     scenario,
     compensation,
     mortgage,
+    affordability,
+    verdict
+  });
+
+  if (registryPackets?.packets && Object.keys(registryPackets.packets).length) {
+    truth.public.registry_packets = registryPackets.packets;
+
+    if (!truth.public.va_loan && registryPackets.packets.va_loans) {
+      truth.public.va_loan = registryPackets.packets.va_loans;
+      truth.context_used.va_loan = true;
+    }
+
+    if (!truth.public.compensation && registryPackets.packets.compensation_context) {
+      truth.public.compensation = normalizeCompensation(
+        registryPackets.packets.compensation_context,
+        scenario
+      );
+      truth.context_used.compensation = Boolean(truth.public.compensation);
+    }
+
+    if (!truth.public.mortgage && registryPackets.packets.mortgage_engine) {
+      truth.public.mortgage = normalizeMortgage(
+        registryPackets.packets.mortgage_engine,
+        scenario
+      );
+      truth.context_used.housing = Boolean(truth.public.mortgage);
+    }
+
+    if (!truth.public.affordability && registryPackets.packets.affordability_engine) {
+      truth.public.affordability = registryPackets.packets.affordability_engine;
+      truth.context_used.housing = true;
+    }
+
+    if (!truth.public.verdict && registryPackets.packets.decision_rules) {
+      truth.public.verdict = registryPackets.packets.decision_rules;
+    }
+  }
+
+  truth.public.missing_inputs = listMissingInputs({
+    normalizedProfile,
+    scenario,
+    compensation: truth.public.compensation,
+    mortgage: truth.public.mortgage,
     intent
   });
 
   truth.public.next_action = buildNextAction({
     intent,
     missing: truth.public.missing_inputs,
-    verdict,
-    compensation,
-    mortgage,
-    affordability,
-    vaLoan
+    verdict: truth.public.verdict,
+    compensation: truth.public.compensation,
+    mortgage: truth.public.mortgage,
+    affordability: truth.public.affordability,
+    vaLoan: truth.public.va_loan
   });
 
   if (debug) {
@@ -1520,14 +1580,73 @@ async function buildTruthPacket({
       scenario,
       merged_context_keys: Object.keys(mergedContext || {}),
       normalized_profile_keys: Object.keys(normalizedProfile || {}),
-      compensation_loaded: Boolean(compensation),
-      mortgage_loaded: Boolean(mortgage),
-      va_loan_loaded: Boolean(vaLoan),
-      supabase_loaded: Boolean(mergedContext?.supabase_loaded)
+      compensation_loaded: Boolean(truth.public.compensation),
+      mortgage_loaded: Boolean(truth.public.mortgage),
+      affordability_loaded: Boolean(truth.public.affordability),
+      verdict_loaded: Boolean(truth.public.verdict),
+      va_loan_loaded: Boolean(truth.public.va_loan),
+      supabase_loaded: Boolean(mergedContext?.supabase_loaded),
+      registry_info: registryInfo,
+      registry_packets_context_used: registryPackets?.context_used || null,
+      registry_errors: registryPackets?.errors || []
     };
   }
 
   return truth;
+}
+
+function buildRegistryEngineMap(registryInfo) {
+  const tools = Array.isArray(registryInfo?.tools) ? registryInfo.tools : [];
+
+  const out = {};
+
+  tools.forEach((tool) => {
+    if (tool?.name) out[tool.name] = true;
+  });
+
+  return out;
+}
+
+async function buildRegistryPacketsSafe({
+  message,
+  intent,
+  email,
+  normalizedProfile,
+  scenario,
+  compensation,
+  mortgage,
+  affordability,
+  verdict
+}) {
+  if (typeof agentRegistry.buildToolPackets !== "function") {
+    return null;
+  }
+
+  try {
+    return await agentRegistry.buildToolPackets({
+      message,
+      intent,
+      email,
+      profile: normalizedProfile,
+      normalizedProfile,
+      scenario,
+      compensation,
+      mortgage,
+      affordability,
+      verdict,
+      context: {
+        profile: normalizedProfile,
+        scenario,
+        compensation,
+        mortgage,
+        affordability,
+        verdict
+      }
+    });
+  } catch (err) {
+    console.warn("agent-registry buildToolPackets failed:", err?.message || err);
+    return null;
+  }
 }
 
 function buildScenario({ message, mergedContext, normalizedProfile }) {
@@ -1805,7 +1924,7 @@ function parseHypotheticalCreditScore(message) {
 }
 
 // ============================================================
-// //#11 COMPENSATION ENGINE
+// //#11 COMPENSATION ENGINE — THROUGH AGENT REGISTRY
 // ============================================================
 
 async function computeCompensationSafe(profile, scenario) {
@@ -1822,23 +1941,31 @@ async function computeCompensationSafe(profile, scenario) {
     base: scenario.base || profile.base,
     zip: scenario.zip || profile.zip,
     bahZip: scenario.zip || profile.zip,
-    va_disability: scenario.va_disability ?? profile.va_disability
+    va_disability: scenario.va_disability ?? profile.va_disability,
+    profile,
+    scenario
   };
 
-  const fn =
-    compensationContext.safeBuildCompensationContext ||
-    compensationContext.buildCompensationContext ||
-    compensationContext.default?.safeBuildCompensationContext ||
-    compensationContext.default?.buildCompensationContext;
+  const loaded = await loadRegisteredToolSafe("compensation_context");
 
-  if (typeof fn === "function") {
-    try {
-      const result = await fn(input);
-      if (result && typeof result === "object" && result.ok !== false) {
-        return normalizeCompensation(result, input);
+  if (loaded?.module) {
+    const fn = getExportedFunction(loaded.module, [
+      "safeBuildCompensationContext",
+      "buildCompensationContext",
+      "calculateCompensation",
+      "getCompensation"
+    ]);
+
+    if (typeof fn === "function") {
+      try {
+        const result = await fn(input);
+
+        if (result && typeof result === "object" && result.ok !== false) {
+          return normalizeCompensation(result, input);
+        }
+      } catch (err) {
+        console.warn("agent-registry compensation_context failed:", err?.message || err);
       }
-    } catch (err) {
-      console.warn("compensation-context failed:", err?.message || err);
     }
   }
 
@@ -1874,7 +2001,24 @@ async function computeCompensationSafe(profile, scenario) {
   return null;
 }
 
-function normalizeCompensation(result, input) {
+async function loadRegisteredToolSafe(name) {
+  if (typeof agentRegistry.loadTool !== "function") return null;
+
+  try {
+    const loaded = await agentRegistry.loadTool(name);
+
+    if (loaded?.ok && loaded?.module) {
+      return loaded;
+    }
+
+    return null;
+  } catch (err) {
+    console.warn(`agent-registry loadTool(${name}) failed:`, err?.message || err);
+    return null;
+  }
+}
+
+function normalizeCompensation(result, input = {}) {
   const basePay = num(
     pickFirst(
       result.basePay,
@@ -2078,7 +2222,7 @@ function normalizeCompensation(result, input) {
       pickFirst(
         result.source,
         result.sourceVersion,
-        "TheWing compensation-context"
+        "TheWing agent-registry compensation_context"
       )
     ),
     note: safeStr(
@@ -2094,7 +2238,7 @@ function normalizeCompensation(result, input) {
 }
 
 // ============================================================
-// //#12 MORTGAGE ENGINE
+// //#12 MORTGAGE ENGINE — THROUGH AGENT REGISTRY
 // ============================================================
 
 async function computeMortgageSafe(profile, scenario, compensation) {
@@ -2122,30 +2266,40 @@ async function computeMortgageSafe(profile, scenario, compensation) {
     monthlyIncome: compensation?.total_monthly || null,
     base: scenario.base || profile.base,
     zip: scenario.zip || profile.zip,
-    cityKey: scenario.cityKey || profile.cityKey
+    cityKey: scenario.cityKey || profile.cityKey,
+    profile,
+    scenario,
+    compensation
   };
 
-  const fn =
-    mortgageEngine.safeCalculateMortgage ||
-    mortgageEngine.calculateMortgage ||
-    mortgageEngine.default?.safeCalculateMortgage ||
-    mortgageEngine.default?.calculateMortgage;
+  const loaded = await loadRegisteredToolSafe("mortgage_engine");
 
-  if (typeof fn === "function") {
-    try {
-      const result = await fn(input);
-      if (result && typeof result === "object" && result.ok !== false) {
-        return normalizeMortgage(result, input);
+  if (loaded?.module) {
+    const fn = getExportedFunction(loaded.module, [
+      "safeCalculateMortgage",
+      "calculateMortgage",
+      "computeMortgage",
+      "buildMortgage",
+      "getMortgage"
+    ]);
+
+    if (typeof fn === "function") {
+      try {
+        const result = await fn(input);
+
+        if (result && typeof result === "object" && result.ok !== false) {
+          return normalizeMortgage(result, input);
+        }
+      } catch (err) {
+        console.warn("agent-registry mortgage_engine failed:", err?.message || err);
       }
-    } catch (err) {
-      console.warn("mortgage-engine failed:", err?.message || err);
     }
   }
 
   return computeMortgageFallback(input);
 }
 
-function normalizeMortgage(result, input) {
+function normalizeMortgage(result, input = {}) {
   const principalInterest = num(
     pickFirst(
       result.principal_interest,
@@ -2218,7 +2372,7 @@ function normalizeMortgage(result, input) {
     hoa: roundMoney(hoa),
     pmi: roundMoney(pmi),
     all_in_monthly: roundMoney(allIn),
-    source: safeStr(pickFirst(result.source, "TheWing mortgage-engine")),
+    source: safeStr(pickFirst(result.source, "TheWing agent-registry mortgage_engine")),
     note: safeStr(pickFirst(result.note, result.reason))
   });
 }
@@ -2292,27 +2446,138 @@ function monthlyPaymentPI(principal, apr, termYears) {
 // //#13 AFFORDABILITY + VERDICT
 // ============================================================
 
-function computeAffordabilitySafe({
+async function computeAffordabilitySafe({
   normalizedProfile,
   scenario,
   compensation,
   mortgage
 }) {
-  const income =
-    num(compensation?.total_monthly) ||
-    num(scenario.income) ||
-    num(normalizedProfile.income);
+  const input = {
+    income:
+      num(compensation?.total_monthly) ||
+      num(scenario.income) ||
+      num(normalizedProfile.income),
+    monthlyIncome:
+      num(compensation?.total_monthly) ||
+      num(scenario.income) ||
+      num(normalizedProfile.income),
+    expenses:
+      num(scenario.expenses) ||
+      num(normalizedProfile.monthly_expenses) ||
+      num(scenario.debt) ||
+      num(normalizedProfile.debt) ||
+      0,
+    monthlyExpenses:
+      num(scenario.expenses) ||
+      num(normalizedProfile.monthly_expenses) ||
+      num(scenario.debt) ||
+      num(normalizedProfile.debt) ||
+      0,
+    housingAllIn: num(mortgage?.all_in_monthly),
+    mortgage: num(mortgage?.all_in_monthly),
+    price: num(scenario.price),
+    homePrice: num(scenario.price),
+    downpayment: num(scenario.downpayment) || 0,
+    creditScore: scenario.creditScore,
+    profile: normalizedProfile,
+    scenario,
+    compensation,
+    mortgage
+  };
 
+  const loaded = await loadRegisteredToolSafe("affordability_engine");
+
+  if (loaded?.module) {
+    const fn = getExportedFunction(loaded.module, [
+      "computeAffordability",
+      "calculateAffordability",
+      "scoreAffordability",
+      "buildAffordability",
+      "affordabilityEngine"
+    ]);
+
+    if (typeof fn === "function") {
+      try {
+        const result = await fn(input);
+
+        if (result && typeof result === "object" && result.ok !== false) {
+          return normalizeAffordability(result, input);
+        }
+      } catch (err) {
+        console.warn("agent-registry affordability_engine failed:", err?.message || err);
+      }
+    }
+  }
+
+  return computeAffordabilityFallback(input);
+}
+
+function normalizeAffordability(result, input = {}) {
+  const income = num(pickFirst(result.income, result.monthlyIncome, input.income));
   if (!income || income <= 0) return null;
 
-  const expenses =
-    num(scenario.expenses) ||
-    num(normalizedProfile.monthly_expenses) ||
-    num(scenario.debt) ||
-    num(normalizedProfile.debt) ||
-    0;
+  const expenses = num(pickFirst(result.expenses, result.monthlyExpenses, input.expenses)) || 0;
 
-  const housingAllIn = num(mortgage?.all_in_monthly);
+  const housingAllIn = num(
+    pickFirst(
+      result.housingAllIn,
+      result.housing_all_in,
+      result.mortgage,
+      input.housingAllIn
+    )
+  );
+
+  const housingRatio = num(
+    pickFirst(
+      result.housing_ratio,
+      result.housingRatio,
+      income && housingAllIn ? housingAllIn / income : null
+    )
+  );
+
+  const backendRatio = num(
+    pickFirst(
+      result.backend_ratio,
+      result.backEndRatio,
+      income && housingAllIn ? (housingAllIn + expenses) / income : null
+    )
+  );
+
+  return stripEmpty({
+    ok: result.ok !== false,
+    income: roundMoney(income),
+    housing_cap_30: roundMoney(
+      pickFirst(result.housing_cap_30, result.housingCap, income * 0.3)
+    ),
+    housing_ratio: housingRatio,
+    expense_ratio: num(
+      pickFirst(
+        result.expense_ratio,
+        result.expenseRatio,
+        income && expenses ? expenses / income : null
+      )
+    ),
+    backend_ratio: backendRatio,
+    residual_income: roundMoney(
+      pickFirst(
+        result.residual_income,
+        result.residual,
+        income && housingAllIn ? income - housingAllIn - expenses : null
+      )
+    ),
+    score: pickFirst(result.score, result.grade, null),
+    status: pickFirst(result.status, result.verdict, null),
+    source: safeStr(pickFirst(result.source, "TheWing agent-registry affordability_engine")),
+    note: safeStr(pickFirst(result.note, result.reason))
+  });
+}
+
+function computeAffordabilityFallback(input) {
+  const income = num(input.income);
+  if (!income || income <= 0) return null;
+
+  const expenses = num(input.expenses) || 0;
+  const housingAllIn = num(input.housingAllIn);
 
   const housingCap = income * 0.3;
   const residual = housingAllIn ? income - housingAllIn - expenses : null;
@@ -2348,6 +2613,76 @@ function computeAffordabilitySafe({
     status,
     source: "ask-amy deterministic affordability math"
   };
+}
+
+async function computeVerdictSafe({
+  normalizedProfile,
+  scenario,
+  compensation,
+  mortgage,
+  affordability
+}) {
+  const input = {
+    normalizedProfile,
+    profile: normalizedProfile,
+    scenario,
+    compensation,
+    mortgage,
+    affordability
+  };
+
+  const loaded = await loadRegisteredToolSafe("decision_rules");
+
+  if (loaded?.module) {
+    const fn = getExportedFunction(loaded.module, [
+      "computeVerdict",
+      "getVerdict",
+      "scoreDecision",
+      "buildDecision",
+      "evaluate",
+      "decisionRules"
+    ]);
+
+    if (typeof fn === "function") {
+      try {
+        const result = await fn(input);
+
+        if (result && typeof result === "object" && result.ok !== false) {
+          return normalizeVerdict(result);
+        }
+      } catch (err) {
+        console.warn("agent-registry decision_rules failed:", err?.message || err);
+      }
+    }
+  }
+
+  return computeVerdictFallback({
+    compensation,
+    mortgage,
+    affordability
+  });
+}
+
+function normalizeVerdict(result) {
+  if (!result || typeof result !== "object") return null;
+
+  const status = safeStr(
+    pickFirst(result.status, result.verdict, result.label, result.decision)
+  ).toUpperCase();
+
+  return stripEmpty({
+    ok: result.ok !== false,
+    status: status || null,
+    grade: pickFirst(result.grade, result.score, null),
+    label: pickFirst(result.label, status || null),
+    bluf: safeStr(pickFirst(result.bluf, result.summary, result.message)),
+    reasons: Array.isArray(result.reasons)
+      ? result.reasons
+      : Array.isArray(result.notes)
+        ? result.notes
+        : [],
+    source: safeStr(pickFirst(result.source, "TheWing agent-registry decision_rules"))
+  });
 }
 
 function computeVerdictFallback({ compensation, mortgage, affordability }) {
@@ -2424,7 +2759,7 @@ function computeVerdictFallback({ compensation, mortgage, affordability }) {
 }
 
 // ============================================================
-// //#14 VA LOAN ENGINE
+// //#14 VA LOAN ENGINE — THROUGH AGENT REGISTRY
 // ============================================================
 
 async function buildVaLoanContextSafe({
@@ -2433,48 +2768,64 @@ async function buildVaLoanContextSafe({
   scenario,
   compensation,
   mortgage,
-  affordability
+  affordability,
+  verdict
 }) {
-  const fromShared = await trySharedVaLoans({
+  const input = {
     message,
     profile: normalizedProfile,
-    scenario,
-    compensation,
-    mortgage,
-    affordability
-  });
-
-  if (fromShared) return normalizeVaLoanPacket(fromShared);
-
-  return buildVaLoanFallbackPacket({
-    message,
     normalizedProfile,
     scenario,
     compensation,
     mortgage,
-    affordability
-  });
-}
+    affordability,
+    verdict,
+    context: {
+      profile: normalizedProfile,
+      scenario,
+      compensation,
+      mortgage,
+      affordability,
+      verdict
+    }
+  };
 
-async function trySharedVaLoans(input) {
-  const fn =
-    vaLoans.buildVaLoanTruthPacket ||
-    vaLoans.analyzeVaLoanQuestion ||
-    vaLoans.getVaLoanGuidance ||
-    vaLoans.default?.buildVaLoanTruthPacket ||
-    vaLoans.default?.analyzeVaLoanQuestion ||
-    vaLoans.default?.getVaLoanGuidance;
+  const loaded = await loadRegisteredToolSafe("va_loans");
 
-  if (typeof fn !== "function") return null;
+  if (loaded?.module) {
+    const fn = getExportedFunction(loaded.module, [
+      "buildVaLoanTruthPacket",
+      "analyzeVaLoanQuestion",
+      "getVaLoanGuidance",
+      "buildVaLoanPacket",
+      "vaLoanEngine"
+    ]);
 
-  try {
-    const result = await fn(input);
-    if (result && typeof result === "object") return result;
-    return null;
-  } catch (err) {
-    console.warn("va-loans failed:", err?.message || err);
-    return null;
+    if (typeof fn === "function") {
+      try {
+        const result = await fn(input);
+
+        if (result && typeof result === "object" && result.ok !== false) {
+          return normalizeVaLoanPacket(result);
+        }
+      } catch (err) {
+        console.warn("agent-registry va_loans failed:", err?.message || err);
+      }
+    }
   }
+
+  if (detectIntent(message) === "va_loan") {
+    return buildVaLoanFallbackPacket({
+      message,
+      normalizedProfile,
+      scenario,
+      compensation,
+      mortgage,
+      affordability
+    });
+  }
+
+  return null;
 }
 
 function normalizeVaLoanPacket(raw) {
@@ -2482,7 +2833,7 @@ function normalizeVaLoanPacket(raw) {
 
   return stripEmpty({
     ...raw,
-    source: safeStr(pickFirst(raw.source, raw._source, "TheWing va-loans.js")),
+    source: safeStr(pickFirst(raw.source, raw._source, "TheWing agent-registry va_loans")),
     topic: safeStr(pickFirst(raw.topic, raw.intent, raw.category)),
     title: safeStr(pickFirst(raw.title, raw.topic_title, raw.guidance?.title)),
     bluf: safeStr(pickFirst(raw.bluf, raw.summary, raw.guidance?.bluf)),
@@ -2504,7 +2855,15 @@ function normalizeVaLoanPacket(raw) {
         ? raw.nextSteps
         : Array.isArray(raw.guidance?.next_steps)
           ? raw.guidance.next_steps
-          : undefined
+          : undefined,
+    funding_fee: pickFirst(
+      raw.funding_fee,
+      raw.fundingFee,
+      raw.purchase_scenario?.loan?.fundingFee,
+      raw.purchase_scenario?.loan?.funding_fee
+    ),
+    purchase_scenario: raw.purchase_scenario || raw.purchaseScenario,
+    profile_signals: raw.profile_signals || raw.profileSignals
   });
 }
 
@@ -2602,7 +2961,7 @@ function buildVaLoanFallbackPacket({
       ? {
           price: roundMoney(price),
           downpayment: roundMoney(downpayment),
-          downPaymentPct: price > 0 ? round2(downpayment / price) : 0,
+          downPaymentPct: price > 0 ? Math.round((downpayment / price) * 10000) / 10000 : 0,
           priorUse,
           fundingFeeExempt,
           loan: {
@@ -2680,7 +3039,7 @@ function estimateVaFundingFeeFallback({
   return {
     exempt: false,
     priorUse: use,
-    downPaymentPct: round2(down / p),
+    downPaymentPct: Math.round((down / p) * 10000) / 10000,
     feePct,
     amount: roundMoney(baseLoan * feePct),
     label
@@ -2924,93 +3283,6 @@ function getFallbackVaGuidance(topic) {
   };
 
   return topics[topic] || topics.overview;
-}
-
-function buildDirectVaLoanReply({ packet }) {
-  if (!packet) return "";
-
-  const lines = [];
-
-  const bluf = safeStr(
-    packet.bluf ||
-      "A VA Loan can be powerful, but it still needs a payment, PCS timeline, reserve, and exit-strategy test."
-  );
-
-  lines.push(`BLUF: ${bluf}`);
-
-  const title = safeStr(packet.title || packet.topic);
-  if (title) lines.push(`Topic: ${title}.`);
-
-  const fundingFee = pickFirst(
-    packet.funding_fee,
-    packet.fundingFee,
-    packet.purchase_scenario?.loan?.fundingFee,
-    packet.purchase_scenario?.loan?.funding_fee
-  );
-
-  if (fundingFee) {
-    if (typeof fundingFee === "object") {
-      const feeAmount = pickFirst(fundingFee.amount, fundingFee.fundingFee);
-      const feePct = pickFirst(fundingFee.feePct, fundingFee.fee_pct);
-      const exempt = fundingFee.exempt === true;
-
-      lines.push(
-        exempt
-          ? "Numbers: VA funding fee looks likely exempt based on the profile signals I have, but that must be confirmed on the COE or by the lender."
-          : `Numbers: estimated VA funding fee is ${money(feeAmount)}${feePct ? ` (${pct(feePct)})` : ""}.`
-      );
-
-      if (packet.purchase_scenario?.loan?.estimatedLoanWithFinancedFundingFee) {
-        lines.push(
-          `If financed, estimated loan balance becomes ${money(
-            packet.purchase_scenario.loan.estimatedLoanWithFinancedFundingFee
-          )}.`
-        );
-      }
-    } else {
-      lines.push(`Numbers: estimated VA funding fee is ${money(fundingFee)}.`);
-    }
-  }
-
-  const keyPoints = Array.isArray(packet.key_points)
-    ? packet.key_points
-    : Array.isArray(packet.keyPoints)
-      ? packet.keyPoints
-      : [];
-
-  if (keyPoints.length) {
-    lines.push(`Why: ${keyPoints.slice(0, 3).join(" ")}`);
-  } else {
-    lines.push(
-      "Why: eligible VA borrowers can often use $0 down and VA Loans do not require monthly PMI, but closing costs, funding-fee status, property condition, appraisal, and occupancy still matter."
-    );
-  }
-
-  const risks = Array.isArray(packet.risks) ? packet.risks : [];
-
-  if (risks.length) {
-    lines.push(`Risk: ${risks.slice(0, 2).join(" ")}`);
-  } else {
-    lines.push(
-      "Risk: approval does not mean the decision is good. The plan still needs to survive PCS timeline, reserves, resale/rent-out fallback, and monthly cash flow."
-    );
-  }
-
-  const nextSteps = Array.isArray(packet.next_steps)
-    ? packet.next_steps
-    : Array.isArray(packet.nextSteps)
-      ? packet.nextSteps
-      : [];
-
-  if (nextSteps.length) {
-    lines.push(`Next move: ${nextSteps.slice(0, 3).join(" ")}`);
-  } else {
-    lines.push(
-      "Next move: confirm COE and funding-fee status, estimate all-in payment and cash-to-close, then compare the payment against BAH, income, expenses, reserves, and PCS timeline."
-    );
-  }
-
-  return lines.join(" ");
 }
 
 // ============================================================
@@ -3322,6 +3594,93 @@ function buildDirectDeterministicReply({
   return "";
 }
 
+function buildDirectVaLoanReply({ packet }) {
+  if (!packet) return "";
+
+  const lines = [];
+
+  const bluf = safeStr(
+    packet.bluf ||
+      "A VA Loan can be powerful, but it still needs a payment, PCS timeline, reserve, and exit-strategy test."
+  );
+
+  lines.push(`BLUF: ${bluf}`);
+
+  const title = safeStr(packet.title || packet.topic);
+  if (title) lines.push(`Topic: ${title}.`);
+
+  const fundingFee = pickFirst(
+    packet.funding_fee,
+    packet.fundingFee,
+    packet.purchase_scenario?.loan?.fundingFee,
+    packet.purchase_scenario?.loan?.funding_fee
+  );
+
+  if (fundingFee) {
+    if (typeof fundingFee === "object") {
+      const feeAmount = pickFirst(fundingFee.amount, fundingFee.fundingFee);
+      const feePct = pickFirst(fundingFee.feePct, fundingFee.fee_pct);
+      const exempt = fundingFee.exempt === true;
+
+      lines.push(
+        exempt
+          ? "Numbers: VA funding fee looks likely exempt based on the profile signals I have, but that must be confirmed on the COE or by the lender."
+          : `Numbers: estimated VA funding fee is ${money(feeAmount)}${feePct ? ` (${pct(feePct)})` : ""}.`
+      );
+
+      if (packet.purchase_scenario?.loan?.estimatedLoanWithFinancedFundingFee) {
+        lines.push(
+          `If financed, estimated loan balance becomes ${money(
+            packet.purchase_scenario.loan.estimatedLoanWithFinancedFundingFee
+          )}.`
+        );
+      }
+    } else {
+      lines.push(`Numbers: estimated VA funding fee is ${money(fundingFee)}.`);
+    }
+  }
+
+  const keyPoints = Array.isArray(packet.key_points)
+    ? packet.key_points
+    : Array.isArray(packet.keyPoints)
+      ? packet.keyPoints
+      : [];
+
+  if (keyPoints.length) {
+    lines.push(`Why: ${keyPoints.slice(0, 3).join(" ")}`);
+  } else {
+    lines.push(
+      "Why: eligible VA borrowers can often use $0 down and VA Loans do not require monthly PMI, but closing costs, funding-fee status, property condition, appraisal, and occupancy still matter."
+    );
+  }
+
+  const risks = Array.isArray(packet.risks) ? packet.risks : [];
+
+  if (risks.length) {
+    lines.push(`Risk: ${risks.slice(0, 2).join(" ")}`);
+  } else {
+    lines.push(
+      "Risk: approval does not mean the decision is good. The plan still needs to survive PCS timeline, reserves, resale/rent-out fallback, and monthly cash flow."
+    );
+  }
+
+  const nextSteps = Array.isArray(packet.next_steps)
+    ? packet.next_steps
+    : Array.isArray(packet.nextSteps)
+      ? packet.nextSteps
+      : [];
+
+  if (nextSteps.length) {
+    lines.push(`Next move: ${nextSteps.slice(0, 3).join(" ")}`);
+  } else {
+    lines.push(
+      "Next move: confirm COE and funding-fee status, estimate all-in payment and cash-to-close, then compare the payment against BAH, income, expenses, reserves, and PCS timeline."
+    );
+  }
+
+  return lines.join(" ");
+}
+
 function firstName(fullName) {
   const s = safeStr(fullName);
   if (!s) return "";
@@ -3339,6 +3698,7 @@ function buildSystemPrompt({ profileSummary, deterministic }) {
     "You are Amy, PCSUnited’s AI Concierge, powered by TheWing.ai.",
     "PCSUnited is the trusted military PCS, housing, and financial-readiness brand.",
     "TheWing.ai is the software intelligence layer behind calculations, profile loading, decision logic, and concierge guidance.",
+    "TheWing.ai uses an agent-registry switchboard to load deterministic tools from _share modules.",
     "",
     "Your job:",
     "- Help military members understand pay, BAH, BAS, VA disability, retirement, affordability, mortgage estimates, VA Loan strategy, PCS housing strategy, dashboard readiness, and next steps.",
@@ -3388,7 +3748,10 @@ function buildSystemPrompt({ profileSummary, deterministic }) {
     JSON.stringify(packet || {}, null, 2),
     "",
     "VA Loan packet available:",
-    JSON.stringify(packet?.va_loan || {}, null, 2)
+    JSON.stringify(packet?.va_loan || {}, null, 2),
+    "",
+    "Registry packets available:",
+    JSON.stringify(packet?.registry_packets || {}, null, 2)
   ].join("\n");
 }
 
@@ -3413,6 +3776,7 @@ function buildUserPayload({
     behavior_rules: {
       bluf_first: true,
       use_truth_packet_over_model_math: true,
+      use_agent_registry_packets: true,
       use_va_loan_packet_for_va_questions: true,
       do_not_invent_or_change_member_name: true,
       do_not_fabricate_numbers: true,
@@ -3424,6 +3788,7 @@ function buildUserPayload({
     },
     member_profile: stripSensitiveProfile(normalizedProfile),
     truth_packet: deterministic?.public || null,
+    registry_packets: deterministic?.public?.registry_packets || null,
     va_loan_packet: deterministic?.public?.va_loan || null,
     dashboard_context_present: Boolean(
       Object.keys(mergedContext?.fad || {}).length ||
@@ -3654,7 +4019,8 @@ function buildStructuredAnswerFromText({
     }
   }
 
-  const financedVaLoan = vaLoan?.purchase_scenario?.loan?.estimatedLoanWithFinancedFundingFee;
+  const financedVaLoan =
+    vaLoan?.purchase_scenario?.loan?.estimatedLoanWithFinancedFundingFee;
 
   if (financedVaLoan) {
     numbers.push({
