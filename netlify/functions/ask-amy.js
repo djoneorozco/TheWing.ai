@@ -1,7 +1,7 @@
 // netlify/functions/ask-amy.js
 // ============================================================
 // TheWing.ai • PCSUnited AI Concierge — Ask Amy
-// v1.1.0
+// v1.2.0
 //
 // PURPOSE
 // - Member-facing PCSUnited AI Concierge endpoint
@@ -9,6 +9,7 @@
 // - Reads profile/bridge/dashboard context from PCSUnited frontend
 // - ALWAYS enriches from Supabase when email exists
 // - Uses deterministic engines when available
+// - Uses compensation-context.js for Base Pay + BAS + BAH + VA
 // - Uses OpenAI only as explanation/conversation layer
 //
 // CORE IDEA
@@ -44,7 +45,22 @@ try {
   createClient = null;
 }
 
+let pathToFileURL = null;
+let nodePath = null;
+
+try {
+  ({ pathToFileURL } = require("url"));
+  nodePath = require("path");
+} catch (_) {
+  pathToFileURL = null;
+  nodePath = null;
+}
+
+const asyncModuleCache = new Map();
+
 const shared = {
+  compensationContext: safeRequire("./_share/compensation-context.js"),
+  compensationContextPath: "./_share/compensation-context.js",
   profileNormalizer: safeRequire("./_share/profile-normalizer.js"),
   payEngine: safeRequire("./_share/pay-engine.js"),
   mortgageEngine: safeRequire("./_share/mortgage-engine.js"),
@@ -57,7 +73,7 @@ const shared = {
 // //#2 CONFIG
 // ============================================================
 
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 
 const ALLOW_ORIGINS = [
   "https://pcsunited.com",
@@ -143,15 +159,8 @@ exports.handler = async function handler(event) {
 
     const clientContext = collectClientContext(body);
 
-    // IMPORTANT:
-    // Frontend localStorage is fast, but Supabase is the source of truth.
-    // We now ALWAYS enrich from Supabase when an email exists.
     const supabaseContext = await loadSupabaseMemberContext(email);
 
-    // Merge priority:
-    // 1) frontend/local dashboard state
-    // 2) Supabase saved member data
-    // 3) frontend profile/bridge again for live dashboard overrides
     const mergedContext = mergeDeep(
       {},
       clientContext,
@@ -380,6 +389,53 @@ function safeRequire(relPath) {
   } catch (_) {
     return null;
   }
+}
+
+async function safeImport(relPath) {
+  if (!relPath) return null;
+
+  if (asyncModuleCache.has(relPath)) {
+    return asyncModuleCache.get(relPath);
+  }
+
+  try {
+    if (!pathToFileURL || !nodePath || typeof __dirname === "undefined") {
+      asyncModuleCache.set(relPath, null);
+      return null;
+    }
+
+    const absPath = nodePath.join(__dirname, relPath);
+    const mod = await import(pathToFileURL(absPath).href);
+    asyncModuleCache.set(relPath, mod);
+    return mod;
+  } catch (err) {
+    console.warn(`safeImport(${relPath}) failed:`, err?.message || err);
+    asyncModuleCache.set(relPath, null);
+    return null;
+  }
+}
+
+function getExportedFunction(mod, names = []) {
+  if (!mod) return null;
+
+  for (const name of names) {
+    if (typeof mod[name] === "function") return mod[name];
+    if (mod.default && typeof mod.default[name] === "function") {
+      return mod.default[name];
+    }
+  }
+
+  if (typeof mod === "function") return mod;
+  if (typeof mod.default === "function") return mod.default;
+
+  return null;
+}
+
+function unwrapModule(mod) {
+  if (!mod) return null;
+  return mod.default && typeof mod.default === "object"
+    ? { ...mod.default, ...mod }
+    : mod;
 }
 
 function safeJsonParse(raw) {
@@ -1330,6 +1386,7 @@ async function buildTruthPacket({
       ),
       supabase: Boolean(mergedContext?.supabase_loaded),
       shared_engines: {
+        compensation_context: Boolean(shared.compensationContext),
         profile_normalizer: Boolean(shared.profileNormalizer),
         pay_engine: Boolean(shared.payEngine),
         mortgage_engine: Boolean(shared.mortgageEngine),
@@ -1696,7 +1753,7 @@ async function computeCompensationSafe(profile, scenario) {
     va_disability: scenario.va_disability ?? profile.va_disability,
   };
 
-  const engineResult = trySharedPayEngine(input);
+  const engineResult = await trySharedPayEngine(input);
 
   if (engineResult) return normalizeCompensation(engineResult, input);
 
@@ -1732,9 +1789,38 @@ async function computeCompensationSafe(profile, scenario) {
   return null;
 }
 
-function trySharedPayEngine(input) {
-  const mod = shared.payEngine;
-  if (!mod) return null;
+async function trySharedPayEngine(input) {
+  const compensationCandidates = [
+    shared.compensationContext,
+    await safeImport(shared.compensationContextPath || "./_share/compensation-context.js"),
+  ]
+    .map(unwrapModule)
+    .filter(Boolean);
+
+  for (const comp of compensationCandidates) {
+    const fn = getExportedFunction(comp, [
+      "buildCompensationContext",
+      "safeBuildCompensationContext",
+    ]);
+
+    if (typeof fn === "function") {
+      try {
+        const result = await fn(input);
+        if (result && typeof result === "object" && result.ok !== false) {
+          return result;
+        }
+      } catch (err) {
+        console.warn("compensation-context failed:", err?.message || err);
+      }
+    }
+  }
+
+  const payCandidates = [
+    shared.payEngine,
+    await safeImport("./_share/pay-engine.js"),
+  ]
+    .map(unwrapModule)
+    .filter(Boolean);
 
   const functionNames = [
     "computePay",
@@ -1743,25 +1829,30 @@ function trySharedPayEngine(input) {
     "calculateCompensation",
     "getCompensation",
     "payEngine",
+    "calculateMonthlyMilitaryIncome",
+    "calculatePaySummary",
+    "safeCalculateMonthlyMilitaryIncome",
   ];
 
-  for (const name of functionNames) {
-    if (typeof mod[name] === "function") {
-      try {
-        const result = mod[name](input);
-        if (result && typeof result === "object") return result;
-      } catch (err) {
-        console.warn(`pay-engine.${name} failed:`, err?.message || err);
+  for (const mod of payCandidates) {
+    for (const name of functionNames) {
+      if (typeof mod[name] === "function") {
+        try {
+          const result = await mod[name](input);
+          if (result && typeof result === "object") return result;
+        } catch (err) {
+          console.warn(`pay-engine.${name} failed:`, err?.message || err);
+        }
       }
     }
-  }
 
-  if (typeof mod === "function") {
-    try {
-      const result = mod(input);
-      if (result && typeof result === "object") return result;
-    } catch (err) {
-      console.warn("pay-engine default function failed:", err?.message || err);
+    if (typeof mod === "function") {
+      try {
+        const result = await mod(input);
+        if (result && typeof result === "object") return result;
+      } catch (err) {
+        console.warn("pay-engine default function failed:", err?.message || err);
+      }
     }
   }
 
@@ -1770,21 +1861,73 @@ function trySharedPayEngine(input) {
 
 function normalizeCompensation(result, input) {
   const basePay = num(
-    pickFirst(result.basePay, result.base_pay, result.base, result.monthly_base_pay)
+    pickFirst(
+      result.basePay,
+      result.base_pay,
+      result.basicPay,
+      result.monthly_base_pay,
+      result.monthly?.basePay,
+      result.monthly?.basicPay,
+      result.basicPayMonthly,
+      result.monthly?.basic_pay
+    )
   );
 
   const bas = num(
-    pickFirst(result.bas, result.BAS, result.basic_allowance_subsistence)
+    pickFirst(
+      result.bas,
+      result.BAS,
+      result.basic_allowance_subsistence,
+      result.monthly?.bas,
+      result.basMonthly
+    )
   );
 
-  const bah = num(pickFirst(result.bah, result.BAH, result.housing_allowance));
+  const bah = num(
+    pickFirst(
+      result.bah,
+      result.BAH,
+      result.bahMonthly,
+      result.monthlyBah,
+      result.housing_allowance,
+      result.monthly?.bah,
+      result.components?.bah?.bahMonthly
+    )
+  );
 
   const va = num(
-    pickFirst(result.va, result.va_disability_pay, result.disability, result.vaCompensation)
+    pickFirst(
+      result.va,
+      result.va_disability_pay,
+      result.vaCompensation,
+      result.vaMonthly,
+      result.disability,
+      result.monthly?.vaDisability,
+      result.components?.va?.vaMonthly
+    )
   );
 
   const retirement = num(
-    pickFirst(result.retirement, result.retired_pay, result.retirement_pay)
+    pickFirst(
+      result.retirement,
+      result.retired_pay,
+      result.retirement_pay,
+      result.retirementMonthly,
+      result.monthly?.retirement,
+      result.components?.retirement?.retirementMonthly
+    )
+  );
+
+  const specialPay = num(
+    pickFirst(result.specialPay, result.specialPayMonthly, result.monthly?.specialPay)
+  );
+
+  const spouseIncome = num(
+    pickFirst(result.spouseIncome, result.spouseIncomeMonthly, result.monthly?.spouseIncome)
+  );
+
+  const additionalIncome = num(
+    pickFirst(result.additionalIncome, result.additionalIncomeMonthly, result.monthly?.additionalIncome)
   );
 
   const total = num(
@@ -1793,16 +1936,40 @@ function normalizeCompensation(result, input) {
       result.totalMonthly,
       result.total_monthly,
       result.monthly_total,
-      [basePay, bas, bah, va, retirement]
+      result.householdIncomeMonthly,
+      result.militaryIncomeMonthly,
+      result.monthly?.total,
+      result.monthly?.householdIncome,
+      result.monthly?.militaryIncome,
+      result.totalMonthlyMilitaryIncome,
+      result.totalHouseholdIncomeMonthly,
+      [
+        basePay,
+        bas,
+        bah,
+        va,
+        retirement,
+        specialPay,
+        spouseIncome,
+        additionalIncome,
+      ]
         .filter((x) => Number.isFinite(x))
         .reduce((a, b) => a + b, 0)
     )
   );
 
   if (
-    ![basePay, bas, bah, va, retirement, total].some(
-      (x) => Number.isFinite(x) && x > 0
-    )
+    ![
+      basePay,
+      bas,
+      bah,
+      va,
+      retirement,
+      specialPay,
+      spouseIncome,
+      additionalIncome,
+      total,
+    ].some((x) => Number.isFinite(x) && x > 0)
   ) {
     return null;
   }
@@ -1810,23 +1977,83 @@ function normalizeCompensation(result, input) {
   return stripEmpty({
     ok: result.ok !== false,
     rank_paygrade: normalizePaygrade(
-      pickFirst(result.rank_paygrade, result.paygrade, input.rank_paygrade)
+      pickFirst(
+        result.rank_paygrade,
+        result.paygrade,
+        result.rank,
+        result.profile?.rank_paygrade,
+        input.rank_paygrade
+      )
     ),
     rank_short: rankShort(
-      pickFirst(result.rank_paygrade, result.paygrade, input.rank_paygrade)
+      pickFirst(
+        result.rank_paygrade,
+        result.paygrade,
+        result.rank,
+        result.profile?.rank_paygrade,
+        input.rank_paygrade
+      )
     ),
-    yos: num(pickFirst(result.yos, input.yos)),
-    base: safeStr(pickFirst(result.base, input.base)),
-    zip: safeStr(pickFirst(result.resolvedZip, result.zip, input.zip)),
-    with_dependents: input.withDependents ?? input.family,
+    yos: num(
+      pickFirst(
+        result.yos,
+        result.yearsOfService,
+        result.profile?.yos,
+        result.profile?.yearsOfService,
+        input.yos
+      )
+    ),
+    base: safeStr(
+      pickFirst(
+        result.resolvedBase,
+        result.canonicalBase,
+        result.base,
+        result.profile?.base,
+        input.base
+      )
+    ),
+    zip: safeStr(
+      pickFirst(
+        result.resolvedZip,
+        result.dutyZip,
+        result.zip,
+        result.profile?.zip,
+        result.profile?.dutyZip,
+        input.zip
+      )
+    ),
+    mha_code: safeStr(pickFirst(result.mhaCode, result.profile?.mhaCode)),
+    mha_name: safeStr(pickFirst(result.mhaName, result.profile?.mhaName)),
+    with_dependents: pickFirst(
+      result.with_dependents,
+      result.profile?.hasDependents,
+      input.withDependents,
+      input.family
+    ),
+    dependents: pickFirst(result.dependents, result.profile?.dependents),
+
     base_pay: roundMoney(basePay),
     bas: roundMoney(bas),
     bah: roundMoney(bah),
     va_disability_pay: roundMoney(va),
     retirement_pay: roundMoney(retirement),
+    special_pay: roundMoney(specialPay),
+    spouse_income: roundMoney(spouseIncome),
+    additional_income: roundMoney(additionalIncome),
     total_monthly: roundMoney(total),
-    source: safeStr(pickFirst(result.source, "TheWing pay-engine")),
-    note: safeStr(pickFirst(result.note, result.bahNote, result.reason)),
+
+    source: safeStr(
+      pickFirst(result.source, result.sourceVersion, "TheWing compensation-context/pay-engine")
+    ),
+    note: safeStr(
+      pickFirst(
+        result.note,
+        Array.isArray(result.notes) ? result.notes.join(" ") : "",
+        result.bahNote,
+        result.reason
+      )
+    ),
+    warnings: Array.isArray(result.warnings) ? result.warnings : undefined,
   });
 }
 
@@ -1862,42 +2089,49 @@ async function computeMortgageSafe(profile, scenario, compensation) {
     cityKey: scenario.cityKey || profile.cityKey,
   };
 
-  const engineResult = trySharedMortgageEngine(input);
+  const engineResult = await trySharedMortgageEngine(input);
 
   if (engineResult) return normalizeMortgage(engineResult, input);
 
   return computeMortgageFallback(input);
 }
 
-function trySharedMortgageEngine(input) {
-  const mod = shared.mortgageEngine;
-  if (!mod) return null;
+async function trySharedMortgageEngine(input) {
+  const mortgageCandidates = [
+    shared.mortgageEngine,
+    await safeImport("./_share/mortgage-engine.js"),
+  ]
+    .map(unwrapModule)
+    .filter(Boolean);
 
   const functionNames = [
     "computeMortgage",
     "calculateMortgage",
+    "safeCalculateMortgage",
     "mortgageEngine",
     "getMortgage",
     "buildMortgage",
   ];
 
-  for (const name of functionNames) {
-    if (typeof mod[name] === "function") {
-      try {
-        const result = mod[name](input);
-        if (result && typeof result === "object") return result;
-      } catch (err) {
-        console.warn(`mortgage-engine.${name} failed:`, err?.message || err);
+  for (const mod of mortgageCandidates) {
+    for (const name of functionNames) {
+      if (typeof mod[name] === "function") {
+        try {
+          const result = await mod[name](input);
+          if (result && typeof result === "object") return result;
+        } catch (err) {
+          console.warn(`mortgage-engine.${name} failed:`, err?.message || err);
+        }
       }
     }
-  }
 
-  if (typeof mod === "function") {
-    try {
-      const result = mod(input);
-      if (result && typeof result === "object") return result;
-    } catch (err) {
-      console.warn("mortgage-engine default function failed:", err?.message || err);
+    if (typeof mod === "function") {
+      try {
+        const result = await mod(input);
+        if (result && typeof result === "object") return result;
+      } catch (err) {
+        console.warn("mortgage-engine default function failed:", err?.message || err);
+      }
     }
   }
 
@@ -1935,7 +2169,13 @@ function normalizeMortgage(result, input) {
       result.monthly_total,
       result.payment,
       result.monthlyPayment,
-      [principalInterest, taxes, insurance, hoa, pmi]
+      [
+        principalInterest,
+        taxes,
+        insurance,
+        hoa,
+        pmi,
+      ]
         .filter((x) => Number.isFinite(x))
         .reduce((a, b) => a + b, 0)
     )
@@ -2069,15 +2309,18 @@ async function computeAffordabilitySafe({
     creditScore: scenario.creditScore,
   };
 
-  const engineResult = trySharedAffordabilityEngine(input);
+  const engineResult = await trySharedAffordabilityEngine(input);
 
   if (engineResult) return normalizeAffordability(engineResult, input);
 
   return computeAffordabilityFallback(input);
 }
 
-function trySharedAffordabilityEngine(input) {
-  const mod = shared.affordabilityEngine;
+async function trySharedAffordabilityEngine(input) {
+  const mod =
+    unwrapModule(shared.affordabilityEngine) ||
+    unwrapModule(await safeImport("./_share/affordability-engine.js"));
+
   if (!mod) return null;
 
   const functionNames = [
@@ -2091,7 +2334,7 @@ function trySharedAffordabilityEngine(input) {
   for (const name of functionNames) {
     if (typeof mod[name] === "function") {
       try {
-        const result = mod[name](input);
+        const result = await mod[name](input);
         if (result && typeof result === "object") return result;
       } catch (err) {
         console.warn(`affordability-engine.${name} failed:`, err?.message || err);
@@ -2101,7 +2344,7 @@ function trySharedAffordabilityEngine(input) {
 
   if (typeof mod === "function") {
     try {
-      const result = mod(input);
+      const result = await mod(input);
       if (result && typeof result === "object") return result;
     } catch (err) {
       console.warn("affordability-engine default function failed:", err?.message || err);
@@ -2554,7 +2797,11 @@ function buildDirectDeterministicReply({
         ? `That breaks down as Base Pay ${money(comp.base_pay)}, BAS ${money(comp.bas)}, and BAH ${money(comp.bah)}.`
         : "I do not have the full pay breakdown, but I do have a saved monthly income value from your member profile.",
       comp.base || comp.zip
-        ? `I’m using ${[comp.rank_paygrade, comp.base, comp.zip]
+        ? `I’m using ${[
+            comp.rank_paygrade,
+            comp.base,
+            comp.zip,
+          ]
             .filter(Boolean)
             .join(" • ")}.`
         : "",
