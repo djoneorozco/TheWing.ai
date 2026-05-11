@@ -1,1 +1,590 @@
-a
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- ============================================================
+    THEWING.ai / PCSUnited • Ask Amy Command Center
+    index.html
+    v1.0.0
+    Frontend-only standalone app
+    Backend endpoint: https://thewing.netlify.app/api/agent-amy
+  ============================================================= -->
+
+  <!-- //#1) CORE META -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- //#2) SEO / BRAND META -->
+  <title>Ask Amy | PCSUnited AI Concierge powered by TheWing.ai</title>
+  <meta
+    name="description"
+    content="Ask Amy is the PCSUnited AI Concierge powered by TheWing.ai, helping military families understand PCS housing strategy, military pay, BAH, VA Loan guidance, affordability, and financial readiness."
+  />
+
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0b0e1a" />
+
+  <!-- //#3) CANONICAL -->
+  <link rel="canonical" href="https://thewing.ai/ask-amy" />
+
+  <!-- //#4) OPEN GRAPH -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Ask Amy | PCSUnited AI Concierge" />
+  <meta
+    property="og:description"
+    content="A premium PCSUnited command center for PCS housing strategy, military compensation, BAH, mortgage readiness, VA Loan guidance, and financial decision support."
+  />
+  <meta property="og:site_name" content="TheWing.ai" />
+
+  <!-- //#5) TWITTER / X -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Ask Amy | PCSUnited AI Concierge" />
+  <meta
+    name="twitter:description"
+    content="PCSUnited AI Concierge powered by TheWing.ai for PCS housing, BAH, VA Loan, mortgage, and financial-readiness guidance."
+  />
+
+  <!-- //#6) FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- //#7) APP CSS -->
+  <link rel="stylesheet" href="./ask-amy.css" />
+
+  <!-- //#8) STRUCTURED DATA -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Ask Amy",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "description": "Ask Amy is the PCSUnited AI Concierge powered by TheWing.ai. It helps military families understand PCS housing strategy, compensation, BAH, VA Loan guidance, mortgage estimates, affordability, and financial readiness.",
+    "brand": {
+      "@type": "Brand",
+      "name": "PCSUnited"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "TheWing.ai"
+    }
+  }
+  </script>
+</head>
+
+<body>
+  <!-- ============================================================
+    //#9) NO-JS FALLBACK
+  ============================================================= -->
+  <noscript>
+    <div class="pcsu-noscript">
+      <strong>Ask Amy needs JavaScript enabled.</strong>
+      <span>
+        Please enable JavaScript to use the PCSUnited AI Concierge powered by TheWing.ai.
+      </span>
+    </div>
+  </noscript>
+
+  <!-- ============================================================
+    //#10) BACKGROUND SYSTEM
+  ============================================================= -->
+  <div class="amy-bg" aria-hidden="true">
+    <div class="amy-bg__orb amy-bg__orb--mint"></div>
+    <div class="amy-bg__orb amy-bg__orb--sapphire"></div>
+    <div class="amy-bg__orb amy-bg__orb--gold"></div>
+    <div class="amy-bg__grid"></div>
+    <div class="amy-bg__vignette"></div>
+  </div>
+
+  <!-- ============================================================
+    //#11) APP SHELL
+  ============================================================= -->
+  <main
+    id="ask-amy-app"
+    class="amy-app"
+    data-endpoint="https://thewing.netlify.app/api/agent-amy"
+  >
+    <!-- ============================================================
+      //#12) TOP COMMAND BAR
+    ============================================================= -->
+    <header class="amy-topbar">
+      <div class="amy-topbar__brand">
+        <div class="amy-mark" aria-hidden="true">
+          <span class="amy-mark__wing">W</span>
+        </div>
+
+        <div>
+          <p class="amy-eyebrow">PCSUnited Command Center</p>
+          <h1>Ask Amy</h1>
+        </div>
+      </div>
+
+      <div class="amy-topbar__status">
+        <div class="amy-connection-pill" id="amy-connection-pill">
+          <span class="amy-dot amy-dot--idle" id="amy-connection-dot"></span>
+          <span id="amy-connection-label">Ready</span>
+        </div>
+
+        <div class="amy-powered">
+          Powered by <strong>TheWing.ai</strong>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================================================
+      //#13) MAIN GRID
+    ============================================================= -->
+    <section class="amy-grid" aria-label="Ask Amy Command Center">
+      <!-- ============================================================
+        //#14) LEFT RAIL — PROFILE / SIGNALS / ACTIONS
+      ============================================================= -->
+      <aside class="amy-panel amy-left" aria-label="Profile and quick actions">
+        <!-- //#14A) AMY IDENTITY CARD -->
+        <section class="amy-agent-card">
+          <div class="amy-avatar-wrap">
+            <div class="amy-avatar" role="img" aria-label="Amy AI Concierge avatar"></div>
+            <span class="amy-avatar-ring"></span>
+          </div>
+
+          <div class="amy-agent-copy">
+            <p class="amy-eyebrow">A.I. Concierge</p>
+            <h2>Amy</h2>
+            <p>
+              PCS housing, pay, BAH, VA Loan, mortgage, and readiness guidance.
+            </p>
+          </div>
+
+          <div class="amy-agent-badge">
+            PCSUnited • TheWing.ai
+          </div>
+        </section>
+
+        <!-- //#14B) PROFILE SUMMARY -->
+        <section class="amy-card amy-profile-card">
+          <div class="amy-card__head">
+            <div>
+              <p class="amy-eyebrow">Member Context</p>
+              <h3 id="amy-profile-name">Profile loading…</h3>
+            </div>
+            <span class="amy-mini-status" id="amy-profile-status">Scanning</span>
+          </div>
+
+          <div class="amy-profile-lines">
+            <div class="amy-profile-line">
+              <span>Rank</span>
+              <strong id="amy-profile-rank">—</strong>
+            </div>
+
+            <div class="amy-profile-line">
+              <span>Base</span>
+              <strong id="amy-profile-base">—</strong>
+            </div>
+
+            <div class="amy-profile-line">
+              <span>BAH ZIP</span>
+              <strong id="amy-profile-zip">—</strong>
+            </div>
+
+            <div class="amy-profile-line">
+              <span>Status</span>
+              <strong id="amy-profile-mode">—</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- //#14C) SIGNAL GRID -->
+        <section class="amy-card">
+          <div class="amy-card__head">
+            <div>
+              <p class="amy-eyebrow">Readiness Signals</p>
+              <h3>Loaded Data</h3>
+            </div>
+          </div>
+
+          <div class="amy-signal-grid">
+            <div class="amy-signal" id="amy-signal-profile">
+              <span class="amy-signal__dot"></span>
+              <div>
+                <strong>Profile</strong>
+                <small id="amy-signal-profile-text">Checking</small>
+              </div>
+            </div>
+
+            <div class="amy-signal" id="amy-signal-bridge">
+              <span class="amy-signal__dot"></span>
+              <div>
+                <strong>Bridge</strong>
+                <small id="amy-signal-bridge-text">Checking</small>
+              </div>
+            </div>
+
+            <div class="amy-signal" id="amy-signal-financial">
+              <span class="amy-signal__dot"></span>
+              <div>
+                <strong>Financial</strong>
+                <small id="amy-signal-financial-text">Checking</small>
+              </div>
+            </div>
+
+            <div class="amy-signal" id="amy-signal-base">
+              <span class="amy-signal__dot"></span>
+              <div>
+                <strong>Base</strong>
+                <small id="amy-signal-base-text">Checking</small>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- //#14D) QUICK ACTIONS -->
+        <section class="amy-card">
+          <div class="amy-card__head">
+            <div>
+              <p class="amy-eyebrow">Quick Actions</p>
+              <h3>Ask Faster</h3>
+            </div>
+          </div>
+
+          <div class="amy-quick-actions">
+            <button
+              class="amy-quick-btn"
+              type="button"
+              data-prompt="What is my Base Pay, BAS, BAH, and total monthly compensation?"
+            >
+              Pay + BAH
+            </button>
+
+            <button
+              class="amy-quick-btn"
+              type="button"
+              data-prompt="Based on my loaded profile, how much house can I safely afford?"
+            >
+              Affordability
+            </button>
+
+            <button
+              class="amy-quick-btn"
+              type="button"
+              data-prompt="Explain my mortgage estimate and what is driving the monthly payment."
+            >
+              Mortgage
+            </button>
+
+            <button
+              class="amy-quick-btn"
+              type="button"
+              data-prompt="Give me VA Loan guidance for my current PCS housing situation."
+            >
+              VA Loan
+            </button>
+
+            <button
+              class="amy-quick-btn"
+              type="button"
+              data-prompt="Should I rent or buy based on my PCS timeline, BAH, and financial readiness?"
+            >
+              Rent vs Buy
+            </button>
+
+            <button
+              class="amy-quick-btn"
+              type="button"
+              data-prompt="What is my biggest financial risk right now?"
+            >
+              Biggest Risk
+            </button>
+          </div>
+        </section>
+
+        <!-- //#14E) NAV LINKS -->
+        <section class="amy-card amy-resource-card">
+          <div class="amy-card__head">
+            <div>
+              <p class="amy-eyebrow">PCSUnited Tools</p>
+              <h3>Launch Points</h3>
+            </div>
+          </div>
+
+          <nav class="amy-resource-links" aria-label="PCSUnited tool links">
+            <a href="/resources" target="_blank" rel="noopener">PCS Resources</a>
+            <a href="/air-force/base-demographics" target="_blank" rel="noopener">Base Demographics</a>
+            <a href="/financial-dashboard" target="_blank" rel="noopener">Financial Dashboard</a>
+            <a href="/bah-calculator" target="_blank" rel="noopener">BAH Calculator</a>
+            <a href="/va-calculator" target="_blank" rel="noopener">VA Calculator</a>
+          </nav>
+        </section>
+      </aside>
+
+      <!-- ============================================================
+        //#15) CENTER — CHAT COMMAND CENTER
+      ============================================================= -->
+      <section class="amy-panel amy-chat-panel" aria-label="Ask Amy chat">
+        <!-- //#15A) CHAT HEADER -->
+        <div class="amy-chat-head">
+          <div>
+            <p class="amy-eyebrow">Live Guidance</p>
+            <h2 id="amy-chat-title">PCSUnited AI Concierge</h2>
+            <p id="amy-chat-subtitle">
+              Ask about PCS housing, BAH, pay, mortgage readiness, VA Loans, or your financial dashboard.
+            </p>
+          </div>
+
+          <div class="amy-chat-head__meta">
+            <span id="amy-intent-pill">Intent: Ready</span>
+            <span id="amy-latency-pill">Latency: —</span>
+          </div>
+        </div>
+
+        <!-- //#15B) CHAT MESSAGES -->
+        <div
+          id="amy-chat"
+          class="amy-chat"
+          role="log"
+          aria-live="polite"
+          aria-label="Ask Amy conversation"
+        ></div>
+
+        <!-- //#15C) ERROR STRIP -->
+        <div id="amy-error-strip" class="amy-error-strip" hidden>
+          <strong>Connection issue</strong>
+          <span id="amy-error-text">
+            Amy could not reach TheWing.ai.
+          </span>
+        </div>
+
+        <!-- //#15D) COMPOSER -->
+        <form id="amy-form" class="amy-composer" autocomplete="off">
+          <label class="sr-only" for="amy-input">Ask Amy a question</label>
+
+          <textarea
+            id="amy-input"
+            class="amy-input"
+            rows="1"
+            placeholder="Ask Amy anything about PCS housing, BAH, pay, mortgage readiness, or VA Loans…"
+          ></textarea>
+
+          <button id="amy-send" class="amy-send" type="submit">
+            <span>Send</span>
+            <svg
+              aria-hidden="true"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M5 12h13M13 6l6 6-6 6"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </form>
+
+        <div class="amy-composer-hint">
+          Press <strong>Enter</strong> to send • Use <strong>Shift + Enter</strong> for a new line
+        </div>
+      </section>
+
+      <!-- ============================================================
+        //#16) RIGHT RAIL — TRUTH PACKET INTELLIGENCE
+      ============================================================= -->
+      <aside class="amy-panel amy-intel" aria-label="Live intelligence panel">
+        <!-- //#16A) INTEL HEADER -->
+        <section class="amy-intel-hero">
+          <p class="amy-eyebrow">Truth Packet</p>
+          <h2>Live Intelligence</h2>
+          <p>
+            Amy’s backend returns deterministic context first. This panel reflects what TheWing.ai actually knows.
+          </p>
+        </section>
+
+        <!-- //#16B) VERDICT CARD -->
+        <section class="amy-card amy-verdict-card" id="amy-verdict-card">
+          <div class="amy-card__head">
+            <div>
+              <p class="amy-eyebrow">Decision Read</p>
+              <h3 id="amy-verdict-label">Waiting for analysis</h3>
+            </div>
+            <span class="amy-grade" id="amy-verdict-grade">—</span>
+          </div>
+
+          <p class="amy-verdict-bluf" id="amy-verdict-bluf">
+            Ask Amy a question to generate a readiness read.
+          </p>
+        </section>
+
+        <!-- //#16C) COMPENSATION CARD -->
+        <section class="amy-card amy-intel-card">
+          <div class="amy-card__head">
+            <div>
+              <p class="amy-eyebrow">Compensation</p>
+              <h3>Pay + BAH</h3>
+            </div>
+            <span class="amy-card-tag" id="amy-comp-status">Idle</span>
+          </div>
+
+          <div class="amy-metric-grid">
+            <div class="amy-metric">
+              <span>Total Monthly</span>
+              <strong id="amy-comp-total">—</strong>
+            </div>
+
+            <div class="amy-metric">
+              <span>Base Pay</span>
+              <strong id="amy-comp-basepay">—</strong>
+            </div>
+
+            <div class="amy-metric">
+              <span>BAS</span>
+              <strong id="amy-comp-bas">—</strong>
+            </div>
+
+            <div class="amy-metric">
+              <span>BAH</span>
+              <strong id="amy-comp-bah">—</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- //#16D) MORTGAGE CARD -->
+        <section class="amy-card amy-intel-card">
+          <div class="amy-card__head">
+            <div>
+              <p class="amy-eyebrow">Mortgage</p>
+              <h3>Payment Estimate</h3>
+            </div>
+            <span class="amy-card-tag" id="amy-mtg-status">Idle</span>
+          </div>
+
+          <div class="amy-metric-grid">
+            <div class="amy-metric amy-metric--wide">
+              <span>All-In Monthly</span>
+              <strong id="amy-mtg-allin">—</strong>
+            </div>
+
+            <div class="amy-metric">
+              <span>Price</span>
+              <strong id="amy-mtg-price">—</strong>
+            </div>
+
+            <div class="amy-metric">
+              <span>Loan</span>
+              <strong id="amy-mtg-loan">—</strong>
+            </div>
+
+            <div class="amy-metric">
+              <span>APR</span>
+              <strong id="amy-mtg-apr">—</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- //#16E) AFFORDABILITY CARD -->
+        <section class="amy-card amy-intel-card">
+          <div class="amy-card__head">
+            <div>
+              <p class="amy-eyebrow">Affordability</p>
+              <h3>Readiness Ratios</h3>
+            </div>
+            <span class="amy-card-tag" id="amy-afford-status">Idle</span>
+          </div>
+
+          <div class="amy-ratio-stack">
+            <div class="amy-ratio">
+              <div class="amy-ratio__top">
+                <span>Housing Ratio</span>
+                <strong id="amy-afford-housing-ratio">—</strong>
+              </div>
+              <div class="amy-ratio__bar">
+                <span id="amy-afford-housing-bar"></span>
+              </div>
+            </div>
+
+            <div class="amy-ratio">
+              <div class="amy-ratio__top">
+                <span>Back-End Ratio</span>
+                <strong id="amy-afford-backend-ratio">—</strong>
+              </div>
+              <div class="amy-ratio__bar">
+                <span id="amy-afford-backend-bar"></span>
+              </div>
+            </div>
+
+            <div class="amy-metric amy-metric--wide">
+              <span>Residual Income</span>
+              <strong id="amy-afford-residual">—</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- //#16F) VA LOAN CARD -->
+        <section class="amy-card amy-intel-card">
+          <div class="amy-card__head">
+            <div>
+              <p class="amy-eyebrow">VA Loan</p>
+              <h3>Guidance Packet</h3>
+            </div>
+            <span class="amy-card-tag" id="amy-va-status">Idle</span>
+          </div>
+
+          <div class="amy-va-box">
+            <p id="amy-va-title">No VA Loan packet loaded yet.</p>
+            <small id="amy-va-bluf">
+              Ask Amy about VA eligibility, funding fee, zero down, no PMI, entitlement, or PCS buying strategy.
+            </small>
+          </div>
+        </section>
+
+        <!-- //#16G) NEXT ACTION CARD -->
+        <section class="amy-card amy-next-card">
+          <div class="amy-card__head">
+            <div>
+              <p class="amy-eyebrow">Next Action</p>
+              <h3 id="amy-next-label">Stand by</h3>
+            </div>
+          </div>
+
+          <p id="amy-next-message">
+            Ask a question and Amy will recommend a practical next move.
+          </p>
+        </section>
+
+        <!-- //#16H) MISSING INPUTS CARD -->
+        <section class="amy-card amy-missing-card">
+          <div class="amy-card__head">
+            <div>
+              <p class="amy-eyebrow">Missing Inputs</p>
+              <h3>Data Gaps</h3>
+            </div>
+            <span class="amy-card-tag" id="amy-missing-count">0</span>
+          </div>
+
+          <ul id="amy-missing-list" class="amy-missing-list">
+            <li>No missing inputs detected yet.</li>
+          </ul>
+        </section>
+      </aside>
+    </section>
+
+    <!-- ============================================================
+      //#17) FOOTER STRIP
+    ============================================================= -->
+    <footer class="amy-footer">
+      <span>
+        Amy provides educational decision support. Loan approval, VA eligibility, entitlement, funding-fee exemption, and underwriting must be confirmed with official sources and your lender.
+      </span>
+    </footer>
+  </main>
+
+  <!-- ============================================================
+    //#18) APP JAVASCRIPT
+  ============================================================= -->
+  <script src="./ask-amy.js" defer></script>
+</body>
+</html>
