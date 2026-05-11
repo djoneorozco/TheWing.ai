@@ -3,11 +3,17 @@
 <head>
   <!-- ============================================================
     PCSUNITED • ASK AMY
-    STANDALONE ASK AMY COMMAND CENTER
+    STANDALONE ASK AMY COMMAND CENTER v1.3.1
     THEWING.ai POWERED
-    ORIGINAL ASK ELENA v5.3 STYLE PRESERVED
-    ENDPOINT:
-    https://thewing.netlify.app/api/agent-amy
+
+    PURPOSE
+    - Exact original Ask Elena / Ask Amy modal UX
+    - Bottom-right launcher visible by default
+    - Chat opens only after clicking launcher
+    - Uses TheWing agent endpoint:
+      https://thewing.netlify.app/api/agent-amy
+    - Frontend only
+    - No backend/OpenAI logic in frontend
   ============================================================= -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,19 +24,141 @@
     content="Ask Amy is the PCSUnited AI Concierge powered by TheWing.ai for PCS, pay, BAH, VA Loan, mortgage, and financial readiness guidance."
   />
 
-  <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Barlow:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
 
   <style>
     html,
     body {
       margin: 0;
+      width: 100%;
       min-height: 100%;
-      background: #050608;
+      background: transparent;
+      overflow: hidden;
     }
 
     body {
-      overflow: hidden;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
+
+    /* ============================================================
+      ASK AMY — LAUNCHER
+    ============================================================ */
+
+    #ask-elena-launcher {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 2147480000;
+      padding: 1rem 1.2rem;
+      border-radius: 1rem;
+      cursor: pointer;
+      background: rgba(14, 18, 30, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+      transition: 0.4s ease;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+    }
+
+    #ask-elena-launcher:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(14, 18, 30, 0.82);
+    }
+
+    #ask-elena-launcher img {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      flex: 0 0 auto;
+    }
+
+    .ask-launcher-copy {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .ask-launcher-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .ask-launcher-subtitle {
+      font-size: 0.7rem;
+      color: #a8b0d6;
+    }
+
+    /* ============================================================
+      ASK AMY — MODAL WRAPPER
+    ============================================================ */
+
+    #ask-elena-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 2147480001;
+      display: none;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 18px;
+      background: rgba(4, 6, 10, 0.34);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    #ask-elena-panel {
+      position: relative;
+      width: min(1280px, calc(100vw - 36px));
+      max-width: min(1280px, calc(100vw - 36px));
+      max-height: calc(100vh - 36px);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    }
+
+    #ask-elena-modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 30;
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(7, 8, 12, 0.64);
+      color: #f4efe6;
+      font: 800 12px/1 Barlow, Inter, sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 10px 12px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.32);
+    }
+
+    #ask-elena-modal-close:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(7, 8, 12, 0.82);
+    }
+
+    /* ============================================================
+      ASK AMY COMMAND CENTER v1.3 EXACT UI
+    ============================================================ */
 
     #ask-elena-shell,
     #ask-elena-shell * {
@@ -39,955 +167,989 @@
     }
 
     #ask-elena-shell {
-      --ae-bg:#06070b;
-      --ae-bg2:#0b0d12;
-      --ae-bg3:#12151b;
+      --ae-bg: #06070b;
+      --ae-bg2: #0b0d12;
+      --ae-bg3: #12151b;
 
-      --ae-card:rgba(15,17,22,.82);
-      --ae-card2:rgba(18,20,26,.90);
-      --ae-card3:rgba(22,24,31,.84);
+      --ae-card: rgba(15, 17, 22, 0.82);
+      --ae-card2: rgba(18, 20, 26, 0.9);
+      --ae-card3: rgba(22, 24, 31, 0.84);
 
-      --ae-ink:#f4efe6;
-      --ae-ink-soft:#e8dece;
-      --ae-muted:rgba(220,207,185,.72);
-      --ae-muted2:rgba(220,207,185,.52);
+      --ae-ink: #f4efe6;
+      --ae-ink-soft: #e8dece;
+      --ae-muted: rgba(220, 207, 185, 0.72);
+      --ae-muted2: rgba(220, 207, 185, 0.52);
 
-      --ae-line:rgba(201,170,115,.16);
-      --ae-line2:rgba(201,170,115,.28);
+      --ae-line: rgba(201, 170, 115, 0.16);
+      --ae-line2: rgba(201, 170, 115, 0.28);
 
-      --ae-gold:#c9aa73;
-      --ae-gold2:#e3c792;
-      --ae-gold3:#a88752;
-      --ae-bronze:#8d6a3d;
-      --ae-cream:#f7f0e3;
+      --ae-gold: #c9aa73;
+      --ae-gold2: #e3c792;
+      --ae-gold3: #a88752;
+      --ae-bronze: #8d6a3d;
+      --ae-cream: #f7f0e3;
 
-      --ae-danger:#d78f97;
-      --ae-warn:#d7b06a;
-      --ae-mint:#9fe7d5;
+      --ae-danger: #d78f97;
+      --ae-warn: #d7b06a;
+      --ae-mint: #9fe7d5;
 
-      --ae-radius:20px;
-      --ae-radius-lg:24px;
-      --ae-shadow:0 22px 55px rgba(0,0,0,.54);
-      --ae-shadow-soft:0 14px 28px rgba(0,0,0,.34);
-      --ae-shadow-deep:0 28px 70px rgba(0,0,0,.60);
+      --ae-radius: 20px;
+      --ae-radius-lg: 24px;
+      --ae-shadow: 0 22px 55px rgba(0, 0, 0, 0.54);
+      --ae-shadow-soft: 0 14px 28px rgba(0, 0, 0, 0.34);
+      --ae-shadow-deep: 0 28px 70px rgba(0, 0, 0, 0.6);
     }
 
     #ask-elena-shell {
-      min-height: 100vh;
-      height: 100vh;
-      width: 100%;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:40px 20px;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
       background:
-        radial-gradient(1200px 720px at 14% 8%, rgba(201,170,115,.10), transparent 52%),
-        radial-gradient(980px 580px at 86% 14%, rgba(227,199,146,.06), transparent 42%),
-        radial-gradient(900px 700px at 52% 100%, rgba(110,89,55,.12), transparent 58%),
+        radial-gradient(1200px 720px at 14% 8%, rgba(201, 170, 115, 0.1), transparent 52%),
+        radial-gradient(980px 580px at 86% 14%, rgba(227, 199, 146, 0.06), transparent 42%),
+        radial-gradient(900px 700px at 52% 100%, rgba(110, 89, 55, 0.12), transparent 58%),
         linear-gradient(180deg, #050608 0%, #090b10 34%, #07080c 100%);
-      color:var(--ae-ink);
-      overflow:hidden;
+      color: var(--ae-ink);
     }
 
     #ae-container {
-      width:100%;
-      max-width:1400px;
-      display:grid;
-      grid-template-columns:280px minmax(0, 1fr);
-      gap:24px;
-      position:relative;
-      align-items:stretch;
+      width: 100%;
+      max-width: 1400px;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 24px;
+      position: relative;
+      align-items: stretch;
     }
 
     #ae-left {
-      position:relative;
-      overflow:hidden;
-      border-radius:var(--ae-radius-lg);
-      padding:28px 24px;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--ae-radius-lg);
+      padding: 28px 24px;
       background:
-        radial-gradient(700px 260px at 18% 10%, rgba(201,170,115,.10), transparent 60%),
-        radial-gradient(520px 200px at 82% 16%, rgba(227,199,146,.05), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
-      background-color:var(--ae-card);
-      border:1px solid var(--ae-line);
-      box-shadow:var(--ae-shadow);
-      backdrop-filter:blur(14px) saturate(135%);
-      -webkit-backdrop-filter:blur(14px) saturate(135%);
+        radial-gradient(700px 260px at 18% 10%, rgba(201, 170, 115, 0.1), transparent 60%),
+        radial-gradient(520px 200px at 82% 16%, rgba(227, 199, 146, 0.05), transparent 60%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+      background-color: var(--ae-card);
+      border: 1px solid var(--ae-line);
+      box-shadow: var(--ae-shadow);
+      backdrop-filter: blur(14px) saturate(135%);
+      -webkit-backdrop-filter: blur(14px) saturate(135%);
     }
 
     #ae-left::before {
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
       background:
-        radial-gradient(circle at 20% 18%, rgba(255,255,255,.04), transparent 24%),
-        linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0));
-      opacity:.72;
+        radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.04), transparent 24%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0));
+      opacity: 0.72;
     }
 
     .ae-avatar-wrapper {
-      width:168px;
-      height:168px;
-      margin:0 auto 18px auto;
-      position:relative;
-      border-radius:50%;
+      width: 168px;
+      height: 168px;
+      margin: 0 auto 18px auto;
+      position: relative;
+      border-radius: 50%;
     }
 
     .ae-avatar-wrapper::before {
-      content:"";
-      position:absolute;
-      inset:-30px;
-      border-radius:50%;
+      content: "";
+      position: absolute;
+      inset: -30px;
+      border-radius: 50%;
       background:
-        radial-gradient(circle, rgba(201,170,115,.32), rgba(141,106,61,.20), transparent 72%);
-      filter:blur(26px);
-      z-index:0;
+        radial-gradient(circle, rgba(201, 170, 115, 0.32), rgba(141, 106, 61, 0.2), transparent 72%);
+      filter: blur(26px);
+      z-index: 0;
     }
 
     .ae-avatar {
-      position:relative;
-      z-index:2;
-      width:168px;
-      height:168px;
-      border-radius:50%;
-      background-image:url("https://cdn.prod.website-files.com/691facbe35fbba00c096f2b7/69dd8fca181814ed403a6fc4_Salma1.jpg");
-      background-size:cover;
-      background-position:center;
-      border:2px solid rgba(255,255,255,.14);
+      position: relative;
+      z-index: 2;
+      width: 168px;
+      height: 168px;
+      border-radius: 50%;
+      background-image: url("https://cdn.prod.website-files.com/691facbe35fbba00c096f2b7/69dd8fca181814ed403a6fc4_Salma1.jpg");
+      background-size: cover;
+      background-position: center;
+      border: 2px solid rgba(255, 255, 255, 0.14);
       box-shadow:
-        0 0 0 8px rgba(255,255,255,.025),
-        0 18px 32px rgba(0,0,0,.34);
+        0 0 0 8px rgba(255, 255, 255, 0.025),
+        0 18px 32px rgba(0, 0, 0, 0.34);
     }
 
     .ae-name {
-      text-align:center;
-      font-family:"Gilda Display", Georgia, serif;
-      font-size:28px;
-      line-height:1.05;
-      letter-spacing:.02em;
-      margin-top:10px;
-      color:var(--ae-cream);
-      position:relative;
-      z-index:1;
+      text-align: center;
+      font-family: "Gilda Display", Georgia, serif;
+      font-size: 28px;
+      line-height: 1.05;
+      letter-spacing: 0.02em;
+      margin-top: 10px;
+      color: var(--ae-cream);
+      position: relative;
+      z-index: 1;
     }
 
     .ae-sub {
-      text-align:center;
-      font-size:13px;
-      color:var(--ae-muted);
-      margin-top:6px;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      font-weight:800;
-      position:relative;
-      z-index:1;
+      text-align: center;
+      font-size: 13px;
+      color: var(--ae-muted);
+      margin-top: 6px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 800;
+      position: relative;
+      z-index: 1;
     }
 
     .ae-links {
-      margin-top:26px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      position:relative;
-      z-index:1;
+      margin-top: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
     }
 
     .ae-link-btn {
-      display:block;
-      text-decoration:none;
-      padding:11px 14px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:var(--ae-ink);
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--ae-line);
-      transition:.22s ease;
-      box-shadow:var(--ae-shadow-soft);
+      display: block;
+      text-decoration: none;
+      padding: 11px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ae-ink);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--ae-line);
+      transition: 0.22s ease;
+      box-shadow: var(--ae-shadow-soft);
     }
 
     .ae-link-btn:hover {
-      transform:translateY(-1px);
-      border-color:var(--ae-line2);
-      background:rgba(201,170,115,.08);
-      color:var(--ae-cream);
+      transform: translateY(-1px);
+      border-color: var(--ae-line2);
+      background: rgba(201, 170, 115, 0.08);
+      color: var(--ae-cream);
     }
 
     .ae-badge {
-      margin-top:28px;
-      text-align:center;
-      font-size:11px;
-      line-height:1.45;
-      color:var(--ae-gold2);
-      opacity:.92;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      font-weight:800;
-      position:relative;
-      z-index:1;
+      margin-top: 28px;
+      text-align: center;
+      font-size: 11px;
+      line-height: 1.45;
+      color: var(--ae-gold2);
+      opacity: 0.92;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 800;
+      position: relative;
+      z-index: 1;
     }
 
     #ae-right {
-      position:relative;
-      overflow:hidden;
-      border-radius:var(--ae-radius-lg);
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--ae-radius-lg);
       background:
-        radial-gradient(1200px 700px at 15% 10%, rgba(201,170,115,.10), transparent 55%),
-        radial-gradient(800px 460px at 92% 12%, rgba(227,199,146,.05), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      background-color:var(--ae-card);
-      border:1px solid var(--ae-line);
-      box-shadow:var(--ae-shadow);
-      display:flex;
-      flex-direction:column;
-      height:760px;
-      min-height:760px;
-      max-height:760px;
-      min-width:0;
-      backdrop-filter:blur(14px) saturate(135%);
-      -webkit-backdrop-filter:blur(14px) saturate(135%);
+        radial-gradient(1200px 700px at 15% 10%, rgba(201, 170, 115, 0.1), transparent 55%),
+        radial-gradient(800px 460px at 92% 12%, rgba(227, 199, 146, 0.05), transparent 55%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+      background-color: var(--ae-card);
+      border: 1px solid var(--ae-line);
+      box-shadow: var(--ae-shadow);
+      display: flex;
+      flex-direction: column;
+      height: 760px;
+      min-height: 760px;
+      max-height: 760px;
+      min-width: 0;
+      backdrop-filter: blur(14px) saturate(135%);
+      -webkit-backdrop-filter: blur(14px) saturate(135%);
     }
 
     #ae-right::before {
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0));
-      opacity:.7;
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0));
+      opacity: 0.7;
     }
 
     .ae-topbar {
-      position:relative;
-      z-index:1;
-      flex:0 0 auto;
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      padding:20px 20px 12px 20px;
-      border-bottom:1px solid rgba(255,255,255,.06);
-      background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01));
+      position: relative;
+      z-index: 1;
+      flex: 0 0 auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 20px 12px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
     }
 
     .ae-topbar-copy h2 {
-      margin:0;
-      font-family:"Gilda Display", Georgia, serif;
-      font-size:24px;
-      line-height:1.05;
-      color:var(--ae-cream);
-      letter-spacing:.02em;
+      margin: 0;
+      font-family: "Gilda Display", Georgia, serif;
+      font-size: 24px;
+      line-height: 1.05;
+      color: var(--ae-cream);
+      letter-spacing: 0.02em;
     }
 
     .ae-topbar-copy p {
-      margin:6px 0 0 0;
-      font-size:13px;
-      line-height:1.4;
-      font-weight:700;
-      color:var(--ae-muted);
-      max-width:540px;
-    }
-
-    .ae-status-pill {
-      border-radius:999px;
-      padding:9px 11px;
-      font-size:10px;
-      font-weight:900;
-      letter-spacing:.10em;
-      text-transform:uppercase;
-      color:var(--ae-gold2);
-      border:1px solid rgba(201,170,115,.18);
-      background:rgba(201,170,115,.055);
-      white-space:nowrap;
-      box-shadow:var(--ae-shadow-soft);
+      margin: 6px 0 0 0;
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 700;
+      color: var(--ae-muted);
+      max-width: 540px;
     }
 
     .ae-chat {
-      position:relative;
-      z-index:1;
-      flex:1 1 auto;
-      min-height:0;
-      min-width:0;
-      overflow-y:auto;
-      overflow-x:hidden;
-      padding:24px;
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      scroll-behavior:smooth;
-      overscroll-behavior:contain;
+      position: relative;
+      z-index: 1;
+      flex: 1 1 auto;
+      min-height: 0;
+      min-width: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scroll-behavior: smooth;
+      overscroll-behavior: contain;
     }
 
     .ae-chat::-webkit-scrollbar {
-      width:8px;
+      width: 8px;
     }
 
     .ae-chat::-webkit-scrollbar-thumb {
-      background:rgba(201,170,115,.25);
-      border-radius:999px;
+      background: rgba(201, 170, 115, 0.25);
+      border-radius: 999px;
     }
 
     .ae-chat::-webkit-scrollbar-track {
-      background:transparent;
+      background: transparent;
     }
 
     .ae-msg {
-      max-width:82%;
-      padding:13px 15px;
-      border-radius:16px;
-      font-size:14px;
-      line-height:1.55;
-      white-space:pre-wrap;
-      word-break:break-word;
-      overflow-wrap:anywhere;
-      backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
-      color:var(--ae-cream) !important;
-      box-shadow:var(--ae-shadow-soft);
-      border:1px solid rgba(255,255,255,.10);
-      flex:0 0 auto;
+      max-width: 82%;
+      padding: 13px 15px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: var(--ae-cream) !important;
+      box-shadow: var(--ae-shadow-soft);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      flex: 0 0 auto;
     }
 
     .ae-user {
-      align-self:flex-end;
+      align-self: flex-end;
       background:
-        radial-gradient(220px 110px at 20% 25%, rgba(201,170,115,.14), transparent 65%),
-        rgba(201,170,115,.08);
-      border-color:rgba(201,170,115,.24);
-      color:var(--ae-cream) !important;
+        radial-gradient(220px 110px at 20% 25%, rgba(201, 170, 115, 0.14), transparent 65%),
+        rgba(201, 170, 115, 0.08);
+      border-color: rgba(201, 170, 115, 0.24);
+      color: var(--ae-cream) !important;
     }
 
     .ae-bot {
-      align-self:flex-start;
+      align-self: flex-start;
       background:
-        radial-gradient(220px 110px at 20% 25%, rgba(227,199,146,.10), transparent 65%),
-        rgba(255,255,255,.04);
-      border-color:rgba(255,255,255,.10);
-      color:var(--ae-cream) !important;
+        radial-gradient(220px 110px at 20% 25%, rgba(227, 199, 146, 0.1), transparent 65%),
+        rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: var(--ae-cream) !important;
     }
 
     .ae-typing {
-      opacity:.92;
-      font-size:12px !important;
-      color:var(--ae-ink-soft) !important;
+      opacity: 0.92;
+      font-size: 12px !important;
+      color: var(--ae-ink-soft) !important;
     }
 
     .ae-footer {
-      position:relative;
-      z-index:1;
-      flex:0 0 auto;
-      padding:18px;
-      border-top:1px solid rgba(255,255,255,.08);
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:10px;
-      background:rgba(0,0,0,.12);
+      position: relative;
+      z-index: 1;
+      flex: 0 0 auto;
+      padding: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.12);
     }
 
     .ae-input {
-      width:100%;
-      min-width:0;
-      padding:14px;
-      font-size:14px;
-      font-weight:800;
-      background:rgba(255,255,255,.05);
-      border:1px solid var(--ae-line);
-      color:var(--ae-cream) !important;
-      border-radius:14px;
-      outline:none;
-      transition:.16s ease;
-      box-shadow:inset 0 14px 28px rgba(0,0,0,.20);
+      width: 100%;
+      min-width: 0;
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--ae-line);
+      color: var(--ae-cream) !important;
+      border-radius: 14px;
+      outline: none;
+      transition: 0.16s ease;
+      box-shadow: inset 0 14px 28px rgba(0, 0, 0, 0.2);
     }
 
     .ae-input:focus {
-      border-color:rgba(201,170,115,.52);
+      border-color: rgba(201, 170, 115, 0.52);
       box-shadow:
-        inset 0 14px 28px rgba(0,0,0,.20),
-        0 0 0 4px rgba(201,170,115,.10);
+        inset 0 14px 28px rgba(0, 0, 0, 0.2),
+        0 0 0 4px rgba(201, 170, 115, 0.1);
     }
 
     .ae-input::placeholder {
-      color:rgba(231,214,186,.55);
+      color: rgba(231, 214, 186, 0.55);
     }
 
     .ae-btn {
-      padding:14px 20px;
-      background:linear-gradient(180deg, rgba(227,199,146,.98), rgba(169,135,82,.95));
-      color:#1b1308;
-      border-radius:14px;
-      font-weight:900;
-      font-size:12px;
-      letter-spacing:.10em;
-      text-transform:uppercase;
-      cursor:pointer;
-      border:none;
-      transition:.22s ease;
-      box-shadow:0 16px 30px rgba(0,0,0,.36);
-      flex:0 0 auto;
+      padding: 14px 20px;
+      background: linear-gradient(180deg, rgba(227, 199, 146, 0.98), rgba(169, 135, 82, 0.95));
+      color: #1b1308;
+      border-radius: 14px;
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      transition: 0.22s ease;
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.36);
+      flex: 0 0 auto;
     }
 
     .ae-btn:hover {
-      filter:brightness(1.06);
-      transform:translateY(-1px);
+      filter: brightness(1.06);
+      transform: translateY(-1px);
     }
 
     .ae-btn[disabled] {
-      opacity:.6;
-      cursor:not-allowed;
-      transform:none;
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .tw-caret {
-      display:inline-block;
-      width:1px;
-      height:1.2em;
-      background:currentColor;
-      margin-left:2px;
-      animation:tw-blink 1s steps(1,end) infinite;
+      display: inline-block;
+      width: 1px;
+      height: 1.2em;
+      background: currentColor;
+      margin-left: 2px;
+      animation: tw-blink 1s steps(1, end) infinite;
     }
 
     @keyframes tw-blink {
-      50% { opacity:0; }
+      50% {
+        opacity: 0;
+      }
     }
 
     @media (max-width: 980px) {
-      #ask-elena-shell {
-        align-items:stretch;
-        padding:20px 12px;
-        overflow:auto;
-      }
-
       #ae-container {
-        grid-template-columns:1fr;
+        grid-template-columns: 1fr;
       }
 
       #ae-left {
-        display:none;
+        display: none;
       }
 
       #ae-right {
-        height:calc(100vh - 40px);
-        min-height:calc(100vh - 40px);
-        max-height:calc(100vh - 40px);
+        height: 680px;
+        min-height: 680px;
+        max-height: 680px;
       }
 
       .ae-topbar {
-        flex-direction:column;
-        align-items:flex-start;
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
 
     @media (max-width: 767px) {
+      #ask-elena-modal {
+        align-items: stretch !important;
+        justify-content: stretch !important;
+        padding: 10px !important;
+      }
+
+      #ask-elena-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: calc(100vh - 20px) !important;
+        border-radius: 18px !important;
+      }
+
       #ask-elena-shell {
-        padding:10px;
+        padding: 20px 12px;
       }
 
       #ae-right {
-        height:calc(100vh - 20px);
-        min-height:calc(100vh - 20px);
-        max-height:calc(100vh - 20px);
-        border-radius:18px;
+        height: calc(100vh - 60px);
+        min-height: calc(100vh - 60px);
+        max-height: calc(100vh - 60px);
       }
 
       .ae-footer {
-        grid-template-columns:1fr;
+        grid-template-columns: 1fr;
       }
 
       .ae-btn {
-        width:100%;
+        width: 100%;
       }
     }
   </style>
 </head>
 
 <body>
-  <div id="ask-elena-shell" data-endpoint="https://thewing.netlify.app/api/agent-amy">
-    <div id="ae-container">
-      <div id="ae-left">
-        <div class="ae-avatar-wrapper">
-          <div class="ae-avatar"></div>
-        </div>
+  <!-- ============================================================
+    ASK AMY — LAUNCHER
+  ============================================================ -->
+  <div id="ask-elena-launcher">
+    <img
+      src="https://cdn.prod.website-files.com/691facbe35fbba00c096f2b7/69d8372486a31818a04707cc_9f4f7dc4931f7063cf256ae1dff2d58f_ElenaProfile.jpg"
+      alt="Ask Amy"
+    />
+    <div class="ask-launcher-copy">
+      <div class="ask-launcher-title">Ask Amy</div>
+      <div class="ask-launcher-subtitle">Your A.I. Concierge</div>
+    </div>
+  </div>
 
-        <div class="ae-name">Amy</div>
-        <div class="ae-sub">A.I Agent & Concierge</div>
+  <!-- ============================================================
+    ASK AMY — MODAL WRAPPER
+  ============================================================ -->
+  <div id="ask-elena-modal">
+    <div id="ask-elena-panel">
+      <button id="ask-elena-modal-close" aria-label="Close Ask Amy">Close ✕</button>
 
-        <div class="ae-links">
-          <a class="ae-link-btn" href="/resources" target="_blank">PCS Resources</a>
-          <a class="ae-link-btn" href="/air-force/base-demographics" target="_blank">Base Demographics</a>
-          <a class="ae-link-btn" href="/financial-dashboard" target="_blank">Financial Dashboard</a>
-          <a class="ae-link-btn" href="/bah-calculator" target="_blank">BAH Calculator</a>
-          <a class="ae-link-btn" href="/va-calculator" target="_blank">VA Calculator</a>
-        </div>
+      <div id="ask-elena-shell" data-endpoint="https://thewing.netlify.app/api/agent-amy">
+        <div id="ae-container">
+          <div id="ae-left">
+            <div class="ae-avatar-wrapper">
+              <div class="ae-avatar"></div>
+            </div>
 
-        <div class="ae-badge">PCSUnited • Powered by TheWing.ai</div>
-      </div>
+            <div class="ae-name">Amy</div>
+            <div class="ae-sub">A.I Agent & Concierge</div>
 
-      <div id="ae-right">
-        <div class="ae-topbar">
-          <div class="ae-topbar-copy">
-            <h2>Ask Amy</h2>
-            <p>PCS, Pay, BAH &amp; Financial Readiness Concierge.</p>
+            <div class="ae-links">
+              <a class="ae-link-btn" href="/resources" target="_blank" rel="noopener">PCS Resources</a>
+              <a class="ae-link-btn" href="/air-force/base-demographics" target="_blank" rel="noopener">Base Demographics</a>
+              <a class="ae-link-btn" href="/financial-dashboard" target="_blank" rel="noopener">Financial Dashboard</a>
+              <a class="ae-link-btn" href="/bah-calculator" target="_blank" rel="noopener">BAH Calculator</a>
+              <a class="ae-link-btn" href="/va-calculator" target="_blank" rel="noopener">VA Calculator</a>
+            </div>
+
+            <div class="ae-badge">PCSUnited • Powered by TheWing.ai</div>
           </div>
 
-          <div class="ae-status-pill" id="ae-status-pill">Connected</div>
+          <div id="ae-right">
+            <div class="ae-topbar">
+              <div class="ae-topbar-copy">
+                <h2>Ask Amy</h2>
+                <p>PCS, Pay, BAH &amp; Financial Readiness Concierge.</p>
+              </div>
+            </div>
+
+            <div class="ae-chat" id="ae-chat"></div>
+
+            <div class="ae-footer">
+              <input id="ae-input" class="ae-input" type="text" placeholder="Ask Amy anything…" />
+              <button id="ae-send" class="ae-btn">Send</button>
+            </div>
+          </div>
         </div>
 
-        <div class="ae-chat" id="ae-chat"></div>
+        <script>
+          (() => {
+            const root = document.getElementById("ask-elena-shell");
+            if (!root || root.__askAmyMountedV13) return;
+            root.__askAmyMountedV13 = true;
 
-        <div class="ae-footer">
-          <input id="ae-input" class="ae-input" type="text" placeholder="Ask Amy anything…" />
-          <button id="ae-send" class="ae-btn">Send</button>
-        </div>
+            const RAW_ENDPOINT = root.getAttribute("data-endpoint") || "";
+            const chatEl = document.getElementById("ae-chat");
+            const inputEl = document.getElementById("ae-input");
+            const sendBtn = document.getElementById("ae-send");
+
+            const PROFILE_KEY = "pcsunited.profile.v1";
+            const IDENTITY_KEY = "pcsunited.identity.v1";
+            const BRIDGE_KEY = "pcsunited.bridge.v1";
+            const LEGACY_BRIDGE_KEY = "realtysass.bridge";
+            const SESSION_KEY = "pcsunited.session.v1";
+            const FINANCIAL_INTAKE_KEY = "pcsunited.financial.intake.v1";
+            const KPI_OVERRIDES_KEY = "pcsunited.kpi_overrides.v1";
+            const BASELINE_KEY = "pcsunited.baseline.v1";
+            const SELECTED_BASE_KEY = "pcsunited.selectedBase.v1";
+            const SELECTED_CITY_URL_KEY = "pcsunited.selectedCityJsonUrl.v1";
+
+            function resolveAskEndpoint(raw) {
+              if (raw) return raw;
+              return "https://thewing.netlify.app/api/agent-amy";
+            }
+
+            const ENDPOINT = resolveAskEndpoint(RAW_ENDPOINT);
+
+            const prefersReduced = () =>
+              window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+            function scrollToBottom() {
+              if (!chatEl) return;
+              chatEl.scrollTop = chatEl.scrollHeight;
+            }
+
+            function clean(v) {
+              return String(v == null ? "" : v).trim();
+            }
+
+            function lowerEmail(v) {
+              return clean(v).toLowerCase();
+            }
+
+            function safeParse(raw, fallback = null) {
+              try {
+                const parsed = JSON.parse(raw || "null");
+                return parsed == null ? fallback : parsed;
+              } catch {
+                return fallback;
+              }
+            }
+
+            function readStore(key, fallback = null) {
+              try {
+                const localRaw = localStorage.getItem(key);
+                if (localRaw) return safeParse(localRaw, fallback);
+
+                const sessionRaw = sessionStorage.getItem(key);
+                if (sessionRaw) return safeParse(sessionRaw, fallback);
+
+                return fallback;
+              } catch {
+                return fallback;
+              }
+            }
+
+            function readTextStore(key, fallback = "") {
+              try {
+                const localRaw = localStorage.getItem(key);
+                if (localRaw) return localRaw;
+
+                const sessionRaw = sessionStorage.getItem(key);
+                if (sessionRaw) return sessionRaw;
+
+                return fallback;
+              } catch {
+                return fallback;
+              }
+            }
+
+            function mergeObjects() {
+              const out = {};
+
+              for (const obj of arguments) {
+                if (!obj || typeof obj !== "object") continue;
+
+                Object.keys(obj).forEach((key) => {
+                  const value = obj[key];
+
+                  if (value === undefined || value === null || value === "") return;
+
+                  if (
+                    value &&
+                    typeof value === "object" &&
+                    !Array.isArray(value)
+                  ) {
+                    out[key] = mergeObjects(out[key] || {}, value);
+                  } else {
+                    out[key] = value;
+                  }
+                });
+              }
+
+              return out;
+            }
+
+            function normalizeProfile(profile) {
+              if (!profile || typeof profile !== "object") return null;
+
+              return {
+                id: profile.id ?? null,
+                profiles_user_id_unique: profile.profiles_user_id_unique ?? profile.user_id ?? profile.userId ?? null,
+                email: lowerEmail(profile.email || ""),
+                full_name: clean(
+                  profile.full_name ||
+                  profile.fullName ||
+                  [profile.first_name, profile.last_name].filter(Boolean).join(" ") ||
+                  profile.name ||
+                  ""
+                ),
+                first_name: clean(profile.first_name || profile.firstName || ""),
+                last_name: clean(profile.last_name || profile.lastName || ""),
+                phone: clean(profile.phone || ""),
+                mode: clean(profile.mode || profile.user_type || profile.userType || ""),
+                military_status: clean(profile.military_status || profile.mode || profile.user_type || ""),
+                rank: clean(profile.rank || profile.rank_paygrade || profile.paygrade || ""),
+                rank_paygrade: clean(profile.rank_paygrade || profile.rankPaygrade || profile.paygrade || profile.rank || ""),
+                va_disability: profile.va_disability ?? profile.vaDisability ?? profile.va ?? null,
+                yos: profile.yos ?? profile.years_of_service ?? profile.yearsOfService ?? null,
+                family: profile.family ?? profile.dependents ?? profile.withDependents ?? null,
+                family_size: profile.family_size ?? profile.familySize ?? profile.household_size ?? profile.householdSize ?? null,
+                base: clean(profile.base || profile.base_name || profile.baseName || profile.installation || profile.duty_station || ""),
+                zip: clean(profile.zip || profile.base_zip || profile.baseZip || profile.bah_zip || profile.bahZip || ""),
+                notes: clean(profile.notes || ""),
+                projected_home_price: profile.projected_home_price ?? profile.projectedHomePrice ?? profile.price ?? profile.homePrice ?? profile.housingPrice ?? null,
+                monthly_expenses: profile.monthly_expenses ?? profile.monthlyExpenses ?? profile.expenses ?? profile.expensesOverride ?? null,
+                downpayment: profile.downpayment ?? profile.downPayment ?? profile.down_payment ?? profile.dpAmt ?? profile.savingsOverride ?? null,
+                savings: profile.savings ?? profile.currentSavings ?? profile.cash ?? null,
+                credit_score: profile.credit_score ?? profile.creditScore ?? profile.fico ?? profile.score ?? null,
+                bedrooms: profile.bedrooms ?? profile.beds ?? null,
+                bathrooms: profile.bathrooms ?? profile.baths ?? null,
+                sqft: profile.sqft ?? null,
+                cityKey: clean(profile.cityKey || profile.city_key || profile.market || profile.marketSlug || ""),
+                loanType: clean(profile.loanType || profile.loan_type || "va"),
+                termYears: profile.termYears ?? profile.term_years ?? 30
+              };
+            }
+
+            function getFirstName(profile) {
+              if (!profile || typeof profile !== "object") return "";
+
+              const first =
+                clean(profile.first_name || profile.firstName || "") ||
+                clean(profile.full_name || profile.fullName || profile.name || "").split(" ")[0];
+
+              return clean(first);
+            }
+
+            function collectLocalContext() {
+              const profile = readStore(PROFILE_KEY, null);
+              const identity = readStore(IDENTITY_KEY, null);
+              const bridge = readStore(BRIDGE_KEY, null);
+              const legacyBridge = readStore(LEGACY_BRIDGE_KEY, null);
+              const session = readStore(SESSION_KEY, null);
+              const financialIntake = readStore(FINANCIAL_INTAKE_KEY, null);
+              const kpiOverrides = readStore(KPI_OVERRIDES_KEY, null);
+              const baseline = readStore(BASELINE_KEY, null);
+
+              let selectedBase = null;
+              let selectedCityJsonUrl = "";
+
+              try {
+                selectedBase =
+                  safeParse(localStorage.getItem(SELECTED_BASE_KEY), null) ||
+                  safeParse(sessionStorage.getItem(SELECTED_BASE_KEY), null) ||
+                  localStorage.getItem(SELECTED_BASE_KEY) ||
+                  sessionStorage.getItem(SELECTED_BASE_KEY) ||
+                  null;
+              } catch {}
+
+              try {
+                selectedCityJsonUrl =
+                  localStorage.getItem(SELECTED_CITY_URL_KEY) ||
+                  sessionStorage.getItem(SELECTED_CITY_URL_KEY) ||
+                  "";
+              } catch {}
+
+              const sessionEmail =
+                readTextStore("pcsunited.sessionEmail", "") ||
+                readTextStore("pcsunited.loginEmail", "");
+
+              const mergedProfile = normalizeProfile(
+                mergeObjects(
+                  baseline || {},
+                  identity || {},
+                  profile || {},
+                  bridge || {},
+                  legacyBridge || {},
+                  financialIntake || {},
+                  kpiOverrides || {},
+                  sessionEmail ? { email: sessionEmail } : {}
+                )
+              );
+
+              return {
+                profile: mergedProfile || profile || {},
+                identity: identity || {},
+                bridge: mergeObjects(bridge || {}, legacyBridge || {}, baseline || {}),
+                session: session || {},
+                financial_intake: financialIntake || {},
+                kpi_overrides: kpiOverrides || {},
+                baseline: baseline || {},
+                selected_base: selectedBase,
+                selected_city_json_url: selectedCityJsonUrl
+              };
+            }
+
+            function buildContextSummary(profile) {
+              if (!profile) return "";
+
+              const parts = [];
+
+              if (profile.full_name) parts.push("Name: " + profile.full_name);
+              if (profile.mode) parts.push("Status: " + profile.mode);
+              if (profile.base) parts.push("Base: " + profile.base);
+              if (profile.zip) parts.push("ZIP: " + profile.zip);
+              if (profile.rank_paygrade || profile.rank) parts.push("Rank: " + (profile.rank_paygrade || profile.rank));
+              if (profile.yos != null) parts.push("YOS: " + profile.yos);
+              if (profile.family != null) parts.push("Dependents: " + profile.family);
+
+              if (profile.va_disability != null) {
+                parts.push("VA Disability: " + profile.va_disability + "%");
+              }
+
+              if (profile.projected_home_price) {
+                parts.push("Target Price: $" + Number(profile.projected_home_price).toLocaleString("en-US"));
+              }
+
+              if (profile.monthly_expenses) {
+                parts.push("Monthly Expenses: $" + Number(profile.monthly_expenses).toLocaleString("en-US"));
+              }
+
+              if (profile.downpayment) {
+                parts.push("Down Payment: $" + Number(profile.downpayment).toLocaleString("en-US"));
+              }
+
+              if (profile.credit_score) parts.push("Credit Score: " + profile.credit_score);
+              if (profile.bedrooms) parts.push("Bedrooms: " + profile.bedrooms);
+
+              return parts.join(" | ");
+            }
+
+            async function pushMsg(role, content, opts = {}) {
+              const { typewriter = false, speed = 18, delay = 120 } = opts;
+
+              if (!chatEl) return;
+
+              const msg = document.createElement("div");
+              msg.className = "ae-msg " + (role === "user" ? "ae-user" : "ae-bot");
+
+              const textNode = document.createElement("span");
+              msg.appendChild(textNode);
+              chatEl.appendChild(msg);
+              scrollToBottom();
+
+              if (!typewriter || prefersReduced() || role === "user") {
+                textNode.textContent = content;
+                scrollToBottom();
+                return;
+              }
+
+              await typewriterInto(textNode, content, speed, delay);
+              scrollToBottom();
+            }
+
+            function showTyping() {
+              if (!chatEl) return;
+
+              const existing = document.getElementById("ae-typing");
+              if (existing) existing.remove();
+
+              const t = document.createElement("div");
+              t.className = "ae-msg ae-bot ae-typing";
+              t.id = "ae-typing";
+              t.textContent = "Amy is reviewing your question…";
+              chatEl.appendChild(t);
+              scrollToBottom();
+            }
+
+            function hideTyping() {
+              const t = document.getElementById("ae-typing");
+              if (t) t.remove();
+            }
+
+            function typewriterInto(el, text, speed = 18, startDelay = 120) {
+              return new Promise((resolve) => {
+                el.textContent = "";
+
+                const caret = document.createElement("span");
+                caret.className = "tw-caret";
+                el.appendChild(caret);
+
+                let i = 0;
+
+                const tick = () => {
+                  if (i < text.length) {
+                    caret.insertAdjacentText("beforebegin", text.charAt(i++));
+                    scrollToBottom();
+                    setTimeout(tick, speed);
+                  } else {
+                    caret.remove();
+                    resolve();
+                  }
+                };
+
+                setTimeout(tick, startDelay);
+              });
+            }
+
+            async function callAmy(userText) {
+              if (!sendBtn) return;
+
+              sendBtn.disabled = true;
+              showTyping();
+
+              try {
+                const localContext = collectLocalContext();
+                const mergedProfile = normalizeProfile(localContext.profile || {});
+                const contextSummary = buildContextSummary(mergedProfile);
+
+                const payload = {
+                  message: userText,
+                  email: mergedProfile?.email || localContext.identity?.email || localContext.bridge?.email || undefined,
+                  profile: mergedProfile || undefined,
+                  identity: localContext.identity || undefined,
+                  bridge: localContext.bridge || undefined,
+                  context: {
+                    profile: mergedProfile || undefined,
+                    identity: localContext.identity || undefined,
+                    bridge: localContext.bridge || undefined,
+                    session: localContext.session || undefined,
+                    financial_intake: localContext.financial_intake || undefined,
+                    kpi_overrides: localContext.kpi_overrides || undefined,
+                    baseline: localContext.baseline || undefined,
+                    selected_base: localContext.selected_base || undefined,
+                    selected_city_json_url: localContext.selected_city_json_url || undefined,
+                    profile_summary: contextSummary || undefined
+                  },
+                  profileContext: contextSummary || undefined
+                };
+
+                const res = await fetch(ENDPOINT, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload)
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                hideTyping();
+
+                if (!res.ok || !data || data.ok !== true) {
+                  throw new Error((data && data.error) || "Request failed.");
+                }
+
+                const reply = String(
+                  data.reply ||
+                  data.answer?.summary ||
+                  data.answer?.bluf ||
+                  "I’m here. What would you like to explore?"
+                );
+
+                const ui = data.ui || {};
+                const speed = Number(ui.speed || 18);
+                const delay = Number(ui.startDelay || 120);
+
+                await pushMsg("assistant", reply, { typewriter: true, speed, delay });
+
+              } catch (err) {
+                hideTyping();
+
+                await pushMsg(
+                  "assistant",
+                  "Hmm… I hit a connection snag. Please make sure this widget is calling https://thewing.netlify.app/api/agent-amy.",
+                  { typewriter: true, speed: 16, delay: 80 }
+                );
+              } finally {
+                sendBtn.disabled = false;
+              }
+            }
+
+            async function trySend() {
+              if (!inputEl) return;
+
+              const text = clean(inputEl.value);
+              if (!text) return;
+
+              await pushMsg("user", text);
+
+              inputEl.value = "";
+
+              await callAmy(text);
+            }
+
+            if (sendBtn) {
+              sendBtn.addEventListener("click", trySend);
+            }
+
+            if (inputEl) {
+              inputEl.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  trySend();
+                }
+              });
+            }
+
+            const localContext = collectLocalContext();
+            const localProfile = normalizeProfile(localContext.profile || {});
+            const firstName = getFirstName(localProfile);
+
+            const greeting = firstName
+              ? `Hey ${firstName} — I’m Amy, your PCSUnited AI Concierge powered by TheWing.ai. Ask me about your military pay, BAH, PCS housing strategy, affordability, mortgage estimate, or what your financial dashboard is really telling you.`
+              : "Hey — I’m Amy, your PCSUnited AI Concierge powered by TheWing.ai. Ask me about your military pay, BAH, PCS housing strategy, affordability, mortgage estimate, or what your financial dashboard is really telling you.";
+
+            pushMsg("assistant", greeting, { typewriter: true, speed: 18, delay: 220 });
+          })();
+        </script>
       </div>
     </div>
   </div>
 
+  <!-- ============================================================
+    ASK AMY — OPEN / CLOSE LOGIC
+  ============================================================ -->
   <script>
-  (() => {
-    const root = document.getElementById("ask-elena-shell");
-    if (!root || root.__askAmyMountedV13Standalone) return;
-    root.__askAmyMountedV13Standalone = true;
+    (function () {
+      const launcher = document.getElementById("ask-elena-launcher");
+      const modal = document.getElementById("ask-elena-modal");
+      const closeBtn = document.getElementById("ask-elena-modal-close");
 
-    const RAW_ENDPOINT = root.getAttribute("data-endpoint") || "";
-    const chatEl = document.getElementById("ae-chat");
-    const inputEl = document.getElementById("ae-input");
-    const sendBtn = document.getElementById("ae-send");
-    const statusPill = document.getElementById("ae-status-pill");
+      if (!launcher || !modal || !closeBtn) return;
 
-    const PROFILE_KEY = "pcsunited.profile.v1";
-    const IDENTITY_KEY = "pcsunited.identity.v1";
-    const BRIDGE_KEY = "pcsunited.bridge.v1";
-    const LEGACY_BRIDGE_KEY = "realtysass.bridge";
-    const SESSION_KEY = "pcsunited.session.v1";
-    const FINANCIAL_INTAKE_KEY = "pcsunited.financial.intake.v1";
-    const KPI_OVERRIDES_KEY = "pcsunited.kpi_overrides.v1";
-    const BASELINE_KEY = "pcsunited.baseline.v1";
-    const SELECTED_BASE_KEY = "pcsunited.selectedBase.v1";
-    const SELECTED_CITY_URL_KEY = "pcsunited.selectedCityJsonUrl.v1";
-
-    function resolveAskEndpoint(raw) {
-      if (raw) return raw;
-
-      if (location.hostname && /webflow\.io$/i.test(location.hostname)) {
-        return "https://thewing.netlify.app/api/agent-amy";
+      function openAskElena() {
+        modal.style.display = "flex";
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
       }
 
-      return "https://thewing.netlify.app/api/agent-amy";
-    }
-
-    const ENDPOINT = resolveAskEndpoint(RAW_ENDPOINT);
-
-    const prefersReduced = () =>
-      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    function setStatus(text) {
-      if (statusPill) statusPill.textContent = text;
-    }
-
-    function scrollToBottom() {
-      if (!chatEl) return;
-      chatEl.scrollTop = chatEl.scrollHeight;
-    }
-
-    function clean(v) {
-      return String(v == null ? "" : v).trim();
-    }
-
-    function lowerEmail(v) {
-      return clean(v).toLowerCase();
-    }
-
-    function safeParse(raw, fallback = null) {
-      try {
-        const parsed = JSON.parse(raw || "null");
-        return parsed == null ? fallback : parsed;
-      } catch {
-        return fallback;
-      }
-    }
-
-    function readStore(key, fallback = null) {
-      try {
-        const localRaw = localStorage.getItem(key);
-        if (localRaw) return safeParse(localRaw, fallback);
-
-        const sessionRaw = sessionStorage.getItem(key);
-        if (sessionRaw) return safeParse(sessionRaw, fallback);
-
-        return fallback;
-      } catch {
-        return fallback;
-      }
-    }
-
-    function readTextStore(key, fallback = "") {
-      try {
-        const localRaw = localStorage.getItem(key);
-        if (localRaw) return localRaw;
-
-        const sessionRaw = sessionStorage.getItem(key);
-        if (sessionRaw) return sessionRaw;
-
-        return fallback;
-      } catch {
-        return fallback;
-      }
-    }
-
-    function mergeObjects() {
-      const out = {};
-
-      for (const obj of arguments) {
-        if (!obj || typeof obj !== "object") continue;
-
-        Object.keys(obj).forEach((key) => {
-          const value = obj[key];
-
-          if (value === undefined || value === null || value === "") return;
-
-          if (
-            value &&
-            typeof value === "object" &&
-            !Array.isArray(value)
-          ) {
-            out[key] = mergeObjects(out[key] || {}, value);
-          } else {
-            out[key] = value;
-          }
-        });
+      function closeAskElena() {
+        modal.style.display = "none";
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
       }
 
-      return out;
-    }
+      launcher.addEventListener("click", openAskElena);
+      closeBtn.addEventListener("click", closeAskElena);
 
-    function normalizeProfile(profile) {
-      if (!profile || typeof profile !== "object") return null;
-
-      return {
-        id: profile.id ?? null,
-        profiles_user_id_unique: profile.profiles_user_id_unique ?? profile.user_id ?? profile.userId ?? null,
-        email: lowerEmail(profile.email || ""),
-        full_name: clean(
-          profile.full_name ||
-          profile.fullName ||
-          [profile.first_name, profile.last_name].filter(Boolean).join(" ") ||
-          profile.name ||
-          ""
-        ),
-        first_name: clean(profile.first_name || profile.firstName || ""),
-        last_name: clean(profile.last_name || profile.lastName || ""),
-        phone: clean(profile.phone || ""),
-        mode: clean(profile.mode || profile.user_type || profile.userType || ""),
-        military_status: clean(profile.military_status || profile.mode || profile.user_type || ""),
-        rank: clean(profile.rank || profile.rank_paygrade || profile.paygrade || ""),
-        rank_paygrade: clean(profile.rank_paygrade || profile.rankPaygrade || profile.paygrade || profile.rank || ""),
-        va_disability: profile.va_disability ?? profile.vaDisability ?? profile.va ?? null,
-        yos: profile.yos ?? profile.years_of_service ?? profile.yearsOfService ?? null,
-        family: profile.family ?? profile.dependents ?? profile.withDependents ?? null,
-        family_size: profile.family_size ?? profile.familySize ?? profile.household_size ?? profile.householdSize ?? null,
-        base: clean(profile.base || profile.base_name || profile.baseName || profile.installation || profile.duty_station || ""),
-        zip: clean(profile.zip || profile.base_zip || profile.baseZip || profile.bah_zip || profile.bahZip || ""),
-        notes: clean(profile.notes || ""),
-        projected_home_price: profile.projected_home_price ?? profile.projectedHomePrice ?? profile.price ?? profile.homePrice ?? profile.housingPrice ?? null,
-        monthly_expenses: profile.monthly_expenses ?? profile.monthlyExpenses ?? profile.expenses ?? profile.expensesOverride ?? null,
-        downpayment: profile.downpayment ?? profile.downPayment ?? profile.down_payment ?? profile.dpAmt ?? profile.savingsOverride ?? null,
-        savings: profile.savings ?? profile.currentSavings ?? profile.cash ?? null,
-        credit_score: profile.credit_score ?? profile.creditScore ?? profile.fico ?? profile.score ?? null,
-        bedrooms: profile.bedrooms ?? profile.beds ?? null,
-        bathrooms: profile.bathrooms ?? profile.baths ?? null,
-        sqft: profile.sqft ?? null,
-        cityKey: clean(profile.cityKey || profile.city_key || profile.market || profile.marketSlug || ""),
-        loanType: clean(profile.loanType || profile.loan_type || "va"),
-        termYears: profile.termYears ?? profile.term_years ?? 30
-      };
-    }
-
-    function getFirstName(profile) {
-      if (!profile || typeof profile !== "object") return "";
-
-      const first =
-        clean(profile.first_name || profile.firstName || "") ||
-        clean(profile.full_name || profile.fullName || profile.name || "").split(" ")[0];
-
-      return clean(first);
-    }
-
-    function collectLocalContext() {
-      const profile = readStore(PROFILE_KEY, null);
-      const identity = readStore(IDENTITY_KEY, null);
-      const bridge = readStore(BRIDGE_KEY, null);
-      const legacyBridge = readStore(LEGACY_BRIDGE_KEY, null);
-      const session = readStore(SESSION_KEY, null);
-      const financialIntake = readStore(FINANCIAL_INTAKE_KEY, null);
-      const kpiOverrides = readStore(KPI_OVERRIDES_KEY, null);
-      const baseline = readStore(BASELINE_KEY, null);
-
-      let selectedBase = null;
-      let selectedCityJsonUrl = "";
-
-      try {
-        selectedBase =
-          safeParse(localStorage.getItem(SELECTED_BASE_KEY), null) ||
-          safeParse(sessionStorage.getItem(SELECTED_BASE_KEY), null) ||
-          localStorage.getItem(SELECTED_BASE_KEY) ||
-          sessionStorage.getItem(SELECTED_BASE_KEY) ||
-          null;
-      } catch {}
-
-      try {
-        selectedCityJsonUrl =
-          localStorage.getItem(SELECTED_CITY_URL_KEY) ||
-          sessionStorage.getItem(SELECTED_CITY_URL_KEY) ||
-          "";
-      } catch {}
-
-      const sessionEmail =
-        readTextStore("pcsunited.sessionEmail", "") ||
-        readTextStore("pcsunited.loginEmail", "");
-
-      const mergedProfile = normalizeProfile(
-        mergeObjects(
-          baseline || {},
-          identity || {},
-          profile || {},
-          bridge || {},
-          legacyBridge || {},
-          financialIntake || {},
-          kpiOverrides || {},
-          sessionEmail ? { email: sessionEmail } : {}
-        )
-      );
-
-      return {
-        profile: mergedProfile || profile || {},
-        identity: identity || {},
-        bridge: mergeObjects(bridge || {}, legacyBridge || {}, baseline || {}),
-        session: session || {},
-        financial_intake: financialIntake || {},
-        kpi_overrides: kpiOverrides || {},
-        baseline: baseline || {},
-        selected_base: selectedBase,
-        selected_city_json_url: selectedCityJsonUrl
-      };
-    }
-
-    function buildContextSummary(profile) {
-      if (!profile) return "";
-
-      const parts = [];
-
-      if (profile.full_name) parts.push("Name: " + profile.full_name);
-      if (profile.mode) parts.push("Status: " + profile.mode);
-      if (profile.base) parts.push("Base: " + profile.base);
-      if (profile.zip) parts.push("ZIP: " + profile.zip);
-      if (profile.rank_paygrade || profile.rank) parts.push("Rank: " + (profile.rank_paygrade || profile.rank));
-      if (profile.yos != null) parts.push("YOS: " + profile.yos);
-      if (profile.family != null) parts.push("Dependents: " + profile.family);
-
-      if (profile.va_disability != null) {
-        parts.push("VA Disability: " + profile.va_disability + "%");
-      }
-
-      if (profile.projected_home_price) {
-        parts.push("Target Price: $" + Number(profile.projected_home_price).toLocaleString("en-US"));
-      }
-
-      if (profile.monthly_expenses) {
-        parts.push("Monthly Expenses: $" + Number(profile.monthly_expenses).toLocaleString("en-US"));
-      }
-
-      if (profile.downpayment) {
-        parts.push("Down Payment: $" + Number(profile.downpayment).toLocaleString("en-US"));
-      }
-
-      if (profile.credit_score) parts.push("Credit Score: " + profile.credit_score);
-      if (profile.bedrooms) parts.push("Bedrooms: " + profile.bedrooms);
-
-      return parts.join(" | ");
-    }
-
-    async function pushMsg(role, content, opts = {}) {
-      const { typewriter = false, speed = 18, delay = 120 } = opts;
-
-      if (!chatEl) return;
-
-      const msg = document.createElement("div");
-      msg.className = "ae-msg " + (role === "user" ? "ae-user" : "ae-bot");
-
-      const textNode = document.createElement("span");
-      msg.appendChild(textNode);
-      chatEl.appendChild(msg);
-      scrollToBottom();
-
-      if (!typewriter || prefersReduced() || role === "user") {
-        textNode.textContent = content;
-        scrollToBottom();
-        return;
-      }
-
-      await typewriterInto(textNode, content, speed, delay);
-      scrollToBottom();
-    }
-
-    function showTyping() {
-      if (!chatEl) return;
-
-      const existing = document.getElementById("ae-typing");
-      if (existing) existing.remove();
-
-      const t = document.createElement("div");
-      t.className = "ae-msg ae-bot ae-typing";
-      t.id = "ae-typing";
-      t.textContent = "Amy is reviewing your question…";
-      chatEl.appendChild(t);
-      scrollToBottom();
-    }
-
-    function hideTyping() {
-      const t = document.getElementById("ae-typing");
-      if (t) t.remove();
-    }
-
-    function typewriterInto(el, text, speed = 18, startDelay = 120) {
-      return new Promise((resolve) => {
-        el.textContent = "";
-
-        const caret = document.createElement("span");
-        caret.className = "tw-caret";
-        el.appendChild(caret);
-
-        let i = 0;
-
-        const tick = () => {
-          if (i < text.length) {
-            caret.insertAdjacentText("beforebegin", text.charAt(i++));
-            scrollToBottom();
-            setTimeout(tick, speed);
-          } else {
-            caret.remove();
-            resolve();
-          }
-        };
-
-        setTimeout(tick, startDelay);
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeAskElena();
       });
-    }
 
-    async function callAmy(userText) {
-      if (!sendBtn) return;
-
-      sendBtn.disabled = true;
-      setStatus("Thinking");
-      showTyping();
-
-      try {
-        const localContext = collectLocalContext();
-        const mergedProfile = normalizeProfile(localContext.profile || {});
-        const contextSummary = buildContextSummary(mergedProfile);
-
-        const payload = {
-          message: userText,
-          email: mergedProfile?.email || localContext.identity?.email || localContext.bridge?.email || undefined,
-          profile: mergedProfile || undefined,
-          identity: localContext.identity || undefined,
-          bridge: localContext.bridge || undefined,
-          context: {
-            profile: mergedProfile || undefined,
-            identity: localContext.identity || undefined,
-            bridge: localContext.bridge || undefined,
-            session: localContext.session || undefined,
-            financial_intake: localContext.financial_intake || undefined,
-            kpi_overrides: localContext.kpi_overrides || undefined,
-            baseline: localContext.baseline || undefined,
-            selected_base: localContext.selected_base || undefined,
-            selected_city_json_url: localContext.selected_city_json_url || undefined,
-            profile_summary: contextSummary || undefined
-          },
-          profileContext: contextSummary || undefined
-        };
-
-        const res = await fetch(ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json().catch(() => ({}));
-
-        hideTyping();
-
-        if (!res.ok || !data || data.ok !== true) {
-          throw new Error((data && data.error) || "Request failed.");
-        }
-
-        const reply = String(
-          data.reply ||
-          data.answer?.summary ||
-          data.answer?.bluf ||
-          "I’m here. What would you like to explore?"
-        );
-
-        const ui = data.ui || {};
-        const speed = Number(ui.speed || 18);
-        const delay = Number(ui.startDelay || 120);
-
-        setStatus("Connected");
-
-        await pushMsg("assistant", reply, { typewriter: true, speed, delay });
-
-      } catch (err) {
-        hideTyping();
-        setStatus("Connection Issue");
-
-        await pushMsg(
-          "assistant",
-          "Hmm… I hit a connection snag. Please make sure this app is calling https://thewing.netlify.app/api/agent-amy.",
-          { typewriter: true, speed: 16, delay: 80 }
-        );
-      } finally {
-        sendBtn.disabled = false;
-      }
-    }
-
-    async function trySend() {
-      if (!inputEl) return;
-
-      const text = clean(inputEl.value);
-      if (!text) return;
-
-      await pushMsg("user", text);
-
-      inputEl.value = "";
-
-      await callAmy(text);
-    }
-
-    if (sendBtn) {
-      sendBtn.addEventListener("click", trySend);
-    }
-
-    if (inputEl) {
-      inputEl.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          trySend();
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.style.display === "flex") {
+          closeAskElena();
         }
       });
-    }
-
-    const localContext = collectLocalContext();
-    const localProfile = normalizeProfile(localContext.profile || {});
-    const firstName = getFirstName(localProfile);
-
-    const greeting = firstName
-      ? `Hey ${firstName} — I’m Amy, your PCSUnited AI Concierge powered by TheWing.ai. Ask me about your military pay, BAH, PCS housing strategy, affordability, mortgage estimate, or what your financial dashboard is really telling you.`
-      : "Hey — I’m Amy, your PCSUnited AI Concierge powered by TheWing.ai. Ask me about your military pay, BAH, PCS housing strategy, affordability, mortgage estimate, or what your financial dashboard is really telling you.";
-
-    pushMsg("assistant", greeting, { typewriter: true, speed: 18, delay: 220 });
-  })();
+    })();
   </script>
 </body>
 </html>
