@@ -36,75 +36,91 @@
         </div>
       </div>
 
-      <nav class="bd-topnav" aria-label="Base Demographics Navigation">
-        <button class="bd-nav-btn is-active" data-tab="overview">Overview</button>
-        <button class="bd-nav-btn" data-tab="realestate">Real Estate</button>
-        <button class="bd-nav-btn" data-tab="demographics">Demographics</button>
-        <button class="bd-nav-btn" data-tab="base">Base</button>
-        <button class="bd-nav-btn" data-tab="guidance">Guidance</button>
-      </nav>
-
       <div class="bd-user-pill">
-        <div class="bd-user-avatar" id="bdUserInitials">JO</div>
+        <div class="bd-user-avatar" id="bdUserInitials">M</div>
         <div>
           <div class="bd-user-name" id="bdUserName">Member</div>
-          <div class="bd-user-meta" id="bdUserMeta">Profile loading...</div>
+          <div class="bd-user-meta" id="bdUserMeta">Member profile</div>
         </div>
       </div>
     </header>
 
     <!-- =====================================================
-      HERO / SELECTED BASE SUMMARY
+      HERO / SELECTED BASE SUMMARY + MEMBER GLASS PANEL
     ====================================================== -->
     <section class="bd-hero">
       <div class="bd-hero-bg" id="bdHeroBg"></div>
 
       <div class="bd-hero-content">
-        <div class="bd-eyebrow" id="bdHeroEyebrow">Base Intelligence</div>
+        <div class="bd-hero-left">
+          <div class="bd-eyebrow" id="bdHeroEyebrow">Base Intelligence</div>
 
-        <h1 class="bd-title" id="bdHeroTitle">Base Demographics</h1>
+          <h1 class="bd-title" id="bdHeroTitle">Base Demographics</h1>
 
-        <p class="bd-subtitle" id="bdHeroSubtitle">
-          Personalized base, housing, real estate, and PCS decision intelligence for account members.
-        </p>
+          <p class="bd-subtitle" id="bdHeroSubtitle">
+            Personalized base, housing, real estate, and PCS decision intelligence for account members.
+          </p>
 
-        <div class="bd-hero-tags">
-          <span id="bdSelectedPlace">Selected base loading...</span>
-          <span id="bdDataUpdated">Data status pending</span>
-          <span id="bdConfidence">Member view</span>
+          <div class="bd-hero-tags">
+            <span id="bdSelectedPlace">Selected base loading...</span>
+            <span id="bdDataUpdated">Data status pending</span>
+            <span id="bdConfidence">Member view</span>
+          </div>
         </div>
+
+        <aside class="bd-hero-glass-panel" aria-label="Member Housing Profile">
+          <div class="bd-glass-kicker">Member Housing Snapshot</div>
+          <h2 class="bd-glass-title" id="bdGlassWelcome">Your PCS Numbers</h2>
+
+          <div class="bd-glass-grid">
+            <div class="bd-glass-row">
+              <span>Base Pay</span>
+              <strong id="bdHeroBasePay">—</strong>
+            </div>
+
+            <div class="bd-glass-row">
+              <span>BAH</span>
+              <strong id="bdHeroBah">—</strong>
+            </div>
+
+            <div class="bd-glass-row">
+              <span>Total Monthly Income</span>
+              <strong id="bdHeroTotalMonthly">—</strong>
+            </div>
+
+            <div class="bd-glass-row">
+              <span>Target Price</span>
+              <strong id="bdHeroTargetPrice">—</strong>
+            </div>
+
+            <div class="bd-glass-row">
+              <span>Family Size</span>
+              <strong id="bdHeroFamilySize">—</strong>
+            </div>
+
+            <div class="bd-glass-row bd-glass-row-accent">
+              <span>Recommended Rooms</span>
+              <strong id="bdHeroRooms">—</strong>
+            </div>
+          </div>
+
+          <p class="bd-glass-note">
+            Rooms estimate uses family size minus one as a quick planning shortcut.
+          </p>
+        </aside>
       </div>
     </section>
 
     <!-- =====================================================
-      MEMBER PROFILE STRIP
+      TAB NAVIGATION BELOW HERO
     ====================================================== -->
-    <section class="bd-profile-strip" aria-label="Member Profile Summary">
-      <article class="bd-profile-card">
-        <span class="bd-profile-label">Rank / Years</span>
-        <strong id="bdProfileRank">—</strong>
-      </article>
-
-      <article class="bd-profile-card">
-        <span class="bd-profile-label">Dependents</span>
-        <strong id="bdProfileDependents">—</strong>
-      </article>
-
-      <article class="bd-profile-card">
-        <span class="bd-profile-label">BAH</span>
-        <strong id="bdProfileBah">—</strong>
-      </article>
-
-      <article class="bd-profile-card">
-        <span class="bd-profile-label">Monthly Income</span>
-        <strong id="bdProfileIncome">—</strong>
-      </article>
-
-      <article class="bd-profile-card">
-        <span class="bd-profile-label">Housing Goal</span>
-        <strong id="bdProfileGoal">Buy / Rent Analysis</strong>
-      </article>
-    </section>
+    <nav class="bd-tabbar" aria-label="Base Demographics Navigation">
+      <button class="bd-nav-btn is-active" data-tab="overview">Overview</button>
+      <button class="bd-nav-btn" data-tab="realestate">Real Estate</button>
+      <button class="bd-nav-btn" data-tab="demographics">Demographics</button>
+      <button class="bd-nav-btn" data-tab="base">Base</button>
+      <button class="bd-nav-btn" data-tab="guidance">Guidance</button>
+    </nav>
 
     <!-- =====================================================
       MAIN TAB BODY
@@ -160,12 +176,15 @@
 
   <!-- =====================================================
     TAB MODULES
+    Keep only overview.js active until the other files exist.
   ====================================================== -->
   <script type="module" src="./tabs/overview.js"></script>
-  <script type="module" src="./tabs/realestate.js"></script>
-  <script type="module" src="./tabs/demographics.js"></script>
-  <script type="module" src="./tabs/base.js"></script>
-  <script type="module" src="./tabs/guidance.js"></script>
+
+  <!-- Future tabs -->
+  <!-- <script type="module" src="./tabs/realestate.js"></script> -->
+  <!-- <script type="module" src="./tabs/demographics.js"></script> -->
+  <!-- <script type="module" src="./tabs/base.js"></script> -->
+  <!-- <script type="module" src="./tabs/guidance.js"></script> -->
 
   <!-- =====================================================
     APP CONTROLLER
