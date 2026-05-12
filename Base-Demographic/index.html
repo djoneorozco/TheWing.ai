@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Base Demographics | TheWing.ai</title>
+
+  <meta
+    name="description"
+    content="Member-only PCSUnited Base Demographics app powered by TheWing.ai. Personalized base, housing, real estate, demographic, and guidance intelligence for military families."
+  />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Barlow:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="./basedemo.css" />
+</head>
+
+<body>
+  <div id="baseDemoApp" class="bd-app" data-app="thewing-base-demographic">
+
+    <!-- =====================================================
+      TOP APP BAR
+    ====================================================== -->
+    <header class="bd-topbar">
+      <div class="bd-brand">
+        <div class="bd-brand-mark">✦</div>
+        <div>
+          <div class="bd-brand-title">PCS UNITED</div>
+          <div class="bd-brand-subtitle">Powered by TheWing.ai</div>
+        </div>
+      </div>
+
+      <nav class="bd-topnav" aria-label="Base Demographics Navigation">
+        <button class="bd-nav-btn is-active" data-tab="overview">Overview</button>
+        <button class="bd-nav-btn" data-tab="realestate">Real Estate</button>
+        <button class="bd-nav-btn" data-tab="demographics">Demographics</button>
+        <button class="bd-nav-btn" data-tab="base">Base</button>
+        <button class="bd-nav-btn" data-tab="guidance">Guidance</button>
+      </nav>
+
+      <div class="bd-user-pill">
+        <div class="bd-user-avatar" id="bdUserInitials">JO</div>
+        <div>
+          <div class="bd-user-name" id="bdUserName">Member</div>
+          <div class="bd-user-meta" id="bdUserMeta">Profile loading...</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- =====================================================
+      HERO / SELECTED BASE SUMMARY
+    ====================================================== -->
+    <section class="bd-hero">
+      <div class="bd-hero-bg" id="bdHeroBg"></div>
+
+      <div class="bd-hero-content">
+        <div class="bd-eyebrow" id="bdHeroEyebrow">Base Intelligence</div>
+
+        <h1 class="bd-title" id="bdHeroTitle">Base Demographics</h1>
+
+        <p class="bd-subtitle" id="bdHeroSubtitle">
+          Personalized base, housing, real estate, and PCS decision intelligence for account members.
+        </p>
+
+        <div class="bd-hero-tags">
+          <span id="bdSelectedPlace">Selected base loading...</span>
+          <span id="bdDataUpdated">Data status pending</span>
+          <span id="bdConfidence">Member view</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+      MEMBER PROFILE STRIP
+    ====================================================== -->
+    <section class="bd-profile-strip" aria-label="Member Profile Summary">
+      <article class="bd-profile-card">
+        <span class="bd-profile-label">Rank / Years</span>
+        <strong id="bdProfileRank">—</strong>
+      </article>
+
+      <article class="bd-profile-card">
+        <span class="bd-profile-label">Dependents</span>
+        <strong id="bdProfileDependents">—</strong>
+      </article>
+
+      <article class="bd-profile-card">
+        <span class="bd-profile-label">BAH</span>
+        <strong id="bdProfileBah">—</strong>
+      </article>
+
+      <article class="bd-profile-card">
+        <span class="bd-profile-label">Monthly Income</span>
+        <strong id="bdProfileIncome">—</strong>
+      </article>
+
+      <article class="bd-profile-card">
+        <span class="bd-profile-label">Housing Goal</span>
+        <strong id="bdProfileGoal">Buy / Rent Analysis</strong>
+      </article>
+    </section>
+
+    <!-- =====================================================
+      MAIN TAB BODY
+    ====================================================== -->
+    <main class="bd-main">
+
+      <section
+        id="bdTabOverview"
+        class="bd-tab-panel is-active"
+        data-panel="overview"
+        aria-label="Overview Tab"
+      ></section>
+
+      <section
+        id="bdTabRealEstate"
+        class="bd-tab-panel"
+        data-panel="realestate"
+        aria-label="Real Estate Tab"
+      ></section>
+
+      <section
+        id="bdTabDemographics"
+        class="bd-tab-panel"
+        data-panel="demographics"
+        aria-label="Demographics Tab"
+      ></section>
+
+      <section
+        id="bdTabBase"
+        class="bd-tab-panel"
+        data-panel="base"
+        aria-label="Base Tab"
+      ></section>
+
+      <section
+        id="bdTabGuidance"
+        class="bd-tab-panel"
+        data-panel="guidance"
+        aria-label="Guidance Tab"
+      ></section>
+
+    </main>
+
+    <!-- =====================================================
+      ERROR / STATUS
+    ====================================================== -->
+    <div id="bdAppStatus" class="bd-status" hidden></div>
+
+    <footer class="bd-footer">
+      PCSUnited and TheWing.ai provide planning intelligence only. Verify official base access, housing, BAH, school, and financial information before making decisions.
+    </footer>
+  </div>
+
+  <!-- =====================================================
+    TAB MODULES
+  ====================================================== -->
+  <script type="module" src="./tabs/overview.js"></script>
+  <script type="module" src="./tabs/realestate.js"></script>
+  <script type="module" src="./tabs/demographics.js"></script>
+  <script type="module" src="./tabs/base.js"></script>
+  <script type="module" src="./tabs/guidance.js"></script>
+
+  <!-- =====================================================
+    APP CONTROLLER
+  ====================================================== -->
+  <script type="module" src="./basedemo.js"></script>
+</body>
+</html>
