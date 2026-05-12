@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Base Demographics | TheWing.ai</title>
 
   <meta
     name="description"
-    content="Member-only PCSUnited Base Demographics app powered by TheWing.ai. Personalized base, housing, real estate, demographic, and guidance intelligence for military families."
+    content="Member-only PCSUnited Base Demographics app powered by TheWing.ai."
   />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,9 +23,6 @@
 <body>
   <div id="baseDemoApp" class="bd-app" data-app="thewing-base-demographic">
 
-    <!-- =====================================================
-      TOP APP BAR
-    ====================================================== -->
     <header class="bd-topbar">
       <div class="bd-brand">
         <div class="bd-brand-mark">✦</div>
@@ -45,13 +41,10 @@
       </div>
     </header>
 
-    <!-- =====================================================
-      HERO / SELECTED BASE SUMMARY + MEMBER GLASS PANEL
-    ====================================================== -->
-    <section class="bd-hero">
+    <section class="bd-hero bd-hero-with-glass">
       <div class="bd-hero-bg" id="bdHeroBg"></div>
 
-      <div class="bd-hero-content">
+      <div class="bd-hero-content bd-hero-content-split">
         <div class="bd-hero-left">
           <div class="bd-eyebrow" id="bdHeroEyebrow">Base Intelligence</div>
 
@@ -66,54 +59,48 @@
             <span id="bdDataUpdated">Data status pending</span>
             <span id="bdConfidence">Member view</span>
           </div>
+
+          <div class="bd-hero-mini-label">Member Housing Snapshot</div>
         </div>
 
-        <aside class="bd-hero-glass-panel" aria-label="Member Housing Profile">
-          <div class="bd-glass-kicker">Member Housing Snapshot</div>
-          <h2 class="bd-glass-title" id="bdGlassWelcome">Your PCS Numbers</h2>
+        <aside class="bd-profile-glass" aria-label="Profile Information">
+          <h2 class="bd-profile-glass-title">Profile Information</h2>
 
-          <div class="bd-glass-grid">
-            <div class="bd-glass-row">
+          <div class="bd-profile-glass-list">
+            <div class="bd-profile-glass-row">
               <span>Base Pay</span>
               <strong id="bdHeroBasePay">—</strong>
             </div>
 
-            <div class="bd-glass-row">
+            <div class="bd-profile-glass-row">
               <span>BAH</span>
               <strong id="bdHeroBah">—</strong>
             </div>
 
-            <div class="bd-glass-row">
+            <div class="bd-profile-glass-row">
               <span>Total Monthly Income</span>
               <strong id="bdHeroTotalMonthly">—</strong>
             </div>
 
-            <div class="bd-glass-row">
+            <div class="bd-profile-glass-row">
               <span>Target Price</span>
               <strong id="bdHeroTargetPrice">—</strong>
             </div>
 
-            <div class="bd-glass-row">
+            <div class="bd-profile-glass-row">
               <span>Family Size</span>
               <strong id="bdHeroFamilySize">—</strong>
             </div>
 
-            <div class="bd-glass-row bd-glass-row-accent">
+            <div class="bd-profile-glass-row">
               <span>Recommended Rooms</span>
               <strong id="bdHeroRooms">—</strong>
             </div>
           </div>
-
-          <p class="bd-glass-note">
-            Rooms estimate uses family size minus one as a quick planning shortcut.
-          </p>
         </aside>
       </div>
     </section>
 
-    <!-- =====================================================
-      TAB NAVIGATION BELOW HERO
-    ====================================================== -->
     <nav class="bd-tabbar" aria-label="Base Demographics Navigation">
       <button class="bd-nav-btn is-active" data-tab="overview">Overview</button>
       <button class="bd-nav-btn" data-tab="realestate">Real Estate</button>
@@ -122,51 +109,14 @@
       <button class="bd-nav-btn" data-tab="guidance">Guidance</button>
     </nav>
 
-    <!-- =====================================================
-      MAIN TAB BODY
-    ====================================================== -->
     <main class="bd-main">
-
-      <section
-        id="bdTabOverview"
-        class="bd-tab-panel is-active"
-        data-panel="overview"
-        aria-label="Overview Tab"
-      ></section>
-
-      <section
-        id="bdTabRealEstate"
-        class="bd-tab-panel"
-        data-panel="realestate"
-        aria-label="Real Estate Tab"
-      ></section>
-
-      <section
-        id="bdTabDemographics"
-        class="bd-tab-panel"
-        data-panel="demographics"
-        aria-label="Demographics Tab"
-      ></section>
-
-      <section
-        id="bdTabBase"
-        class="bd-tab-panel"
-        data-panel="base"
-        aria-label="Base Tab"
-      ></section>
-
-      <section
-        id="bdTabGuidance"
-        class="bd-tab-panel"
-        data-panel="guidance"
-        aria-label="Guidance Tab"
-      ></section>
-
+      <section id="bdTabOverview" class="bd-tab-panel is-active" data-panel="overview"></section>
+      <section id="bdTabRealEstate" class="bd-tab-panel" data-panel="realestate"></section>
+      <section id="bdTabDemographics" class="bd-tab-panel" data-panel="demographics"></section>
+      <section id="bdTabBase" class="bd-tab-panel" data-panel="base"></section>
+      <section id="bdTabGuidance" class="bd-tab-panel" data-panel="guidance"></section>
     </main>
 
-    <!-- =====================================================
-      ERROR / STATUS
-    ====================================================== -->
     <div id="bdAppStatus" class="bd-status" hidden></div>
 
     <footer class="bd-footer">
@@ -174,21 +124,12 @@
     </footer>
   </div>
 
-  <!-- =====================================================
-    TAB MODULES
-    Keep only overview.js active until the other files exist.
-  ====================================================== -->
   <script type="module" src="./tabs/overview.js"></script>
-
-  <!-- Future tabs -->
   <!-- <script type="module" src="./tabs/realestate.js"></script> -->
   <!-- <script type="module" src="./tabs/demographics.js"></script> -->
   <!-- <script type="module" src="./tabs/base.js"></script> -->
   <!-- <script type="module" src="./tabs/guidance.js"></script> -->
 
-  <!-- =====================================================
-    APP CONTROLLER
-  ====================================================== -->
   <script type="module" src="./basedemo.js"></script>
 </body>
 </html>
