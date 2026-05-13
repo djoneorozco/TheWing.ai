@@ -1,16 +1,4 @@
-// ============================================================
-// PCSUnited • Base Demographics SaaS
-// VOICE AMY ENABLED VERSION
-// v3.1.0
-//
-// UPDATE
-// - FIXED browser autoplay issue
-// - Amy audio now preloads silently
-// - Floating concierge button added
-// - User click unlocks browser audio
-// - Works with ElevenLabs + TheWing
-// ============================================================
-
+<script>
 (() => {
   "use strict";
 
@@ -23,23 +11,19 @@
   let CITY = null;
   let ACTIVE_BED = "3";
 
+  // ============================================================
+  // VOICE AMY
+  // ============================================================
+
   let AMY_AUDIO_INSTANCE = null;
   let AMY_PENDING_AUDIO = null;
   let AMY_BUTTON_RENDERED = false;
 
-  const $ = (sel, node = root) => node.querySelector(sel);
-  const $$ = (sel, node = root) => Array.from(node.querySelectorAll(sel));
-
-  // ============================================================
-  // #1 CONFIG
-  // ============================================================
-
   const VOICE_BASE_BRIEF_ENDPOINT =
     "https://thewing.netlify.app/api/voice-base-brief";
 
-  // ============================================================
-  // #2 CITY JSON URL
-  // ============================================================
+  const $ = (sel, node = root) => node.querySelector(sel);
+  const $$ = (sel, node = root) => Array.from(node.querySelectorAll(sel));
 
   function getCityJsonUrl(){
     return (
@@ -49,35 +33,19 @@
     );
   }
 
-  // ============================================================
-  // #3 STORAGE HYDRATION
-  // ============================================================
-
   function hydrateSelectedBaseFromStorage(){
-
     try{
-
-      const raw =
-        localStorage.getItem(
-          "pcsunited.selectedBase.v1"
-        );
-
+      const raw = localStorage.getItem("pcsunited.selectedBase.v1");
       if (!raw) return;
 
-      const selected =
-        JSON.parse(raw);
+      const selected = JSON.parse(raw);
 
       if (selected?.jsonUrl){
-
-        window.PCSU_SELECTED_CITY_JSON_URL =
-          selected.jsonUrl;
-
-        window.OROZCO_CITY_JSON_URL =
-          selected.jsonUrl;
+        window.PCSU_SELECTED_CITY_JSON_URL = selected.jsonUrl;
+        window.OROZCO_CITY_JSON_URL = selected.jsonUrl;
       }
 
     }catch(err){
-
       console.warn(
         "Could not hydrate selected base from storage:",
         err
@@ -85,12 +53,7 @@
     }
   }
 
-  // ============================================================
-  // #4 FORMATTERS
-  // ============================================================
-
   function fmtMoney(v){
-
     const n = Number(v);
 
     if (!Number.isFinite(n)) return "—";
@@ -98,25 +61,22 @@
     return new Intl.NumberFormat(
       "en-US",
       {
-        style:"currency",
-        currency:"USD",
-        maximumFractionDigits:0
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
       }
     ).format(n);
   }
 
   function fmtNum(v){
-
     const n = Number(v);
 
     if (!Number.isFinite(n)) return "—";
 
-    return new Intl.NumberFormat("en-US")
-      .format(n);
+    return new Intl.NumberFormat("en-US").format(n);
   }
 
   function fmtPct(v, digits = 1){
-
     const n = Number(v);
 
     if (!Number.isFinite(n)) return "—";
@@ -125,7 +85,6 @@
   }
 
   function fmtPctFromDecimal(v, digits = 2){
-
     const n = Number(v);
 
     if (!Number.isFinite(n)) return "—";
@@ -133,16 +92,11 @@
     return `${(n * 100).toFixed(digits)}%`;
   }
 
-  // ============================================================
-  // #5 HELPERS
-  // ============================================================
-
   function arr(v){
     return Array.isArray(v) ? v : [];
   }
 
   function esc(str){
-
     return String(str ?? "")
       .replaceAll("&","&amp;")
       .replaceAll("<","&lt;")
@@ -152,9 +106,7 @@
   }
 
   function firstDefined(...vals){
-
     for (const v of vals){
-
       if (
         v !== undefined &&
         v !== null &&
@@ -192,12 +144,7 @@
     return [];
   }
 
-  // ============================================================
-  // #6 DOM HELPERS
-  // ============================================================
-
   function setText(sel, value){
-
     const el = $(sel);
 
     if (el){
@@ -206,7 +153,6 @@
   }
 
   function setHtml(sel, html){
-
     const el = $(sel);
 
     if (el){
@@ -231,10 +177,6 @@
         : `<li>No data available yet.</li>`;
   }
 
-  // ============================================================
-  // #7 SCORE BARS
-  // ============================================================
-
   function renderScoreBars(scorecard = {}){
 
     const rows = [
@@ -247,7 +189,8 @@
 
     return rows.map(([label, value]) => {
 
-      const n = Number(value);
+      const n =
+        Number(value);
 
       const width =
         Number.isFinite(n)
@@ -256,10 +199,7 @@
 
       return `
         <div class="or-bar-row">
-
-          <div class="or-bar-name">
-            ${esc(label)}
-          </div>
+          <div class="or-bar-name">${esc(label)}</div>
 
           <div class="or-bar-track">
             <div
@@ -271,19 +211,15 @@
           <div class="or-bar-val">
             ${Number.isFinite(n) ? n : "—"}
           </div>
-
         </div>
       `;
     }).join("");
   }
 
-  // ============================================================
-  // #8 MINI BAR
-  // ============================================================
-
   function miniBar(label, value, max, displayText){
 
-    const n = Number(value);
+    const n =
+      Number(value);
 
     const width =
       Number.isFinite(n) && max > 0
@@ -311,10 +247,6 @@
     `;
   }
 
-  // ============================================================
-  // #9 ERROR
-  // ============================================================
-
   function showError(message){
 
     const box =
@@ -323,7 +255,6 @@
     if (!box) return;
 
     box.textContent = message;
-
     box.classList.add("is-show");
   }
 
@@ -335,13 +266,8 @@
     if (!box) return;
 
     box.textContent = "";
-
     box.classList.remove("is-show");
   }
-
-  // ============================================================
-  // #10 TABS
-  // ============================================================
 
   function bindTabs(){
 
@@ -354,28 +280,22 @@
 
         if (!tab) return;
 
-        $$("[data-or-tab]")
-          .forEach(node => {
-            node.classList.remove("is-active");
-          });
+        $$("[data-or-tab]").forEach(node => {
+          node.classList.remove("is-active");
+        });
 
         btn.classList.add("is-active");
 
-        $$("[data-or-panel]")
-          .forEach(panel => {
+        $$("[data-or-panel]").forEach(panel => {
 
-            panel.classList.toggle(
-              "is-active",
-              panel.getAttribute("data-or-panel") === tab
-            );
-          });
+          panel.classList.toggle(
+            "is-active",
+            panel.getAttribute("data-or-panel") === tab
+          );
+        });
       });
     });
   }
-
-  // ============================================================
-  // #11 BEDROOMS
-  // ============================================================
 
   function bindBedrooms(){
 
@@ -405,8 +325,12 @@
     });
   }
 
+  function getBaseProfile(data){
+    return data?.base_profile || {};
+  }
+
   // ============================================================
-  // #12 VOICE AMY
+  // VOICE AMY HELPERS
   // ============================================================
 
   async function prepareAmyBaseBrief(data){
@@ -462,10 +386,6 @@
       );
     }
   }
-
-  // ============================================================
-  // #13 FLOATING BUTTON
-  // ============================================================
 
   function injectAmyButton(){
 
@@ -541,210 +461,6 @@
     document.body.appendChild(btn);
   }
 
-  // ============================================================
-  // #14 BASE PROFILE
-  // ============================================================
-
-  function getBaseProfile(data){
-    return data?.base_profile || {};
-  }
-
-  // ============================================================
-  // #15 BASE
-  // ============================================================
-
-  function renderBase(data){
-
-    const base =
-      getBaseProfile(data);
-
-    setText(
-      "#orBaseIntro",
-      firstDefined(
-        base.base_bluf,
-        data.profile,
-        "Base overview loaded."
-      )
-    );
-  }
-
-  // ============================================================
-  // #16 HERO
-  // ============================================================
-
-  function renderHero(data){
-
-    const bg =
-      $("#orHeroBg");
-
-    if (bg && data.image_url){
-
-      bg.style.setProperty(
-        "--hero-image",
-        `url("${data.image_url}")`
-      );
-    }
-
-    setText(
-      "#orHeroEyebrow",
-      `${data.state || "State"} • ${data.market_label || "City Intelligence"}`
-    );
-
-    setText(
-      "#orHeroTitle",
-      `${data.name || data.city || "Base"}${data.state_code ? `, ${data.state_code}` : ""}`
-    );
-
-    setText(
-      "#orHeroSubtitle",
-      data.profile || "City intelligence loaded."
-    );
-
-    setText(
-      "#orKpiHomePrice",
-      fmtMoney(
-        data.metrics?.median_sale_price ||
-        data.avg_home_value
-      )
-    );
-
-    setText(
-      "#orKpiRent",
-      fmtMoney(
-        data.metrics?.median_rent ||
-        data.rental_metrics?.median_rent
-      )
-    );
-
-    setText(
-      "#orKpiMortgage",
-      fmtMoney(
-        data.avg_home_mortgage_monthly?.avg
-      )
-    );
-  }
-
-  // ============================================================
-  // #17 OVERVIEW
-  // ============================================================
-
-  function renderOverview(data){
-
-    setText(
-      "#orOverviewIntro",
-      data.profile || "City overview loaded."
-    );
-
-    renderList(
-      "#orSummaryPoints",
-      data.summary_points
-    );
-
-    setHtml(
-      "#orScoreBars",
-      renderScoreBars(data.scorecard || {})
-    );
-  }
-
-  // ============================================================
-  // #18 BEDROOM
-  // ============================================================
-
-  function renderBedroom(data, bedKey){
-
-    const bed =
-      data.by_bedroom?.[bedKey];
-
-    if (!bed) return;
-
-    setText(
-      "#orBedHomePrice",
-      fmtMoney(bed.home_price?.avg)
-    );
-
-    setText(
-      "#orBedRent",
-      fmtMoney(bed.rent_monthly?.avg)
-    );
-
-    setText(
-      "#orBedMortgage",
-      fmtMoney(bed.mortgage_monthly?.avg)
-    );
-
-    setText(
-      "#orBedUtilities",
-      fmtMoney(bed.utilities?.total?.avg)
-    );
-  }
-
-  // ============================================================
-  // #19 REAL ESTATE
-  // ============================================================
-
-  function renderRealEstate(data){
-
-    renderBedroom(
-      data,
-      ACTIVE_BED
-    );
-  }
-
-  // ============================================================
-  // #20 DEMOGRAPHICS
-  // ============================================================
-
-  function renderDemographics(data){
-
-    setText(
-      "#orDemoPopulation",
-      fmtNum(
-        data.population?.estimate
-      )
-    );
-
-    setText(
-      "#orDemoIncome",
-      fmtMoney(
-        data.income?.median_household_income
-      )
-    );
-  }
-
-  // ============================================================
-  // #21 GUIDANCE
-  // ============================================================
-
-  function renderGuidance(data){
-
-    renderList(
-      "#orBuyerGuidance",
-      data.buyer_guidance
-    );
-  }
-
-  // ============================================================
-  // #22 RENDER ALL
-  // ============================================================
-
-  function renderAll(data){
-
-    CITY = data;
-
-    hideError();
-
-    renderBase(data);
-    renderHero(data);
-    renderOverview(data);
-    renderRealEstate(data);
-    renderDemographics(data);
-    renderGuidance(data);
-  }
-
-  // ============================================================
-  // #23 LOAD CITY
-  // ============================================================
-
   async function loadCity(){
 
     const cityJsonUrl =
@@ -770,7 +486,16 @@
       const data =
         await res.json();
 
-      renderAll(data);
+      CITY = data;
+
+      hideError();
+
+      renderBase(data);
+      renderHero(data);
+      renderOverview(data);
+      renderRealEstate(data);
+      renderDemographics(data);
+      renderGuidance(data);
 
       // ========================================================
       // PREPARE AMY AUDIO
@@ -795,21 +520,23 @@
         "Check the city JSON path."
       );
 
+      setText(
+        "#orVerdictTitle",
+        "Load Error"
+      );
+
+      setText(
+        "#orVerdictCopy",
+        "The shell loaded, but the city JSON did not."
+      );
+
       showError(
         String(err?.message || err)
       );
     }
   }
 
-  // ============================================================
-  // #24 GLOBAL
-  // ============================================================
-
   window.loadCity = loadCity;
-
-  // ============================================================
-  // #25 BASE SWITCH
-  // ============================================================
 
   window.addEventListener(
     "pcsu:base-selected",
@@ -831,10 +558,6 @@
     }
   );
 
-  // ============================================================
-  // #26 INIT
-  // ============================================================
-
   hydrateSelectedBaseFromStorage();
 
   bindTabs();
@@ -844,3 +567,4 @@
   loadCity();
 
 })();
+</script>
