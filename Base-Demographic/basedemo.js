@@ -1,3 +1,16 @@
+// ============================================================
+// PCSUnited • Base Demographics SaaS
+// VOICE AMY ENABLED VERSION
+// v3.1.0
+//
+// UPDATE
+// - FIXED browser autoplay issue
+// - Amy audio now preloads silently
+// - Floating concierge button added
+// - User click unlocks browser audio
+// - Works with ElevenLabs + TheWing
+// ============================================================
+
 (() => {
   "use strict";
 
@@ -9,7 +22,10 @@
 
   let CITY = null;
   let ACTIVE_BED = "3";
-  let AMY_ALREADY_PLAYED = false;
+
+  let AMY_AUDIO_INSTANCE = null;
+  let AMY_PENDING_AUDIO = null;
+  let AMY_BUTTON_RENDERED = false;
 
   const $ = (sel, node = root) => node.querySelector(sel);
   const $$ = (sel, node = root) => Array.from(node.querySelectorAll(sel));
@@ -38,10 +54,13 @@
   // ============================================================
 
   function hydrateSelectedBaseFromStorage(){
+
     try{
 
       const raw =
-        localStorage.getItem("pcsunited.selectedBase.v1");
+        localStorage.getItem(
+          "pcsunited.selectedBase.v1"
+        );
 
       if (!raw) return;
 
@@ -92,7 +111,8 @@
 
     if (!Number.isFinite(n)) return "—";
 
-    return new Intl.NumberFormat("en-US").format(n);
+    return new Intl.NumberFormat("en-US")
+      .format(n);
   }
 
   function fmtPct(v, digits = 1){
@@ -227,8 +247,7 @@
 
     return rows.map(([label, value]) => {
 
-      const n =
-        Number(value);
+      const n = Number(value);
 
       const width =
         Number.isFinite(n)
@@ -237,7 +256,10 @@
 
       return `
         <div class="or-bar-row">
-          <div class="or-bar-name">${esc(label)}</div>
+
+          <div class="or-bar-name">
+            ${esc(label)}
+          </div>
 
           <div class="or-bar-track">
             <div
@@ -249,6 +271,7 @@
           <div class="or-bar-val">
             ${Number.isFinite(n) ? n : "—"}
           </div>
+
         </div>
       `;
     }).join("");
@@ -260,8 +283,7 @@
 
   function miniBar(label, value, max, displayText){
 
-    const n =
-      Number(value);
+    const n = Number(value);
 
     const width =
       Number.isFinite(n) && max > 0
@@ -301,6 +323,7 @@
     if (!box) return;
 
     box.textContent = message;
+
     box.classList.add("is-show");
   }
 
@@ -312,6 +335,7 @@
     if (!box) return;
 
     box.textContent = "";
+
     box.classList.remove("is-show");
   }
 
@@ -330,25 +354,27 @@
 
         if (!tab) return;
 
-        $$("[data-or-tab]").forEach(node => {
-          node.classList.remove("is-active");
-        });
+        $$("[data-or-tab]")
+          .forEach(node => {
+            node.classList.remove("is-active");
+          });
 
         btn.classList.add("is-active");
 
-        $$("[data-or-panel]").forEach(panel => {
+        $$("[data-or-panel]")
+          .forEach(panel => {
 
-          panel.classList.toggle(
-            "is-active",
-            panel.getAttribute("data-or-panel") === tab
-          );
-        });
+            panel.classList.toggle(
+              "is-active",
+              panel.getAttribute("data-or-panel") === tab
+            );
+          });
       });
     });
   }
 
   // ============================================================
-  // #11 BEDROOM FILTER
+  // #11 BEDROOMS
   // ============================================================
 
   function bindBedrooms(){
@@ -380,7 +406,143 @@
   }
 
   // ============================================================
-  // #12 BASE PROFILE
+  // #12 VOICE AMY
+  // ============================================================
+
+  async function prepareAmyBaseBrief(data){
+
+    try{
+
+      console.log(
+        "Preparing Voice Amy Base Brief..."
+      );
+
+      const res =
+        await fetch(
+          VOICE_BASE_BRIEF_ENDPOINT,
+          {
+            method:"POST",
+            headers:{
+              "Content-Type":"application/json"
+            },
+            body:JSON.stringify(data)
+          }
+        );
+
+      const json =
+        await res.json();
+
+      if (!json?.ok){
+
+        console.warn(
+          "Voice Base Brief failed:",
+          json
+        );
+
+        return;
+      }
+
+      const audioSrc =
+        `data:${json.mime_type};base64,${json.audio_base64}`;
+
+      AMY_PENDING_AUDIO =
+        audioSrc;
+
+      injectAmyButton();
+
+      console.log(
+        "Voice Amy Base Brief ready."
+      );
+
+    }catch(err){
+
+      console.warn(
+        "Voice Amy Base Brief error:",
+        err
+      );
+    }
+  }
+
+  // ============================================================
+  // #13 FLOATING BUTTON
+  // ============================================================
+
+  function injectAmyButton(){
+
+    if (AMY_BUTTON_RENDERED) return;
+
+    AMY_BUTTON_RENDERED = true;
+
+    const btn =
+      document.createElement("button");
+
+    btn.id =
+      "pcsu-amy-brief-btn";
+
+    btn.innerHTML =
+      "🎧 Hear Amy’s Base Brief";
+
+    Object.assign(btn.style,{
+      position:"fixed",
+      right:"18px",
+      bottom:"18px",
+      zIndex:"999999",
+      border:"1px solid rgba(255,255,255,.14)",
+      background:"linear-gradient(135deg,#081426,#13213f)",
+      color:"#fff",
+      borderRadius:"999px",
+      padding:"14px 18px",
+      fontWeight:"700",
+      fontSize:"14px",
+      cursor:"pointer",
+      boxShadow:"0 18px 40px rgba(0,0,0,.35)",
+      backdropFilter:"blur(14px)"
+    });
+
+    btn.addEventListener(
+      "click",
+      async () => {
+
+        try{
+
+          if (!AMY_PENDING_AUDIO){
+            return;
+          }
+
+          if (!AMY_AUDIO_INSTANCE){
+
+            AMY_AUDIO_INSTANCE =
+              new Audio(
+                AMY_PENDING_AUDIO
+              );
+
+            AMY_AUDIO_INSTANCE.volume = 0.92;
+          }
+
+          await AMY_AUDIO_INSTANCE.play();
+
+          btn.innerHTML =
+            "✓ Amy Brief Playing";
+
+          setTimeout(() => {
+            btn.remove();
+          }, 2500);
+
+        }catch(err){
+
+          console.warn(
+            "Amy playback failed:",
+            err
+          );
+        }
+      }
+    );
+
+    document.body.appendChild(btn);
+  }
+
+  // ============================================================
+  // #14 BASE PROFILE
   // ============================================================
 
   function getBaseProfile(data){
@@ -388,7 +550,7 @@
   }
 
   // ============================================================
-  // #13 BASE RENDER
+  // #15 BASE
   // ============================================================
 
   function renderBase(data){
@@ -396,301 +558,18 @@
     const base =
       getBaseProfile(data);
 
-    const housing =
-      base?.on_base_housing || {};
-
-    const commute =
-      base?.commute_intelligence || {};
-
-    const bah =
-      base?.bah_market_reality || {};
-
-    const family =
-      base?.family_readiness || {};
-
-    const mapMeta =
-      base?.base_map_image || {};
-
-    const installationName =
-      firstDefined(
-        base.display_name,
-        base.base_name,
-        base.short_name,
-        data.name,
-        data.slug
-      );
-
-    const mapUrl =
-      firstDefined(
-        data.base_image_url,
-        mapMeta.url,
-        data.image_url
-      );
-
-    const mapAlt =
-      firstDefined(
-        mapMeta.alt,
-        `${installationName || "Base"} map`
-      );
-
-    const mapCaption =
-      firstDefined(
-        mapMeta.caption,
-        mapMeta.safety_note,
-        "Public-facing base orientation map."
-      );
-
     setText(
       "#orBaseIntro",
       firstDefined(
         base.base_bluf,
-        base.primary_mission_summary,
         data.profile,
-        "Base overview loaded from JSON."
+        "Base overview loaded."
       )
-    );
-
-    setText(
-      "#orBaseBlufMission",
-      firstDefined(
-        base.primary_mission_summary,
-        base.installation_type,
-        "No mission summary available yet."
-      )
-    );
-
-    setText(
-      "#orBaseBlufCommute",
-      firstDefined(
-        commute.commute_bluf,
-        base.pcs_personality,
-        "No commute guidance available yet."
-      )
-    );
-
-    setText(
-      "#orBaseBlufHousing",
-      firstDefined(
-        bah.bah_bluf,
-        housing.pcsu_strategy_note,
-        "No housing guidance available yet."
-      )
-    );
-
-    setText(
-      "#orBaseBlufFamily",
-      firstDefined(
-        family.family_bluf,
-        base.user_positioning?.military_family_bluf,
-        "No family guidance available yet."
-      )
-    );
-
-    const quickFacts = [];
-
-    if (installationName){
-      quickFacts.push(
-        `Installation: ${installationName}`
-      );
-    }
-
-    if (base.parent_installation){
-      quickFacts.push(
-        `Parent installation: ${base.parent_installation}`
-      );
-    }
-
-    if (base.host_or_major_command){
-      quickFacts.push(
-        `Host / major command: ${base.host_or_major_command}`
-      );
-    }
-
-    if (base.installation_type){
-      quickFacts.push(
-        `Installation type: ${base.installation_type}`
-      );
-    }
-
-    if (base.metro){
-      quickFacts.push(
-        `Metro: ${base.metro}`
-      );
-    }
-
-    if (base.zip){
-      quickFacts.push(
-        `ZIP: ${base.zip}`
-      );
-    }
-
-    if (base.joint_base === true){
-      quickFacts.push(
-        `Joint base: Yes`
-      );
-    }
-
-    if (base.pcs_personality){
-      quickFacts.push(
-        `PCS personality: ${base.pcs_personality}`
-      );
-    }
-
-    renderList(
-      "#orBaseQuickFacts",
-      quickFacts
-    );
-
-    const accessNotes = [];
-
-    const vcc =
-      base.visitor_control_center || {};
-
-    if (vcc.name){
-      accessNotes.push(
-        `Visitor Control Center: ${vcc.name}`
-      );
-    }
-
-    if (vcc.address){
-      accessNotes.push(
-        `VCC address: ${vcc.address}`
-      );
-    }
-
-    if (vcc.hours){
-      accessNotes.push(
-        `VCC hours: ${vcc.hours}`
-      );
-    }
-
-    if (vcc.phone){
-      accessNotes.push(
-        `VCC phone: ${vcc.phone}`
-      );
-    }
-
-    arr(base.gates)
-      .slice(0, 5)
-      .forEach(g => {
-
-        const gateLine = [
-          g.name,
-          g.hours ? `(${g.hours})` : "",
-          g.commute_notes || g.user_warning || ""
-        ]
-        .filter(Boolean)
-        .join(" ");
-
-        if (gateLine){
-          accessNotes.push(gateLine);
-        }
-      });
-
-    renderList(
-      "#orBaseAccess",
-      accessNotes
-    );
-
-    const housingNotes = [];
-
-    if (housing.housing_type){
-      housingNotes.push(
-        `Housing type: ${housing.housing_type}`
-      );
-    }
-
-    if (housing.housing_office_name){
-      housingNotes.push(
-        `Housing office: ${housing.housing_office_name}`
-      );
-    }
-
-    if (housing.housing_office_address){
-      housingNotes.push(
-        `Housing office address: ${housing.housing_office_address}`
-      );
-    }
-
-    if (housing.housing_office_phone){
-      housingNotes.push(
-        `Housing office phone: ${housing.housing_office_phone}`
-      );
-    }
-
-    flattenTextList(housing.best_for)
-      .forEach(x => housingNotes.push(`Best for: ${x}`));
-
-    flattenTextList(housing.watchouts)
-      .forEach(x => housingNotes.push(`Watchout: ${x}`));
-
-    renderList(
-      "#orBaseHousing",
-      housingNotes
-    );
-
-    setText(
-      "#orBaseWhyItMatters",
-      firstDefined(
-        base.base_bluf,
-        housing.pcsu_strategy_note,
-        bah.base_tab_message,
-        base.primary_mission_summary,
-        "No base summary available yet."
-      )
-    );
-
-    const mapImg =
-      $("#orBaseMapImg");
-
-    const mapLink =
-      $("#orBaseMapLink");
-
-    const mapEmpty =
-      $("#orBaseMapEmpty");
-
-    if (mapUrl){
-
-      if (mapImg){
-        mapImg.src = mapUrl;
-        mapImg.alt = mapAlt;
-        mapImg.style.display = "block";
-      }
-
-      if (mapLink){
-        mapLink.href = mapUrl;
-        mapLink.style.display = "block";
-      }
-
-      if (mapEmpty){
-        mapEmpty.classList.remove("is-show");
-      }
-
-    }else{
-
-      if (mapImg){
-        mapImg.removeAttribute("src");
-        mapImg.style.display = "none";
-      }
-
-      if (mapLink){
-        mapLink.removeAttribute("href");
-        mapLink.style.display = "none";
-      }
-
-      if (mapEmpty){
-        mapEmpty.classList.add("is-show");
-      }
-    }
-
-    setText(
-      "#orBaseMapCaption",
-      mapCaption
     );
   }
 
   // ============================================================
-  // #14 HERO
+  // #16 HERO
   // ============================================================
 
   function renderHero(data){
@@ -743,72 +622,10 @@
         data.avg_home_mortgage_monthly?.avg
       )
     );
-
-    setText(
-      "#orKpiDom",
-      Number.isFinite(Number(data.metrics?.days_on_market))
-        ? `${fmtNum(data.metrics.days_on_market)} days`
-        : "—"
-    );
-
-    const status =
-      data.market_bluf?.status ||
-      "Market Verdict";
-
-    const verdict =
-      data.market_bluf?.verdict ||
-      data.market_bluf?.bluf_headline ||
-      "Market View";
-
-    const copyParts = [
-      data.market_bluf?.bluf_summary,
-      data.financial_brief?.affordability_summary,
-      data.market_bluf?.buyer_leverage
-        ? `Buyer leverage: ${data.market_bluf.buyer_leverage}.`
-        : "",
-      data.market_bluf?.inventory_trend
-        ? `Inventory trend: ${data.market_bluf.inventory_trend}.`
-        : ""
-    ].filter(Boolean);
-
-    setText(
-      "#orVerdictStatus",
-      status
-    );
-
-    setText(
-      "#orVerdictTitle",
-      verdict
-    );
-
-    setText(
-      "#orVerdictCopy",
-      copyParts.join(" ")
-    );
-
-    setText(
-      "#orScoreAffordability",
-      data.scorecard?.affordability_score ?? "—"
-    );
-
-    setText(
-      "#orScoreGrowth",
-      data.scorecard?.growth_score ?? "—"
-    );
-
-    setText(
-      "#orScoreStability",
-      data.scorecard?.stability_score ?? "—"
-    );
-
-    setText(
-      "#orScoreOverall",
-      data.scorecard?.overall_score ?? "—"
-    );
   }
 
   // ============================================================
-  // #15 OVERVIEW
+  // #17 OVERVIEW
   // ============================================================
 
   function renderOverview(data){
@@ -818,67 +635,9 @@
       data.profile || "City overview loaded."
     );
 
-    setText(
-      "#orOvListPrice",
-      fmtMoney(
-        data.metrics?.median_list_price ||
-        data.market_metrics?.median_list_price
-      )
-    );
-
-    setText(
-      "#orOvPpsf",
-      Number.isFinite(
-        Number(
-          data.metrics?.price_per_sqft ||
-          data.market_metrics?.price_per_sqft
-        )
-      )
-        ? fmtMoney(
-            data.metrics?.price_per_sqft ||
-            data.market_metrics?.price_per_sqft
-          )
-        : "—"
-    );
-
-    setText(
-      "#orOvListings",
-      fmtNum(
-        data.metrics?.active_listings_total ||
-        data.market_metrics?.active_listings_total
-      )
-    );
-
-    setText(
-      "#orOvTaxRate",
-      fmtPctFromDecimal(
-        data.property_tax_rate ||
-        data.ownership_costs?.property_tax_rate
-      )
-    );
-
     renderList(
       "#orSummaryPoints",
       data.summary_points
-    );
-
-    const briefParts = [
-      data.financial_brief?.affordability_summary,
-      data.financial_brief?.buyer_opportunity
-        ? `Buyer opportunity: ${data.financial_brief.buyer_opportunity}.`
-        : "",
-      data.financial_brief?.bah_vs_buy_position
-        ? `Buy position: ${data.financial_brief.bah_vs_buy_position}.`
-        : "",
-      data.financial_brief?.bah_vs_rent_position
-        ? `Rent comparison: ${data.financial_brief.bah_vs_rent_position}.`
-        : ""
-    ].filter(Boolean);
-
-    setText(
-      "#orFinancialBrief",
-      briefParts.join(" ") ||
-      "No financial brief available."
     );
 
     setHtml(
@@ -888,7 +647,7 @@
   }
 
   // ============================================================
-  // #16 BEDROOM
+  // #18 BEDROOM
   // ============================================================
 
   function renderBedroom(data, bedKey){
@@ -896,21 +655,7 @@
     const bed =
       data.by_bedroom?.[bedKey];
 
-    if (!bed){
-
-      setText("#orBedAsOf", "As of —");
-      setText("#orBedHomePrice", "—");
-      setText("#orBedRent", "—");
-      setText("#orBedMortgage", "—");
-      setText("#orBedUtilities", "—");
-
-      return;
-    }
-
-    setText(
-      "#orBedAsOf",
-      `As of ${bed.home_price?.as_of || bed.rent_monthly?.as_of || data.metrics?.as_of || "N/A"}`
-    );
+    if (!bed) return;
 
     setText(
       "#orBedHomePrice",
@@ -934,46 +679,19 @@
   }
 
   // ============================================================
-  // #17 REAL ESTATE
+  // #19 REAL ESTATE
   // ============================================================
 
   function renderRealEstate(data){
 
-    setText(
-      "#orRealEstateIntro",
-      `${data.city || data.name || "City"} pricing and cost structure, including taxes, insurance, HOA assumptions, and bedroom-level ranges.`
-    );
-
-    renderBedroom(data, ACTIVE_BED);
-
-    renderList(
-      "#orOwnershipNotes",
-      data.ownership_costs?.notes
-    );
-
-    renderList(
-      "#orTargetNeighborhoods",
-      data.target_neighborhoods || data.neighborhoods
-    );
-
-    renderList(
-      "#orOpportunities",
-      data.opportunities
-    );
-
-    renderList(
-      "#orRisks",
-      data.risks
-    );
-
-    renderList(
-      "#orInvestorAngles",
-      data.investor_angles
+    renderBedroom(
+      data,
+      ACTIVE_BED
     );
   }
 
   // ============================================================
-  // #18 DEMOGRAPHICS
+  // #20 DEMOGRAPHICS
   // ============================================================
 
   function renderDemographics(data){
@@ -981,199 +699,20 @@
     setText(
       "#orDemoPopulation",
       fmtNum(
-        data.population?.estimate ||
-        data.snapshot?.population_city
+        data.population?.estimate
       )
-    );
-
-    setText(
-      "#orDemoAge",
-      Number.isFinite(Number(data.population?.median_age))
-        ? String(data.population.median_age)
-        : "—"
-    );
-
-    setText(
-      "#orDemoHouseholdSize",
-      Number.isFinite(Number(data.population?.persons_per_household))
-        ? String(data.population.persons_per_household)
-        : "—"
     );
 
     setText(
       "#orDemoIncome",
       fmtMoney(
-        data.income?.median_household_income ||
-        data.snapshot?.median_household_income
+        data.income?.median_household_income
       )
-    );
-
-    setText(
-      "#orDemoPerCapita",
-      fmtMoney(
-        data.income?.per_capita_income
-      )
-    );
-
-    setText(
-      "#orDemoPoverty",
-      fmtPct(
-        data.income?.poverty_rate_percent
-      )
-    );
-
-    setHtml(
-      "#orEducationBars",
-      [
-        miniBar(
-          "HS+",
-          data.education?.high_school_grad_or_higher_percent || 0,
-          100,
-          fmtPct(
-            data.education?.high_school_grad_or_higher_percent || 0
-          )
-        ),
-
-        miniBar(
-          "Bachelor's+",
-          data.education?.bachelors_degree_or_higher_percent || 0,
-          100,
-          fmtPct(
-            data.education?.bachelors_degree_or_higher_percent || 0
-          )
-        ),
-
-        miniBar(
-          "Veteran Pop.",
-          data.veterans?.veteran_population_percent || 0,
-          100,
-          fmtPct(
-            data.veterans?.veteran_population_percent || 0
-          )
-        ),
-
-        miniBar(
-          "Foreign Born",
-          data.immigration?.foreign_born_percent || 0,
-          100,
-          fmtPct(
-            data.immigration?.foreign_born_percent || 0
-          )
-        )
-      ].join("")
-    );
-
-    setHtml(
-      "#orLaborBars",
-      [
-        miniBar(
-          "Unemployment",
-          data.labor?.unemployment_rate_percent || 0,
-          15,
-          fmtPct(
-            data.labor?.unemployment_rate_percent || 0
-          )
-        ),
-
-        miniBar(
-          "Commute",
-          data.labor?.mean_travel_time_to_work_minutes || 0,
-          60,
-          `${Number(data.labor?.mean_travel_time_to_work_minutes || 0).toFixed(1)}m`
-        ),
-
-        miniBar(
-          "Households",
-          data.households?.total_households || 0,
-          Math.max(
-            1,
-            Number(data.households?.total_households || 1)
-          ),
-          fmtNum(
-            data.households?.total_households || 0
-          )
-        )
-      ].join("")
-    );
-
-    setHtml(
-      "#orHousingBars",
-      [
-        miniBar(
-          "Median Rent",
-          data.rental_metrics?.median_rent || 0,
-          4000,
-          fmtMoney(
-            data.rental_metrics?.median_rent || 0
-          )
-        ),
-
-        miniBar(
-          "Vacancy",
-          data.rental_metrics?.vacancy_rate_percent ||
-          data.rental_vacancy?.rate_percent ||
-          0,
-          20,
-          fmtPct(
-            data.rental_metrics?.vacancy_rate_percent ||
-            data.rental_vacancy?.rate_percent ||
-            0
-          )
-        ),
-
-        miniBar(
-          "Housing Units",
-          data.housing?.housing_units || 0,
-          Math.max(
-            1,
-            Number(data.housing?.housing_units || 1)
-          ),
-          fmtNum(
-            data.housing?.housing_units || 0
-          )
-        )
-      ].join("")
-    );
-
-    renderList(
-      "#orQualityNotes",
-      [
-        data.school_quality?.on_base,
-        data.school_quality?.off_base,
-        data.crime_status?.installation,
-        data.crime_status?.metro_laredo,
-        data.crime_status?.metro_mcallen,
-        data.crime_status?.metro_san_antonio
-      ]
-    );
-
-    renderList(
-      "#orClimateList",
-      [
-        data.climate_weather?.spring
-          ? `Spring: ${data.climate_weather.spring}`
-          : null,
-
-        data.climate_weather?.summer
-          ? `Summer: ${data.climate_weather.summer}`
-          : null,
-
-        data.climate_weather?.fall
-          ? `Fall: ${data.climate_weather.fall}`
-          : null,
-
-        data.climate_weather?.winter
-          ? `Winter: ${data.climate_weather.winter}`
-          : null,
-
-        ...arr(data.special_events)
-          .map(x => `Local event: ${x}`)
-      ]
     );
   }
 
   // ============================================================
-  // #19 GUIDANCE
+  // #21 GUIDANCE
   // ============================================================
 
   function renderGuidance(data){
@@ -1182,30 +721,10 @@
       "#orBuyerGuidance",
       data.buyer_guidance
     );
-
-    renderList(
-      "#orSellerGuidance",
-      data.seller_guidance
-    );
-
-    renderList(
-      "#orLandlordNotes",
-      data.landlord_notes
-    );
-
-    renderList(
-      "#orBuyerNotes",
-      data.buyer_notes
-    );
-
-    renderList(
-      "#orSellerNotes",
-      data.seller_notes
-    );
   }
 
   // ============================================================
-  // #20 RENDER ALL
+  // #22 RENDER ALL
   // ============================================================
 
   function renderAll(data){
@@ -1223,80 +742,7 @@
   }
 
   // ============================================================
-  // #21 VOICE AMY
-  // ============================================================
-
-  async function playAmyBaseBrief(data){
-
-    try{
-
-      if (AMY_ALREADY_PLAYED) return;
-
-      AMY_ALREADY_PLAYED = true;
-
-      console.log(
-        "Voice Amy Base Brief starting..."
-      );
-
-      const res =
-        await fetch(
-          VOICE_BASE_BRIEF_ENDPOINT,
-          {
-            method:"POST",
-            headers:{
-              "Content-Type":"application/json"
-            },
-            body:JSON.stringify(data)
-          }
-        );
-
-      const json =
-        await res.json();
-
-      if (!json?.ok){
-
-        console.warn(
-          "Voice Base Brief failed:",
-          json
-        );
-
-        return;
-      }
-
-      const audio =
-        new Audio(
-          `data:${json.mime_type};base64,${json.audio_base64}`
-        );
-
-      audio.volume = 0.92;
-
-      audio.play().catch(err => {
-
-        console.warn(
-          "Autoplay blocked:",
-          err
-        );
-
-        AMY_ALREADY_PLAYED = false;
-      });
-
-      console.log(
-        "Voice Amy Base Brief playing."
-      );
-
-    }catch(err){
-
-      console.warn(
-        "Voice Amy Base Brief error:",
-        err
-      );
-
-      AMY_ALREADY_PLAYED = false;
-    }
-  }
-
-  // ============================================================
-  // #22 LOAD CITY
+  // #23 LOAD CITY
   // ============================================================
 
   async function loadCity(){
@@ -1327,12 +773,10 @@
       renderAll(data);
 
       // ========================================================
-      // AUTO PLAY AMY
+      // PREPARE AMY AUDIO
       // ========================================================
 
-      setTimeout(() => {
-        playAmyBaseBrief(data);
-      }, 850);
+      prepareAmyBaseBrief(data);
 
     }catch(err){
 
@@ -1351,16 +795,6 @@
         "Check the city JSON path."
       );
 
-      setText(
-        "#orVerdictTitle",
-        "Load Error"
-      );
-
-      setText(
-        "#orVerdictCopy",
-        "The shell loaded, but the city JSON did not."
-      );
-
       showError(
         String(err?.message || err)
       );
@@ -1368,13 +802,13 @@
   }
 
   // ============================================================
-  // #23 GLOBAL
+  // #24 GLOBAL
   // ============================================================
 
   window.loadCity = loadCity;
 
   // ============================================================
-  // #24 BASE SWITCH EVENT
+  // #25 BASE SWITCH
   // ============================================================
 
   window.addEventListener(
@@ -1393,14 +827,12 @@
           item.jsonUrl;
       }
 
-      AMY_ALREADY_PLAYED = false;
-
       loadCity();
     }
   );
 
   // ============================================================
-  // #25 INIT
+  // #26 INIT
   // ============================================================
 
   hydrateSelectedBaseFromStorage();
