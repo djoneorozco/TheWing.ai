@@ -1,16 +1,19 @@
 // ============================================================
 // TheWing.ai • Voice Base Brief
-// v1.0.0
+// v1.1.0
 //
 // PURPOSE
-// - Generates short spoken city/base summaries
-// - Uses deterministic JSON data
-// - Sends script to ElevenLabs
+// - Generates spoken Amy summaries
+// - Supports Base Demographics scripts
+// - Supports BasicBrain custom_script
+// - Uses ElevenLabs
 //
 // ENDPOINT
 // - /.netlify/functions/voice-base-brief
 // - /api/voice-base-brief
 // ============================================================
+
+"use strict";
 
 const ELEVENLABS_API_KEY =
   process.env.ELEVENLABS_API_KEY || "";
@@ -23,215 +26,240 @@ const MODEL_ID =
   process.env.ELEVENLABS_MODEL_ID ||
   "eleven_flash_v2_5";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS"
-};
+const ALLOWED_ORIGINS = new Set([
+  "https://pcsunited.com",
+  "https://www.pcsunited.com",
+  "https://pcsunited.netlify.app",
+  "https://pcsunited-com-28346d.webflow.io",
+  "https://pcs-united.webflow.io",
+  "https://pcsu.webflow.io",
+  "https://thewing.ai",
+  "https://www.thewing.ai",
+  "https://thewing.netlify.app",
+  "http://localhost:3000",
+  "http://localhost:8888",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:8888"
+]);
 
-function response(statusCode, body, contentType = "application/json"){
+function getOrigin(event){
+  return String(
+    event?.headers?.origin ||
+    event?.headers?.Origin ||
+    ""
+  ).trim();
+}
+
+function corsHeaders(event){
+  const origin = getOrigin(event);
+
   return {
-    statusCode,
-    headers:{
-      ...corsHeaders,
-      "Content-Type": contentType
-    },
-    body
+    "Access-Control-Allow-Origin": ALLOWED_ORIGINS.has(origin) ? origin : "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Max-Age": "86400",
+    "Vary": "Origin",
+    "Content-Type": "application/json"
   };
 }
 
-function clean(v){
-  return String(v || "").trim();
+function response(event, statusCode, payload){
+  return {
+    statusCode,
+    headers: corsHeaders(event),
+    body: JSON.stringify(payload || {})
+  };
 }
 
-function first(...vals){
-  for(const v of vals){
-    if(v !== undefined && v !== null && v !== ""){
-      return v;
+function clean(value){
+  return String(value || "").trim();
+}
+
+function first(...values){
+  for(const value of values){
+    if(value !== undefined && value !== null && clean(value)){
+      return value;
     }
   }
+
   return "";
 }
 
-function buildScript(data = {}){
-
-  const city =
-    clean(
-      first(
-        data.city,
-        data.place,
-        data.name
-      )
-    );
-
-  const state =
-    clean(
-      first(
-        data.state_code,
-        data.state
-      )
-    );
-
-  const base =
-    clean(
-      first(
-        data.base_profile?.display_name,
-        data.base_profile?.base_name,
-        data.name
-      )
-    );
-
-  const verdict =
-    clean(
-      first(
-        data.market_bluf?.verdict,
-        data.market_bluf?.bluf_headline
-      )
-    );
-
-  const affordability =
-    clean(
-      first(
-        data.financial_brief?.affordability_summary
-      )
-    );
-
-  const buyerOpportunity =
-    clean(
-      first(
-        data.financial_brief?.buyer_opportunity
-      )
-    );
-
-  const strategy =
-    clean(
-      first(
-        data.base_profile?.bah_market_reality?.base_tab_message,
-        data.base_profile?.on_base_housing?.pcsu_strategy_note
-      )
-    );
-
-  return `
-Welcome to ${base}.
-
-${city}${state ? `, ${state},` : ""} remains ${
-verdict || "an important military housing market"
-}.
-
-${affordability}
-
-${buyerOpportunity}
-
-${strategy}
-
-PCSUnited recommends focusing on affordability, commute balance, long-term ownership costs, and overall mission fit before purchasing.
-  `
-  .replace(/\s+/g, " ")
-  .trim();
+function normalizeSpaces(text){
+  return clean(text).replace(/\s+/g, " ");
 }
 
-export async function handler(event){
+function buildBaseBriefScript(data = {}){
+  const city = clean(
+    first(
+      data.city,
+      data.place,
+      data.name
+    )
+  );
 
+  const state = clean(
+    first(
+      data.state_code,
+      data.state
+    )
+  );
+
+  const base = clean(
+    first(
+      data.base,
+      data.base_profile?.display_name,
+      data.base_profile?.base_name,
+      data.name
+    )
+  );
+
+  const verdict = clean(
+    first(
+      data.market_bluf?.verdict,
+      data.market_bluf?.bluf_headline
+    )
+  );
+
+  const affordability = clean(
+    first(
+      data.financial_brief?.affordability_summary
+    )
+  );
+
+  const buyerOpportunity = clean(
+    first(
+      data.financial_brief?.buyer_opportunity
+    )
+  );
+
+  const strategy = clean(
+    first(
+      data.base_profile?.bah_market_reality?.base_tab_message,
+      data.base_profile?.on_base_housing?.pcsu_strategy_note
+    )
+  );
+
+  return normalizeSpaces(`
+    Welcome to ${base || "your gaining base"}.
+
+    ${city || "This market"}${state ? `, ${state},` : ""} remains ${
+      verdict || "an important military housing market"
+    }.
+
+    ${affordability}
+
+    ${buyerOpportunity}
+
+    ${strategy}
+
+    PCSUnited recommends focusing on affordability, commute balance, long-term ownership costs, and overall mission fit before purchasing.
+  `);
+}
+
+function buildScript(payload = {}){
+  const customScript = clean(payload.custom_script);
+
+  if(customScript){
+    return normalizeSpaces(customScript);
+  }
+
+  return buildBaseBriefScript(payload);
+}
+
+exports.handler = async function handler(event){
   if(event.httpMethod === "OPTIONS"){
     return {
-      statusCode:204,
-      headers:corsHeaders,
-      body:""
+      statusCode: 204,
+      headers: corsHeaders(event),
+      body: ""
     };
   }
 
   if(event.httpMethod !== "POST"){
-    return response(
-      405,
-      JSON.stringify({
-        ok:false,
-        error:"Method not allowed. Use POST."
-      })
-    );
+    return response(event, 405, {
+      ok: false,
+      error: "Method not allowed. Use POST."
+    });
   }
 
   if(!ELEVENLABS_API_KEY){
-    return response(
-      500,
-      JSON.stringify({
-        ok:false,
-        error:"Missing ELEVENLABS_API_KEY"
-      })
-    );
+    return response(event, 500, {
+      ok: false,
+      error: "Missing ELEVENLABS_API_KEY"
+    });
+  }
+
+  let payload = {};
+
+  try{
+    payload = JSON.parse(event.body || "{}");
+  }catch(_){
+    return response(event, 400, {
+      ok: false,
+      error: "Invalid JSON body."
+    });
   }
 
   try{
+    const script = buildScript(payload);
 
-    const payload =
-      JSON.parse(event.body || "{}");
-
-    const script =
-      buildScript(payload);
-
-    const eleven =
-      await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
-        {
-          method:"POST",
-          headers:{
-            "xi-api-key":ELEVENLABS_API_KEY,
-            "Content-Type":"application/json",
-            "Accept":"audio/mpeg"
-          },
-          body:JSON.stringify({
-            text:script,
-            model_id:MODEL_ID,
-            output_format:"mp3_44100_128",
-            voice_settings:{
-              stability:0.42,
-              similarity_boost:0.82,
-              style:0.28,
-              use_speaker_boost:true
-            }
-          })
-        }
-      );
-
-    if(!eleven.ok){
-
-      const details =
-        await eleven.text();
-
-      return response(
-        500,
-        JSON.stringify({
-          ok:false,
-          error:"ElevenLabs request failed",
-          details
-        })
-      );
+    if(!script){
+      return response(event, 400, {
+        ok: false,
+        error: "No voice script could be generated."
+      });
     }
 
-    const arrayBuffer =
-      await eleven.arrayBuffer();
-
-    const base64 =
-      Buffer.from(arrayBuffer)
-      .toString("base64");
-
-    return response(
-      200,
-      JSON.stringify({
-        ok:true,
-        script,
-        audio_base64:base64,
-        mime_type:"audio/mpeg"
-      })
+    const eleven = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
+      {
+        method: "POST",
+        headers: {
+          "xi-api-key": ELEVENLABS_API_KEY,
+          "Content-Type": "application/json",
+          "Accept": "audio/mpeg"
+        },
+        body: JSON.stringify({
+          text: script,
+          model_id: MODEL_ID,
+          output_format: "mp3_44100_128",
+          voice_settings: {
+            stability: 0.42,
+            similarity_boost: 0.82,
+            style: 0.28,
+            use_speaker_boost: true
+          }
+        })
+      }
     );
 
-  }catch(err){
+    if(!eleven.ok){
+      const details = await eleven.text();
 
-    return response(
-      500,
-      JSON.stringify({
-        ok:false,
-        error:String(err?.message || err)
-      })
-    );
+      return response(event, 500, {
+        ok: false,
+        error: "ElevenLabs request failed",
+        details
+      });
+    }
+
+    const arrayBuffer = await eleven.arrayBuffer();
+    const audioBase64 = Buffer.from(arrayBuffer).toString("base64");
+
+    return response(event, 200, {
+      ok: true,
+      script,
+      audio_base64: audioBase64,
+      audio_mime_type: "audio/mpeg",
+      mime_type: "audio/mpeg",
+      source: "thewing.voice-base-brief.v1.1.0"
+    });
+
+  }catch(error){
+    return response(event, 500, {
+      ok: false,
+      error: error?.message || "Voice generation failed."
+    });
   }
-}
+};
