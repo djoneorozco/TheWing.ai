@@ -1,0 +1,1384 @@
+/* =========================================================
+  PCSUnited • Housing Quiz + AIOU Companion Flow
+  housingquiz.css
+  GitHub-ready stylesheet
+
+  FILES REQUIRED:
+  - index.html
+  - housingquiz.css
+  - housingquiz.js
+========================================================= */
+
+/* =========================================================
+  1. GLOBAL RESET / PAGE SHELL
+========================================================= */
+
+*,
+*::before,
+*::after{
+  box-sizing:border-box;
+}
+
+html{
+  width:100%;
+  min-height:100%;
+  scroll-behavior:smooth;
+}
+
+body{
+  width:100%;
+  min-height:100vh;
+  margin:0;
+  background:
+    radial-gradient(900px 520px at 18% 12%, rgba(142,243,197,.10), transparent 58%),
+    radial-gradient(900px 520px at 92% 16%, rgba(106,167,255,.10), transparent 58%),
+    linear-gradient(135deg,#111820 0%,#171d25 45%,#0b1017 100%);
+  color:#ffffff;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+#pcsu-housing-page,
+#pcsu-housing-page *{
+  box-sizing:border-box;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+
+#pcsu-housing-page{
+  width:100%;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  color:#ffffff;
+
+  --pcsu-ink:#ffffff;
+  --pcsu-muted:rgba(230,236,255,.76);
+  --pcsu-muted2:rgba(230,236,255,.58);
+  --pcsu-accent:#8ef3c5;
+  --pcsu-accent2:#6aa7ff;
+  --pcsu-danger:#ff6f9f;
+  --pcsu-stroke:rgba(255,255,255,.10);
+  --pcsu-panel:rgba(255,255,255,.045);
+  --pcsu-shadow:0 26px 70px rgba(0,0,0,.42);
+}
+
+#pcsu-housing-shell{
+  width:100%;
+  max-width:1480px;
+  min-height:650px;
+  display:grid;
+  grid-template-columns:430px minmax(0,1fr);
+  overflow:hidden;
+  border-radius:30px;
+  border:1px solid rgba(255,255,255,.16);
+  background:
+    radial-gradient(900px 500px at 80% 8%, rgba(106,167,255,.10), transparent 60%),
+    linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 24px 60px rgba(0,0,0,.46);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+/* =========================================================
+  2. LEFT VISUAL PANEL
+========================================================= */
+
+#pcsu-housing-visual{
+  position:relative;
+  min-height:650px;
+  display:flex;
+  flex-direction:column;
+  background:#111820;
+  border-right:1px solid rgba(255,255,255,.12);
+  overflow:hidden;
+}
+
+#pcsu-visual-image-wrap{
+  position:relative;
+  flex:1;
+  min-height:0;
+  overflow:hidden;
+}
+
+#pcsu-visual-image{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center;
+}
+
+#pcsu-visual-image-wrap::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.34) 100%),
+    linear-gradient(90deg,rgba(0,0,0,.14),transparent 42%);
+  pointer-events:none;
+}
+
+#pcsu-visual-caption{
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:11px 18px;
+  background:rgba(0,0,0,.66);
+  border-top:1px solid rgba(255,255,255,.12);
+  color:rgba(255,255,255,.94);
+  font-size:14px;
+  line-height:1.35;
+  font-weight:500;
+  letter-spacing:.01em;
+  text-align:center;
+}
+
+#pcsu-housing-content{
+  width:100%;
+  min-width:0;
+  padding:36px 46px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:
+    radial-gradient(900px 520px at 85% 12%, rgba(106,167,255,.08), transparent 60%),
+    radial-gradient(680px 460px at 15% 92%, rgba(142,243,197,.05), transparent 60%),
+    rgba(8,13,20,.10);
+}
+
+/* =========================================================
+  3. SHARED HOUSING QUIZ RESET
+========================================================= */
+
+#pcsu-housing-quiz,
+#pcsu-housing-quiz *{
+  box-sizing:border-box;
+}
+
+#pcsu-housing-quiz{
+  width:100%;
+  display:block;
+  color:#fff;
+  background:transparent !important;
+}
+
+#hq-shell,
+#hq-card,
+#hq-inner{
+  width:100%;
+  background:transparent !important;
+  background-image:none !important;
+  border:none !important;
+  box-shadow:none !important;
+  outline:none !important;
+  filter:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+#hq-shell::before,
+#hq-shell::after,
+#hq-card::before,
+#hq-card::after,
+#hq-inner::before,
+#hq-inner::after{
+  display:none !important;
+  content:none !important;
+}
+
+/* =========================================================
+  4. HOUSING QUIZ TYPOGRAPHY
+========================================================= */
+
+#hq-kicker{
+  margin-bottom:10px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--pcsu-accent);
+}
+
+#hq-question{
+  margin:0;
+  max-width:850px;
+  font-size:48px;
+  line-height:1.02;
+  font-weight:900;
+  letter-spacing:-.05em;
+  color:#ffffff;
+}
+
+#hq-sub{
+  margin-top:14px;
+  max-width:760px;
+  font-size:16px;
+  line-height:1.55;
+  color:rgba(230,236,255,.78);
+}
+
+/* =========================================================
+  5. HOUSING QUIZ OPTION CARDS
+========================================================= */
+
+#hq-options{
+  margin-top:26px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+
+.hq-option{
+  position:relative;
+  appearance:none;
+  width:100%;
+  text-align:left;
+  min-height:112px;
+  padding:22px;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  cursor:pointer;
+  transition:.20s ease;
+  overflow:hidden;
+}
+
+.hq-option:hover{
+  transform:translateY(-1px);
+  border-color:rgba(142,243,197,.30);
+  background:rgba(255,255,255,.055);
+}
+
+.hq-option.active{
+  border-color:rgba(142,243,197,.42);
+  background:rgba(142,243,197,.08);
+}
+
+.hq-check{
+  position:absolute;
+  top:16px;
+  right:16px;
+  width:30px;
+  height:30px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#8ef3c5 0%,#6aa7ff 100%);
+  color:#071018;
+  font-size:14px;
+  font-weight:900;
+  opacity:0;
+  transform:scale(.8);
+  transition:.18s ease;
+}
+
+.hq-option.active .hq-check{
+  opacity:1;
+  transform:scale(1);
+}
+
+.hq-option-title{
+  display:block;
+  padding-right:34px;
+  font-size:16px;
+  line-height:1.2;
+  font-weight:800;
+  color:#ffffff;
+}
+
+.hq-option-copy{
+  display:block;
+  margin-top:8px;
+  max-width:360px;
+  font-size:14px;
+  line-height:1.45;
+  color:rgba(228,233,250,.66);
+}
+
+/* =========================================================
+  6. HOUSING QUIZ BEDROOM / BATHROOM SLIDERS
+========================================================= */
+
+#hq-slider-panel{
+  margin-top:28px;
+  display:none;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:22px;
+}
+
+.hq-slider-card{
+  min-width:0;
+  padding:0;
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+}
+
+.hq-slider-label{
+  display:block;
+  margin:0 0 8px;
+  font-size:11px;
+  line-height:1;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.115em;
+  color:var(--pcsu-accent);
+}
+
+.hq-topbox{
+  min-height:56px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.10);
+  background:linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.045));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 12px 26px rgba(0,0,0,.10);
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  overflow:hidden;
+  transition:.18s ease;
+}
+
+.hq-topbox:hover{
+  border-color:rgba(142,243,197,.20);
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.055));
+}
+
+.hq-slider-value{
+  font-size:28px;
+  line-height:1;
+  font-weight:900;
+  color:#ffffff;
+  letter-spacing:-.04em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.hq-pill-mini{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:84px;
+  height:30px;
+  padding:0 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.06);
+  font-size:11px;
+  font-weight:900;
+  color:rgba(230,236,255,.82);
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+
+.hq-slider-wrap{
+  margin-top:17px;
+}
+
+.hq-slider-shell{
+  position:relative;
+  height:20px;
+  border-radius:999px;
+  background:transparent;
+}
+
+.hq-slider-shell::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:50%;
+  height:7px;
+  transform:translateY(-50%);
+  border-radius:999px;
+  background:var(
+    --rail-bg,
+    linear-gradient(
+      90deg,
+      #8ef3c5 0%,
+      #6aa7ff 60%,
+      rgba(255,255,255,.15) 60%,
+      rgba(255,255,255,.15) 100%
+    )
+  );
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,.28),
+    inset 0 -1px 2px rgba(0,0,0,.12),
+    0 7px 16px rgba(106,167,255,.16);
+  pointer-events:none;
+}
+
+.hq-range{
+  width:100%;
+  -webkit-appearance:none;
+  appearance:none;
+  background:transparent;
+  position:relative;
+  z-index:2;
+  height:20px;
+  margin:0;
+  cursor:pointer;
+}
+
+.hq-range:focus{
+  outline:none;
+}
+
+.hq-range::-webkit-slider-runnable-track{
+  height:20px;
+  background:transparent;
+  border:none;
+}
+
+.hq-range::-moz-range-track{
+  height:20px;
+  background:transparent;
+  border:none;
+}
+
+.hq-range::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width:28px;
+  height:28px;
+  margin-top:-4px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#ffffff,#e9eef6);
+  border:1px solid rgba(18,24,38,.13);
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -2px 6px rgba(18,24,38,.08);
+  transition:.16s ease;
+}
+
+.hq-range:hover::-webkit-slider-thumb{
+  transform:scale(1.05);
+}
+
+.hq-range::-moz-range-thumb{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#ffffff,#e9eef6);
+  border:1px solid rgba(18,24,38,.13);
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -2px 6px rgba(18,24,38,.08);
+  cursor:pointer;
+  transition:.16s ease;
+}
+
+.hq-scale{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+  padding:0 2px;
+  font-size:11px;
+  font-weight:900;
+  color:rgba(230,236,255,.55);
+}
+
+.hq-slider-help{
+  margin-top:14px;
+  font-size:13px;
+  color:rgba(230,236,255,.68);
+  line-height:1.45;
+}
+
+/* =========================================================
+  7. HOUSING QUIZ CONDITION QUESTION
+========================================================= */
+
+#hq-condition-panel{
+  margin-top:26px;
+  display:none;
+}
+
+#hq-condition-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+}
+
+.hq-condition-card{
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+}
+
+.hq-condition-img{
+  width:100%;
+  height:170px;
+  display:block;
+  object-fit:cover;
+}
+
+.hq-condition-label{
+  padding:10px 14px 12px;
+  text-align:center;
+  font-size:13px;
+  font-weight:900;
+  color:rgba(238,243,255,.82);
+}
+
+#hq-condition-slider-row{
+  margin-top:20px;
+}
+
+#hq-condition-label-row{
+  display:grid;
+  grid-template-columns:120px 1fr 120px;
+  align-items:center;
+  gap:14px;
+}
+
+.hq-condition-end{
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:rgba(238,243,255,.82);
+}
+
+.hq-condition-end.right{
+  text-align:right;
+}
+
+#hq-condition-current{
+  margin-top:10px;
+  text-align:center;
+  font-size:13px;
+  font-weight:900;
+  color:rgba(230,236,255,.78);
+}
+
+/* =========================================================
+  8. HOUSING QUIZ BOTTOM / BUTTONS
+========================================================= */
+
+#hq-bottom{
+  margin-top:22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  flex-wrap:wrap;
+}
+
+#hq-helper{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:14px;
+  line-height:1.55;
+  color:rgba(230,236,255,.72);
+}
+
+#hq-helper-icon{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  color:var(--pcsu-accent);
+  font-size:13px;
+  flex:0 0 auto;
+}
+
+#hq-actions{
+  display:flex;
+  gap:12px;
+}
+
+.hq-btn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  min-width:150px;
+  height:54px;
+  padding:0 22px;
+  border-radius:18px;
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  transition:.18s ease;
+}
+
+#hq-back{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  color:#dbe5ff;
+}
+
+#hq-next{
+  background:linear-gradient(135deg,#8ef3c5 0%,#6aa7ff 100%);
+  color:#071018;
+}
+
+#hq-next:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.03);
+}
+
+#hq-next[disabled]{
+  opacity:.45;
+  cursor:not-allowed;
+  transform:none;
+  filter:none;
+}
+
+/* =========================================================
+  9. HOUSING QUIZ FINISH / BASELINE RESULTS
+========================================================= */
+
+#hq-finish{
+  display:none;
+  padding-top:10px;
+}
+
+#hq-finish-title{
+  font-size:40px;
+  line-height:1.04;
+  font-weight:900;
+  letter-spacing:-.05em;
+  color:#ffffff;
+}
+
+#hq-finish-copy{
+  margin-top:12px;
+  max-width:760px;
+  font-size:15px;
+  line-height:1.65;
+  color:rgba(230,236,255,.74);
+}
+
+#hq-baseline-grid{
+  margin-top:30px;
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:14px;
+  max-width:1250px;
+}
+
+.hq-baseline-card{
+  min-height:94px;
+  padding:18px 20px;
+  border-radius:18px;
+  border:1px solid rgba(180,210,255,.18);
+  background:rgba(255,255,255,.045);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 12px 28px rgba(0,0,0,.16);
+}
+
+.hq-baseline-label{
+  font-size:12px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:rgba(230,236,255,.64);
+}
+
+.hq-baseline-value{
+  margin-top:14px;
+  font-size:28px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.04em;
+  color:#ffffff;
+}
+
+#hq-baseline-summary{
+  margin-top:20px;
+  max-width:900px;
+  font-size:14px;
+  line-height:1.65;
+  color:rgba(230,236,255,.72);
+}
+
+/* =========================================================
+  10. AIOU RESET / SHELL
+========================================================= */
+
+#aiou-shell,
+#aiou-shell *{
+  box-sizing:border-box;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+
+#aiou-shell{
+  width:100%;
+  display:block;
+  color:#fff;
+  background:transparent !important;
+
+  --ink:#ffffff;
+  --muted:rgba(230,236,255,.76);
+  --muted2:rgba(230,236,255,.58);
+  --accent:#8ef3c5;
+  --accent2:#6aa7ff;
+  --danger:#ff6f9f;
+  --stroke:rgba(255,255,255,.10);
+}
+
+#aiou-stage{
+  width:100%;
+  background:transparent !important;
+  display:none;
+}
+
+#aiou-stage.active{
+  display:block;
+  margin-top:36px;
+}
+
+#aiou-kicker{
+  margin-bottom:10px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--accent);
+}
+
+#aiou-title{
+  margin:0;
+  max-width:900px;
+  font-size:48px;
+  line-height:1.02;
+  font-weight:900;
+  letter-spacing:-.05em;
+  color:#ffffff;
+}
+
+#aiou-sub{
+  margin-top:14px;
+  max-width:760px;
+  font-size:16px;
+  line-height:1.55;
+  color:var(--muted);
+}
+
+/* =========================================================
+  11. AIOU PROGRESS / QUESTION
+========================================================= */
+
+#aiou-progress-wrap{
+  margin-top:26px;
+  width:100%;
+  height:7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.10);
+  overflow:hidden;
+}
+
+#aiou-progress-bar{
+  width:0%;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transform-origin:left;
+  transition:width .22s ease;
+}
+
+#aiou-question-meta{
+  margin-top:18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+#aiou-qtitle{
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:rgba(230,236,255,.72);
+}
+
+#aiou-clock{
+  min-width:58px;
+  height:30px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  border:1px solid rgba(106,167,255,.46);
+  background:rgba(106,167,255,.12);
+  color:#ffffff;
+  font-size:12px;
+  font-weight:900;
+}
+
+#aiou-qtext{
+  margin-top:16px;
+  max-width:860px;
+  font-size:24px;
+  line-height:1.18;
+  font-weight:900;
+  letter-spacing:-.035em;
+  color:#ffffff;
+}
+
+/* =========================================================
+  12. AIOU VISUAL QUESTION
+========================================================= */
+
+#aiou-visual-area{
+  margin-top:26px;
+  display:none;
+}
+
+#aiou-visual-area.active{
+  display:block;
+}
+
+.aiou-dualpref{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+}
+
+.aiou-dualpref figure{
+  margin:0;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+}
+
+.aiou-dualpref img{
+  width:100%;
+  height:190px;
+  display:block;
+  object-fit:cover;
+  cursor:pointer;
+}
+
+.aiou-dualpref figcaption{
+  padding:10px 14px 12px;
+  text-align:center;
+  font-size:13px;
+  font-weight:900;
+  color:rgba(238,243,255,.82);
+}
+
+#aiou-slider-row{
+  margin-top:20px;
+}
+
+#aiou-slider-label-row{
+  display:grid;
+  grid-template-columns:120px 1fr 120px;
+  align-items:center;
+  gap:14px;
+}
+
+.aiou-slider-end{
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:rgba(238,243,255,.82);
+}
+
+.aiou-slider-end.right{
+  text-align:right;
+}
+
+.aiou-slider-shell{
+  position:relative;
+  height:20px;
+  border-radius:999px;
+  background:transparent;
+}
+
+.aiou-slider-shell::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:50%;
+  height:7px;
+  transform:translateY(-50%);
+  border-radius:999px;
+  background:var(
+    --rail-bg,
+    linear-gradient(
+      90deg,
+      var(--accent) 0%,
+      var(--accent2) 50%,
+      rgba(255,255,255,.15) 50%,
+      rgba(255,255,255,.15) 100%
+    )
+  );
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,.28),
+    inset 0 -1px 2px rgba(0,0,0,.12),
+    0 7px 16px rgba(106,167,255,.16);
+  pointer-events:none;
+}
+
+.aiou-range{
+  width:100%;
+  -webkit-appearance:none;
+  appearance:none;
+  background:transparent;
+  position:relative;
+  z-index:2;
+  height:20px;
+  margin:0;
+  cursor:pointer;
+}
+
+.aiou-range:focus{
+  outline:none;
+}
+
+.aiou-range::-webkit-slider-runnable-track{
+  height:20px;
+  background:transparent;
+  border:none;
+}
+
+.aiou-range::-moz-range-track{
+  height:20px;
+  background:transparent;
+  border:none;
+}
+
+.aiou-range::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width:28px;
+  height:28px;
+  margin-top:-4px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#ffffff,#e9eef6);
+  border:1px solid rgba(18,24,38,.13);
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -2px 6px rgba(18,24,38,.08);
+  transition:.16s ease;
+}
+
+.aiou-range:hover::-webkit-slider-thumb{
+  transform:scale(1.05);
+}
+
+.aiou-range::-moz-range-thumb{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#ffffff,#e9eef6);
+  border:1px solid rgba(18,24,38,.13);
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -2px 6px rgba(18,24,38,.08);
+  cursor:pointer;
+}
+
+#aiou-vlabel{
+  margin-top:10px;
+  text-align:center;
+  font-size:13px;
+  font-weight:900;
+  color:rgba(230,236,255,.78);
+}
+
+/* =========================================================
+  13. AIOU SCALE
+========================================================= */
+
+#aiou-scale{
+  margin-top:26px;
+  display:none;
+  grid-template-columns:repeat(11,1fr);
+  gap:8px;
+  max-width:860px;
+}
+
+#aiou-scale.active{
+  display:grid;
+}
+
+.aiou-pill{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.045);
+  color:#ffffff;
+  border-radius:14px;
+  min-height:46px;
+  font-size:13px;
+  font-weight:900;
+  cursor:pointer;
+  transition:.16s ease;
+}
+
+.aiou-pill:hover{
+  transform:translateY(-1px);
+  border-color:rgba(142,243,197,.28);
+}
+
+.aiou-pill.active{
+  border-color:rgba(142,243,197,.44);
+  background:rgba(142,243,197,.09);
+}
+
+/* =========================================================
+  14. AIOU BOTTOM / BUTTONS
+========================================================= */
+
+#aiou-bottom{
+  margin-top:22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  flex-wrap:wrap;
+}
+
+#aiou-helper{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:14px;
+  line-height:1.55;
+  color:rgba(230,236,255,.72);
+}
+
+#aiou-helper-icon{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  color:var(--accent);
+  font-size:13px;
+  flex:0 0 auto;
+}
+
+#aiou-actions{
+  display:flex;
+  gap:12px;
+}
+
+.aiou-btn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  min-width:150px;
+  height:54px;
+  padding:0 22px;
+  border-radius:18px;
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  transition:.18s ease;
+}
+
+#aiou-skip{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  color:#dbe5ff;
+}
+
+#aiou-reset{
+  background:transparent;
+  border:1px solid rgba(255,111,159,.68);
+  color:#ff6f9f;
+}
+
+.aiou-btn:hover{
+  transform:translateY(-1px);
+}
+
+/* =========================================================
+  15. AIOU RESULTS
+========================================================= */
+
+#aiou-results{
+  display:none;
+  padding-top:10px;
+}
+
+#aiou-results.active{
+  display:block;
+}
+
+#aiou-results-title{
+  font-size:40px;
+  line-height:1.04;
+  font-weight:900;
+  letter-spacing:-.05em;
+  color:#ffffff;
+}
+
+#aiou-results-copy{
+  margin-top:12px;
+  max-width:860px;
+  font-size:15px;
+  line-height:1.65;
+  color:rgba(230,236,255,.74);
+}
+
+#aiou-kpi-grid{
+  margin-top:30px;
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:14px;
+  max-width:1250px;
+}
+
+.aiou-kpi-card{
+  min-height:94px;
+  padding:18px 20px;
+  border-radius:18px;
+  border:1px solid rgba(180,210,255,.18);
+  background:rgba(255,255,255,.045);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 12px 28px rgba(0,0,0,.16);
+}
+
+.aiou-kpi-label{
+  font-size:12px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:rgba(230,236,255,.64);
+}
+
+.aiou-kpi-value{
+  margin-top:14px;
+  font-size:28px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.04em;
+  color:#ffffff;
+}
+
+#aiou-consistency,
+#aiou-archetype,
+#aiou-mbti{
+  margin-top:16px;
+  max-width:920px;
+  font-size:14px;
+  line-height:1.65;
+  color:rgba(230,236,255,.76);
+}
+
+#aiou-archetype{
+  font-weight:900;
+  color:#ffffff;
+}
+
+#aiou-report-box{
+  margin-top:20px;
+  max-width:1100px;
+  padding:18px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.045);
+  font-size:14px;
+  line-height:1.65;
+  color:rgba(230,236,255,.78);
+}
+
+.aiou-ok{
+  color:#58f7b7;
+  font-weight:900;
+}
+
+.aiou-flag{
+  color:#ff6f9f;
+  font-weight:900;
+}
+
+/* =========================================================
+  16. RESPONSIVE
+========================================================= */
+
+@media(max-width:1200px){
+  #pcsu-housing-shell{
+    grid-template-columns:360px minmax(0,1fr);
+  }
+
+  #pcsu-housing-content{
+    padding:32px;
+  }
+
+  #hq-question,
+  #aiou-title{
+    font-size:42px;
+  }
+
+  #hq-baseline-grid,
+  #aiou-kpi-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+
+@media(max-width:980px){
+  #pcsu-housing-page{
+    padding:16px;
+  }
+
+  #pcsu-housing-shell{
+    grid-template-columns:1fr;
+  }
+
+  #pcsu-housing-visual{
+    min-height:320px;
+    border-right:none;
+    border-bottom:1px solid rgba(255,255,255,.12);
+  }
+
+  #pcsu-visual-image-wrap{
+    height:320px;
+    flex:none;
+  }
+
+  #pcsu-housing-content{
+    padding:30px 24px;
+  }
+
+  #hq-question,
+  #aiou-title{
+    font-size:38px;
+  }
+
+  #hq-options,
+  #hq-slider-panel,
+  #hq-condition-grid,
+  .aiou-dualpref{
+    grid-template-columns:1fr;
+  }
+
+  #hq-condition-label-row,
+  #aiou-slider-label-row{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .hq-condition-end.right,
+  .aiou-slider-end.right{
+    text-align:left;
+  }
+
+  #aiou-scale{
+    grid-template-columns:repeat(6,1fr);
+  }
+}
+
+@media(max-width:640px){
+  #pcsu-housing-page{
+    padding:10px;
+    align-items:flex-start;
+  }
+
+  #pcsu-housing-shell{
+    border-radius:22px;
+  }
+
+  #pcsu-housing-visual{
+    min-height:250px;
+  }
+
+  #pcsu-visual-image-wrap{
+    height:250px;
+  }
+
+  #pcsu-housing-content{
+    padding:24px 18px;
+  }
+
+  #hq-question,
+  #aiou-title{
+    font-size:30px;
+  }
+
+  #hq-sub,
+  #aiou-sub{
+    font-size:14px;
+  }
+
+  #aiou-qtext{
+    font-size:20px;
+  }
+
+  .hq-option{
+    min-height:auto;
+    padding:18px;
+  }
+
+  #hq-bottom,
+  #aiou-bottom{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  #hq-actions,
+  #aiou-actions{
+    width:100%;
+  }
+
+  .hq-btn,
+  .aiou-btn{
+    flex:1;
+    min-width:0;
+  }
+
+  .hq-slider-value{
+    font-size:25px;
+  }
+
+  .hq-condition-img,
+  .aiou-dualpref img{
+    height:145px;
+  }
+
+  #hq-baseline-grid,
+  #aiou-kpi-grid{
+    grid-template-columns:1fr;
+  }
+
+  #hq-finish-title,
+  #aiou-results-title{
+    font-size:32px;
+  }
+
+  #aiou-scale{
+    grid-template-columns:repeat(4,1fr);
+  }
+}
