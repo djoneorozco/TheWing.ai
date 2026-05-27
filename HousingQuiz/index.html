@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- =========================================================
+    PCSUnited • Housing Quiz + AIOU Companion Flow
+    index.html
+    GitHub-ready page shell
+
+    FILES REQUIRED IN SAME FOLDER:
+    - index.html
+    - housingquiz.css
+    - housingquiz.js
+  ========================================================== -->
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>PCSUnited Housing Quiz</title>
+
+  <meta
+    name="description"
+    content="PCSUnited Housing Quiz and AIOU Buyer Assumption Test for understanding housing preferences, tradeoffs, and lifestyle fit."
+  />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="./housingquiz.css" />
+</head>
+
+<body>
+
+  <!-- =========================================================
+    PAGE SHELL
+  ========================================================== -->
+
+  <main id="pcsu-housing-page">
+
+    <section id="pcsu-housing-shell">
+
+      <!-- =====================================================
+        LEFT VISUAL PANEL
+      ====================================================== -->
+
+      <aside id="pcsu-housing-visual" aria-label="PCSUnited housing guidance visual">
+
+        <div id="pcsu-visual-image-wrap">
+
+          <img
+            id="pcsu-visual-image"
+            src="https://cdn.prod.website-files.com/68cecb820ec3dbdca3ef9099/692e1cae5cb137297b29e73f_ChatGPT%20Image%20Nov%2026%2C%202026%2C%2008_29_59%20AM.png"
+            alt="PCSUnited AI housing guide holding a tablet"
+          />
+
+        </div>
+
+        <div id="pcsu-visual-caption">
+          Learn the Psychology behind Home Buying.
+        </div>
+
+      </aside>
+
+      <!-- =====================================================
+        RIGHT QUIZ PANEL
+      ====================================================== -->
+
+      <section id="pcsu-housing-content">
+
+        <!-- =================================================
+          HOUSING QUIZ INTAKE
+        ================================================== -->
+
+        <div id="pcsu-housing-quiz">
+
+          <div id="hq-shell">
+
+            <div id="hq-card">
+
+              <div id="hq-inner">
+
+                <div id="hq-kicker">Housing Quiz</div>
+
+                <h2 id="hq-question">
+                  Discover Your Housing Wants vs. Needs
+                </h2>
+
+                <div id="hq-sub">
+                  Choose the lifestyle that feels closest to the kind of life you want to build.
+                </div>
+
+                <div id="hq-options"></div>
+
+                <!-- =========================================
+                  BEDROOM / BATHROOM SLIDER PANEL
+                ========================================== -->
+
+                <div id="hq-slider-panel">
+
+                  <div class="hq-slider-card">
+
+                    <label class="hq-slider-label" for="hq-bedrooms-range">
+                      Bedrooms Wanted
+                    </label>
+
+                    <div class="hq-topbox">
+
+                      <div class="hq-slider-value" id="hq-bedrooms-value">
+                        3
+                      </div>
+
+                      <div class="hq-pill-mini" id="hq-bedrooms-pill">
+                        Bedrooms
+                      </div>
+
+                    </div>
+
+                    <div class="hq-slider-wrap">
+
+                      <div class="hq-slider-shell">
+
+                        <input
+                          id="hq-bedrooms-range"
+                          class="hq-range"
+                          type="range"
+                          min="1"
+                          max="6"
+                          step="1"
+                          value="3"
+                        />
+
+                      </div>
+
+                      <div class="hq-scale">
+
+                        <span>1</span>
+                        <span>3</span>
+                        <span>6</span>
+
+                      </div>
+
+                    </div>
+
+                    <div class="hq-slider-help">
+                      Choose the bedroom count that feels right for your family, guests, work, or future flexibility.
+                    </div>
+
+                  </div>
+
+                  <div class="hq-slider-card">
+
+                    <label class="hq-slider-label" for="hq-bathrooms-range">
+                      Bathrooms Wanted
+                    </label>
+
+                    <div class="hq-topbox">
+
+                      <div class="hq-slider-value" id="hq-bathrooms-value">
+                        2
+                      </div>
+
+                      <div class="hq-pill-mini" id="hq-bathrooms-pill">
+                        Bathrooms
+                      </div>
+
+                    </div>
+
+                    <div class="hq-slider-wrap">
+
+                      <div class="hq-slider-shell">
+
+                        <input
+                          id="hq-bathrooms-range"
+                          class="hq-range"
+                          type="range"
+                          min="1"
+                          max="4"
+                          step="1"
+                          value="2"
+                        />
+
+                      </div>
+
+                      <div class="hq-scale">
+
+                        <span>1</span>
+                        <span>2</span>
+                        <span>4</span>
+
+                      </div>
+
+                    </div>
+
+                    <div class="hq-slider-help">
+                      Choose the bathroom count that would make daily routines feel smoother and less crowded.
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <!-- =========================================
+                  HOME CONDITION PANEL
+                ========================================== -->
+
+                <div id="hq-condition-panel">
+
+                  <div id="hq-condition-grid">
+
+                    <div class="hq-condition-card">
+
+                      <img
+                        class="hq-condition-img"
+                        src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80"
+                        alt="Home that may require fixes"
+                      />
+
+                      <div class="hq-condition-label">
+                        May Require Fixes
+                      </div>
+
+                    </div>
+
+                    <div class="hq-condition-card">
+
+                      <img
+                        class="hq-condition-img"
+                        src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=80"
+                        alt="Brand new home"
+                      />
+
+                      <div class="hq-condition-label">
+                        Brand New Home
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  <div id="hq-condition-slider-row">
+
+                    <div id="hq-condition-label-row">
+
+                      <div class="hq-condition-end">
+                        Needs Fixes
+                      </div>
+
+                      <div class="hq-slider-shell">
+
+                        <input
+                          id="hq-condition-range"
+                          class="hq-range"
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="1"
+                          value="50"
+                        />
+
+                      </div>
+
+                      <div class="hq-condition-end right">
+                        Brand New
+                      </div>
+
+                    </div>
+
+                    <div id="hq-condition-current">
+                      Neutral
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <!-- =========================================
+                  HOUSING QUIZ ACTIONS
+                ========================================== -->
+
+                <div id="hq-bottom">
+
+                  <div id="hq-helper">
+
+                    <div id="hq-helper-icon">
+                      ✓
+                    </div>
+
+                    <div id="hq-helper-copy">
+                      There are no right or wrong answers.
+                      We're simply learning what matters most to your lifestyle.
+                    </div>
+
+                  </div>
+
+                  <div id="hq-actions">
+
+                    <button
+                      class="hq-btn"
+                      id="hq-back"
+                      type="button"
+                    >
+                      Back
+                    </button>
+
+                    <button
+                      class="hq-btn"
+                      id="hq-next"
+                      type="button"
+                      disabled
+                    >
+                      Continue
+                    </button>
+
+                  </div>
+
+                </div>
+
+                <!-- =========================================
+                  HOUSING QUIZ FINISH / BASELINE RESULTS
+                ========================================== -->
+
+                <div id="hq-finish">
+
+                  <div id="hq-finish-title">
+                    Your Housing Profile Is Ready
+                  </div>
+
+                  <div id="hq-finish-copy">
+                    PCSUnited now understands the type of lifestyle, space, tradeoffs, home condition, and housing experience you're hoping to create.
+                  </div>
+
+                  <div id="hq-baseline-grid">
+
+                    <div class="hq-baseline-card">
+
+                      <div class="hq-baseline-label">
+                        Openness
+                      </div>
+
+                      <div class="hq-baseline-value" id="hq-score-openness">
+                        —
+                      </div>
+
+                    </div>
+
+                    <div class="hq-baseline-card">
+
+                      <div class="hq-baseline-label">
+                        Discipline
+                      </div>
+
+                      <div class="hq-baseline-value" id="hq-score-discipline">
+                        —
+                      </div>
+
+                    </div>
+
+                    <div class="hq-baseline-card">
+
+                      <div class="hq-baseline-label">
+                        Lifestyle Pull
+                      </div>
+
+                      <div class="hq-baseline-value" id="hq-score-lifestyle">
+                        —
+                      </div>
+
+                    </div>
+
+                    <div class="hq-baseline-card">
+
+                      <div class="hq-baseline-label">
+                        Flexibility
+                      </div>
+
+                      <div class="hq-baseline-value" id="hq-score-flexibility">
+                        —
+                      </div>
+
+                    </div>
+
+                    <div class="hq-baseline-card">
+
+                      <div class="hq-baseline-label">
+                        Risk Aversion
+                      </div>
+
+                      <div class="hq-baseline-value" id="hq-score-risk">
+                        —
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  <div id="hq-baseline-summary">
+                    This is your first-pass housing baseline. The deeper AIOU Psychology Quiz will now test whether these early preferences stay consistent under pressure, budget tradeoffs, repairs, commute, and lifestyle compromises.
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- =================================================
+          A.I.O.U INLINE BUYER ASSUMPTION TEST
+        ================================================== -->
+
+        <div
+          id="aiou-shell"
+          data-endpoint="https://theorozcorealty.netlify.app/.netlify/functions/aiou-report"
+        >
+
+          <div id="aiou-stage">
+
+            <div id="aiou-quiz-panel">
+
+              <div id="aiou-kicker">
+                A.I.O.U Assumption Test
+              </div>
+
+              <h2 id="aiou-title">
+                Testing Your Housing Assumptions
+              </h2>
+
+              <div id="aiou-sub">
+                PCSUnited is now checking whether your housing preferences stay consistent when budget, repairs, commute, and lifestyle tradeoffs are introduced.
+              </div>
+
+              <div id="aiou-progress-wrap">
+
+                <div id="aiou-progress-bar"></div>
+
+              </div>
+
+              <div id="aiou-question-meta">
+
+                <div id="aiou-qtitle">
+                  Question
+                </div>
+
+                <div id="aiou-clock">
+                  10
+                </div>
+
+              </div>
+
+              <div id="aiou-qtext"></div>
+
+              <!-- =========================================
+                AIOU VISUAL QUESTION
+              ========================================== -->
+
+              <div id="aiou-visual-area">
+
+                <div class="aiou-dualpref">
+
+                  <figure>
+
+                    <img
+                      id="aiou-vimg-a"
+                      src="https://cdn.prod.website-files.com/68cecb820ec3dbdca3ef9099/68f9a10aab47946a36f5c135_04d878cc02583fb9bfda33ddbd28d91a_MinorFixesHome.jpg"
+                      alt="May Require Fixes"
+                    />
+
+                    <figcaption>
+                      May Require Fixes
+                    </figcaption>
+
+                  </figure>
+
+                  <figure>
+
+                    <img
+                      id="aiou-vimg-b"
+                      src="https://cdn.prod.website-files.com/68cecb820ec3dbdca3ef9099/68f9a113c4924ecebad2319a_a0cc3184b96f525ed5a278c3bac62891_BrandNewHome.jpg"
+                      alt="Brand New Home"
+                    />
+
+                    <figcaption>
+                      Brand New Home
+                    </figcaption>
+
+                  </figure>
+
+                </div>
+
+                <div id="aiou-slider-row">
+
+                  <div id="aiou-slider-label-row">
+
+                    <div class="aiou-slider-end">
+                      Needs Fixes
+                    </div>
+
+                    <div class="aiou-slider-shell">
+
+                      <input
+                        id="aiou-vslider"
+                        class="aiou-range"
+                        type="range"
+                        min="-5"
+                        max="5"
+                        step="1"
+                        value="0"
+                      />
+
+                    </div>
+
+                    <div class="aiou-slider-end right">
+                      Brand New
+                    </div>
+
+                  </div>
+
+                  <div id="aiou-vlabel">
+                    Neutral
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div id="aiou-scale"></div>
+
+              <div id="aiou-bottom">
+
+                <div id="aiou-helper">
+
+                  <div id="aiou-helper-icon">
+                    ✓
+                  </div>
+
+                  <div>
+                    No answer becomes neutral after 10 seconds. This helps reveal instinctive tradeoff behavior.
+                  </div>
+
+                </div>
+
+                <div id="aiou-actions">
+
+                  <button
+                    class="aiou-btn"
+                    id="aiou-skip"
+                    type="button"
+                  >
+                    Skip
+                  </button>
+
+                  <button
+                    class="aiou-btn"
+                    id="aiou-reset"
+                    type="button"
+                  >
+                    Reset
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- =========================================
+              AIOU RESULTS
+            ========================================== -->
+
+            <div id="aiou-results">
+
+              <div id="aiou-results-title">
+                Your Assumption Test Is Complete
+              </div>
+
+              <div id="aiou-results-copy">
+                PCSUnited compared your housing instincts against tradeoff pressure to see whether your preferences stayed consistent.
+              </div>
+
+              <div id="aiou-kpi-grid">
+
+                <div class="aiou-kpi-card">
+
+                  <div class="aiou-kpi-label">
+                    Openness
+                  </div>
+
+                  <div class="aiou-kpi-value" id="aiou-k-open">
+                    —
+                  </div>
+
+                </div>
+
+                <div class="aiou-kpi-card">
+
+                  <div class="aiou-kpi-label">
+                    Discipline
+                  </div>
+
+                  <div class="aiou-kpi-value" id="aiou-k-disc">
+                    —
+                  </div>
+
+                </div>
+
+                <div class="aiou-kpi-card">
+
+                  <div class="aiou-kpi-label">
+                    Lifestyle Pull
+                  </div>
+
+                  <div class="aiou-kpi-value" id="aiou-k-life">
+                    —
+                  </div>
+
+                </div>
+
+                <div class="aiou-kpi-card">
+
+                  <div class="aiou-kpi-label">
+                    Flexibility
+                  </div>
+
+                  <div class="aiou-kpi-value" id="aiou-k-flex">
+                    —
+                  </div>
+
+                </div>
+
+                <div class="aiou-kpi-card">
+
+                  <div class="aiou-kpi-label">
+                    Risk Aversion
+                  </div>
+
+                  <div class="aiou-kpi-value" id="aiou-k-risk">
+                    —
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div id="aiou-consistency"></div>
+
+              <div id="aiou-archetype"></div>
+
+              <div id="aiou-mbti"></div>
+
+              <div id="aiou-report-box">
+                (Generating your personalized memo…)
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+  <script src="./housingquiz.js"></script>
+
+</body>
+</html>
