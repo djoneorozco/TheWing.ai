@@ -1,1337 +1,1224 @@
 /* =========================================================
-  PCS SNAPSHOT v5.1.0 • AURORA THEME
-  FILE: snapshot.css
+  PCS SNAPSHOT v5.1.1
+  FILE: snapshot.js
 
-  THEWING.AI SPLIT VERSION
-  UPDATED:
-  - CSS extracted from original single-file Snapshot
-  - Runtime IDs/classes preserved
-  - Page-safe body styling added
+  FIX:
+  - Your uploaded snapshot.js accidentally contained CSS.
+  - This file is real JavaScript.
+  - Reads URL params from the Webflow iframe handoff.
+  - Loads PCS Snapshot safely.
+  - Keeps existing HTML/CSS IDs unchanged.
 ========================================================= */
 
-/* =========================================================
-   #1) PAGE BASE
-========================================================= */
-html,
-body{
-  margin:0;
-  min-height:100%;
-  background:#091726;
-}
-
-/* =========================================================
-   #2) SCOPE RESET + TOKENS
-========================================================= */
-#pcs-snapshot-shell,
-#pcs-snapshot-shell *{
-  box-sizing:border-box;
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-}
-
-#pcs-snapshot-shell{
-  width:100%;
-  display:block;
-
-  --pcs-ink:#f4f8ff;
-  --pcs-ink-2:#ffffff;
-  --pcs-muted:rgba(244,248,255,.78);
-  --pcs-muted-2:rgba(244,248,255,.56);
-
-  --pcs-accent:#66b9ff;
-  --pcs-accent-2:#9de8ff;
-  --pcs-accent-3:#8e88ff;
-  --pcs-ok:#50e5bf;
-  --pcs-warn:#ffb56b;
-  --pcs-bad:#ff7e94;
-  --pcs-coral:#ff9f68;
-
-  --pcs-border-06:rgba(255,255,255,.06);
-  --pcs-border-07:rgba(255,255,255,.07);
-  --pcs-border-08:rgba(255,255,255,.09);
-  --pcs-border-10:rgba(255,255,255,.12);
-
-  --pcs-topline-03:rgba(255,255,255,.03);
-  --pcs-topline-04:rgba(255,255,255,.04);
-
-  --pcs-shadow-inset-soft:inset 0 1px 0 var(--pcs-topline-03);
-  --pcs-shadow-inset:inset 0 1px 0 var(--pcs-topline-04);
-  --pcs-shadow-card:0 18px 42px rgba(7,14,28,.16);
-  --pcs-shadow-glass:0 22px 44px rgba(7,14,28,.18);
-  --pcs-shadow-wrap:0 34px 100px rgba(6,12,24,.24);
-
-  --pcs-grad-glass:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
-  --pcs-grad-card:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.045));
-  --pcs-grad-subcard:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-  --pcs-grad-panel:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
-  --pcs-grad-pill:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
-  --pcs-grad-deep:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
-  --pcs-grad-box:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.025));
-  --pcs-grad-button:linear-gradient(135deg, rgba(157,232,255,.98), rgba(116,170,255,.94));
-  --pcs-grad-button-soft:linear-gradient(135deg, rgba(80,229,191,.98), rgba(102,185,255,.92));
-}
-
-#pcs-snapshot-shell svg{
-  display:block;
-}
-
-/* =========================================================
-   #3) THEME WRAPPER
-========================================================= */
-#pcs-snapshot-wrap{
-  width:min(1480px,100%);
-  margin:0 auto;
-  padding:20px;
-  color:var(--pcs-ink);
-  background:
-    radial-gradient(1100px 640px at 10% 8%, rgba(72,216,255,.19), transparent 54%),
-    radial-gradient(840px 520px at 88% 10%, rgba(255,178,108,.15), transparent 42%),
-    radial-gradient(680px 420px at 96% 14%, rgba(255,130,130,.09), transparent 28%),
-    radial-gradient(860px 560px at 50% 100%, rgba(142,136,255,.14), transparent 52%),
-    linear-gradient(135deg, #0c6478 0%, #173459 34%, #273555 66%, #43344b 100%);
-  border-radius:28px;
-  border:1px solid var(--pcs-border-07);
-  box-shadow:var(--pcs-shadow-wrap);
-  overflow:hidden;
-  position:relative;
-  isolation:isolate;
-}
-
-#pcs-snapshot-wrap::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)),
-    radial-gradient(circle at 22% 18%, rgba(255,255,255,.08), transparent 22%),
-    radial-gradient(circle at 82% 10%, rgba(255,213,150,.07), transparent 16%);
-  mix-blend-mode:screen;
-  opacity:.75;
-}
-
-/* =========================================================
-   #4) GLOBAL SNAPSHOT CARDS
-========================================================= */
-.pcs-card{
-  background:var(--pcs-grad-card);
-  border:1px solid var(--pcs-border-08);
-  box-shadow:var(--pcs-shadow-card);
-  border-radius:24px;
-  backdrop-filter:blur(16px) saturate(135%);
-  -webkit-backdrop-filter:blur(16px) saturate(135%);
-  position:relative;
-  overflow:hidden;
-}
-
-.pcs-card::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0));
-  opacity:.78;
-}
-
-.pcs-subcard{
-  background:var(--pcs-grad-subcard);
-  border:1px solid var(--pcs-border-07);
-  border-radius:20px;
-  box-shadow:var(--pcs-shadow-glass);
-  backdrop-filter:blur(12px) saturate(128%);
-  -webkit-backdrop-filter:blur(12px) saturate(128%);
-}
-
-.pcs-title{
-  margin:0;
-  color:var(--pcs-ink-2);
-  text-transform:uppercase;
-  letter-spacing:.02em;
-  font-weight:900;
-}
-
-.pcs-dot{
-  width:5px;
-  height:5px;
-  border-radius:999px;
-  background:var(--pcs-accent-2);
-  display:inline-block;
-  margin:0 8px;
-  transform:translateY(-1px);
-  box-shadow:0 0 12px rgba(157,232,255,.28);
-}
-
-/* =========================================================
-   #5) TOP STRIP — 4 CARD HEADER
-========================================================= */
-.pcs-top{
-  margin-bottom:18px;
-}
-
-.pcs-top-head{
-  margin:0 0 14px;
-  padding:0 2px;
-}
-
-.pcs-top-head .pcs-title{
-  font-size:24px;
-  line-height:1.08;
-  margin-bottom:10px;
-}
-
-#pcs-city-line{
-  font-size:14px;
-  font-weight:700;
-  color:var(--pcs-muted);
-  display:block;
-}
-
-.pts-grid{
-  display:grid;
-  grid-template-columns:1.18fr 1fr 1fr 1fr;
-  gap:16px;
-  align-items:stretch;
-}
-
-.pts-card{
-  min-height:178px;
-  border-radius:24px;
-  border:1px solid var(--pcs-border-08);
-  background:
-    radial-gradient(500px 240px at 14% 0%, rgba(157,232,255,.13), transparent 58%),
-    radial-gradient(340px 160px at 96% 0%, rgba(255,173,108,.08), transparent 48%),
-    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-  box-shadow:0 12px 28px rgba(7,14,28,.14);
-  padding:20px 20px 18px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  overflow:hidden;
-  position:relative;
-  backdrop-filter:blur(14px) saturate(130%);
-  -webkit-backdrop-filter:blur(14px) saturate(130%);
-}
-
-.pts-card::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background:radial-gradient(circle at 18% 18%, rgba(255,255,255,.04), transparent 22%);
-  opacity:.85;
-}
-
-.pts-card > *{
-  position:relative;
-  z-index:1;
-}
-
-.pts-top{
-  display:grid;
-  grid-template-columns:72px 1fr;
-  gap:14px;
-  align-items:center;
-}
-
-.pts-icon{
-  width:58px;
-  height:58px;
-  border-radius:999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid var(--pcs-border-10);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 24px rgba(102,185,255,.10);
-  flex:0 0 58px;
-  background:
-    radial-gradient(circle at 35% 30%, rgba(157,232,255,.26), rgba(102,185,255,.12) 44%, rgba(12,28,46,.20) 100%);
-  color:var(--pcs-accent-2);
-}
-
-.pts-icon svg{
-  width:26px;
-  height:26px;
-}
-
-.pts-copy{
-  min-width:0;
-}
-
-.pts-kicker{
-  margin:0 0 4px;
-  font-size:12px;
-  line-height:1.15;
-  font-weight:900;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:var(--pcs-muted);
-}
-
-.pts-bigline{
-  display:flex;
-  align-items:baseline;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-.pts-value{
-  margin:0;
-  font-size:27px;
-  line-height:1;
-  font-weight:900;
-  letter-spacing:-.03em;
-  color:#fff;
-}
-
-.pts-unit{
-  font-size:14px;
-  line-height:1;
-  font-weight:700;
-  color:var(--pcs-muted);
-}
-
-.pts-body{
-  margin-top:16px;
-}
-
-.pts-body-copy,
-.pts-income-breakdown{
-  margin:0;
-  font-size:13px;
-  line-height:1.45;
-  font-weight:700;
-  color:#f2f7ff;
-}
-
-.pts-meta{
-  margin-top:10px;
-  padding-top:12px;
-  border-top:1px solid var(--pcs-border-08);
-  font-size:12px;
-  line-height:1.4;
-  font-weight:700;
-  color:var(--pcs-muted);
-}
-
-.pts-card-income .pts-icon{
-  background:
-    radial-gradient(circle at 35% 30%, rgba(102,185,255,.28), rgba(157,232,255,.10) 42%, rgba(12,28,46,.20) 100%);
-  color:#dff5ff;
-}
-
-.pts-card-income .pts-value,
-.pts-card-bah .pts-value{
-  color:#eafbff;
-}
-
-.pts-card-bah .pts-icon{
-  background:
-    radial-gradient(circle at 35% 30%, rgba(157,232,255,.24), rgba(102,185,255,.10) 42%, rgba(12,28,46,.20) 100%);
-  color:#dff5ff;
-}
-
-.pts-card-market .pts-icon{
-  background:
-    radial-gradient(circle at 35% 30%, rgba(80,229,191,.18), rgba(255,159,104,.08) 42%, rgba(12,28,46,.20) 100%);
-  color:#f7fdff;
-}
-
-.pts-card-market .pts-value{
-  color:#f8fdff;
-  font-size:26px;
-}
-
-.pts-card-power .pts-icon{
-  background:
-    radial-gradient(circle at 35% 30%, rgba(255,181,107,.20), rgba(233,140,255,.08) 42%, rgba(12,28,46,.20) 100%);
-  color:var(--pcs-warn);
-}
-
-.pts-power-row{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-}
-
-.pts-power-score{
-  font-size:27px;
-  line-height:1;
-  font-weight:900;
-  letter-spacing:-.03em;
-  color:#fff;
-}
-
-.pts-stars{
-  font-size:24px;
-  line-height:1;
-  letter-spacing:.08em;
-  color:var(--pcs-warn);
-  white-space:nowrap;
-}
-
-/* =========================================================
-   #6) MAIN GRID
-========================================================= */
-.pcs-main{
-  display:grid;
-  grid-template-columns:.98fr 1.02fr;
-  gap:18px;
-}
-
-.pcs-stack{
-  display:grid;
-  gap:18px;
-}
-
-/* =========================================================
-   #7) LEFT — CURRENT DUTY STATION
-========================================================= */
-.pcs-current-panel{
-  padding:14px;
-  position:relative;
-  overflow:hidden;
-}
-
-.pcs-current-panel::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background:
-    linear-gradient(90deg, transparent 0%, rgba(255,255,255,.04) 50%, transparent 100%),
-    radial-gradient(circle at 24% 22%, rgba(255,255,255,.04), transparent 24%);
-  mix-blend-mode:screen;
-  opacity:.55;
-}
-
-.pcs-current-shell{
-  position:relative;
-  z-index:1;
-}
-
-.pcs-current-title{
-  margin:0 0 10px;
-  color:var(--pcs-ink-2);
-  font-size:15px;
-  line-height:1.15;
-  text-transform:uppercase;
-  font-weight:900;
-  letter-spacing:.12em;
-  text-align:left;
-  padding:0 2px;
-}
-
-.pcs-current-grid{
-  display:grid;
-  grid-template-columns:.93fr 1.07fr;
-  gap:12px;
-  align-items:stretch;
-  min-height:372px;
-}
-
-.pcs-image-card{
-  overflow:hidden;
-  min-height:372px;
-  position:relative;
-  border-radius:20px;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(102,185,255,.20), transparent 55%),
-    radial-gradient(circle at 75% 75%, rgba(157,232,255,.10), transparent 55%),
-    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0));
-  border:1px solid var(--pcs-border-08);
-  box-shadow:var(--pcs-shadow-glass);
-}
-
-.pcs-image-card img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-
-.pcs-image-chip{
-  position:absolute;
-  top:10px;
-  left:10px;
-  z-index:2;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-height:24px;
-  padding:0 10px;
-  border-radius:999px;
-  border:1px solid var(--pcs-border-10);
-  background:var(--pcs-grad-glass);
-  color:#f4f7ff;
-  font-size:9px;
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:.14em;
-  white-space:nowrap;
-  box-shadow:0 8px 18px rgba(7,14,28,.14);
-}
-
-.pcs-image-overlay{
-  position:absolute;
-  inset:auto 0 0 0;
-  z-index:2;
-  padding:12px 12px 10px;
-  background:linear-gradient(180deg, rgba(4,6,15,0) 0%, rgba(4,6,15,.14) 24%, rgba(11,18,31,.62) 100%);
-  text-align:center;
-}
-
-.pcs-image-city{
-  display:block;
-  font-weight:900;
-  font-size:18px;
-  line-height:1.05;
-  letter-spacing:.04em;
-  text-transform:uppercase;
-  color:#fff;
-  text-shadow:0 8px 24px rgba(0,0,0,.24);
-}
-
-.pcs-image-tagline{
-  display:block;
-  margin-top:4px;
-  color:var(--pcs-accent-2);
-  font-size:10px;
-  line-height:1.25;
-  font-weight:700;
-  text-shadow:0 8px 22px rgba(0,0,0,.18);
-}
-
-.pcs-info-card{
-  min-height:372px;
-  padding:10px;
-  display:grid;
-  grid-template-rows:auto auto auto 1fr;
-  gap:8px;
-  align-self:stretch;
-}
-
-.pcs-brief-banner{
-  display:flex;
-  align-items:flex-start;
-  gap:8px;
-  padding:10px;
-  border-radius:14px;
-  border:1px solid var(--pcs-border-07);
-  background:rgba(255,255,255,.08);
-  box-shadow:0 8px 18px rgba(7,14,28,.12);
-}
-
-.pcs-brief-banner-icon{
-  width:22px;
-  height:22px;
-  min-width:22px;
-  border-radius:999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#0a1626;
-  background:var(--pcs-grad-button);
-  border:1px solid rgba(255,255,255,.12);
-  box-shadow:0 0 16px rgba(102,185,255,.10);
-  flex:0 0 22px;
-}
-
-.pcs-brief-banner-icon svg{
-  width:12px;
-  height:12px;
-}
-
-.pcs-brief-banner-copy{
-  min-width:0;
-}
-
-.pcs-brief-banner-head{
-  margin:0 0 2px;
-  font-size:10px;
-  line-height:1.2;
-  font-weight:900;
-  color:#fff;
-  text-transform:uppercase;
-  letter-spacing:.08em;
-}
-
-.pcs-brief-banner-sub{
-  margin:0;
-  font-size:10px;
-  line-height:1.35;
-  font-weight:600;
-  color:#eef5ff;
-}
-
-.pcs-mini-section{
-  border-radius:14px;
-  border:1px solid var(--pcs-border-07);
-  background:var(--pcs-grad-panel);
-  padding:9px;
-  box-shadow:0 8px 16px rgba(7,14,28,.10);
-}
-
-.pcs-mini-head{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  margin-bottom:7px;
-}
-
-.pcs-mini-head-icon{
-  width:18px;
-  height:18px;
-  min-width:18px;
-  border-radius:999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(255,255,255,.05);
-  border:1px solid var(--pcs-border-08);
-  color:#dfe7ff;
-  flex:0 0 18px;
-}
-
-.pcs-mini-head-icon svg{
-  width:11px;
-  height:11px;
-}
-
-.pcs-mini-head-title{
-  margin:0;
-  color:#f2f7ff;
-  font-size:10px;
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:.14em;
-}
-
-.pcs-mini-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0,1fr));
-  gap:7px;
-}
-
-.pcs-mini-stat{
-  min-height:54px;
-  border-radius:12px;
-  padding:8px 8px 7px;
-  border:1px solid var(--pcs-border-06);
-  background:var(--pcs-grad-deep);
-  box-shadow:inset 0 14px 28px rgba(255,255,255,.01);
-}
-
-.pcs-mini-label{
-  font-size:9px;
-  line-height:1.1;
-  font-weight:800;
-  color:#edf4ff;
-  margin-bottom:5px;
-  display:flex;
-  align-items:center;
-  gap:5px;
-}
-
-.pcs-mini-label svg{
-  width:10px;
-  height:10px;
-  flex:0 0 10px;
-}
-
-.pcs-mini-value{
-  font-size:14px;
-  line-height:1.08;
-  font-weight:900;
-  color:#fff;
-  letter-spacing:-.02em;
-}
-
-.pcs-mini-sub{
-  margin-top:2px;
-  font-size:9px;
-  line-height:1.1;
-  font-weight:700;
-  color:#edf4ff;
-  opacity:.86;
-}
-
-.pcs-mini-list{
-  margin:0;
-  padding:0;
-  list-style:none;
-  display:grid;
-  gap:6px;
-}
-
-.pcs-mini-item{
-  display:flex;
-  align-items:flex-start;
-  gap:7px;
-  font-size:10px;
-  line-height:1.3;
-  font-weight:600;
-  color:#f2f7ff;
-}
-
-.pcs-mini-dot{
-  width:6px;
-  height:6px;
-  min-width:6px;
-  border-radius:999px;
-  margin-top:4px;
-  background:linear-gradient(135deg, var(--pcs-accent-2), var(--pcs-accent-3));
-  box-shadow:0 0 10px rgba(102,185,255,.14);
-  flex:0 0 6px;
-}
-
-.pcs-fin-box{
-  border-radius:12px;
-  padding:9px 9px 8px;
-  border:1px solid var(--pcs-border-06);
-  background:var(--pcs-grad-deep);
-  box-shadow:inset 0 14px 28px rgba(255,255,255,.01);
-  align-self:end;
-}
-
-.pcs-fin-top{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  margin-bottom:4px;
-}
-
-.pcs-fin-dot{
-  width:10px;
-  height:10px;
-  border-radius:999px;
-  background:var(--pcs-ok);
-  box-shadow:0 0 14px rgba(80,229,191,.22);
-  flex:0 0 10px;
-}
-
-.pcs-fin-head{
-  margin:0;
-  font-size:11px;
-  line-height:1.15;
-  font-weight:900;
-  color:#d2fff3;
-  text-transform:uppercase;
-  letter-spacing:.05em;
-}
-
-.pcs-fin-copy{
-  margin:0;
-  font-size:10px;
-  line-height:1.35;
-  font-weight:600;
-  color:#f2f7ff;
-}
-
-/* =========================================================
-   #8) LEFT — HOUSING AFFORDABILITY
-========================================================= */
-.pcs-afford-panel{
-  padding:16px 18px 16px;
-  position:relative;
-}
-
-.pcs-afford-head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:2px;
-  margin-bottom:6px;
-  flex-wrap:wrap;
-}
-
-.pcs-afford-title{
-  font-size:18px;
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:.03em;
-  color:#fff;
-  margin:0;
-}
-
-.pcs-afford-kicker{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 10px;
-  border-radius:14px;
-  background:var(--pcs-grad-pill);
-  border:1px solid var(--pcs-border-08);
-  box-shadow:0 8px 16px rgba(7,14,28,.10);
-  white-space:nowrap;
-}
-
-.pcs-bedroom-left{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  line-height:1;
-  min-width:28px;
-}
-
-#pcs-bedroom-value{
-  font-size:30px;
-  color:#fff;
-  font-weight:900;
-  letter-spacing:-.04em;
-  line-height:1;
-}
-
-.pcs-bedroom-label{
-  margin-top:3px;
-  font-size:10px;
-  color:#f2f7ff;
-  opacity:.82;
-  font-weight:800;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-}
-
-.pcs-bedroom-right{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-
-.pcs-bedroom-btn{
-  width:20px;
-  height:16px;
-  border-radius:6px;
-  border:1px solid var(--pcs-border-10);
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  font-size:9px;
-  font-weight:900;
-  line-height:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  padding:0;
-  appearance:none;
-  box-shadow:0 4px 10px rgba(7,14,28,.08);
-}
-
-.pcs-bedroom-btn:hover{
-  background:rgba(255,255,255,.12);
-}
-
-.pcs-bedroom-btn:active{
-  transform:translateY(1px);
-}
-
-.pcs-afford-grid{
-  display:grid;
-  grid-template-columns:.98fr .92fr;
-  gap:10px;
-  align-items:start;
-}
-
-.pcs-afford-copy{
-  padding-right:6px;
-  padding-top:2px;
-}
-
-#pcs-afford-headline{
-  font-size:28px;
-  font-weight:900;
-  color:var(--pcs-ok);
-  line-height:1.08;
-  letter-spacing:-.025em;
-  margin-bottom:10px;
-}
-
-#pcs-afford-headline span{
-  color:#fff;
-  font-weight:800;
-}
-
-#pcs-afford-subline{
-  font-size:14px;
-  color:#f2f7ff;
-  font-weight:600;
-  line-height:1.35;
-  margin-bottom:14px;
-}
-
-.pcs-checklist{
-  display:grid;
-  gap:12px;
-}
-
-.pcs-check{
-  display:flex;
-  align-items:flex-start;
-  gap:10px;
-  color:#f2f7ff;
-  font-size:13px;
-  line-height:1.45;
-  font-weight:600;
-}
-
-.pcs-check-mark{
-  width:18px;
-  height:18px;
-  border-radius:999px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  flex:0 0 18px;
-  font-size:12px;
-  margin-top:1px;
-  color:#08111f;
-  background:var(--pcs-grad-button);
-  box-shadow:0 0 14px rgba(102,170,255,.14);
-}
-
-.pcs-check strong{
-  color:#fff;
-  font-weight:900;
-}
-
-.pcs-donut-zone{
-  min-height:250px;
-  display:flex;
-  align-items:flex-start;
-  justify-content:center;
-  position:relative;
-  overflow:visible;
-  padding-top:4px;
-}
-
-.pcs-donut-wrap{
-  width:292px;
-  height:292px;
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.pcs-donut{
-  width:292px;
-  height:292px;
-  border-radius:50%;
-  position:relative;
-  transform:rotate(-8deg);
-  background:conic-gradient(#66b9ff 0deg 72deg,#8edbff 72deg 135deg,#50e5bf 135deg 192deg,#a186ff 192deg 232deg,#ff9f68 232deg 282deg,#7bc9ff 282deg 360deg);
-  box-shadow:inset 0 10px 22px rgba(255,255,255,.12),inset 0 -18px 30px rgba(0,0,0,.12),0 22px 46px rgba(7,14,28,.14);
-}
-
-.pcs-donut::before{
-  content:"";
-  position:absolute;
-  inset:56px;
-  border-radius:50%;
-  background:radial-gradient(circle at 50% 38%, rgba(31,46,75,.84), rgba(14,22,36,.88));
-  box-shadow:inset 0 2px 10px rgba(255,255,255,.04),0 0 0 8px rgba(255,255,255,.03);
-}
-
-.pcs-donut-center{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  pointer-events:none;
-  text-align:center;
-  z-index:3;
-}
-
-.pcs-donut-center-inner{
-  width:126px;
-  transform:translateY(-1px);
-}
-
-#pcs-donut-buffer{
-  font-size:20px;
-  font-weight:900;
-  color:#fff;
-  line-height:1;
-  letter-spacing:-.03em;
-  margin-bottom:4px;
-}
-
-#pcs-donut-buffer-label{
-  font-size:12px;
-  font-weight:900;
-  line-height:1.1;
-  text-transform:uppercase;
-  letter-spacing:.05em;
-  color:#f4f7ff;
-}
-
-.pcs-donut-amount{
-  position:absolute;
-  font-size:16px;
-  font-weight:900;
-  color:#fff;
-  text-shadow:0 5px 18px rgba(0,0,0,.18);
-  z-index:4;
-  letter-spacing:-.02em;
-}
-
-.pcs-afford-footer{
-  margin-top:14px;
-  font-size:13px;
-  font-weight:700;
-  color:#f2f7ff;
-  line-height:1.45;
-  padding-top:12px;
-  border-top:1px solid var(--pcs-border-08);
-}
-
-/* =========================================================
-   #9) RIGHT — 12 MONTH HOUSING TREND
-========================================================= */
-.pcs-trend-panel{
-  padding:18px 18px 16px;
-  min-height:388px;
-}
-
-.pcs-trend-title{
-  font-size:18px;
-  font-weight:900;
-  letter-spacing:.03em;
-  text-transform:uppercase;
-  color:#fff;
-  margin:0 0 4px;
-}
-
-.pcs-trend-sub{
-  font-size:13px;
-  color:var(--pcs-muted);
-  font-weight:600;
-  margin-bottom:12px;
-}
-
-.trend-toggle{
-  display:flex;
-  gap:10px;
-  margin-bottom:12px;
-}
-
-.trend-btn{
-  appearance:none;
-  border:none;
-  padding:9px 16px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  border:1px solid var(--pcs-border-08);
-  color:#f2f7ff;
-  font-size:12px;
-  font-weight:800;
-  letter-spacing:.05em;
-  text-transform:uppercase;
-  cursor:pointer;
-  box-shadow:0 6px 12px rgba(7,14,28,.08);
-}
-
-.trend-btn.active{
-  color:#08111e;
-  border-color:rgba(157,232,255,.40);
-  background:var(--pcs-grad-button);
-}
-
-#pcs-trend-chart-apex{
-  min-height:232px;
-  margin-top:2px;
-  border-radius:18px;
-  background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
-  border:1px solid var(--pcs-border-06);
-  padding:6px 8px 0;
-  overflow:hidden;
-}
-
-#pcs-trend-summary{
-  margin-top:12px;
-  font-size:14px;
-  font-weight:700;
-  color:#fff;
-  line-height:1.4;
-}
-
-/* =========================================================
-   #10) RIGHT — YOUR LIVING STRATEGY
-========================================================= */
-.pcs-ls-panel{
-  padding:18px 18px 16px;
-  min-height:298px;
-}
-
-.pcs-own-title{
-  font-size:18px;
-  font-weight:900;
-  letter-spacing:.03em;
-  text-transform:uppercase;
-  color:#fff;
-  margin:0 0 10px;
-}
-
-.pcs-ls-tabs{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:8px;
-  margin-bottom:10px;
-}
-
-.pcs-ls-tab{
-  appearance:none;
-  border:none;
-  padding:10px 8px;
-  border-radius:12px;
-  background:rgba(255,255,255,.08);
-  border:1px solid var(--pcs-border-08);
-  color:#f2f7ff;
-  font-size:12px;
-  font-weight:800;
-  letter-spacing:.05em;
-  text-transform:uppercase;
-  cursor:pointer;
-  box-shadow:0 6px 12px rgba(7,14,28,.08);
-}
-
-.pcs-ls-tab.active{
-  color:#08111e;
-  border-color:rgba(157,232,255,.40);
-  background:var(--pcs-grad-button);
-}
-
-.pcs-ls-status{
-  min-height:18px;
-  font-size:12px;
-  font-weight:900;
-  color:#d2fff3;
-  line-height:1.3;
-  letter-spacing:.04em;
-  margin-bottom:10px;
-  text-transform:uppercase;
-}
-
-.pcs-ls-chart-wrap{
-  height:220px;
-  margin-top:2px;
-  border-radius:18px;
-  background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
-  border:1px solid var(--pcs-border-06);
-  padding:8px 10px 6px;
-  overflow:hidden;
-  position:relative;
-}
-
-#pcs-ls-chart{
-  width:100% !important;
-  height:100% !important;
-  display:block;
-}
-
-.pcs-ls-stats{
-  display:grid;
-  grid-template-columns:1fr .85fr;
-  gap:12px;
-  margin-top:12px;
-}
-
-.pcs-ls-main{
-  border-radius:18px;
-  padding:14px;
-  background:var(--pcs-grad-pill);
-  border:1px solid var(--pcs-border-08);
-  box-shadow:0 8px 16px rgba(7,14,28,.10);
-}
-
-#pcs-ls-main{
-  font-size:30px;
-  line-height:1;
-  font-weight:900;
-  letter-spacing:-.03em;
-  color:#fff;
-  margin:0 0 6px;
-}
-
-#pcs-ls-sub{
-  font-size:13px;
-  line-height:1.35;
-  font-weight:700;
-  color:#f2f7ff;
-  margin:0 0 10px;
-}
-
-#pcs-ls-equity{
-  font-size:18px;
-  line-height:1.1;
-  font-weight:900;
-  color:#d2fff3;
-  margin:0 0 10px;
-}
-
-#pcs-ls-bluf{
-  font-size:13px;
-  line-height:1.45;
-  font-weight:700;
-  color:#fff;
-  margin:0;
-}
-
-.pcs-ls-side{
-  display:grid;
-  gap:10px;
-}
-
-.pcs-ls-side > div{
-  min-height:58px;
-  border-radius:16px;
-  padding:12px 14px;
-  background:var(--pcs-grad-pill);
-  border:1px solid var(--pcs-border-08);
-  box-shadow:0 8px 16px rgba(7,14,28,.10);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.pcs-ls-side span{
-  font-size:11px;
-  line-height:1.2;
-  font-weight:800;
-  color:#f2f7ff;
-  opacity:.84;
-  text-transform:uppercase;
-  letter-spacing:.08em;
-}
-
-.pcs-ls-side b{
-  font-size:18px;
-  line-height:1;
-  font-weight:900;
-  letter-spacing:-.02em;
-  color:#fff;
-}
-
-/* =========================================================
-   #11) HIDDEN LEGACY / RUNTIME TARGETS
-========================================================= */
-#pcs-quickfacts,
-#pcsc-status,
-#side-upcoming,
-#chart-current,
-#chart-upcoming,
-#rating-current,
-#rating-upcoming,
-#stars-current,
-#stars-upcoming,
-#pcs-income-chart,
-#pcs-bah-chart,
-#pcs-income-summary,
-#pcs-bah-summary,
-#pcs-own-bar-low,
-#pcs-own-bar-high,
-#pcs-own-high-tag,
-#pcs-own-chip-median,
-#pcs-own-chip-gap-low,
-#pcs-own-chip-gap-high,
-#pcs-afford-chart,
-#pcs-afford-summary,
-#pcs-pricebreak-chart,
-#pcs-pricebreak-note{
-  display:none !important;
-}
-
-.pcs-hidden-runtime{
-  display:none !important;
-}
-
-/* =========================================================
-   #12) RESPONSIVE
-========================================================= */
-@media (max-width:1220px){
-  .pts-grid{
-    grid-template-columns:1fr 1fr;
-  }
-}
-
-@media (max-width:1180px){
-  .pcs-main{
-    grid-template-columns:1fr;
-  }
-}
-
-@media (max-width:860px){
-  #pcs-snapshot-wrap{
-    padding:14px;
-    border-radius:22px;
+(function () {
+  "use strict";
+
+  /* =========================================================
+    #1) HELPERS
+  ========================================================= */
+
+  function $(id) {
+    return document.getElementById(id);
   }
 
-  .pcs-top-head .pcs-title{
-    font-size:20px;
+  function text(id, value) {
+    var el = $(id);
+    if (el) el.textContent = value;
   }
 
-  .pcs-current-grid,
-  .pcs-afford-grid,
-  .pcs-ls-stats{
-    grid-template-columns:1fr;
+  function html(id, value) {
+    var el = $(id);
+    if (el) el.innerHTML = value;
   }
 
-  .pcs-image-card{
-    min-height:300px;
+  function money(value) {
+    var n = Number(value || 0);
+    return "$" + Math.round(n).toLocaleString();
   }
 
-  .pcs-info-card{
-    min-height:auto;
-    grid-template-rows:auto auto auto auto;
+  function moneyK(value) {
+    var n = Number(value || 0);
+    if (n >= 1000000) return "$" + (n / 1000000).toFixed(1) + "M";
+    if (n >= 1000) return "$" + Math.round(n / 1000) + "K";
+    return money(n);
   }
 
-  #pcs-afford-headline{
-    font-size:24px;
+  function pct(value) {
+    var n = Number(value || 0);
+    return (n > 0 ? "+" : "") + n.toFixed(1) + "%";
   }
 
-  .pcs-donut-wrap,
-  .pcs-donut{
-    width:252px;
-    height:252px;
+  function clamp(n, min, max) {
+    return Math.max(min, Math.min(max, Number(n || 0)));
   }
 
-  .pcs-donut::before{
-    inset:48px;
+  function safeNum(value, fallback) {
+    var n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
   }
 
-  .pcs-ls-chart-wrap{
-    height:200px;
-  }
-}
-
-@media (max-width:760px){
-  .pts-grid{
-    grid-template-columns:1fr;
+  function getParam(name, fallback) {
+    var params = new URLSearchParams(window.location.search || "");
+    var value = params.get(name);
+    return value !== null && value !== "" ? value : fallback;
   }
 
-  .pts-card{
-    min-height:auto;
+  function normalizeRank(raw) {
+    return String(raw || "E7").toUpperCase().replace("-", "");
   }
 
-  .pts-top{
-    grid-template-columns:58px 1fr;
-    gap:12px;
+  function prettyRank(raw) {
+    var r = normalizeRank(raw);
+    return r.replace(/^([EO])(\d+)$/, "$1-$2");
   }
 
-  .pts-icon{
-    width:52px;
-    height:52px;
-    flex-basis:52px;
+  function normalizeBaseKey(raw) {
+    return String(raw || "Lackland")
+      .replace(/\+/g, " ")
+      .replace(/\s+AFB$/i, "")
+      .replace(/\s+SFB$/i, "")
+      .replace(/\s+/g, "-")
+      .trim();
   }
 
-  .pts-value,
-  .pts-power-score{
-    font-size:24px;
+  function baseDisplayName(raw) {
+    var s = String(raw || "Lackland AFB").replace(/\+/g, " ").trim();
+    if (!s) return "Lackland AFB";
+    return s;
   }
 
-  .pts-stars{
-    font-size:20px;
+  function getByPath(obj, paths, fallback) {
+    if (!obj) return fallback;
+
+    for (var i = 0; i < paths.length; i++) {
+      var path = paths[i];
+      var parts = path.split(".");
+      var cur = obj;
+
+      for (var j = 0; j < parts.length; j++) {
+        if (cur && Object.prototype.hasOwnProperty.call(cur, parts[j])) {
+          cur = cur[parts[j]];
+        } else {
+          cur = undefined;
+          break;
+        }
+      }
+
+      if (cur !== undefined && cur !== null && cur !== "") {
+        return cur;
+      }
+    }
+
+    return fallback;
   }
-}
+
+  function setImage(id, src, alt) {
+    var img = $(id);
+    if (!img) return;
+
+    if (src) {
+      img.src = src;
+      img.alt = alt || "PCS location image";
+    } else {
+      img.removeAttribute("src");
+      img.alt = alt || "PCS location image";
+    }
+  }
+
+  /* =========================================================
+    #2) INPUT STATE FROM URL
+  ========================================================= */
+
+  var STATE = {
+    type: getParam("type", "ad"),
+    rank: normalizeRank(getParam("rank", "E7")),
+    yos: safeNum(getParam("yos", "16"), 16),
+    family: safeNum(getParam("family", "4"), 4),
+
+    currentBase: baseDisplayName(
+      getParam("curBase", sessionStorage.getItem("pcs_current_base") || "Fort-Sam-Houston AFB")
+    ),
+
+    newBase: baseDisplayName(
+      getParam("newBase", getParam("base", sessionStorage.getItem("pcs_new_base") || "Lackland AFB"))
+    ),
+
+    currentCityKey: normalizeBaseKey(
+      getParam("curCityKey", getParam("curFileKey", sessionStorage.getItem("pcs_current_cityKey") || "Fort-Sam-Houston"))
+    ),
+
+    newCityKey: normalizeBaseKey(
+      getParam("newCityKey", getParam("cityKey", getParam("newFileKey", sessionStorage.getItem("pcs_new_cityKey") || "Lackland")))
+    ),
+
+    currentZip: getParam("curZip", sessionStorage.getItem("pcs_current_zip") || "78234"),
+    newZip: getParam("newZip", sessionStorage.getItem("pcs_new_zip") || "78236"),
+
+    bedroom: 3
+  };
+
+  /* =========================================================
+    #3) FALLBACK DATA
+  ========================================================= */
+
+  var FALLBACK_CITY = {
+    city: "San Antonio",
+    place: "San Antonio",
+    state: "TX",
+    market_label: "Military Metropolis with Affordable Expansion",
+    image_url: "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
+
+    population: {
+      city: 1500000,
+      metro: 2600000
+    },
+
+    income: {
+      median_household_income: 69906
+    },
+
+    housing: {
+      market: {
+        median_home_price: 288700,
+        yoy_change: -3.2,
+        days_on_market: 83,
+        inventory_signal: "Buyer-Friendly"
+      }
+    },
+
+    market_bluf: {
+      headline: "Buyer-Leaning Market",
+      summary: "Softening prices and extended inventory create strong opportunity for negotiation below asking."
+    },
+
+    financial_brief: {
+      headline: "Strategic Buy Window",
+      summary: "Favorable pricing and elevated inventory create opportunity for below-market acquisition."
+    },
+
+    scorecard: {
+      traffic: "Moderate",
+      employment: "Stable"
+    },
+
+    lifestyle: [
+      "Hot summers, mild winters, low snow risk",
+      "Strong military presence and family-heavy suburbs",
+      "Moderate congestion with typical 20–35 min commute"
+    ],
+
+    by_bedroom: {
+      "2": {
+        home_price: 255000,
+        mortgage_monthly: 1650,
+        rent: 1550,
+        utilities: 210
+      },
+      "3": {
+        home_price: 302500,
+        mortgage_monthly: 1912,
+        rent: 1850,
+        utilities: 235
+      },
+      "4": {
+        home_price: 365000,
+        mortgage_monthly: 2325,
+        rent: 2250,
+        utilities: 275
+      },
+      "5": {
+        home_price: 430000,
+        mortgage_monthly: 2740,
+        rent: 2650,
+        utilities: 325
+      }
+    }
+  };
+
+  var FALLBACK_CURRENT_CITY = {
+    city: "Previous Duty Station",
+    place: "Previous Duty Station",
+    state: "",
+    market_label: "Previous duty station comparison baseline",
+    image_url: "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
+
+    population: {
+      city: 1000000,
+      metro: 1500000
+    },
+
+    income: {
+      median_household_income: 65000
+    },
+
+    housing: {
+      market: {
+        median_home_price: 315000,
+        yoy_change: 1.5,
+        days_on_market: 55,
+        inventory_signal: "Balanced"
+      }
+    },
+
+    market_bluf: {
+      headline: "Comparison Market",
+      summary: "Used as a baseline to compare BAH, home prices, and housing pressure."
+    },
+
+    financial_brief: {
+      headline: "Previous Market Baseline",
+      summary: "This location is used to compare PCS affordability against the new duty station."
+    },
+
+    scorecard: {
+      traffic: "Moderate",
+      employment: "Stable"
+    },
+
+    lifestyle: [
+      "Previous location comparison baseline",
+      "Used to compare housing allowance and market pressure",
+      "Actual city data loads when a matching JSON file is available"
+    ],
+
+    by_bedroom: {
+      "2": {
+        home_price: 280000,
+        mortgage_monthly: 1800,
+        rent: 1700,
+        utilities: 220
+      },
+      "3": {
+        home_price: 330000,
+        mortgage_monthly: 2100,
+        rent: 2000,
+        utilities: 250
+      },
+      "4": {
+        home_price: 390000,
+        mortgage_monthly: 2500,
+        rent: 2400,
+        utilities: 290
+      },
+      "5": {
+        home_price: 455000,
+        mortgage_monthly: 2920,
+        rent: 2800,
+        utilities: 340
+      }
+    }
+  };
+
+  /* =========================================================
+    #4) PAY TABLE FALLBACK
+  ========================================================= */
+
+  var BASE_PAY = {
+    E1: 2017,
+    E2: 2261,
+    E3: 2378,
+    E4: 2633,
+    E5: 3214,
+    E6: 3987,
+    E7: 5621,
+    E8: 6440,
+    E9: 7360,
+    O1: 3826,
+    O2: 4419,
+    O3: 5127,
+    O4: 6064,
+    O5: 7030,
+    O6: 8430,
+    O7: 10700,
+    O8: 12800
+  };
+
+  var BAS = 466;
+
+  var BAH_BY_KEY = {
+    Andrews: 3096,
+    Barksdale: 1599,
+    Beale: 2550,
+    Cannon: 1320,
+    Charleston: 2445,
+    "Davis-Monthan": 1869,
+    Dover: 2142,
+    Dyess: 1551,
+    Eglin: 2424,
+    Elmendorf: 2718,
+    "F.E-Warren": 1785,
+    Fairchild: 2070,
+    "Fort-Sam-Houston": 2172,
+    Holloman: 1410,
+    Hurlburt: 2424,
+    Keesler: 1815,
+    Kirtland: 1989,
+    Lackland: 2172,
+    Langley: 2355,
+    Laughlin: 1530,
+    "Little-Rock": 1665,
+    Luke: 2442,
+    MacDill: 2748,
+    Malmstrom: 1590,
+    Maxwell: 1665,
+    McConnell: 1659,
+    McGuire: 2862,
+    Minot: 1620,
+    Moody: 1560,
+    "Mountain-Home": 1740,
+    Nellis: 2391,
+    Offutt: 1890,
+    Peterson: 2520,
+    Randolph: 2172,
+    Robins: 1650,
+    Scott: 1860,
+    "Seymour-Johnson": 1710,
+    Shaw: 1590,
+    Sheppard: 1425,
+    Tinker: 1704,
+    Travis: 3270,
+    Tyndall: 2160,
+    Whiteman: 1425,
+    "Wright-Patterson": 1740
+  };
+
+  function getBasePay(rank) {
+    return BASE_PAY[normalizeRank(rank)] || BASE_PAY.E7;
+  }
+
+  function getBah(cityKey) {
+    return BAH_BY_KEY[cityKey] || BAH_BY_KEY[normalizeBaseKey(cityKey)] || 2172;
+  }
+
+  /* =========================================================
+    #5) DATA LOADING
+  ========================================================= */
+
+  async function fetchJsonSafe(url) {
+    try {
+      var res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function loadCityData(cityKey, fallback) {
+    var key = normalizeBaseKey(cityKey);
+
+    var urls = [
+      "./cities/" + encodeURIComponent(key) + ".json",
+      "/cities/" + encodeURIComponent(key) + ".json",
+      "/netlify/functions/cities/" + encodeURIComponent(key) + ".json",
+      "/.netlify/functions/cities/" + encodeURIComponent(key) + ".json",
+      "/api/cities/" + encodeURIComponent(key),
+      "/api/city?cityKey=" + encodeURIComponent(key)
+    ];
+
+    for (var i = 0; i < urls.length; i++) {
+      var data = await fetchJsonSafe(urls[i]);
+      if (data) return data;
+    }
+
+    return fallback;
+  }
+
+  /* =========================================================
+    #6) DATA EXTRACTION
+  ========================================================= */
+
+  function cityLabel(data) {
+    var city = getByPath(data, ["city", "place", "name"], "San Antonio");
+    var state = getByPath(data, ["state_code", "state"], "TX");
+
+    if (String(city).toUpperCase().indexOf(String(state).toUpperCase()) > -1) {
+      return String(city);
+    }
+
+    return String(city) + (state ? ", " + String(state).toUpperCase() : "");
+  }
+
+  function cityImage(data) {
+    return getByPath(data, ["image_url", "base_profile.base_map_image", "snapshot.image_url"], FALLBACK_CITY.image_url);
+  }
+
+  function medianHome(data) {
+    return safeNum(
+      getByPath(data, [
+        "housing.market.median_home_price",
+        "market_metrics.median_home_price",
+        "avg_home_value",
+        "average_home_value",
+        "avgHome",
+        "city_avg_home"
+      ], 288700),
+      288700
+    );
+  }
+
+  function yoyChange(data) {
+    return safeNum(
+      getByPath(data, [
+        "housing.market.yoy_change",
+        "market_metrics.yoy_change",
+        "snapshot.yoy_change",
+        "scorecard.home_price_yoy"
+      ], -3.2),
+      -3.2
+    );
+  }
+
+  function daysOnMarket(data) {
+    return safeNum(
+      getByPath(data, [
+        "housing.market.days_on_market",
+        "market_metrics.days_on_market",
+        "market_metrics.dom",
+        "snapshot.days_on_market"
+      ], 83),
+      83
+    );
+  }
+
+  function medianIncome(data) {
+    return safeNum(
+      getByPath(data, [
+        "income.median_household_income",
+        "demographics.income.median_household_income",
+        "households.median_income",
+        "snapshot.median_income"
+      ], 69906),
+      69906
+    );
+  }
+
+  function populationCity(data) {
+    return safeNum(
+      getByPath(data, [
+        "population.city",
+        "demographics.population.city",
+        "population.total",
+        "snapshot.population"
+      ], 1500000),
+      1500000
+    );
+  }
+
+  function populationMetro(data) {
+    return safeNum(
+      getByPath(data, [
+        "population.metro",
+        "demographics.population.metro",
+        "snapshot.metro_population"
+      ], 2600000),
+      2600000
+    );
+  }
+
+  function marketSignal(data) {
+    return getByPath(data, [
+      "housing.market.inventory_signal",
+      "market_bluf.signal",
+      "scorecard.market_signal"
+    ], "Buyer-Friendly");
+  }
+
+  function trafficLevel(data) {
+    return getByPath(data, [
+      "scorecard.traffic",
+      "lifestyle.traffic",
+      "commute_intelligence.traffic"
+    ], "Moderate");
+  }
+
+  function employmentStatus(data) {
+    return getByPath(data, [
+      "scorecard.employment",
+      "labor.employment_status",
+      "snapshot.employment"
+    ], "Stable");
+  }
+
+  function marketHeadline(data) {
+    return getByPath(data, [
+      "market_bluf.headline",
+      "financial_brief.market_headline",
+      "snapshot.market_headline"
+    ], "Buyer-Leaning Market");
+  }
+
+  function marketSummary(data) {
+    return getByPath(data, [
+      "market_bluf.summary",
+      "market_bluf.bluf",
+      "financial_brief.market_summary",
+      "snapshot.market_summary"
+    ], "Softening prices and extended inventory create strong opportunity for negotiation below asking.");
+  }
+
+  function financialHeadline(data) {
+    return getByPath(data, [
+      "financial_brief.headline",
+      "financial_brief.title",
+      "market_bluf.financial_headline"
+    ], "Strategic Buy Window");
+  }
+
+  function financialSummary(data) {
+    return getByPath(data, [
+      "financial_brief.summary",
+      "financial_brief.bluf",
+      "market_bluf.financial_summary"
+    ], "Favorable pricing and elevated inventory create opportunity for below-market acquisition.");
+  }
+
+  function lifestyleList(data) {
+    var raw = getByPath(data, ["lifestyle", "military_lifestyle_fit.bullets", "snapshot.lifestyle"], null);
+
+    if (Array.isArray(raw)) return raw.slice(0, 3);
+
+    return [
+      "Military-friendly community with PCS turnover awareness",
+      "Housing choice depends heavily on commute and school priorities",
+      "Compare BAH against full housing cost, not just mortgage"
+    ];
+  }
+
+  function bedroomData(data, bedroom) {
+    var b = String(bedroom);
+    var node = getByPath(data, ["by_bedroom." + b], null);
+
+    if (!node) {
+      node = getByPath(FALLBACK_CITY, ["by_bedroom." + b], FALLBACK_CITY.by_bedroom["3"]);
+    }
+
+    var home = safeNum(
+      getByPath(node, ["home_price", "price", "average_home_price"], medianHome(data)),
+      medianHome(data)
+    );
+
+    var mortgage = safeNum(
+      getByPath(node, ["mortgage_monthly", "avg_home_mortgage_monthly", "monthly_mortgage"], home * 0.00635),
+      home * 0.00635
+    );
+
+    var rent = safeNum(
+      getByPath(node, ["rent", "rent_monthly", "average_rent"], mortgage * 0.92),
+      mortgage * 0.92
+    );
+
+    var utilities = safeNum(
+      getByPath(node, ["utilities", "utilities_monthly", "average_utilities"], 235),
+      235
+    );
+
+    var taxes = safeNum(
+      getByPath(node, ["taxes", "tax_monthly", "property_tax_monthly"], 0),
+      0
+    );
+
+    var insurance = safeNum(
+      getByPath(node, ["insurance", "insurance_monthly"], 0),
+      0
+    );
+
+    var hoa = safeNum(
+      getByPath(node, ["hoa", "hoa_monthly"], 0),
+      0
+    );
+
+    return {
+      home: home,
+      mortgage: mortgage,
+      rent: rent,
+      utilities: utilities,
+      taxes: taxes,
+      insurance: insurance,
+      hoa: hoa,
+      totalHousing: mortgage + taxes + insurance + hoa + utilities
+    };
+  }
+
+  /* =========================================================
+    #7) CHARTS
+  ========================================================= */
+
+  var trendChart = null;
+  var livingChart = null;
+  var chartCurrent = null;
+  var chartUpcoming = null;
+  var incomeChart = null;
+  var bahChart = null;
+  var affordChart = null;
+  var priceBreakChart = null;
+
+  function destroyChart(chart) {
+    try {
+      if (chart && chart.destroy) chart.destroy();
+    } catch (e) {}
+  }
+
+  function renderTrendChart(data, years) {
+    var el = $("pcs-trend-chart-apex");
+    if (!el || typeof ApexCharts === "undefined") return;
+
+    if (trendChart) {
+      try { trendChart.destroy(); } catch (e) {}
+      trendChart = null;
+    }
+
+    var base = medianHome(data);
+    var months = years === 3 ? 36 : 12;
+    var yoy = yoyChange(data);
+    var points = [];
+    var labels = [];
+
+    for (var i = months - 1; i >= 0; i--) {
+      var progress = (months - i) / months;
+      var seasonal = Math.sin(progress * Math.PI * 2) * 0.015;
+      var drift = (yoy / 100) * progress;
+      var value = base * (1 - drift + seasonal);
+      points.push(Math.round(value));
+      labels.push(i === 0 ? "Now" : "-" + i + "m");
+    }
+
+    trendChart = new ApexCharts(el, {
+      chart: {
+        type: "area",
+        height: 230,
+        toolbar: { show: false },
+        zoom: { enabled: false },
+        foreColor: "rgba(244,248,255,.72)"
+      },
+      series: [
+        {
+          name: "Median Home Price",
+          data: points
+        }
+      ],
+      xaxis: {
+        categories: labels,
+        labels: {
+          show: false
+        },
+        axisBorder: { show: false },
+        axisTicks: { show: false }
+      },
+      yaxis: {
+        labels: {
+          formatter: function (val) {
+            return moneyK(val);
+          }
+        }
+      },
+      dataLabels: { enabled: false },
+      stroke: {
+        curve: "smooth",
+        width: 3
+      },
+      fill: {
+        type: "gradient",
+        gradient: {
+          shadeIntensity: 0.4,
+          opacityFrom: 0.32,
+          opacityTo: 0.04,
+          stops: [0, 90, 100]
+        }
+      },
+      grid: {
+        borderColor: "rgba(255,255,255,.08)",
+        strokeDashArray: 4
+      },
+      tooltip: {
+        y: {
+          formatter: function (val) {
+            return money(val);
+          }
+        }
+      }
+    });
+
+    trendChart.render();
+  }
+
+  function renderSimpleCanvasChart(canvasId, labels, values) {
+    var canvas = $(canvasId);
+
+    if (!canvas || typeof Chart === "undefined") return null;
+
+    var ctx = canvas.getContext("2d");
+
+    return new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            data: values,
+            borderWidth: 1,
+            borderRadius: 12
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return money(context.raw);
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: "rgba(244,248,255,.74)" }
+          },
+          y: {
+            grid: { color: "rgba(255,255,255,.08)" },
+            ticks: {
+              color: "rgba(244,248,255,.74)",
+              callback: function (value) {
+                return moneyK(value);
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function renderDoughnut(canvasId, labels, values) {
+    var canvas = $(canvasId);
+
+    if (!canvas || typeof Chart === "undefined") return null;
+
+    var ctx = canvas.getContext("2d");
+
+    return new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            data: values,
+            borderWidth: 0,
+            cutout: "68%"
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return context.label + ": " + money(context.raw);
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /* =========================================================
+    #8) PAINT UI
+  ========================================================= */
+
+  function paintTopStrip(currentData, newData) {
+    var basePay = getBasePay(STATE.rank);
+    var newBah = getBah(STATE.newCityKey);
+    var currentBah = getBah(STATE.currentCityKey);
+    var totalIncome = basePay + newBah + BAS;
+    var bahDelta = newBah - currentBah;
+
+    text("pcs-income-main", money(totalIncome));
+    html("pcs-income-breakdown", "Base Pay: " + money(basePay) + ", BAH " + money(newBah) + ",<br />BAS " + money(BAS));
+    text("pts-income-meta", "True disposable baseline before housing");
+
+    text("pts-bah-delta", (bahDelta >= 0 ? "+" : "-") + money(Math.abs(bahDelta)));
+    text("pts-bah-copy", "Compared with your previous duty station housing allowance.");
+    text("pts-bah-meta", "vs. Previous Duty Station");
+
+    text("pts-market-signal", marketSignal(newData));
+    text("pts-market-copy", "Inventory elevated • Softer prices • Better leverage");
+    text("pts-market-meta", "Current market condition");
+
+    var bed = bedroomData(newData, STATE.bedroom);
+    var housingRatio = bed.totalHousing / Math.max(totalIncome, 1);
+    var score = clamp(5 - Math.max(0, housingRatio - 0.25) * 10, 1, 5);
+
+    text("pts-power-score", score.toFixed(1));
+    text("pts-power-stars", "★★★★★");
+    text("pts-power-copy", "Based on total income & housing market");
+    text("pts-power-meta", "Overall affordability signal");
+  }
+
+  function paintCityBrief(newData) {
+    text("pcs-city-line", cityLabel(newData) + " • Quick PCS Snapshot");
+
+    setImage("img-current", cityImage(newData), cityLabel(newData));
+
+    text("pcs-current-city", cityLabel(newData).toUpperCase());
+    text("pcs-current-tagline", "“" + getByPath(newData, ["market_label", "snapshot.market_label"], "Military Market Intelligence") + "”");
+
+    text("pcs-current-bluf-headline", marketHeadline(newData));
+    text("pcs-current-bluf-summary", marketSummary(newData));
+
+    text("pcs-cur-population-city", (populationCity(newData) / 1000000).toFixed(1) + "M");
+    text("pcs-cur-population-metro", "Metro: " + (populationMetro(newData) / 1000000).toFixed(1) + "M");
+
+    text("pcs-cur-median-income", money(medianIncome(newData)));
+    text("pcs-cur-market-trend", pct(yoyChange(newData)) + " YoY");
+    text("pcs-cur-median-home", moneyK(medianHome(newData)));
+    text("pcs-cur-traffic-level", trafficLevel(newData));
+    text("pcs-cur-employment-status", employmentStatus(newData));
+
+    var list = lifestyleList(newData);
+    var listHtml = "";
+
+    list.forEach(function (item) {
+      listHtml += ''
+        + '<li class="pcs-mini-item">'
+        + '<span class="pcs-mini-dot"></span>'
+        + '<span>' + String(item) + '</span>'
+        + '</li>';
+    });
+
+    html("pcs-cur-lifestyle-list", listHtml);
+
+    text("pcs-cur-financial-headline", financialHeadline(newData));
+    text("pcs-cur-financial-summary", financialSummary(newData));
+  }
+
+  function paintAffordability(newData) {
+    var bed = bedroomData(newData, STATE.bedroom);
+    var bah = getBah(STATE.newCityKey);
+    var buffer = bah - bed.totalHousing;
+    var covered = Math.round((bah / Math.max(bed.totalHousing, 1)) * 100);
+
+    text("pcs-bedroom-value", STATE.bedroom);
+
+    html(
+      "pcs-afford-headline",
+      (buffer >= 0 ? money(buffer) : "-" + money(Math.abs(buffer))) + " <span>Monthly Buffer</span>"
+    );
+
+    html(
+      "pcs-afford-subline",
+      "BAH covers <strong>" + covered + "%</strong> of a typical mortgage stack"
+    );
+
+    text("pcs-afford-home-price", money(bed.home));
+    text("pcs-afford-mortgage", money(bed.mortgage));
+    text("pcs-afford-taxes", money(bed.taxes));
+    text("pcs-afford-insurance", money(bed.insurance));
+    text("pcs-afford-hoa", money(bed.hoa));
+    text("pcs-afford-utilities", money(bed.utilities));
+
+    text("pcs-donut-buffer", (buffer >= 0 ? "+" : "-") + Math.abs(Math.round(buffer)));
+    text("pcs-donut-buffer-label", "Monthly Buffer");
+
+    text("pcs-amt-mortgage", money(bed.mortgage));
+    text("pcs-amt-taxes", money(bed.taxes));
+    text("pcs-amt-insurance", money(bed.insurance));
+    text("pcs-amt-hoa", money(bed.hoa));
+    text("pcs-amt-utilities", money(bed.utilities));
+
+    text(
+      "pcs-afford-footer",
+      buffer >= 0
+        ? "BAH is currently covering the estimated housing stack for this bedroom profile."
+        : "BAH does not fully cover the estimated housing stack for this bedroom profile."
+    );
+
+    var donut = $("pcs-afford-donut");
+    if (donut) {
+      var total = Math.max(bed.totalHousing, 1);
+      var mortgageDeg = Math.round((bed.mortgage / total) * 360);
+      var taxDeg = Math.round(((bed.mortgage + bed.taxes) / total) * 360);
+      var insDeg = Math.round(((bed.mortgage + bed.taxes + bed.insurance) / total) * 360);
+      var hoaDeg = Math.round(((bed.mortgage + bed.taxes + bed.insurance + bed.hoa) / total) * 360);
+
+      donut.style.background =
+        "conic-gradient("
+        + "rgba(157,232,255,.95) 0deg " + mortgageDeg + "deg,"
+        + "rgba(80,229,191,.92) " + mortgageDeg + "deg " + taxDeg + "deg,"
+        + "rgba(255,181,107,.92) " + taxDeg + "deg " + insDeg + "deg,"
+        + "rgba(142,136,255,.92) " + insDeg + "deg " + hoaDeg + "deg,"
+        + "rgba(255,255,255,.35) " + hoaDeg + "deg 360deg"
+        + ")";
+    }
+  }
+
+  function paintLivingStrategy(newData) {
+    var bed = bedroomData(newData, STATE.bedroom);
+    var income = getBasePay(STATE.rank) + getBah(STATE.newCityKey) + BAS;
+    var residualBuy = income - bed.totalHousing;
+    var residualRent = income - bed.rent - bed.utilities;
+
+    var buyWins = residualBuy >= residualRent - 150;
+
+    text("pcs-ls-status", buyWins ? "WEALTH BUILDING • HIGHER COST" : "RENT FLEXIBILITY • LOWER RISK");
+    text("pcs-ls-main", buyWins ? "Buy" : "Rent");
+    text(
+      "pcs-ls-sub",
+      buyWins
+        ? "Buying can work if you want stability and can tolerate ownership costs."
+        : "Renting may protect flexibility if the PCS timeline is short."
+    );
+    text("pcs-ls-equity", money(Math.max(0, bed.home * 0.035)) + " estimated first-year equity movement");
+    text("pcs-ls-bluf", buyWins ? "Buy is viable with disciplined price control." : "Rent is safer unless the purchase price is below market.");
+    text("pcs-ls-annual", money(Math.abs((bed.totalHousing - bed.rent) * 12)));
+    text("pcs-ls-vs", "Buy vs Rent Annual Cost Gap");
+    text("pcs-ls-gap", money(Math.abs(residualBuy - residualRent)) + " monthly residual difference");
+
+    destroyChart(livingChart);
+    livingChart = renderDoughnut("pcs-ls-chart", ["Buy Stack", "Rent Stack", "Residual"], [
+      bed.totalHousing,
+      bed.rent + bed.utilities,
+      Math.max(0, residualBuy)
+    ]);
+  }
+
+  function paintComparison(currentData, newData) {
+    var currentBah = getBah(STATE.currentCityKey);
+    var newBah = getBah(STATE.newCityKey);
+    var currentHome = medianHome(currentData);
+    var newHome = medianHome(newData);
+
+    setImage("img-upcoming", cityImage(newData), cityLabel(newData));
+
+    text("side-current", STATE.currentBase);
+    text("side-upcoming", STATE.newBase);
+    text("loc-upcoming", cityLabel(newData));
+
+    text("bah-upcoming", money(newBah));
+    text("price-upcoming", moneyK(newHome));
+    text("yoy-upcoming", pct(yoyChange(newData)));
+    text("dom-upcoming", String(daysOnMarket(newData)));
+
+    text(
+      "pcsc-status",
+      newBah >= currentBah
+        ? "BAH improves by " + money(newBah - currentBah) + " per month."
+        : "BAH decreases by " + money(currentBah - newBah) + " per month."
+    );
+
+    html(
+      "facts-upcoming",
+      "<li>Median home: " + moneyK(newHome) + "</li>"
+      + "<li>Days on market: " + daysOnMarket(newData) + "</li>"
+      + "<li>Market signal: " + marketSignal(newData) + "</li>"
+    );
+
+    text("rating-current", (currentBah / Math.max(currentHome * 0.00635, 1) * 5).toFixed(1));
+    text("rating-upcoming", (newBah / Math.max(newHome * 0.00635, 1) * 5).toFixed(1));
+    text("stars-current", "★★★★★");
+    text("stars-upcoming", "★★★★★");
+
+    destroyChart(chartCurrent);
+    destroyChart(chartUpcoming);
+
+    chartCurrent = renderSimpleCanvasChart("chart-current", ["BAH", "Home"], [currentBah, currentHome / 100]);
+    chartUpcoming = renderSimpleCanvasChart("chart-upcoming", ["BAH", "Home"], [newBah, newHome / 100]);
+  }
+
+  function paintQuickFacts(newData) {
+    text("pcs-qf-poverty", getByPath(newData, ["income.poverty_rate", "demographics.poverty_rate"], "14.4%"));
+    text("pcs-qf-home", moneyK(medianHome(newData)));
+    text("pcs-qf-dom", String(daysOnMarket(newData)));
+
+    var basePay = getBasePay(STATE.rank);
+    var bah = getBah(STATE.newCityKey);
+
+    destroyChart(incomeChart);
+    destroyChart(bahChart);
+
+    incomeChart = renderSimpleCanvasChart("pcs-income-chart", ["Base Pay", "BAH", "BAS"], [basePay, bah, BAS]);
+    bahChart = renderSimpleCanvasChart("pcs-bah-chart", ["Current", "New"], [getBah(STATE.currentCityKey), bah]);
+
+    text("pcs-income-summary", "Total monthly compensation estimate: " + money(basePay + bah + BAS));
+    text("pcs-bah-summary", "New duty station BAH estimate: " + money(bah));
+  }
+
+  function paintOwnershipRange(newData) {
+    var bed = bedroomData(newData, STATE.bedroom);
+    var low = bed.home * 0.85;
+    var high = bed.home * 1.15;
+    var median = medianHome(newData);
+
+    text("pcs-own-gap-note", "Typical entry range around " + cityLabel(newData));
+    text("pcs-own-right-text", "Comparing low vs high market entry");
+
+    text("pcs-own-y1", "$450K");
+    text("pcs-own-y2", "$350K");
+    text("pcs-own-y3", "$250K");
+    text("pcs-own-y4", "$150K");
+
+    text("pcs-own-low-value", moneyK(low));
+    text("pcs-own-high-value", moneyK(high));
+    text("pcs-own-high-tag", "Upper Range");
+    text("pcs-own-chip-median", "Median: " + moneyK(median));
+    text("pcs-own-chip-gap-low", "Low: " + moneyK(low));
+    text("pcs-own-chip-gap-high", "High: " + moneyK(high));
+
+    var lowBar = $("pcs-own-bar-low");
+    var highBar = $("pcs-own-bar-high");
+
+    if (lowBar) lowBar.style.height = clamp((low / 450000) * 100, 8, 100) + "%";
+    if (highBar) highBar.style.height = clamp((high / 450000) * 100, 8, 100) + "%";
+
+    destroyChart(affordChart);
+    destroyChart(priceBreakChart);
+
+    affordChart = renderDoughnut("pcs-afford-chart", ["Mortgage", "Utilities", "Buffer"], [
+      bed.mortgage,
+      bed.utilities,
+      Math.max(0, getBah(STATE.newCityKey) - bed.totalHousing)
+    ]);
+
+    priceBreakChart = renderSimpleCanvasChart("pcs-pricebreak-chart", ["Low", "Median", "High"], [low, median, high]);
+
+    text("pcs-afford-summary", "Affordability is based on BAH compared against mortgage, utilities, taxes, insurance, and HOA.");
+    text("pcs-pricebreak-note", "Price range is estimated from the selected bedroom profile and local market baseline.");
+  }
+
+  function paintLegend(newData) {
+    var bed = bedroomData(newData, STATE.bedroom);
+
+    text("pcs-leg-mortgage", money(bed.mortgage));
+    text("pcs-leg-taxes", money(bed.taxes));
+    text("pcs-leg-insurance", money(bed.insurance));
+    text("pcs-leg-hoa", money(bed.hoa));
+    text("pcs-leg-utilities", money(bed.utilities));
+  }
+
+  function paintAll(currentData, newData) {
+    paintTopStrip(currentData, newData);
+    paintCityBrief(newData);
+    paintAffordability(newData);
+    paintLivingStrategy(newData);
+    paintComparison(currentData, newData);
+    paintQuickFacts(newData);
+    paintOwnershipRange(newData);
+    paintLegend(newData);
+    renderTrendChart(newData, 1);
+  }
+
+  /* =========================================================
+    #9) EVENTS
+  ========================================================= */
+
+  function wireEvents(currentData, newData) {
+    var up = $("pcs-bedroom-up");
+    var down = $("pcs-bedroom-down");
+
+    if (up) {
+      up.addEventListener("click", function () {
+        STATE.bedroom = clamp(STATE.bedroom + 1, 2, 5);
+        paintAll(currentData, newData);
+      });
+    }
+
+    if (down) {
+      down.addEventListener("click", function () {
+        STATE.bedroom = clamp(STATE.bedroom - 1, 2, 5);
+        paintAll(currentData, newData);
+      });
+    }
+
+    var btn1 = $("btn-1yr");
+    var btn3 = $("btn-3yr");
+
+    if (btn1) {
+      btn1.addEventListener("click", function () {
+        btn1.classList.add("active");
+        if (btn3) btn3.classList.remove("active");
+        renderTrendChart(newData, 1);
+      });
+    }
+
+    if (btn3) {
+      btn3.addEventListener("click", function () {
+        btn3.classList.add("active");
+        if (btn1) btn1.classList.remove("active");
+        renderTrendChart(newData, 3);
+      });
+    }
+
+    var tabs = document.querySelectorAll(".pcs-ls-tab");
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        tabs.forEach(function (t) {
+          t.classList.remove("active");
+        });
+
+        tab.classList.add("active");
+
+        var mode = tab.getAttribute("data-mode") || "buy";
+        var bed = bedroomData(newData, STATE.bedroom);
+
+        if (mode === "rent") {
+          text("pcs-ls-main", "Rent");
+          text("pcs-ls-sub", "Renting protects flexibility and lowers maintenance exposure.");
+          text("pcs-ls-bluf", "Rent is the safer short-PCS strategy.");
+          text("pcs-ls-status", "FLEXIBILITY • LOWER COMMITMENT");
+          text("pcs-ls-annual", money((bed.rent + bed.utilities) * 12));
+        } else if (mode === "base") {
+          text("pcs-ls-main", "Base Housing");
+          text("pcs-ls-sub", "Base housing can simplify commute and reduce market exposure.");
+          text("pcs-ls-bluf", "Base housing is best when certainty beats wealth building.");
+          text("pcs-ls-status", "STABILITY • COMMUTE CONTROL");
+          text("pcs-ls-annual", money(getBah(STATE.newCityKey) * 12));
+        } else {
+          paintLivingStrategy(newData);
+        }
+      });
+    });
+  }
+
+  /* =========================================================
+    #10) BOOT
+  ========================================================= */
+
+  async function boot() {
+    try {
+      var currentData = await loadCityData(STATE.currentCityKey, FALLBACK_CURRENT_CITY);
+      var newData = await loadCityData(STATE.newCityKey, FALLBACK_CITY);
+
+      paintAll(currentData, newData);
+      wireEvents(currentData, newData);
+
+      window.PCS_SNAPSHOT_STATE = {
+        input: STATE,
+        currentData: currentData,
+        newData: newData
+      };
+
+      console.log("PCS Snapshot loaded:", window.PCS_SNAPSHOT_STATE);
+    } catch (err) {
+      console.error("PCS Snapshot failed to load:", err);
+
+      paintAll(FALLBACK_CURRENT_CITY, FALLBACK_CITY);
+      wireEvents(FALLBACK_CURRENT_CITY, FALLBACK_CITY);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
