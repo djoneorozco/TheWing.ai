@@ -1,5 +1,5 @@
 /* =========================================================
-  PCS SNAPSHOT v5.1.1
+  PCS SNAPSHOT v5.1.2
   FILE: snapshot.js
 
   FIX:
@@ -8,6 +8,8 @@
   - Reads URL params from the Webflow iframe handoff.
   - Loads PCS Snapshot safely.
   - Keeps existing HTML/CSS IDs unchanged.
+  - UPDATED: City image now prioritizes JSON image_url first.
+  - UPDATED: San Antonio image is now the fallback instead of black PCSU image.
 ========================================================= */
 
 (function () {
@@ -161,12 +163,15 @@
     #3) FALLBACK DATA
   ========================================================= */
 
+  var SAN_ANTONIO_FALLBACK_IMAGE = "https://cdn.prod.website-files.com/69b6b526f23748df9f189b16/69c0dc6d478fad1e706ff1f4_dc56ce56878bed382d61aab987ab76eb_San_Antonio.png";
+
   var FALLBACK_CITY = {
     city: "San Antonio",
     place: "San Antonio",
     state: "TX",
     market_label: "Military Metropolis with Affordable Expansion",
-    image_url: "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
+    image_url: SAN_ANTONIO_FALLBACK_IMAGE,
+    base_image_url: "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f75f2d5218031764a79775_Lackland.png",
 
     population: {
       city: 1500000,
@@ -240,7 +245,7 @@
     place: "Previous Duty Station",
     state: "",
     market_label: "Previous duty station comparison baseline",
-    image_url: "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
+    image_url: SAN_ANTONIO_FALLBACK_IMAGE,
 
     population: {
       city: 1000000,
@@ -429,6 +434,16 @@
   ========================================================= */
 
   function cityLabel(data) {
+    var placeDetail = getByPath(data, ["place_detail"], "");
+    if (placeDetail) return String(placeDetail);
+
+    var submarket = getByPath(data, ["submarket"], "");
+    var stateCode = getByPath(data, ["state_code"], "");
+
+    if (submarket && stateCode) {
+      return String(submarket) + ", " + String(stateCode).toUpperCase();
+    }
+
     var city = getByPath(data, ["city", "place", "name"], "San Antonio");
     var state = getByPath(data, ["state_code", "state"], "TX");
 
@@ -440,14 +455,38 @@
   }
 
   function cityImage(data) {
-    return getByPath(data, ["image_url", "base_profile.base_map_image", "snapshot.image_url"], FALLBACK_CITY.image_url);
+    var img = getByPath(data, [
+      "image_url",
+      "snapshot.image_url"
+    ], "");
+
+    if (img && typeof img === "string") {
+      return img;
+    }
+
+    var baseImg = getByPath(data, [
+      "base_image_url",
+      "base_profile.base_map_image.url"
+    ], "");
+
+    if (baseImg && typeof baseImg === "string") {
+      return baseImg;
+    }
+
+    return SAN_ANTONIO_FALLBACK_IMAGE;
   }
 
   function medianHome(data) {
     return safeNum(
       getByPath(data, [
         "housing.market.median_home_price",
+        "housing.market.median_sale_price_current",
         "market_metrics.median_home_price",
+        "market_metrics.median_sold_price",
+        "market_metrics.median_sale_price",
+        "metrics.median_sold_price",
+        "metrics.median_sale_price",
+        "snapshot.median_home_price",
         "avg_home_value",
         "average_home_value",
         "avgHome",
@@ -461,8 +500,11 @@
     return safeNum(
       getByPath(data, [
         "housing.market.yoy_change",
+        "housing.market.zillow_one_year_change_percent",
         "market_metrics.yoy_change",
+        "market_metrics.zillow_one_year_change_percent",
         "snapshot.yoy_change",
+        "snapshot.market_trend_yoy",
         "scorecard.home_price_yoy"
       ], -3.2),
       -3.2
@@ -473,8 +515,10 @@
     return safeNum(
       getByPath(data, [
         "housing.market.days_on_market",
+        "housing.market.average_days_on_market",
         "market_metrics.days_on_market",
         "market_metrics.dom",
+        "metrics.days_on_market",
         "snapshot.days_on_market"
       ], 83),
       83
@@ -487,7 +531,8 @@
         "income.median_household_income",
         "demographics.income.median_household_income",
         "households.median_income",
-        "snapshot.median_income"
+        "snapshot.median_income",
+        "snapshot.median_household_income"
       ], 69906),
       69906
     );
@@ -497,9 +542,11 @@
     return safeNum(
       getByPath(data, [
         "population.city",
+        "population.estimate",
         "demographics.population.city",
         "population.total",
-        "snapshot.population"
+        "snapshot.population",
+        "snapshot.population_city"
       ], 1500000),
       1500000
     );
@@ -510,7 +557,8 @@
       getByPath(data, [
         "population.metro",
         "demographics.population.metro",
-        "snapshot.metro_population"
+        "snapshot.metro_population",
+        "snapshot.population_metro"
       ], 2600000),
       2600000
     );
@@ -520,6 +568,7 @@
     return getByPath(data, [
       "housing.market.inventory_signal",
       "market_bluf.signal",
+      "market_bluf.status",
       "scorecard.market_signal"
     ], "Buyer-Friendly");
   }
@@ -527,6 +576,7 @@
   function trafficLevel(data) {
     return getByPath(data, [
       "scorecard.traffic",
+      "snapshot.traffic_level",
       "lifestyle.traffic",
       "commute_intelligence.traffic"
     ], "Moderate");
@@ -535,6 +585,7 @@
   function employmentStatus(data) {
     return getByPath(data, [
       "scorecard.employment",
+      "snapshot.employment_status",
       "labor.employment_status",
       "snapshot.employment"
     ], "Stable");
@@ -543,6 +594,7 @@
   function marketHeadline(data) {
     return getByPath(data, [
       "market_bluf.headline",
+      "market_bluf.bluf_headline",
       "financial_brief.market_headline",
       "snapshot.market_headline"
     ], "Buyer-Leaning Market");
@@ -551,6 +603,7 @@
   function marketSummary(data) {
     return getByPath(data, [
       "market_bluf.summary",
+      "market_bluf.bluf_summary",
       "market_bluf.bluf",
       "financial_brief.market_summary",
       "snapshot.market_summary"
@@ -561,6 +614,7 @@
     return getByPath(data, [
       "financial_brief.headline",
       "financial_brief.title",
+      "financial_brief.bah_vs_buy_position",
       "market_bluf.financial_headline"
     ], "Strategic Buy Window");
   }
@@ -568,13 +622,14 @@
   function financialSummary(data) {
     return getByPath(data, [
       "financial_brief.summary",
+      "financial_brief.affordability_summary",
       "financial_brief.bluf",
       "market_bluf.financial_summary"
     ], "Favorable pricing and elevated inventory create opportunity for below-market acquisition.");
   }
 
   function lifestyleList(data) {
-    var raw = getByPath(data, ["lifestyle", "military_lifestyle_fit.bullets", "snapshot.lifestyle"], null);
+    var raw = getByPath(data, ["lifestyle", "military_lifestyle_fit.bullets", "summary_points", "snapshot.lifestyle"], null);
 
     if (Array.isArray(raw)) return raw.slice(0, 3);
 
@@ -585,6 +640,23 @@
     ];
   }
 
+  function avgFromRange(value, fallback) {
+    if (typeof value === "number") return value;
+
+    if (value && typeof value === "object") {
+      if (Number.isFinite(Number(value.avg))) return Number(value.avg);
+
+      var low = Number(value.low);
+      var high = Number(value.high);
+
+      if (Number.isFinite(low) && Number.isFinite(high)) {
+        return (low + high) / 2;
+      }
+    }
+
+    return fallback;
+  }
+
   function bedroomData(data, bedroom) {
     var b = String(bedroom);
     var node = getByPath(data, ["by_bedroom." + b], null);
@@ -593,25 +665,17 @@
       node = getByPath(FALLBACK_CITY, ["by_bedroom." + b], FALLBACK_CITY.by_bedroom["3"]);
     }
 
-    var home = safeNum(
-      getByPath(node, ["home_price", "price", "average_home_price"], medianHome(data)),
-      medianHome(data)
-    );
+    var homeRaw = getByPath(node, ["home_price", "price", "average_home_price"], medianHome(data));
+    var home = safeNum(avgFromRange(homeRaw, medianHome(data)), medianHome(data));
 
-    var mortgage = safeNum(
-      getByPath(node, ["mortgage_monthly", "avg_home_mortgage_monthly", "monthly_mortgage"], home * 0.00635),
-      home * 0.00635
-    );
+    var mortgageRaw = getByPath(node, ["mortgage_monthly", "avg_home_mortgage_monthly", "monthly_mortgage"], home * 0.00635);
+    var mortgage = safeNum(avgFromRange(mortgageRaw, home * 0.00635), home * 0.00635);
 
-    var rent = safeNum(
-      getByPath(node, ["rent", "rent_monthly", "average_rent"], mortgage * 0.92),
-      mortgage * 0.92
-    );
+    var rentRaw = getByPath(node, ["rent", "rent_monthly", "average_rent"], mortgage * 0.92);
+    var rent = safeNum(avgFromRange(rentRaw, mortgage * 0.92), mortgage * 0.92);
 
-    var utilities = safeNum(
-      getByPath(node, ["utilities", "utilities_monthly", "average_utilities"], 235),
-      235
-    );
+    var utilitiesRaw = getByPath(node, ["utilities.total", "utilities", "utilities_monthly", "average_utilities"], 235);
+    var utilities = safeNum(avgFromRange(utilitiesRaw, 235), 235);
 
     var taxes = safeNum(
       getByPath(node, ["taxes", "tax_monthly", "property_tax_monthly"], 0),
@@ -624,7 +688,7 @@
     );
 
     var hoa = safeNum(
-      getByPath(node, ["hoa", "hoa_monthly"], 0),
+      getByPath(node, ["hoa", "hoa_monthly"], getByPath(data, ["hoa_monthly", "ownership_costs.hoa_monthly_default", "costs.hoa_monthly_default"], 0)),
       0
     );
 
@@ -870,7 +934,7 @@
     setImage("img-current", cityImage(newData), cityLabel(newData));
 
     text("pcs-current-city", cityLabel(newData).toUpperCase());
-    text("pcs-current-tagline", "“" + getByPath(newData, ["market_label", "snapshot.market_label"], "Military Market Intelligence") + "”");
+    text("pcs-current-tagline", "“" + getByPath(newData, ["market_label", "base_profile.market_label", "snapshot.market_label"], "Military Market Intelligence") + "”");
 
     text("pcs-current-bluf-headline", marketHeadline(newData));
     text("pcs-current-bluf-summary", marketSummary(newData));
@@ -888,11 +952,11 @@
     var listHtml = "";
 
     list.forEach(function (item) {
-      listHtml += ''
+      listHtml += ""
         + '<li class="pcs-mini-item">'
         + '<span class="pcs-mini-dot"></span>'
-        + '<span>' + String(item) + '</span>'
-        + '</li>';
+        + "<span>" + String(item) + "</span>"
+        + "</li>";
     });
 
     html("pcs-cur-lifestyle-list", listHtml);
@@ -971,12 +1035,14 @@
 
     text("pcs-ls-status", buyWins ? "WEALTH BUILDING • HIGHER COST" : "RENT FLEXIBILITY • LOWER RISK");
     text("pcs-ls-main", buyWins ? "Buy" : "Rent");
+
     text(
       "pcs-ls-sub",
       buyWins
         ? "Buying can work if you want stability and can tolerate ownership costs."
         : "Renting may protect flexibility if the PCS timeline is short."
     );
+
     text("pcs-ls-equity", money(Math.max(0, bed.home * 0.035)) + " estimated first-year equity movement");
     text("pcs-ls-bluf", buyWins ? "Buy is viable with disciplined price control." : "Rent is safer unless the purchase price is below market.");
     text("pcs-ls-annual", money(Math.abs((bed.totalHousing - bed.rent) * 12)));
@@ -1035,7 +1101,7 @@
   }
 
   function paintQuickFacts(newData) {
-    text("pcs-qf-poverty", getByPath(newData, ["income.poverty_rate", "demographics.poverty_rate"], "14.4%"));
+    text("pcs-qf-poverty", getByPath(newData, ["income.poverty_rate_percent", "income.poverty_rate", "demographics.poverty_rate"], "14.4%"));
     text("pcs-qf-home", moneyK(medianHome(newData)));
     text("pcs-qf-dom", String(daysOnMarket(newData)));
 
