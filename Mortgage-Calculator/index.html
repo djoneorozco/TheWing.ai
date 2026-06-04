@@ -4,7 +4,17 @@
   <!-- =========================================================
     PCSUNITED • LIGHTWEIGHT FAD / MORTGAGE HEALTH DASHBOARD
     index.html
-    v1.0.0
+    v1.1.0 • STREAMLINED HEALTH-FIRST LAYOUT
+
+    UPDATE
+    - Moved Lightweight Financial Health ring into top-right hero card
+    - Removed bottom Lightweight Financial Health section
+    - Moved health comment panel into About section
+    - Updated four primary metric panels:
+      1) Total Income
+      2) Total Monthly Obligations
+      3) All-In Mortgage
+      4) Residual Income
   ========================================================== -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -47,7 +57,7 @@
       <main class="app">
 
         <!-- =====================================================
-          TOPBAR
+          TOPBAR / HEALTH-FIRST HERO
         ====================================================== -->
         <header class="topbar">
           <div class="title-wrap">
@@ -58,11 +68,22 @@
             </div>
           </div>
 
-          <section class="hero-card glass" aria-label="Financial health summary">
-            <div class="mini-label">Financial Health</div>
-            <div class="hero-value" id="hero-health">Needs Inputs</div>
-            <div class="hero-sub" id="hero-health-note">
-              Calculate mortgage health to generate your snapshot.
+          <section class="hero-card glass health-hero-card" aria-label="Financial health summary">
+            <div class="health-hero-copy">
+              <div class="mini-label">Financial Health</div>
+              <div class="hero-value" id="hero-health">Needs Inputs</div>
+              <div class="hero-sub" id="hero-health-note">
+                Calculate mortgage health to generate your snapshot.
+              </div>
+            </div>
+
+            <div class="hero-ring-wrap">
+              <div id="healthRing" class="score-ring hero-score-ring" style="--pct:0;--ring-color:var(--mint);">
+                <div class="score-center">
+                  <div id="residualPercent" class="score-number">—</div>
+                  <div class="score-label">Residual %</div>
+                </div>
+              </div>
             </div>
           </section>
         </header>
@@ -70,33 +91,55 @@
         <div class="divider"></div>
 
         <!-- =====================================================
-          SEO / ABOUT
+          ABOUT / BLUF HEALTH COMMENT
         ====================================================== -->
         <section class="seo-copy glass" aria-label="About this mortgage dashboard">
-          <h2 class="panel-title">About the PCSUnited Financial Health Snapshot</h2>
-          <div class="panel-rule"></div>
-          <p>
-            PCSUnited’s Financial Health Snapshot helps military users estimate mortgage payment pressure before moving into a deeper financial dashboard. It reads Financial Intake data when available, estimates monthly mortgage cost, and optionally uses TheWing.ai to calculate military compensation.
-          </p>
-          <p>
-            The core output is simple: total income minus mortgage payment and monthly obligations equals residual income. That residual margin becomes a lightweight financial health signal designed for fast PCS and home-buying decisions.
-          </p>
+          <div class="about-layout">
+            <div class="about-copy">
+              <h2 class="panel-title">About the PCSUnited Financial Health Snapshot</h2>
+              <div class="panel-rule"></div>
+
+              <p>
+                PCSUnited’s Financial Health Snapshot helps military users estimate mortgage payment pressure before moving into a deeper financial dashboard. It reads Financial Intake data when available, estimates monthly mortgage cost, and optionally uses TheWing.ai to calculate military compensation.
+              </p>
+
+              <p>
+                The core output is simple: total income minus mortgage payment and monthly obligations equals residual income. That residual margin becomes a lightweight financial health signal designed for fast PCS and home-buying decisions.
+              </p>
+            </div>
+
+            <div class="about-health-comment">
+              <div class="health-bar compact-health-bar">
+                <div id="healthBarFill" class="health-bar-fill"></div>
+              </div>
+
+              <div class="note-box" id="healthNote">
+                Add income data to generate a lightweight financial health signal.
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- =====================================================
-          HERO METRICS
+          PRIMARY METRICS
         ====================================================== -->
         <section class="summary-grid hero-metrics" aria-label="Snapshot metrics">
-          <div class="mini-card glass">
-            <div class="mini-label">All-In Mortgage</div>
-            <div class="metric-value" id="hero-payment">$—</div>
-            <div class="metric-caption">P&I + taxes + insurance + HOA + PMI</div>
-          </div>
-
           <div class="mini-card glass">
             <div class="mini-label">Total Income</div>
             <div class="metric-value" id="hero-income">$—</div>
             <div class="metric-caption">Military compensation + additional income</div>
+          </div>
+
+          <div class="mini-card glass">
+            <div class="mini-label">Total Monthly Obligations</div>
+            <div class="metric-value" id="healthObligations">$—</div>
+            <div class="metric-caption">Utilities, debts, credit cards, car payments</div>
+          </div>
+
+          <div class="mini-card glass">
+            <div class="mini-label">All-In Mortgage</div>
+            <div class="metric-value" id="hero-payment">$—</div>
+            <div class="metric-caption">P&I + taxes + insurance + HOA + PMI</div>
           </div>
 
           <div class="mini-card glass">
@@ -105,7 +148,8 @@
             <div class="metric-caption">Income left after mortgage and obligations</div>
           </div>
 
-          <div class="mini-card glass">
+          <!-- Kept for JS compatibility; visually hidden by CSS if desired -->
+          <div class="mini-card glass metric-hidden-compat">
             <div class="mini-label">Residual Margin</div>
             <div class="metric-value" id="hero-residual-pct">—</div>
             <div class="metric-caption">Residual income ÷ total income</div>
@@ -266,7 +310,7 @@
               <label class="row-label" for="monthlyObligations">Monthly Obligations</label>
               <input id="monthlyObligations" class="field-input" type="number" min="0" step="1" placeholder="e.g., 1200" />
               <div class="range-meta">
-                Use this for debts or monthly expenses not included in the mortgage.
+                Use this for utilities, debts, credit cards, car payments, or recurring obligations not included in the mortgage.
               </div>
             </div>
 
@@ -450,61 +494,13 @@
               </section>
             </section>
 
-            <!-- FINANCIAL HEALTH -->
-            <section class="panel glass">
-              <div class="panel-head">
-                <div>
-                  <h2 class="panel-title">Lightweight Financial Health</h2>
-                  <div class="panel-subtitle">Residual-based mini-FAD</div>
-                </div>
-              </div>
-
-              <div class="panel-rule"></div>
-
-              <div class="health-grid">
-                <div class="ring-wrap">
-                  <div id="healthRing" class="score-ring" style="--pct:0;--ring-color:var(--mint);">
-                    <div class="score-center">
-                      <div id="residualPercent" class="score-number">—</div>
-                      <div class="score-label">Residual %</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <div class="kv-table">
-                    <div class="kv-row">
-                      <div class="kv-key">Total Income</div>
-                      <div class="kv-val" id="healthIncome">$—</div>
-                    </div>
-                    <div class="kv-row">
-                      <div class="kv-key">Mortgage Payment</div>
-                      <div class="kv-val" id="healthMortgage">$—</div>
-                    </div>
-                    <div class="kv-row">
-                      <div class="kv-key">Monthly Obligations</div>
-                      <div class="kv-val" id="healthObligations">$—</div>
-                    </div>
-                    <div class="kv-row">
-                      <div class="kv-key">Total Outflow</div>
-                      <div class="kv-val" id="healthOutflow">$—</div>
-                    </div>
-                    <div class="kv-row">
-                      <div class="kv-key">Residual Income</div>
-                      <div class="kv-val" id="healthResidual">$—</div>
-                    </div>
-                  </div>
-
-                  <div class="health-bar">
-                    <div id="healthBarFill" class="health-bar-fill"></div>
-                  </div>
-
-                  <div class="note-box" id="healthNote">
-                    Add income data to generate a lightweight financial health signal.
-                  </div>
-                </div>
-              </div>
-            </section>
+            <!-- Hidden compatibility nodes for mortgage.js -->
+            <div class="compat-hidden" aria-hidden="true">
+              <span id="healthIncome">$—</span>
+              <span id="healthMortgage">$—</span>
+              <span id="healthOutflow">$—</span>
+              <span id="healthResidual">$—</span>
+            </div>
 
           </section>
         </section>
