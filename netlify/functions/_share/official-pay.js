@@ -1,7 +1,7 @@
 // official-pay.js
 // ============================================================
 // TheWing.ai • Official Pay Source
-// v1.0.0
+// v1.0.1
 //
 // FILE
 // - netlify/functions/_share/official-pay.js
@@ -25,6 +25,12 @@
 //
 // MODULE STYLE
 // - ES Module exports for Netlify Functions with "type": "module"
+//
+// UPDATE v1.0.1
+// - Corrected E-8 and E-9 threshold mappings.
+// - E-8 now starts at Over 8 YOS.
+// - E-9 now starts at Over 10 YOS.
+// - pickThreshold now throws when YOS is below the first valid official threshold.
 // ============================================================
 
 // ============================================================
@@ -54,6 +60,7 @@ export const YOS_THRESHOLDS = Object.freeze([
 // ============================================================
 // //#4) 2026 BASIC PAY — ENLISTED
 // //#    0 means "2 or less"
+// //#    Missing lower keys mean official blank / unsupported cells
 // ============================================================
 
 export const ENLISTED_PAY_2026 = Object.freeze({
@@ -99,17 +106,50 @@ export const ENLISTED_PAY_2026 = Object.freeze({
     20: 6245.70, 22: 6475.20, 24: 6598.20, 26: 7067.40, 28: 7067.40,
     30: 7067.40, 32: 7067.40, 34: 7067.40, 36: 7067.40, 38: 7067.40, 40: 7067.40
   },
+
+  // UPDATED:
+  // DFAS E-8 has official blanks before Over 8 YOS.
+  // Do not provide 0/2/3/4/6 keys, because those would incorrectly backfill pay.
   "E-8": {
-    0: 5656.50, 2: 5907.00, 3: 6061.80, 4: 6247.20, 6: 6448.20, 8: 6811.20,
-    10: 6811.20, 12: 6811.20, 14: 6811.20, 16: 6811.20, 18: 6811.20,
-    20: 6995.40, 22: 7308.30, 24: 7481.70, 26: 7908.90, 28: 7908.90,
-    30: 8067.30, 32: 8067.30, 34: 8067.30, 36: 8067.30, 38: 8067.30, 40: 8067.30
+    8: 5656.50,
+    10: 5907.00,
+    12: 6061.80,
+    14: 6247.20,
+    16: 6448.20,
+    18: 6811.20,
+    20: 6995.40,
+    22: 7308.30,
+    24: 7481.70,
+    26: 7908.90,
+    28: 7908.90,
+    30: 8067.30,
+    32: 8067.30,
+    34: 8067.30,
+    36: 8067.30,
+    38: 8067.30,
+    40: 8067.30
   },
+
+  // UPDATED:
+  // DFAS E-9 has official blanks before Over 10 YOS.
+  // Do not provide 0/2/3/4/6/8 keys, because those would incorrectly backfill pay.
   "E-9": {
-    0: 6910.20, 2: 7066.50, 3: 7263.60, 4: 7496.10, 6: 7730.70, 8: 7730.70,
-    10: 7730.70, 12: 7730.70, 14: 7730.70, 16: 7730.70, 18: 7730.70,
-    20: 8105.10, 22: 8423.10, 24: 8756.70, 26: 9267.90, 28: 9267.90,
-    30: 9730.20, 32: 9730.20, 34: 10217.40, 36: 10217.40, 38: 10729.20, 40: 10729.20
+    10: 6910.20,
+    12: 7066.50,
+    14: 7263.60,
+    16: 7496.10,
+    18: 7730.70,
+    20: 8105.10,
+    22: 8423.10,
+    24: 8756.70,
+    26: 9267.90,
+    28: 9267.90,
+    30: 9730.20,
+    32: 9730.20,
+    34: 10217.40,
+    36: 10217.40,
+    38: 10729.20,
+    40: 10729.20
   }
 });
 
@@ -239,7 +279,15 @@ export function pickThreshold(row, yos) {
     throw new Error("Pay row has no usable thresholds.");
   }
 
-  let chosen = keys[0];
+  const firstKey = keys[0];
+
+  if (yos < firstKey) {
+    throw new Error(
+      `No official pay value exists for this rank at ${yos} years of service. First valid threshold is over ${firstKey} years.`
+    );
+  }
+
+  let chosen = firstKey;
 
   for (const key of keys) {
     if (yos >= key) chosen = key;
