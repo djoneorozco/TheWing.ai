@@ -1,13 +1,12 @@
 /* =========================================================
   PCSUNITED • LIGHTWEIGHT FAD / MORTGAGE HEALTH DASHBOARD
   mortgage.css
-  v1.1.0 • STREAMLINED HEALTH-FIRST LAYOUT
+  v1.2.2 • BUYER COMFORT RANGE STYLES
 
   UPDATE
-  - Financial Health ring moved into top-right hero card
-  - About section now carries the health BLUF/comment
+  - Added Buyer Comfort Range card + track styles for v1.2.2 shell
+  - Financial Health ring in top-right hero card
   - Four main metric cards: Income, Obligations, Mortgage, Residual
-  - Bottom Lightweight Financial Health panel removed from index
   - Compatibility nodes hidden safely
 ========================================================= */
 
@@ -904,6 +903,132 @@ select{
 
 .health-bar-fill.bad{
   background:linear-gradient(90deg,var(--danger),var(--gold));
+}
+
+/* =========================================================
+  BUYER COMFORT RANGE
+========================================================= */
+
+.housing-range-card{
+  width:100%;
+  padding:16px 18px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.housing-range-top{
+  margin-bottom:12px;
+}
+
+.housing-range-label{
+  display:block;
+  color:var(--muted2);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.housing-range-title{
+  display:block;
+  margin-top:4px;
+  color:var(--ink);
+  font-size:15px;
+  font-weight:800;
+}
+
+.housing-range-target-center{
+  text-align:center;
+  margin:10px 0 14px;
+}
+
+.housing-range-target-center small{
+  display:block;
+  color:var(--muted2);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+.housing-range-target-center b{
+  display:block;
+  margin-top:6px;
+  color:var(--ink);
+  font-size:28px;
+  font-weight:900;
+  line-height:1.1;
+}
+
+.housing-range-track-wrap{
+  margin-top:4px;
+}
+
+.housing-range-scale{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:8px;
+  color:var(--muted2);
+  font-size:12px;
+  font-weight:700;
+}
+
+.housing-range-track{
+  position:relative;
+  width:100%;
+  height:12px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.housing-range-fill{
+  position:absolute;
+  top:0;
+  left:0;
+  width:0;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--mint) 0%,var(--mint) 58%,var(--blue) 100%);
+  transition:left .25s ease,width .25s ease,background .25s ease;
+}
+
+.housing-range-fill.warn{
+  background:linear-gradient(90deg,var(--gold) 0%,var(--blue) 100%);
+}
+
+.housing-range-fill.bad{
+  background:linear-gradient(90deg,var(--danger) 0%,var(--gold) 100%);
+}
+
+.housing-range-note{
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.03);
+  color:rgba(240,246,255,.84);
+  font-size:13px;
+  line-height:1.55;
+  min-height:78px;
+  display:flex;
+  align-items:center;
+}
+
+.housing-range-note.warn{
+  color:var(--gold);
+  border-color:rgba(255,213,142,.25);
+  background:rgba(255,213,142,.065);
+}
+
+.housing-range-note.bad{
+  color:var(--danger);
+  border-color:rgba(255,135,135,.25);
+  background:rgba(255,135,135,.065);
 }
 
 /* =========================================================

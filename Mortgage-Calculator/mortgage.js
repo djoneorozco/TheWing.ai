@@ -1,113 +1,136 @@
 /* =========================================================
   PCSUNITED • LIGHTWEIGHT FAD / MORTGAGE HEALTH DASHBOARD
   mortgage.js
-  v1.0.1
+  v1.2.2 • PAYLOAD UNWRAP + MORTGAGE LOCK FIX
 
-  THEWING ENDPOINTS
-  - Compensation: https://thewing.netlify.app/api/opensource-brain
-  - Mortgage:     https://thewing.netlify.app/api/mortgage
+  Synced from webflow-js-embed.html for local index.html dev.
 ========================================================= */
 
 (function(){
   "use strict";
 
-  // =========================================================
-  // //#1 CONFIG
-  // =========================================================
+  /* =========================================================
+    //#1 CONFIG
+  ========================================================= */
+
+  const VERSION = "1.2.2-payload-unwrap-mortgage-lock-fix";
+
   const API_BASE = "https://thewing.netlify.app/api";
-  const EP_BRAIN = API_BASE + "/opensource-brain";
   const EP_MORTGAGE = API_BASE + "/mortgage";
+  const EP_BRAIN = API_BASE + "/opensource-brain";
 
-  const TERM_YEARS = 30;
+  const DEFAULT_TERM_YEARS = 30;
 
-  const KEY_INTAKE = "pcsunited.financial.intake.v1";
-  const KEY_INTAKE_LEGACY = "pcsunited.financial_intake.v1";
-  const KEY_OVERRIDES = "pcsunited.kpi_overrides.v1";
-  const KEY_BRIDGE_V1 = "pcsunited.bridge.v1";
-  const KEY_BRIDGE = "pcsunited.bridge";
-  const KEY_REALTY_BRIDGE = "realtysass.bridge";
-
-  const KEY_OUTPUT = "pcsunited.lightweight_fad.snapshot.v1";
-  const KEY_MORTGAGE_HEALTH = "pcsunited.mortgage_health.v1";
-
-  const BASE_META = {
-    "Andrews AFB": { zip:"20762", cityKey:"Andrews", state:"MD", market:"Washington DC" },
-    "Barksdale AFB": { zip:"71110", cityKey:"Barksdale", state:"LA", market:"Bossier City" },
-    "Beale AFB": { zip:"95903", cityKey:"Beale", state:"CA", market:"Marysville" },
-    "Cannon AFB": { zip:"88103", cityKey:"Cannon", state:"NM", market:"Clovis" },
-    "Charleston AFB": { zip:"29404", cityKey:"Charleston", state:"SC", market:"Charleston" },
-    "Davis-Monthan AFB": { zip:"85707", cityKey:"DavisMonthan", state:"AZ", market:"Tucson" },
-    "Dover AFB": { zip:"19902", cityKey:"Dover", state:"DE", market:"Dover" },
-    "Dyess AFB": { zip:"79607", cityKey:"Dyess", state:"TX", market:"Abilene" },
-    "Eglin AFB": { zip:"32542", cityKey:"Eglin", state:"FL", market:"Fort Walton Beach" },
-    "Fairchild AFB": { zip:"99011", cityKey:"Fairchild", state:"WA", market:"Spokane" },
-    "FE Warren AFB": { zip:"82005", cityKey:"FEWarren", state:"WY", market:"Cheyenne" },
-    "Holloman AFB": { zip:"88330", cityKey:"Holloman", state:"NM", market:"Alamogordo" },
-    "Hurlburt Field": { zip:"32544", cityKey:"Hurlburt", state:"FL", market:"Fort Walton Beach" },
-    "JBSA Fort Sam Houston": { zip:"78234", cityKey:"FortSamHouston", state:"TX", market:"San Antonio" },
-    "JBSA Lackland": { zip:"78236", cityKey:"Lackland", state:"TX", market:"San Antonio" },
-    "JBSA Randolph": { zip:"78150", cityKey:"Randolph", state:"TX", market:"San Antonio" },
-    "Keesler AFB": { zip:"39534", cityKey:"Keesler", state:"MS", market:"Biloxi" },
-    "Kirtland AFB": { zip:"87117", cityKey:"Kirtland", state:"NM", market:"Albuquerque" },
-    "Langley AFB": { zip:"23665", cityKey:"Langley", state:"VA", market:"Hampton Roads" },
-    "Laughlin AFB": { zip:"78843", cityKey:"Laughlin", state:"TX", market:"Del Rio" },
-    "Little Rock AFB": { zip:"72099", cityKey:"LittleRock", state:"AR", market:"Little Rock" },
-    "Luke AFB": { zip:"85309", cityKey:"Luke", state:"AZ", market:"Phoenix" },
-    "MacDill AFB": { zip:"33621", cityKey:"MacDill", state:"FL", market:"Tampa" },
-    "Malmstrom AFB": { zip:"59402", cityKey:"Malmstrom", state:"MT", market:"Great Falls" },
-    "Maxwell AFB": { zip:"36112", cityKey:"Maxwell", state:"AL", market:"Montgomery" },
-    "McConnell AFB": { zip:"67221", cityKey:"McConnell", state:"KS", market:"Wichita" },
-    "McGuire AFB": { zip:"08641", cityKey:"McGuire", state:"NJ", market:"Joint Base MDL" },
-    "Minot AFB": { zip:"58705", cityKey:"Minot", state:"ND", market:"Minot" },
-    "Moody AFB": { zip:"31699", cityKey:"Moody", state:"GA", market:"Valdosta" },
-    "Mountain Home AFB": { zip:"83648", cityKey:"MountainHome", state:"ID", market:"Mountain Home" },
-    "Nellis AFB": { zip:"89191", cityKey:"Nellis", state:"NV", market:"Las Vegas" },
-    "Offutt AFB": { zip:"68113", cityKey:"Offutt", state:"NE", market:"Omaha" },
-    "Patrick SFB": { zip:"32925", cityKey:"Patrick", state:"FL", market:"Space Coast" },
-    "Peterson SFB": { zip:"80914", cityKey:"Peterson", state:"CO", market:"Colorado Springs" },
-    "Robins AFB": { zip:"31098", cityKey:"Robins", state:"GA", market:"Warner Robins" },
-    "Scott AFB": { zip:"62225", cityKey:"Scott", state:"IL", market:"St. Louis Metro" },
-    "Seymour Johnson AFB": { zip:"27531", cityKey:"SeymourJohnson", state:"NC", market:"Goldsboro" },
-    "Shaw AFB": { zip:"29152", cityKey:"Shaw", state:"SC", market:"Sumter" },
-    "Sheppard AFB": { zip:"76311", cityKey:"Sheppard", state:"TX", market:"Wichita Falls" },
-    "Tinker AFB": { zip:"73145", cityKey:"Tinker", state:"OK", market:"Oklahoma City" },
-    "Travis AFB": { zip:"94535", cityKey:"Travis", state:"CA", market:"Fairfield" },
-    "Tyndall AFB": { zip:"32403", cityKey:"Tyndall", state:"FL", market:"Panama City" },
-    "Vance AFB": { zip:"73705", cityKey:"Vance", state:"OK", market:"Enid" },
-    "Vandenberg SFB": { zip:"93437", cityKey:"Vandenberg", state:"CA", market:"Lompoc" },
-    "Whiteman AFB": { zip:"65305", cityKey:"Whiteman", state:"MO", market:"Knob Noster" },
-    "Wright-Patterson AFB": { zip:"45433", cityKey:"WrightPatterson", state:"OH", market:"Dayton" }
+  const STORAGE_KEYS = {
+    intakeModern:"pcsunited.financial.intake.v1",
+    intakeLegacy:"pcsunited.financial_intake.v1",
+    bridgeV1:"pcsunited.bridge.v1",
+    bridge:"pcsunited.bridge",
+    realtyBridge:"realtysass.bridge",
+    profile:"pcsunited.profile.v1",
+    kpi:"pcsunited.kpi_overrides.v1",
+    openFlow:"pcsunited.open_flow_ready.v1",
+    mortgageResult:"pcsunited.mortgage_snapshot.v1",
+    mortgageMirror:"realtysass.mortgage_cache.v1"
   };
 
-  // =========================================================
-  // //#2 DOM
-  // =========================================================
-  const $ = (id) => document.getElementById(id);
+  const BAS = {
+    enlisted:465.77,
+    officer:320.78
+  };
+
+  const BASE_META = {
+    "Andrews AFB": { zip:"20762", market:"Washington DC" },
+    "Barksdale AFB": { zip:"71110", market:"Bossier City" },
+    "Beale AFB": { zip:"95903", market:"Marysville" },
+    "Cannon AFB": { zip:"88103", market:"Clovis" },
+    "Charleston AFB": { zip:"29404", market:"Charleston" },
+    "Davis-Monthan AFB": { zip:"85707", market:"Tucson" },
+    "Dover AFB": { zip:"19902", market:"Dover" },
+    "Dyess AFB": { zip:"79607", market:"Abilene" },
+    "Eglin AFB": { zip:"32542", market:"Fort Walton Beach" },
+    "Fairchild AFB": { zip:"99011", market:"Spokane" },
+    "FE Warren AFB": { zip:"82005", market:"Cheyenne" },
+    "Holloman AFB": { zip:"88330", market:"Alamogordo" },
+    "Hurlburt Field": { zip:"32544", market:"Fort Walton Beach" },
+    "JBSA Fort Sam Houston": { zip:"78234", market:"San Antonio" },
+    "JBSA Lackland": { zip:"78236", market:"San Antonio" },
+    "JBSA Randolph": { zip:"78150", market:"San Antonio" },
+    "Keesler AFB": { zip:"39534", market:"Biloxi" },
+    "Kirtland AFB": { zip:"87117", market:"Albuquerque" },
+    "Langley AFB": { zip:"23665", market:"Hampton Roads" },
+    "Laughlin AFB": { zip:"78843", market:"Del Rio" },
+    "Little Rock AFB": { zip:"72099", market:"Little Rock" },
+    "Luke AFB": { zip:"85309", market:"Phoenix" },
+    "MacDill AFB": { zip:"33621", market:"Tampa" },
+    "Malmstrom AFB": { zip:"59402", market:"Great Falls" },
+    "Maxwell AFB": { zip:"36112", market:"Montgomery" },
+    "McConnell AFB": { zip:"67221", market:"Wichita" },
+    "McGuire AFB": { zip:"08641", market:"Joint Base MDL" },
+    "Minot AFB": { zip:"58705", market:"Minot" },
+    "Moody AFB": { zip:"31699", market:"Valdosta" },
+    "Mountain Home AFB": { zip:"83648", market:"Mountain Home" },
+    "Nellis AFB": { zip:"89191", market:"Las Vegas" },
+    "Offutt AFB": { zip:"68113", market:"Omaha" },
+    "Patrick SFB": { zip:"32925", market:"Space Coast" },
+    "Peterson SFB": { zip:"80914", market:"Colorado Springs" },
+    "Robins AFB": { zip:"31098", market:"Warner Robins" },
+    "Scott AFB": { zip:"62225", market:"St. Louis Metro" },
+    "Seymour Johnson AFB": { zip:"27531", market:"Goldsboro" },
+    "Shaw AFB": { zip:"29152", market:"Sumter" },
+    "Sheppard AFB": { zip:"76311", market:"Wichita Falls" },
+    "Tinker AFB": { zip:"73145", market:"Oklahoma City" },
+    "Travis AFB": { zip:"94535", market:"Fairfield" },
+    "Tyndall AFB": { zip:"32403", market:"Panama City" },
+    "Vance AFB": { zip:"73705", market:"Enid" },
+    "Vandenberg SFB": { zip:"93437", market:"Lompoc" },
+    "Whiteman AFB": { zip:"65305", market:"Knob Noster" },
+    "Wright-Patterson AFB": { zip:"45433", market:"Dayton" }
+  };
+
+  const state = {
+    income:{
+      basePay:0,
+      bah:0,
+      bas:0,
+      additional:0,
+      total:0,
+      source:"—",
+      lockedOfficial:false,
+      raw:null
+    },
+    mortgage:null,
+    obligations:0,
+    residual:0,
+    residualPct:0,
+    health:"Needs Inputs",
+    healthKind:"warn",
+    healthNote:""
+  };
+
+  /* =========================================================
+    //#2 DOM
+  ========================================================= */
+
+  const root = document.getElementById("pcsu-mortgage-shell");
+  if(!root) return;
+
+  const $ = function(id){
+    return document.getElementById(id);
+  };
 
   const el = {
-    heroHealth:$("hero-health"),
-    heroHealthNote:$("hero-health-note"),
-    heroPayment:$("hero-payment"),
-    heroIncome:$("hero-income"),
-    heroResidual:$("hero-residual"),
-    heroResidualPct:$("hero-residual-pct"),
-
-    statusPill:$("statusPill"),
-    statusText:$("statusText"),
-    errorBox:$("errorBox"),
-
     rank:$("rank"),
     yos:$("yos"),
     base:$("base"),
     dependents:$("dependents"),
     additionalIncome:$("additionalIncome"),
     monthlyObligations:$("monthlyObligations"),
-
     btnFetchPay:$("btn-fetch-pay"),
     btnCalc:$("btn-calc"),
     btnClear:$("btn-clear"),
-
     profilePills:$("profilePills"),
+    errorBox:$("errorBox"),
 
     homePrice:$("homePrice"),
     downPayment:$("downPayment"),
@@ -118,7 +141,32 @@
     hoaMonthly:$("hoaMonthly"),
     pmiMonthly:$("pmiMonthly"),
 
+    statusPill:$("statusPill"),
+    statusText:$("statusText"),
     rateLine:$("rateLine"),
+
+    heroHealth:$("hero-health"),
+    heroHealthNote:$("hero-health-note"),
+    heroIncome:$("hero-income"),
+    heroPayment:$("hero-payment"),
+    heroResidual:$("hero-residual"),
+    heroResidualPct:$("hero-residual-pct"),
+
+    healthRing:$("healthRing"),
+    residualPercent:$("residualPercent"),
+
+    healthIncome:$("healthIncome"),
+    healthMortgage:$("healthMortgage"),
+    healthObligations:$("healthObligations"),
+    healthOutflow:$("healthOutflow"),
+    healthResidual:$("healthResidual"),
+
+    buyerRangeTarget:$("buyerRangeTarget"),
+    buyerRangeMin:$("buyerRangeMin"),
+    buyerRangeMax:$("buyerRangeMax"),
+    buyerRangeFill:$("buyerRangeFill"),
+    buyerRangeNote:$("buyerRangeNote"),
+    buyerRangeProgress:$("buyerRangeProgress"),
 
     allInPayment:$("allInPayment"),
     loanAmount:$("loanAmount"),
@@ -136,66 +184,49 @@
     bas:$("bas"),
     additionalIncomeOut:$("additionalIncomeOut"),
     compSource:$("compSource"),
-    verdictBox:$("verdictBox"),
-
-    healthRing:$("healthRing"),
-    residualPercent:$("residualPercent"),
-    healthBarFill:$("healthBarFill"),
-    healthIncome:$("healthIncome"),
-    healthMortgage:$("healthMortgage"),
-    healthObligations:$("healthObligations"),
-    healthOutflow:$("healthOutflow"),
-    healthResidual:$("healthResidual"),
-    healthNote:$("healthNote")
+    verdictBox:$("verdictBox")
   };
 
-  // =========================================================
-  // //#3 HELPERS
-  // =========================================================
-  function n(value, fallback){
-    const parsed = Number(String(value ?? "").replace(/[$,%]/g, "").replace(/,/g, ""));
-    return Number.isFinite(parsed) ? parsed : (fallback || 0);
+  /* =========================================================
+    //#3 UTILITIES
+  ========================================================= */
+
+  function n(v, fallback){
+    const x = Number(String(v ?? "").replace(/[$,%]/g,"").replace(/,/g,""));
+    return Number.isFinite(x) ? x : (fallback || 0);
   }
 
   function clamp(value, min, max){
     return Math.max(min, Math.min(max, value));
   }
 
-  function round2(value){
-    return Math.round((Number(value) || 0) * 100) / 100;
-  }
-
-  function money(value){
+  function money(value, decimals){
     const x = Number(value);
-    if(!Number.isFinite(x)) return "—";
-    return x.toLocaleString("en-US", {
+    if(!Number.isFinite(x)) return "$—";
+
+    return x.toLocaleString("en-US",{
       style:"currency",
       currency:"USD",
-      maximumFractionDigits:0
+      minimumFractionDigits:decimals || 0,
+      maximumFractionDigits:decimals || 0
     });
   }
 
-  function money2(value){
+  function pct(value, decimals){
     const x = Number(value);
     if(!Number.isFinite(x)) return "—";
-    return x.toLocaleString("en-US", {
-      style:"currency",
-      currency:"USD",
-      minimumFractionDigits:2,
-      maximumFractionDigits:2
-    });
-  }
-
-  function pct(value){
-    const x = Number(value);
-    if(!Number.isFinite(x)) return "—";
-    return `${round2(x)}%`;
+    return x.toFixed(decimals ?? 1) + "%";
   }
 
   function readJSON(key, fallback){
     try{
-      const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
+      const rawLocal = localStorage.getItem(key);
+      if(rawLocal) return JSON.parse(rawLocal);
+
+      const rawSession = sessionStorage.getItem(key);
+      if(rawSession) return JSON.parse(rawSession);
+
+      return fallback;
     }catch(_){
       return fallback;
     }
@@ -209,123 +240,229 @@
 
   function dispatchSafe(name, detail){
     try{
-      window.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
+      window.dispatchEvent(new CustomEvent(name,{ detail:detail || {} }));
     }catch(_){}
   }
 
-  async function postJSON(url, body){
-    const response = await fetch(url, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      cache:"no-store",
-      body:JSON.stringify(body || {})
+  function setText(node, value){
+    if(node) node.textContent = value;
+  }
+
+  function setInputValue(node, value){
+    if(!node) return;
+    if(value === undefined || value === null || value === "") return;
+    node.value = String(value);
+  }
+
+  function setError(message){
+    if(!el.errorBox) return;
+    el.errorBox.textContent = message || "";
+  }
+
+  function setStatus(kind, text){
+    if(el.statusPill){
+      const dot = el.statusPill.querySelector(".dot");
+      if(dot){
+        dot.classList.remove("ok","warn","bad");
+        if(kind) dot.classList.add(kind);
+      }
+    }
+
+    setText(el.statusText, text || "Ready");
+  }
+
+  function clearClasses(node){
+    if(!node) return;
+    node.classList.remove("ok","warn","bad");
+  }
+
+  function applyKind(node, kind){
+    if(!node) return;
+    clearClasses(node);
+    if(kind) node.classList.add(kind);
+  }
+
+  function rankType(rank){
+    const r = String(rank || "").toUpperCase();
+    if(r.startsWith("O-") || r.startsWith("W-")) return "officer";
+    if(r.startsWith("E-")) return "enlisted";
+    return "enlisted";
+  }
+
+  function hasDependents(){
+    return String(el.dependents?.value || "without") === "with";
+  }
+
+  function familyCount(){
+    return hasDependents() ? 2 : 1;
+  }
+
+  function scoreAPR(score){
+    const s = Number(score) || 720;
+
+    if(s >= 780) return 6.50;
+    if(s >= 760) return 6.75;
+    if(s >= 720) return 7.00;
+    if(s >= 700) return 7.20;
+    if(s >= 680) return 7.35;
+    if(s >= 660) return 7.85;
+    if(s >= 640) return 8.25;
+    if(s >= 620) return 9.25;
+    return 9.95;
+  }
+
+  function mortgagePI(loanAmount, apr, termYears){
+    const principal = Math.max(0, n(loanAmount,0));
+    const monthlyRate = (Math.max(0, n(apr,0)) / 100) / 12;
+    const months = Math.max(1, Math.round(n(termYears, DEFAULT_TERM_YEARS) * 12));
+
+    if(principal <= 0) return 0;
+    if(monthlyRate <= 0) return principal / months;
+
+    const pow = Math.pow(1 + monthlyRate, months);
+    return principal * ((monthlyRate * pow) / (pow - 1));
+  }
+
+  function normalizeRank(value){
+    const raw = String(value || "").toUpperCase();
+    const match = raw.match(/[EOW]-?\d{1,2}/);
+    if(!match) return raw;
+    return match[0].replace(/([EOW])(\d)/,"$1-$2");
+  }
+
+  function nearestYos(value){
+    const y = Number(value) || 0;
+    if(!y) return "";
+    const allowed = [2,4,6,8,10,12,14,16,18,20,22,24,26,28,30];
+    let best = allowed[0];
+    let diff = Math.abs(y - best);
+
+    allowed.forEach(function(item){
+      const d = Math.abs(y - item);
+      if(d < diff){
+        best = item;
+        diff = d;
+      }
     });
 
-    const data = await response.json().catch(() => ({}));
+    return String(best);
+  }
 
-    if(!response.ok || data.ok === false){
-      throw new Error(data.error || data.message || `HTTP ${response.status}`);
+  function setSelectIfOptionExists(select, value){
+    if(!select || !value) return;
+
+    const wanted = String(value).trim().toLowerCase();
+    const options = Array.from(select.options || []);
+
+    const exact = options.find(function(opt){
+      return String(opt.value || "").trim().toLowerCase() === wanted;
+    });
+
+    if(exact){
+      select.value = exact.value;
+      return;
+    }
+
+    const loose = options.find(function(opt){
+      return String(opt.value || "").trim().toLowerCase().includes(wanted) ||
+             wanted.includes(String(opt.value || "").trim().toLowerCase());
+    });
+
+    if(loose){
+      select.value = loose.value;
+    }
+  }
+
+  function collectInputs(){
+    return {
+      rank:String(el.rank?.value || "").trim(),
+      yos:n(el.yos?.value,0),
+      base:String(el.base?.value || "").trim(),
+      dependents:String(el.dependents?.value || "without"),
+      additionalIncome:Math.max(0,n(el.additionalIncome?.value,0)),
+      obligations:Math.max(0,n(el.monthlyObligations?.value,0)),
+      homePrice:Math.max(0,n(el.homePrice?.value,450000)),
+      downPayment:Math.max(0,n(el.downPayment?.value,22500)),
+      creditScore:clamp(Math.round(n(el.creditScore?.value,720)),300,850),
+      loanType:String(el.loanType?.value || "va"),
+      taxRate:Math.max(0,n(el.taxRate?.value,2.10)),
+      insuranceMonthly:Math.max(0,n(el.insuranceMonthly?.value,180)),
+      hoaMonthly:Math.max(0,n(el.hoaMonthly?.value,0)),
+      pmiMonthly:Math.max(0,n(el.pmiMonthly?.value,0))
+    };
+  }
+
+  function syncIncomeTotal(){
+    const input = collectInputs();
+
+    state.income.additional = input.additionalIncome;
+    state.income.total =
+      n(state.income.basePay,0) +
+      n(state.income.bah,0) +
+      n(state.income.bas,0) +
+      input.additionalIncome;
+
+    return state.income;
+  }
+
+  function isPayControl(node){
+    return (
+      node === el.rank ||
+      node === el.yos ||
+      node === el.base ||
+      node === el.dependents
+    );
+  }
+
+  function isAdditionalIncomeControl(node){
+    return node === el.additionalIncome;
+  }
+
+  function isMortgageControl(node){
+    return (
+      node === el.homePrice ||
+      node === el.downPayment ||
+      node === el.creditScore ||
+      node === el.loanType ||
+      node === el.taxRate ||
+      node === el.insuranceMonthly ||
+      node === el.hoaMonthly ||
+      node === el.pmiMonthly
+    );
+  }
+
+  function unwrapApiPayload(data){
+    return (data && (data.payload || data.data || data.result || data)) || {};
+  }
+
+  async function postJSON(url, body){
+    const res = await fetch(url,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify(body)
+    });
+
+    const data = await res.json().catch(function(){ return {}; });
+
+    if(!res.ok || data.ok === false){
+      throw new Error(data.error || data.message || "Request failed.");
     }
 
     return data;
   }
 
-  function setStatus(kind, text){
-    if(!el.statusPill) return;
+  /* =========================================================
+    //#4 STORAGE PREFILL
+  ========================================================= */
 
-    const dot = el.statusPill.querySelector(".dot");
-    if(dot){
-      dot.classList.remove("ok","warn","bad");
-      if(kind) dot.classList.add(kind);
-    }
-
-    el.statusText.textContent = text || "Ready";
-  }
-
-  function setError(message){
-    el.errorBox.textContent = message ? String(message) : "";
-  }
-
-  function classTone(node, tone){
-    if(!node) return;
-    node.classList.remove("ok","warn","bad");
-    if(tone) node.classList.add(tone);
-  }
-
-  function getBaseMeta(){
-    const baseName = String(el.base.value || "").trim();
-    return BASE_META[baseName] || {};
-  }
-
-  function familyCount(){
-    return String(el.dependents.value || "") === "with" ? 2 : 1;
-  }
-
-  function hasDependents(){
-    return String(el.dependents.value || "") === "with";
-  }
-
-  function aprFromCreditScore(score){
-    const s = clamp(Math.floor(n(score, 720) || 720), 300, 850);
-
-    if(s >= 780) return 6.10;
-    if(s >= 760) return 6.25;
-    if(s >= 740) return 6.45;
-    if(s >= 720) return 6.65;
-    if(s >= 700) return 6.95;
-    if(s >= 680) return 7.25;
-    if(s >= 660) return 7.55;
-    if(s >= 640) return 7.85;
-
-    return 8.25;
-  }
-
-  function monthlyPI(loanAmount, aprPct, termYears){
-    const loan = Math.max(0, n(loanAmount, 0));
-    const apr = Math.max(0, n(aprPct, 0)) / 100;
-    const years = Math.max(1, Math.round(n(termYears, 30) || 30));
-    const months = years * 12;
-    const monthlyRate = apr / 12;
-
-    if(loan <= 0) return 0;
-    if(monthlyRate <= 0) return loan / months;
-
-    const pow = Math.pow(1 + monthlyRate, months);
-    const payment = loan * monthlyRate * pow / (pow - 1);
-
-    return Number.isFinite(payment) ? payment : 0;
-  }
-
-  function safeSetInput(input, value){
-    if(!input) return;
-    const valueNumber = n(value, 0);
-    if(valueNumber > 0){
-      input.value = String(Math.round(valueNumber));
-    }
-  }
-
-  // =========================================================
-  // //#4 STATE
-  // =========================================================
-  const state = {
-    intake:null,
-    compensation:null,
-    mortgage:null,
-    health:null,
-    compSource:"none",
-    mortgageSource:"local"
-  };
-
-  // =========================================================
-  // //#5 FINANCIAL INTAKE PREFILL
-  // =========================================================
-  function getFinancialIntake(){
-    const intakeModern = readJSON(KEY_INTAKE, {}) || {};
-    const intakeLegacy = readJSON(KEY_INTAKE_LEGACY, {}) || {};
-    const overrides = readJSON(KEY_OVERRIDES, {}) || {};
-    const bridgeV1 = readJSON(KEY_BRIDGE_V1, {}) || {};
-    const bridge = readJSON(KEY_BRIDGE, {}) || {};
-    const realtyBridge = readJSON(KEY_REALTY_BRIDGE, {}) || {};
+  function getMergedStoredContext(){
+    const intakeModern = readJSON(STORAGE_KEYS.intakeModern,{}) || {};
+    const intakeLegacy = readJSON(STORAGE_KEYS.intakeLegacy,{}) || {};
+    const bridgeV1 = readJSON(STORAGE_KEYS.bridgeV1,{}) || {};
+    const bridge = readJSON(STORAGE_KEYS.bridge,{}) || {};
+    const realtyBridge = readJSON(STORAGE_KEYS.realtyBridge,{}) || {};
+    const profile = readJSON(STORAGE_KEYS.profile,{}) || {};
+    const kpi = readJSON(STORAGE_KEYS.kpi,{}) || {};
 
     return {
       ...realtyBridge,
@@ -333,444 +470,599 @@
       ...bridgeV1,
       ...intakeLegacy,
       ...intakeModern,
-      ...overrides
+      ...profile,
+      ...kpi
     };
   }
 
-  function prefillFromIntake(){
-    const intake = getFinancialIntake();
-    state.intake = intake;
-
-    const price =
-      n(intake.projected_home_price, 0) ||
-      n(intake.projectedHomePrice, 0) ||
-      n(intake.homePrice, 0) ||
-      n(intake.price, 0) ||
-      n(intake.housingOverride, 0) ||
-      n(intake.housing, 0);
-
-    const down =
-      n(intake.downpayment, 0) ||
-      n(intake.downPayment, 0) ||
-      n(intake.down_payment, 0) ||
-      n(intake.dpAmt, 0) ||
-      n(intake.savingsOverride, 0);
-
-    const score =
-      n(intake.credit_score, 0) ||
-      n(intake.creditScore, 0) ||
-      n(intake.fico, 0);
+  function prefillFromStorage(){
+    const data = getMergedStoredContext();
 
     const expenses =
-      n(intake.monthly_expenses, 0) ||
-      n(intake.monthlyExpenses, 0) ||
-      n(intake.expenses, 0) ||
-      n(intake.expensesOverride, 0);
+      data.monthly_expenses ??
+      data.monthlyExpenses ??
+      data.expenses ??
+      data.expensesOverride ??
+      "";
 
-    safeSetInput(el.homePrice, price);
-    safeSetInput(el.downPayment, down);
-    safeSetInput(el.creditScore, score);
-    safeSetInput(el.monthlyObligations, expenses);
+    const price =
+      data.projected_home_price ??
+      data.projectedHomePrice ??
+      data.homePrice ??
+      data.price ??
+      data.housing ??
+      data.housingOverride ??
+      "";
 
-    const rank = String(
-      intake.rank_paygrade ||
-      intake.rankPaygrade ||
-      intake.rank ||
-      ""
-    ).trim().toUpperCase();
+    const down =
+      data.downpayment ??
+      data.downPayment ??
+      data.dpAmt ??
+      data.savingsOverride ??
+      "";
 
-    if(rank && Array.from(el.rank.options).some(option => option.value === rank)){
-      el.rank.value = rank;
-    }
+    const credit =
+      data.credit_score ??
+      data.creditScore ??
+      data.fico ??
+      "";
 
-    const yos = String(
-      intake.yos ||
-      intake.yearsOfService ||
-      intake.years_of_service ||
-      ""
-    ).replace(/[^\d]/g,"");
+    const rank =
+      data.rank_paygrade ??
+      data.rankPaygrade ??
+      data.rank ??
+      "";
 
-    if(yos && Array.from(el.yos.options).some(option => option.value === yos)){
-      el.yos.value = yos;
-    }
+    const yos =
+      data.yos ??
+      data.years_of_service ??
+      data.yearsOfService ??
+      "";
 
-    const baseName = String(
-      intake.base ||
-      intake.currentBase ||
-      intake.current_base ||
-      intake.pcsBase ||
-      intake.pcs_base ||
-      ""
-    ).trim();
-
-    if(baseName && Array.from(el.base.options).some(option => option.value === baseName)){
-      el.base.value = baseName;
-    }
+    const base =
+      data.base ??
+      data.selected_base ??
+      data.selectedBase ??
+      data.pcs_base ??
+      data.pcsBase ??
+      "";
 
     const family =
-      n(intake.family, 0) ||
-      n(intake.familySize, 0) ||
-      n(intake.family_size, 0) ||
-      n(intake.dependents_count, 0);
+      data.family ??
+      data.dependents_count ??
+      data.dependents ??
+      "";
 
-    if(family){
-      el.dependents.value = family > 1 ? "with" : "without";
+    if(rank) setInputValue(el.rank, normalizeRank(rank));
+    if(yos) setInputValue(el.yos, nearestYos(yos));
+    if(base) setSelectIfOptionExists(el.base, base);
+
+    if(family !== ""){
+      const familyNum = Number(family);
+      if(Number.isFinite(familyNum)){
+        setInputValue(el.dependents, familyNum > 1 ? "with" : "without");
+      }else{
+        const f = String(family).toLowerCase();
+        if(f.includes("without")) setInputValue(el.dependents,"without");
+        if(f.includes("with")) setInputValue(el.dependents,"with");
+      }
     }
 
-    const additional =
-      n(intake.additional_income, 0) ||
-      n(intake.additionalIncome, 0) ||
-      n(intake.additional_monthly_income, 0);
+    setInputValue(el.monthlyObligations, expenses);
+    setInputValue(el.homePrice, price);
+    setInputValue(el.downPayment, down);
+    setInputValue(el.creditScore, credit);
 
-    if(additional > 0){
-      el.additionalIncome.value = String(Math.round(additional));
+    if(!el.downPayment?.value && price){
+      setInputValue(el.downPayment, Math.round(Number(price) * 0.05));
     }
-
-    const insurance =
-      n(intake.insurance_monthly, 0) ||
-      n(intake.insuranceMonthly, 0) ||
-      n(intake.home_insurance_monthly, 0) ||
-      n(intake.homeInsuranceMonthly, 0);
-
-    safeSetInput(el.insuranceMonthly, insurance);
   }
 
-  // =========================================================
-  // //#6 COMPENSATION
-  // =========================================================
+  /* =========================================================
+    //#5 LOCAL FALLBACK PAY — PREVIEW ONLY
+  ========================================================= */
+
+  function estimateLocalBasePay(rank, yos){
+    const r = String(rank || "E-5").toUpperCase();
+    const y = Number(yos || 6);
+
+    const enlisted = {
+      "E-1": 2017,
+      "E-2": 2261,
+      "E-3": 2380,
+      "E-4": 2634,
+      "E-5": 3199,
+      "E-6": 3632,
+      "E-7": 4625,
+      "E-8": 5666,
+      "E-9": 6949
+    };
+
+    const officer = {
+      "O-1": 3826,
+      "O-2": 4410,
+      "O-3": 5102,
+      "O-4": 5803,
+      "O-5": 6909,
+      "O-6": 8281,
+      "O-7": 10339,
+      "O-8": 12457,
+      "O-9": 17715,
+      "O-10": 18667
+    };
+
+    let base = enlisted[r] || officer[r] || 3199;
+
+    if(y >= 4) base *= 1.08;
+    if(y >= 8) base *= 1.16;
+    if(y >= 12) base *= 1.24;
+    if(y >= 16) base *= 1.33;
+    if(y >= 20) base *= 1.42;
+    if(y >= 24) base *= 1.50;
+
+    return Math.round(base);
+  }
+
+  function estimateLocalBAH(baseName, rank, dependents){
+    const meta = BASE_META[baseName] || {};
+    const market = String(meta.market || "").toLowerCase();
+    const hasDeps = String(dependents || "with") === "with";
+    const r = String(rank || "E-5").toUpperCase();
+
+    let bah = 1850;
+
+    if(market.includes("san antonio")) bah = 1850;
+    else if(market.includes("las vegas")) bah = 2250;
+    else if(market.includes("phoenix")) bah = 2350;
+    else if(market.includes("tampa")) bah = 2550;
+    else if(market.includes("colorado springs")) bah = 2300;
+    else if(market.includes("washington")) bah = 3250;
+    else if(market.includes("fairfield")) bah = 3100;
+    else if(market.includes("space coast")) bah = 2400;
+    else if(market.includes("charleston")) bah = 2400;
+    else if(market.includes("hampton")) bah = 2250;
+    else if(market.includes("spokane")) bah = 1950;
+    else if(market.includes("albuquerque")) bah = 1900;
+    else if(market.includes("tucson")) bah = 1850;
+    else if(market.includes("omaha")) bah = 1750;
+    else if(market.includes("oklahoma")) bah = 1650;
+    else if(market.includes("biloxi")) bah = 1600;
+    else if(market.includes("wichita")) bah = 1500;
+    else if(market.includes("clovis")) bah = 1400;
+
+    if(hasDeps) bah += 220;
+
+    if(r.startsWith("O-")) bah += 450;
+    else if(["E-7","E-8","E-9"].includes(r)) bah += 250;
+    else if(["E-1","E-2","E-3","E-4"].includes(r)) bah -= 150;
+
+    return Math.max(950, Math.round(bah));
+  }
+
+  function applyLocalPay(reason){
+    const input = collectInputs();
+    const type = rankType(input.rank);
+
+    if(!input.rank || !input.yos){
+      state.income = {
+        basePay:0,
+        bah:0,
+        bas:0,
+        additional:input.additionalIncome,
+        total:input.additionalIncome,
+        source:reason || "Needs inputs",
+        lockedOfficial:false,
+        raw:null
+      };
+      return state.income;
+    }
+
+    const basePay = estimateLocalBasePay(input.rank, input.yos);
+    const bah = input.base
+      ? estimateLocalBAH(input.base, input.rank, input.dependents)
+      : 0;
+    const bas = BAS[type] || BAS.enlisted;
+    const total = basePay + bah + bas + input.additionalIncome;
+
+    state.income = {
+      basePay,
+      bah,
+      bas,
+      additional:input.additionalIncome,
+      total,
+      source:reason || "Local preview",
+      lockedOfficial:false,
+      raw:null
+    };
+
+    return state.income;
+  }
+
+  /* =========================================================
+    //#6 THEWING.AI PAY ENGINE
+  ========================================================= */
+
+  function buildBrainInput(){
+    const input = collectInputs();
+    const meta = BASE_META[input.base] || {};
+
+    return {
+      source:"pcsunited.mortgage.health.webflow." + VERSION,
+      mode:"active_duty",
+      status:"active_duty",
+
+      rank:input.rank,
+      rank_paygrade:input.rank,
+      paygrade:input.rank,
+
+      yos:input.yos,
+      yearsOfService:input.yos,
+      years_of_service:input.yos,
+
+      base:input.base,
+      currentBase:input.base,
+      current_base:input.base,
+      pcsBase:input.base,
+      pcs_base:input.base,
+      selected_base:input.base,
+
+      dependents:input.dependents,
+      dependentStatus:input.dependents,
+      hasDependents:hasDependents(),
+      has_dependents:hasDependents(),
+      with_dependents:hasDependents(),
+
+      family:familyCount(),
+      familySize:familyCount(),
+      family_size:familyCount(),
+      dependents_count:hasDependents() ? 1 : 0,
+
+      zip:meta.zip || "",
+      bah_zip:meta.zip || "",
+
+      additionalIncome:input.additionalIncome,
+      additional_income:input.additionalIncome,
+
+      monthlyExpenses:input.obligations,
+      monthly_expenses:input.obligations,
+      expenses:input.obligations,
+
+      projectedHomePrice:input.homePrice,
+      projected_home_price:input.homePrice,
+      price:input.homePrice,
+
+      downpayment:input.downPayment,
+      downPayment:input.downPayment,
+
+      creditScore:input.creditScore,
+      credit_score:input.creditScore
+    };
+  }
+
+  function validatePayInputs(){
+    const input = collectInputs();
+
+    if(!input.rank){
+      throw new Error("Select a rank before calculating military pay.");
+    }
+
+    if(!input.yos){
+      throw new Error("Select years of service before calculating military pay.");
+    }
+
+    if(!input.base){
+      throw new Error("Select a base before calculating military pay.");
+    }
+
+    return input;
+  }
+
+  function pickFirstNumber(){
+    for(let i = 0; i < arguments.length; i++){
+      const value = n(arguments[i], NaN);
+      if(Number.isFinite(value) && value >= 0) return value;
+    }
+    return 0;
+  }
+
   function extractCompensation(data){
-    const payload = data && (data.payload || data.data || data.result || data) || {};
-    const truth = payload.truth_packet || payload.truthPacket || data.truth_packet || {};
-    const comp = payload.compensation || payload.comp || payload.pay || truth.compensation || {};
-    const monthly = comp.monthly || payload.monthly || truth.monthly || comp || {};
+    const payload = unwrapApiPayload(data);
+    const truth = payload.truth_packet || payload.truthPacket || data.truth_packet || data.truthPacket || {};
+    const compRoot = payload.compensation || payload.comp || truth.compensation || {};
+    const payRoot = payload.pay || truth.pay || {};
+    const monthly =
+      compRoot.monthly ||
+      payload.monthly ||
+      truth.monthly ||
+      payRoot ||
+      compRoot ||
+      {};
 
-    const basePay =
-      n(monthly.basicPay, 0) ||
-      n(monthly.basePay, 0) ||
-      n(monthly.base_pay, 0) ||
-      n(payload.basePay, 0) ||
-      n(payload.base_pay, 0);
+    const basePay = pickFirstNumber(
+      monthly.basicPay,
+      monthly.basePay,
+      monthly.base_pay,
+      monthly.monthly_base_pay,
+      payRoot.basePay,
+      payRoot.basicPay,
+      payRoot.base_pay,
+      payload.basePay,
+      payload.base_pay
+    );
 
-    const bas =
-      n(monthly.bas, 0) ||
-      n(monthly.BAS, 0) ||
-      n(payload.bas, 0) ||
-      n(payload.BAS, 0);
+    const bah = pickFirstNumber(
+      monthly.bah,
+      monthly.BAH,
+      monthly.monthly_bah,
+      monthly.housing_allowance,
+      payRoot.bah,
+      payRoot.BAH,
+      payload.bah,
+      payload.BAH
+    );
 
-    const bah =
-      n(monthly.bah, 0) ||
-      n(monthly.BAH, 0) ||
-      n(payload.bah, 0) ||
-      n(payload.BAH, 0);
+    const bas = pickFirstNumber(
+      monthly.bas,
+      monthly.BAS,
+      monthly.monthly_bas,
+      payRoot.bas,
+      payRoot.BAS,
+      payload.bas,
+      payload.BAS
+    ) || BAS[rankType(collectInputs().rank)] || BAS.enlisted;
 
-    const total =
-      n(monthly.grossMonthlyComp, 0) ||
-      n(monthly.combinedMonthlyGross, 0) ||
-      n(monthly.totalMilitaryIncome, 0) ||
-      n(monthly.totalMonthly, 0) ||
-      n(monthly.total_monthly, 0) ||
-      n(payload.totalMonthly, 0) ||
-      n(payload.total_monthly, 0) ||
-      (basePay + bas + bah);
+    const totalFromBackend = pickFirstNumber(
+      monthly.grossMonthlyComp,
+      monthly.combinedMonthlyGross,
+      monthly.totalMilitaryIncome,
+      monthly.totalMonthly,
+      monthly.total_monthly,
+      monthly.total,
+      payRoot.totalPay,
+      payRoot.total,
+      payload.totalMonthly,
+      payload.total_monthly
+    );
+
+    const additional = collectInputs().additionalIncome;
+    const total = totalFromBackend > 0
+      ? totalFromBackend + additional
+      : basePay + bas + bah + additional;
 
     return {
       basePay,
-      bas,
       bah,
+      bas,
+      additional,
       total,
       raw:data
     };
   }
 
-  async function fetchCompensation(){
+  async function fetchTheWingPay(options){
+    const opts = options || {};
+
     setError("");
-    setStatus("warn", "Fetching TheWing pay…");
-    el.btnFetchPay.disabled = true;
+    setStatus("warn","Loading TheWing.ai pay…");
 
-    const rank = String(el.rank.value || "").trim();
-    const yos = n(el.yos.value, 0);
-    const baseName = String(el.base.value || "").trim();
-    const meta = getBaseMeta();
-    const additionalIncome = Math.max(0, n(el.additionalIncome.value, 0));
-    const monthlyExpenses = Math.max(0, n(el.monthlyObligations.value, 0));
-
-    if(!rank){
-      setStatus("bad", "Missing rank");
-      setError("Select a rank.");
-      el.btnFetchPay.disabled = false;
-      return;
-    }
-
-    if(!yos){
-      setStatus("bad", "Missing YOS");
-      setError("Select years of service.");
-      el.btnFetchPay.disabled = false;
-      return;
-    }
-
-    if(!baseName){
-      setStatus("bad", "Missing base");
-      setError("Select a base.");
-      el.btnFetchPay.disabled = false;
-      return;
-    }
-
-    const input = {
-      source:"pcsunited.lightweight_fad.mortgage_health.saas.v1",
-      mode:"active_duty",
-      status:"active_duty",
-
-      rank,
-      rank_paygrade:rank,
-      paygrade:rank,
-
-      yos,
-      yearsOfService:yos,
-      years_of_service:yos,
-
-      base:baseName,
-      currentBase:baseName,
-      current_base:baseName,
-      pcsBase:baseName,
-      pcs_base:baseName,
-
-      dependents:el.dependents.value,
-      dependentStatus:el.dependents.value,
-      hasDependents:hasDependents(),
-      has_dependents:hasDependents(),
-
-      family:familyCount(),
-      familySize:familyCount(),
-      family_size:familyCount(),
-
-      zip:meta.zip || "",
-      bah_zip:meta.zip || "",
-      cityKey:meta.cityKey || "",
-      market:meta.market || "",
-
-      additionalIncome,
-      additional_income:additionalIncome,
-      additionalIncomeMonthly:additionalIncome,
-
-      monthlyExpenses,
-      monthly_expenses:monthlyExpenses,
-      expenses:monthlyExpenses,
-
-      projectedHomePrice:n(el.homePrice.value,0),
-      projected_home_price:n(el.homePrice.value,0),
-      price:n(el.homePrice.value,0),
-
-      downpayment:n(el.downPayment.value,0),
-      downPayment:n(el.downPayment.value,0),
-
-      creditScore:n(el.creditScore.value,720),
-      credit_score:n(el.creditScore.value,720)
-    };
-
-    const bodies = [
-      { tool:"PCS_SNAPSHOT", input },
-      { type:"PCS_SNAPSHOT", input },
-      input
-    ];
-
-    let lastError = null;
+    if(el.btnFetchPay) el.btnFetchPay.disabled = true;
+    if(el.btnCalc && opts.disableCalc !== false) el.btnCalc.disabled = true;
 
     try{
-      for(const body of bodies){
-        try{
-          const data = await postJSON(`${EP_BRAIN}?t=${Date.now()}`, body);
-          const comp = extractCompensation(data);
+      validatePayInputs();
+      const input = buildBrainInput();
 
-          if(comp && (comp.basePay || comp.bas || comp.bah || comp.total)){
-            state.compensation = comp;
-            state.compSource = "TheWing.ai";
-            paintCompensation();
-            computeHealth();
-            setStatus("ok", "TheWing pay loaded");
-            el.btnFetchPay.disabled = false;
-            return;
+      const bodies = [
+        { tool:"PCS_SNAPSHOT", input:input },
+        { type:"PCS_SNAPSHOT", input:input },
+        input
+      ];
+
+      let parsed = null;
+      let lastError = null;
+      let rawResponse = null;
+
+      for(let i = 0; i < bodies.length; i++){
+        try{
+          rawResponse = await postJSON(EP_BRAIN + "?t=" + Date.now(), bodies[i]);
+          parsed = extractCompensation(rawResponse);
+
+          if(parsed.basePay > 0 && parsed.bah >= 0){
+            break;
           }
+
+          lastError = new Error("TheWing.ai response did not include readable Base Pay and BAH.");
         }catch(err){
           lastError = err;
         }
       }
 
-      throw lastError || new Error("TheWing did not return compensation for this combination.");
+      if(!parsed || !(parsed.basePay > 0)){
+        throw lastError || new Error("TheWing.ai pay estimate failed.");
+      }
+
+      state.income = {
+        basePay:parsed.basePay,
+        bah:parsed.bah,
+        bas:parsed.bas,
+        additional:parsed.additional,
+        total:parsed.total,
+        source:"TheWing.ai",
+        lockedOfficial:true,
+        raw:parsed.raw
+      };
+
+      setStatus("ok","TheWing.ai pay loaded");
+      renderAll();
+      saveSnapshot();
+
+      dispatchSafe("pcsunited:compensation-ready",{
+        source:"pcsunited.mortgage.health",
+        engine:"TheWing.ai",
+        income:state.income,
+        raw:rawResponse
+      });
+
+      return state.income;
     }catch(err){
-      state.compensation = null;
-      state.compSource = "error";
-      paintCompensation();
-      computeHealth();
-      setStatus("bad", "Pay error");
-      setError(err && err.message ? err.message : String(err));
+      applyLocalPay("Local preview — TheWing.ai unavailable");
+      setStatus("warn","Local pay preview");
+      setError((err?.message || "TheWing.ai pay was unavailable.") + " This is using a local preview.");
+
+      renderAll();
+      saveSnapshot();
+
+      return state.income;
     }finally{
-      el.btnFetchPay.disabled = false;
+      if(el.btnFetchPay) el.btnFetchPay.disabled = false;
+      if(el.btnCalc) el.btnCalc.disabled = false;
     }
   }
 
-  function paintCompensation(){
-    const comp = state.compensation || {};
-    const additional = Math.max(0, n(el.additionalIncome.value, 0));
-    const totalIncome = n(comp.total, 0) + additional;
+  /* =========================================================
+    //#7 MORTGAGE ENGINE
+  ========================================================= */
 
-    el.basePay.textContent = comp.basePay ? money2(comp.basePay) : "$—";
-    el.bah.textContent = comp.bah ? money2(comp.bah) : "$—";
-    el.bas.textContent = comp.bas ? money2(comp.bas) : "$—";
-    el.additionalIncomeOut.textContent = money2(additional);
-    el.totalIncome.textContent = totalIncome > 0 ? money2(totalIncome) : "$—";
-    el.heroIncome.textContent = totalIncome > 0 ? money2(totalIncome) : "$—";
-    el.compSource.textContent = state.compSource === "TheWing.ai" ? "TheWing.ai" : "—";
+  function buildLocalMortgage(){
+    const input = collectInputs();
 
-    renderPills();
-  }
-
-  // =========================================================
-  // //#7 MORTGAGE
-  // =========================================================
-  function localMortgageFallback(){
-    const price = Math.max(0, n(el.homePrice.value, 0));
-    const downPayment = clamp(Math.max(0, n(el.downPayment.value, 0)), 0, price);
-    const loanAmount = Math.max(0, price - downPayment);
-    const creditScore = clamp(n(el.creditScore.value, 720), 300, 850);
-    const apr = aprFromCreditScore(creditScore);
-
-    const pi = monthlyPI(loanAmount, apr, TERM_YEARS);
-    const taxMonthly = (price * (Math.max(0, n(el.taxRate.value, 0)) / 100)) / 12;
-    const insuranceMonthly = Math.max(0, n(el.insuranceMonthly.value, 0));
-    const hoaMonthly = Math.max(0, n(el.hoaMonthly.value, 0));
-    const pmiMonthly = Math.max(0, n(el.pmiMonthly.value, 0));
+    const homePrice = input.homePrice;
+    const downPayment = Math.min(input.downPayment, homePrice);
+    const loanAmount = Math.max(0, homePrice - downPayment);
+    const apr = scoreAPR(input.creditScore);
+    const pi = mortgagePI(loanAmount, apr, DEFAULT_TERM_YEARS);
+    const taxMonthly = (homePrice * (input.taxRate / 100)) / 12;
+    const insuranceMonthly = input.insuranceMonthly;
+    const hoaMonthly = input.hoaMonthly;
+    const pmiMonthly = input.loanType === "va" ? 0 : input.pmiMonthly;
     const allIn = pi + taxMonthly + insuranceMonthly + hoaMonthly + pmiMonthly;
 
     return {
-      ok:true,
-      source:"local_fallback",
-      apr,
-      termYears:TERM_YEARS,
-      price,
+      homePrice,
       downPayment,
+      creditScore:input.creditScore,
+      loanType:input.loanType,
+      apr,
+      termYears:DEFAULT_TERM_YEARS,
       loanAmount,
-      monthly:{
-        principalInterest:round2(pi),
-        pi:round2(pi),
-        propertyTax:round2(taxMonthly),
-        tax:round2(taxMonthly),
-        insurance:round2(insuranceMonthly),
-        hoa:round2(hoaMonthly),
-        pmi:round2(pmiMonthly),
-        allIn:round2(allIn),
-        totalMonthly:round2(allIn),
-        totalPayment:round2(allIn)
-      },
-      breakdown:{
-        pi:round2(pi),
-        tax:round2(taxMonthly),
-        insurance:round2(insuranceMonthly),
-        hoa:round2(hoaMonthly),
-        pmi:round2(pmiMonthly),
-        allIn:round2(allIn)
-      }
+      pi,
+      taxMonthly,
+      insuranceMonthly,
+      hoaMonthly,
+      pmiMonthly,
+      allIn,
+      source:"Local fallback",
+      lockedOfficial:false,
+      meta:{}
     };
   }
 
-  function normalizeMortgageResult(data){
-    const mortgage = data.mortgage || data.result || data;
-    const monthly = mortgage.monthly || data.monthly || {};
-    const breakdown = mortgage.breakdown || data.breakdown || {};
-    const meta = data.meta || mortgage.meta || {};
+  function setLocalMortgage(){
+    state.mortgage = buildLocalMortgage();
+    return state.mortgage;
+  }
 
-    const price = n(
+  function normalizeMortgageResult(data){
+    const payload = unwrapApiPayload(data);
+    const mortgage = payload.mortgage || data.mortgage || payload.result || data.result || payload;
+    const monthly = mortgage.monthly || payload.monthly || data.monthly || {};
+    const breakdown = mortgage.breakdown || payload.breakdown || data.breakdown || {};
+    const meta = payload.meta || data.meta || mortgage.meta || {};
+    const input = collectInputs();
+
+    const homePrice = n(
       mortgage.price ||
+      payload.price ||
       data.price ||
-      n(el.homePrice.value,0),
-      0
+      input.homePrice,
+      input.homePrice
     );
 
     const loanAmount = n(
       mortgage.loanAmount ||
       mortgage.loan_amount ||
+      payload.loanAmount ||
+      payload.loan_amount ||
       data.loanAmount ||
-      data.loan_amount ||
-      data.loan ||
-      price - n(el.downPayment.value,0),
-      0
+      data.loan_amount,
+      Math.max(0, homePrice - input.downPayment)
     );
 
     const apr = n(
       mortgage.apr ||
+      payload.apr ||
       data.apr ||
-      data.rate ||
-      aprFromCreditScore(el.creditScore.value),
-      0
+      data.rate,
+      scoreAPR(input.creditScore)
     );
 
-    const pi =
-      n(breakdown.pi,0) ||
-      n(monthly.principalInterest,0) ||
-      n(monthly.monthlyPI,0) ||
-      n(monthly.pi,0) ||
-      n(monthly.principal_interest,0);
+    const pi = pickFirstNumber(
+      breakdown.pi,
+      monthly.pi,
+      monthly.principalInterest,
+      monthly.principal_interest,
+      monthly.monthlyPI
+    );
 
-    const tax =
-      n(breakdown.tax,0) ||
-      n(monthly.propertyTax,0) ||
-      n(monthly.tax,0) ||
-      n(monthly.taxMonthly,0);
+    const taxMonthly = pickFirstNumber(
+      breakdown.tax,
+      monthly.tax,
+      monthly.propertyTax,
+      monthly.property_tax,
+      monthly.taxMonthly
+    );
 
-    const insurance =
-      n(breakdown.insurance,0) ||
-      n(monthly.insurance,0) ||
-      n(monthly.insuranceMonthly,0);
+    const insuranceMonthly = pickFirstNumber(
+      breakdown.insurance,
+      monthly.insurance,
+      monthly.insuranceMonthly
+    );
 
-    const hoa =
-      n(breakdown.hoa,0) ||
-      n(monthly.hoa,0) ||
-      n(monthly.hoaMonthly,0);
+    const hoaMonthly = pickFirstNumber(
+      breakdown.hoa,
+      monthly.hoa,
+      monthly.hoaMonthly
+    );
 
-    const pmi =
-      n(breakdown.pmi,0) ||
-      n(monthly.pmi,0) ||
-      n(monthly.pmiMonthly,0);
+    const pmiMonthly = input.loanType === "va"
+      ? 0
+      : pickFirstNumber(
+          breakdown.pmi,
+          monthly.pmi,
+          monthly.pmiMonthly
+        );
 
-    const allIn =
-      n(breakdown.allIn,0) ||
-      n(monthly.allIn,0) ||
-      n(monthly.totalMonthly,0) ||
-      n(monthly.totalPayment,0) ||
-      n(data.totalMonthly,0) ||
-      (pi + tax + insurance + hoa + pmi);
+    const allIn = pickFirstNumber(
+      breakdown.allIn,
+      monthly.allIn,
+      monthly.totalMonthly,
+      monthly.totalPayment,
+      payload.totalMonthly,
+      data.totalMonthly,
+      pi + taxMonthly + insuranceMonthly + hoaMonthly + pmiMonthly
+    );
 
     return {
-      ok:true,
-      source:data.source || data.app || "thewing_mortgage",
+      homePrice,
+      downPayment:input.downPayment,
+      creditScore:input.creditScore,
+      loanType:input.loanType,
       apr,
-      termYears:n(mortgage.termYears || data.termYears || TERM_YEARS, TERM_YEARS),
-      price,
+      termYears:n(mortgage.termYears || payload.termYears || data.termYears || DEFAULT_TERM_YEARS, DEFAULT_TERM_YEARS),
       loanAmount,
-      monthly:{
-        principalInterest:round2(pi),
-        pi:round2(pi),
-        propertyTax:round2(tax),
-        tax:round2(tax),
-        insurance:round2(insurance),
-        hoa:round2(hoa),
-        pmi:round2(pmi),
-        allIn:round2(allIn),
-        totalMonthly:round2(allIn),
-        totalPayment:round2(allIn)
-      },
-      breakdown:{
-        pi:round2(pi),
-        tax:round2(tax),
-        insurance:round2(insurance),
-        hoa:round2(hoa),
-        pmi:round2(pmi),
-        allIn:round2(allIn)
-      },
+      pi,
+      taxMonthly,
+      insuranceMonthly,
+      hoaMonthly,
+      pmiMonthly,
+      allIn,
+      source:"TheWing.ai",
+      lockedOfficial:true,
       meta:{
-        engineVersion:meta.engineVersion || data.engineVersion || "",
-        insuranceSource:meta.insuranceSource || "",
-        propertyTaxSource:meta.propertyTaxSource || "",
+        engineVersion:meta.engineVersion || data.engineVersion || payload.engineVersion || "",
         aprSource:meta.aprSource || data.aprSource || "",
+        propertyTaxSource:meta.propertyTaxSource || "",
+        insuranceSource:meta.insuranceSource || "",
         pmiSource:meta.pmiSource || "",
         generatedAt:meta.generatedAt || ""
       },
@@ -778,427 +1070,595 @@
     };
   }
 
-  async function calculateMortgage(){
-    setError("");
-    setStatus("warn", "Calculating mortgage…");
-    el.btnCalc.disabled = true;
+  function getMortgageSnapshot(){
+    if(state.mortgage && Number.isFinite(state.mortgage.allIn)){
+      return state.mortgage;
+    }
+    return buildLocalMortgage();
+  }
 
-    const price = Math.max(0, n(el.homePrice.value,0));
-    const downPayment = Math.max(0, n(el.downPayment.value,0));
-    const creditScore = clamp(n(el.creditScore.value,720), 300, 850);
-    const taxRate = Math.max(0, n(el.taxRate.value,0));
-    const insuranceMonthly = Math.max(0, n(el.insuranceMonthly.value,0));
-    const hoaMonthly = Math.max(0, n(el.hoaMonthly.value,0));
-    const pmiMonthly = Math.max(0, n(el.pmiMonthly.value,0));
-    const loanType = String(el.loanType.value || "va");
+  async function fetchTheWingMortgage(options){
+    const opts = options || {};
+    const input = collectInputs();
 
-    const payload = {
-      source:"pcsunited.lightweight_fad.mortgage_health.saas.v1",
+    setStatus("warn","Calculating mortgage…");
 
-      price,
-      projected_home_price:price,
-      projectedHomePrice:price,
-
-      downpayment:downPayment,
-      downPayment,
-      down_payment:downPayment,
-
-      creditScore,
-      credit_score:creditScore,
-
-      termYears:TERM_YEARS,
-      term_years:TERM_YEARS,
-
-      loanType,
-      loan_type:loanType,
-
-      property_tax_rate:taxRate,
-      propertyTaxRate:taxRate,
-      taxRate,
-
-      insurance_monthly:insuranceMonthly,
-      insuranceMonthly,
-      home_insurance_monthly:insuranceMonthly,
-      homeInsuranceMonthly:insuranceMonthly,
-
-      hoa_monthly:hoaMonthly,
-      hoaMonthly,
-
-      pmi_monthly:pmiMonthly,
-      pmiMonthly
-    };
+    if(el.btnCalc && opts.disableCalc !== false) el.btnCalc.disabled = true;
 
     try{
-      const data = await postJSON(`${EP_MORTGAGE}?t=${Date.now()}`, payload);
+      const payload = {
+        price:input.homePrice,
+        homePrice:input.homePrice,
+        projected_home_price:input.homePrice,
+        downpayment:input.downPayment,
+        downPayment:input.downPayment,
+        credit_score:input.creditScore,
+        creditScore:input.creditScore,
+        termYears:DEFAULT_TERM_YEARS,
+        loanType:input.loanType,
+        taxRate:input.taxRate,
+        propertyTaxRate:input.taxRate,
+        insuranceMonthly:input.insuranceMonthly,
+        hoaMonthly:input.hoaMonthly,
+        pmiMonthly:input.pmiMonthly,
+        source:"pcsunited.mortgage.health.webflow." + VERSION
+      };
+
+      const data = await postJSON(EP_MORTGAGE + "?t=" + Date.now(), payload);
       state.mortgage = normalizeMortgageResult(data);
-      state.mortgageSource = "TheWing.ai";
 
-      paintMortgage();
-      computeHealth();
-      setStatus("ok", "Mortgage ready");
+      setStatus("ok","Ready");
+      renderAll();
+      saveSnapshot();
+
+      dispatchSafe("pcsunited:mortgage-ready",{
+        source:"pcsunited.mortgage.health",
+        engine:"TheWing.ai",
+        mortgage:state.mortgage,
+        raw:data
+      });
+
+      return state.mortgage;
     }catch(err){
-      state.mortgage = localMortgageFallback();
-      state.mortgageSource = "Local fallback";
+      state.mortgage = buildLocalMortgage();
+      setStatus("warn","Local mortgage estimate");
+      setError("TheWing.ai mortgage engine was unavailable, so this is using the local mortgage fallback. " + (err?.message || ""));
 
-      paintMortgage();
-      computeHealth();
-      setStatus("warn", "Local mortgage math");
-      setError(
-        "TheWing mortgage endpoint did not respond, so this dashboard used local fallback math. " +
-        (err && err.message ? err.message : "")
-      );
+      renderAll();
+      saveSnapshot();
+
+      return state.mortgage;
     }finally{
-      el.btnCalc.disabled = false;
+      if(el.btnCalc) el.btnCalc.disabled = false;
     }
   }
 
-  function paintMortgage(){
-    const mortgage = state.mortgage || localMortgageFallback();
-    const breakdown = mortgage.breakdown || {};
-    const monthly = mortgage.monthly || {};
+  async function calculateFullTheWingFlow(){
+    setError("");
+    setStatus("warn","Running TheWing.ai flow…");
 
-    const allIn =
-      n(breakdown.allIn,0) ||
-      n(monthly.allIn,0) ||
-      n(monthly.totalMonthly,0);
+    if(el.btnCalc) el.btnCalc.disabled = true;
+    if(el.btnFetchPay) el.btnFetchPay.disabled = true;
 
-    const pi =
-      n(breakdown.pi,0) ||
-      n(monthly.pi,0) ||
-      n(monthly.principalInterest,0);
+    try{
+      await fetchTheWingPay({ disableCalc:false });
+      await fetchTheWingMortgage({ disableCalc:false });
 
-    const tax =
-      n(breakdown.tax,0) ||
-      n(monthly.tax,0) ||
-      n(monthly.propertyTax,0);
+      setStatus("ok","TheWing.ai snapshot ready");
+      renderAll();
+      saveSnapshot();
+    }catch(err){
+      setStatus("warn","Snapshot completed with fallback");
+      setError("TheWing.ai flow had an issue. " + (err?.message || ""));
+      renderAll();
+      saveSnapshot();
+    }finally{
+      if(el.btnCalc) el.btnCalc.disabled = false;
+      if(el.btnFetchPay) el.btnFetchPay.disabled = false;
+    }
+  }
 
-    const insurance =
-      n(breakdown.insurance,0) ||
-      n(monthly.insurance,0);
+  /* =========================================================
+    //#8 HEALTH + BUYER RANGE
+  ========================================================= */
 
-    const hoa =
-      n(breakdown.hoa,0) ||
-      n(monthly.hoa,0);
+  function computeHealth(){
+    const input = collectInputs();
+    const mortgage = getMortgageSnapshot();
 
-    const pmi =
-      n(breakdown.pmi,0) ||
-      n(monthly.pmi,0);
+    syncIncomeTotal();
 
-    el.allInPayment.textContent = money2(allIn);
-    el.heroPayment.textContent = money2(allIn);
-    el.loanAmount.textContent = `${money(mortgage.loanAmount)} loan`;
-    el.piPayment.textContent = money2(pi);
-    el.taxMonthly.textContent = money2(tax);
-    el.insuranceOut.textContent = money2(insurance);
-    el.hoaOut.textContent = money2(hoa);
-    el.pmiOut.textContent = money2(pmi);
+    state.obligations = input.obligations;
 
-    const apr = n(mortgage.apr,0);
-    const termYears = n(mortgage.termYears, TERM_YEARS) || TERM_YEARS;
+    const totalIncome = n(state.income.total,0);
+    const allInMortgage = n(mortgage.allIn,0);
+    const obligations = n(state.obligations,0);
+    const residual = totalIncome - allInMortgage - obligations;
+    const residualPct = totalIncome > 0 ? (residual / totalIncome) * 100 : 0;
 
-    el.rateLine.textContent = apr > 0
-      ? `${apr.toFixed(2)}% APR • ${termYears} years`
-      : "TheWing mortgage engine";
+    state.residual = residual;
+    state.residualPct = residualPct;
 
-    if(state.mortgageSource === "TheWing.ai"){
-      const meta = mortgage.meta || {};
-      const parts = ["Mortgage calculation powered by TheWing.ai /api/mortgage."];
+    let health = "Needs Inputs";
+    let note = "Add income data to generate a lightweight financial health signal.";
+    let kind = "warn";
 
-      if(meta.engineVersion){
-        parts.push(`Engine ${meta.engineVersion}.`);
-      }
-
-      if(meta.insuranceSource === "inputMonthly"){
-        parts.push("Insurance uses your monthly input.");
-      }
-
-      el.mortgageSource.textContent = parts.join(" ");
+    if(totalIncome <= 0){
+      health = "Needs Inputs";
+      kind = "warn";
+      note = "Add income data to generate a lightweight financial health signal.";
+    }else if(residualPct >= 35){
+      health = "Strong";
+      kind = "ok";
+      note = "Strong residual margin after mortgage and obligations.";
+    }else if(residualPct >= 20){
+      health = "Stable";
+      kind = "ok";
+      note = "Healthy residual margin. You still have meaningful breathing room after the mortgage.";
+    }else if(residualPct >= 10){
+      health = "Stressed";
+      kind = "warn";
+      note = "Residual margin is thin. Consider reducing price or obligations.";
+    }else if(residualPct >= 0){
+      health = "High Risk";
+      kind = "bad";
+      note = "Very limited residual margin after mortgage and obligations.";
     }else{
-      el.mortgageSource.textContent = "Mortgage calculation is using local fallback math.";
+      health = "Not Ready";
+      kind = "bad";
+      note = "Projected outflow is higher than income. Lower price, reduce obligations, or increase income before buying.";
     }
+
+    state.health = health;
+    state.healthKind = kind;
+    state.healthNote = note;
+
+    return {
+      totalIncome,
+      allInMortgage,
+      obligations,
+      residual,
+      residualPct,
+      health,
+      kind,
+      note,
+      mortgage
+    };
   }
 
-  // =========================================================
-  // //#8 FINANCIAL HEALTH
-  // =========================================================
-  function getHealthStatus(residualRatio, residual, income){
-    if(income <= 0){
+  function computeBuyerRange(){
+    const health = computeHealth();
+    const mortgage = health.mortgage || getMortgageSnapshot();
+
+    const currentPrice = Math.max(0, mortgage.homePrice || collectInputs().homePrice);
+    const residualPct = Number(health.residualPct) || 0;
+
+    if(health.totalIncome <= 0 || currentPrice <= 0){
       return {
-        label:"Needs Inputs",
-        tone:"warn",
-        note:"Fetch pay or enter income details to calculate financial health."
+        min:0,
+        target:currentPrice,
+        max:0,
+        leftPct:47,
+        widthPct:6,
+        kind:"warn",
+        note:"Enter income, obligations, and home price to generate a smarter purchase range."
       };
     }
 
-    if(residual < 0){
-      return {
-        label:"High Risk",
-        tone:"bad",
-        note:"Estimated mortgage and obligations exceed monthly income."
-      };
+    let leftRoomPct = 8;
+    let rightRoomPct = 8;
+    let downsidePct = 0.08;
+    let upsidePct = 0.08;
+
+    if(residualPct >= 70){
+      leftRoomPct = 0;
+      rightRoomPct = 42;
+      downsidePct = 0.00;
+      upsidePct = 0.36;
+    }else if(residualPct >= 60){
+      leftRoomPct = 3;
+      rightRoomPct = 38;
+      downsidePct = 0.02;
+      upsidePct = 0.30;
+    }else if(residualPct >= 50){
+      leftRoomPct = 6;
+      rightRoomPct = 32;
+      downsidePct = 0.04;
+      upsidePct = 0.24;
+    }else if(residualPct >= 40){
+      leftRoomPct = 9;
+      rightRoomPct = 26;
+      downsidePct = 0.06;
+      upsidePct = 0.18;
+    }else if(residualPct >= 35){
+      leftRoomPct = 12;
+      rightRoomPct = 22;
+      downsidePct = 0.08;
+      upsidePct = 0.14;
+    }else if(residualPct >= 25){
+      leftRoomPct = 16;
+      rightRoomPct = 14;
+      downsidePct = 0.11;
+      upsidePct = 0.09;
+    }else if(residualPct >= 20){
+      leftRoomPct = 20;
+      rightRoomPct = 8;
+      downsidePct = 0.15;
+      upsidePct = 0.05;
+    }else if(residualPct >= 15){
+      leftRoomPct = 25;
+      rightRoomPct = 4;
+      downsidePct = 0.20;
+      upsidePct = 0.02;
+    }else if(residualPct >= 10){
+      leftRoomPct = 30;
+      rightRoomPct = 1;
+      downsidePct = 0.25;
+      upsidePct = 0.00;
+    }else if(residualPct >= 5){
+      leftRoomPct = 35;
+      rightRoomPct = 0;
+      downsidePct = 0.30;
+      upsidePct = 0.00;
+    }else if(residualPct >= 0){
+      leftRoomPct = 40;
+      rightRoomPct = 0;
+      downsidePct = 0.36;
+      upsidePct = 0.00;
+    }else{
+      leftRoomPct = 45;
+      rightRoomPct = 0;
+      downsidePct = 0.42;
+      upsidePct = 0.00;
     }
 
-    if(residualRatio >= 35){
-      return {
-        label:"Strong",
-        tone:"ok",
-        note:"Strong residual margin after mortgage and obligations."
-      };
-    }
+    const leftPct = clamp(50 - leftRoomPct, 0, 100);
+    const widthPct = clamp(leftRoomPct + rightRoomPct, 6, 92);
 
-    if(residualRatio >= 25){
-      return {
-        label:"Healthy",
-        tone:"ok",
-        note:"Healthy residual income after required outflow."
-      };
-    }
+    const targetPrice = currentPrice;
+    const minPrice = Math.max(0, Math.round((currentPrice * (1 - downsidePct)) / 1000) * 1000);
+    const maxPrice = Math.max(minPrice, Math.round((currentPrice * (1 + upsidePct)) / 1000) * 1000);
 
-    if(residualRatio >= 15){
-      return {
-        label:"Workable",
-        tone:"warn",
-        note:"Workable, but the budget should be watched closely."
-      };
-    }
+    let kind = health.kind;
+    let note = "";
 
-    if(residualRatio >= 5){
-      return {
-        label:"Stressed",
-        tone:"warn",
-        note:"Residual margin is thin. Consider reducing price or obligations."
-      };
+    if(health.kind === "ok"){
+      if(upsidePct > 0){
+        note =
+          health.health +
+          ": Your selected " +
+          money(targetPrice,0) +
+          " target is within the green zone. You may have room up to " +
+          money(maxPrice,0) +
+          " if desired.";
+      }else{
+        note =
+          health.health +
+          ": Your selected " +
+          money(targetPrice,0) +
+          " target is within range.";
+      }
+    }else if(health.kind === "warn"){
+      note =
+        health.health +
+        ": Your selected " +
+        money(targetPrice,0) +
+        " target is workable but tight. Safer lane is " +
+        money(minPrice,0) +
+        " to " +
+        money(maxPrice,0) +
+        ".";
+    }else{
+      note =
+        health.health +
+        ": Your selected " +
+        money(targetPrice,0) +
+        " target is under pressure. Safer lane is closer to " +
+        money(minPrice,0) +
+        " to " +
+        money(maxPrice,0) +
+        ".";
     }
 
     return {
-      label:"High Risk",
-      tone:"bad",
-      note:"Very limited residual margin after mortgage and obligations."
+      min:minPrice,
+      target:targetPrice,
+      max:maxPrice,
+      leftPct,
+      widthPct,
+      kind,
+      note
     };
   }
 
-  function computeHealth(){
-    const mortgage = state.mortgage || localMortgageFallback();
+  /* =========================================================
+    //#9 RENDER
+  ========================================================= */
 
-    const allIn =
-      n(mortgage.breakdown && mortgage.breakdown.allIn,0) ||
-      n(mortgage.monthly && mortgage.monthly.allIn,0) ||
-      n(mortgage.monthly && mortgage.monthly.totalMonthly,0);
+  function renderAll(){
+    const health = computeHealth();
+    const range = computeBuyerRange();
 
-    const comp = state.compensation || {};
-    const militaryIncome = n(comp.total,0);
-    const additionalIncome = Math.max(0, n(el.additionalIncome.value,0));
-    const totalIncome = militaryIncome + additionalIncome;
-
-    const monthlyObligations = Math.max(0, n(el.monthlyObligations.value,0));
-    const totalOutflow = allIn + monthlyObligations;
-    const residual = totalIncome - totalOutflow;
-
-    const residualRatio = totalIncome > 0 ? (residual / totalIncome) * 100 : 0;
-    const housingRatio = totalIncome > 0 ? (allIn / totalIncome) * 100 : 0;
-    const outflowRatio = totalIncome > 0 ? (totalOutflow / totalIncome) * 100 : 0;
-
-    const status = getHealthStatus(residualRatio, residual, totalIncome);
-
-    state.health = {
-      totalIncome:round2(totalIncome),
-      militaryIncome:round2(militaryIncome),
-      additionalIncome:round2(additionalIncome),
-      mortgagePayment:round2(allIn),
-      monthlyObligations:round2(monthlyObligations),
-      totalOutflow:round2(totalOutflow),
-      residualIncome:round2(residual),
-      residualRatioPct:round2(residualRatio),
-      housingRatioPct:round2(housingRatio),
-      totalOutflowRatioPct:round2(outflowRatio),
-      status:status.label,
-      tone:status.tone,
-      note:status.note
-    };
-
-    paintHealth();
-    saveSnapshot();
-
-    return state.health;
+    renderPills();
+    renderMortgage(health.mortgage);
+    renderIncome();
+    renderHealth(health);
+    renderBuyerRange(range);
+    renderVerdict(health, range);
   }
 
-  function paintHealth(){
-    const health = state.health || {};
-    const tone = health.tone || "warn";
-
-    const ringColor =
-      tone === "ok"
-        ? "var(--mint)"
-        : tone === "bad"
-          ? "var(--danger)"
-          : "var(--gold)";
-
-    const residualPct = n(health.residualRatioPct,0);
-    const ringPct = clamp(residualPct, 0, 100);
-
-    el.healthRing.style.setProperty("--pct", ringPct);
-    el.healthRing.style.setProperty("--ring-color", ringColor);
-
-    el.residualPercent.textContent = health.totalIncome > 0 ? pct(residualPct) : "—";
-
-    el.healthBarFill.classList.remove("warn","bad");
-    if(tone === "warn") el.healthBarFill.classList.add("warn");
-    if(tone === "bad") el.healthBarFill.classList.add("bad");
-    el.healthBarFill.style.width = `${ringPct}%`;
-
-    el.healthIncome.textContent = health.totalIncome > 0 ? money2(health.totalIncome) : "$—";
-    el.healthMortgage.textContent = health.mortgagePayment > 0 ? money2(health.mortgagePayment) : "$—";
-    el.healthObligations.textContent = money2(health.monthlyObligations || 0);
-    el.healthOutflow.textContent = health.totalOutflow > 0 ? money2(health.totalOutflow) : "$—";
-    el.healthResidual.textContent = health.totalIncome > 0 ? money2(health.residualIncome) : "$—";
-
-    classTone(el.healthResidual, tone);
-    classTone(el.healthNote, tone);
-    classTone(el.heroHealth, tone);
-    classTone(el.heroResidual, tone);
-    classTone(el.heroResidualPct, tone);
-    classTone(el.verdictBox, tone);
-
-    el.totalIncome.textContent = health.totalIncome > 0 ? money2(health.totalIncome) : "$—";
-    el.heroIncome.textContent = health.totalIncome > 0 ? money2(health.totalIncome) : "$—";
-    el.housingRatio.textContent = health.totalIncome > 0 ? `${pct(health.housingRatioPct)} housing ratio` : "— housing ratio";
-
-    el.heroResidual.textContent = health.totalIncome > 0 ? money2(health.residualIncome) : "$—";
-    el.heroResidualPct.textContent = health.totalIncome > 0 ? pct(health.residualRatioPct) : "—";
-
-    el.heroHealth.textContent = health.status || "Needs Inputs";
-    el.heroHealthNote.textContent = health.note || "Calculate mortgage health to generate your snapshot.";
-
-    el.healthNote.textContent =
-      health.totalIncome > 0
-        ? `${health.status}: ${health.note} Residual margin is ${pct(health.residualRatioPct)} of total monthly income.`
-        : "Add income data to generate a lightweight financial health signal.";
-
-    el.verdictBox.textContent =
-      health.totalIncome > 0
-        ? `Verdict: ${health.status}. Total income is ${money2(health.totalIncome)}, total outflow is ${money2(health.totalOutflow)}, and residual income is ${money2(health.residualIncome)}.`
-        : "Verdict: Need income data. Use optional military inputs and fetch TheWing pay.";
-  }
-
-  // =========================================================
-  // //#9 SNAPSHOT SAVE
-  // =========================================================
-  function saveSnapshot(){
-    const payload = {
-      source:"pcsunited.lightweight_fad.mortgage_health.saas.v1",
-      saved_at:new Date().toISOString(),
-
-      profile:{
-        rank:el.rank.value,
-        rank_paygrade:el.rank.value,
-        yos:n(el.yos.value,0),
-        base:el.base.value,
-        dependents:el.dependents.value,
-        family:familyCount()
-      },
-
-      inputs:{
-        price:n(el.homePrice.value,0),
-        downpayment:n(el.downPayment.value,0),
-        credit_score:n(el.creditScore.value,720),
-        loan_type:el.loanType.value,
-        property_tax_rate:n(el.taxRate.value,0),
-        insurance_monthly:n(el.insuranceMonthly.value,0),
-        hoa_monthly:n(el.hoaMonthly.value,0),
-        pmi_monthly:n(el.pmiMonthly.value,0),
-        additional_income:n(el.additionalIncome.value,0),
-        monthly_obligations:n(el.monthlyObligations.value,0)
-      },
-
-      compensation:state.compensation,
-      mortgage:state.mortgage,
-      financial_health:state.health
-    };
-
-    writeJSON(KEY_OUTPUT, payload);
-    writeJSON(KEY_MORTGAGE_HEALTH, payload);
-
-    dispatchSafe("pcsunited:mortgage-health-ready", payload);
-    dispatchSafe("pcsunited:lightweight-fad-ready", payload);
-  }
-
-  // =========================================================
-  // //#10 UI
-  // =========================================================
   function renderPills(){
-    const items = [
-      ["Rank", el.rank.value || "—"],
-      ["YOS", el.yos.value || "—"],
-      ["Base", el.base.value || "—"],
-      ["Deps", el.dependents.value === "with" ? "With" : "Without"],
-      ["Extra", money(n(el.additionalIncome.value,0))]
+    const input = collectInputs();
+
+    if(!el.profilePills) return;
+
+    const bits = [
+      ["Rank", input.rank || "—"],
+      ["YOS", input.yos || "—"],
+      ["Base", input.base || "Select base"],
+      ["Deps", input.dependents === "with" ? "With" : "Without"],
+      ["Extra", money(input.additionalIncome,0)]
     ];
 
-    el.profilePills.innerHTML = items.map(([label, value]) => {
-      return `<div class="info-pill"><span>${label}:</span><b>${String(value)}</b></div>`;
+    el.profilePills.innerHTML = bits.map(function(pair){
+      return '<div class="info-pill"><span>' + pair[0] + ':</span><b>' + pair[1] + '</b></div>';
     }).join("");
   }
 
-  function clearAll(){
-    state.intake = null;
-    state.compensation = null;
-    state.mortgage = null;
-    state.health = null;
-    state.compSource = "none";
-    state.mortgageSource = "local";
+  function renderMortgage(mortgage){
+    const m = mortgage || getMortgageSnapshot();
 
-    el.rank.value = "E-5";
-    el.yos.value = "6";
-    el.base.value = "JBSA Lackland";
-    el.dependents.value = "with";
-    el.additionalIncome.value = "0";
-    el.monthlyObligations.value = "";
-
-    el.homePrice.value = "450000";
-    el.downPayment.value = "22500";
-    el.creditScore.value = "720";
-    el.loanType.value = "va";
-    el.taxRate.value = "2.10";
-    el.insuranceMonthly.value = "180";
-    el.hoaMonthly.value = "0";
-    el.pmiMonthly.value = "0";
-
-    el.basePay.textContent = "$—";
-    el.bah.textContent = "$—";
-    el.bas.textContent = "$—";
-    el.additionalIncomeOut.textContent = "$—";
-    el.totalIncome.textContent = "$—";
-    el.heroIncome.textContent = "$—";
-    el.compSource.textContent = "—";
-
-    setError("");
-    setStatus(null, "Ready");
-    renderPills();
-
-    state.mortgage = localMortgageFallback();
-    paintMortgage();
-    paintCompensation();
-    computeHealth();
+    setText(el.heroPayment, money(m.allIn,2));
+    setText(el.allInPayment, money(m.allIn,2));
+    setText(el.loanAmount, money(m.loanAmount,0) + " loan");
+    setText(el.piPayment, money(m.pi,2));
+    setText(el.taxMonthly, money(m.taxMonthly,2));
+    setText(el.insuranceOut, money(m.insuranceMonthly,2));
+    setText(el.hoaOut, money(m.hoaMonthly,2));
+    setText(el.pmiOut, money(m.pmiMonthly,2));
+    setText(el.mortgageSource, "Mortgage source: " + (m.source || "Local fallback"));
+    setText(el.rateLine, (Number(m.apr || 0).toFixed(2)) + "% APR • " + DEFAULT_TERM_YEARS + " years");
   }
 
-  function recalcLocal(){
-    renderPills();
+  function renderIncome(){
+    const i = state.income;
+    const mortgage = getMortgageSnapshot();
+    const housingRatio = i.total > 0 ? (mortgage.allIn / i.total) * 100 : 0;
 
-    if(state.mortgageSource !== "TheWing.ai"){
-      state.mortgage = localMortgageFallback();
-      paintMortgage();
+    setText(el.heroIncome, i.total > 0 ? money(i.total,2) : "$—");
+    setText(el.totalIncome, i.total > 0 ? money(i.total,2) : "$—");
+    setText(el.housingRatio, i.total > 0 ? pct(housingRatio,1) + " housing ratio" : "— housing ratio");
+
+    setText(el.basePay, i.basePay > 0 ? money(i.basePay,2) : "$—");
+    setText(el.bah, i.base ? money(i.bah,2) : "$—");
+    setText(el.bas, i.basePay > 0 ? money(i.bas,2) : "$—");
+    setText(el.additionalIncomeOut, money(i.additional,2));
+    setText(el.compSource, i.source || "—");
+
+    setText(el.healthIncome, i.total > 0 ? money(i.total,2) : "$—");
+  }
+
+  function renderHealth(health){
+    const ringPct = clamp(Math.max(0, health.residualPct),0,100);
+
+    setText(el.heroHealth, health.health);
+    setText(
+      el.heroHealthNote,
+      health.note + (health.totalIncome > 0 ? " Residual margin is " + pct(health.residualPct,1) + " of total monthly income." : "")
+    );
+
+    setText(el.residualPercent, health.totalIncome > 0 ? pct(health.residualPct,1) : "—");
+    setText(el.heroResidual, health.totalIncome > 0 ? money(health.residual,2) : "$—");
+    setText(el.heroResidualPct, health.totalIncome > 0 ? pct(health.residualPct,1) : "—");
+
+    setText(el.healthObligations, money(health.obligations,2));
+    setText(el.healthMortgage, money(health.allInMortgage,2));
+    setText(el.healthOutflow, money(health.allInMortgage + health.obligations,2));
+    setText(el.healthResidual, health.totalIncome > 0 ? money(health.residual,2) : "$—");
+
+    applyKind(el.heroHealth, health.kind);
+    applyKind(el.heroResidual, health.kind);
+    applyKind(el.heroResidualPct, health.kind);
+
+    if(el.healthRing){
+      el.healthRing.style.setProperty("--pct", String(ringPct));
+      el.healthRing.style.setProperty(
+        "--ring-color",
+        health.kind === "ok" ? "var(--mint)" : health.kind === "bad" ? "var(--danger)" : "var(--gold)"
+      );
+    }
+  }
+
+  function renderBuyerRange(range){
+    setText(el.buyerRangeMin, range.min > 0 ? money(range.min,0) : "$—");
+    setText(el.buyerRangeTarget, range.target > 0 ? money(range.target,0) : "$—");
+    setText(el.buyerRangeMax, range.max > 0 ? money(range.max,0) : "$—");
+
+    if(el.buyerRangeFill){
+      el.buyerRangeFill.style.left = range.leftPct + "%";
+      el.buyerRangeFill.style.width = range.widthPct + "%";
+      el.buyerRangeFill.style.transform = "none";
+
+      el.buyerRangeFill.style.setProperty("--buyer-fill-left", range.leftPct + "%");
+      el.buyerRangeFill.style.setProperty("--buyer-fill-width", range.widthPct + "%");
+
+      if(range.kind === "ok"){
+        el.buyerRangeFill.style.background =
+          "linear-gradient(90deg,var(--mint) 0%,var(--mint) 58%,var(--blue) 100%)";
+      }else if(range.kind === "warn"){
+        el.buyerRangeFill.style.background =
+          "linear-gradient(90deg,var(--gold) 0%,var(--blue) 100%)";
+      }else{
+        el.buyerRangeFill.style.background =
+          "linear-gradient(90deg,var(--danger) 0%,var(--gold) 100%)";
+      }
+
+      el.buyerRangeFill.classList.remove("warn","bad");
+      if(range.kind === "warn") el.buyerRangeFill.classList.add("warn");
+      if(range.kind === "bad") el.buyerRangeFill.classList.add("bad");
     }
 
-    paintCompensation();
-    computeHealth();
+    if(el.buyerRangeNote){
+      el.buyerRangeNote.textContent = range.note;
+      el.buyerRangeNote.classList.remove("warn","bad");
+      if(range.kind === "warn") el.buyerRangeNote.classList.add("warn");
+      if(range.kind === "bad") el.buyerRangeNote.classList.add("bad");
+    }
+
+    if(el.buyerRangeProgress){
+      const minVal = range.min > 0 ? range.min : 0;
+      const maxVal = range.max > 0 ? range.max : (range.target > 0 ? range.target : 100);
+      const nowVal = range.target > 0 ? range.target : 0;
+
+      el.buyerRangeProgress.setAttribute("aria-valuemin", String(minVal));
+      el.buyerRangeProgress.setAttribute("aria-valuemax", String(Math.max(maxVal, minVal + 1)));
+      el.buyerRangeProgress.setAttribute("aria-valuenow", String(nowVal));
+      el.buyerRangeProgress.setAttribute(
+        "aria-valuetext",
+        range.target > 0
+          ? "Preferred target " + money(range.target,0) + ", range " + money(range.min,0) + " to " + money(range.max,0)
+          : "Enter income, obligations, and home price to generate a purchase range."
+      );
+    }
   }
 
-  function wireEvents(){
-    el.btnFetchPay.addEventListener("click", fetchCompensation);
-    el.btnCalc.addEventListener("click", calculateMortgage);
-    el.btnClear.addEventListener("click", clearAll);
+  function renderVerdict(health, range){
+    if(!el.verdictBox) return;
 
-    [
+    el.verdictBox.classList.remove("ok","warn","bad");
+
+    let sourceNote = state.income.lockedOfficial
+      ? " Compensation source: TheWing.ai."
+      : " Compensation source: local preview. Click Calculate Mortgage Health to run TheWing.ai.";
+
+    if(!collectInputs().base){
+      sourceNote = " Select a base to calculate BAH through TheWing.ai.";
+    }
+
+    let message = "Verdict: Need income data." + sourceNote;
+
+    if(health.totalIncome > 0){
+      message =
+        "Verdict: " +
+        health.health +
+        ". " +
+        health.note +
+        " Selected buyer target: " +
+        (range.target > 0 ? money(range.target,0) : "$—") +
+        "." +
+        sourceNote;
+
+      el.verdictBox.classList.add(health.kind);
+    }
+
+    el.verdictBox.textContent = message;
+  }
+
+  /* =========================================================
+    //#10 SAVE SNAPSHOT
+  ========================================================= */
+
+  function saveSnapshot(){
+    const payload = {
+      source:"pcsunited.mortgage.health.webflow." + VERSION,
+      version:VERSION,
+      saved_at:new Date().toISOString(),
+      inputs:collectInputs(),
+      income:{
+        basePay:state.income.basePay,
+        bah:state.income.bah,
+        bas:state.income.bas,
+        additional:state.income.additional,
+        total:state.income.total,
+        source:state.income.source,
+        lockedOfficial:state.income.lockedOfficial
+      },
+      mortgage:getMortgageSnapshot(),
+      obligations:state.obligations,
+      residual:state.residual,
+      residual_pct:state.residualPct,
+      health:state.health,
+      health_kind:state.healthKind,
+      buyer_range:computeBuyerRange()
+    };
+
+    writeJSON(STORAGE_KEYS.mortgageResult,payload);
+    writeJSON(STORAGE_KEYS.mortgageMirror,payload);
+
+    dispatchSafe("pcsunited:mortgage-health-ready",payload);
+  }
+
+  /* =========================================================
+    //#11 ACTIONS
+  ========================================================= */
+
+  function clearAll(){
+    setInputValue(el.rank,"");
+    setInputValue(el.yos,"");
+    setInputValue(el.base,"");
+    setInputValue(el.dependents,"without");
+    setInputValue(el.additionalIncome,"0");
+    setInputValue(el.monthlyObligations,"");
+    setInputValue(el.homePrice,"450000");
+    setInputValue(el.downPayment,"22500");
+    setInputValue(el.creditScore,"720");
+    setInputValue(el.loanType,"va");
+    setInputValue(el.taxRate,"2.10");
+    setInputValue(el.insuranceMonthly,"180");
+    setInputValue(el.hoaMonthly,"0");
+    setInputValue(el.pmiMonthly,"0");
+
+    state.income = {
+      basePay:0,
+      bah:0,
+      bas:0,
+      additional:0,
+      total:0,
+      source:"—",
+      lockedOfficial:false,
+      raw:null
+    };
+
+    setError("");
+    setStatus(null,"Ready");
+
+    setLocalMortgage();
+    renderAll();
+    saveSnapshot();
+  }
+
+  function handleInputChange(event){
+    setError("");
+
+    const changedNode = event?.target || document.activeElement;
+
+    if(isPayControl(changedNode)){
+      state.income.lockedOfficial = false;
+      applyLocalPay("Local preview — pay inputs changed");
+    }else if(isAdditionalIncomeControl(changedNode)){
+      if(state.income.lockedOfficial){
+        syncIncomeTotal();
+      }else{
+        applyLocalPay("Local preview");
+      }
+    }else if(isMortgageControl(changedNode)){
+      if(!state.mortgage || !state.mortgage.lockedOfficial){
+        setLocalMortgage();
+      }
+    }else if(state.income.lockedOfficial){
+      syncIncomeTotal();
+    }
+
+    renderAll();
+    saveSnapshot();
+  }
+
+  /* =========================================================
+    //#12 WIRE UP
+  ========================================================= */
+
+  function bind(){
+    const liveInputs = [
       el.rank,
       el.yos,
       el.base,
@@ -1213,45 +1673,77 @@
       el.insuranceMonthly,
       el.hoaMonthly,
       el.pmiMonthly
-    ].forEach((input) => {
-      if(!input) return;
+    ];
 
-      input.addEventListener("input", recalcLocal);
-      input.addEventListener("change", recalcLocal);
+    liveInputs.forEach(function(node){
+      if(!node) return;
+      node.addEventListener("input", handleInputChange);
+      node.addEventListener("change", handleInputChange);
     });
+
+    if(el.btnFetchPay){
+      el.btnFetchPay.addEventListener("click", function(){
+        fetchTheWingPay();
+      });
+    }
+
+    if(el.btnCalc){
+      el.btnCalc.addEventListener("click", function(){
+        calculateFullTheWingFlow();
+      });
+    }
+
+    if(el.btnClear){
+      el.btnClear.addEventListener("click", clearAll);
+    }
   }
 
-  // =========================================================
-  // //#11 BOOT
-  // =========================================================
+  /* =========================================================
+    //#13 BOOT
+  ========================================================= */
+
   function boot(){
-    prefillFromIntake();
-    wireEvents();
-    renderPills();
+    prefillFromStorage();
 
-    state.mortgage = localMortgageFallback();
+    if(collectInputs().rank && collectInputs().yos){
+      applyLocalPay("Local preview");
+    }else{
+      state.income = {
+        basePay:0,
+        bah:0,
+        bas:0,
+        additional:collectInputs().additionalIncome,
+        total:collectInputs().additionalIncome,
+        source:"—",
+        lockedOfficial:false,
+        raw:null
+      };
+    }
 
-    paintMortgage();
-    paintCompensation();
-    computeHealth();
+    setLocalMortgage();
+    renderAll();
+    saveSnapshot();
+    bind();
 
-    setStatus(null, "Ready");
-
-    window.PCSU_LIGHTWEIGHT_FAD = {
-      version:"1.0.1",
-      endpoints:{
-        brain:EP_BRAIN,
-        mortgage:EP_MORTGAGE
-      },
-      getState:function(){
-        return JSON.parse(JSON.stringify(state));
-      },
-      calculateMortgage,
-      fetchCompensation,
-      computeHealth,
-      clear:clearAll
+    window.PCSU_MORTGAGE_HEALTH = {
+      version:VERSION,
+      state:state,
+      collectInputs:collectInputs,
+      buildBrainInput:buildBrainInput,
+      extractCompensation:extractCompensation,
+      normalizeMortgageResult:normalizeMortgageResult,
+      computeHealth:computeHealth,
+      computeBuyerRange:computeBuyerRange,
+      renderAll:renderAll,
+      fetchTheWingPay:fetchTheWingPay,
+      fetchTheWingMortgage:fetchTheWingMortgage,
+      calculateFullTheWingFlow:calculateFullTheWingFlow,
+      clearAll:clearAll
     };
+
+    console.log("PCSUnited Mortgage Health loaded:", VERSION);
   }
 
   boot();
+
 })();
