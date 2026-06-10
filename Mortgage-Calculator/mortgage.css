@@ -812,6 +812,33 @@ select{
   color:var(--danger);
 }
 
+.va-readiness-panel{
+  margin-top:14px;
+}
+
+.va-readiness-title{
+  margin:0 0 4px;
+  color:rgba(244,248,255,.96);
+  font-size:15px;
+  line-height:1.25;
+  font-weight:800;
+}
+
+.va-readiness-sub{
+  margin:0 0 10px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+}
+
+#vaReadinessNote.warn{
+  color:var(--gold);
+}
+
+#vaReadinessNote.bad{
+  color:var(--danger);
+}
+
 /* =========================================================
   HEALTH
 ========================================================= */

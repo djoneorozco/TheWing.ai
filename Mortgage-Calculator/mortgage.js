@@ -1,7 +1,7 @@
 /* =========================================================
   PCSUNITED • LIGHTWEIGHT FAD / MORTGAGE HEALTH DASHBOARD
   mortgage.js
-  v1.2.2 • PAYLOAD UNWRAP + MORTGAGE LOCK FIX
+  v1.3.0 • VA OVERLAY PAYLOAD + READINESS UI
 
   Synced from webflow-js-embed.html for local index.html dev.
 ========================================================= */
@@ -13,7 +13,7 @@
     //#1 CONFIG
   ========================================================= */
 
-  const VERSION = "1.2.2-payload-unwrap-mortgage-lock-fix";
+  const VERSION = "1.3.0-va-overlay-payload-readiness-ui";
 
   const API_BASE = "https://thewing.netlify.app/api";
   const EP_MORTGAGE = API_BASE + "/mortgage";
@@ -28,6 +28,7 @@
     bridge:"pcsunited.bridge",
     realtyBridge:"realtysass.bridge",
     profile:"pcsunited.profile.v1",
+    identity:"pcsunited.identity.v1",
     kpi:"pcsunited.kpi_overrides.v1",
     openFlow:"pcsunited.open_flow_ready.v1",
     mortgageResult:"pcsunited.mortgage_snapshot.v1",
@@ -86,6 +87,17 @@
     "Vandenberg SFB": { zip:"93437", market:"Lompoc" },
     "Whiteman AFB": { zip:"65305", market:"Knob Noster" },
     "Wright-Patterson AFB": { zip:"45433", market:"Dayton" }
+  };
+
+  const ZIP_TO_STATE = {
+    "20762":"MD","71110":"LA","95903":"CA","88103":"NM","29404":"SC","85707":"AZ",
+    "19902":"DE","79607":"TX","32542":"FL","99011":"WA","82005":"WY","88330":"NM",
+    "32544":"FL","78234":"TX","78236":"TX","78150":"TX","39534":"MS","87117":"NM",
+    "23665":"VA","78843":"TX","72099":"AR","85309":"AZ","33621":"FL","59402":"MT",
+    "36112":"AL","67221":"KS","08641":"NJ","58705":"ND","31699":"GA","83648":"ID",
+    "89191":"NV","68113":"NE","32925":"FL","80914":"CO","31098":"GA","62225":"IL",
+    "27531":"NC","29152":"SC","76311":"TX","73145":"OK","94535":"CA","32403":"FL",
+    "73705":"OK","93437":"CA","65305":"MO","45433":"OH"
   };
 
   const state = {
@@ -176,6 +188,15 @@
     hoaOut:$("hoaOut"),
     pmiOut:$("pmiOut"),
     mortgageSource:$("mortgageSource"),
+
+    vaReadinessPanel:$("vaReadinessPanel"),
+    vaFundingFeeOut:$("vaFundingFeeOut"),
+    vaTotalLoanOut:$("vaTotalLoanOut"),
+    vaDtiOut:$("vaDtiOut"),
+    vaResidualIncomeOut:$("vaResidualIncomeOut"),
+    vaResidualRequiredOut:$("vaResidualRequiredOut"),
+    vaResidualPassOut:$("vaResidualPassOut"),
+    vaReadinessNote:$("vaReadinessNote"),
 
     totalIncome:$("totalIncome"),
     housingRatio:$("housingRatio"),
@@ -392,6 +413,248 @@
     };
   }
 
+  function pickFirstString(){
+    for(let i = 0; i < arguments.length; i += 1){
+      const value = String(arguments[i] == null ? "" : arguments[i]).trim();
+      if(value) return value;
+    }
+    return "";
+  }
+
+  function pickStoredNumber(){
+    for(let i = 0; i < arguments.length; i += 1){
+      const value = n(arguments[i], NaN);
+      if(Number.isFinite(value) && value >= 0) return value;
+    }
+    return null;
+  }
+
+  function pickNullableNumber(){
+    for(let i = 0; i < arguments.length; i += 1){
+      const value = n(arguments[i], NaN);
+      if(Number.isFinite(value)) return value;
+    }
+    return null;
+  }
+
+  function isVaLoanType(loanType){
+    return String(loanType || "").trim().toLowerCase() === "va";
+  }
+
+  function stateFromBaseZip(baseName){
+    const meta = BASE_META[String(baseName || "").trim()] || {};
+    const zip = String(meta.zip || "").trim();
+    return zip ? (ZIP_TO_STATE[zip] || "") : "";
+  }
+
+  function resolveFamilySize(input, stored){
+    const storedSize = pickStoredNumber(
+      stored.family_size,
+      stored.familySize,
+      stored.householdSize,
+      stored.household_size
+    );
+
+    if(storedSize !== null && storedSize > 0){
+      return Math.max(1, Math.round(storedSize));
+    }
+
+    const family = stored.family ?? stored.dependents_count ?? stored.dependents;
+    const familyNum = Number(family);
+
+    if(Number.isFinite(familyNum) && familyNum > 0){
+      return Math.max(1, Math.round(familyNum));
+    }
+
+    return input.dependents === "with" ? 2 : 1;
+  }
+
+  function buildVaOverlayPayload(input){
+    if(!isVaLoanType(input.loanType)){
+      return {};
+    }
+
+    syncIncomeTotal();
+
+    const stored = getMergedStoredContext();
+    const income = state.income;
+    const payload = { loanType:"va" };
+
+    const basePay = pickStoredNumber(
+      income.basePay,
+      stored.basePay,
+      stored.base_pay,
+      stored.basicPay,
+      stored.basic_pay
+    );
+    if(basePay !== null) payload.basePay = basePay;
+
+    const bah = pickStoredNumber(income.bah, stored.bah, stored.BAH);
+    if(bah !== null) payload.bah = bah;
+
+    const bas = pickStoredNumber(income.bas, stored.bas, stored.BAS);
+    if(bas !== null) payload.bas = bas;
+
+    const otherIncome = pickStoredNumber(
+      input.additionalIncome,
+      stored.otherIncome,
+      stored.other_income,
+      stored.additionalIncome,
+      stored.additional_income
+    );
+    if(otherIncome !== null) payload.otherIncome = otherIncome;
+
+    const monthlyDebts = pickStoredNumber(
+      input.obligations,
+      stored.monthlyDebts,
+      stored.monthly_debts,
+      stored.monthly_debt,
+      stored.debt,
+      stored.monthlyDebt,
+      stored.non_housing_debt,
+      stored.nonHousingDebt
+    );
+    if(monthlyDebts !== null) payload.monthlyDebts = monthlyDebts;
+
+    const disability = pickStoredNumber(
+      stored.disability,
+      stored.vaDisability,
+      stored.va_disability,
+      stored.vaDisabilityMonthly,
+      stored.va_disability_monthly,
+      stored.monthlyVA,
+      stored.vaCompensation,
+      stored.va_compensation
+    );
+    if(disability !== null && disability > 0) payload.disability = disability;
+
+    const rating = n(
+      stored.rating ??
+      stored.vaRating ??
+      stored.va_rating ??
+      stored.va_disability ??
+      stored.vaDisability ??
+      stored.vaDisabilityRating,
+      NaN
+    );
+    if(Number.isFinite(rating) && rating >= 0){
+      payload.rating = Math.round(rating);
+    }
+
+    const retirement = pickStoredNumber(
+      stored.retirement,
+      stored.retirementPay,
+      stored.retirement_pay,
+      stored.retiredPayGross,
+      stored.grossMonthlyRetiredPay,
+      stored.retirementPayGross
+    );
+    if(retirement !== null && retirement > 0) payload.retirement = retirement;
+
+    payload.familySize = resolveFamilySize(input, stored);
+
+    const stateAbbr = pickFirstString(
+      stored.state,
+      stored.propertyState,
+      stored.property_state,
+      stored.usState,
+      stateFromBaseZip(input.base)
+    ).toUpperCase().slice(0, 2);
+    if(stateAbbr) payload.state = stateAbbr;
+
+    const maintenanceUtilitiesMonthly = pickStoredNumber(
+      stored.maintenanceUtilitiesMonthly,
+      stored.maintenance_utilities_monthly,
+      stored.maintenanceAndUtilities
+    );
+    if(maintenanceUtilitiesMonthly !== null && maintenanceUtilitiesMonthly > 0){
+      payload.maintenanceUtilitiesMonthly = maintenanceUtilitiesMonthly;
+    }
+
+    const estimatedTaxesMonthly = pickStoredNumber(
+      stored.estimatedTaxesMonthly,
+      stored.estimated_taxes_monthly,
+      stored.federalStateTaxesMonthly
+    );
+    if(estimatedTaxesMonthly !== null && estimatedTaxesMonthly > 0){
+      payload.estimatedTaxesMonthly = estimatedTaxesMonthly;
+    }
+
+    if(
+      stored.receivesVaCompensation === true ||
+      stored.receives_va_compensation === true ||
+      stored.likely_funding_fee_exempt === true
+    ){
+      payload.receivesVaCompensation = true;
+    }else if(Number.isFinite(rating) && rating >= 10){
+      payload.receivesVaCompensation = true;
+    }
+
+    if(
+      stored.fundingFeeExempt === true ||
+      stored.funding_fee_exempt === true ||
+      stored.exempt === true
+    ){
+      payload.fundingFeeExempt = true;
+    }
+
+    const priorUse = pickFirstString(
+      stored.priorUse,
+      stored.prior_use,
+      stored.firstUse,
+      stored.first_use
+    );
+    if(priorUse) payload.priorUse = priorUse;
+
+    if(stored.financeFundingFee === false || stored.finance_funding_fee === false){
+      payload.financeFundingFee = false;
+    }
+
+    return payload;
+  }
+
+  function extractVaMortgageFields(data){
+    const payload = unwrapApiPayload(data);
+
+    return {
+      vaFundingFee:pickNullableNumber(data.vaFundingFee, payload.vaFundingFee),
+      vaFundingFeeRate:pickNullableNumber(data.vaFundingFeeRate, payload.vaFundingFeeRate),
+      baseLoanAmount:pickNullableNumber(data.baseLoanAmount, payload.baseLoanAmount),
+      totalLoanAmount:pickNullableNumber(data.totalLoanAmount, payload.totalLoanAmount),
+      fundingFeeExempt:(
+        data.fundingFeeExempt === true ||
+        payload.fundingFeeExempt === true
+          ? true
+          : data.fundingFeeExempt === false || payload.fundingFeeExempt === false
+            ? false
+            : null
+      ),
+      residualIncome:pickNullableNumber(data.residualIncome, payload.residualIncome),
+      requiredResidualIncome:pickNullableNumber(
+        data.requiredResidualIncome,
+        payload.requiredResidualIncome
+      ),
+      residualPass:(
+        data.residualPass === true || payload.residualPass === true
+          ? true
+          : data.residualPass === false || payload.residualPass === false
+            ? false
+            : null
+      ),
+      dti:pickNullableNumber(data.dti, payload.dti),
+      vaNotes:Array.isArray(data.vaNotes)
+        ? data.vaNotes
+        : Array.isArray(payload.vaNotes)
+          ? payload.vaNotes
+          : [],
+      vaWarnings:Array.isArray(data.vaWarnings)
+        ? data.vaWarnings
+        : Array.isArray(payload.vaWarnings)
+          ? payload.vaWarnings
+          : []
+    };
+  }
+
   function syncIncomeTotal(){
     const input = collectInputs();
 
@@ -462,6 +725,7 @@
     const bridge = readJSON(STORAGE_KEYS.bridge,{}) || {};
     const realtyBridge = readJSON(STORAGE_KEYS.realtyBridge,{}) || {};
     const profile = readJSON(STORAGE_KEYS.profile,{}) || {};
+    const identity = readJSON(STORAGE_KEYS.identity,{}) || {};
     const kpi = readJSON(STORAGE_KEYS.kpi,{}) || {};
 
     return {
@@ -470,6 +734,7 @@
       ...bridgeV1,
       ...intakeLegacy,
       ...intakeModern,
+      ...identity,
       ...profile,
       ...kpi
     };
@@ -1042,6 +1307,12 @@
       pi + taxMonthly + insuranceMonthly + hoaMonthly + pmiMonthly
     );
 
+    const va = extractVaMortgageFields(data);
+    const displayLoanAmount =
+      isVaLoanType(input.loanType) && va.totalLoanAmount !== null
+        ? va.totalLoanAmount
+        : loanAmount;
+
     return {
       homePrice,
       downPayment:input.downPayment,
@@ -1049,7 +1320,7 @@
       loanType:input.loanType,
       apr,
       termYears:n(mortgage.termYears || payload.termYears || data.termYears || DEFAULT_TERM_YEARS, DEFAULT_TERM_YEARS),
-      loanAmount,
+      loanAmount:displayLoanAmount,
       pi,
       taxMonthly,
       insuranceMonthly,
@@ -1058,13 +1329,26 @@
       allIn,
       source:"TheWing.ai",
       lockedOfficial:true,
+      va:va,
+      vaFundingFee:va.vaFundingFee,
+      vaFundingFeeRate:va.vaFundingFeeRate,
+      baseLoanAmount:va.baseLoanAmount,
+      totalLoanAmount:va.totalLoanAmount,
+      fundingFeeExempt:va.fundingFeeExempt,
+      residualIncome:va.residualIncome,
+      requiredResidualIncome:va.requiredResidualIncome,
+      residualPass:va.residualPass,
+      dti:va.dti,
+      vaNotes:va.vaNotes,
+      vaWarnings:va.vaWarnings,
       meta:{
         engineVersion:meta.engineVersion || data.engineVersion || payload.engineVersion || "",
         aprSource:meta.aprSource || data.aprSource || "",
         propertyTaxSource:meta.propertyTaxSource || "",
         insuranceSource:meta.insuranceSource || "",
         pmiSource:meta.pmiSource || "",
-        generatedAt:meta.generatedAt || ""
+        generatedAt:meta.generatedAt || "",
+        vaOverlayApplied:meta.vaOverlayApplied === true
       },
       raw:data
     };
@@ -1101,7 +1385,8 @@
         insuranceMonthly:input.insuranceMonthly,
         hoaMonthly:input.hoaMonthly,
         pmiMonthly:input.pmiMonthly,
-        source:"pcsunited.mortgage.health.webflow." + VERSION
+        source:"pcsunited.mortgage.health.webflow." + VERSION,
+        ...buildVaOverlayPayload(input)
       };
 
       const data = await postJSON(EP_MORTGAGE + "?t=" + Date.now(), payload);
@@ -1381,6 +1666,7 @@
 
     renderPills();
     renderMortgage(health.mortgage);
+    renderVaReadiness(health.mortgage);
     renderIncome();
     renderHealth(health);
     renderBuyerRange(range);
@@ -1407,10 +1693,18 @@
 
   function renderMortgage(mortgage){
     const m = mortgage || getMortgageSnapshot();
+    const input = collectInputs();
+    const loanLabelAmount =
+      isVaLoanType(input.loanType) && Number.isFinite(m.totalLoanAmount)
+        ? m.totalLoanAmount
+        : m.loanAmount;
 
     setText(el.heroPayment, money(m.allIn,2));
     setText(el.allInPayment, money(m.allIn,2));
-    setText(el.loanAmount, money(m.loanAmount,0) + " loan");
+    setText(
+      el.loanAmount,
+      money(loanLabelAmount,0) + (isVaLoanType(input.loanType) ? " VA loan" : " loan")
+    );
     setText(el.piPayment, money(m.pi,2));
     setText(el.taxMonthly, money(m.taxMonthly,2));
     setText(el.insuranceOut, money(m.insuranceMonthly,2));
@@ -1418,6 +1712,101 @@
     setText(el.pmiOut, money(m.pmiMonthly,2));
     setText(el.mortgageSource, "Mortgage source: " + (m.source || "Local fallback"));
     setText(el.rateLine, (Number(m.apr || 0).toFixed(2)) + "% APR • " + DEFAULT_TERM_YEARS + " years");
+  }
+
+  function hasVaOverlayData(mortgage){
+    const m = mortgage || {};
+    return (
+      (m.vaFundingFee !== null && m.vaFundingFee !== undefined) ||
+      (m.totalLoanAmount !== null && m.totalLoanAmount !== undefined) ||
+      (m.dti !== null && m.dti !== undefined) ||
+      (m.residualIncome !== null && m.residualIncome !== undefined)
+    );
+  }
+
+  function renderVaReadiness(mortgage){
+    const panel = el.vaReadinessPanel;
+    const input = collectInputs();
+
+    if(!panel){
+      return;
+    }
+
+    if(!isVaLoanType(input.loanType)){
+      panel.hidden = true;
+      return;
+    }
+
+    panel.hidden = false;
+
+    const m = mortgage || getMortgageSnapshot();
+    const hasOverlay = hasVaOverlayData(m) && m.lockedOfficial;
+
+    if(!hasOverlay){
+      setText(el.vaFundingFeeOut, "$—");
+      setText(el.vaTotalLoanOut, "$—");
+      setText(el.vaDtiOut, "—");
+      setText(el.vaResidualIncomeOut, "$—");
+      setText(el.vaResidualRequiredOut, "$—");
+      setText(el.vaResidualPassOut, "—");
+      setText(
+        el.vaReadinessNote,
+        "Run Calculate Mortgage Health to load VA funding fee, DTI, and residual income from TheWing.ai."
+      );
+      if(el.vaReadinessNote) el.vaReadinessNote.classList.remove("warn","bad");
+      [el.vaFundingFeeOut, el.vaTotalLoanOut, el.vaDtiOut, el.vaResidualIncomeOut, el.vaResidualRequiredOut, el.vaResidualPassOut]
+        .forEach(function(node){
+          if(node) node.classList.remove("ok","warn","bad");
+        });
+      return;
+    }
+
+    const fundingFeeExempt = m.fundingFeeExempt === true;
+    const fundingFeeText = fundingFeeExempt
+      ? "Exempt ($0)"
+      : money(m.vaFundingFee,0);
+
+    setText(el.vaFundingFeeOut, fundingFeeText);
+    setText(
+      el.vaTotalLoanOut,
+      m.totalLoanAmount !== null ? money(m.totalLoanAmount,0) : money(m.loanAmount,0)
+    );
+    setText(el.vaDtiOut, m.dti !== null ? pct(m.dti * 100,1) : "—");
+    setText(
+      el.vaResidualIncomeOut,
+      m.residualIncome !== null ? money(m.residualIncome,0) : "$—"
+    );
+    setText(
+      el.vaResidualRequiredOut,
+      m.requiredResidualIncome !== null ? money(m.requiredResidualIncome,0) : "$—"
+    );
+
+    let residualStatus = "Review";
+    let residualKind = "warn";
+
+    if(m.residualPass === true){
+      residualStatus = "Pass";
+      residualKind = "ok";
+    }else if(m.residualPass === false){
+      residualStatus = "Review";
+      residualKind = "warn";
+    }
+
+    setText(el.vaResidualPassOut, residualStatus);
+    applyKind(el.vaResidualPassOut, residualKind);
+
+    let note = "VA readiness from TheWing.ai official-va overlay.";
+    if(Array.isArray(m.vaWarnings) && m.vaWarnings.length){
+      note += " " + m.vaWarnings[0];
+    }else if(Array.isArray(m.vaNotes) && m.vaNotes.length){
+      note += " " + m.vaNotes[0];
+    }
+
+    setText(el.vaReadinessNote, note);
+    if(el.vaReadinessNote){
+      el.vaReadinessNote.classList.remove("warn","bad");
+      if(residualKind === "warn") el.vaReadinessNote.classList.add("warn");
+    }
   }
 
   function renderIncome(){

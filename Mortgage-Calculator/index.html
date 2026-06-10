@@ -579,6 +579,50 @@
                 </div>
               </div>
 
+              <div id="vaReadinessPanel" class="va-readiness-panel" hidden>
+                <div class="panel-rule"></div>
+                <h3 class="va-readiness-title">VA Readiness</h3>
+                <p class="va-readiness-sub">
+                  Official VA overlay from TheWing.ai when income and debt fields are available.
+                </p>
+
+                <div class="kv-table">
+                  <div class="kv-row">
+                    <div class="kv-key">VA Funding Fee</div>
+                    <div class="kv-val" id="vaFundingFeeOut">$—</div>
+                  </div>
+
+                  <div class="kv-row">
+                    <div class="kv-key">Total VA Loan Amount</div>
+                    <div class="kv-val" id="vaTotalLoanOut">$—</div>
+                  </div>
+
+                  <div class="kv-row">
+                    <div class="kv-key">DTI</div>
+                    <div class="kv-val" id="vaDtiOut">—</div>
+                  </div>
+
+                  <div class="kv-row">
+                    <div class="kv-key">Residual Income</div>
+                    <div class="kv-val" id="vaResidualIncomeOut">$—</div>
+                  </div>
+
+                  <div class="kv-row">
+                    <div class="kv-key">Residual Required</div>
+                    <div class="kv-val" id="vaResidualRequiredOut">$—</div>
+                  </div>
+
+                  <div class="kv-row">
+                    <div class="kv-key">Residual Status</div>
+                    <div class="kv-val" id="vaResidualPassOut">—</div>
+                  </div>
+                </div>
+
+                <div class="range-meta" id="vaReadinessNote">
+                  Run Calculate Mortgage Health with VA loan selected to load VA readiness fields.
+                </div>
+              </div>
+
               <div class="range-meta" id="mortgageSource">
                 Mortgage math will use TheWing.ai when available, with local fallback.
               </div>
