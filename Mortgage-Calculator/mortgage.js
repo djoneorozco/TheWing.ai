@@ -1,7 +1,7 @@
 /* =========================================================
   PCSUNITED • LIGHTWEIGHT FAD / MORTGAGE HEALTH DASHBOARD
   mortgage.js
-  v1.0.0
+  v1.0.1
 
   THEWING ENDPOINTS
   - Compensation: https://thewing.netlify.app/api/opensource-brain
@@ -425,6 +425,14 @@
     if(additional > 0){
       el.additionalIncome.value = String(Math.round(additional));
     }
+
+    const insurance =
+      n(intake.insurance_monthly, 0) ||
+      n(intake.insuranceMonthly, 0) ||
+      n(intake.home_insurance_monthly, 0) ||
+      n(intake.homeInsuranceMonthly, 0);
+
+    safeSetInput(el.insuranceMonthly, insurance);
   }
 
   // =========================================================
@@ -668,6 +676,7 @@
     const mortgage = data.mortgage || data.result || data;
     const monthly = mortgage.monthly || data.monthly || {};
     const breakdown = mortgage.breakdown || data.breakdown || {};
+    const meta = data.meta || mortgage.meta || {};
 
     const price = n(
       mortgage.price ||
@@ -732,7 +741,7 @@
 
     return {
       ok:true,
-      source:data.source || "thewing_mortgage",
+      source:data.source || data.app || "thewing_mortgage",
       apr,
       termYears:n(mortgage.termYears || data.termYears || TERM_YEARS, TERM_YEARS),
       price,
@@ -756,6 +765,14 @@
         hoa:round2(hoa),
         pmi:round2(pmi),
         allIn:round2(allIn)
+      },
+      meta:{
+        engineVersion:meta.engineVersion || data.engineVersion || "",
+        insuranceSource:meta.insuranceSource || "",
+        propertyTaxSource:meta.propertyTaxSource || "",
+        aprSource:meta.aprSource || data.aprSource || "",
+        pmiSource:meta.pmiSource || "",
+        generatedAt:meta.generatedAt || ""
       },
       raw:data
     };
@@ -801,6 +818,8 @@
 
       insurance_monthly:insuranceMonthly,
       insuranceMonthly,
+      home_insurance_monthly:insuranceMonthly,
+      homeInsuranceMonthly:insuranceMonthly,
 
       hoa_monthly:hoaMonthly,
       hoaMonthly,
@@ -875,14 +894,28 @@
     el.pmiOut.textContent = money2(pmi);
 
     const apr = n(mortgage.apr,0);
+    const termYears = n(mortgage.termYears, TERM_YEARS) || TERM_YEARS;
+
     el.rateLine.textContent = apr > 0
-      ? `${apr.toFixed(2)}% APR • ${TERM_YEARS} years`
+      ? `${apr.toFixed(2)}% APR • ${termYears} years`
       : "TheWing mortgage engine";
 
-    el.mortgageSource.textContent =
-      state.mortgageSource === "TheWing.ai"
-        ? "Mortgage calculation powered by TheWing.ai /api/mortgage."
-        : "Mortgage calculation is using local fallback math.";
+    if(state.mortgageSource === "TheWing.ai"){
+      const meta = mortgage.meta || {};
+      const parts = ["Mortgage calculation powered by TheWing.ai /api/mortgage."];
+
+      if(meta.engineVersion){
+        parts.push(`Engine ${meta.engineVersion}.`);
+      }
+
+      if(meta.insuranceSource === "inputMonthly"){
+        parts.push("Insurance uses your monthly input.");
+      }
+
+      el.mortgageSource.textContent = parts.join(" ");
+    }else{
+      el.mortgageSource.textContent = "Mortgage calculation is using local fallback math.";
+    }
   }
 
   // =========================================================
@@ -1205,7 +1238,7 @@
     setStatus(null, "Ready");
 
     window.PCSU_LIGHTWEIGHT_FAD = {
-      version:"1.0.0",
+      version:"1.0.1",
       endpoints:{
         brain:EP_BRAIN,
         mortgage:EP_MORTGAGE
