@@ -596,6 +596,16 @@ export function normalizeMortgageInput(body = {}) {
   // ------------------------------------------------------------
   // Insurance
   // ------------------------------------------------------------
+  const insuranceMonthlyInput = Math.max(
+    0,
+    firstNumber(
+      body.insurance_monthly,
+      body.insuranceMonthly,
+      body.home_insurance_monthly,
+      body.homeInsuranceMonthly
+    )
+  );
+
   const insuranceAnnualInput = Math.max(
     0,
     firstNumber(
@@ -639,7 +649,10 @@ export function normalizeMortgageInput(body = {}) {
   let insuranceAnnual = 0;
   let insuranceSource = "none";
 
-  if (insuranceAnnualInput > 0) {
+  if (insuranceMonthlyInput > 0) {
+    insuranceAnnual = insuranceMonthlyInput * 12;
+    insuranceSource = "inputMonthly";
+  } else if (insuranceAnnualInput > 0) {
     insuranceAnnual = insuranceAnnualInput;
     insuranceSource = "inputAnnual";
   } else if (insuranceRateInput > 0 && price > 0) {
