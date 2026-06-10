@@ -1,7 +1,7 @@
 // netlify/functions/opensource-brain.js
 // ============================================================
 // TheWing.ai • Open Source Brain
-// v1.1.0
+// v1.1.1
 //
 // PURPOSE
 // - Public calculator endpoint for PCSUnited tools
@@ -22,6 +22,18 @@
 // ROUTES
 // - /.netlify/functions/opensource-brain
 // - /api/opensource-brain through netlify.toml redirect
+//
+// UPDATE v1.1.1
+// - PCS_SNAPSHOT now requires rank/paygrade.
+// - PCS_SNAPSHOT now requires YOS.
+// - PCS_SNAPSHOT now requires dependent status / family value.
+// - PCS_SNAPSHOT no longer silently defaults missing rank to E-5.
+// - PCS_SNAPSHOT no longer silently defaults missing YOS to 0.
+// - PCS_SNAPSHOT no longer silently defaults missing dependents to "with."
+// - Added dedicated PCS_SNAPSHOT payload branch.
+// - Added clearer Base Pay vs BAH error messages.
+// - Error responses now include sourceVersions.
+// - Handler now supports body.type / input.tool / input.type.
 // ============================================================
 
 import {
@@ -41,7 +53,7 @@ import * as OFFICIAL_RETIREMENT from "./_share/official-retirement.js";
 // //#1) CONFIG
 // ============================================================
 
-const BRAIN_VERSION = "thewing-open-brain-1.1.0";
+const BRAIN_VERSION = "thewing-open-brain-1.1.1";
 const APP_NAME = "TheWing.ai";
 const ALLOW_ORIGIN = "*";
 
@@ -126,7 +138,7 @@ function inferToolName(toolName) {
 function normalizeRank(rank) {
   const raw = normalizeUpper(rank);
 
-  if (!raw) return "E-5";
+  if (!raw) return "";
 
   const m = raw.match(/^([EOW])\s*-?\s*(\d{1,2})(E)?$/);
 
@@ -146,7 +158,94 @@ function normalizeRetirementSystem(value) {
   return "HIGH3";
 }
 
-function normalizeDependents(value, input = {}) {
+function hasInputValue(value) {
+  return value !== undefined && value !== null && String(value).trim() !== "";
+}
+
+function hasRankInput(input = {}) {
+  return [
+    input.rank,
+    input.rank_paygrade,
+    input.rankPaygrade,
+    input.paygrade,
+    input.grade
+  ].some(hasInputValue);
+}
+
+function hasYosInput(input = {}) {
+  return [
+    input.yos,
+    input.yearsOfService,
+    input.years_of_service,
+    input.serviceYears
+  ].some(hasInputValue);
+}
+
+function hasBaseInput(input = {}) {
+  return [
+    input.base,
+    input.currentBase,
+    input.current_base,
+    input.location,
+    input.duty_station,
+    input.dutyStation,
+    input.station,
+    input.pcs_base,
+    input.pcsBase
+  ].some(hasInputValue);
+}
+
+function hasDependentInput(input = {}) {
+  return [
+    input.dependents,
+    input.dependentStatus,
+    input.dependent_status,
+    input.hasDependents,
+    input.has_dependents,
+    input.family,
+    input.familySize,
+    input.family_size
+  ].some(function(value){
+    return value !== undefined && value !== null && String(value).trim() !== "";
+  });
+}
+
+function validatePcsSnapshotInput(input = {}) {
+  if (!hasRankInput(input)) {
+    throw new Error("Missing rank/paygrade for PCS_SNAPSHOT compensation calculation.");
+  }
+
+  if (!hasYosInput(input)) {
+    throw new Error("Missing years of service for PCS_SNAPSHOT compensation calculation.");
+  }
+
+  const yosValue =
+    input.yos ??
+    input.yearsOfService ??
+    input.years_of_service ??
+    input.serviceYears;
+
+  const yosNumber = Number(yosValue);
+
+  if (!Number.isFinite(yosNumber) || yosNumber < 0) {
+    throw new Error("Invalid years of service for PCS_SNAPSHOT compensation calculation.");
+  }
+
+  if (!hasBaseInput(input)) {
+    throw new Error("Missing base/duty station for PCS_SNAPSHOT BAH calculation.");
+  }
+
+  if (!hasDependentInput(input)) {
+    throw new Error("Missing dependent status/family value for PCS_SNAPSHOT BAH calculation.");
+  }
+}
+
+function normalizeDependents(value, input = {}, options = {}) {
+  const hasExplicit =
+    value !== undefined &&
+    value !== null &&
+    String(value).trim() !== "";
+
   const raw =
     value ??
     input.dependents ??
@@ -157,7 +256,15 @@ function normalizeDependents(value, input = {}) {
     input.family ??
     input.familySize ??
     input.family_size ??
-    "with";
+    (
+      options.requireExplicit
+        ? ""
+        : "with"
+    );
+
+  if (options.requireExplicit && !hasExplicit && !hasDependentInput(input)) {
+    throw new Error("Missing dependent status/family value for compensation calculation.");
+  }
 
   if (typeof raw === "boolean") {
     return raw ? "with" : "without";
@@ -169,7 +276,13 @@ function normalizeDependents(value, input = {}) {
 
   const s = normalizeString(raw).toLowerCase();
 
-  if (!s) return "with";
+  if (!s) {
+    if (options.requireExplicit) {
+      throw new Error("Missing dependent status/family value for compensation calculation.");
+    }
+
+    return "with";
+  }
 
   if (
     [
@@ -306,24 +419,47 @@ function sourceVersions() {
 // //#4) PROFILE NORMALIZATION — ACTIVE DUTY / BAH
 // ============================================================
 
-function buildCanonicalProfile(input = {}) {
-  const rank = normalizeRank(
+function buildCanonicalProfile(input = {}, options = {}) {
+  const requireExplicit = options.requireExplicit === true;
+
+  const rankInput =
     input.rank ||
     input.rank_paygrade ||
     input.rankPaygrade ||
     input.paygrade ||
     input.grade ||
-    "E-5"
-  );
+    (
+      requireExplicit
+        ? ""
+        : "E-5"
+    );
 
-  const yearsOfService = toFiniteNumber(
+  const rank = normalizeRank(rankInput);
+
+  if (requireExplicit && !rank) {
+    throw new Error("Missing rank/paygrade for compensation calculation.");
+  }
+
+  const yosRaw =
     input.yos ??
     input.yearsOfService ??
     input.years_of_service ??
     input.serviceYears ??
-    0,
-    0
-  );
+    (
+      requireExplicit
+        ? undefined
+        : 0
+    );
+
+  if (requireExplicit && !hasInputValue(yosRaw)) {
+    throw new Error("Missing years of service for compensation calculation.");
+  }
+
+  const yearsOfService = toFiniteNumber(yosRaw, NaN);
+
+  if (!Number.isFinite(yearsOfService) || yearsOfService < 0) {
+    throw new Error("Invalid years of service for compensation calculation.");
+  }
 
   const currentBase = normalizeBase(
     input.base ||
@@ -338,6 +474,10 @@ function buildCanonicalProfile(input = {}) {
     ""
   );
 
+  if (requireExplicit && !currentBase) {
+    throw new Error("Missing base/duty station for compensation calculation.");
+  }
+
   const dependents = normalizeDependents(
     input.dependents ??
     input.dependentStatus ??
@@ -347,7 +487,8 @@ function buildCanonicalProfile(input = {}) {
     input.family ??
     input.familySize ??
     input.family_size,
-    input
+    input,
+    { requireExplicit }
   );
 
   return {
@@ -376,18 +517,34 @@ function buildCanonicalProfile(input = {}) {
 
 function getCompensationProfile(profile) {
   if (!profile.currentBase) {
-    throw new Error("Base is required.");
+    throw new Error("BAH calculation failed: base/duty station is required.");
   }
 
-  const payRecord = getPayRecord2026(profile.rank, profile.yearsOfService, {
-    basType: profile.basType || ""
-  });
+  let payRecord;
 
-  const bahRecord = getBahRecord(
-    profile.currentBase,
-    profile.rank,
-    profile.dependents
-  );
+  try {
+    payRecord = getPayRecord2026(profile.rank, profile.yearsOfService, {
+      basType: profile.basType || ""
+    });
+  } catch (err) {
+    throw new Error(
+      `Base Pay calculation failed from official-pay.js for rank ${profile.rank || "UNKNOWN"} at ${profile.yearsOfService ?? "UNKNOWN"} years of service: ${err?.message || "Unknown pay error"}`
+    );
+  }
+
+  let bahRecord;
+
+  try {
+    bahRecord = getBahRecord(
+      profile.currentBase,
+      profile.rank,
+      profile.dependents
+    );
+  } catch (err) {
+    throw new Error(
+      `BAH calculation failed from official-bah.js for base ${profile.currentBase || "UNKNOWN"}, rank ${profile.rank || "UNKNOWN"}, dependents ${profile.dependents || "UNKNOWN"}: ${err?.message || "Unknown BAH error"}`
+    );
+  }
 
   const basicPay = money(payRecord.basicPayMonthly);
   const bas = money(payRecord.basMonthly);
@@ -812,6 +969,10 @@ function buildGenericPayload(profile, compensation, tool) {
   };
 }
 
+function buildPcsSnapshotPayload(profile, compensation) {
+  return buildGenericPayload(profile, compensation, "PCS_SNAPSHOT");
+}
+
 function buildFadPayload(profile, compensation) {
   const payload = buildGenericPayload(profile, compensation, "FAD");
 
@@ -886,6 +1047,18 @@ function buildPayload(input, toolName) {
     return buildRetirementVAPayload(input, "RETIREMENT_VA");
   }
 
+  if (tool === "PCS_SNAPSHOT") {
+    validatePcsSnapshotInput(input);
+
+    const profile = buildCanonicalProfile(input, {
+      requireExplicit: true
+    });
+
+    const compensation = getCompensationProfile(profile);
+
+    return buildPcsSnapshotPayload(profile, compensation);
+  }
+
   const profile = buildCanonicalProfile(input);
   const compensation = getCompensationProfile(profile);
 
@@ -935,6 +1108,18 @@ export const handler = async (event) => {
             }
           }
         },
+        pcsSnapshot: {
+          method: "POST",
+          body: {
+            tool: "PCS_SNAPSHOT",
+            input: {
+              rank: "E-5",
+              yos: 8,
+              base: "Lackland AFB",
+              dependents: "with"
+            }
+          }
+        },
         retirementVaCalculator: {
           method: "POST",
           body: {
@@ -958,14 +1143,21 @@ export const handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return json(405, {
       ok: false,
+      app: APP_NAME,
+      brainVersion: BRAIN_VERSION,
+      sourceVersions: sourceVersions(),
       error: "Method not allowed. Use POST."
     });
   }
 
+  let body = {};
+  let input = {};
+  let toolName = "GENERIC";
+
   try {
-    const body = JSON.parse(event.body || "{}");
-    const input = body.input || body;
-    const toolName = body.tool || "GENERIC";
+    body = JSON.parse(event.body || "{}");
+    input = body.input || body;
+    toolName = body.tool || body.type || input.tool || input.type || "GENERIC";
 
     const payload = buildPayload(input, toolName);
 
@@ -989,7 +1181,9 @@ export const handler = async (event) => {
       ok: false,
       app: APP_NAME,
       brainVersion: BRAIN_VERSION,
-      error: err?.message || "Unknown error"
+      tool: inferToolName(toolName),
+      error: err?.message || "Unknown error",
+      sourceVersions: sourceVersions()
     });
   }
 };
