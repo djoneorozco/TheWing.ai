@@ -1,13 +1,14 @@
 /* =========================================================
   PCSUNITED • LIGHTWEIGHT FAD / MORTGAGE HEALTH DASHBOARD
   mortgage.css
-  v1.2.2 • BUYER COMFORT RANGE STYLES
+  v1.2.2 • BUYER COMFORT RANGE SHELL
 
   UPDATE
-  - Added Buyer Comfort Range card + track styles for v1.2.2 shell
+  - Buyer Comfort Range card replaces legacy health bar in About panel
+  - Range track fill supports JS left/width + --buyer-fill-* CSS vars
   - Financial Health ring in top-right hero card
   - Four main metric cards: Income, Obligations, Mortgage, Residual
-  - Compatibility nodes hidden safely
+  - Scoped tone states for hero + range note/fill (ok / warn / bad)
 ========================================================= */
 
 :root{
@@ -59,6 +60,7 @@ select{
   width:100%;
   min-height:100vh;
   color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 }
 
 .pcsu-stage{
@@ -240,6 +242,21 @@ select{
   color:var(--danger);
 }
 
+#hero-residual.ok,
+#hero-residual-pct.ok{
+  color:var(--mint);
+}
+
+#hero-residual.warn,
+#hero-residual-pct.warn{
+  color:var(--gold);
+}
+
+#hero-residual.bad,
+#hero-residual-pct.bad{
+  color:var(--danger);
+}
+
 .hero-sub{
   margin-top:8px;
   color:var(--muted);
@@ -274,11 +291,6 @@ select{
   display:flex;
   flex-direction:column;
   justify-content:center;
-}
-
-.compact-health-bar{
-  margin-top:0;
-  margin-bottom:12px;
 }
 
 @media(max-width:900px){
@@ -676,15 +688,6 @@ select{
   background:rgba(255,135,135,.065);
 }
 
-.about-health-comment .note-box{
-  margin-top:0;
-  min-height:78px;
-  display:flex;
-  align-items:center;
-  font-size:13px;
-  line-height:1.55;
-}
-
 .error-box{
   margin-top:12px;
   color:var(--danger);
@@ -911,102 +914,149 @@ select{
 
 .housing-range-card{
   width:100%;
-  padding:16px 18px;
+  padding:18px 18px 16px;
   border-radius:18px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(0,0,0,.18);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.11);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(106,167,255,.12), transparent 46%),
+    radial-gradient(circle at 0% 100%, rgba(142,243,197,.08), transparent 42%),
+    linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.022));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 14px 30px rgba(0,0,0,.22);
 }
 
 .housing-range-top{
-  margin-bottom:12px;
+  margin-bottom:10px;
 }
 
 .housing-range-label{
   display:block;
-  color:var(--muted2);
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:.08em;
+  color:var(--mint);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.14em;
   text-transform:uppercase;
 }
 
 .housing-range-title{
   display:block;
-  margin-top:4px;
+  margin-top:5px;
   color:var(--ink);
-  font-size:15px;
-  font-weight:800;
+  font-size:16px;
+  font-weight:900;
+  letter-spacing:-.02em;
+  line-height:1.2;
 }
 
 .housing-range-target-center{
   text-align:center;
-  margin:10px 0 14px;
+  margin:12px 0 16px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(0,0,0,.14);
 }
 
 .housing-range-target-center small{
   display:block;
   color:var(--muted2);
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:.06em;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.12em;
   text-transform:uppercase;
 }
 
 .housing-range-target-center b{
   display:block;
-  margin-top:6px;
+  margin-top:7px;
   color:var(--ink);
-  font-size:28px;
+  font-size:30px;
   font-weight:900;
-  line-height:1.1;
+  line-height:1.05;
+  letter-spacing:-.04em;
 }
 
 .housing-range-track-wrap{
-  margin-top:4px;
+  margin-top:2px;
 }
 
 .housing-range-scale{
   display:flex;
   justify-content:space-between;
   gap:12px;
-  margin-bottom:8px;
-  color:var(--muted2);
+  margin-bottom:9px;
+  color:var(--muted);
   font-size:12px;
-  font-weight:700;
+  font-weight:800;
+}
+
+.housing-range-scale span{
+  min-width:0;
+  white-space:nowrap;
 }
 
 .housing-range-track{
   position:relative;
   width:100%;
-  height:12px;
+  height:14px;
   border-radius:999px;
+  overflow:visible;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.housing-range-track::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
   overflow:hidden;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  pointer-events:none;
+}
+
+.housing-range-track::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:2px;
+  height:20px;
+  border-radius:999px;
+  background:rgba(244,248,255,.28);
+  box-shadow:0 0 10px rgba(106,167,255,.22);
+  pointer-events:none;
+  z-index:2;
 }
 
 .housing-range-fill{
   position:absolute;
   top:0;
-  left:0;
-  width:0;
+  left:var(--buyer-fill-left,0);
+  width:var(--buyer-fill-width,0);
   height:100%;
   border-radius:999px;
   background:linear-gradient(90deg,var(--mint) 0%,var(--mint) 58%,var(--blue) 100%);
-  transition:left .25s ease,width .25s ease,background .25s ease;
+  box-shadow:0 0 18px rgba(142,243,197,.18);
+  transition:left .28s ease,width .28s ease,background .28s ease,box-shadow .28s ease;
+  z-index:1;
 }
 
 .housing-range-fill.warn{
   background:linear-gradient(90deg,var(--gold) 0%,var(--blue) 100%);
+  box-shadow:0 0 16px rgba(255,213,142,.16);
 }
 
 .housing-range-fill.bad{
   background:linear-gradient(90deg,var(--danger) 0%,var(--gold) 100%);
+  box-shadow:0 0 16px rgba(255,135,135,.16);
 }
 
 .housing-range-note{
-  margin-top:12px;
+  margin-top:14px;
   padding:12px 14px;
   border-radius:14px;
   border:1px solid rgba(255,255,255,.10);
@@ -1017,6 +1067,12 @@ select{
   min-height:78px;
   display:flex;
   align-items:center;
+}
+
+.housing-range-note.ok{
+  color:var(--mint);
+  border-color:rgba(142,243,197,.25);
+  background:rgba(142,243,197,.065);
 }
 
 .housing-range-note.warn{
@@ -1092,5 +1148,17 @@ select{
 
   .status-pill{
     align-self:flex-start;
+  }
+
+  .housing-range-target-center b{
+    font-size:24px;
+  }
+
+  .housing-range-scale{
+    font-size:11px;
+  }
+
+  .housing-range-note{
+    min-height:auto;
   }
 }
