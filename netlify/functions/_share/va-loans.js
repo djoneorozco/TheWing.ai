@@ -46,80 +46,62 @@
 //   “generally,” “may,” “often,” “eligible borrower,” “lender determines,” etc.
 // ============================================================
 
+import {
+  VA_FUNDING_FEE_TABLE as OFFICIAL_VA_FUNDING_FEE_TABLE,
+  isFundingFeeExempt as officialIsFundingFeeExempt
+} from "./official-va.js";
+
 // ============================================================
 // //#1) VERSION
 // ============================================================
 
-export const VA_LOANS_VERSION = "va-loans-2026.1";
+export const VA_LOANS_VERSION = "va-loans-2026.2";
 
 // ============================================================
 // //#2) OFFICIAL-STYLE CONSTANTS
 // ============================================================
 //
-// Funding fee table:
-// Current VA purchase/cash-out funding fee structure is commonly represented
-// by first use vs subsequent use and down payment tier.
-// This module uses the modern VA funding fee percentages:
-// - Purchase / construction:
-//   First use: 2.15% with <5% down, 1.50% with 5-9.99%, 1.25% with 10%+
-//   Subsequent use: 3.30% with <5% down, 1.50% with 5-9.99%, 1.25% with 10%+
-// - IRRRL: 0.50%
-// - Manufactured home not permanently affixed: 1.00%
-// - Assumption: 0.50%
-// - Vendee: 2.25%
-//
-// Keep these values centralized so future updates only happen here.
+// Purchase / cash-out / IRRRL tiers come from official-va.js.
+// Extended loan types remain here until promoted to official-va.js.
 // ============================================================
 
+const PURCHASE_FUNDING_FEE_LABELS = Object.freeze({
+  first_use: [
+    "First use, less than 5% down",
+    "First use, 5% to 9.99% down",
+    "First use, 10% or more down"
+  ],
+  subsequent_use: [
+    "Subsequent use, less than 5% down",
+    "Subsequent use, 5% to 9.99% down",
+    "Subsequent use, 10% or more down"
+  ]
+});
+
+function withPurchaseLabels(useKey, rows) {
+  return rows.map(function (row, index) {
+    return {
+      ...row,
+      label: PURCHASE_FUNDING_FEE_LABELS[useKey][index] || `${useKey.replace(/_/g, " ")} purchase`
+    };
+  });
+}
+
 export const VA_FUNDING_FEE_TABLE = Object.freeze({
-  version: "VA funding fee table reference 2026.1",
+  version: "VA funding fee table reference 2026.2 (official-va source)",
+  sourceModule: "official-va.js",
   purchase: {
-    first_use: [
-      {
-        minDownPct: 0,
-        maxDownPct: 4.999999,
-        feePct: 0.0215,
-        label: "First use, less than 5% down"
-      },
-      {
-        minDownPct: 5,
-        maxDownPct: 9.999999,
-        feePct: 0.015,
-        label: "First use, 5% to 9.99% down"
-      },
-      {
-        minDownPct: 10,
-        maxDownPct: Infinity,
-        feePct: 0.0125,
-        label: "First use, 10% or more down"
-      }
-    ],
-    subsequent_use: [
-      {
-        minDownPct: 0,
-        maxDownPct: 4.999999,
-        feePct: 0.033,
-        label: "Subsequent use, less than 5% down"
-      },
-      {
-        minDownPct: 5,
-        maxDownPct: 9.999999,
-        feePct: 0.015,
-        label: "Subsequent use, 5% to 9.99% down"
-      },
-      {
-        minDownPct: 10,
-        maxDownPct: Infinity,
-        feePct: 0.0125,
-        label: "Subsequent use, 10% or more down"
-      }
-    ]
+    first_use: withPurchaseLabels(
+      "first_use",
+      OFFICIAL_VA_FUNDING_FEE_TABLE.purchase.first_use
+    ),
+    subsequent_use: withPurchaseLabels(
+      "subsequent_use",
+      OFFICIAL_VA_FUNDING_FEE_TABLE.purchase.subsequent_use
+    )
   },
-  cash_out_refinance: {
-    first_use: 0.0215,
-    subsequent_use: 0.033
-  },
-  irrrl: 0.005,
+  cash_out_refinance: { ...OFFICIAL_VA_FUNDING_FEE_TABLE.cash_out_refinance },
+  irrrl: OFFICIAL_VA_FUNDING_FEE_TABLE.irrrl,
   manufactured_home_not_permanently_affixed: 0.01,
   assumption: 0.005,
   vendee: 0.0225
@@ -1067,13 +1049,42 @@ export function calculateVaFundingFee(input = {}) {
   const downPaymentPct = price && price > 0 ? downpayment / price : 0;
   const priorUse = scenario.priorUse || "first_use";
 
+  const officialExemption = officialIsFundingFeeExempt({
+    fundingFeeExempt: pickFirst(
+      scenario.fundingFeeExempt,
+      input.fundingFeeExempt,
+      input.funding_fee_exempt,
+      input.exempt
+    ),
+    rating: profile.va_disability,
+    receivesVaCompensation: profile.likely_funding_fee_exempt,
+    purpleHeart: pickFirst(input.purpleHeart, input.purple_heart, profile.purpleHeart),
+    survivingSpouse: pickFirst(
+      input.survivingSpouse,
+      input.surviving_spouse,
+      profile.survivingSpouse
+    ),
+    vaCompensationPending: pickFirst(
+      input.vaCompensationPending,
+      input.va_compensation_pending,
+      input.disabilityPending
+    )
+  });
+
   const exempt =
+    officialExemption.exempt ||
     scenario.fundingFeeExempt ||
     profile.likely_funding_fee_exempt ||
     isLikelyFundingFeeExempt(profile) ||
     boolish(input.exempt, false);
 
   if (exempt) {
+    const warnings = [];
+
+    if (officialExemption.warning) {
+      warnings.push(officialExemption.warning);
+    }
+
     return stripEmpty({
       ok: true,
       version: VA_LOANS_VERSION,
@@ -1089,8 +1100,8 @@ export function calculateVaFundingFee(input = {}) {
       label: "Funding fee exempt",
       bluf:
         "The borrower appears likely exempt from the VA funding fee based on the provided profile. Confirm exemption status on the COE or with the lender.",
-      warnings: [],
-      source: "TheWing va-loans.js"
+      warnings,
+      source: "TheWing official-va.js via va-loans.js"
     });
   }
 
@@ -1147,7 +1158,7 @@ export function calculateVaFundingFee(input = {}) {
         ? `Estimated VA funding fee is ${money(feeAmount)} and is assumed financed into the loan.`
         : `Estimated VA funding fee is ${money(feeAmount)} and is assumed paid at closing.`,
     warnings,
-    source: "TheWing va-loans.js"
+    source: "TheWing official-va.js via va-loans.js"
   });
 }
 
