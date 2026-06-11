@@ -73,6 +73,33 @@ function officialWHtR(waist, height) {
   return 0;
 }
 
+const WALK_BAND_BY_PAIR = {
+  under25_male: ["male_afspecwar_eod", "under_30"],
+  "25-29_male": ["male_afspecwar_eod", "under_30"],
+  "30-34_male": ["male_afspecwar_eod", "30_39"],
+  "35-39_male": ["male_afspecwar_eod", "30_39"],
+  "40-44_male": ["male_afspecwar_eod", "40_49"],
+  "45-49_male": ["male_afspecwar_eod", "40_49"],
+  "50-54_male": ["male_afspecwar_eod", "50_59"],
+  "55-59_male": ["male_afspecwar_eod", "50_59"],
+  "60plus_male": ["male_afspecwar_eod", "60_and_over"],
+  under25_female: ["female", "under_30"],
+  "25-29_female": ["female", "under_30"],
+  "30-34_female": ["female", "30_39"],
+  "35-39_female": ["female", "30_39"],
+  "40-44_female": ["female", "40_49"],
+  "45-49_female": ["female", "40_49"],
+  "50-54_female": ["female", "50_59"],
+  "55-59_female": ["female", "50_59"],
+  "60plus_female": ["female", "60_and_over"]
+};
+
+function officialWalk(pairKey, seconds) {
+  const [group, band] = WALK_BAND_BY_PAIR[pairKey];
+  const maxSeconds = pfra.walk_standards[group][band].seconds;
+  return seconds <= maxSeconds ? 35.0 : 0.0;
+}
+
 const cases = [
   {
     label: "Male Under 25 — max push/sit/run + best WHtR",
@@ -145,6 +172,42 @@ const cases = [
     core: { event: "rev_crunch", value: 65 },
     cardio: { event: "hamr", value: 75 },
     expect: { strength: 15, core: 15 }
+  },
+  {
+    label: "Male 40–44 — 2 km Walk passing",
+    pair: "40-44_male",
+    body: { waist: 32, height: 72 },
+    strength: { event: "push_up", value: 52 },
+    core: { event: "sit_up", value: 50 },
+    cardio: { event: "walk_2km", value: 983 },
+    expect: { cardio: 35, componentsPass: true }
+  },
+  {
+    label: "Male 40–44 — 2 km Walk failing",
+    pair: "40-44_male",
+    body: { waist: 32, height: 72 },
+    strength: { event: "push_up", value: 52 },
+    core: { event: "sit_up", value: 50 },
+    cardio: { event: "walk_2km", value: 984 },
+    expect: { cardio: 0, pass: false }
+  },
+  {
+    label: "Female 40–44 — 2 km Walk passing",
+    pair: "40-44_female",
+    body: { waist: 32, height: 72 },
+    strength: { event: "push_up", value: 41 },
+    core: { event: "sit_up", value: 46 },
+    cardio: { event: "walk_2km", value: 1069 },
+    expect: { cardio: 35, componentsPass: true }
+  },
+  {
+    label: "Female 40–44 — 2 km Walk failing",
+    pair: "40-44_female",
+    body: { waist: 32, height: 72 },
+    strength: { event: "push_up", value: 41 },
+    core: { event: "sit_up", value: 46 },
+    cardio: { event: "walk_2km", value: 1070 },
+    expect: { cardio: 0, pass: false }
   }
 ];
 
@@ -154,12 +217,14 @@ for (const test of cases) {
   const body = officialWHtR(test.body.waist, test.body.height);
   const strength = officialScore(test.strength.event, test.pair, test.strength.value);
   const core = officialScore(test.core.event, test.pair, test.core.value, test.core.event === "plank" ? "higher" : "higher");
-  const cardio = officialScore(
-    test.cardio.event,
-    test.pair,
-    test.cardio.value,
-    test.cardio.event === "run_2mi" ? "lower" : "higher"
-  );
+  const cardio = test.cardio.event === "walk_2km"
+    ? officialWalk(test.pair, test.cardio.value)
+    : officialScore(
+      test.cardio.event,
+      test.pair,
+      test.cardio.value,
+      test.cardio.event === "run_2mi" ? "lower" : "higher"
+    );
   const total = body + strength + core + cardio;
   const bodyPass = roundWHtR(test.body.waist / test.body.height) <= 0.59;
   const componentsPass = bodyPass && strength >= 2.5 && core >= 2.5 && cardio >= 35;
@@ -183,6 +248,9 @@ for (const test of cases) {
   }
   if (test.core.event === "rev_crunch" && test.pair === "under25_male") {
     calcOk = calcOk && jsSource.includes("max: buildMap([60,58,58,56,56,54,54,52,52,50,50,48,48,46,46,44,44,42])");
+  }
+  if (test.cardio.event === "walk_2km" && test.pair === "40-44_male") {
+    calcOk = calcOk && jsSource.includes("983, 1069, 983, 1069");
   }
 
   const finalOk = ok && calcOk;
