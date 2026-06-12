@@ -1,7 +1,7 @@
 // netlify/functions/opensource-brain.js
 // ============================================================
 // TheWing.ai • Open Source Brain
-// v1.1.1
+// v1.1.2
 //
 // PURPOSE
 // - Public calculator endpoint for PCSUnited tools
@@ -34,6 +34,13 @@
 // - Added clearer Base Pay vs BAH error messages.
 // - Error responses now include sourceVersions.
 // - Handler now supports body.type / input.tool / input.type.
+//
+// UPDATE v1.1.2
+// - RETIREMENT_VA now requires explicit rank, YOS, and VA rating.
+// - Added validateRetirementVAInput() with dependent field checks.
+// - RETIREMENT_VA exposes retirementBaseMethod and compensationAccuracy.
+// - RETIREMENT_VA monthly payload includes frontend extraction aliases.
+// - RETIREMENT_VA summary headline distinguishes High-3 vs estimate proxy.
 // ============================================================
 
 import {
@@ -53,7 +60,11 @@ import * as OFFICIAL_RETIREMENT from "./_share/official-retirement.js";
 // //#1) CONFIG
 // ============================================================
 
-const BRAIN_VERSION = "thewing-open-brain-1.1.1";
+const BRAIN_VERSION = "thewing-open-brain-1.1.2";
+
+const SUPPORTED_VA_RATINGS = Object.freeze([
+  0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100
+]);
 const APP_NAME = "TheWing.ai";
 const ALLOW_ORIGIN = "*";
 
@@ -149,11 +160,22 @@ function normalizeRank(rank) {
   return raw.replace(/\s+/g, "");
 }
 
-function normalizeRetirementSystem(value) {
+function normalizeRetirementSystem(value, options = {}) {
   const raw = normalizeUpper(value);
+  const hasExplicit = hasInputValue(value);
+
+  if (!raw) {
+    return "HIGH3";
+  }
 
   if (raw === "HIGH3" || raw === "HIGH-3" || raw === "HIGH 3") return "HIGH3";
   if (raw === "BRS" || raw === "BLENDED") return "BRS";
+
+  if (options.strict === true || hasExplicit) {
+    throw new Error(
+      `Unsupported retirementSystem "${value}". Supported systems: HIGH3, BRS.`
+    );
+  }
 
   return "HIGH3";
 }
@@ -208,6 +230,118 @@ function hasDependentInput(input = {}) {
   ].some(function(value){
     return value !== undefined && value !== null && String(value).trim() !== "";
   });
+}
+
+function getVaRatingInput(input = {}) {
+  return (
+    input.vaRating ??
+    input.va_rating ??
+    input.vaDisability ??
+    input.va_disability ??
+    input.disability_rating ??
+    input.disabilityRating ??
+    input.rating
+  );
+}
+
+function hasVaRatingInput(input = {}) {
+  const raw = getVaRatingInput(input);
+  return hasInputValue(raw);
+}
+
+function isBooleanCompatible(value) {
+  if (value === true || value === false) return true;
+  if (value === undefined || value === null || String(value).trim() === "") {
+    return true;
+  }
+
+  const s = String(value).trim().toLowerCase();
+
+  return ["true", "false", "1", "0", "yes", "no", "y", "n"].includes(s);
+}
+
+function toNonNegativeInteger(value, fieldName) {
+  const n = Number.parseInt(String(value ?? "").replace(/[^\d-]/g, ""), 10);
+
+  if (!Number.isFinite(n) || n < 0) {
+    throw new Error(`${fieldName} must be a non-negative integer.`);
+  }
+
+  return n;
+}
+
+function validateRetirementVAInput(input = {}) {
+  if (!hasRankInput(input)) {
+    throw new Error("Missing rank/paygrade for RETIREMENT_VA calculation.");
+  }
+
+  if (!hasYosInput(input)) {
+    throw new Error("Missing years of service for RETIREMENT_VA calculation.");
+  }
+
+  const yosValue =
+    input.yos ??
+    input.yearsOfService ??
+    input.years_of_service ??
+    input.serviceYears;
+
+  const yosNumber = Number(yosValue);
+
+  if (!Number.isFinite(yosNumber) || yosNumber < 0) {
+    throw new Error("Invalid years of service for RETIREMENT_VA calculation.");
+  }
+
+  if (
+    hasInputValue(input.retirementSystem) ||
+    hasInputValue(input.retirement_system) ||
+    hasInputValue(input.system)
+  ) {
+    normalizeRetirementSystem(
+      input.retirementSystem ||
+      input.retirement_system ||
+      input.system,
+      { strict: true }
+    );
+  }
+
+  if (!hasVaRatingInput(input)) {
+    throw new Error("Missing VA disability rating for RETIREMENT_VA calculation.");
+  }
+
+  const vaRating = toInteger(getVaRatingInput(input), NaN);
+
+  if (!SUPPORTED_VA_RATINGS.includes(vaRating)) {
+    throw new Error(
+      `Invalid VA disability rating for RETIREMENT_VA calculation. Supported ratings: ${SUPPORTED_VA_RATINGS.join(", ")}.`
+    );
+  }
+
+  if (!isBooleanCompatible(input.spouse)) {
+    throw new Error("spouse must be a boolean-compatible value for RETIREMENT_VA calculation.");
+  }
+
+  const childrenUnder18 = toNonNegativeInteger(
+    input.childrenUnder18 ?? input.children_under_18 ?? 0,
+    "childrenUnder18"
+  );
+
+  const childrenInSchoolOver18 = toNonNegativeInteger(
+    input.childrenInSchoolOver18 ??
+    input.children_in_school_over_18 ??
+    input.childrenOver18School ??
+    input.children_over_18_school ??
+    0,
+    "childrenInSchoolOver18"
+  );
+
+  const dependentParents = toNonNegativeInteger(
+    input.dependentParents ?? input.dependent_parents ?? 0,
+    "dependentParents"
+  );
+
+  if (dependentParents > 2) {
+    throw new Error("dependentParents cannot exceed 2 for RETIREMENT_VA calculation.");
+  }
 }
 
 function validatePcsSnapshotInput(input = {}) {
@@ -614,21 +748,38 @@ function getOfficialRetirementPay(input) {
 }
 
 function buildRetirementVAProfile(input = {}) {
+  if (!hasRankInput(input)) {
+    throw new Error("Missing rank/paygrade for RETIREMENT_VA calculation.");
+  }
+
+  if (!hasYosInput(input)) {
+    throw new Error("Missing years of service for RETIREMENT_VA calculation.");
+  }
+
   const rank = normalizeRank(
     input.rank ||
     input.rank_paygrade ||
     input.rankPaygrade ||
     input.paygrade ||
-    "E-6"
+    input.grade ||
+    ""
   );
+
+  if (!rank) {
+    throw new Error("Missing rank/paygrade for RETIREMENT_VA calculation.");
+  }
 
   const yearsOfService = toFiniteNumber(
     input.yos ??
     input.yearsOfService ??
     input.years_of_service ??
-    20,
-    20
+    input.serviceYears,
+    NaN
   );
+
+  if (!Number.isFinite(yearsOfService) || yearsOfService < 0) {
+    throw new Error("Invalid years of service for RETIREMENT_VA calculation.");
+  }
 
   const retirementSystem = normalizeRetirementSystem(
     input.retirementSystem ||
@@ -637,15 +788,17 @@ function buildRetirementVAProfile(input = {}) {
     "HIGH3"
   );
 
-  const vaRating = toInteger(
-    input.vaRating ??
-    input.va_rating ??
-    input.vaDisability ??
-    input.va_disability ??
-    input.rating ??
-    0,
-    0
-  );
+  if (!hasVaRatingInput(input)) {
+    throw new Error("Missing VA disability rating for RETIREMENT_VA calculation.");
+  }
+
+  const vaRating = toInteger(getVaRatingInput(input), NaN);
+
+  if (!SUPPORTED_VA_RATINGS.includes(vaRating)) {
+    throw new Error(
+      `Invalid VA disability rating for RETIREMENT_VA calculation. Supported ratings: ${SUPPORTED_VA_RATINGS.join(", ")}.`
+    );
+  }
 
   const spouse =
     input.spouse === true ||
@@ -706,8 +859,30 @@ function buildRetirementVAProfile(input = {}) {
   };
 }
 
+function resolveRetirementAccuracy(retirementRecord = {}) {
+  const retirementBaseMethod =
+    retirementRecord.baseMethod || "FINAL_MONTH_ESTIMATE";
+
+  if (retirementBaseMethod === "HIGH36_AVERAGE") {
+    return {
+      retirementBaseMethod,
+      compensationAccuracy: "official_va_and_high36_retirement",
+      retirementLabel: "High-3 retirement"
+    };
+  }
+
+  return {
+    retirementBaseMethod,
+    compensationAccuracy: "official_va_and_retirement_estimate",
+    retirementLabel: "Retirement estimate using final monthly basic pay proxy"
+  };
+}
+
 function buildRetirementVAPayload(input = {}, tool = "RETIREMENT_VA") {
+  validateRetirementVAInput(input);
+
   const profile = buildRetirementVAProfile(input);
+  const generatedAt = new Date().toISOString();
 
   const payRecord = getPayRecord2026(profile.rank, profile.yearsOfService, {
     basType: ""
@@ -715,11 +890,18 @@ function buildRetirementVAPayload(input = {}, tool = "RETIREMENT_VA") {
 
   const monthlyBasicPayAtRetirement = money(payRecord.basicPayMonthly);
 
-  const retirementRecord = getOfficialRetirementPay({
+  const retirementInput = {
     retirementSystem: profile.retirementSystem,
     yearsOfService: profile.yearsOfService,
     monthlyBasicPayAtRetirement
-  });
+  };
+
+  if (Array.isArray(input.high36MonthlyArray) && input.high36MonthlyArray.length > 0) {
+    retirementInput.high36MonthlyArray = input.high36MonthlyArray;
+  }
+
+  const retirementRecord = getOfficialRetirementPay(retirementInput);
+  const accuracy = resolveRetirementAccuracy(retirementRecord);
 
   const vaRecord =
     profile.vaRating > 0
@@ -755,28 +937,48 @@ function buildRetirementVAPayload(input = {}, tool = "RETIREMENT_VA") {
 
   const combinedMonthlyGross = money(retiredPayGross + vaCompensation);
 
+  const monthly = {
+    retiredPayGross,
+    grossMonthlyRetiredPay: retiredPayGross,
+    retirementPay: retiredPayGross,
+    retirement_pay: retiredPayGross,
+    retiredPay: retiredPayGross,
+    retired_pay: retiredPayGross,
+    monthlyRetirement: retiredPayGross,
+
+    vaCompensation,
+    monthlyVA: vaCompensation,
+    vaMonthly: vaCompensation,
+    disabilityPay: vaCompensation,
+    disability_pay: vaCompensation,
+    vaDisabilityPay: vaCompensation,
+    va_disability_pay: vaCompensation,
+
+    combinedMonthlyGross,
+    grossMonthlyComp: combinedMonthlyGross,
+    totalMonthly: combinedMonthlyGross,
+    total: combinedMonthlyGross,
+    total_monthly: combinedMonthlyGross
+  };
+
+  const sourceModules = {
+    officialPay: OFFICIAL_PAY_RATE_VERSION || null,
+    officialRetirement: OFFICIAL_RETIREMENT_RATE_VERSION || null,
+    officialVa: OFFICIAL_VA_RATE_VERSION || null
+  };
+
   const compensation = {
     ok: true,
     lane: "RETIRED_VETERAN",
-    monthly: {
-      retiredPayGross,
-      grossMonthlyRetiredPay: retiredPayGross,
-      retirementPay: retiredPayGross,
-      vaCompensation,
-      monthlyVA: vaCompensation,
-      combinedMonthlyGross,
-      grossMonthlyComp: combinedMonthlyGross,
-      totalMonthly: combinedMonthlyGross
-    },
+    monthly,
     detail: {
       payRecord,
       retirementRecord,
       vaRecord,
-      sourceModules: {
-        officialPay: OFFICIAL_PAY_RATE_VERSION,
-        officialRetirement: OFFICIAL_RETIREMENT_RATE_VERSION,
-        officialVa: OFFICIAL_VA_RATE_VERSION
-      }
+      retirementBaseMethod: accuracy.retirementBaseMethod,
+      compensationAccuracy: accuracy.compensationAccuracy,
+      retirementLabel: accuracy.retirementLabel,
+      sourceModules
     },
     sourceVersion: `${OFFICIAL_PAY_RATE_VERSION}+${OFFICIAL_RETIREMENT_RATE_VERSION}+${OFFICIAL_VA_RATE_VERSION}`
   };
@@ -789,6 +991,9 @@ function buildRetirementVAPayload(input = {}, tool = "RETIREMENT_VA") {
     vaRating: profile.vaRating,
     dependentProfile: profile.dependentProfile,
     monthlyBasicPayAtRetirement,
+    retirementBaseMethod: accuracy.retirementBaseMethod,
+    compensationAccuracy: accuracy.compensationAccuracy,
+    retirementLabel: accuracy.retirementLabel,
 
     retiredPayGross,
     grossMonthlyRetiredPay: retiredPayGross,
@@ -806,24 +1011,37 @@ function buildRetirementVAPayload(input = {}, tool = "RETIREMENT_VA") {
     payRecord
   };
 
+  const summaryHeadline =
+    accuracy.retirementBaseMethod === "HIGH36_AVERAGE"
+      ? `Combined monthly retired pay and VA compensation is $${combinedMonthlyGross.toLocaleString()}.`
+      : `Estimated combined monthly retired pay and VA compensation is $${combinedMonthlyGross.toLocaleString()} because retirement uses final monthly basic pay as a High-3 proxy.`;
+
   const summary = {
     mode: "VETERAN",
-    headline: `Estimated combined monthly retired pay and VA compensation is $${combinedMonthlyGross.toLocaleString()}.`,
+    headline: summaryHeadline,
     monthlyIncome: combinedMonthlyGross,
     monthlyRetiredPay: retiredPayGross,
     monthlyVA: vaCompensation,
-    combinedMonthlyGross
+    combinedMonthlyGross,
+    retirementBaseMethod: accuracy.retirementBaseMethod,
+    compensationAccuracy: accuracy.compensationAccuracy,
+    retirementLabel: accuracy.retirementLabel
   };
 
   return {
     tool,
     app: APP_NAME,
+    brainVersion: BRAIN_VERSION,
+    generatedAt,
+    payRateVersion: OFFICIAL_PAY_RATE_VERSION || null,
+    retirementRateVersion: OFFICIAL_RETIREMENT_RATE_VERSION || null,
+    vaRateVersion: OFFICIAL_VA_RATE_VERSION || null,
     profile,
     calculator,
     compensation,
     summary,
 
-    monthly: compensation.monthly,
+    monthly,
     retirementRecord,
     vaRecord,
     payRecord,
@@ -842,6 +1060,7 @@ function buildRetirementVAPayload(input = {}, tool = "RETIREMENT_VA") {
               : "STRONG"
     },
 
+    sourceModules,
     sourceVersions: sourceVersions()
   };
 }
@@ -1044,6 +1263,7 @@ function buildPayload(input, toolName) {
     tool === "RETIREMENT_AND_VA" ||
     tool === "RETIREMENT_VA_CALCULATOR"
   ) {
+    validateRetirementVAInput(input);
     return buildRetirementVAPayload(input, "RETIREMENT_VA");
   }
 
@@ -1126,11 +1346,11 @@ export const handler = async (event) => {
             tool: "RETIREMENT_VA",
             input: {
               rank: "E-6",
-              yos: 22,
+              yos: 20,
               retirementSystem: "HIGH3",
               vaRating: 70,
-              spouse: false,
-              childrenUnder18: 0,
+              spouse: true,
+              childrenUnder18: 1,
               childrenInSchoolOver18: 0,
               dependentParents: 0
             }
