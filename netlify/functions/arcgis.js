@@ -45,7 +45,7 @@ exports.handler = async function (event) {
           f: "json",
           singleLine: address,
           outFields: "Match_addr,Addr_type,PlaceName,City,Region,Postal,Country",
-          maxLocations: "5",
+          maxLocations: params.limit || "5",
           token: ARCGIS_API_KEY,
         });
     }
@@ -74,7 +74,6 @@ exports.handler = async function (event) {
     else if (action === "places") {
       const lat = params.lat;
       const lon = params.lon;
-      const category = params.category || "hospital";
 
       if (!lat || !lon) {
         return {
@@ -91,8 +90,39 @@ exports.handler = async function (event) {
           x: lon,
           y: lat,
           radius: params.radius || "10000",
-          categoryIds: category,
+          categoryIds: params.categoryIds || params.category || "",
+          searchText: params.searchText || "",
           pageSize: params.limit || "10",
+          token: ARCGIS_API_KEY,
+        });
+    }
+
+    else if (action === "route") {
+      const fromLat = params.fromLat;
+      const fromLon = params.fromLon;
+      const toLat = params.toLat;
+      const toLon = params.toLon;
+
+      if (!fromLat || !fromLon || !toLat || !toLon) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            error: "Missing route coordinates",
+            required: ["fromLat", "fromLon", "toLat", "toLon"],
+          }),
+        };
+      }
+
+      url =
+        "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve?" +
+        new URLSearchParams({
+          f: "json",
+          stops: `${fromLon},${fromLat};${toLon},${toLat}`,
+          returnDirections: "true",
+          returnRoutes: "true",
+          returnStops: "false",
+          returnBarriers: "false",
           token: ARCGIS_API_KEY,
         });
     }
@@ -103,7 +133,7 @@ exports.handler = async function (event) {
         headers,
         body: JSON.stringify({
           error: "Invalid action",
-          allowed: ["geocode", "reverse", "places"],
+          allowed: ["geocode", "reverse", "places", "route"],
         }),
       };
     }
