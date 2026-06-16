@@ -1,0 +1,668 @@
+<!-- //#0 HOUSE OF SASS • TRANSPARENT INPUT STRIP v2.1.1
+     PCS SNAPSHOT STREAMLINED FLOW
+     - Top row collects: Rank, YoS, Family Size, Current Base Location
+     - Bottom pill is now the New Base Location selector
+     - Selecting New Base automatically launches PCS Snapshot
+     - v2.1.1: unknown bases fail clearly; same-base blocked; fileKey/zip never silently default to Lackland
+-->
+<div id="sass-front-strip" style="all: initial;">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+
+  <style>
+    #sass-front-strip,
+    #sass-front-strip * {
+      box-sizing: border-box;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    #sass-shell {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 10px 0 10px;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      color: #e9ecff;
+    }
+
+    #sass-input-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      #sass-input-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      #sass-input-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sass-field-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #a8b0d6;
+      letter-spacing: .1em;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .sass-select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(12,14,25,0.65);
+      backdrop-filter: blur(4px);
+      color: #e9ecff;
+      font-size: 14px;
+      outline: none;
+      transition: 0.15s ease;
+      appearance: auto;
+    }
+
+    .sass-select:focus {
+      border-color: #8ef3c5;
+      box-shadow: 0 0 0 1px rgba(142,243,197,.25);
+    }
+
+    .sass-select option,
+    .sass-select optgroup {
+      background: #0c0e19;
+      color: #e9ecff;
+    }
+
+    #sass-new-base-stack {
+      position: relative;
+      width: 320px;
+      max-width: 88vw;
+      height: 42px;
+      margin: 22px auto 0;
+      border-radius: 999px;
+    }
+
+    #sass-new-base {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      z-index: 10;
+    }
+
+    #sass-new-base-shell {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      border-radius: 999px;
+      background: radial-gradient(circle at top left, #8ef3c5, #6aa7ff);
+      box-shadow: 0 14px 30px rgba(0,0,0,.80);
+      transition: 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #050712;
+      line-height: 1;
+      user-select: none;
+    }
+
+    #sass-new-base-stack:hover #sass-new-base-shell {
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+    }
+
+    #sass-new-base-stack:focus-within #sass-new-base-shell {
+      box-shadow:
+        0 14px 30px rgba(0,0,0,.80),
+        0 0 0 2px rgba(142,243,197,.30);
+    }
+
+    #sass-new-base-text {
+      padding: 0 46px 0 24px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      text-align: center;
+    }
+
+    #sass-new-base-caret {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      opacity: .9;
+    }
+
+    #sass-launch-status {
+      display: none;
+      margin-top: 12px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #8ef3c5;
+      text-align: center;
+      letter-spacing: .02em;
+    }
+
+    #sass-launch-status.sass-status-active {
+      display: block;
+    }
+
+    .sass-hidden {
+      display: none !important;
+    }
+  </style>
+
+  <div id="sass-shell">
+    <div id="sass-input-row">
+      <div id="wrap-rank">
+        <label class="sass-field-label" for="sass-rank">Rank</label>
+        <select id="sass-rank" class="sass-select">
+          <optgroup label="Enlisted">
+            <option value="E1">E-1</option>
+            <option value="E2">E-2</option>
+            <option value="E3">E-3</option>
+            <option value="E4">E-4</option>
+            <option value="E5">E-5</option>
+            <option value="E6">E-6</option>
+            <option value="E7" selected>E-7</option>
+            <option value="E8">E-8</option>
+            <option value="E9">E-9</option>
+          </optgroup>
+          <optgroup label="Officers">
+            <option value="O1">O-1</option>
+            <option value="O2">O-2</option>
+            <option value="O3">O-3</option>
+            <option value="O4">O-4</option>
+            <option value="O5">O-5</option>
+            <option value="O6">O-6</option>
+            <option value="O7">O-7</option>
+            <option value="O8">O-8</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div>
+        <label class="sass-field-label" for="sass-yos">Years of Service</label>
+        <select id="sass-yos" class="sass-select">
+          <option value="2">2 Years</option>
+          <option value="4">4 Years</option>
+          <option value="6">6 Years</option>
+          <option value="8">8 Years</option>
+          <option value="10">10 Years</option>
+          <option value="12">12 Years</option>
+          <option value="14">14 Years</option>
+          <option value="16" selected>16 Years</option>
+          <option value="18">18 Years</option>
+          <option value="20">20 Years</option>
+          <option value="22">22 Years</option>
+          <option value="24">24 Years</option>
+          <option value="26">26 Years</option>
+          <option value="28">28 Years</option>
+          <option value="30">30 Years</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="sass-field-label" for="sass-family">Family Size</label>
+        <select id="sass-family" class="sass-select">
+          <option value="1">1 Person</option>
+          <option value="2">2 People</option>
+          <option value="3">3 People</option>
+          <option value="4" selected>4 People</option>
+          <option value="5">5 People</option>
+          <option value="6">6 People</option>
+          <option value="7">7 People</option>
+          <option value="8">8 People</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="sass-field-label" for="sass-current-base">Current Base Location</label>
+        <select id="sass-current-base" class="sass-select">
+          <option value="" selected>Select Current Base</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="sass-new-base-stack">
+      <select id="sass-new-base" aria-label="Select New Base Location">
+        <option value="" selected>Select New Base Location</option>
+      </select>
+
+      <div id="sass-new-base-shell">
+        <div id="sass-new-base-text">Select New Base Location</div>
+        <svg id="sass-new-base-caret" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M7 10l5 5 5-5" stroke="rgba(5,7,18,.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div id="sass-launch-status">
+      Building your PCS Snapshot...
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      "use strict";
+
+      var SNAPSHOT_BASE_URL = "https://pcsunited-com-28346d.webflow.io/air-force/pcs-snapshot";
+
+      var BASES = [
+        { value: "Andrews AFB",          fileKey: "Andrews",          zip: "20762" },
+        { value: "Barksdale AFB",        fileKey: "Barksdale",        zip: "71110" },
+        { value: "Beale AFB",            fileKey: "Beale",            zip: "95903" },
+        { value: "Cannon AFB",           fileKey: "Cannon",           zip: "88103" },
+        { value: "Charleston AFB",       fileKey: "Charleston",       zip: "29404" },
+        { value: "Davis-Monthan AFB",    fileKey: "Davis-Monthan",    zip: "85707" },
+        { value: "Dover AFB",            fileKey: "Dover",            zip: "19902" },
+        { value: "Dyess AFB",            fileKey: "Dyess",            zip: "79607" },
+        { value: "Eglin AFB",            fileKey: "Eglin",            zip: "32542" },
+        { value: "Elmendorf AFB",        fileKey: "Elmendorf",        zip: "99506" },
+        { value: "F.E-Warren AFB",       fileKey: "F.E-Warren",       zip: "82005" },
+        { value: "Fairchild AFB",        fileKey: "Fairchild",        zip: "99011" },
+        { value: "Fort-Sam-Houston AFB", fileKey: "Fort-Sam-Houston", zip: "78234" },
+        { value: "Holloman AFB",         fileKey: "Holloman",         zip: "88330" },
+        { value: "Hurlburt AFB",         fileKey: "Hurlburt",         zip: "32544" },
+        { value: "Keesler AFB",          fileKey: "Keesler",          zip: "39534" },
+        { value: "Kirtland AFB",         fileKey: "Kirtland",         zip: "87117" },
+        { value: "Lackland AFB",         fileKey: "Lackland",         zip: "78236" },
+        { value: "Langley AFB",          fileKey: "Langley",          zip: "23665" },
+        { value: "Laughlin AFB",         fileKey: "Laughlin",         zip: "78843" },
+        { value: "Little-Rock AFB",      fileKey: "Little-Rock",      zip: "72099" },
+        { value: "Luke AFB",             fileKey: "Luke",             zip: "85309" },
+        { value: "MacDill AFB",          fileKey: "MacDill",          zip: "33621" },
+        { value: "Malmstrom AFB",        fileKey: "Malmstrom",        zip: "59402" },
+        { value: "Maxwell AFB",          fileKey: "Maxwell",          zip: "36112" },
+        { value: "McConnell AFB",        fileKey: "McConnell",        zip: "67221" },
+        { value: "McGuire AFB",          fileKey: "McGuire",          zip: "08641" },
+        { value: "Minot AFB",            fileKey: "Minot",            zip: "58705" },
+        { value: "Moody AFB",            fileKey: "Moody",            zip: "31699" },
+        { value: "Mountain-Home AFB",    fileKey: "Mountain-Home",    zip: "83648" },
+        { value: "Nellis AFB",           fileKey: "Nellis",           zip: "89191" },
+        { value: "Offutt AFB",           fileKey: "Offutt",           zip: "68113" },
+        { value: "Peterson AFB",         fileKey: "Peterson",         zip: "80914" },
+        { value: "Randolph AFB",         fileKey: "Randolph",         zip: "78150" },
+        { value: "Robins AFB",           fileKey: "Robins",           zip: "31098" },
+        { value: "Scott AFB",            fileKey: "Scott",            zip: "62225" },
+        { value: "Seymour-Johnson AFB",  fileKey: "Seymour-Johnson",  zip: "27531" },
+        { value: "Shaw AFB",             fileKey: "Shaw",             zip: "29152" },
+        { value: "Sheppard AFB",         fileKey: "Sheppard",         zip: "76311" },
+        { value: "Tinker AFB",           fileKey: "Tinker",           zip: "73145" },
+        { value: "Travis AFB",           fileKey: "Travis",           zip: "94535" },
+        { value: "Tyndall AFB",          fileKey: "Tyndall",          zip: "32403" },
+        { value: "Whiteman AFB",         fileKey: "Whiteman",         zip: "65305" },
+        { value: "Wright-Patterson AFB", fileKey: "Wright-Patterson", zip: "45433" }
+      ];
+
+      var BASE_META = Object.create(null);
+
+      BASES.forEach(function(base) {
+        BASE_META[base.value] = {
+          label: base.value,
+          fileKey: base.fileKey,
+          zip: base.zip
+        };
+      });
+
+      var BASE_ALIASES = {
+        "Andrews": "Andrews AFB",
+        "AndrewsAFB": "Andrews AFB",
+        "Joint Base Andrews": "Andrews AFB",
+        "JB Andrews": "Andrews AFB",
+        "Barksdale": "Barksdale AFB",
+        "BarksdaleAFB": "Barksdale AFB",
+        "Beale": "Beale AFB",
+        "BealeAFB": "Beale AFB",
+        "Cannon": "Cannon AFB",
+        "CannonAFB": "Cannon AFB",
+        "Charleston": "Charleston AFB",
+        "CharlestonAFB": "Charleston AFB",
+        "Joint Base Charleston": "Charleston AFB",
+        "Davis-Monthan": "Davis-Monthan AFB",
+        "DavisMonthan": "Davis-Monthan AFB",
+        "DavisMonthanAFB": "Davis-Monthan AFB",
+        "DMAFB": "Davis-Monthan AFB",
+        "Dover": "Dover AFB",
+        "DoverAFB": "Dover AFB",
+        "Dyess": "Dyess AFB",
+        "DyessAFB": "Dyess AFB",
+        "Eglin": "Eglin AFB",
+        "EglinAFB": "Eglin AFB",
+        "Elmendorf": "Elmendorf AFB",
+        "ElmendorfAFB": "Elmendorf AFB",
+        "JBER": "Elmendorf AFB",
+        "Joint Base Elmendorf-Richardson": "Elmendorf AFB",
+        "F.E-Warren": "F.E-Warren AFB",
+        "FE-Warren": "F.E-Warren AFB",
+        "FEWarren": "F.E-Warren AFB",
+        "FEWarrenAFB": "F.E-Warren AFB",
+        "F E Warren": "F.E-Warren AFB",
+        "Francis E. Warren": "F.E-Warren AFB",
+        "Fairchild": "Fairchild AFB",
+        "FairchildAFB": "Fairchild AFB",
+        "Fort Sam Houston": "Fort-Sam-Houston AFB",
+        "Fort-Sam-Houston": "Fort-Sam-Houston AFB",
+        "FortSamHouston": "Fort-Sam-Houston AFB",
+        "FortSamHoustonAFB": "Fort-Sam-Houston AFB",
+        "Fort Sam Houston AFB": "Fort-Sam-Houston AFB",
+        "JBSA-Fort-Sam-Houston": "Fort-Sam-Houston AFB",
+        "JBSA-Fort Sam Houston": "Fort-Sam-Houston AFB",
+        "JBSA Fort Sam Houston": "Fort-Sam-Houston AFB",
+        "Holloman": "Holloman AFB",
+        "HollomanAFB": "Holloman AFB",
+        "Hurlburt": "Hurlburt AFB",
+        "HurlburtAFB": "Hurlburt AFB",
+        "Hurlburt Field": "Hurlburt AFB",
+        "Keesler": "Keesler AFB",
+        "KeeslerAFB": "Keesler AFB",
+        "Kirtland": "Kirtland AFB",
+        "KirtlandAFB": "Kirtland AFB",
+        "Lackland": "Lackland AFB",
+        "LacklandAFB": "Lackland AFB",
+        "JBSA-Lackland": "Lackland AFB",
+        "JBSA Lackland": "Lackland AFB",
+        "Joint Base San Antonio Lackland": "Lackland AFB",
+        "Langley": "Langley AFB",
+        "LangleyAFB": "Langley AFB",
+        "Joint Base Langley-Eustis": "Langley AFB",
+        "Laughlin": "Laughlin AFB",
+        "LaughlinAFB": "Laughlin AFB",
+        "Little Rock AFB": "Little-Rock AFB",
+        "Little-Rock": "Little-Rock AFB",
+        "LittleRock": "Little-Rock AFB",
+        "LittleRockAFB": "Little-Rock AFB",
+        "Little Rock": "Little-Rock AFB",
+        "Luke": "Luke AFB",
+        "LukeAFB": "Luke AFB",
+        "MacDill": "MacDill AFB",
+        "MacDillAFB": "MacDill AFB",
+        "Malmstrom": "Malmstrom AFB",
+        "MalmstromAFB": "Malmstrom AFB",
+        "Maxwell": "Maxwell AFB",
+        "MaxwellAFB": "Maxwell AFB",
+        "McConnell": "McConnell AFB",
+        "McConnellAFB": "McConnell AFB",
+        "McGuire": "McGuire AFB",
+        "McGuireAFB": "McGuire AFB",
+        "JBMDL": "McGuire AFB",
+        "Joint Base McGuire-Dix-Lakehurst": "McGuire AFB",
+        "Minot": "Minot AFB",
+        "MinotAFB": "Minot AFB",
+        "Moody": "Moody AFB",
+        "MoodyAFB": "Moody AFB",
+        "Mountain Home AFB": "Mountain-Home AFB",
+        "Mountain-Home": "Mountain-Home AFB",
+        "MountainHome": "Mountain-Home AFB",
+        "MountainHomeAFB": "Mountain-Home AFB",
+        "Mountain Home": "Mountain-Home AFB",
+        "Nellis": "Nellis AFB",
+        "NellisAFB": "Nellis AFB",
+        "Offutt": "Offutt AFB",
+        "OffuttAFB": "Offutt AFB",
+        "Peterson": "Peterson AFB",
+        "PetersonAFB": "Peterson AFB",
+        "Peterson SFB": "Peterson AFB",
+        "Peterson Space Force Base": "Peterson AFB",
+        "Randolph": "Randolph AFB",
+        "RandolphAFB": "Randolph AFB",
+        "JBSA-Randolph": "Randolph AFB",
+        "JBSA Randolph": "Randolph AFB",
+        "Joint Base San Antonio Randolph": "Randolph AFB",
+        "Robins": "Robins AFB",
+        "RobinsAFB": "Robins AFB",
+        "Scott": "Scott AFB",
+        "ScottAFB": "Scott AFB",
+        "Seymour Johnson AFB": "Seymour-Johnson AFB",
+        "Seymour-Johnson": "Seymour-Johnson AFB",
+        "SeymourJohnson": "Seymour-Johnson AFB",
+        "SeymourJohnsonAFB": "Seymour-Johnson AFB",
+        "Shaw": "Shaw AFB",
+        "ShawAFB": "Shaw AFB",
+        "Sheppard": "Sheppard AFB",
+        "SheppardAFB": "Sheppard AFB",
+        "Tinker": "Tinker AFB",
+        "TinkerAFB": "Tinker AFB",
+        "Travis": "Travis AFB",
+        "TravisAFB": "Travis AFB",
+        "Tyndall": "Tyndall AFB",
+        "TyndallAFB": "Tyndall AFB",
+        "Whiteman": "Whiteman AFB",
+        "WhitemanAFB": "Whiteman AFB",
+        "Wright-Patterson": "Wright-Patterson AFB",
+        "WrightPatterson": "Wright-Patterson AFB",
+        "WrightPattersonAFB": "Wright-Patterson AFB",
+        "WPAFB": "Wright-Patterson AFB"
+      };
+
+      function canonicalBaseName(raw) {
+        var s = String(raw || "").trim();
+        if (!s) return "";
+        if (BASE_META[s]) return s;
+        return BASE_ALIASES[s] || "";
+      }
+
+      function resolveBaseMeta(raw, label) {
+        var canonical = canonicalBaseName(raw);
+        if (!canonical || !BASE_META[canonical]) {
+          alert("Unknown " + label + " selection. Please choose a supported base from the list.");
+          console.error("[PCS Embed] Unknown base for " + label + ":", raw);
+          return null;
+        }
+        return BASE_META[canonical];
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function populateBaseSelect(selectEl, placeholderText) {
+        if (!selectEl) return;
+
+        var html = "";
+
+        if (placeholderText) {
+          html += '<option value="" selected>' + escapeHtml(placeholderText) + '</option>';
+        }
+
+        BASES.forEach(function(base) {
+          html += '<option value="' + escapeHtml(base.value) + '">' + escapeHtml(base.value) + '</option>';
+        });
+
+        selectEl.innerHTML = html;
+      }
+
+      function getEl(id) {
+        return document.getElementById(id);
+      }
+
+      var rankSel = getEl("sass-rank");
+      var yosSel = getEl("sass-yos");
+      var familySel = getEl("sass-family");
+      var currentBaseSel = getEl("sass-current-base");
+      var newBaseSel = getEl("sass-new-base");
+      var newBaseText = getEl("sass-new-base-text");
+      var launchStatus = getEl("sass-launch-status");
+
+      populateBaseSelect(currentBaseSel, "Select Current Base");
+      populateBaseSelect(newBaseSel, "Select New Base Location");
+
+      function validateProfileInputs() {
+        var rank = String(rankSel && rankSel.value ? rankSel.value : "").trim();
+        var yos = String(yosSel && yosSel.value ? yosSel.value : "").trim();
+        var fam = String(familySel && familySel.value ? familySel.value : "").trim();
+        var curBaseRaw = String(currentBaseSel && currentBaseSel.value ? currentBaseSel.value : "").trim();
+
+        if (!rank) {
+          alert("Please select your rank.");
+          if (rankSel) rankSel.focus();
+          return false;
+        }
+
+        if (!yos) {
+          alert("Please select your years of service.");
+          if (yosSel) yosSel.focus();
+          return false;
+        }
+
+        if (!fam) {
+          alert("Please select your family size.");
+          if (familySel) familySel.focus();
+          return false;
+        }
+
+        if (!curBaseRaw) {
+          alert("Please select your current base location first.");
+          if (currentBaseSel) currentBaseSel.focus();
+          return false;
+        }
+
+        return true;
+      }
+
+      function launchSnapshot() {
+        var rank = String(rankSel && rankSel.value ? rankSel.value : "").trim();
+        var yos = String(yosSel && yosSel.value ? yosSel.value : "").trim();
+        var fam = String(familySel && familySel.value ? familySel.value : "").trim();
+        var curBaseRaw = String(currentBaseSel && currentBaseSel.value ? currentBaseSel.value : "").trim();
+        var newBaseRaw = String(newBaseSel && newBaseSel.value ? newBaseSel.value : "").trim();
+
+        if (!validateProfileInputs()) return;
+
+        if (!newBaseRaw) {
+          if (newBaseText) newBaseText.textContent = "Select New Base Location";
+          return;
+        }
+
+        var curMeta = resolveBaseMeta(curBaseRaw, "Current Base");
+        var newMeta = resolveBaseMeta(newBaseRaw, "New Base");
+        if (!curMeta || !newMeta) {
+          if (newBaseSel) newBaseSel.value = "";
+          if (newBaseText) newBaseText.textContent = "Select New Base Location";
+          return;
+        }
+
+        var curBase = curMeta.label;
+        var newBase = newMeta.label;
+
+        if (curBase === newBase) {
+          alert("Current Base and New Base cannot be the same. Please select a different destination base.");
+          if (newBaseSel) newBaseSel.value = "";
+          if (newBaseText) newBaseText.textContent = "Select New Base Location";
+          return;
+        }
+
+        var curFileKey = curMeta.fileKey;
+        var newFileKey = newMeta.fileKey;
+        var curZip = curMeta.zip;
+        var newZip = newMeta.zip;
+
+        try {
+          sessionStorage.setItem("pcs_rank", rank);
+          sessionStorage.setItem("pcs_yos", yos);
+          sessionStorage.setItem("pcs_family", fam);
+
+          sessionStorage.setItem("pcs_current_base", curBase);
+          sessionStorage.setItem("pcs_current_cityKey", curFileKey);
+          sessionStorage.setItem("pcs_current_fileKey", curFileKey);
+          sessionStorage.setItem("pcs_current_zip", curZip);
+
+          sessionStorage.setItem("pcs_new_base", newBase);
+          sessionStorage.setItem("pcs_new_cityKey", newFileKey);
+          sessionStorage.setItem("pcs_new_fileKey", newFileKey);
+          sessionStorage.setItem("pcs_new_zip", newZip);
+        } catch (e) {
+          console.warn("[PCS Embed] sessionStorage unavailable; URL params will carry the handoff.");
+        }
+
+        if (newBaseText) {
+          newBaseText.textContent = newBase;
+        }
+
+        if (launchStatus) {
+          launchStatus.classList.add("sass-status-active");
+          launchStatus.textContent = "Building your PCS Snapshot for " + newBase + "...";
+        }
+
+        var params = new URLSearchParams();
+
+        params.set("type", "ad");
+        params.set("rank", rank);
+        params.set("yos", yos);
+        params.set("family", fam);
+
+        params.set("base", newBase);
+        params.set("cityKey", newFileKey);
+
+        params.set("curBase", curBase);
+        params.set("newBase", newBase);
+
+        params.set("curCityKey", curFileKey);
+        params.set("newCityKey", newFileKey);
+
+        params.set("curFileKey", curFileKey);
+        params.set("newFileKey", newFileKey);
+
+        params.set("curZip", curZip);
+        params.set("newZip", newZip);
+
+        params.set("currentBase", curBase);
+        params.set("currentLocation", curBase);
+        params.set("destinationBase", newBase);
+        params.set("newLocation", newBase);
+
+        window.location.href = SNAPSHOT_BASE_URL + "?" + params.toString();
+      }
+
+      if (newBaseSel) {
+        newBaseSel.addEventListener("mousedown", function(e) {
+          if (!validateProfileInputs()) {
+            e.preventDefault();
+            return false;
+          }
+        });
+
+        newBaseSel.addEventListener("touchstart", function(e) {
+          if (!validateProfileInputs()) {
+            e.preventDefault();
+            return false;
+          }
+        }, { passive: false });
+
+        newBaseSel.addEventListener("change", function() {
+          var selectedText = String(newBaseSel.value || "").trim();
+
+          if (newBaseText) {
+            newBaseText.textContent = selectedText || "Select New Base Location";
+          }
+
+          if (selectedText) {
+            launchSnapshot();
+          }
+        });
+      }
+    })();
+  </script>
+</div>

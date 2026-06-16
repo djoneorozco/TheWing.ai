@@ -1,15 +1,13 @@
 /* =========================================================
-  PCS SNAPSHOT v5.1.2
+  PCS SNAPSHOT v5.1.3
   FILE: snapshot.js
 
   FIX:
-  - Your uploaded snapshot.js accidentally contained CSS.
-  - This file is real JavaScript.
-  - Reads URL params from the Webflow iframe handoff.
-  - Loads PCS Snapshot safely.
-  - Keeps existing HTML/CSS IDs unchanged.
-  - UPDATED: City image now prioritizes JSON image_url first.
-  - UPDATED: San Antonio image is now the fallback instead of black PCSU image.
+  - URL params win over sessionStorage for all handoff fields.
+  - sessionStorage fallbacks added for rank/yos/family/fileKey keys.
+  - Official compensation via /api/opensource-brain (rank, YOS, dependents).
+  - Absolute TheWing city JSON fetch paths for Webflow embed hosting.
+  - Labeled fallback + console errors when base JSON is unavailable.
 ========================================================= */
 
 (function () {
@@ -63,6 +61,42 @@
     var params = new URLSearchParams(window.location.search || "");
     var value = params.get(name);
     return value !== null && value !== "" ? value : fallback;
+  }
+
+  function hasUrlParam(name) {
+    var params = new URLSearchParams(window.location.search || "");
+    var value = params.get(name);
+    return value !== null && value !== "";
+  }
+
+  function getStorageItem(key) {
+    try {
+      return sessionStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function hasExplicitHandoff() {
+    return (
+      hasUrlParam("newBase") ||
+      hasUrlParam("base") ||
+      hasUrlParam("newFileKey") ||
+      hasUrlParam("newCityKey") ||
+      hasUrlParam("cityKey") ||
+      hasUrlParam("curBase") ||
+      hasUrlParam("rank") ||
+      hasUrlParam("yos") ||
+      hasUrlParam("family")
+    );
+  }
+
+  function getApiOrigin() {
+    return String(
+      window.PCSU_THEWING_API_ORIGIN ||
+      window.PCSU_API_ORIGIN ||
+      "https://thewing.netlify.app"
+    ).replace(/\/+$/, "");
   }
 
   function normalizeRank(raw) {
@@ -128,35 +162,100 @@
   }
 
   /* =========================================================
-    #2) INPUT STATE FROM URL
+    #2) INPUT STATE FROM URL / SESSION
+    URL params always win when present.
   ========================================================= */
+
+  function resolveCurrentBaseLabel() {
+    return baseDisplayName(
+      getParam(
+        "curBase",
+        getParam(
+          "currentBase",
+          getParam(
+            "currentLocation",
+            getStorageItem("pcs_current_base") || (hasExplicitHandoff() ? "" : "Fort-Sam-Houston AFB")
+          )
+        )
+      )
+    );
+  }
+
+  function resolveNewBaseLabel() {
+    return baseDisplayName(
+      getParam(
+        "newBase",
+        getParam(
+          "base",
+          getParam(
+            "destinationBase",
+            getParam(
+              "newLocation",
+              getStorageItem("pcs_new_base") || (hasExplicitHandoff() ? "" : "Lackland AFB")
+            )
+          )
+        )
+      )
+    );
+  }
+
+  function resolveCityKey(paramNames, storageKeys, baseLabel, demoDefault) {
+    var i;
+    var fromParam = "";
+
+    for (i = 0; i < paramNames.length; i++) {
+      fromParam = getParam(paramNames[i], "");
+      if (fromParam) return normalizeBaseKey(fromParam);
+    }
+
+    for (i = 0; i < storageKeys.length; i++) {
+      fromParam = getStorageItem(storageKeys[i]) || "";
+      if (fromParam) return normalizeBaseKey(fromParam);
+    }
+
+    if (baseLabel) return normalizeBaseKey(baseLabel);
+    return hasExplicitHandoff() ? "" : normalizeBaseKey(demoDefault);
+  }
+
+  var CURRENT_BASE_LABEL = resolveCurrentBaseLabel();
+  var NEW_BASE_LABEL = resolveNewBaseLabel();
 
   var STATE = {
     type: getParam("type", "ad"),
-    rank: normalizeRank(getParam("rank", "E7")),
-    yos: safeNum(getParam("yos", "16"), 16),
-    family: safeNum(getParam("family", "4"), 4),
+    rank: normalizeRank(getParam("rank", getStorageItem("pcs_rank") || "E7")),
+    yos: safeNum(getParam("yos", getStorageItem("pcs_yos") || "16"), 16),
+    family: safeNum(getParam("family", getStorageItem("pcs_family") || "4"), 4),
 
-    currentBase: baseDisplayName(
-      getParam("curBase", sessionStorage.getItem("pcs_current_base") || "Fort-Sam-Houston AFB")
+    currentBase: CURRENT_BASE_LABEL,
+    newBase: NEW_BASE_LABEL,
+
+    currentCityKey: resolveCityKey(
+      ["curCityKey", "curFileKey"],
+      ["pcs_current_cityKey", "pcs_current_fileKey"],
+      CURRENT_BASE_LABEL,
+      "Fort-Sam-Houston"
     ),
 
-    newBase: baseDisplayName(
-      getParam("newBase", getParam("base", sessionStorage.getItem("pcs_new_base") || "Lackland AFB"))
+    newCityKey: resolveCityKey(
+      ["newCityKey", "cityKey", "newFileKey"],
+      ["pcs_new_cityKey", "pcs_new_fileKey"],
+      NEW_BASE_LABEL,
+      "Lackland"
     ),
 
-    currentCityKey: normalizeBaseKey(
-      getParam("curCityKey", getParam("curFileKey", sessionStorage.getItem("pcs_current_cityKey") || "Fort-Sam-Houston"))
-    ),
-
-    newCityKey: normalizeBaseKey(
-      getParam("newCityKey", getParam("cityKey", getParam("newFileKey", sessionStorage.getItem("pcs_new_cityKey") || "Lackland")))
-    ),
-
-    currentZip: getParam("curZip", sessionStorage.getItem("pcs_current_zip") || "78234"),
-    newZip: getParam("newZip", sessionStorage.getItem("pcs_new_zip") || "78236"),
+    currentZip: getParam("curZip", getStorageItem("pcs_current_zip") || "78234"),
+    newZip: getParam("newZip", getStorageItem("pcs_new_zip") || "78236"),
 
     bedroom: 3
+  };
+
+  var COMP = {
+    loaded: false,
+    source: "static",
+    basePay: null,
+    bas: null,
+    bahNew: null,
+    bahCurrent: null
   };
 
   /* =========================================================
@@ -388,11 +487,123 @@
   };
 
   function getBasePay(rank) {
+    if (COMP.basePay !== null && COMP.basePay !== undefined) return COMP.basePay;
     return BASE_PAY[normalizeRank(rank)] || BASE_PAY.E7;
   }
 
-  function getBah(cityKey) {
-    return BAH_BY_KEY[cityKey] || BAH_BY_KEY[normalizeBaseKey(cityKey)] || 2172;
+  function getBasAmount() {
+    if (COMP.bas !== null && COMP.bas !== undefined) return COMP.bas;
+    return BAS;
+  }
+
+  function dependentsLabel() {
+    return STATE.family >= 2 ? "with" : "without";
+  }
+
+  function getBah(cityKey, role) {
+    if (role === "current" && COMP.bahCurrent !== null && COMP.bahCurrent !== undefined) {
+      return COMP.bahCurrent;
+    }
+
+    if (role !== "current" && COMP.bahNew !== null && COMP.bahNew !== undefined) {
+      return COMP.bahNew;
+    }
+
+    var staticVal = BAH_BY_KEY[cityKey] || BAH_BY_KEY[normalizeBaseKey(cityKey)];
+
+    if (staticVal !== undefined) return staticVal;
+
+    console.warn(
+      "[PCS Snapshot] Static BAH fallback used for",
+      cityKey || "(empty)",
+      role === "current" ? "(current base)" : "(destination base)"
+    );
+
+    return 2172;
+  }
+
+  function extractCompensationMonthly(data) {
+    var source = (data && data.payload) || (data && data.data) || data || {};
+    var compensation = source.compensation || source.pay || source.income || {};
+    return compensation.monthly || source.monthly || source.paySummary || {};
+  }
+
+  async function fetchCompensationForBase(baseName) {
+    if (!baseName) return null;
+
+    var endpoint = getApiOrigin() + "/api/opensource-brain";
+
+    try {
+      var res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tool: "PCS_SNAPSHOT",
+          input: {
+            rank: prettyRank(STATE.rank),
+            yos: STATE.yos,
+            base: baseName,
+            family: STATE.family,
+            dependents: dependentsLabel()
+          }
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status);
+      }
+
+      var data = await res.json();
+      var monthly = extractCompensationMonthly(data);
+
+      return {
+        basePay: safeNum(monthly.basicPay || monthly.basePay, null),
+        bah: safeNum(monthly.bah, null),
+        bas: safeNum(monthly.bas, null)
+      };
+    } catch (err) {
+      console.warn("[PCS Snapshot] Official compensation fetch failed for", baseName + ":", err);
+      return null;
+    }
+  }
+
+  async function loadCompensation() {
+    var results = await Promise.all([
+      fetchCompensationForBase(STATE.newBase),
+      fetchCompensationForBase(STATE.currentBase)
+    ]);
+
+    var newComp = results[0];
+    var curComp = results[1];
+
+    if (newComp && newComp.bah !== null) {
+      COMP.bahNew = newComp.bah;
+      COMP.basePay = newComp.basePay;
+      COMP.bas = newComp.bas;
+      COMP.source = "official";
+    }
+
+    if (curComp && curComp.bah !== null) {
+      COMP.bahCurrent = curComp.bah;
+    }
+
+    COMP.loaded = true;
+
+    if (COMP.source === "official") {
+      console.info(
+        "[PCS Snapshot] Official compensation loaded:",
+        prettyRank(STATE.rank),
+        STATE.yos + " YOS",
+        dependentsLabel() + " dependents",
+        "destination BAH " + money(COMP.bahNew || 0)
+      );
+    } else {
+      console.warn(
+        "[PCS Snapshot] Using static compensation tables for",
+        prettyRank(STATE.rank),
+        dependentsLabel() + " dependents"
+      );
+    }
   }
 
   /* =========================================================
@@ -409,24 +620,53 @@
     }
   }
 
-  async function loadCityData(cityKey, fallback) {
+  async function loadCityData(cityKey, fallback, label) {
+    label = label || "destination";
     var key = normalizeBaseKey(cityKey);
 
+    if (!key) {
+      console.error("[PCS Snapshot] Missing base file key for " + label + " load.");
+      return markFallbackData(fallback, key, label);
+    }
+
+    var encoded = encodeURIComponent(key) + ".json";
+    var origin = getApiOrigin();
+    var host = String(window.location.origin || "").replace(/\/+$/, "");
+
     var urls = [
-      "./cities/" + encodeURIComponent(key) + ".json",
-      "/cities/" + encodeURIComponent(key) + ".json",
-      "/netlify/functions/cities/" + encodeURIComponent(key) + ".json",
-      "/.netlify/functions/cities/" + encodeURIComponent(key) + ".json",
-      "/api/cities/" + encodeURIComponent(key),
+      "./cities/" + encoded,
+      "/cities/" + encoded,
+      host + "/netlify/functions/cities/" + encoded,
+      host + "/.netlify/functions/cities/" + encoded,
+      origin + "/netlify/functions/cities/" + encoded,
+      origin + "/.netlify/functions/cities/" + encoded,
+      origin + "/api/cities/" + encodeURIComponent(key),
       "/api/city?cityKey=" + encodeURIComponent(key)
     ];
 
     for (var i = 0; i < urls.length; i++) {
       var data = await fetchJsonSafe(urls[i]);
-      if (data) return data;
+      if (data) {
+        console.info("[PCS Snapshot] Loaded " + label + " data for", key, "from", urls[i]);
+        return data;
+      }
     }
 
-    return fallback;
+    console.error(
+      "[PCS Snapshot] Failed to load " + label + " JSON for key '" + key + "'.",
+      "Tried:",
+      urls
+    );
+
+    return markFallbackData(fallback, key, label);
+  }
+
+  function markFallbackData(fallback, requestedKey, label) {
+    var copy = Object.assign({}, fallback);
+    copy.__pcs_fallback = true;
+    copy.__pcs_requested_key = requestedKey || "";
+    copy.__pcs_fallback_label = label;
+    return copy;
   }
 
   /* =========================================================
@@ -901,13 +1141,13 @@
 
   function paintTopStrip(currentData, newData) {
     var basePay = getBasePay(STATE.rank);
-    var newBah = getBah(STATE.newCityKey);
-    var currentBah = getBah(STATE.currentCityKey);
-    var totalIncome = basePay + newBah + BAS;
+    var newBah = getBah(STATE.newCityKey, "new");
+    var currentBah = getBah(STATE.currentCityKey, "current");
+    var totalIncome = basePay + newBah + getBasAmount();
     var bahDelta = newBah - currentBah;
 
     text("pcs-income-main", money(totalIncome));
-    html("pcs-income-breakdown", "Base Pay: " + money(basePay) + ", BAH " + money(newBah) + ",<br />BAS " + money(BAS));
+    html("pcs-income-breakdown", "Base Pay: " + money(basePay) + ", BAH " + money(newBah) + ",<br />BAS " + money(getBasAmount()));
     text("pts-income-meta", "True disposable baseline before housing");
 
     text("pts-bah-delta", (bahDelta >= 0 ? "+" : "-") + money(Math.abs(bahDelta)));
@@ -929,7 +1169,19 @@
   }
 
   function paintCityBrief(newData) {
-    text("pcs-city-line", cityLabel(newData) + " • Quick PCS Snapshot");
+    if (newData && newData.__pcs_fallback) {
+      console.warn(
+        "[PCS Snapshot] Destination base JSON unavailable for",
+        newData.__pcs_requested_key || STATE.newCityKey,
+        "- showing labeled preview data"
+      );
+      text(
+        "pcs-city-line",
+        (STATE.newBase || "Selected Base") + " • Data preview (base file unavailable)"
+      );
+    } else {
+      text("pcs-city-line", cityLabel(newData) + " • Quick PCS Snapshot");
+    }
 
     setImage("img-current", cityImage(newData), cityLabel(newData));
 
@@ -967,7 +1219,7 @@
 
   function paintAffordability(newData) {
     var bed = bedroomData(newData, STATE.bedroom);
-    var bah = getBah(STATE.newCityKey);
+    var bah = getBah(STATE.newCityKey, "new");
     var buffer = bah - bed.totalHousing;
     var covered = Math.round((bah / Math.max(bed.totalHousing, 1)) * 100);
 
@@ -1027,7 +1279,7 @@
 
   function paintLivingStrategy(newData) {
     var bed = bedroomData(newData, STATE.bedroom);
-    var income = getBasePay(STATE.rank) + getBah(STATE.newCityKey) + BAS;
+    var income = getBasePay(STATE.rank) + getBah(STATE.newCityKey, "new") + getBasAmount();
     var residualBuy = income - bed.totalHousing;
     var residualRent = income - bed.rent - bed.utilities;
 
@@ -1058,8 +1310,8 @@
   }
 
   function paintComparison(currentData, newData) {
-    var currentBah = getBah(STATE.currentCityKey);
-    var newBah = getBah(STATE.newCityKey);
+    var currentBah = getBah(STATE.currentCityKey, "current");
+    var newBah = getBah(STATE.newCityKey, "new");
     var currentHome = medianHome(currentData);
     var newHome = medianHome(newData);
 
@@ -1106,15 +1358,15 @@
     text("pcs-qf-dom", String(daysOnMarket(newData)));
 
     var basePay = getBasePay(STATE.rank);
-    var bah = getBah(STATE.newCityKey);
+    var bah = getBah(STATE.newCityKey, "new");
 
     destroyChart(incomeChart);
     destroyChart(bahChart);
 
-    incomeChart = renderSimpleCanvasChart("pcs-income-chart", ["Base Pay", "BAH", "BAS"], [basePay, bah, BAS]);
-    bahChart = renderSimpleCanvasChart("pcs-bah-chart", ["Current", "New"], [getBah(STATE.currentCityKey), bah]);
+    incomeChart = renderSimpleCanvasChart("pcs-income-chart", ["Base Pay", "BAH", "BAS"], [basePay, bah, getBasAmount()]);
+    bahChart = renderSimpleCanvasChart("pcs-bah-chart", ["Current", "New"], [getBah(STATE.currentCityKey, "current"), bah]);
 
-    text("pcs-income-summary", "Total monthly compensation estimate: " + money(basePay + bah + BAS));
+    text("pcs-income-summary", "Total monthly compensation estimate: " + money(basePay + bah + getBasAmount()));
     text("pcs-bah-summary", "New duty station BAH estimate: " + money(bah));
   }
 
@@ -1151,7 +1403,7 @@
     affordChart = renderDoughnut("pcs-afford-chart", ["Mortgage", "Utilities", "Buffer"], [
       bed.mortgage,
       bed.utilities,
-      Math.max(0, getBah(STATE.newCityKey) - bed.totalHousing)
+      Math.max(0, getBah(STATE.newCityKey, "new") - bed.totalHousing)
     ]);
 
     priceBreakChart = renderSimpleCanvasChart("pcs-pricebreak-chart", ["Low", "Median", "High"], [low, median, high]);
@@ -1247,7 +1499,7 @@
           text("pcs-ls-sub", "Base housing can simplify commute and reduce market exposure.");
           text("pcs-ls-bluf", "Base housing is best when certainty beats wealth building.");
           text("pcs-ls-status", "STABILITY • COMMUTE CONTROL");
-          text("pcs-ls-annual", money(getBah(STATE.newCityKey) * 12));
+          text("pcs-ls-annual", money(getBah(STATE.newCityKey, "new") * 12));
         } else {
           paintLivingStrategy(newData);
         }
@@ -1261,14 +1513,25 @@
 
   async function boot() {
     try {
-      var currentData = await loadCityData(STATE.currentCityKey, FALLBACK_CURRENT_CITY);
-      var newData = await loadCityData(STATE.newCityKey, FALLBACK_CITY);
+      if (hasExplicitHandoff()) {
+        console.info("[PCS Snapshot] Handoff state:", STATE);
+      }
+
+      var results = await Promise.all([
+        loadCityData(STATE.currentCityKey, FALLBACK_CURRENT_CITY, "current"),
+        loadCityData(STATE.newCityKey, FALLBACK_CITY, "destination"),
+        loadCompensation()
+      ]);
+
+      var currentData = results[0];
+      var newData = results[1];
 
       paintAll(currentData, newData);
       wireEvents(currentData, newData);
 
       window.PCS_SNAPSHOT_STATE = {
         input: STATE,
+        compensation: COMP,
         currentData: currentData,
         newData: newData
       };
