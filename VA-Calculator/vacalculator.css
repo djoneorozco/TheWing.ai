@@ -202,6 +202,10 @@ body::after{
   margin-bottom:20px;
 }
 
+#pcsu-retire-va-shell .seo-faq{
+  margin-top:20px;
+}
+
 #pcsu-retire-va-shell .seo-copy p,
 #pcsu-retire-va-shell .seo-faq p{
   margin:0 0 12px 0;
@@ -216,10 +220,14 @@ body::after{
 }
 
 #pcsu-retire-va-shell .seo-faq h3{
-  margin:0 0 8px 0;
+  margin:22px 0 8px 0;
   color:rgba(244,248,255,.96);
   font-size:18px;
   font-weight:700;
+}
+
+#pcsu-retire-va-shell .seo-faq h3:first-of-type{
+  margin-top:0;
 }
 
 #pcsu-retire-va-shell .summary-grid{
