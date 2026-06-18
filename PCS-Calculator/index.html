@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- //#1) META -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- //#2) SEO -->
+  <title>PCS Move Calculator | Estimate MALT, Travel Days & Move Cash Flow | PCSUnited</title>
+  <meta
+    name="description"
+    content="Estimate PCS move money, MALT, authorized travel days, expenses, and net move position using PCSUnited's Aurora-style PCS Move Calculator."
+  />
+  <link rel="canonical" href="https://www.pcsunited.com/pcs-calculator" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="PCS Move Calculator | PCSUnited" />
+  <meta
+    property="og:description"
+    content="Estimate PCS move money, MALT, travel days, expenses, and net move position before your next military move."
+  />
+  <meta property="og:url" content="https://www.pcsunited.com/pcs-calculator" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PCS Move Calculator | PCSUnited" />
+  <meta
+    name="twitter:description"
+    content="Estimate PCS move money, MALT, travel days, expenses, and net move position before your next military move."
+  />
+
+  <!-- //#3) FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- //#4) STYLESHEET -->
+  <link rel="stylesheet" href="./pcs-calculator.css" />
+</head>
+
+<body>
+  <!-- //#5) ROOT -->
+  <div id="pcsu-pcs-shell">
+    <div class="pcs-stage">
+      <div class="app">
+
+        <!-- //#6) TOPBAR -->
+        <div class="topbar">
+          <div class="title-wrap">
+            <h1 class="title">PCS Move Calculator</h1>
+            <div class="subtitle">
+              Estimate your MALT, authorized travel days, move expenses, and PCS move cash position.
+            </div>
+          </div>
+
+          <div class="hero-card glass">
+            <div class="mini-label" id="pcs-total-hero-label">Estimated Net Move Position</div>
+            <div class="hero-value" id="pcs-total-hero-value">$0.00</div>
+            <div class="hero-sub" id="pcs-total-hero-sub">MALT + DLA − Expenses</div>
+          </div>
+        </div>
+
+        <!-- //#7) DIVIDER -->
+        <div class="divider"></div>
+
+        <!-- //#8) ABOUT / SEO COPY -->
+        <section class="seo-copy glass" aria-label="About this calculator">
+          <h2 class="panel-title">About the PCS Move Calculator</h2>
+          <div class="panel-rule"></div>
+          <p>
+            PCSUnited’s PCS Move Calculator helps military users estimate their move-related
+            cash flow before leaving one duty location for the next. It combines MALT,
+            authorized travel days, estimated expenses, and available official entitlement
+            data into one clean readiness-style view.
+          </p>
+          <p>
+            This tool is designed as the move-money companion to PCS Snapshot, BAH Calculator,
+            and PCSUnited’s base intelligence workflow. Use it to preview whether your move
+            may create a cash surplus, stay neutral, or require additional planning.
+          </p>
+        </section>
+
+        <!-- //#9) SUMMARY SELECTORS -->
+        <div class="summary-grid">
+          <div class="mini-card glass">
+            <div class="mini-label">Pay Grade</div>
+            <div class="mini-value">
+              <div class="select-wrap">
+                <select id="pcs-paygrade">
+                  <option>E-1</option>
+                  <option>E-2</option>
+                  <option>E-3</option>
+                  <option>E-4</option>
+                  <option selected>E-5</option>
+                  <option>E-6</option>
+                  <option>E-7</option>
+                  <option>E-8</option>
+                  <option>E-9</option>
+                  <option>O-1</option>
+                  <option>O-2</option>
+                  <option>O-3</option>
+                  <option>O-4</option>
+                  <option>O-5</option>
+                  <option>O-6</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="mini-card glass">
+            <div class="mini-label">Dependents</div>
+            <div class="mini-value">
+              <div class="select-wrap">
+                <select id="pcs-dependents">
+                  <option selected>With Dependents</option>
+                  <option>Without Dependents</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="mini-card glass">
+            <div class="mini-label">Current Location</div>
+            <div class="mini-value">
+              <div class="select-wrap">
+                <select id="pcs-current-base">
+                  <option>Andrews AFB</option>
+                  <option>Barksdale AFB</option>
+                  <option>Beale AFB</option>
+                  <option>Cannon AFB</option>
+                  <option>Charleston AFB</option>
+                  <option>Creech AFB</option>
+                  <option>Davis-Monthan AFB</option>
+                  <option>Dover AFB</option>
+                  <option>Dyess AFB</option>
+                  <option>Edwards AFB</option>
+                  <option>Eglin AFB</option>
+                  <option>Elmendorf AFB</option>
+                  <option>Fairchild AFB</option>
+                  <option>F.E. Warren AFB</option>
+                  <option>Goodfellow AFB</option>
+                  <option>Grand Forks AFB</option>
+                  <option>Hanscom AFB</option>
+                  <option>Hill AFB</option>
+                  <option>Holloman AFB</option>
+                  <option>Hurlburt Field</option>
+                  <option selected>Lackland AFB</option>
+                  <option>JBSA-Randolph</option>
+                  <option>JBSA-Fort Sam Houston</option>
+                  <option>Keesler AFB</option>
+                  <option>Kirtland AFB</option>
+                  <option>Langley AFB</option>
+                  <option>Laughlin AFB</option>
+                  <option>Little Rock AFB</option>
+                  <option>Los Angeles AFB</option>
+                  <option>Luke AFB</option>
+                  <option>MacDill AFB</option>
+                  <option>Maxwell AFB</option>
+                  <option>McChord Field</option>
+                  <option>McConnell AFB</option>
+                  <option>McGuire AFB</option>
+                  <option>Minot AFB</option>
+                  <option>Moody AFB</option>
+                  <option>Mountain Home AFB</option>
+                  <option>Nellis AFB</option>
+                  <option>Robins AFB</option>
+                  <option>Scott AFB</option>
+                  <option>Seymour Johnson AFB</option>
+                  <option>Shaw AFB</option>
+                  <option>Tinker AFB</option>
+                  <option>Travis AFB</option>
+                  <option>Tyndall AFB</option>
+                  <option>Whiteman AFB</option>
+                  <option>Wright-Patterson AFB</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="mini-card glass">
+            <div class="mini-label">New Base</div>
+            <div class="mini-value">
+              <div class="select-wrap">
+                <select id="pcs-gaining-base">
+                  <option>Andrews AFB</option>
+                  <option>Barksdale AFB</option>
+                  <option>Beale AFB</option>
+                  <option>Cannon AFB</option>
+                  <option>Charleston AFB</option>
+                  <option>Creech AFB</option>
+                  <option selected>Davis-Monthan AFB</option>
+                  <option>Dover AFB</option>
+                  <option>Dyess AFB</option>
+                  <option>Edwards AFB</option>
+                  <option>Eglin AFB</option>
+                  <option>Elmendorf AFB</option>
+                  <option>Fairchild AFB</option>
+                  <option>F.E. Warren AFB</option>
+                  <option>Goodfellow AFB</option>
+                  <option>Grand Forks AFB</option>
+                  <option>Hanscom AFB</option>
+                  <option>Hill AFB</option>
+                  <option>Holloman AFB</option>
+                  <option>Hurlburt Field</option>
+                  <option>Lackland AFB</option>
+                  <option>JBSA-Randolph</option>
+                  <option>JBSA-Fort Sam Houston</option>
+                  <option>Keesler AFB</option>
+                  <option>Kirtland AFB</option>
+                  <option>Langley AFB</option>
+                  <option>Laughlin AFB</option>
+                  <option>Little Rock AFB</option>
+                  <option>Los Angeles AFB</option>
+                  <option>Luke AFB</option>
+                  <option>MacDill AFB</option>
+                  <option>Maxwell AFB</option>
+                  <option>McChord Field</option>
+                  <option>McConnell AFB</option>
+                  <option>McGuire AFB</option>
+                  <option>Minot AFB</option>
+                  <option>Moody AFB</option>
+                  <option>Mountain Home AFB</option>
+                  <option>Nellis AFB</option>
+                  <option>Robins AFB</option>
+                  <option>Scott AFB</option>
+                  <option>Seymour Johnson AFB</option>
+                  <option>Shaw AFB</option>
+                  <option>Tinker AFB</option>
+                  <option>Travis AFB</option>
+                  <option>Tyndall AFB</option>
+                  <option>Whiteman AFB</option>
+                  <option>Wright-Patterson AFB</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- //#9B) DETAIL INPUTS -->
+        <div class="summary-grid detail-grid">
+          <div class="mini-card glass">
+            <div class="mini-label">Official Distance Miles</div>
+            <div class="mini-value">
+              <input id="pcs-distance" type="number" min="0" step="1" value="588" />
+            </div>
+          </div>
+
+          <div class="mini-card glass">
+            <div class="mini-label">Authorized POVs</div>
+            <div class="mini-value">
+              <div class="select-wrap">
+                <select id="pcs-povs">
+                  <option selected>1 POV</option>
+                  <option>2 POVs</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="mini-card glass">
+            <div class="mini-label">Estimated HHG Weight</div>
+            <div class="mini-value">
+              <input id="pcs-weight" type="number" min="0" step="100" value="9000" />
+            </div>
+          </div>
+
+          <div class="mini-card glass">
+            <div class="mini-label">Estimated Expenses</div>
+            <div class="mini-value">
+              <input id="pcs-expenses" type="number" min="0" step="50" value="1200" />
+            </div>
+          </div>
+        </div>
+
+        <!-- //#10) MAIN GRID -->
+        <div class="main-grid">
+
+          <!-- //#10A) LEFT PANEL -->
+          <section class="panel glass">
+            <h2 class="panel-title">Move Money Estimate</h2>
+            <div class="panel-rule"></div>
+
+            <div id="pcs-info-panel" style="display:none;">
+              <div id="pcs-info-current">Lackland AFB</div>
+              <div id="pcs-info-gaining">Davis-Monthan AFB</div>
+              <div id="pcs-info-rank">E-5</div>
+              <div id="pcs-info-dependency">With Dependents</div>
+            </div>
+
+            <div class="calc-card pay-estimate-card">
+              <div class="calc-left">
+                <div class="calc-title" id="pcs-malt-label">Estimated MALT</div>
+                <div class="calc-sub">Mileage allowance for authorized POV travel</div>
+              </div>
+              <div class="calc-right">
+                <div class="calc-main gold" id="pcs-malt-amount">$0.00</div>
+                <div class="calc-mini" id="pcs-malt-breakdown">PCS mileage component</div>
+              </div>
+            </div>
+
+            <div class="calc-card pay-estimate-card">
+              <div class="calc-left">
+                <div class="calc-title" id="pcs-dla-label">Estimated DLA</div>
+                <div class="calc-sub">Dislocation Allowance when official table is loaded</div>
+              </div>
+              <div class="calc-right">
+                <div class="calc-main" id="pcs-dla-amount">Pending</div>
+                <div class="calc-mini" id="pcs-dla-breakdown">Official DLA table required</div>
+              </div>
+            </div>
+
+            <div class="calc-card pay-estimate-card">
+              <div class="calc-left">
+                <div class="calc-title" id="pcs-expense-label">Estimated Expenses</div>
+                <div class="calc-sub">User-entered planning expenses</div>
+              </div>
+              <div class="calc-right">
+                <div class="calc-main" id="pcs-expense-amount">$1,200.00</div>
+                <div class="calc-mini" id="pcs-expense-breakdown">Out-of-pocket estimate</div>
+              </div>
+            </div>
+
+            <div class="calc-card pay-estimate-card">
+              <div class="calc-left">
+                <div class="calc-title" id="pcs-days-label">Authorized Travel Days</div>
+                <div class="calc-sub">Planning estimate from official PCS distance</div>
+              </div>
+              <div class="calc-right">
+                <div class="calc-main" id="pcs-days-amount">2 Days</div>
+                <div class="calc-mini" id="pcs-days-breakdown">400 miles + 350 mile rule</div>
+              </div>
+            </div>
+
+            <div class="input-divider"></div>
+
+            <h2 class="panel-title insight-title">PCS Move Insight</h2>
+            <div class="panel-rule insight-rule"></div>
+
+            <ul class="insight-list" id="pcs-insight-list">
+              <li>
+                <span class="dot mint"></span>
+                <span>
+                  This estimate uses the PCS move engine to calculate known move entitlements.
+                </span>
+              </li>
+              <li>
+                <span class="dot peach"></span>
+                <span>
+                  DLA and HHG values will appear once the official tables are loaded.
+                </span>
+              </li>
+              <li>
+                <span class="dot lav"></span>
+                <span>
+                  Use your official distance from orders or DPS for the most accurate estimate.
+                </span>
+              </li>
+            </ul>
+          </section>
+
+          <!-- //#10B) RIGHT PANEL -->
+          <section class="panel glass">
+            <div class="chart-zone">
+              <div class="bars breakdown-bars" id="pcs-breakdown-rows">
+                <div class="bar-col">
+                  <div class="bar-stack">
+                    <div id="pcs-bar-malt" class="bar-fill bar-aqua" style="height:42%;"></div>
+                  </div>
+                  <div class="bar-label">MALT</div>
+                  <div class="bar-value" id="pcs-bar-malt-value">$0</div>
+                </div>
+
+                <div class="bar-col">
+                  <div class="bar-stack">
+                    <div id="pcs-bar-dla" class="bar-fill bar-peach" style="height:10%;"></div>
+                  </div>
+                  <div class="bar-label">DLA</div>
+                  <div class="bar-value" id="pcs-bar-dla-value">Pending</div>
+                </div>
+
+                <div class="bar-col">
+                  <div class="bar-stack">
+                    <div id="pcs-bar-expenses" class="bar-fill bar-lav" style="height:78%;"></div>
+                  </div>
+                  <div class="bar-label">Expenses</div>
+                  <div class="bar-value" id="pcs-bar-expenses-value">$1,200</div>
+                </div>
+              </div>
+
+              <div class="score-ring-wrap">
+                <div id="scoreRing" class="score-ring" style="--pct:50;">
+                  <div class="score-center">
+                    <div id="pcs-net-amount" class="score-number small-money">$0.00</div>
+                    <div id="scoreLabel" class="score-label">Net Move Position</div>
+                  </div>
+                </div>
+
+                <div id="pcs-total-wrap" class="next-assessment visible-pay-total">
+                  <div class="total-pay-label" id="pcs-signal-label">Move Cash Signal</div>
+                  <div class="total-pay-note" id="pcs-total-note">MALT + DLA − Expenses</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- //#11) FAQ -->
+        <section class="seo-faq glass" aria-label="Frequently asked questions">
+          <h2 class="panel-title">PCS Move Calculator FAQ</h2>
+          <div class="panel-rule"></div>
+
+          <h3>What does this PCS calculator estimate?</h3>
+          <p>
+            It estimates MALT, authorized PCS travel days, estimated move expenses,
+            known entitlements, and your estimated net move position.
+          </p>
+
+          <h3>Why does DLA show as pending?</h3>
+          <p>
+            DLA requires the official rate table by grade and dependency status.
+            PCSUnited’s engine is already structured for it, but the table should only
+            be loaded from official source data.
+          </p>
+
+          <h3>Should I use official mileage?</h3>
+          <p>
+            Yes. For best results, enter the official PCS distance from your orders,
+            finance office, or transportation office. Estimated map mileage may differ
+            from official authorized mileage.
+          </p>
+        </section>
+
+        <!-- //#12) FOOTER NOTE -->
+        <div class="footer-note" id="pcs-footer-note">
+          Estimate generated through TheWing.ai <code>/api/pcs-move</code>. DLA and HHG
+          estimates will activate after official PCS tables are loaded.
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- //#13) SCRIPT -->
+  <script src="./pcs-calculator.js"></script>
+</body>
+</html>
