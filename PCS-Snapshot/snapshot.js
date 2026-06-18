@@ -1,13 +1,14 @@
 /* =========================================================
-  PCS SNAPSHOT v5.1.3
+  PCS SNAPSHOT v5.1.4
   FILE: snapshot.js
 
-  FIX:
-  - URL params win over sessionStorage for all handoff fields.
-  - sessionStorage fallbacks added for rank/yos/family/fileKey keys.
-  - Official compensation via /api/opensource-brain (rank, YOS, dependents).
+  UPDATE:
+  - Replaces top-strip Market Signal runtime with Travel Expenses / DLA + MALT.
+  - Calls /api/pcs-move during Snapshot load.
+  - Calculates estimated base-to-base distance when no official distance is provided.
+  - URL params still win over sessionStorage for handoff fields.
+  - Official compensation via /api/opensource-brain.
   - Absolute TheWing city JSON fetch paths for Webflow embed hosting.
-  - Labeled fallback + console errors when base JSON is unavailable.
 ========================================================= */
 
 (function () {
@@ -256,6 +257,17 @@
     bas: null,
     bahNew: null,
     bahCurrent: null
+  };
+
+  var PCS_MOVE = {
+    loaded: false,
+    source: "pending",
+    total: 0,
+    dla: 0,
+    malt: 0,
+    distanceMiles: 0,
+    povs: 1,
+    warnings: []
   };
 
   /* =========================================================
@@ -607,6 +619,338 @@
   }
 
   /* =========================================================
+    #4B) PCS MOVE CASH — DLA + MALT
+  ========================================================= */
+
+  var BASE_COORDS = {
+    "Andrews AFB": [38.8108, -76.8669],
+    "Barksdale AFB": [32.5018, -93.6627],
+    "Beale AFB": [39.1361, -121.4366],
+    "Cannon AFB": [34.3828, -103.3221],
+    "Charleston AFB": [32.8986, -80.0405],
+    "Creech AFB": [36.5872, -115.6731],
+    "Davis-Monthan AFB": [32.1665, -110.8832],
+    "Dover AFB": [39.1295, -75.4659],
+    "Dyess AFB": [32.4208, -99.8546],
+    "Edwards AFB": [34.9054, -117.8837],
+    "Eglin AFB": [30.4832, -86.5254],
+    "Elmendorf AFB": [61.2500, -149.8065],
+    "Fairchild AFB": [47.6151, -117.6558],
+    "F.E. Warren AFB": [41.1333, -104.8667],
+    "F.E-Warren AFB": [41.1333, -104.8667],
+    "Fort Sam Houston AFB": [29.4594, -98.4151],
+    "Fort-Sam-Houston AFB": [29.4594, -98.4151],
+    "JBSA-Fort Sam Houston": [29.4594, -98.4151],
+    "Goodfellow AFB": [31.4332, -100.4012],
+    "Grand Forks AFB": [47.9611, -97.4012],
+    "Hanscom AFB": [42.4699, -71.2890],
+    "Hill AFB": [41.1239, -111.9730],
+    "Holloman AFB": [32.8525, -106.1066],
+    "Hurlburt Field": [30.4278, -86.6893],
+    "Lackland AFB": [29.3842, -98.5811],
+    "Randolph AFB": [29.5297, -98.2789],
+    "JBSA-Randolph": [29.5297, -98.2789],
+    "Keesler AFB": [30.4106, -88.9244],
+    "Kirtland AFB": [35.0402, -106.6090],
+    "Langley AFB": [37.0829, -76.3605],
+    "Laughlin AFB": [29.3595, -100.7780],
+    "Little Rock AFB": [34.9169, -92.1497],
+    "Little-Rock AFB": [34.9169, -92.1497],
+    "Los Angeles AFB": [33.9180, -118.3800],
+    "Luke AFB": [33.5350, -112.3831],
+    "MacDill AFB": [27.8493, -82.5212],
+    "Malmstrom AFB": [47.5047, -111.1873],
+    "Maxwell AFB": [32.3829, -86.3658],
+    "McChord Field": [47.1377, -122.4765],
+    "McConnell AFB": [37.6231, -97.2672],
+    "McGuire AFB": [40.0156, -74.5917],
+    "Minot AFB": [48.4156, -101.3580],
+    "Moody AFB": [30.9678, -83.1930],
+    "Mountain Home AFB": [43.0436, -115.8724],
+    "Mountain-Home AFB": [43.0436, -115.8724],
+    "Nellis AFB": [36.2362, -115.0343],
+    "Offutt AFB": [41.1183, -95.9125],
+    "Peterson AFB": [38.8230, -104.7008],
+    "Robins AFB": [32.6401, -83.5919],
+    "Scott AFB": [38.5452, -89.8504],
+    "Seymour Johnson AFB": [35.3394, -77.9606],
+    "Seymour-Johnson AFB": [35.3394, -77.9606],
+    "Shaw AFB": [33.9727, -80.4706],
+    "Sheppard AFB": [33.9888, -98.4919],
+    "Tinker AFB": [35.4147, -97.3866],
+    "Travis AFB": [38.2627, -121.9275],
+    "Tyndall AFB": [30.0707, -85.5766],
+    "Whiteman AFB": [38.7303, -93.5482],
+    "Wright-Patterson AFB": [39.8261, -84.0483]
+  };
+
+  function normalizeBaseForDistance(value) {
+    var s = baseDisplayName(value)
+      .replace(/\+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!s) return "";
+
+    var noSuffix = s
+      .replace(/\s+AFB$/i, "")
+      .replace(/\s+SFB$/i, "")
+      .replace(/\s+Field$/i, "")
+      .trim();
+
+    var aliases = {
+      "Fort-Sam-Houston": "Fort-Sam-Houston AFB",
+      "Fort Sam Houston": "Fort Sam Houston AFB",
+      "JBSA Fort Sam Houston": "JBSA-Fort Sam Houston",
+      "JBSA-Fort-Sam-Houston": "JBSA-Fort Sam Houston",
+      "Randolph": "Randolph AFB",
+      "JBSA Randolph": "JBSA-Randolph",
+      "JBSA-Randolph": "JBSA-Randolph",
+      "Lackland": "Lackland AFB",
+      "Andrews": "Andrews AFB",
+      "Barksdale": "Barksdale AFB",
+      "Beale": "Beale AFB",
+      "Cannon": "Cannon AFB",
+      "Charleston": "Charleston AFB",
+      "Creech": "Creech AFB",
+      "Davis-Monthan": "Davis-Monthan AFB",
+      "Davis Monthan": "Davis-Monthan AFB",
+      "Dover": "Dover AFB",
+      "Dyess": "Dyess AFB",
+      "Edwards": "Edwards AFB",
+      "Eglin": "Eglin AFB",
+      "Elmendorf": "Elmendorf AFB",
+      "Fairchild": "Fairchild AFB",
+      "F.E. Warren": "F.E. Warren AFB",
+      "F.E-Warren": "F.E-Warren AFB",
+      "Goodfellow": "Goodfellow AFB",
+      "Grand Forks": "Grand Forks AFB",
+      "Hanscom": "Hanscom AFB",
+      "Hill": "Hill AFB",
+      "Holloman": "Holloman AFB",
+      "Hurlburt": "Hurlburt Field",
+      "Keesler": "Keesler AFB",
+      "Kirtland": "Kirtland AFB",
+      "Langley": "Langley AFB",
+      "Laughlin": "Laughlin AFB",
+      "Little Rock": "Little Rock AFB",
+      "Little-Rock": "Little-Rock AFB",
+      "Los Angeles": "Los Angeles AFB",
+      "Luke": "Luke AFB",
+      "MacDill": "MacDill AFB",
+      "Malmstrom": "Malmstrom AFB",
+      "Maxwell": "Maxwell AFB",
+      "McChord": "McChord Field",
+      "McConnell": "McConnell AFB",
+      "McGuire": "McGuire AFB",
+      "Minot": "Minot AFB",
+      "Moody": "Moody AFB",
+      "Mountain Home": "Mountain Home AFB",
+      "Mountain-Home": "Mountain-Home AFB",
+      "Nellis": "Nellis AFB",
+      "Offutt": "Offutt AFB",
+      "Peterson": "Peterson AFB",
+      "Robins": "Robins AFB",
+      "Scott": "Scott AFB",
+      "Seymour Johnson": "Seymour Johnson AFB",
+      "Seymour-Johnson": "Seymour-Johnson AFB",
+      "Shaw": "Shaw AFB",
+      "Sheppard": "Sheppard AFB",
+      "Tinker": "Tinker AFB",
+      "Travis": "Travis AFB",
+      "Tyndall": "Tyndall AFB",
+      "Whiteman": "Whiteman AFB",
+      "Wright-Patterson": "Wright-Patterson AFB",
+      "Wright Patterson": "Wright-Patterson AFB"
+    };
+
+    if (BASE_COORDS[s]) return s;
+    if (BASE_COORDS[noSuffix]) return noSuffix;
+    if (aliases[s]) return aliases[s];
+    if (aliases[noSuffix]) return aliases[noSuffix];
+
+    if (BASE_COORDS[noSuffix + " AFB"]) return noSuffix + " AFB";
+
+    return s;
+  }
+
+  function milesBetweenCoords(a, b) {
+    var R = 3958.8;
+
+    function toRad(deg) {
+      return deg * Math.PI / 180;
+    }
+
+    var lat1 = toRad(a[0]);
+    var lon1 = toRad(a[1]);
+    var lat2 = toRad(b[0]);
+    var lon2 = toRad(b[1]);
+
+    var dLat = lat2 - lat1;
+    var dLon = lon2 - lon1;
+
+    var h =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1) * Math.cos(lat2) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function estimateBaseDistanceMiles(currentBase, newBase) {
+    var from = normalizeBaseForDistance(currentBase);
+    var to = normalizeBaseForDistance(newBase);
+
+    if (!from || !to || from === to) return 0;
+
+    var a = BASE_COORDS[from];
+    var b = BASE_COORDS[to];
+
+    if (!a || !b) {
+      console.warn("[PCS Snapshot] Missing base coordinates for PCS move distance:", {
+        fromInput: currentBase,
+        toInput: newBase,
+        fromResolved: from,
+        toResolved: to
+      });
+
+      return 0;
+    }
+
+    return Math.round(milesBetweenCoords(a, b) * 1.18);
+  }
+
+  function resolvePcsDistanceMiles() {
+    var fromUrl = safeNum(getParam("distanceMiles", getParam("distance", "")), 0);
+    if (fromUrl > 0) return fromUrl;
+
+    var fromStorage = safeNum(
+      getStorageItem("pcs_distance_miles") || getStorageItem("pcs_distance"),
+      0
+    );
+
+    if (fromStorage > 0) return fromStorage;
+
+    return estimateBaseDistanceMiles(STATE.currentBase, STATE.newBase);
+  }
+
+  function resolvePcsPovs() {
+    var fromUrl = safeNum(getParam("povs", getParam("pov", "")), 0);
+    if (fromUrl > 0) return clamp(Math.round(fromUrl), 1, 2);
+
+    var fromStorage = safeNum(
+      getStorageItem("pcs_povs") || getStorageItem("pcs_pov"),
+      0
+    );
+
+    if (fromStorage > 0) return clamp(Math.round(fromStorage), 1, 2);
+
+    return 1;
+  }
+
+  function extractPcsMoveResult(data) {
+    var result = data && data.result ? data.result : {};
+    var dla = result.dla || {};
+    var malt = result.malt || {};
+    var knownEntitlements = result.knownEntitlements || {};
+
+    var dlaAmount = dla.available ? safeNum(dla.amount, 0) : safeNum(knownEntitlements.dla, 0);
+    var maltAmount = safeNum(malt.totalAmount, safeNum(knownEntitlements.malt, 0));
+    var total = dlaAmount + maltAmount;
+
+    return {
+      loaded: true,
+      source: "official",
+      total: total,
+      dla: dlaAmount,
+      malt: maltAmount,
+      distanceMiles: safeNum(malt.distanceMiles, resolvePcsDistanceMiles()),
+      povs: safeNum(malt.povs, resolvePcsPovs()),
+      warnings: Array.isArray(data && data.warnings) ? data.warnings : []
+    };
+  }
+
+  async function loadPcsMoveEstimate() {
+    var distanceMiles = resolvePcsDistanceMiles();
+    var povs = resolvePcsPovs();
+
+    if (!distanceMiles || distanceMiles <= 0) {
+      PCS_MOVE = {
+        loaded: true,
+        source: "missing_distance",
+        total: 0,
+        dla: 0,
+        malt: 0,
+        distanceMiles: 0,
+        povs: povs,
+        warnings: ["Missing distance estimate for PCS move calculation."]
+      };
+
+      return PCS_MOVE;
+    }
+
+    var endpoint = getApiOrigin() + "/api/pcs-move";
+
+    try {
+      var res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          source: "PCS Snapshot",
+          poweredBy: "TheWing.ai",
+          input: {
+            rank: prettyRank(STATE.rank),
+            yos: STATE.yos,
+            familySize: STATE.family,
+            hasDependents: STATE.family >= 2,
+            dependents: dependentsLabel(),
+            currentBase: STATE.currentBase,
+            gainingBase: STATE.newBase,
+            distanceMiles: distanceMiles,
+            distanceSource: "estimated_base_to_base",
+            povs: povs,
+            year: 2026
+          }
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status);
+      }
+
+      var data = await res.json();
+
+      PCS_MOVE = extractPcsMoveResult(data);
+
+      console.info(
+        "[PCS Snapshot] PCS move estimate loaded:",
+        "DLA " + money(PCS_MOVE.dla),
+        "MALT " + money(PCS_MOVE.malt),
+        "Total " + money(PCS_MOVE.total),
+        Math.round(PCS_MOVE.distanceMiles || 0) + " miles",
+        (PCS_MOVE.povs || 1) + " POV"
+      );
+
+      return PCS_MOVE;
+    } catch (err) {
+      console.warn("[PCS Snapshot] PCS move estimate failed:", err);
+
+      PCS_MOVE = {
+        loaded: true,
+        source: "error",
+        total: 0,
+        dla: 0,
+        malt: 0,
+        distanceMiles: distanceMiles,
+        povs: povs,
+        warnings: [err && err.message ? err.message : "PCS move estimate failed."]
+      };
+
+      return PCS_MOVE;
+    }
+  }
+
+  /* =========================================================
     #5) DATA LOADING
   ========================================================= */
 
@@ -928,7 +1272,7 @@
     );
 
     var hoa = safeNum(
-      getByPath(node, ["hoa", "hoa_monthly"], getByPath(data, ["hoa_monthly", "ownership_costs.hoa_monthly_default", "costs.hoa_monthly_default"], 0)),
+      getByPath(node, ["hoa", "hoa_monthly", getByPath(data, ["hoa_monthly", "ownership_costs.hoa_monthly_default", "costs.hoa_monthly_default"], 0)], 0),
       0
     );
 
@@ -1154,9 +1498,21 @@
     text("pts-bah-copy", "Compared with your previous duty station housing allowance.");
     text("pts-bah-meta", "vs. Previous Duty Station");
 
-    text("pts-market-signal", marketSignal(newData));
-    text("pts-market-copy", "Inventory elevated • Softer prices • Better leverage");
-    text("pts-market-meta", "Current market condition");
+    if (PCS_MOVE && PCS_MOVE.loaded && PCS_MOVE.total > 0) {
+      text("pts-market-signal", money(PCS_MOVE.total));
+      html(
+        "pts-market-copy",
+        "DLA: <strong>" + money(PCS_MOVE.dla) + "</strong> • MALT: <strong>" + money(PCS_MOVE.malt) + "</strong>"
+      );
+      text(
+        "pts-market-meta",
+        "DLA + MALT • " + Math.round(PCS_MOVE.distanceMiles || 0).toLocaleString() + " mi • " + (PCS_MOVE.povs || 1) + " POV"
+      );
+    } else {
+      text("pts-market-signal", "$0");
+      text("pts-market-copy", "DLA + MALT unavailable for this route.");
+      text("pts-market-meta", "PCS move cash estimate");
+    }
 
     var bed = bedroomData(newData, STATE.bedroom);
     var housingRatio = bed.totalHousing / Math.max(totalIncome, 1);
@@ -1520,7 +1876,8 @@
       var results = await Promise.all([
         loadCityData(STATE.currentCityKey, FALLBACK_CURRENT_CITY, "current"),
         loadCityData(STATE.newCityKey, FALLBACK_CITY, "destination"),
-        loadCompensation()
+        loadCompensation(),
+        loadPcsMoveEstimate()
       ]);
 
       var currentData = results[0];
@@ -1532,6 +1889,7 @@
       window.PCS_SNAPSHOT_STATE = {
         input: STATE,
         compensation: COMP,
+        pcsMove: PCS_MOVE,
         currentData: currentData,
         newData: newData
       };
