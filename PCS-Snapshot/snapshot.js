@@ -1,14 +1,19 @@
 /* =========================================================
-  PCS SNAPSHOT v5.1.4
+  PCS SNAPSHOT v5.1.5
   FILE: snapshot.js
 
-  UPDATE:
-  - Replaces top-strip Market Signal runtime with Travel Expenses / DLA + MALT.
-  - Calls /api/pcs-move during Snapshot load.
-  - Calculates estimated base-to-base distance when no official distance is provided.
-  - URL params still win over sessionStorage for handoff fields.
-  - Official compensation via /api/opensource-brain.
+  FIX:
+  - URL params win over sessionStorage for all handoff fields.
+  - sessionStorage fallbacks added for rank/yos/family/fileKey keys.
+  - Official compensation via /api/opensource-brain (rank, YOS, dependents).
   - Absolute TheWing city JSON fetch paths for Webflow embed hosting.
+  - Labeled fallback + console errors when base JSON is unavailable.
+
+  UPDATE:
+  - Replaces Market Signal runtime values with Travel Expenses / DLA + MALT.
+  - Calls /api/pcs-move for DLA and MALT.
+  - Keeps original image rendering and 1-year / 3-year trend chart behavior.
+  - Fixes HOA fallback bug that could stop paintAll() before charts/images render.
 ========================================================= */
 
 (function () {
@@ -638,8 +643,8 @@
     "Fairchild AFB": [47.6151, -117.6558],
     "F.E. Warren AFB": [41.1333, -104.8667],
     "F.E-Warren AFB": [41.1333, -104.8667],
-    "Fort Sam Houston AFB": [29.4594, -98.4151],
     "Fort-Sam-Houston AFB": [29.4594, -98.4151],
+    "Fort Sam Houston AFB": [29.4594, -98.4151],
     "JBSA-Fort Sam Houston": [29.4594, -98.4151],
     "Goodfellow AFB": [31.4332, -100.4012],
     "Grand Forks AFB": [47.9611, -97.4012],
@@ -1272,7 +1277,15 @@
     );
 
     var hoa = safeNum(
-      getByPath(node, ["hoa", "hoa_monthly", getByPath(data, ["hoa_monthly", "ownership_costs.hoa_monthly_default", "costs.hoa_monthly_default"], 0)], 0),
+      getByPath(
+        node,
+        ["hoa", "hoa_monthly"],
+        getByPath(
+          data,
+          ["hoa_monthly", "ownership_costs.hoa_monthly_default", "costs.hoa_monthly_default"],
+          0
+        )
+      ),
       0
     );
 
