@@ -1611,8 +1611,8 @@
     text("pcs-afford-hoa", money(bed.hoa));
     text("pcs-afford-utilities", money(bed.utilities));
 
-    text("pcs-donut-buffer", (buffer >= 0 ? "+" : "-") + Math.abs(Math.round(buffer)));
-    text("pcs-donut-buffer-label", "Monthly Buffer");
+    text("pcs-donut-buffer", covered + "%");
+    text("pcs-donut-buffer-label", "BAH Covered");
 
     text("pcs-amt-mortgage", money(bed.mortgage));
     text("pcs-amt-taxes", money(bed.taxes));
