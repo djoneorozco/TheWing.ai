@@ -221,7 +221,8 @@ export function calculatePcsMoveEstimate(input = {}) {
   const perDiem = calculatePcsPerDiem({
     travelDays: travelDays.ok ? travelDays.days : null,
     familySize: normalized.familySize,
-    hasDependents: normalized.hasDependents
+    hasDependents: normalized.hasDependents,
+    year: normalized.year
   });
 
   if (!perDiem.available) {

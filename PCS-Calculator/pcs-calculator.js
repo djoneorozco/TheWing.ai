@@ -375,10 +375,18 @@
       if (!normalized.perDiem.available) pending.push("per diem");
 
       if (!pending.length) {
-        return "Known entitlements only — additional tables pending";
+        return "Known entitlements minus estimated expenses";
       }
 
-      return "MALT only — " + pending.join("/") + " pending";
+      if (normalized.perDiem.available && !normalized.dla.available) {
+        return "MALT + per diem loaded — DLA pending";
+      }
+
+      if (!normalized.perDiem.available && !normalized.dla.available) {
+        return "MALT only — DLA/per diem pending";
+      }
+
+      return "Known entitlements only — " + pending.join("/") + " pending";
     }
 
     function signalText(signal, net) {
@@ -470,9 +478,15 @@
       }
 
       if (isPartial) {
-        insightLines.push(
-          "This is a partial estimate because DLA, per diem, and PPM/GCC reimbursement are not loaded yet."
-        );
+        if (normalized.perDiem.available && !dlaAvailable) {
+          insightLines.push(
+            "Known per diem is included using standard CONUS FY2026 rates and JTR PCS travel-day rules. DLA and PPM/GCC reimbursement are still pending."
+          );
+        } else {
+          insightLines.push(
+            "This is a partial estimate because DLA, per diem, and PPM/GCC reimbursement are not all loaded yet."
+          );
+        }
       } else {
         insightLines.push(
           "Estimated net move position is " + money2(displayNet) + " using all loaded official PCS entitlements."
@@ -497,7 +511,7 @@
 
       setText(
         els.footerNote,
-        "Current beta estimate includes MALT, authorized travel days, and official HHG weight allowance checks. DLA and per diem will activate after official DTMO/JTR tables are loaded."
+        "Current beta estimate includes MALT, authorized travel days, standard CONUS PCS per diem, and official HHG weight allowance checks. DLA will activate after the official DTMO table is loaded."
       );
     }
 
