@@ -9,7 +9,7 @@
 
   <meta
     name="description"
-    content="PCS Snapshot helps military families compare pay, BAH, housing affordability, and living strategy for a new duty station."
+    content="PCS Snapshot helps military families compare pay, BAH, housing affordability, PCS move entitlements, and living strategy for a new duty station."
   />
 
   <!-- #2) FONTS -->
@@ -30,14 +30,17 @@
 
 <body>
   <!-- =========================================================
-    PCS SNAPSHOT v5.1.0
+    PCS SNAPSHOT v5.1.1
     THEWING.AI SPLIT VERSION
     FILE: index.html
 
-    IMPORTANT:
-    - Runtime IDs preserved.
-    - CSS moved to snapshot.css.
-    - JS moved to snapshot.js.
+    UPDATE:
+    - Replaced Market Signal top card with Travel Expenses / DLA + MALT.
+    - Runtime IDs preserved:
+      pts-market-signal
+      pts-market-copy
+      pts-market-meta
+    - JS should now paint these IDs with /api/pcs-move result.
   ========================================================== -->
 
   <main id="pcs-snapshot-shell">
@@ -118,33 +121,34 @@
             </div>
           </article>
 
-          <!-- MARKET SIGNAL -->
-          <article class="pts-card pts-card-market">
+          <!-- TRAVEL EXPENSES / DLA + MALT -->
+          <article class="pts-card pts-card-market pts-card-move">
             <div class="pts-top">
               <div class="pts-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M4 10.5 12 5l8 5.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                  <path d="M9 20v-5h6v5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                  <path d="M8 11h.01M12 11h.01M16 11h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                  <path d="M7 7V5.8A2.8 2.8 0 0 1 9.8 3h4.4A2.8 2.8 0 0 1 17 5.8V7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M5 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  <path d="M8.25 13h7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M12 9.75v6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
               </div>
 
               <div class="pts-copy">
-                <p class="pts-kicker">Market Signal</p>
+                <p class="pts-kicker">Travel Expenses</p>
                 <div class="pts-bigline">
-                  <p class="pts-value" id="pts-market-signal">Buyer-Friendly</p>
+                  <p class="pts-value" id="pts-market-signal">Calculating...</p>
                 </div>
               </div>
             </div>
 
             <div class="pts-body">
               <p class="pts-body-copy" id="pts-market-copy">
-                Inventory elevated • Softer prices • Better leverage
+                DLA + MALT estimate loading...
               </p>
             </div>
 
             <div class="pts-meta" id="pts-market-meta">
-              Current market condition
+              PCS move cash estimate
             </div>
           </article>
 
