@@ -184,8 +184,116 @@
       return map[rank] || rank;
     }
 
+    //#4B) BASE DISTANCE ESTIMATOR
+    // Planning estimate only.
+    // Official PCS mileage should come from orders, DPS, TMO, or Finance.
+    const BASE_COORDS = {
+      "Andrews AFB": [38.8108, -76.8669],
+      "Barksdale AFB": [32.5018, -93.6627],
+      "Beale AFB": [39.1361, -121.4366],
+      "Cannon AFB": [34.3828, -103.3221],
+      "Charleston AFB": [32.8986, -80.0405],
+      "Creech AFB": [36.5872, -115.6731],
+      "Davis-Monthan AFB": [32.1665, -110.8832],
+      "Dover AFB": [39.1295, -75.4659],
+      "Dyess AFB": [32.4208, -99.8546],
+      "Edwards AFB": [34.9054, -117.8837],
+      "Eglin AFB": [30.4832, -86.5254],
+      "Elmendorf AFB": [61.2500, -149.8065],
+      "Fairchild AFB": [47.6151, -117.6558],
+      "F.E. Warren AFB": [41.1333, -104.8667],
+      "Goodfellow AFB": [31.4332, -100.4012],
+      "Grand Forks AFB": [47.9611, -97.4012],
+      "Hanscom AFB": [42.4699, -71.2890],
+      "Hill AFB": [41.1239, -111.9730],
+      "Holloman AFB": [32.8525, -106.1066],
+      "Hurlburt Field": [30.4278, -86.6893],
+      "Lackland AFB": [29.3842, -98.5811],
+      "JBSA-Randolph": [29.5297, -98.2789],
+      "JBSA-Fort Sam Houston": [29.4594, -98.4151],
+      "Keesler AFB": [30.4106, -88.9244],
+      "Kirtland AFB": [35.0402, -106.6090],
+      "Langley AFB": [37.0829, -76.3605],
+      "Laughlin AFB": [29.3595, -100.7780],
+      "Little Rock AFB": [34.9169, -92.1497],
+      "Los Angeles AFB": [33.9180, -118.3800],
+      "Luke AFB": [33.5350, -112.3831],
+      "MacDill AFB": [27.8493, -82.5212],
+      "Maxwell AFB": [32.3829, -86.3658],
+      "McChord Field": [47.1377, -122.4765],
+      "McConnell AFB": [37.6231, -97.2672],
+      "McGuire AFB": [40.0156, -74.5917],
+      "Minot AFB": [48.4156, -101.3580],
+      "Moody AFB": [30.9678, -83.1930],
+      "Mountain Home AFB": [43.0436, -115.8724],
+      "Nellis AFB": [36.2362, -115.0343],
+      "Robins AFB": [32.6401, -83.5919],
+      "Scott AFB": [38.5452, -89.8504],
+      "Seymour Johnson AFB": [35.3394, -77.9606],
+      "Shaw AFB": [33.9727, -80.4706],
+      "Tinker AFB": [35.4147, -97.3866],
+      "Travis AFB": [38.2627, -121.9275],
+      "Tyndall AFB": [30.0707, -85.5766],
+      "Whiteman AFB": [38.7303, -93.5482],
+      "Wright-Patterson AFB": [39.8261, -84.0483]
+    };
+
+    function normalizeBaseNameForDistance(value) {
+      return String(value || "").trim();
+    }
+
+    function milesBetweenCoords(a, b) {
+      const R = 3958.8;
+      const toRad = (deg) => deg * Math.PI / 180;
+
+      const lat1 = toRad(a[0]);
+      const lon1 = toRad(a[1]);
+      const lat2 = toRad(b[0]);
+      const lon2 = toRad(b[1]);
+
+      const dLat = lat2 - lat1;
+      const dLon = lon2 - lon1;
+
+      const h =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+
+      return 2 * R * Math.asin(Math.sqrt(h));
+    }
+
+    function estimateBaseDistanceMiles(currentBase, gainingBase) {
+      const from = normalizeBaseNameForDistance(currentBase);
+      const to = normalizeBaseNameForDistance(gainingBase);
+
+      if (!from || !to || from === to) return 0;
+
+      const a = BASE_COORDS[from];
+      const b = BASE_COORDS[to];
+
+      if (!a || !b) return null;
+
+      // Great-circle distance is too low for planning.
+      // 1.18 is a simple road-route factor for rough PCS planning.
+      return Math.round(milesBetweenCoords(a, b) * 1.18);
+    }
+
+    function syncDistanceFromBases() {
+      if (!els.distance || !els.currentBase || !els.gainingBase) return;
+
+      const estimated = estimateBaseDistanceMiles(
+        els.currentBase.value,
+        els.gainingBase.value
+      );
+
+      if (Number.isFinite(estimated) && estimated > 0) {
+        els.distance.value = String(estimated);
+      }
+    }
+
     //#5) INPUT READER
     function readInputs() {
+      syncDistanceFromBases();
+
       const rank = normalizeRank(els.paygrade && els.paygrade.value);
       const dependents = normalizeDependents(els.dependents && els.dependents.value);
       const currentBase = String((els.currentBase && els.currentBase.value) || "").trim();
@@ -205,6 +313,7 @@
         currentBase,
         gainingBase,
         distanceMiles,
+        distanceSource: "estimated_base_to_base",
         povs,
         estimatedWeightLbs,
         estimatedExpenses,
@@ -267,7 +376,7 @@
       paintInsights([
         "Running PCSUnited move estimate through TheWing.ai /api/pcs-move.",
         "Known PCS data such as MALT and authorized travel days will calculate now.",
-        "DLA and HHG estimates will activate once official tables are loaded in the shared engine."
+        "DLA and per diem estimates will activate once official tables are loaded in the shared engine."
       ]);
 
       setText(
@@ -465,7 +574,7 @@
 
       if (maltAmount > 0) {
         insightLines.push(
-          "Known MALT is " + money2(maltAmount) + " using " + payload.distanceMiles + " official distance miles and " + payload.povs + " authorized POV" + (payload.povs === 1 ? "." : "s.")
+          "Known MALT is " + money2(maltAmount) + " using " + payload.distanceMiles + " estimated distance miles and " + payload.povs + " authorized POV" + (payload.povs === 1 ? "." : "s.")
         );
       }
 
@@ -497,7 +606,7 @@
 
       setText(
         els.footerNote,
-        "Current beta estimate includes MALT, authorized travel days, and official HHG weight allowance checks. DLA and per diem will activate after official DTMO/JTR tables are loaded."
+        "Current beta estimate includes MALT, authorized travel days, and official HHG weight allowance checks. Distance is a planning estimate unless replaced with official orders/DPS/TMO mileage. DLA and per diem activate after official DTMO/JTR tables are loaded."
       );
     }
 
@@ -545,11 +654,24 @@
 
     //#12) BIND EVENTS
     function bind() {
+      ["currentBase", "gainingBase"].forEach(function (key) {
+        const el = els[key];
+        if (el) {
+          el.addEventListener("change", function () {
+            syncDistanceFromBases();
+            run();
+          });
+
+          el.addEventListener("input", function () {
+            syncDistanceFromBases();
+            run();
+          });
+        }
+      });
+
       [
         "paygrade",
         "dependents",
-        "currentBase",
-        "gainingBase",
         "distance",
         "povs",
         "weight",
@@ -565,6 +687,7 @@
 
     //#13) INIT
     bind();
+    syncDistanceFromBases();
     run();
 
     window.PCSU_AURORA_PCS_MOVE = {
@@ -572,7 +695,8 @@
       endpoint: ENDPOINT,
       apiOrigin: API_ORIGIN,
       poweredBy: "TheWing.ai",
-      route: "/api/pcs-move"
+      route: "/api/pcs-move",
+      estimateBaseDistanceMiles: estimateBaseDistanceMiles
     };
   }
 
