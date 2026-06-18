@@ -30,17 +30,14 @@
 
 <body>
   <!-- =========================================================
-    PCS SNAPSHOT v5.1.1
+    PCS SNAPSHOT v5.1.2
     THEWING.AI SPLIT VERSION
     FILE: index.html
 
     UPDATE:
     - Replaced Market Signal top card with Travel Expenses / DLA + MALT.
-    - Runtime IDs preserved:
-      pts-market-signal
-      pts-market-copy
-      pts-market-meta
-    - JS should now paint these IDs with /api/pcs-move result.
+    - Swapped Housing Affordability Breakdown with 12-Month Housing Trend.
+    - Runtime IDs preserved.
   ========================================================== -->
 
   <main id="pcs-snapshot-shell">
@@ -310,6 +307,28 @@
             </div>
           </section>
 
+          <!-- 12-MONTH HOUSING TREND -->
+          <section class="pcs-trend-panel pcs-card">
+            <h2 class="pcs-trend-title">12-Month Housing Trend</h2>
+            <div class="pcs-trend-sub">Median home price (interactive trend)</div>
+
+            <div class="trend-toggle">
+              <button class="trend-btn active" id="btn-1yr" type="button">1 Year</button>
+              <button class="trend-btn" id="btn-3yr" type="button">3 Years</button>
+            </div>
+
+            <div id="pcs-trend-chart-apex"></div>
+
+            <div id="pcs-trend-summary">
+              12-month change: -3.2% • Balanced to buyer-friendly with elevated inventory and moderate price stability
+            </div>
+          </section>
+
+        </div>
+
+        <!-- RIGHT STACK -->
+        <div class="pcs-stack">
+
           <!-- HOUSING AFFORDABILITY BREAKDOWN -->
           <section class="pcs-afford-panel pcs-card">
             <div class="pcs-afford-head">
@@ -380,27 +399,6 @@
 
             <div class="pcs-afford-footer" id="pcs-afford-footer">
               Based on BAH only, ownership is still being evaluated for this market.
-            </div>
-          </section>
-        </div>
-
-        <!-- RIGHT STACK -->
-        <div class="pcs-stack">
-
-          <!-- 12-MONTH HOUSING TREND -->
-          <section class="pcs-trend-panel pcs-card">
-            <h2 class="pcs-trend-title">12-Month Housing Trend</h2>
-            <div class="pcs-trend-sub">Median home price (interactive trend)</div>
-
-            <div class="trend-toggle">
-              <button class="trend-btn active" id="btn-1yr" type="button">1 Year</button>
-              <button class="trend-btn" id="btn-3yr" type="button">3 Years</button>
-            </div>
-
-            <div id="pcs-trend-chart-apex"></div>
-
-            <div id="pcs-trend-summary">
-              12-month change: -3.2% • Balanced to buyer-friendly with elevated inventory and moderate price stability
             </div>
           </section>
 
