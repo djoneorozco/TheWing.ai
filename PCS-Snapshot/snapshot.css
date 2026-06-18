@@ -9,6 +9,7 @@
   - Page-safe body styling added
   - Adds Travel Expenses / DLA + MALT top-strip card styling
   - Improves Housing Affordability donut center readability
+  - Hides old donut amount labels so center text is readable
 ========================================================= */
 
 /* =========================================================
@@ -1026,14 +1027,9 @@ body{
   color:rgba(244,248,255,.92);
 }
 
+/* Hidden intentionally: old donut amount labels overlapped the center BAH Covered text */
 .pcs-donut-amount{
-  position:absolute;
-  font-size:16px;
-  font-weight:900;
-  color:#fff;
-  text-shadow:0 5px 18px rgba(0,0,0,.18);
-  z-index:4;
-  letter-spacing:-.02em;
+  display:none !important;
 }
 
 .pcs-afford-footer{
