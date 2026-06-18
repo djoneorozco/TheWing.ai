@@ -1,7 +1,7 @@
 // official-hhg.js
 // ============================================================
 // TheWing.ai • Official HHG Weight Allowance Source
-// v1.0.0
+// v1.1.0
 //
 // FILE
 // - netlify/functions/_share/official-hhg.js
@@ -11,51 +11,94 @@
 // - Rank + dependent status lookup and shipment status helper
 // - No UI logic
 // - No localStorage
-// - No MALT / DLA / per diem
+// - No MALT / DLA / per diem / PPM reimbursement
 //
 // SOURCE
-// - Pending official HHG weight allowance table ingestion
+// - Joint Travel Regulations (JTR), Table 5-37, par. 051401
+// - PCS and NTS Weight Allowances (Pounds), JTR edition effective 03/01/2026
 //
 // MODULE STYLE
 // - ES Module exports for Netlify Functions with "type": "module"
-//
-// TODO
-// - Replace HHG_WEIGHT_ALLOWANCES placeholder structure with the official table
-//   once uploaded to the repo from JTR / DTMO source data.
-// - Do not invent HHG weight values in this module.
 // ============================================================
 
-export const RATE_VERSION = "official-hhg-2026.0-placeholder";
+export const RATE_VERSION = "official-hhg-jtr-table-5-37-2026.1";
 
-// ============================================================
-// //#1) HHG WEIGHT ALLOWANCES — structure only until official table is loaded
-// ============================================================
+export const HHG_SOURCE = "JTR Table 5-37, par. 051401 (03/01/2026)";
 
-/**
- * TODO(official-hhg-2026): Populate this object with the official HHG weight allowance table.
- *
- * Expected shape after ingestion:
- * {
- *   withDependents: { "E-1": 0000, "E-2": 0000, ... },
- *   withoutDependents: { "E-1": 0000, "E-2": 0000, ... }
- * }
- */
+const WITHOUT_DEPENDENTS = Object.freeze({
+  "E-1": 5000,
+  "E-2": 5000,
+  "E-3": 5000,
+  "E-4": 7000,
+  "E-5": 7000,
+  "E-6": 8000,
+  "E-7": 11000,
+  "E-8": 12000,
+  "E-9": 13000,
+  "W-1": 10000,
+  "W-2": 12500,
+  "W-3": 13000,
+  "W-4": 14000,
+  "W-5": 16000,
+  "O-1": 10000,
+  "O-1E": 10000,
+  "O-2": 12500,
+  "O-2E": 12500,
+  "O-3": 13000,
+  "O-3E": 13000,
+  "O-4": 14000,
+  "O-5": 16000,
+  "O-6": 18000,
+  "O-7": 18000,
+  "O-8": 18000,
+  "O-9": 18000,
+  "O-10": 18000
+});
+
+const WITH_DEPENDENTS = Object.freeze({
+  "E-1": 8000,
+  "E-2": 8000,
+  "E-3": 8000,
+  "E-4": 8000,
+  "E-5": 9000,
+  "E-6": 11000,
+  "E-7": 13000,
+  "E-8": 14000,
+  "E-9": 15000,
+  "W-1": 12000,
+  "W-2": 13500,
+  "W-3": 14500,
+  "W-4": 17000,
+  "W-5": 17500,
+  "O-1": 12000,
+  "O-1E": 12000,
+  "O-2": 13500,
+  "O-2E": 13500,
+  "O-3": 14500,
+  "O-3E": 14500,
+  "O-4": 17000,
+  "O-5": 17500,
+  "O-6": 18000,
+  "O-7": 18000,
+  "O-8": 18000,
+  "O-9": 18000,
+  "O-10": 18000
+});
+
 export const HHG_WEIGHT_ALLOWANCES = Object.freeze({
-  // TODO(official-hhg-2026): Add official HHG weight allowance rows here.
+  source: HHG_SOURCE,
+  withDependents: WITH_DEPENDENTS,
+  withoutDependents: WITHOUT_DEPENDENTS
 });
 
 export const SUPPORTED_RANKS = Object.freeze([
   "E-1", "E-2", "E-3", "E-4", "E-5", "E-6", "E-7", "E-8", "E-9",
   "W-1", "W-2", "W-3", "W-4", "W-5",
   "O-1E", "O-2E", "O-3E",
-  "O-1", "O-2", "O-3", "O-4", "O-5", "O-6", "O-7", "O-8"
+  "O-1", "O-2", "O-3", "O-4", "O-5", "O-6", "O-7", "O-8", "O-9", "O-10"
 ]);
 
-// ============================================================
-// //#2) HELPERS
-// ============================================================
-
-export function normalizeRank(rank) {
+function normalizeRank(rank) {
   const raw = String(rank ?? "").trim().toUpperCase();
 
   if (!raw) return "";
@@ -96,35 +139,13 @@ function toFiniteNumber(value) {
   return Number.isFinite(n) ? n : null;
 }
 
-function hasAllowanceTable() {
-  return Object.keys(HHG_WEIGHT_ALLOWANCES).length > 0;
-}
-
-// ============================================================
-// //#3) LOOKUPS
-// ============================================================
+export { normalizeRank };
 
 export function getHhgAllowance({ rank, hasDependents = false } = {}) {
   const rankKey = normalizeRank(rank);
   const withDependents = normalizeHasDependents(hasDependents);
-
-  if (!hasAllowanceTable()) {
-    return {
-      ok: false,
-      available: false,
-      allowanceLbs: null,
-      rank: rankKey || null,
-      hasDependents: withDependents,
-      sourceVersion: RATE_VERSION,
-      warning: "TODO(official-hhg-2026): Official HHG weight allowance table is not loaded in repo yet."
-    };
-  }
-
-  const bucket = withDependents
-    ? HHG_WEIGHT_ALLOWANCES.withDependents
-    : HHG_WEIGHT_ALLOWANCES.withoutDependents;
-
-  const allowanceLbs = bucket?.[rankKey];
+  const bucket = withDependents ? WITH_DEPENDENTS : WITHOUT_DEPENDENTS;
+  const allowanceLbs = bucket[rankKey];
 
   if (!Number.isFinite(Number(allowanceLbs))) {
     return {
@@ -217,12 +238,9 @@ export function calculateHhgStatus({ rank, hasDependents = false, estimatedWeigh
   };
 }
 
-// ============================================================
-// //#4) DEFAULT EXPORT
-// ============================================================
-
 export default Object.freeze({
   RATE_VERSION,
+  HHG_SOURCE,
   HHG_WEIGHT_ALLOWANCES,
   SUPPORTED_RANKS,
   normalizeRank,

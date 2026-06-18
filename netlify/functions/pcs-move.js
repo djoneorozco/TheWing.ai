@@ -19,7 +19,7 @@ import {
 } from "./_share/pcs-move-engine.js";
 
 const APP_NAME = "TheWing.ai";
-const HANDLER_VERSION = "thewing-pcs-move-handler-1.0.0";
+const HANDLER_VERSION = "thewing-pcs-move-handler-1.1.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
