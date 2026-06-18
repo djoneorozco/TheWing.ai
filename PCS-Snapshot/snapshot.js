@@ -1519,7 +1519,7 @@
       );
       text(
         "pts-market-meta",
-        "DLA + MALT • " + Math.round(PCS_MOVE.distanceMiles || 0).toLocaleString() + " mi • " + (PCS_MOVE.povs || 1) + " POV"
+        "Estimated Miles • " + Math.round(PCS_MOVE.distanceMiles || 0).toLocaleString() + " mi • " + (PCS_MOVE.povs || 1) + " POV"
       );
     } else {
       text("pts-market-signal", "$0");
