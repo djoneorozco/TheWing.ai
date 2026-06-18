@@ -14,31 +14,29 @@
 // - No MALT / HHG / per diem
 //
 // SOURCE
-// - Pending official 2026 DLA table ingestion
+// - DTMO MAP 72-25(I), CY2026 Dislocation Allowance (DLA) Rates
+// - DTMO Dislocation Allowance page / official 2026 DLA UTD PDF
 //
 // MODULE STYLE
 // - ES Module exports for Netlify Functions with "type": "module"
 //
 // TODO
-// - Replace DLA_RATES placeholder structure with the full official 2026 DLA table
-//   once uploaded to the repo from DFAS / JTR source data.
+// - Ingest the official 2026 DLA PDF/UTD into DLA_RATES when uploaded to repo.
 // - Do not invent DLA dollar values in this module.
 // ============================================================
 
 export const RATE_VERSION = "official-dla-2026.0-placeholder";
 
-// ============================================================
-// //#1) DLA RATES — structure only until official table is loaded
-// ============================================================
+export const DLA_SOURCE = "DTMO MAP 72-25(I), effective January 1, 2026";
 
 /**
- * TODO(official-dla-2026): Populate this object with the full official 2026 DLA table.
+ * TODO(official-dla-2026): Populate from the official DTMO 2026 DLA UTD/PDF.
  *
  * Expected shape after ingestion:
  * {
  *   2026: {
- *     withDependents: { "E-1": 0000, "E-2": 0000, ... },
- *     withoutDependents: { "E-1": 0000, "E-2": 0000, ... }
+ *     withDependents: { "E-1": 0000, ... },
+ *     withoutDependents: { "E-1": 0000, ... }
  *   }
  * }
  */
@@ -50,16 +48,13 @@ export const SUPPORTED_RANKS = Object.freeze([
   "E-1", "E-2", "E-3", "E-4", "E-5", "E-6", "E-7", "E-8", "E-9",
   "W-1", "W-2", "W-3", "W-4", "W-5",
   "O-1E", "O-2E", "O-3E",
-  "O-1", "O-2", "O-3", "O-4", "O-5", "O-6", "O-7", "O-8"
+  "O-1", "O-2", "O-3", "O-4", "O-5", "O-6", "O-7", "O-8", "O-9", "O-10"
 ]);
 
 const DEFAULT_YEAR = 2026;
+const DEFAULT_WARNING = "Official DLA table not loaded";
 
-// ============================================================
-// //#2) HELPERS
-// ============================================================
-
-export function normalizeRank(rank) {
+function normalizeRank(rank) {
   const raw = String(rank ?? "").trim().toUpperCase();
 
   if (!raw) return "";
@@ -105,9 +100,7 @@ function getRateTable(year) {
   return DLA_RATES[normalizeYear(year)] ?? null;
 }
 
-// ============================================================
-// //#3) LOOKUPS
-// ============================================================
+export { normalizeRank };
 
 export function getDlaAmount({ rank, hasDependents = false, year } = {}) {
   const rankKey = normalizeRank(rank);
@@ -124,7 +117,7 @@ export function getDlaAmount({ rank, hasDependents = false, year } = {}) {
       hasDependents: withDependents,
       year: resolvedYear,
       sourceVersion: RATE_VERSION,
-      warning: "TODO(official-dla-2026): Official DLA table is not loaded in repo yet."
+      warning: DEFAULT_WARNING
     };
   }
 
@@ -157,12 +150,9 @@ export function getDlaAmount({ rank, hasDependents = false, year } = {}) {
   };
 }
 
-// ============================================================
-// //#4) DEFAULT EXPORT
-// ============================================================
-
 export default Object.freeze({
   RATE_VERSION,
+  DLA_SOURCE,
   DLA_RATES,
   SUPPORTED_RANKS,
   normalizeRank,

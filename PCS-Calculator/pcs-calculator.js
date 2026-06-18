@@ -230,9 +230,9 @@
 
     //#7) LOADING STATE
     function paintLoading(payload) {
-      setText(els.totalHeroLabel, "Estimated Net Move Position");
+      setText(els.totalHeroLabel, "Known Move Cash Position");
       setText(els.totalHeroValue, "Calculating...");
-      setText(els.totalHeroSub, "MALT + DLA − Expenses");
+      setText(els.totalHeroSub, "MALT only — DLA/per diem pending");
 
       setText(els.infoCurrent, payload.currentBase);
       setText(els.infoGaining, payload.gainingBase);
@@ -278,7 +278,7 @@
 
     //#8) ERROR STATE
     function paintError(message, payload) {
-      setText(els.totalHeroLabel, "Estimated Net Move Position");
+      setText(els.totalHeroLabel, "Known Move Cash Position");
       setText(els.totalHeroValue, "$0.00");
       setText(els.totalHeroSub, "Unable to calculate");
 
@@ -324,28 +324,61 @@
       const result = data && data.result ? data.result : {};
       const malt = result.malt || {};
       const dla = result.dla || {};
+      const perDiem = result.perDiem || {};
       const travelDays = result.travelDays || {};
-      const hhg = result.hhg || {};
+      const hhg = (result.allowanceChecks && result.allowanceChecks.hhg) || result.hhg || {};
+      const knownEntitlements = result.knownEntitlements || {};
 
-      const maltAmount = Number(malt.totalAmount || 0);
+      const maltAmount = Number(
+        knownEntitlements.malt != null ? knownEntitlements.malt : (malt.totalAmount || 0)
+      );
       const dlaAmount = dla.available ? Number(dla.amount || 0) : 0;
+      const perDiemAmount = perDiem.available ? Number(perDiem.amount || 0) : 0;
       const expenses = Number(result.estimatedExpenses || 0);
-      const entitlements = Number(result.estimatedEntitlements || maltAmount + dlaAmount);
-      const net = Number(result.netMovePosition || entitlements - expenses);
+      const isPartial = result.estimateStatus !== "complete";
+      const knownNet = Number(
+        result.knownNetPosition != null ? result.knownNetPosition : (maltAmount - expenses)
+      );
+      const projectedNet = result.projectedNetPosition == null
+        ? null
+        : Number(result.projectedNetPosition);
+      const displayNet = isPartial ? knownNet : (projectedNet != null ? projectedNet : knownNet);
 
       return {
         result,
         malt,
         dla,
+        perDiem,
         travelDays,
         hhg,
         maltAmount,
         dlaAmount,
+        perDiemAmount,
         expenses,
-        entitlements,
-        net,
+        knownNet,
+        projectedNet,
+        displayNet,
+        isPartial,
+        summaryLabel: result.summaryLabel || (isPartial ? "Known Move Cash Position" : "Estimated Net Move Position"),
         warnings: Array.isArray(data && data.warnings) ? data.warnings : []
       };
+    }
+
+    function heroSubtext(normalized) {
+      if (!normalized.isPartial) {
+        return "MALT + DLA + Per Diem − Expenses";
+      }
+
+      const pending = [];
+
+      if (!normalized.dla.available) pending.push("DLA");
+      if (!normalized.perDiem.available) pending.push("per diem");
+
+      if (!pending.length) {
+        return "Known entitlements only — additional tables pending";
+      }
+
+      return "MALT only — " + pending.join("/") + " pending";
     }
 
     function signalText(signal, net) {
@@ -365,7 +398,8 @@
       const dlaAvailable = !!normalized.dla.available;
       const dlaAmount = normalized.dlaAmount;
       const expenses = normalized.expenses;
-      const net = normalized.net;
+      const displayNet = normalized.displayNet;
+      const isPartial = normalized.isPartial;
 
       const days = normalized.travelDays && normalized.travelDays.ok
         ? normalized.travelDays.days
@@ -375,18 +409,19 @@
         ? normalized.malt.ratePerMile
         : 0;
 
-      const moveSignal = signalText(normalized.result.moveCashSignal, net);
+      const moveSignal = signalText(normalized.result.moveCashSignal, displayNet);
+      const hhg = normalized.hhg || {};
 
-      setText(els.totalHeroLabel, "Estimated Net Move Position");
-      setText(els.totalHeroValue, money2(net));
-      setText(els.totalHeroSub, "MALT + DLA − Expenses");
+      setText(els.totalHeroLabel, normalized.summaryLabel);
+      setText(els.totalHeroValue, money2(displayNet));
+      setText(els.totalHeroSub, heroSubtext(normalized));
 
       setText(els.infoCurrent, payload.currentBase);
       setText(els.infoGaining, payload.gainingBase);
       setText(els.infoRank, payload.rank + " • " + rankTitle(payload.rank));
       setText(els.infoDependency, payload.hasDependents ? "With Dependents" : "Without Dependents");
 
-      setText(els.maltAmount, money2(maltAmount));
+      setText(els.maltAmount, maltAmount > 0 ? money2(maltAmount) : "$0.00");
       setText(
         els.maltBreakdown,
         payload.distanceMiles + " miles × " + payload.povs + " POV" + (payload.povs === 1 ? "" : "s") + " × $" + ratePerMile + "/mile"
@@ -397,7 +432,7 @@
         setText(els.dlaBreakdown, payload.rank + " • " + (payload.hasDependents ? "With Dependents" : "Without Dependents"));
       } else {
         setText(els.dlaAmount, "Pending");
-        setText(els.dlaBreakdown, "Official DLA table not loaded yet");
+        setText(els.dlaBreakdown, "Official DLA table not loaded");
       }
 
       setText(els.expenseAmount, money2(expenses));
@@ -406,9 +441,14 @@
       setText(els.daysAmount, days == null ? "—" : days + " Day" + (days === 1 ? "" : "s"));
       setText(els.daysBreakdown, "Authorized travel-day estimate");
 
-      setText(els.netAmount, money2(net));
-      setText(els.signalLabel, moveSignal);
-      setText(els.totalNote, "Known entitlements minus estimated expenses");
+      setText(els.netAmount, money2(displayNet));
+      setText(els.signalLabel, isPartial ? "Known Move Cash Position" : moveSignal);
+      setText(
+        els.totalNote,
+        isPartial
+          ? "Before DLA, per diem, HHG reimbursement, and PPM/GCC are included"
+          : "MALT + DLA + Per Diem − estimated expenses"
+      );
 
       const maxBar = Math.max(maltAmount, dlaAmount, expenses, 1);
 
@@ -419,21 +459,45 @@
       setBarHeight(els.barMalt, pctOfMax(maxBar, maltAmount));
       setBarHeight(els.barDla, dlaAvailable ? pctOfMax(maxBar, dlaAmount) : 8);
       setBarHeight(els.barExpenses, pctOfMax(maxBar, expenses));
-      setRingFromNet(net);
+      setRingFromNet(displayNet);
 
-      const warningLine = normalized.warnings.length
-        ? normalized.warnings[0]
-        : "PCS move estimate completed with available official move data.";
+      const insightLines = [];
 
-      paintInsights([
-        "Estimated MALT is " + money2(maltAmount) + " using " + payload.distanceMiles + " official distance miles and " + payload.povs + " authorized POV" + (payload.povs === 1 ? "." : "s."),
-        "Estimated net move position is " + money2(net) + " before DLA/HHG tables are fully loaded.",
-        warningLine
-      ]);
+      if (maltAmount > 0) {
+        insightLines.push(
+          "Known MALT is " + money2(maltAmount) + " using " + payload.distanceMiles + " official distance miles and " + payload.povs + " authorized POV" + (payload.povs === 1 ? "." : "s.")
+        );
+      }
+
+      if (isPartial) {
+        insightLines.push(
+          "This is a partial estimate because DLA, per diem, and PPM/GCC reimbursement are not loaded yet."
+        );
+      } else {
+        insightLines.push(
+          "Estimated net move position is " + money2(displayNet) + " using all loaded official PCS entitlements."
+        );
+      }
+
+      if (hhg.available && hhg.allowanceLbs != null) {
+        if (hhg.estimatedWeightLbs != null) {
+          insightLines.push(
+            "Official HHG allowance is " + hhg.allowanceLbs.toLocaleString() + " lbs; estimated " + hhg.estimatedWeightLbs.toLocaleString() + " lbs is " + String(hhg.status || "tracked").replace(/_/g, " ") + "."
+          );
+        } else {
+          insightLines.push(
+            "Official HHG allowance is " + hhg.allowanceLbs.toLocaleString() + " lbs for this grade and dependency status."
+          );
+        }
+      } else if (normalized.warnings.length) {
+        insightLines.push(normalized.warnings[0]);
+      }
+
+      paintInsights(insightLines.slice(0, 3));
 
       setText(
         els.footerNote,
-        "Estimate generated by TheWing.ai using /api/pcs-move and the shared PCS move engine. DLA and HHG will activate after official tables are loaded."
+        "Current beta estimate includes MALT, authorized travel days, and official HHG weight allowance checks. DLA and per diem will activate after official DTMO/JTR tables are loaded."
       );
     }
 

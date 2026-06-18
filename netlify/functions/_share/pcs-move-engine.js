@@ -1,21 +1,16 @@
 // pcs-move-engine.js
 // ============================================================
 // TheWing.ai • PCS Move Engine
-// v1.0.0
+// v1.1.0
 //
 // FILE
 // - netlify/functions/_share/pcs-move-engine.js
 //
 // PURPOSE
 // - Compose official PCS move data modules into one defensive estimate
-// - Uses official-malt.js, official-pcs-travel-days.js, official-dla.js, official-hhg.js
-// - No UI logic
-// - No localStorage
-// - No Netlify handler
-//
-// IMPORTANT
-// - This is NOT an API endpoint.
-// - Shared business logic only until a public function wires it up.
+// - Uses official-malt.js, official-pcs-travel-days.js, official-dla.js,
+//   official-hhg.js, official-pcs-per-diem.js
+// - Separates known vs pending entitlements for honest partial estimates
 //
 // MODULE STYLE
 // - ES Module exports for Netlify Functions with "type": "module"
@@ -25,12 +20,11 @@ import { RATE_VERSION as MALT_RATE_VERSION, calculateMalt } from "./official-mal
 import { RULE_VERSION as TRAVEL_DAYS_RULE_VERSION, calculatePcsTravelDays } from "./official-pcs-travel-days.js";
 import { RATE_VERSION as DLA_RATE_VERSION, getDlaAmount, normalizeRank as normalizeDlaRank } from "./official-dla.js";
 import { RATE_VERSION as HHG_RATE_VERSION, calculateHhgStatus, normalizeRank as normalizeHhgRank } from "./official-hhg.js";
+import { RATE_VERSION as PER_DIEM_RATE_VERSION, calculatePcsPerDiem } from "./official-pcs-per-diem.js";
 
-export const PCS_MOVE_ENGINE_VERSION = "pcs-move-engine-2026.1";
+export const PCS_MOVE_ENGINE_VERSION = "pcs-move-engine-2026.2";
 
-// ============================================================
-// //#1) HELPERS
-// ============================================================
+const PPM_WARNING = "PPM/GCC reimbursement estimate is not supported yet.";
 
 function toNumber(value, fallback = 0) {
   const n = Number(value);
@@ -53,14 +47,11 @@ function normalizeString(value) {
 }
 
 function normalizeRank(rank) {
-  const fromDla = normalizeDlaRank(rank);
-  const fromHhg = normalizeHhgRank(rank);
-  return fromDla || fromHhg || "";
+  return normalizeDlaRank(rank) || normalizeHhgRank(rank) || "";
 }
 
 function normalizeHasDependents(input = {}) {
   if (typeof input.hasDependents === "boolean") return input.hasDependents;
-
   if (typeof input.dependents === "boolean") return input.dependents;
 
   if (typeof input.hasDependents === "number" && Number.isFinite(input.hasDependents)) {
@@ -93,10 +84,17 @@ function normalizeHasDependents(input = {}) {
   return false;
 }
 
+function normalizeFamilySize(input = {}, hasDependents = false) {
+  const family = toNullableNumber(input.family ?? input.familySize ?? input.householdSize);
+
+  if (family != null && family >= 1) return Math.trunc(family);
+
+  return hasDependents ? 2 : 1;
+}
+
 function pickFirstNumber(...values) {
   for (const value of values) {
     const n = toNullableNumber(value);
-
     if (n != null) return n;
   }
 
@@ -106,7 +104,6 @@ function pickFirstNumber(...values) {
 function pickFirstString(...values) {
   for (const value of values) {
     const s = normalizeString(value);
-
     if (s) return s;
   }
 
@@ -123,18 +120,22 @@ function pushWarning(warnings, warning) {
   }
 }
 
-function deriveMoveCashSignal(netMovePosition, hasEntitlementData) {
-  if (!hasEntitlementData) return "unknown";
-
-  if (netMovePosition > 250) return "surplus";
-  if (netMovePosition < -250) return "shortfall";
-
+function deriveMoveCashSignal(netPosition, hasKnownEntitlementData) {
+  if (!hasKnownEntitlementData) return "unknown";
+  if (netPosition > 250) return "surplus";
+  if (netPosition < -250) return "shortfall";
   return "neutral";
 }
 
-// ============================================================
-// //#2) INPUT NORMALIZER
-// ============================================================
+function buildPendingEntry(result) {
+  if (result?.available) return null;
+
+  return {
+    available: false,
+    amount: null,
+    warning: result?.warning || "Official table not loaded"
+  };
+}
 
 export function normalizePcsMoveInput(input = {}) {
   const rank = normalizeRank(
@@ -142,6 +143,7 @@ export function normalizePcsMoveInput(input = {}) {
   );
 
   const hasDependents = normalizeHasDependents(input);
+  const familySize = normalizeFamilySize(input, hasDependents);
 
   const distanceMiles = pickFirstNumber(
     input.distanceMiles,
@@ -154,7 +156,6 @@ export function normalizePcsMoveInput(input = {}) {
   );
 
   const povs = pickFirstNumber(input.povs, input.povCount, input.pov_count) ?? 1;
-
   const year = pickFirstNumber(input.year, input.rateYear, input.rate_year) ?? 2026;
 
   const estimatedWeightLbs = pickFirstNumber(
@@ -178,6 +179,7 @@ export function normalizePcsMoveInput(input = {}) {
   return {
     rank,
     hasDependents,
+    familySize,
     distanceMiles,
     povs,
     year,
@@ -185,10 +187,6 @@ export function normalizePcsMoveInput(input = {}) {
     estimatedExpenses: Math.max(0, estimatedExpenses)
   };
 }
-
-// ============================================================
-// //#3) MAIN CALCULATION
-// ============================================================
 
 export function calculatePcsMoveEstimate(input = {}) {
   const warnings = [];
@@ -220,6 +218,16 @@ export function calculatePcsMoveEstimate(input = {}) {
     pushWarning(warnings, dla.warning);
   }
 
+  const perDiem = calculatePcsPerDiem({
+    travelDays: travelDays.ok ? travelDays.days : null,
+    familySize: normalized.familySize,
+    hasDependents: normalized.hasDependents
+  });
+
+  if (!perDiem.available) {
+    pushWarning(warnings, perDiem.warning);
+  }
+
   const hhg = calculateHhgStatus({
     rank: normalized.rank,
     hasDependents: normalized.hasDependents,
@@ -232,15 +240,53 @@ export function calculatePcsMoveEstimate(input = {}) {
     pushWarning(warnings, hhg.warning);
   }
 
-  const maltEntitlement = malt.ok ? malt.totalAmount : 0;
-  const dlaEntitlement = dla.available ? toNumber(dla.amount, 0) : 0;
+  const knownEntitlements = {
+    malt: malt.ok ? money(malt.totalAmount) : null,
+    dla: dla.available ? money(dla.amount) : null,
+    perDiem: perDiem.available ? money(perDiem.amount) : null,
+    total: money(
+      (malt.ok ? malt.totalAmount : 0) +
+      (dla.available ? dla.amount : 0) +
+      (perDiem.available ? perDiem.amount : 0)
+    )
+  };
 
-  const estimatedEntitlements = money(maltEntitlement + dlaEntitlement);
+  const pendingEntitlements = {};
+
+  const pendingDla = buildPendingEntry(dla);
+  if (pendingDla) pendingEntitlements.dla = pendingDla;
+
+  const pendingPerDiem = buildPendingEntry(perDiem);
+  if (pendingPerDiem) pendingEntitlements.perDiem = pendingPerDiem;
+
+  pendingEntitlements.ppmEstimate = {
+    available: false,
+    amount: null,
+    warning: PPM_WARNING
+  };
+
+  pushWarning(warnings, PPM_WARNING);
+
+  const allowanceChecks = { hhg };
+
   const estimatedExpenses = money(normalized.estimatedExpenses);
-  const netMovePosition = money(estimatedEntitlements - estimatedExpenses);
+  const knownNetPosition = money(knownEntitlements.total - estimatedExpenses);
+
+  const estimateComplete =
+    malt.ok &&
+    dla.available &&
+    perDiem.available;
+
+  const estimateStatus = estimateComplete ? "complete" : "partial";
+  const summaryLabel = estimateComplete
+    ? "Estimated Net Move Position"
+    : "Known Move Cash Position";
+
+  const projectedNetPosition = estimateComplete ? knownNetPosition : null;
+
   const moveCashSignal = deriveMoveCashSignal(
-    netMovePosition,
-    malt.ok || dla.available
+    estimateComplete ? projectedNetPosition : knownNetPosition,
+    malt.ok || dla.available || perDiem.available
   );
 
   if (!normalized.rank) {
@@ -251,6 +297,13 @@ export function calculatePcsMoveEstimate(input = {}) {
     pushWarning(warnings, "Missing official PCS distance; MALT and travel-day estimates unavailable.");
   }
 
+  if (estimateStatus === "partial") {
+    pushWarning(
+      warnings,
+      "Partial estimate: only loaded official entitlements are included in knownNetPosition."
+    );
+  }
+
   return {
     ok: true,
     version: {
@@ -258,11 +311,13 @@ export function calculatePcsMoveEstimate(input = {}) {
       malt: MALT_RATE_VERSION,
       travelDays: TRAVEL_DAYS_RULE_VERSION,
       dla: DLA_RATE_VERSION,
-      hhg: HHG_RATE_VERSION
+      hhg: HHG_RATE_VERSION,
+      perDiem: PER_DIEM_RATE_VERSION
     },
     profile: {
       rank: normalized.rank || null,
       hasDependents: normalized.hasDependents,
+      familySize: normalized.familySize,
       distanceMiles: normalized.distanceMiles,
       povs: normalized.povs,
       year: normalized.year,
@@ -271,18 +326,23 @@ export function calculatePcsMoveEstimate(input = {}) {
     malt,
     travelDays,
     dla,
-    hhg,
+    perDiem,
+    knownEntitlements,
+    pendingEntitlements,
+    allowanceChecks,
     estimatedExpenses,
-    estimatedEntitlements,
-    netMovePosition,
+    knownNetPosition,
+    projectedNetPosition,
+    estimateStatus,
+    summaryLabel,
     moveCashSignal,
-    warnings
+    warnings,
+    // Backward-compatible aliases for existing consumers
+    hhg,
+    estimatedEntitlements: knownEntitlements.total,
+    netMovePosition: estimateComplete ? projectedNetPosition : knownNetPosition
   };
 }
-
-// ============================================================
-// //#4) DEFAULT EXPORT
-// ============================================================
 
 export default Object.freeze({
   PCS_MOVE_ENGINE_VERSION,
