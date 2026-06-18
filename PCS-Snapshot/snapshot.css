@@ -8,6 +8,7 @@
   - Runtime IDs/classes preserved
   - Page-safe body styling added
   - Adds Travel Expenses / DLA + MALT top-strip card styling
+  - Improves Housing Affordability donut center readability
 ========================================================= */
 
 /* =========================================================
@@ -1002,26 +1003,27 @@ body{
 }
 
 .pcs-donut-center-inner{
-  width:126px;
-  transform:translateY(-1px);
+  width:132px;
+  transform:translateY(0);
 }
 
 #pcs-donut-buffer{
-  font-size:20px;
+  font-size:34px;
   font-weight:900;
-  color:#fff;
-  line-height:1;
-  letter-spacing:-.03em;
-  margin-bottom:4px;
+  color:#ffffff;
+  line-height:.95;
+  letter-spacing:-.05em;
+  margin-bottom:6px;
+  text-shadow:0 8px 22px rgba(0,0,0,.28);
 }
 
 #pcs-donut-buffer-label{
-  font-size:12px;
+  font-size:11px;
   font-weight:900;
   line-height:1.1;
   text-transform:uppercase;
-  letter-spacing:.05em;
-  color:#f4f7ff;
+  letter-spacing:.08em;
+  color:rgba(244,248,255,.92);
 }
 
 .pcs-donut-amount{
@@ -1357,6 +1359,18 @@ body{
 
   .pcs-donut::before{
     inset:48px;
+  }
+
+  .pcs-donut-center-inner{
+    width:118px;
+  }
+
+  #pcs-donut-buffer{
+    font-size:30px;
+  }
+
+  #pcs-donut-buffer-label{
+    font-size:10px;
   }
 
   .pcs-ls-chart-wrap{
