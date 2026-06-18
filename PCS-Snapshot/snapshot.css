@@ -1,5 +1,5 @@
 /* =========================================================
-  PCS SNAPSHOT v5.1.0 • AURORA THEME
+  PCS SNAPSHOT v5.1.1 • AURORA THEME
   FILE: snapshot.css
 
   THEWING.AI SPLIT VERSION
@@ -7,6 +7,7 @@
   - CSS extracted from original single-file Snapshot
   - Runtime IDs/classes preserved
   - Page-safe body styling added
+  - Adds Travel Expenses / DLA + MALT top-strip card styling
 ========================================================= */
 
 /* =========================================================
@@ -338,6 +339,63 @@ body{
 .pts-card-market .pts-value{
   color:#f8fdff;
   font-size:26px;
+}
+
+/* =========================================================
+   #5B) TOP STRIP — TRAVEL EXPENSES / DLA + MALT CARD
+========================================================= */
+.pts-card-move{
+  background:
+    radial-gradient(520px 250px at 10% 0%, rgba(80,229,191,.18), transparent 58%),
+    radial-gradient(360px 180px at 96% 0%, rgba(255,181,107,.11), transparent 48%),
+    linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.045));
+}
+
+.pts-card-move .pts-icon{
+  background:
+    radial-gradient(circle at 35% 30%, rgba(80,229,191,.26), rgba(157,232,255,.12) 44%, rgba(12,28,46,.22) 100%);
+  color:#dffff7;
+}
+
+.pts-card-move .pts-icon svg{
+  width:27px;
+  height:27px;
+}
+
+.pts-card-move .pts-kicker{
+  color:rgba(223,255,247,.84);
+}
+
+.pts-card-move .pts-value{
+  color:#dffff7;
+  font-size:27px;
+  letter-spacing:-.04em;
+  text-shadow:0 0 22px rgba(80,229,191,.10);
+}
+
+.pts-card-move .pts-body-copy{
+  color:#f4fbff;
+}
+
+.pts-card-move .pts-body-copy strong{
+  color:#fff;
+  font-weight:900;
+}
+
+.pts-card-move .pts-meta{
+  color:rgba(244,248,255,.76);
+}
+
+.pts-card-move #pts-market-copy{
+  font-size:13px;
+  line-height:1.45;
+  font-weight:800;
+}
+
+.pts-card-move #pts-market-meta{
+  font-size:12px;
+  line-height:1.4;
+  font-weight:800;
 }
 
 .pts-card-power .pts-icon{
@@ -1333,5 +1391,9 @@ body{
 
   .pts-stars{
     font-size:20px;
+  }
+
+  .pts-card-move .pts-value{
+    font-size:24px;
   }
 }
