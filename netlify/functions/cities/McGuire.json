@@ -1,19 +1,24 @@
 {
-  "city": "Wrightstown, NJ",
-  "place": "Wrightstown, NJ",
-  "state": "NJ",
+  "slug": "mcguire-afb",
+  "name": "McGuire AFB",
+  "city": "Wrightstown",
+  "submarket": "Burlington County / Joint Base MDL",
+  "place": "McGuire AFB, NJ",
+  "place_detail": "Joint Base McGuire-Dix-Lakehurst, NJ",
+  "state": "New Jersey",
+  "state_code": "NJ",
   "geo_id": "1600000US3482960",
   "year": 2026,
   "last_updated_data_from_sources": "March 2026",
   "image_url": "https://www.jointbasemdl.af.mil",
+  "base_image_url": "",
   "zip": "08641",
   "market_label": "Trenton Metro - Burlington County",
-
+  "profile": "Military-friendly McGuire AFB housing snapshot anchored to Burlington County / Joint Base MDL, built for PCSUnited base-level market overviews.",
   "avg_home_value": 385000,
   "average_home_value": 385000,
   "avgHome": 385000,
   "city_avg_home": 385000,
-
   "snapshot": {
     "population_city": 3200,
     "population_metro": 375000,
@@ -23,7 +28,31 @@
     "traffic_level": "High",
     "employment_status": "Very Stable"
   },
-
+  "market_metrics": {
+    "median_list_price": 395000,
+    "median_sold_price": 382000,
+    "median_sale_price": 382000,
+    "days_on_market": 32,
+    "inventory_months": null,
+    "price_per_sqft": 195,
+    "active_listings_total": 450,
+    "market_type_summary": "Steady demand with limited local inventory.",
+    "zillow_average_home_value": 385000,
+    "zillow_one_year_change_percent": 4.1,
+    "as_of": "2026-03"
+  },
+  "metrics": {
+    "median_list_price": 395000,
+    "median_sold_price": 382000,
+    "median_sale_price": 382000,
+    "days_on_market": 32,
+    "inventory_months": null,
+    "price_per_sqft": 195,
+    "median_rent": 2550,
+    "active_listings_total": 450,
+    "property_tax_rate": 0.0245,
+    "as_of": "2026-03"
+  },
   "mortgage_assumptions": {
     "apr_percent": 6.35,
     "term_years": 30,
@@ -31,84 +60,92 @@
     "includes": "va_loan_all_in",
     "defaults_note": "Based on March 2026 New Jersey VA loan rates."
   },
-
-  "property_tax_rate": 2.45,
-  "insurance_rate": 0.42,
+  "property_tax_rate": 0.0245,
+  "property_tax_rate_percent": 2.45,
+  "insurance_rate": 0.0042,
+  "insurance_rate_percent": 0.42,
   "hoa_monthly": 45,
-
+  "ownership_costs": {
+    "property_tax_rate": 0.0245,
+    "property_tax_rate_percent": 2.45,
+    "insurance_rate_estimate": 0.0042,
+    "insurance_rate_percent": 0.42,
+    "insurance_annual_default": 1617,
+    "hoa_monthly_default": 45,
+    "notes": [
+      "Property taxes and insurance materially affect true monthly ownership cost near McGuire.",
+      "Insurance and HOA should be included in all-in housing cost comparisons."
+    ]
+  },
+  "costs": {
+    "property_tax_rate": 0.0245,
+    "insurance_annual_default": 1617,
+    "hoa_monthly_default": 45
+  },
   "avg_home_mortgage_monthly": {
     "avg": 3450,
     "as_of": "2026-03",
     "notes": "VA loan estimate; higher monthly costs due to significant NJ property taxes"
   },
-
   "population": {
     "estimate": 3200,
     "median_age": 22.8,
     "persons_per_household": 3.1
   },
-
   "households": {
     "total_households": 1100
   },
-
   "income": {
     "median_household_income": 78500,
     "per_capita_income": 34500,
     "poverty_rate_percent": 6.8
   },
-
   "education": {
     "high_school_grad_or_higher_percent": 94.2,
     "bachelors_degree_or_higher_percent": 28.5
   },
-
   "veterans": {
     "veteran_population_percent": 11.2
   },
-
   "immigration": {
     "foreign_born_percent": 8.4
   },
-
   "labor": {
     "mean_travel_time_to_work_minutes": 28.5,
     "unemployment_rate_percent": 3.9
   },
-
   "crime_status": {
     "installation": "High security; gated military community. Extremely safe.",
     "metro_trenton_burlington": "Wrightstown is safe; safety in the metro area varies. Medford and Marlton are preferred safe alternatives for families."
   },
-
   "school_quality": {
     "on_base": "None; residents attend North Hanover Township Schools.",
     "off_base": "Northern Burlington County Regional and Medford schools are highly rated."
   },
-
   "rental_vacancy": {
     "rate_percent": 5.2,
     "notes": "Tight rental market due to proximity to NYC and Philadelphia corridors."
   },
-
+  "rental_metrics": {
+    "median_rent": 2550,
+    "vacancy_rate_percent": 5.2,
+    "notes": "Tight rental market due to proximity to NYC and Philadelphia corridors."
+  },
   "climate_weather": {
     "spring": "Cool/Rainy; 45–65°F",
     "summer": "Hot/Humid; 82–92°F",
     "fall": "Crisp/Sunny; 50–70°F",
     "winter": "Cold/Snowy; 25–40°F"
   },
-
   "special_events": [
     "Power in the Pines Air Show",
     "Burlington County Farm Fair",
     "Trenton Thunder Baseball"
   ],
-
   "military_lifestyle_fit": {
     "rating": "Exceptional",
     "description": "Massive tri-service mission (MDL); heavy community investment and high operational visibility."
   },
-
   "financial_brief": {
     "bah_vs_buy_position": "Neutral to Challenging",
     "bah_vs_rent_position": "Neutral",
@@ -116,7 +153,6 @@
     "buyer_opportunity": "Mount Laurel and Medford offer premium long-term stability.",
     "renter_advantage": false
   },
-
   "market_bluf": {
     "bluf_headline": "High-Demand Tri-State Hub",
     "bluf_summary": "Steady demand from NYC/Philly commuters keeps prices resilient; inventory remains low.",
@@ -127,7 +163,6 @@
     "verdict_color": "yellow",
     "confidence_score": 88
   },
-
   "scorecard": {
     "affordability_score": 55,
     "growth_score": 85,
@@ -135,60 +170,221 @@
     "military_fit_score": 98,
     "overall_score": 83
   },
-
   "rules": {
-    "max_safe_housing_ratio": 0.30,
+    "max_safe_housing_ratio": 0.3,
     "warning_ratio": 0.35,
-    "danger_ratio": 0.40
+    "danger_ratio": 0.4
   },
-
+  "summary_points": [
+    "Joint Base McGuire-Dix-Lakehurst sits in the Burlington County / Joint Base MDL housing market with base-specific affordability, commute, and neighborhood tradeoffs.",
+    "Current market trend is approximately 4.1% year-over-year, which should shape buyer leverage and pricing discipline.",
+    "High property taxes in NJ are the primary hurdle for buyers; resale value is historically strong.",
+    "Neighborhood quality varies across Wrightstown, Mount Holly, Columbus and other nearby corridors — citywide averages should not be the only filter.",
+    "Steady demand from NYC/Philly commuters keeps prices resilient; inventory remains low."
+  ],
+  "opportunities": [
+    "McGuire military demand can support durable housing relevance for disciplined buyers and landlords.",
+    "Local inventory and pricing may offer opportunity for households that stress-test taxes, insurance, and commute together.",
+    "Wrightstown and nearby corridors may offer stronger family or value positioning depending on assignment length.",
+    "Assignment-length clarity can improve rent-versus-buy decisions near McGuire."
+  ],
+  "risks": [
+    "Neighborhood quality, schools, commute, and monthly carrying costs vary across the Burlington County / Joint Base MDL market.",
+    "Property taxes, insurance, HOA, and utilities can widen the gap between list price and true monthly payment.",
+    "Market averages can hide weak submarkets — property-level review matters.",
+    "Stretching beyond a safe housing ratio can reduce PCS flexibility."
+  ],
+  "buyer_notes": [
+    "McGuire buyers should compare all-in monthly cost, not just principal and interest.",
+    "Verify school zones, commute timing, and BAH fit by exact address before signing.",
+    "Mount Laurel and Medford offer premium long-term stability.",
+    "This market rewards disciplined buyers who test the commute during expected report hours."
+  ],
+  "seller_notes": [
+    "Sellers should price against current inventory and days on market rather than older peak assumptions.",
+    "Move-in-ready presentation and realistic pricing matter when buyers have leverage.",
+    "Military-adjacent commute convenience can be a listing strength if framed clearly."
+  ],
+  "investor_angles": [
+    "Military turnover near McGuire can support rental demand, but vacancy and maintenance should be modeled conservatively.",
+    "Investors should underwrite taxes, insurance, HOA, and property condition — not just acquisition price.",
+    "Practical commute corridors often outperform generic metro averages for military renter demand."
+  ],
+  "neighborhoods": [
+    "Wrightstown",
+    "Mount Holly",
+    "Columbus",
+    "Jackson",
+    "Bordentown corridor"
+  ],
+  "target_neighborhoods": [
+    "Wrightstown",
+    "Mount Holly",
+    "Columbus",
+    "Jackson",
+    "Bordentown corridor"
+  ],
+  "buyer_guidance": [
+    "Use all-in monthly payment as the primary screen.",
+    "Compare taxes, insurance, commute, school quality, and resale flexibility before locking a neighborhood.",
+    "Do not choose housing based only on distance to McGuire.",
+    "A slightly lower purchase price can materially improve monthly PCS flexibility."
+  ],
+  "seller_guidance": [
+    "Price against active inventory and days on market.",
+    "Condition and presentation matter when buyers can compare more options.",
+    "Military commute convenience can help positioning if described accurately."
+  ],
+  "landlord_notes": [
+    "Military renter demand can improve occupancy durability near McGuire.",
+    "Model vacancy, repairs, insurance, and turnover conservatively.",
+    "Stable spread matters more than headline affordability alone."
+  ],
   "by_bedroom": {
     "2": {
-      "rent_monthly": { "low": 1700, "high": 2100, "avg": 1900, "as_of": "2026-03" },
-      "home_price": { "low": 240000, "high": 290000, "avg": 265000, "as_of": "2026-01" },
-      "mortgage_monthly": { "low": 2200, "high": 2700, "avg": 2450, "as_of": "2026-03" },
+      "rent_monthly": {
+        "low": 1700,
+        "high": 2100,
+        "avg": 1900,
+        "as_of": "2026-03"
+      },
+      "home_price": {
+        "low": 240000,
+        "high": 290000,
+        "avg": 265000,
+        "as_of": "2026-01"
+      },
+      "mortgage_monthly": {
+        "low": 2200,
+        "high": 2700,
+        "avg": 2450,
+        "as_of": "2026-03"
+      },
       "utilities": {
-        "electric_gas": { "low": 180, "high": 260, "avg": 220 },
-        "water_sewer": { "low": 55, "high": 85, "avg": 70 },
-        "total": { "low": 235, "high": 345, "avg": 290 },
+        "electric_gas": {
+          "low": 180,
+          "high": 260,
+          "avg": 220
+        },
+        "water_sewer": {
+          "low": 55,
+          "high": 85,
+          "avg": 70
+        },
+        "total": {
+          "low": 235,
+          "high": 345,
+          "avg": 290
+        },
         "as_of": "2026-03"
       }
     },
     "3": {
-      "rent_monthly": { "low": 2200, "high": 2900, "avg": 2550 },
-      "home_price": { "low": 340000, "high": 430000, "avg": 385000 },
-      "mortgage_monthly": { "low": 3100, "high": 3850, "avg": 3450 },
+      "rent_monthly": {
+        "low": 2200,
+        "high": 2900,
+        "avg": 2550
+      },
+      "home_price": {
+        "low": 340000,
+        "high": 430000,
+        "avg": 385000
+      },
+      "mortgage_monthly": {
+        "low": 3100,
+        "high": 3850,
+        "avg": 3450
+      },
       "utilities": {
-        "electric_gas": { "low": 220, "high": 340, "avg": 280 },
-        "water_sewer": { "low": 75, "high": 115, "avg": 95 },
-        "total": { "low": 295, "high": 455, "avg": 375 },
+        "electric_gas": {
+          "low": 220,
+          "high": 340,
+          "avg": 280
+        },
+        "water_sewer": {
+          "low": 75,
+          "high": 115,
+          "avg": 95
+        },
+        "total": {
+          "low": 295,
+          "high": 455,
+          "avg": 375
+        },
         "as_of": "2026-03"
       }
     },
     "4": {
-      "rent_monthly": { "low": 2800, "high": 3800, "avg": 3300 },
-      "home_price": { "low": 440000, "high": 580000, "avg": 510000 },
-      "mortgage_monthly": { "low": 3950, "high": 5100, "avg": 4500 },
+      "rent_monthly": {
+        "low": 2800,
+        "high": 3800,
+        "avg": 3300
+      },
+      "home_price": {
+        "low": 440000,
+        "high": 580000,
+        "avg": 510000
+      },
+      "mortgage_monthly": {
+        "low": 3950,
+        "high": 5100,
+        "avg": 4500
+      },
       "utilities": {
-        "electric_gas": { "low": 280, "high": 440, "avg": 360 },
-        "water_sewer": { "low": 90, "high": 140, "avg": 115 },
-        "total": { "low": 370, "high": 580, "avg": 475 },
+        "electric_gas": {
+          "low": 280,
+          "high": 440,
+          "avg": 360
+        },
+        "water_sewer": {
+          "low": 90,
+          "high": 140,
+          "avg": 115
+        },
+        "total": {
+          "low": 370,
+          "high": 580,
+          "avg": 475
+        },
         "as_of": "2026-03"
       }
     },
     "5": {
-      "rent_monthly": { "low": 3500, "high": 4800, "avg": 4150 },
-      "home_price": { "low": 590000, "high": 850000, "avg": 720000 },
-      "mortgage_monthly": { "low": 5200, "high": 7400, "avg": 6300 },
+      "rent_monthly": {
+        "low": 3500,
+        "high": 4800,
+        "avg": 4150
+      },
+      "home_price": {
+        "low": 590000,
+        "high": 850000,
+        "avg": 720000
+      },
+      "mortgage_monthly": {
+        "low": 5200,
+        "high": 7400,
+        "avg": 6300
+      },
       "utilities": {
-        "electric_gas": { "low": 350, "high": 550, "avg": 450 },
-        "water_sewer": { "low": 110, "high": 160, "avg": 135 },
-        "total": { "low": 460, "high": 710, "avg": 585 },
+        "electric_gas": {
+          "low": 350,
+          "high": 550,
+          "avg": 450
+        },
+        "water_sewer": {
+          "low": 110,
+          "high": 160,
+          "avg": 135
+        },
+        "total": {
+          "low": 460,
+          "high": 710,
+          "avg": 585
+        },
         "as_of": "2026-03"
       }
     }
   },
-
   "housing": {
     "housing_units": 1100,
     "median_value_owner_occupied": 382000,
@@ -201,19 +397,589 @@
       "median_listing_price_realtor": 395000,
       "median_listing_price_per_sqft": 195,
       "active_listings_total": 450,
-      "q1_2026": { "median_sale_price": 382000 },
+      "q1_2026": {
+        "median_sale_price": 382000
+      },
       "sale_history_36_months": [
-        { "month": "2023-01", "median_sale_price": 335000 },
-        { "month": "2024-12", "median_sale_price": 368000 },
-        { "month": "2025-06", "median_sale_price": 375000 },
-        { "month": "2026-01", "median_sale_price": 382000 }
+        {
+          "month": "2023-01",
+          "median_sale_price": 335000
+        },
+        {
+          "month": "2024-12",
+          "median_sale_price": 368000
+        },
+        {
+          "month": "2025-06",
+          "median_sale_price": 375000
+        },
+        {
+          "month": "2026-01",
+          "median_sale_price": 382000
+        }
       ]
     }
   },
-
+  "base_profile": {
+    "schema_version": "pcsu-base-profile-v1.0.0",
+    "base_id": "mcguire-afb",
+    "base_name": "McGuire AFB",
+    "display_name": "Joint Base McGuire-Dix-Lakehurst",
+    "short_name": "McGuire",
+    "branch": "Air Force",
+    "joint_base": true,
+    "parent_installation": "Joint Base McGuire-Dix-Lakehurst",
+    "city": "Wrightstown",
+    "state": "New Jersey",
+    "state_abbr": "NJ",
+    "zip": "08641",
+    "metro": "Philadelphia-Camden-Wilmington, PA-NJ-DE-MD",
+    "market_label": "Trenton Metro - Burlington County",
+    "installation_type": "Airlift / Mobility / Tri-Service Joint Base",
+    "host_or_major_command": "305th Air Mobility Wing / Air Mobility Command",
+    "primary_mission_summary": "McGuire AFB is part of Joint Base McGuire-Dix-Lakehurst, supporting air mobility, tri-service operations, and high-demand housing across the Philadelphia and New Jersey corridor.",
+    "pcs_personality": "Massive tri-service mission (MDL); heavy community investment and high operational visibility.",
+    "base_bluf": "Steady demand from NYC/Philly commuters keeps prices resilient; inventory remains low.",
+    "user_positioning": {
+      "military_family_bluf": "Prioritize school-zone verification, BAH fit, commute testing, childcare access, and total monthly housing cost before signing near McGuire.",
+      "single_airman_bluf": "Prioritize commute simplicity, affordability, rental flexibility, and access to daily services around Wrightstown.",
+      "realtor_bluf": "Lead with BAH realism, commute risk, school-zone confidence, and all-in payment math for McGuire clients — not generic Burlington County / Joint Base MDL stats alone.",
+      "investor_bluf": "Rental demand near McGuire is influenced by PCS turnover, training/permanent-party mix, and practical commute corridors."
+    },
+    "base_map_image": {
+      "url": "",
+      "alt": "PCSUnited public-facing Joint Base McGuire-Dix-Lakehurst base orientation map for gates, housing, major services, and nearby recommended neighborhoods.",
+      "title": "Joint Base McGuire-Dix-Lakehurst Base & Housing Overview",
+      "caption": "Public-facing PCS orientation map for gates, housing, major services, and nearby neighborhood strategy.",
+      "last_updated": "2026-06-26",
+      "status": "static_map_first",
+      "map_type": "schematic_orientation_map",
+      "confidence": "medium",
+      "safety_note": "This is not an official DoD map. It is a public-facing PCS orientation graphic using publicly available information and should not be used for access control, emergency routing, or official navigation."
+    },
+    "official_links": {
+      "base_home": "https://www.jbmdl.af.mil/",
+      "housing": "https://www.housing.af.mil/",
+      "visitor_info": "https://www.jbmdl.af.mil/",
+      "exchange": "https://www.shopmyexchange.com/",
+      "commissary": "https://corp.commissaries.com/",
+      "medical": "https://www.jbmdl.af.mil/"
+    },
+    "visitor_control_center": {
+      "name": "Joint Base McGuire-Dix-Lakehurst Visitor Control Center",
+      "building": "Verify current building",
+      "address": "Verify current VCC address at Joint Base McGuire-Dix-Lakehurst, Wrightstown, NJ 08641",
+      "phone": "Verify with official installation visitor information",
+      "hours": "Verify official gate and visitor hours before travel",
+      "best_for": [
+        "Visitors",
+        "Newcomers",
+        "Family members without routine installation access",
+        "PCS arrival planning"
+      ],
+      "map_label": "Visitor Control Center",
+      "map_zone": "primary visitor access area",
+      "note": "Use official Joint Base McGuire-Dix-Lakehurst visitor information before arrival. Access requirements, sponsor rules, gate procedures, and hours can change."
+    },
+    "gates": [
+      {
+        "name": "Main Gate",
+        "type": "primary_gate",
+        "status": "verify_current_status",
+        "hours": "Verify official gate hours before travel",
+        "map_label": "Main Gate",
+        "map_zone": "primary access area",
+        "best_for": [
+          "Visitors",
+          "Newcomers",
+          "General base access"
+        ],
+        "commute_notes": "Primary newcomer and visitor routing anchor for many McGuire PCS households.",
+        "user_warning": "Verify current gate status with official Joint Base McGuire-Dix-Lakehurst sources before travel."
+      },
+      {
+        "name": "Commuter Gate",
+        "type": "commuter_gate",
+        "status": "verify_current_status",
+        "hours": "Verify official gate hours before travel",
+        "map_label": "Commuter Gate",
+        "map_zone": "commuter access area",
+        "best_for": [
+          "Daily commuters",
+          "Off-base residents",
+          "Alternate access"
+        ],
+        "commute_notes": "May support daily commuting depending on duty location and current gate rules.",
+        "user_warning": "Gate hours and route suitability should be verified before relying on this gate."
+      }
+    ],
+    "major_services": [
+      {
+        "name": "Joint Base McGuire-Dix-Lakehurst Medical Clinic / Medical Group",
+        "category": "medical",
+        "map_label": "Medical",
+        "address": "Verify current medical facility routing before travel",
+        "phone": "Verify through official TRICARE / installation medical source",
+        "hours": "Verify current clinic and pharmacy hours",
+        "best_for": [
+          "Primary military medical services",
+          "Family medical orientation",
+          "PCS arrival healthcare setup"
+        ],
+        "map_zone": "medical support area",
+        "user_note": "Verify emergency care options, pharmacy procedures, and clinic availability directly with official medical sources."
+      },
+      {
+        "name": "Installation Commissary",
+        "category": "commissary",
+        "map_label": "Commissary",
+        "address": "Verify current commissary address before travel",
+        "phone": "Verify current phone number with DeCA",
+        "best_for": [
+          "Grocery savings",
+          "Family shopping",
+          "BAH and monthly budget planning"
+        ],
+        "map_zone": "main services / retail area",
+        "user_note": "Commissary access can materially affect monthly food budget for eligible users."
+      },
+      {
+        "name": "Installation Exchange",
+        "category": "exchange_bx",
+        "map_label": "BX / Exchange",
+        "address": "Verify current Exchange location before travel",
+        "phone": "Verify current phone number with AAFES",
+        "hours": "Verify current Exchange hours",
+        "best_for": [
+          "Shopping",
+          "Uniform-related errands",
+          "Food court / daily services",
+          "Family convenience"
+        ],
+        "map_zone": "main services / retail area",
+        "user_note": "Important daily-life anchor for new arrivals and families."
+      },
+      {
+        "name": "Military Housing Office",
+        "category": "housing_office",
+        "map_label": "Housing Office",
+        "address": "Verify current housing office address before travel",
+        "phone": "Verify with official housing office contact",
+        "hours": "Monday-Friday typical business hours; verify holidays",
+        "best_for": [
+          "On-base housing questions",
+          "Off-base housing guidance",
+          "PCS housing counseling"
+        ],
+        "map_zone": "housing support area",
+        "user_note": "Contact the housing office before committing to on-base or off-base housing."
+      }
+    ],
+    "on_base_housing": {
+      "housing_type": "Military housing support environment; verify privatized housing and waitlist details officially",
+      "housing_office_name": "Joint Base McGuire-Dix-Lakehurst Military Housing Office",
+      "housing_office_address": "Verify current housing office address before travel",
+      "housing_office_phone": "Verify with official housing office contact",
+      "housing_office_email": "Verify with official housing office contact",
+      "housing_office_hours": "Monday-Friday typical business hours; verify holidays",
+      "map_label": "Family Housing / Housing Office",
+      "map_zone": "housing support area",
+      "best_for": [
+        "Families prioritizing proximity",
+        "New arrivals wanting simplicity",
+        "Users comparing on-base vs off-base monthly cost"
+      ],
+      "watchouts": [
+        "Availability and waitlists can change",
+        "On-base housing may capture BAH differently than off-base renting",
+        "Pet policies and breed restrictions should be verified",
+        "School assignment must be verified by exact address"
+      ],
+      "pcsu_strategy_note": "Compare on-base housing against off-base rent and mortgage options near McGuire. The best choice depends on rank, dependents, BAH, commute tolerance, school priorities, and assignment length."
+    },
+    "recommended_neighborhoods": [
+      {
+        "name": "Wrightstown",
+        "type": "primary_corridor",
+        "fit_summary": "Wrightstown is a common McGuire PCS research corridor with base-specific commute, school, and affordability tradeoffs.",
+        "best_for": [
+          "Families",
+          "Renters",
+          "VA buyers",
+          "Commute-focused households"
+        ],
+        "commute_band": "Approx. 10-35 minutes depending on gate, route, traffic, and exact address",
+        "likely_gate_logic": [
+          "Primary Gate",
+          "Commuter Gate depending on route"
+        ],
+        "bah_fit": "medium",
+        "family_fit": "high",
+        "single_airman_fit": "medium",
+        "va_buyer_fit": "medium_high",
+        "traffic_risk": "medium",
+        "watchouts": [
+          "Verify exact commute during expected report hours",
+          "School zones must be verified by exact address",
+          "Property condition and monthly carrying costs vary by street and subdivision"
+        ],
+        "pcsu_recommendation": "Treat Wrightstown as a planning candidate and validate with commute testing, school-zone verification, and all-in payment math."
+      },
+      {
+        "name": "Mount Holly",
+        "type": "nearby_neighborhood",
+        "fit_summary": "Mount Holly is a common McGuire PCS research corridor with base-specific commute, school, and affordability tradeoffs.",
+        "best_for": [
+          "Families",
+          "Renters",
+          "VA buyers",
+          "Commute-focused households"
+        ],
+        "commute_band": "Approx. 10-35 minutes depending on gate, route, traffic, and exact address",
+        "likely_gate_logic": [
+          "Primary Gate",
+          "Commuter Gate depending on route"
+        ],
+        "bah_fit": "medium",
+        "family_fit": "high",
+        "single_airman_fit": "medium",
+        "va_buyer_fit": "medium_high",
+        "traffic_risk": "medium",
+        "watchouts": [
+          "Verify exact commute during expected report hours",
+          "School zones must be verified by exact address",
+          "Property condition and monthly carrying costs vary by street and subdivision"
+        ],
+        "pcsu_recommendation": "Treat Mount Holly as a planning candidate and validate with commute testing, school-zone verification, and all-in payment math."
+      },
+      {
+        "name": "Columbus",
+        "type": "nearby_neighborhood",
+        "fit_summary": "Columbus is a common McGuire PCS research corridor with base-specific commute, school, and affordability tradeoffs.",
+        "best_for": [
+          "Families",
+          "Renters",
+          "VA buyers",
+          "Commute-focused households"
+        ],
+        "commute_band": "Approx. 10-35 minutes depending on gate, route, traffic, and exact address",
+        "likely_gate_logic": [
+          "Primary Gate",
+          "Commuter Gate depending on route"
+        ],
+        "bah_fit": "medium_high",
+        "family_fit": "high",
+        "single_airman_fit": "medium",
+        "va_buyer_fit": "medium_high",
+        "traffic_risk": "medium",
+        "watchouts": [
+          "Verify exact commute during expected report hours",
+          "School zones must be verified by exact address",
+          "Property condition and monthly carrying costs vary by street and subdivision"
+        ],
+        "pcsu_recommendation": "Treat Columbus as a planning candidate and validate with commute testing, school-zone verification, and all-in payment math."
+      },
+      {
+        "name": "Jackson",
+        "type": "nearby_neighborhood",
+        "fit_summary": "Jackson is a common McGuire PCS research corridor with base-specific commute, school, and affordability tradeoffs.",
+        "best_for": [
+          "Families",
+          "Renters",
+          "VA buyers",
+          "Commute-focused households"
+        ],
+        "commute_band": "Approx. 10-35 minutes depending on gate, route, traffic, and exact address",
+        "likely_gate_logic": [
+          "Primary Gate",
+          "Commuter Gate depending on route"
+        ],
+        "bah_fit": "medium_high",
+        "family_fit": "medium",
+        "single_airman_fit": "medium",
+        "va_buyer_fit": "medium_high",
+        "traffic_risk": "medium",
+        "watchouts": [
+          "Verify exact commute during expected report hours",
+          "School zones must be verified by exact address",
+          "Property condition and monthly carrying costs vary by street and subdivision"
+        ],
+        "pcsu_recommendation": "Treat Jackson as a planning candidate and validate with commute testing, school-zone verification, and all-in payment math."
+      },
+      {
+        "name": "Bordentown corridor",
+        "type": "nearby_neighborhood",
+        "fit_summary": "Bordentown corridor is a common McGuire PCS research corridor with base-specific commute, school, and affordability tradeoffs.",
+        "best_for": [
+          "Families",
+          "Renters",
+          "VA buyers",
+          "Commute-focused households"
+        ],
+        "commute_band": "Approx. 10-35 minutes depending on gate, route, traffic, and exact address",
+        "likely_gate_logic": [
+          "Primary Gate",
+          "Commuter Gate depending on route"
+        ],
+        "bah_fit": "medium_high",
+        "family_fit": "medium",
+        "single_airman_fit": "medium",
+        "va_buyer_fit": "medium_high",
+        "traffic_risk": "medium",
+        "watchouts": [
+          "Verify exact commute during expected report hours",
+          "School zones must be verified by exact address",
+          "Property condition and monthly carrying costs vary by street and subdivision"
+        ],
+        "pcsu_recommendation": "Treat Bordentown corridor as a planning candidate and validate with commute testing, school-zone verification, and all-in payment math."
+      }
+    ],
+    "commute_intelligence": {
+      "commute_bluf": "For McGuire, gate access and traffic timing often matter more than straight-line distance.",
+      "primary_commute_factors": [
+        "Gate hours",
+        "Morning inbound traffic",
+        "Afternoon outbound traffic",
+        "School drop-off timing",
+        "Exact duty location",
+        "Shift schedule or early report time"
+      ],
+      "commute_bands": [
+        {
+          "label": "Close-in",
+          "range": "0-15 minutes",
+          "fit": "Best for users prioritizing proximity and daily convenience",
+          "watchout": "Close-in areas still need property, school, and safety screening."
+        },
+        {
+          "label": "Balanced",
+          "range": "15-30 minutes",
+          "fit": "Often the best balance between housing quality, services, and commute",
+          "watchout": "Traffic and gate choice can still change the real commute."
+        },
+        {
+          "label": "Lifestyle tradeoff",
+          "range": "30-45+ minutes",
+          "fit": "May work for families wanting larger homes or specific schools",
+          "watchout": "Can become painful for early reporting or frequent base errands."
+        }
+      ],
+      "gate_selection_logic": [
+        "Start with the user's likely duty location.",
+        "Identify the most realistic primary gate.",
+        "Compare the commute during the user's actual report window.",
+        "Do not choose a neighborhood based only on mileage."
+      ],
+      "user_instruction": "Before signing a lease or contract, test the commute from the exact property address to the expected gate during the same time window you would normally report to work."
+    },
+    "bah_market_reality": {
+      "bah_bluf": "McGuire housing decisions should compare BAH against rent, mortgage, utilities, debt, and commute. BAH is a decision filter, not a promise of affordability.",
+      "recommended_calculations": [
+        "BAH with dependents vs estimated rent",
+        "BAH without dependents vs estimated rent",
+        "BAH vs estimated mortgage payment",
+        "Total housing cost vs 30% income lane",
+        "Residual monthly income after expenses and housing",
+        "Rent vs buy break-even horizon"
+      ],
+      "pcsu_decision_outputs": [
+        "Rent",
+        "Buy",
+        "Wait",
+        "Widen search",
+        "Reduce target price",
+        "Consider roommate",
+        "Use on-base housing as comparison"
+      ],
+      "base_tab_message": "Show BAH as a decision filter for McGuire, not a promise of affordability. Push users into PCSUnited financial calculators when the housing gap looks tight."
+    },
+    "family_readiness": {
+      "family_bluf": "Families PCSing to McGuire should verify school zones, childcare options, medical access, commute reality, and housing availability before choosing a neighborhood.",
+      "school_guidance": {
+        "school_zone_warning": "Always verify school assignment by exact address before signing a lease or purchase contract.",
+        "nearby_school_district_note": "Northern Burlington County Regional and Medford schools are highly rated.",
+        "school_liaison_note": "Use official school liaison resources where available for military school transition support."
+      },
+      "childcare_guidance": {
+        "cdc_note": "Child Development Center availability, waitlists, and eligibility should be verified directly with official base resources.",
+        "youth_program_note": "Youth programs and school-age care can materially affect family housing decisions."
+      },
+      "medical_guidance": {
+        "primary_medical_anchor": "Joint Base McGuire-Dix-Lakehurst medical services",
+        "medical_warning": "Verify clinic availability, pharmacy procedures, and emergency care options directly with official medical sources."
+      },
+      "spouse_employment_note": "The broader Burlington County / Joint Base MDL metro may offer spouse employment options, but commute, childcare, and credentialing should be considered together."
+    },
+    "arrival_checklist": {
+      "before_arrival": [
+        "Verify official gate and Visitor Control Center hours.",
+        "Confirm sponsor contact and unit reporting instructions.",
+        "Confirm lodging or temporary housing plan.",
+        "Review housing office guidance before signing any lease or purchase contract.",
+        "Compare BAH against rent, mortgage, utilities, and debt.",
+        "Shortlist neighborhoods by likely gate and commute band.",
+        "Verify school zones by exact property address."
+      ],
+      "first_week": [
+        "Complete unit check-in requirements.",
+        "Visit or contact the housing office if still deciding between on-base and off-base options.",
+        "Confirm medical/pharmacy setup.",
+        "Drive the commute from target neighborhoods during expected report time.",
+        "Tour properties before committing when possible."
+      ],
+      "first_30_days": [
+        "Finalize housing only after comparing commute, BAH fit, school zones, and total monthly cost.",
+        "Save emergency, medical, gate, and housing office contact information.",
+        "Update PCSUnited profile and financial readiness dashboard with final housing numbers."
+      ]
+    },
+    "pcs_watchouts": [
+      {
+        "title": "Gate hours can change",
+        "severity": "high",
+        "message": "Use official Joint Base McGuire-Dix-Lakehurst gate pages before travel or commute planning."
+      },
+      {
+        "title": "Distance is not the same as commute",
+        "severity": "high",
+        "message": "Neighborhoods should be compared by realistic gate access and traffic timing."
+      },
+      {
+        "title": "School zones are address-specific",
+        "severity": "high",
+        "message": "Never assume a school assignment from neighborhood name alone."
+      },
+      {
+        "title": "BAH is not the full affordability picture",
+        "severity": "high",
+        "message": "Users must compare rent or mortgage against income, debt, expenses, utilities, and savings goals."
+      },
+      {
+        "title": "Property taxes and insurance shape true payment",
+        "severity": "medium_high",
+        "message": "In this market, taxes (~2.45%) and insurance assumptions must be included in all-in comparisons."
+      }
+    ],
+    "realtor_intelligence": {
+      "buyer_personas": [
+        {
+          "persona": "First-time VA buyer",
+          "likely_questions": [
+            "Can I afford to buy near McGuire?",
+            "Which areas fit my BAH?",
+            "Should I rent first?"
+          ],
+          "agent_strategy": "Lead with BAH realism, monthly payment clarity, commute testing, and VA loan education."
+        },
+        {
+          "persona": "E-5 / E-6 family with dependents",
+          "likely_questions": [
+            "Where do military families usually live?",
+            "Which school zones should I research?",
+            "Is on-base housing better?"
+          ],
+          "agent_strategy": "Compare top McGuire corridors against commute, schools, and all-in monthly cost."
+        },
+        {
+          "persona": "Single airman / short-term renter",
+          "likely_questions": [
+            "What is close and affordable?",
+            "Do I need a roommate?"
+          ],
+          "agent_strategy": "Keep recommendations practical: commute, rent, safety, property condition, and lease flexibility."
+        }
+      ],
+      "listing_angles": [
+        "Near Joint Base McGuire-Dix-Lakehurst",
+        "Military PCS-friendly positioning",
+        "BAH-conscious rental or purchase option",
+        "Commute-conscious neighborhood positioning"
+      ],
+      "common_objections": [
+        "Commute uncertainty",
+        "School-zone confusion",
+        "Affordability gap between BAH and mortgage",
+        "Short assignment timeline"
+      ],
+      "recommended_agent_behavior": [
+        "Do not overpromise commute times.",
+        "Always recommend school-zone verification by address.",
+        "Use payment math, not just listing price.",
+        "Avoid generic Burlington County / Joint Base MDL advice when the user is assigned to McGuire."
+      ]
+    },
+    "data_confidence": {
+      "overall": "medium",
+      "gate_data": "medium_low",
+      "visitor_control_center": "medium_low",
+      "housing_office": "medium",
+      "major_services": "medium",
+      "recommended_neighborhoods": "curated_pcsunited_intelligence",
+      "commute_bands": "estimated_requires_address_level_validation",
+      "bah_market_guidance": "strategy_layer_requires_rank_family_and_financial_inputs",
+      "last_reviewed": "2026-06-26"
+    },
+    "source_notes": [
+      {
+        "label": "Official Joint Base McGuire-Dix-Lakehurst website",
+        "type": "official",
+        "url": "https://www.jbmdl.af.mil/",
+        "used_for": [
+          "Installation overview",
+          "Visitor guidance",
+          "Official reference links"
+        ]
+      },
+      {
+        "label": "Air Force Housing",
+        "type": "official",
+        "url": "https://www.housing.af.mil/",
+        "used_for": [
+          "Housing office reference",
+          "On-base housing guidance"
+        ]
+      },
+      {
+        "label": "PCSUnited market planning layer",
+        "type": "planning",
+        "url": "",
+        "used_for": [
+          "Market metrics",
+          "BAH guidance",
+          "Neighborhood orientation",
+          "PCS watchouts"
+        ]
+      }
+    ],
+    "disclaimer": "PCSUnited is not an official DoD source. This Base tab is intended for public-facing PCS orientation, housing research, and relocation planning. Users should verify gate hours, access requirements, medical services, housing availability, school zones, and official procedures directly with the installation or official service provider before travel, lease signing, or home purchase."
+  },
   "sources": {
-    "demographics": { "provider": "US Census Bureau / NJ Dept of Labor", "as_of": "2026-03" },
-    "rent": { "provider": "RentCafe / Zumper", "as_of": "2026-03" },
-    "home_price": { "provider": "Bright MLS", "as_of": "2026-03" }
+    "demographics": {
+      "provider": "US Census Bureau / NJ Dept of Labor",
+      "as_of": "2026-03"
+    },
+    "rent": {
+      "provider": "RentCafe / Zumper",
+      "as_of": "2026-03"
+    },
+    "home_price": {
+      "provider": "Bright MLS",
+      "as_of": "2026-03"
+    },
+    "base_profile": {
+      "provider": "PCSUnited planning profile using public-facing installation, housing, and market research structure",
+      "as_of": "2026-06"
+    }
+  },
+  "compatibility": {
+    "orozco_realty_ready": true,
+    "pcsunited_ready": true,
+    "intended_primary_slug": "mcguire-afb",
+    "parser_notes": [
+      "This McGuire AFB file was upgraded to the Lackland-style PCSUnited schema with slug, name, state_code, profile, market_metrics, metrics, ownership_costs, costs, rental_metrics, summary_points, risks, opportunities, buyer_notes, seller_notes, investor_angles, and guidance arrays.",
+      "Burlington County / Joint Base MDL is preserved as the surrounding metro/submarket context; base-specific market data was retained.",
+      "property_tax_rate and insurance_rate are normalized to decimal form for deterministic math, with percent aliases preserved for display compatibility.",
+      "This file now includes base_profile for the PCSUnited Base tab, including gate orientation, visitor control center, major services, on-base housing, recommended nearby neighborhoods, commute intelligence, BAH market guidance, PCS watchouts, and source notes."
+    ]
   }
 }
