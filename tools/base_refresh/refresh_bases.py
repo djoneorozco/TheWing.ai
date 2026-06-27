@@ -146,28 +146,22 @@ def safe_number(value):
 
 def round_number(value):
     num = safe_number(value)
-
     if num is None:
         return None
-
     return round(num)
 
 
 def round_money(value):
     num = safe_number(value)
-
     if num is None:
         return None
-
     return round(num)
 
 
 def round_decimal(value, places=2):
     num = safe_number(value)
-
     if num is None:
         return None
-
     return round(num, places)
 
 
@@ -199,6 +193,16 @@ def average_decimal_or_none(values, places=2):
         return None
 
     return round(sum(nums) / len(nums), places)
+
+
+def sum_or_none(values):
+    nums = [safe_number(v) for v in values]
+    nums = [v for v in nums if v is not None]
+
+    if not nums:
+        return None
+
+    return round(sum(nums))
 
 
 # ============================================================
@@ -329,29 +333,31 @@ def extract_zip_market_values(payload):
     """
     RentCast /markets response shape observed:
 
-    {
-      "id": "85340",
-      "zipCode": "85340",
-      "saleData": {
-        "averagePrice": 649879,
-        "medianPrice": 554990,
-        "averagePricePerSquareFoot": 255.71,
-        "medianPricePerSquareFoot": 237.56,
-        "averageDaysOnMarket": 67.69,
-        "medianDaysOnMarket": 37,
-        "newListings": 94,
-        "totalListings": 471
-      },
-      "rentalData": {
-        ...
-      }
-    }
+    saleData:
+      averagePrice
+      medianPrice
+      averagePricePerSquareFoot
+      medianPricePerSquareFoot
+      averageDaysOnMarket
+      medianDaysOnMarket
+      newListings
+      totalListings
+
+    rentalData:
+      averageRent
+      medianRent
+      averageRentPerSquareFoot
+      medianRentPerSquareFoot
+      averageDaysOnMarket
+      medianDaysOnMarket
+      newListings
+      totalListings
     """
 
     sale_data = payload.get("saleData") or {}
     rental_data = payload.get("rentalData") or {}
 
-    # Some RentCast payloads may also use rentData naming.
+    # Safety fallback in case RentCast ever changes naming.
     if not rental_data:
         rental_data = payload.get("rentData") or {}
 
@@ -359,6 +365,7 @@ def extract_zip_market_values(payload):
         "sale_last_updated": sale_data.get("lastUpdatedDate"),
         "rental_last_updated": rental_data.get("lastUpdatedDate"),
 
+        # Sale market values
         "sale_average_price": round_money(sale_data.get("averagePrice")),
         "sale_median_price": round_money(sale_data.get("medianPrice")),
         "sale_min_price": round_money(sale_data.get("minPrice")),
@@ -380,15 +387,19 @@ def extract_zip_market_values(payload):
         "sale_new_listings": round_number(sale_data.get("newListings")),
         "sale_total_listings": round_number(sale_data.get("totalListings")),
 
-        "rent_average_price": round_money(rental_data.get("averagePrice")),
-        "rent_median_price": round_money(rental_data.get("medianPrice")),
-        "rent_min_price": round_money(rental_data.get("minPrice")),
-        "rent_max_price": round_money(rental_data.get("maxPrice")),
+        # Rental market values
+        # IMPORTANT:
+        # RentCast rentalData uses averageRent / medianRent,
+        # not averagePrice / medianPrice.
+        "rent_average_price": round_money(rental_data.get("averageRent")),
+        "rent_median_price": round_money(rental_data.get("medianRent")),
+        "rent_min_price": round_money(rental_data.get("minRent")),
+        "rent_max_price": round_money(rental_data.get("maxRent")),
         "rent_average_price_per_sqft": round_decimal(
-            rental_data.get("averagePricePerSquareFoot")
+            rental_data.get("averageRentPerSquareFoot")
         ),
         "rent_median_price_per_sqft": round_decimal(
-            rental_data.get("medianPricePerSquareFoot")
+            rental_data.get("medianRentPerSquareFoot")
         ),
         "rent_average_sqft": round_number(rental_data.get("averageSquareFootage")),
         "rent_median_sqft": round_number(rental_data.get("medianSquareFootage")),
@@ -466,7 +477,11 @@ def extract_market_summary(zip_payloads):
         rent_new_listings.append(values.get("rent_new_listings"))
         rent_total_listings.append(values.get("rent_total_listings"))
 
-    avg_home_value = median_or_none(sale_median_prices) or average_or_none(sale_average_prices)
+    avg_home_value = (
+        median_or_none(sale_median_prices)
+        or average_or_none(sale_average_prices)
+    )
+
     median_sale_price = median_or_none(sale_median_prices)
     average_sale_price = average_or_none(sale_average_prices)
 
@@ -493,25 +508,10 @@ def extract_market_summary(zip_payloads):
         or average_or_none(rent_avg_dom)
     )
 
-    total_sale_listings = sum(
-        v for v in [safe_number(x) for x in sale_total_listings]
-        if v is not None
-    ) or None
-
-    total_rental_listings = sum(
-        v for v in [safe_number(x) for x in rent_total_listings]
-        if v is not None
-    ) or None
-
-    total_sale_new_listings = sum(
-        v for v in [safe_number(x) for x in sale_new_listings]
-        if v is not None
-    ) or None
-
-    total_rental_new_listings = sum(
-        v for v in [safe_number(x) for x in rent_new_listings]
-        if v is not None
-    ) or None
+    total_sale_listings = sum_or_none(sale_total_listings)
+    total_rental_listings = sum_or_none(rent_total_listings)
+    total_sale_new_listings = sum_or_none(sale_new_listings)
+    total_rental_new_listings = sum_or_none(rent_new_listings)
 
     return {
         "avg_home_value": avg_home_value,
@@ -671,6 +671,12 @@ def validate_base_output(base, output_json):
 
     if not output_json.get("rental_metrics", {}).get("average_rent"):
         warnings.append("No rental_metrics.average_rent found from RentCast rentalData")
+
+    if not output_json.get("rental_metrics", {}).get("median_rent"):
+        warnings.append("No rental_metrics.median_rent found from RentCast rentalData")
+
+    if not output_json.get("rental_metrics", {}).get("rent_price_per_sqft"):
+        warnings.append("No rental_metrics.rent_price_per_sqft found from RentCast rentalData")
 
     if not base.get("housing_market_zips"):
         warnings.append("Base has no housing_market_zips in base_registry.json")
