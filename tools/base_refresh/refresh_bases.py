@@ -234,12 +234,16 @@ def set_if_value(target, key, value):
 
 def get_nested(data, path, default=None):
     current = data
+
     for key in path:
         if not isinstance(current, dict):
             return default
+
         current = current.get(key)
+
         if current is None:
             return default
+
     return current
 
 
@@ -256,8 +260,16 @@ def find_existing_base_json(base):
 
     slug = base.get("slug")
     name = base.get("name")
+    file_name = base.get("file")
 
     candidates = []
+
+    if file_name:
+        candidates.extend([
+            f"{file_name}.json",
+            f"{file_name.lower()}.json",
+            f"{file_name.replace(' ', '-')}.json"
+        ])
 
     if slug:
         candidates.extend([
@@ -282,10 +294,11 @@ def find_existing_base_json(base):
 
     for candidate in candidates:
         path = LIVE_CITIES_DIR / candidate
+
         if path.exists():
             return path
 
-    slug_lower = safe_slug(slug or name or "")
+    slug_lower = safe_slug(slug or file_name or name or "")
 
     for path in LIVE_CITIES_DIR.glob("*.json"):
         if safe_slug(path.stem) == slug_lower:
@@ -314,6 +327,7 @@ def load_existing_or_minimal(base):
         "state_code": base.get("state_code"),
         "geo_id": base.get("geo_id"),
         "year": int(datetime.now(timezone.utc).strftime("%Y")),
+        "last_updated_data_from_sources": AS_OF_MONTH,
         "zip": base.get("primary_zip"),
         "market_label": base.get("market_label"),
         "profile": "",
@@ -334,8 +348,31 @@ def load_existing_or_minimal(base):
         "veterans": {},
         "immigration": {},
         "labor": {},
+        "crime_status": {},
+        "school_quality": {},
+        "rental_vacancy": {},
         "rental_metrics": {},
+        "climate_weather": {},
+        "special_events": [],
+        "military_lifestyle_fit": {},
+        "financial_brief": {},
+        "market_bluf": {},
+        "scorecard": {},
+        "rules": {},
+        "summary_points": [],
+        "opportunities": [],
+        "risks": [],
+        "buyer_notes": [],
+        "seller_notes": [],
+        "investor_angles": [],
+        "neighborhoods": [],
+        "target_neighborhoods": [],
+        "buyer_guidance": [],
+        "seller_guidance": [],
+        "landlord_notes": [],
+        "by_bedroom": {},
         "housing": {},
+        "base_profile": {},
         "sources": {},
         "compatibility": {
             "orozco_realty_ready": True,
@@ -645,9 +682,6 @@ def fetch_census_profile_for_place(geo_id):
 
 
 def parse_census_profile(payload):
-    """
-    Converts Census array response into a dict.
-    """
     if not isinstance(payload, list) or len(payload) < 2:
         raise RuntimeError("Unexpected Census response shape")
 
@@ -750,12 +784,6 @@ def arcgis_headers():
 
 
 def arcgis_places_near_point(lat, lon, radius=12000, limit=10):
-    """
-    Lightweight ArcGIS Places call.
-
-    This is intentionally broad. It saves public nearby-service context without
-    replacing the curated base_profile.major_services list.
-    """
     url = f"{ARCGIS_PLACES_BASE_URL}/places/near-point"
 
     params = {
@@ -781,22 +809,26 @@ def arcgis_places_near_point(lat, lon, radius=12000, limit=10):
 
 
 def parse_arcgis_places(payload):
-    """
-    Keeps ArcGIS output compact so the public JSON doesn't become huge.
-    """
     results = payload.get("results") or payload.get("places") or []
 
     compact = []
 
     for item in results[:10]:
+        address = item.get("address")
+
+        if isinstance(address, dict):
+            clean_address = (
+                address.get("streetAddress")
+                or address.get("formattedAddress")
+                or address.get("adminRegion")
+            )
+        else:
+            clean_address = address
+
         compact.append({
             "name": item.get("name"),
             "category": item.get("category") or item.get("categories"),
-            "address": (
-                item.get("address", {}).get("streetAddress")
-                if isinstance(item.get("address"), dict)
-                else item.get("address")
-            ),
+            "address": clean_address,
             "distance": item.get("distance"),
             "place_id": item.get("placeId") or item.get("id")
         })
@@ -809,9 +841,6 @@ def parse_arcgis_places(payload):
 # ============================================================
 
 def apply_registry_identity(updated, base):
-    """
-    Keeps identity fields aligned with registry.
-    """
     slug = base.get("slug") or updated.get("slug") or safe_slug(base.get("name"))
 
     updated["slug"] = slug
@@ -850,7 +879,11 @@ def apply_rentcast(updated, rentcast_summary, base, raw_refs):
         updated["city_avg_home"] = avg_home_value
 
     updated.setdefault("snapshot", {})
-    set_if_value(updated["snapshot"], "median_home_price", median_sale_price or avg_home_value)
+    set_if_value(
+        updated["snapshot"],
+        "median_home_price",
+        median_sale_price or avg_home_value
+    )
 
     updated.setdefault("market_metrics", {})
     updated["market_metrics"].update({
@@ -896,10 +929,6 @@ def apply_rentcast(updated, rentcast_summary, base, raw_refs):
     })
 
     updated.setdefault("housing", {})
-    updated["housing"]["median_value_owner_occupied"] = (
-        updated.get("housing", {}).get("median_value_owner_occupied")
-    )
-
     updated["housing"].setdefault("market", {})
     updated["housing"]["market"].update({
         "zillow_average_home_value": avg_home_value,
@@ -1201,7 +1230,6 @@ def refresh_one_base(base):
     # Census
     # ------------------------------
     census_raw_ref = None
-    census_summary = None
 
     try:
         geo_id = base.get("geo_id") or updated.get("geo_id")
@@ -1230,7 +1258,6 @@ def refresh_one_base(base):
     # ArcGIS
     # ------------------------------
     arcgis_raw_ref = None
-    arcgis_summary = None
 
     try:
         lat = safe_number(base.get("lat"))
