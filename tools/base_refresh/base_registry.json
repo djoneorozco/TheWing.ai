@@ -1,1 +1,35 @@
-.
+[
+  {
+    "slug": "lackland",
+    "name": "Lackland AFB",
+    "city": "San Antonio",
+    "state": "Texas",
+    "state_code": "TX",
+    "primary_zip": "78236",
+    "housing_market_zips": ["78245", "78251", "78253", "78254", "78227"],
+    "lat": 29.3842,
+    "lon": -98.5811
+  },
+  {
+    "slug": "luke-afb",
+    "name": "Luke AFB",
+    "city": "Glendale",
+    "state": "Arizona",
+    "state_code": "AZ",
+    "primary_zip": "85309",
+    "housing_market_zips": ["85340", "85392", "85395", "85323", "85345"],
+    "lat": 33.5350,
+    "lon": -112.3830
+  },
+  {
+    "slug": "nellis",
+    "name": "Nellis AFB",
+    "city": "Las Vegas",
+    "state": "Nevada",
+    "state_code": "NV",
+    "primary_zip": "89191",
+    "housing_market_zips": ["89115", "89156", "89081", "89030", "89031"],
+    "lat": 36.2362,
+    "lon": -115.0343
+  }
+]
