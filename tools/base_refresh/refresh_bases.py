@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
 PCSUnited / TheWing.ai
-Base JSON Refresh Script - Starter Version
+Base JSON Refresh Script - RentCast Starter Pipeline
 
 What this does:
 1. Reads tools/base_refresh/base_registry.json
-2. Uses RentCast API to pull market data by housing-market ZIP
+2. Calls RentCast market data for each housing-market ZIP
 3. Saves raw RentCast responses into tools/base_refresh/raw/
-4. Creates updated base JSON files into tools/base_refresh/output/
-5. Writes a refresh report to tools/base_refresh/refresh_report.json
+4. Extracts saleData and rentalData correctly
+5. Updates/preserves existing base JSON structure when possible
+6. Writes refreshed JSONs into tools/base_refresh/output/
+7. Writes tools/base_refresh/refresh_report.json
 
 Run from repo root:
 
@@ -52,8 +54,6 @@ OUTPUT_DIR = BASE_REFRESH_DIR / "output"
 REPORT_PATH = BASE_REFRESH_DIR / "refresh_report.json"
 ENV_PATH = BASE_REFRESH_DIR / ".env"
 
-# Existing live city JSON folder, if available.
-# This lets us preserve your current schema instead of creating tiny JSON files.
 LIVE_CITIES_DIR = REPO_ROOT / "netlify" / "functions" / "cities"
 
 RAW_DIR.mkdir(parents=True, exist_ok=True)
@@ -65,9 +65,6 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 # ============================================================
 
 RENTCAST_BASE_URL = "https://api.rentcast.io/v1"
-
-# Starter endpoint.
-# If RentCast changes endpoint names, adjust this one function: fetch_rentcast_market_zip()
 RENTCAST_MARKET_ENDPOINT = "/markets"
 
 REQUEST_TIMEOUT_SECONDS = 30
@@ -82,9 +79,6 @@ AS_OF = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 # ============================================================
 
 def load_env():
-    """
-    Loads tools/base_refresh/.env locally.
-    """
     if load_dotenv is None:
         print("WARNING: python-dotenv is not installed.")
         print("Install it with: pip install python-dotenv")
@@ -124,10 +118,6 @@ def now_iso():
 
 
 def safe_number(value):
-    """
-    Converts a value into int/float if possible.
-    Returns None if not possible.
-    """
     if value is None:
         return None
 
@@ -154,6 +144,33 @@ def safe_number(value):
     return None
 
 
+def round_number(value):
+    num = safe_number(value)
+
+    if num is None:
+        return None
+
+    return round(num)
+
+
+def round_money(value):
+    num = safe_number(value)
+
+    if num is None:
+        return None
+
+    return round(num)
+
+
+def round_decimal(value, places=2):
+    num = safe_number(value)
+
+    if num is None:
+        return None
+
+    return round(num, places)
+
+
 def median_or_none(values):
     nums = [safe_number(v) for v in values]
     nums = [v for v in nums if v is not None and v > 0]
@@ -174,53 +191,14 @@ def average_or_none(values):
     return round(sum(nums) / len(nums))
 
 
-def deep_find_numeric(data, candidate_keys):
-    """
-    Searches nested dict/list data for the first matching numeric value.
+def average_decimal_or_none(values, places=2):
+    nums = [safe_number(v) for v in values]
+    nums = [v for v in nums if v is not None and v > 0]
 
-    This makes the script more forgiving if RentCast response shape differs.
-    """
-    if isinstance(data, dict):
-        for key in candidate_keys:
-            if key in data:
-                num = safe_number(data.get(key))
-                if num is not None:
-                    return num
+    if not nums:
+        return None
 
-        for value in data.values():
-            found = deep_find_numeric(value, candidate_keys)
-            if found is not None:
-                return found
-
-    elif isinstance(data, list):
-        for item in data:
-            found = deep_find_numeric(item, candidate_keys)
-            if found is not None:
-                return found
-
-    return None
-
-
-def deep_find_all_numeric(data, candidate_keys):
-    """
-    Finds all numeric values matching candidate keys anywhere in payload.
-    """
-    found_values = []
-
-    if isinstance(data, dict):
-        for key, value in data.items():
-            if key in candidate_keys:
-                num = safe_number(value)
-                if num is not None:
-                    found_values.append(num)
-
-            found_values.extend(deep_find_all_numeric(value, candidate_keys))
-
-    elif isinstance(data, list):
-        for item in data:
-            found_values.extend(deep_find_all_numeric(item, candidate_keys))
-
-    return found_values
+    return round(sum(nums) / len(nums), places)
 
 
 # ============================================================
@@ -260,12 +238,6 @@ def rentcast_get(endpoint, params=None):
 
 
 def fetch_rentcast_market_zip(zip_code):
-    """
-    Pull RentCast market data by ZIP.
-
-    If RentCast endpoint behavior differs, this is the only function
-    you should need to adjust.
-    """
     params = {
         "zipCode": str(zip_code)
     }
@@ -284,9 +256,6 @@ def save_raw_rentcast(base_slug, zip_code, payload):
 # ============================================================
 
 def find_existing_base_json(base):
-    """
-    Tries to find an existing JSON file so we preserve the current schema.
-    """
     if not LIVE_CITIES_DIR.exists():
         return None
 
@@ -298,18 +267,21 @@ def find_existing_base_json(base):
     if slug:
         candidates.extend([
             f"{slug}.json",
-            f"{slug.title()}.json"
+            f"{slug.title()}.json",
+            f"{slug.lower()}.json"
         ])
 
     if name:
+        name_no_afb = name.replace(" AFB", "").replace(" SFB", "")
         candidates.extend([
             f"{name}.json",
             f"{name.replace(' ', '-')}.json",
             f"{name.replace(' ', '')}.json",
-            f"{name.replace(' AFB', '')}.json"
+            f"{name_no_afb}.json",
+            f"{name_no_afb.replace(' ', '-')}.json",
+            f"{name_no_afb.replace(' ', '')}.json"
         ])
 
-    # Also scan by slug-ish match.
     for candidate in candidates:
         path = LIVE_CITIES_DIR / candidate
         if path.exists():
@@ -350,128 +322,226 @@ def load_existing_or_minimal(base):
 
 
 # ============================================================
-# TRANSFORM RENTCAST DATA INTO PCSU FIELDS
+# RENTCAST EXTRACTION
 # ============================================================
+
+def extract_zip_market_values(payload):
+    """
+    RentCast /markets response shape observed:
+
+    {
+      "id": "85340",
+      "zipCode": "85340",
+      "saleData": {
+        "averagePrice": 649879,
+        "medianPrice": 554990,
+        "averagePricePerSquareFoot": 255.71,
+        "medianPricePerSquareFoot": 237.56,
+        "averageDaysOnMarket": 67.69,
+        "medianDaysOnMarket": 37,
+        "newListings": 94,
+        "totalListings": 471
+      },
+      "rentalData": {
+        ...
+      }
+    }
+    """
+
+    sale_data = payload.get("saleData") or {}
+    rental_data = payload.get("rentalData") or {}
+
+    # Some RentCast payloads may also use rentData naming.
+    if not rental_data:
+        rental_data = payload.get("rentData") or {}
+
+    values = {
+        "sale_last_updated": sale_data.get("lastUpdatedDate"),
+        "rental_last_updated": rental_data.get("lastUpdatedDate"),
+
+        "sale_average_price": round_money(sale_data.get("averagePrice")),
+        "sale_median_price": round_money(sale_data.get("medianPrice")),
+        "sale_min_price": round_money(sale_data.get("minPrice")),
+        "sale_max_price": round_money(sale_data.get("maxPrice")),
+        "sale_average_price_per_sqft": round_decimal(
+            sale_data.get("averagePricePerSquareFoot")
+        ),
+        "sale_median_price_per_sqft": round_decimal(
+            sale_data.get("medianPricePerSquareFoot")
+        ),
+        "sale_average_sqft": round_number(sale_data.get("averageSquareFootage")),
+        "sale_median_sqft": round_number(sale_data.get("medianSquareFootage")),
+        "sale_average_days_on_market": round_number(
+            sale_data.get("averageDaysOnMarket")
+        ),
+        "sale_median_days_on_market": round_number(
+            sale_data.get("medianDaysOnMarket")
+        ),
+        "sale_new_listings": round_number(sale_data.get("newListings")),
+        "sale_total_listings": round_number(sale_data.get("totalListings")),
+
+        "rent_average_price": round_money(rental_data.get("averagePrice")),
+        "rent_median_price": round_money(rental_data.get("medianPrice")),
+        "rent_min_price": round_money(rental_data.get("minPrice")),
+        "rent_max_price": round_money(rental_data.get("maxPrice")),
+        "rent_average_price_per_sqft": round_decimal(
+            rental_data.get("averagePricePerSquareFoot")
+        ),
+        "rent_median_price_per_sqft": round_decimal(
+            rental_data.get("medianPricePerSquareFoot")
+        ),
+        "rent_average_sqft": round_number(rental_data.get("averageSquareFootage")),
+        "rent_median_sqft": round_number(rental_data.get("medianSquareFootage")),
+        "rent_average_days_on_market": round_number(
+            rental_data.get("averageDaysOnMarket")
+        ),
+        "rent_median_days_on_market": round_number(
+            rental_data.get("medianDaysOnMarket")
+        ),
+        "rent_new_listings": round_number(rental_data.get("newListings")),
+        "rent_total_listings": round_number(rental_data.get("totalListings"))
+    }
+
+    return values
+
 
 def extract_market_summary(zip_payloads):
     """
-    Converts RentCast raw market payloads into simple PCSU metrics.
-
-    Because APIs sometimes return different field names by endpoint/plan,
-    this looks for several likely key names.
+    Aggregates RentCast ZIP-level market data into one base-market summary.
     """
-    median_home_values = []
-    average_home_values = []
-    median_sale_prices = []
-    median_list_prices = []
-    average_rents = []
-    median_rents = []
-    price_per_sqft_values = []
-    days_on_market_values = []
+
+    sale_average_prices = []
+    sale_median_prices = []
+    sale_avg_price_per_sqft = []
+    sale_median_price_per_sqft = []
+    sale_avg_dom = []
+    sale_median_dom = []
+    sale_new_listings = []
+    sale_total_listings = []
+
+    rent_average_prices = []
+    rent_median_prices = []
+    rent_avg_price_per_sqft = []
+    rent_median_price_per_sqft = []
+    rent_avg_dom = []
+    rent_median_dom = []
+    rent_new_listings = []
+    rent_total_listings = []
+
+    sale_dates = []
+    rental_dates = []
+
+    zip_summaries = []
 
     for item in zip_payloads:
-        payload = item.get("payload")
+        zip_code = item.get("zip")
+        payload = item.get("payload") or {}
 
-        median_home_values.extend(
-            deep_find_all_numeric(payload, [
-                "medianHomeValue",
-                "medianValue",
-                "medianPropertyValue",
-                "medianEstimatedValue",
-                "medianSalePrice"
-            ])
-        )
+        values = extract_zip_market_values(payload)
+        values["zip"] = zip_code
 
-        average_home_values.extend(
-            deep_find_all_numeric(payload, [
-                "averageHomeValue",
-                "avgHomeValue",
-                "averageValue",
-                "avgValue",
-                "averageEstimatedValue",
-                "avgEstimatedValue"
-            ])
-        )
+        zip_summaries.append(values)
 
-        median_sale_prices.extend(
-            deep_find_all_numeric(payload, [
-                "medianSalePrice",
-                "medSalePrice",
-                "medianSoldPrice",
-                "medianSalesPrice"
-            ])
-        )
+        if values.get("sale_last_updated"):
+            sale_dates.append(values["sale_last_updated"])
 
-        median_list_prices.extend(
-            deep_find_all_numeric(payload, [
-                "medianListPrice",
-                "medianListingPrice",
-                "medianAskingPrice"
-            ])
-        )
+        if values.get("rental_last_updated"):
+            rental_dates.append(values["rental_last_updated"])
 
-        average_rents.extend(
-            deep_find_all_numeric(payload, [
-                "averageRent",
-                "avgRent",
-                "averageRentalRate",
-                "avgRentalRate"
-            ])
-        )
+        sale_average_prices.append(values.get("sale_average_price"))
+        sale_median_prices.append(values.get("sale_median_price"))
+        sale_avg_price_per_sqft.append(values.get("sale_average_price_per_sqft"))
+        sale_median_price_per_sqft.append(values.get("sale_median_price_per_sqft"))
+        sale_avg_dom.append(values.get("sale_average_days_on_market"))
+        sale_median_dom.append(values.get("sale_median_days_on_market"))
+        sale_new_listings.append(values.get("sale_new_listings"))
+        sale_total_listings.append(values.get("sale_total_listings"))
 
-        median_rents.extend(
-            deep_find_all_numeric(payload, [
-                "medianRent",
-                "medianRentalRate"
-            ])
-        )
+        rent_average_prices.append(values.get("rent_average_price"))
+        rent_median_prices.append(values.get("rent_median_price"))
+        rent_avg_price_per_sqft.append(values.get("rent_average_price_per_sqft"))
+        rent_median_price_per_sqft.append(values.get("rent_median_price_per_sqft"))
+        rent_avg_dom.append(values.get("rent_average_days_on_market"))
+        rent_median_dom.append(values.get("rent_median_days_on_market"))
+        rent_new_listings.append(values.get("rent_new_listings"))
+        rent_total_listings.append(values.get("rent_total_listings"))
 
-        price_per_sqft_values.extend(
-            deep_find_all_numeric(payload, [
-                "pricePerSquareFoot",
-                "pricePerSqFt",
-                "avgPricePerSqFt",
-                "medianPricePerSqFt"
-            ])
-        )
+    avg_home_value = median_or_none(sale_median_prices) or average_or_none(sale_average_prices)
+    median_sale_price = median_or_none(sale_median_prices)
+    average_sale_price = average_or_none(sale_average_prices)
 
-        days_on_market_values.extend(
-            deep_find_all_numeric(payload, [
-                "daysOnMarket",
-                "averageDaysOnMarket",
-                "avgDaysOnMarket",
-                "medianDaysOnMarket"
-            ])
-        )
-
-    avg_home_value = (
-        median_or_none(median_home_values)
-        or average_or_none(average_home_values)
-        or median_or_none(median_sale_prices)
+    price_per_sqft = (
+        median_or_none(sale_median_price_per_sqft)
+        or average_decimal_or_none(sale_avg_price_per_sqft)
     )
 
-    median_sale_price = median_or_none(median_sale_prices)
-    median_list_price = median_or_none(median_list_prices)
-    average_rent = average_or_none(average_rents)
-    median_rent = median_or_none(median_rents)
-    price_per_sqft = average_or_none(price_per_sqft_values)
-    days_on_market = average_or_none(days_on_market_values)
+    sale_days_on_market = (
+        median_or_none(sale_median_dom)
+        or average_or_none(sale_avg_dom)
+    )
+
+    average_rent = average_or_none(rent_average_prices)
+    median_rent = median_or_none(rent_median_prices)
+
+    rent_price_per_sqft = (
+        median_or_none(rent_median_price_per_sqft)
+        or average_decimal_or_none(rent_avg_price_per_sqft)
+    )
+
+    rent_days_on_market = (
+        median_or_none(rent_median_dom)
+        or average_or_none(rent_avg_dom)
+    )
+
+    total_sale_listings = sum(
+        v for v in [safe_number(x) for x in sale_total_listings]
+        if v is not None
+    ) or None
+
+    total_rental_listings = sum(
+        v for v in [safe_number(x) for x in rent_total_listings]
+        if v is not None
+    ) or None
+
+    total_sale_new_listings = sum(
+        v for v in [safe_number(x) for x in sale_new_listings]
+        if v is not None
+    ) or None
+
+    total_rental_new_listings = sum(
+        v for v in [safe_number(x) for x in rent_new_listings]
+        if v is not None
+    ) or None
 
     return {
         "avg_home_value": avg_home_value,
+        "average_sale_price": average_sale_price,
         "median_sale_price": median_sale_price,
-        "median_list_price": median_list_price,
+        "median_list_price": median_sale_price,
+        "price_per_sqft": price_per_sqft,
+        "days_on_market": sale_days_on_market,
+        "total_sale_listings": total_sale_listings,
+        "new_sale_listings": total_sale_new_listings,
+
         "average_rent": average_rent,
         "median_rent": median_rent,
-        "price_per_sqft": price_per_sqft,
-        "days_on_market": days_on_market
+        "rent_price_per_sqft": rent_price_per_sqft,
+        "rent_days_on_market": rent_days_on_market,
+        "total_rental_listings": total_rental_listings,
+        "new_rental_listings": total_rental_new_listings,
+
+        "sale_last_updated": max(sale_dates) if sale_dates else None,
+        "rental_last_updated": max(rental_dates) if rental_dates else None,
+
+        "zip_summaries": zip_summaries
     }
 
 
+# ============================================================
+# UPDATE BASE JSON
+# ============================================================
+
 def update_base_json(base_json, base, market_summary, raw_refs, existing_source_path=None):
-    """
-    Updates/preserves current base JSON.
-    """
     updated = copy.deepcopy(base_json)
 
     slug = base.get("slug") or safe_slug(base.get("name"))
@@ -486,6 +556,8 @@ def update_base_json(base_json, base, market_summary, raw_refs, existing_source_
     updated["zip"] = primary_zip or updated.get("zip")
 
     avg_home_value = market_summary.get("avg_home_value")
+    median_sale_price = market_summary.get("median_sale_price")
+    average_sale_price = market_summary.get("average_sale_price")
 
     if avg_home_value:
         updated["avg_home_value"] = avg_home_value
@@ -493,20 +565,24 @@ def update_base_json(base_json, base, market_summary, raw_refs, existing_source_
         updated["avgHome"] = avg_home_value
 
     updated.setdefault("snapshot", {})
-    if market_summary.get("median_sale_price"):
-        updated["snapshot"]["median_home_price"] = market_summary["median_sale_price"]
+    if median_sale_price:
+        updated["snapshot"]["median_home_price"] = median_sale_price
     elif avg_home_value:
         updated["snapshot"]["median_home_price"] = avg_home_value
 
     updated.setdefault("market_metrics", {})
     updated["market_metrics"].update({
         "median_list_price": market_summary.get("median_list_price"),
-        "median_sold_price": market_summary.get("median_sale_price"),
-        "median_sale_price": market_summary.get("median_sale_price"),
+        "median_sold_price": median_sale_price,
+        "median_sale_price": median_sale_price,
+        "average_sale_price": average_sale_price,
         "days_on_market": market_summary.get("days_on_market"),
         "price_per_sqft": market_summary.get("price_per_sqft"),
+        "total_listings": market_summary.get("total_sale_listings"),
+        "new_listings": market_summary.get("new_sale_listings"),
         "as_of": AS_OF,
         "source": "RentCast",
+        "source_last_updated": market_summary.get("sale_last_updated"),
         "method": "Aggregated from surrounding housing-market ZIPs"
     })
 
@@ -514,8 +590,13 @@ def update_base_json(base_json, base, market_summary, raw_refs, existing_source_
     updated["rental_metrics"].update({
         "average_rent": market_summary.get("average_rent"),
         "median_rent": market_summary.get("median_rent"),
+        "rent_price_per_sqft": market_summary.get("rent_price_per_sqft"),
+        "days_on_market": market_summary.get("rent_days_on_market"),
+        "total_listings": market_summary.get("total_rental_listings"),
+        "new_listings": market_summary.get("new_rental_listings"),
         "as_of": AS_OF,
         "source": "RentCast",
+        "source_last_updated": market_summary.get("rental_last_updated"),
         "method": "Aggregated from surrounding housing-market ZIPs"
     })
 
@@ -525,6 +606,8 @@ def update_base_json(base_json, base, market_summary, raw_refs, existing_source_
         "method": "Uses surrounding PCS buyer/renter ZIPs, not installation-only ZIP."
     }
 
+    updated["rentcast_zip_summaries"] = market_summary.get("zip_summaries", [])
+
     updated.setdefault("data_quality", {})
     updated["data_quality"]["housing_market"] = {
         "provider": "RentCast",
@@ -532,12 +615,14 @@ def update_base_json(base_json, base, market_summary, raw_refs, existing_source_
         "batch_id": BATCH_ID,
         "confidence": "medium-high",
         "method": "Surrounding housing-market ZIP aggregation",
-        "raw_files": raw_refs
+        "raw_files": raw_refs,
+        "notes": "Sale and rental metrics are aggregated across selected PCS housing-market ZIPs."
     }
 
     updated.setdefault("sources", {})
     updated["sources"]["housing_market"] = {
         "provider": "RentCast",
+        "dataset": "RentCast Markets API",
         "as_of": AS_OF,
         "batch_id": BATCH_ID,
         "primary_base_zip": primary_zip,
@@ -576,13 +661,16 @@ def validate_base_output(base, output_json):
             warnings.append(f"Missing required top-level key: {key}")
 
     if not output_json.get("avg_home_value"):
-        warnings.append("No avg_home_value found from RentCast extraction")
+        warnings.append("No avg_home_value found from RentCast saleData")
 
     if not output_json.get("market_metrics", {}).get("median_sale_price"):
-        warnings.append("No market_metrics.median_sale_price found")
+        warnings.append("No market_metrics.median_sale_price found from RentCast saleData")
+
+    if not output_json.get("market_metrics", {}).get("price_per_sqft"):
+        warnings.append("No market_metrics.price_per_sqft found from RentCast saleData")
 
     if not output_json.get("rental_metrics", {}).get("average_rent"):
-        warnings.append("No rental_metrics.average_rent found")
+        warnings.append("No rental_metrics.average_rent found from RentCast rentalData")
 
     if not base.get("housing_market_zips"):
         warnings.append("Base has no housing_market_zips in base_registry.json")
@@ -645,7 +733,22 @@ def refresh_one_base(base):
         "output_file": str(output_path.relative_to(BASE_REFRESH_DIR)),
         "existing_json_used": existing_source_path,
         "housing_market_zips": housing_zips,
-        "market_summary": market_summary,
+        "market_summary": {
+            "avg_home_value": market_summary.get("avg_home_value"),
+            "average_sale_price": market_summary.get("average_sale_price"),
+            "median_sale_price": market_summary.get("median_sale_price"),
+            "median_list_price": market_summary.get("median_list_price"),
+            "price_per_sqft": market_summary.get("price_per_sqft"),
+            "days_on_market": market_summary.get("days_on_market"),
+            "total_sale_listings": market_summary.get("total_sale_listings"),
+            "average_rent": market_summary.get("average_rent"),
+            "median_rent": market_summary.get("median_rent"),
+            "rent_price_per_sqft": market_summary.get("rent_price_per_sqft"),
+            "rent_days_on_market": market_summary.get("rent_days_on_market"),
+            "total_rental_listings": market_summary.get("total_rental_listings"),
+            "sale_last_updated": market_summary.get("sale_last_updated"),
+            "rental_last_updated": market_summary.get("rental_last_updated")
+        },
         "warnings": warnings,
         "raw_files": raw_refs
     }
@@ -672,9 +775,9 @@ def main():
         "as_of": AS_OF,
         "started_at": now_iso(),
         "source_stack": {
-            "housing_market": "RentCast",
-            "demographics": "Census - not enabled in starter script",
-            "nearby_services": "ArcGIS - not enabled in starter script"
+            "housing_market": "RentCast Markets API",
+            "demographics": "Census - not enabled in this script yet",
+            "nearby_services": "ArcGIS - not enabled in this script yet"
         },
         "total_bases": len(bases),
         "updated": [],
