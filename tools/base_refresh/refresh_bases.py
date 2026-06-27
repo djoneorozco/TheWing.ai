@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """
 PCSUnited / TheWing.ai
-Base JSON Refresh Script - RentCast Starter Pipeline
+Base JSON Refresh Pipeline - RentCast + Census + ArcGIS
 
-What this does:
-1. Reads tools/base_refresh/base_registry.json
-2. Calls RentCast market data for each housing-market ZIP
-3. Saves raw RentCast responses into tools/base_refresh/raw/
-4. Extracts saleData and rentalData correctly
-5. Updates/preserves existing base JSON structure when possible
-6. Writes refreshed JSONs into tools/base_refresh/output/
-7. Writes tools/base_refresh/refresh_report.json
+Purpose:
+- Preserve the complete PCSU base JSON structure.
+- Use the existing/base JSON as the template.
+- Refresh only the fields that should come from APIs.
+- Output a complete base.json file.
+
+API responsibility:
+- RentCast = housing market, sale metrics, rental metrics
+- Census = demographics, income, education, veterans, labor, households
+- ArcGIS = nearby services / POI context
+- Existing JSON = curated PCS guidance, base_profile, gates, watchouts, narrative
 
 Run from repo root:
 
@@ -23,6 +26,12 @@ Required local file:
 Example .env:
 
     RENTCAST_API_KEY=your_key_here
+    CENSUS_API_KEY=your_key_here
+    ARCGIS_API_KEY=your_key_here
+
+Important:
+- raw/*.json stays local/private.
+- output/*.json is safe to review and push.
 """
 
 import os
@@ -67,11 +76,20 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 RENTCAST_BASE_URL = "https://api.rentcast.io/v1"
 RENTCAST_MARKET_ENDPOINT = "/markets"
 
+CENSUS_YEAR = "2023"
+CENSUS_DATASET = "acs/acs5/profile"
+CENSUS_BASE_URL = f"https://api.census.gov/data/{CENSUS_YEAR}/{CENSUS_DATASET}"
+
+ARCGIS_PLACES_BASE_URL = (
+    "https://places-api.arcgis.com/arcgis/rest/services/places-service/v1"
+)
+
 REQUEST_TIMEOUT_SECONDS = 30
 REQUEST_SLEEP_SECONDS = 0.25
 
 BATCH_ID = datetime.now(timezone.utc).strftime("%Y_%m")
-AS_OF = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+AS_OF_DATE = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+AS_OF_MONTH = datetime.now(timezone.utc).strftime("%Y-%m")
 
 
 # ============================================================
@@ -81,7 +99,7 @@ AS_OF = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 def load_env():
     if load_dotenv is None:
         print("WARNING: python-dotenv is not installed.")
-        print("Install it with: pip install python-dotenv")
+        print("Install with: pip install python-dotenv")
         return
 
     if ENV_PATH.exists():
@@ -134,6 +152,10 @@ def safe_number(value):
             .replace("%", "")
             .strip()
         )
+
+        if cleaned in ("", "null", "None", "N/A", "-"):
+            return None
+
         try:
             if "." in cleaned:
                 return float(cleaned)
@@ -205,61 +227,30 @@ def sum_or_none(values):
     return round(sum(nums))
 
 
-# ============================================================
-# RENTCAST CLIENT
-# ============================================================
-
-def rentcast_headers():
-    api_key = os.getenv("RENTCAST_API_KEY")
-
-    if not api_key:
-        raise RuntimeError(
-            "Missing RENTCAST_API_KEY. Add it to tools/base_refresh/.env"
-        )
-
-    return {
-        "accept": "application/json",
-        "X-Api-Key": api_key
-    }
+def set_if_value(target, key, value):
+    if value is not None:
+        target[key] = value
 
 
-def rentcast_get(endpoint, params=None):
-    url = f"{RENTCAST_BASE_URL}{endpoint}"
-
-    response = requests.get(
-        url,
-        headers=rentcast_headers(),
-        params=params or {},
-        timeout=REQUEST_TIMEOUT_SECONDS
-    )
-
-    if response.status_code != 200:
-        raise RuntimeError(
-            f"RentCast request failed: {response.status_code} - {response.text}"
-        )
-
-    return response.json()
-
-
-def fetch_rentcast_market_zip(zip_code):
-    params = {
-        "zipCode": str(zip_code)
-    }
-
-    return rentcast_get(RENTCAST_MARKET_ENDPOINT, params=params)
-
-
-def save_raw_rentcast(base_slug, zip_code, payload):
-    raw_path = RAW_DIR / f"{base_slug}-rentcast-market-{zip_code}-{BATCH_ID}.json"
-    write_json(raw_path, payload)
-    return str(raw_path.relative_to(BASE_REFRESH_DIR))
+def get_nested(data, path, default=None):
+    current = data
+    for key in path:
+        if not isinstance(current, dict):
+            return default
+        current = current.get(key)
+        if current is None:
+            return default
+    return current
 
 
 # ============================================================
-# EXISTING JSON PRESERVATION
+# EXISTING JSON / TEMPLATE LOADING
 # ============================================================
 
 def find_existing_base_json(base):
+    """
+    Finds the current live JSON so we can preserve the full schema.
+    """
     if not LIVE_CITIES_DIR.exists():
         return None
 
@@ -271,9 +262,12 @@ def find_existing_base_json(base):
     if slug:
         candidates.extend([
             f"{slug}.json",
-            f"{slug.title()}.json",
-            f"{slug.lower()}.json"
+            f"{slug.lower()}.json",
+            f"{slug.title()}.json"
         ])
+
+        if slug.endswith("-afb"):
+            candidates.append(f"{slug.replace('-afb', '')}.json")
 
     if name:
         name_no_afb = name.replace(" AFB", "").replace(" SFB", "")
@@ -313,59 +307,102 @@ def load_existing_or_minimal(base):
         "slug": base.get("slug"),
         "name": base.get("name"),
         "city": base.get("city"),
+        "submarket": base.get("submarket"),
+        "place": base.get("place"),
+        "place_detail": base.get("place_detail"),
         "state": base.get("state"),
         "state_code": base.get("state_code"),
+        "geo_id": base.get("geo_id"),
+        "year": int(datetime.now(timezone.utc).strftime("%Y")),
         "zip": base.get("primary_zip"),
+        "market_label": base.get("market_label"),
+        "profile": "",
+        "avg_home_value": None,
+        "average_home_value": None,
+        "avgHome": None,
+        "city_avg_home": None,
         "snapshot": {},
         "market_metrics": {},
+        "metrics": {},
+        "mortgage_assumptions": {},
+        "ownership_costs": {},
+        "costs": {},
+        "population": {},
+        "households": {},
+        "income": {},
+        "education": {},
+        "veterans": {},
+        "immigration": {},
+        "labor": {},
         "rental_metrics": {},
-        "sources": {}
+        "housing": {},
+        "sources": {},
+        "compatibility": {
+            "orozco_realty_ready": True,
+            "pcsunited_ready": True
+        }
     }
 
     return minimal, None
 
 
 # ============================================================
-# RENTCAST EXTRACTION
+# RENTCAST CLIENT
 # ============================================================
 
+def rentcast_headers():
+    api_key = os.getenv("RENTCAST_API_KEY")
+
+    if not api_key:
+        raise RuntimeError(
+            "Missing RENTCAST_API_KEY. Add it to tools/base_refresh/.env"
+        )
+
+    return {
+        "accept": "application/json",
+        "X-Api-Key": api_key
+    }
+
+
+def rentcast_get(endpoint, params=None):
+    url = f"{RENTCAST_BASE_URL}{endpoint}"
+
+    response = requests.get(
+        url,
+        headers=rentcast_headers(),
+        params=params or {},
+        timeout=REQUEST_TIMEOUT_SECONDS
+    )
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"RentCast request failed: {response.status_code} - {response.text}"
+        )
+
+    return response.json()
+
+
+def fetch_rentcast_market_zip(zip_code):
+    return rentcast_get(
+        RENTCAST_MARKET_ENDPOINT,
+        params={"zipCode": str(zip_code)}
+    )
+
+
+def save_raw_payload(provider, base_slug, label, payload):
+    raw_path = RAW_DIR / f"{base_slug}-{provider}-{label}-{BATCH_ID}.json"
+    write_json(raw_path, payload)
+    return str(raw_path.relative_to(BASE_REFRESH_DIR))
+
+
 def extract_zip_market_values(payload):
-    """
-    RentCast /markets response shape observed:
-
-    saleData:
-      averagePrice
-      medianPrice
-      averagePricePerSquareFoot
-      medianPricePerSquareFoot
-      averageDaysOnMarket
-      medianDaysOnMarket
-      newListings
-      totalListings
-
-    rentalData:
-      averageRent
-      medianRent
-      averageRentPerSquareFoot
-      medianRentPerSquareFoot
-      averageDaysOnMarket
-      medianDaysOnMarket
-      newListings
-      totalListings
-    """
-
     sale_data = payload.get("saleData") or {}
-    rental_data = payload.get("rentalData") or {}
-
-    # Safety fallback in case RentCast ever changes naming.
-    if not rental_data:
-        rental_data = payload.get("rentData") or {}
+    rental_data = payload.get("rentalData") or payload.get("rentData") or {}
 
     values = {
         "sale_last_updated": sale_data.get("lastUpdatedDate"),
         "rental_last_updated": rental_data.get("lastUpdatedDate"),
 
-        # Sale market values
         "sale_average_price": round_money(sale_data.get("averagePrice")),
         "sale_median_price": round_money(sale_data.get("medianPrice")),
         "sale_min_price": round_money(sale_data.get("minPrice")),
@@ -387,10 +424,6 @@ def extract_zip_market_values(payload):
         "sale_new_listings": round_number(sale_data.get("newListings")),
         "sale_total_listings": round_number(sale_data.get("totalListings")),
 
-        # Rental market values
-        # IMPORTANT:
-        # RentCast rentalData uses averageRent / medianRent,
-        # not averagePrice / medianPrice.
         "rent_average_price": round_money(rental_data.get("averageRent")),
         "rent_median_price": round_money(rental_data.get("medianRent")),
         "rent_min_price": round_money(rental_data.get("minRent")),
@@ -416,11 +449,7 @@ def extract_zip_market_values(payload):
     return values
 
 
-def extract_market_summary(zip_payloads):
-    """
-    Aggregates RentCast ZIP-level market data into one base-market summary.
-    """
-
+def extract_rentcast_summary(zip_payloads):
     sale_average_prices = []
     sale_median_prices = []
     sale_avg_price_per_sqft = []
@@ -441,7 +470,6 @@ def extract_market_summary(zip_payloads):
 
     sale_dates = []
     rental_dates = []
-
     zip_summaries = []
 
     for item in zip_payloads:
@@ -450,7 +478,6 @@ def extract_market_summary(zip_payloads):
 
         values = extract_zip_market_values(payload)
         values["zip"] = zip_code
-
         zip_summaries.append(values)
 
         if values.get("sale_last_updated"):
@@ -508,11 +535,6 @@ def extract_market_summary(zip_payloads):
         or average_or_none(rent_avg_dom)
     )
 
-    total_sale_listings = sum_or_none(sale_total_listings)
-    total_rental_listings = sum_or_none(rent_total_listings)
-    total_sale_new_listings = sum_or_none(sale_new_listings)
-    total_rental_new_listings = sum_or_none(rent_new_listings)
-
     return {
         "avg_home_value": avg_home_value,
         "average_sale_price": average_sale_price,
@@ -520,118 +542,508 @@ def extract_market_summary(zip_payloads):
         "median_list_price": median_sale_price,
         "price_per_sqft": price_per_sqft,
         "days_on_market": sale_days_on_market,
-        "total_sale_listings": total_sale_listings,
-        "new_sale_listings": total_sale_new_listings,
+        "total_sale_listings": sum_or_none(sale_total_listings),
+        "new_sale_listings": sum_or_none(sale_new_listings),
 
         "average_rent": average_rent,
         "median_rent": median_rent,
         "rent_price_per_sqft": rent_price_per_sqft,
         "rent_days_on_market": rent_days_on_market,
-        "total_rental_listings": total_rental_listings,
-        "new_rental_listings": total_rental_new_listings,
+        "total_rental_listings": sum_or_none(rent_total_listings),
+        "new_rental_listings": sum_or_none(rent_new_listings),
 
         "sale_last_updated": max(sale_dates) if sale_dates else None,
         "rental_last_updated": max(rental_dates) if rental_dates else None,
-
         "zip_summaries": zip_summaries
     }
 
 
 # ============================================================
-# UPDATE BASE JSON
+# CENSUS CLIENT
 # ============================================================
 
-def update_base_json(base_json, base, market_summary, raw_refs, existing_source_path=None):
-    updated = copy.deepcopy(base_json)
+CENSUS_PROFILE_VARIABLES = {
+    "NAME": "NAME",
+    "population": "DP05_0001E",
+    "median_age": "DP05_0018E",
+    "total_households": "DP02_0001E",
+    "persons_per_household": "DP02_0016E",
+    "median_household_income": "DP03_0062E",
+    "per_capita_income": "DP03_0088E",
+    "poverty_rate_percent": "DP03_0128PE",
+    "high_school_grad_or_higher_percent": "DP02_0067PE",
+    "bachelors_degree_or_higher_percent": "DP02_0068PE",
+    "veteran_population": "DP02_0095E",
+    "veteran_population_percent": "DP02_0095PE",
+    "foreign_born_percent": "DP02_0092PE",
+    "mean_travel_time_to_work_minutes": "DP03_0025E",
+    "unemployment_rate_percent": "DP03_0009PE",
+    "housing_units": "DP04_0001E",
+    "rental_vacancy_rate_percent": "DP04_0005PE",
+    "median_value_owner_occupied": "DP04_0089E"
+}
 
-    slug = base.get("slug") or safe_slug(base.get("name"))
-    primary_zip = base.get("primary_zip")
-    housing_zips = base.get("housing_market_zips", [])
+
+def parse_census_geo_id(geo_id):
+    """
+    Expected format:
+    1600000US4840036
+
+    state = 48
+    place = 40036
+    """
+    if not geo_id or "US" not in str(geo_id):
+        return None, None
+
+    geo_part = str(geo_id).split("US")[-1]
+
+    if len(geo_part) < 7:
+        return None, None
+
+    state_code = geo_part[:2]
+    place_code = geo_part[2:]
+
+    return state_code, place_code
+
+
+def census_get(params):
+    api_key = os.getenv("CENSUS_API_KEY")
+    request_params = dict(params)
+
+    if api_key:
+        request_params["key"] = api_key
+
+    response = requests.get(
+        CENSUS_BASE_URL,
+        params=request_params,
+        timeout=REQUEST_TIMEOUT_SECONDS
+    )
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"Census request failed: {response.status_code} - {response.text}"
+        )
+
+    return response.json()
+
+
+def fetch_census_profile_for_place(geo_id):
+    state_code, place_code = parse_census_geo_id(geo_id)
+
+    if not state_code or not place_code:
+        raise RuntimeError(f"Invalid or missing Census geo_id: {geo_id}")
+
+    variables = list(CENSUS_PROFILE_VARIABLES.values())
+
+    payload = census_get({
+        "get": ",".join(variables),
+        "for": f"place:{place_code}",
+        "in": f"state:{state_code}"
+    })
+
+    return payload
+
+
+def parse_census_profile(payload):
+    """
+    Converts Census array response into a dict.
+    """
+    if not isinstance(payload, list) or len(payload) < 2:
+        raise RuntimeError("Unexpected Census response shape")
+
+    headers = payload[0]
+    values = payload[1]
+
+    row = dict(zip(headers, values))
+
+    def val(field_name):
+        variable = CENSUS_PROFILE_VARIABLES.get(field_name)
+        return safe_number(row.get(variable))
+
+    return {
+        "name": row.get("NAME"),
+
+        "population": {
+            "estimate": round_number(val("population")),
+            "median_age": round_decimal(val("median_age"), 1),
+            "persons_per_household": round_decimal(
+                val("persons_per_household"), 2
+            )
+        },
+
+        "households": {
+            "total_households": round_number(val("total_households"))
+        },
+
+        "income": {
+            "median_household_income": round_money(
+                val("median_household_income")
+            ),
+            "per_capita_income": round_money(val("per_capita_income")),
+            "poverty_rate_percent": round_decimal(
+                val("poverty_rate_percent"), 1
+            )
+        },
+
+        "education": {
+            "high_school_grad_or_higher_percent": round_decimal(
+                val("high_school_grad_or_higher_percent"), 1
+            ),
+            "bachelors_degree_or_higher_percent": round_decimal(
+                val("bachelors_degree_or_higher_percent"), 1
+            )
+        },
+
+        "veterans": {
+            "veteran_population": round_number(val("veteran_population")),
+            "veteran_population_percent": round_decimal(
+                val("veteran_population_percent"), 1
+            )
+        },
+
+        "immigration": {
+            "foreign_born_percent": round_decimal(
+                val("foreign_born_percent"), 1
+            )
+        },
+
+        "labor": {
+            "mean_travel_time_to_work_minutes": round_decimal(
+                val("mean_travel_time_to_work_minutes"), 1
+            ),
+            "unemployment_rate_percent": round_decimal(
+                val("unemployment_rate_percent"), 1
+            )
+        },
+
+        "housing": {
+            "housing_units": round_number(val("housing_units")),
+            "median_value_owner_occupied": round_money(
+                val("median_value_owner_occupied")
+            )
+        },
+
+        "rental_vacancy": {
+            "rate_percent": round_decimal(
+                val("rental_vacancy_rate_percent"), 1
+            )
+        }
+    }
+
+
+# ============================================================
+# ARCGIS CLIENT
+# ============================================================
+
+def arcgis_headers():
+    api_key = os.getenv("ARCGIS_API_KEY")
+
+    if not api_key:
+        raise RuntimeError(
+            "Missing ARCGIS_API_KEY. Add it to tools/base_refresh/.env"
+        )
+
+    return {
+        "Authorization": f"Bearer {api_key}",
+        "Accept": "application/json"
+    }
+
+
+def arcgis_places_near_point(lat, lon, radius=12000, limit=10):
+    """
+    Lightweight ArcGIS Places call.
+
+    This is intentionally broad. It saves public nearby-service context without
+    replacing the curated base_profile.major_services list.
+    """
+    url = f"{ARCGIS_PLACES_BASE_URL}/places/near-point"
+
+    params = {
+        "x": lon,
+        "y": lat,
+        "radius": radius,
+        "pageSize": limit
+    }
+
+    response = requests.get(
+        url,
+        headers=arcgis_headers(),
+        params=params,
+        timeout=REQUEST_TIMEOUT_SECONDS
+    )
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"ArcGIS request failed: {response.status_code} - {response.text}"
+        )
+
+    return response.json()
+
+
+def parse_arcgis_places(payload):
+    """
+    Keeps ArcGIS output compact so the public JSON doesn't become huge.
+    """
+    results = payload.get("results") or payload.get("places") or []
+
+    compact = []
+
+    for item in results[:10]:
+        compact.append({
+            "name": item.get("name"),
+            "category": item.get("category") or item.get("categories"),
+            "address": (
+                item.get("address", {}).get("streetAddress")
+                if isinstance(item.get("address"), dict)
+                else item.get("address")
+            ),
+            "distance": item.get("distance"),
+            "place_id": item.get("placeId") or item.get("id")
+        })
+
+    return compact
+
+
+# ============================================================
+# APPLY API DATA TO COMPLETE PCSU JSON
+# ============================================================
+
+def apply_registry_identity(updated, base):
+    """
+    Keeps identity fields aligned with registry.
+    """
+    slug = base.get("slug") or updated.get("slug") or safe_slug(base.get("name"))
 
     updated["slug"] = slug
     updated["name"] = base.get("name", updated.get("name"))
     updated["city"] = base.get("city", updated.get("city"))
+    updated["submarket"] = base.get("submarket", updated.get("submarket"))
+    updated["place"] = base.get("place", updated.get("place"))
+    updated["place_detail"] = base.get("place_detail", updated.get("place_detail"))
     updated["state"] = base.get("state", updated.get("state"))
     updated["state_code"] = base.get("state_code", updated.get("state_code"))
-    updated["zip"] = primary_zip or updated.get("zip")
+    updated["geo_id"] = base.get("geo_id", updated.get("geo_id"))
+    updated["zip"] = base.get("primary_zip", updated.get("zip"))
+    updated["market_label"] = base.get("market_label", updated.get("market_label"))
 
-    avg_home_value = market_summary.get("avg_home_value")
-    median_sale_price = market_summary.get("median_sale_price")
-    average_sale_price = market_summary.get("average_sale_price")
+    updated["year"] = int(datetime.now(timezone.utc).strftime("%Y"))
+    updated["last_updated_data_from_sources"] = AS_OF_MONTH
+
+    return updated
+
+
+def apply_rentcast(updated, rentcast_summary, base, raw_refs):
+    avg_home_value = rentcast_summary.get("avg_home_value")
+    median_sale_price = rentcast_summary.get("median_sale_price")
+    average_sale_price = rentcast_summary.get("average_sale_price")
+    median_list_price = rentcast_summary.get("median_list_price")
+    price_per_sqft = rentcast_summary.get("price_per_sqft")
+    days_on_market = rentcast_summary.get("days_on_market")
+    total_sale_listings = rentcast_summary.get("total_sale_listings")
+    average_rent = rentcast_summary.get("average_rent")
+    median_rent = rentcast_summary.get("median_rent")
 
     if avg_home_value:
         updated["avg_home_value"] = avg_home_value
         updated["average_home_value"] = avg_home_value
         updated["avgHome"] = avg_home_value
+        updated["city_avg_home"] = avg_home_value
 
     updated.setdefault("snapshot", {})
-    if median_sale_price:
-        updated["snapshot"]["median_home_price"] = median_sale_price
-    elif avg_home_value:
-        updated["snapshot"]["median_home_price"] = avg_home_value
+    set_if_value(updated["snapshot"], "median_home_price", median_sale_price or avg_home_value)
 
     updated.setdefault("market_metrics", {})
     updated["market_metrics"].update({
-        "median_list_price": market_summary.get("median_list_price"),
+        "median_list_price": median_list_price,
         "median_sold_price": median_sale_price,
         "median_sale_price": median_sale_price,
-        "average_sale_price": average_sale_price,
-        "days_on_market": market_summary.get("days_on_market"),
-        "price_per_sqft": market_summary.get("price_per_sqft"),
-        "total_listings": market_summary.get("total_sale_listings"),
-        "new_listings": market_summary.get("new_sale_listings"),
-        "as_of": AS_OF,
-        "source": "RentCast",
-        "source_last_updated": market_summary.get("sale_last_updated"),
-        "method": "Aggregated from surrounding housing-market ZIPs"
+        "days_on_market": days_on_market,
+        "inventory_months": updated["market_metrics"].get("inventory_months"),
+        "price_per_sqft": price_per_sqft,
+        "active_listings_total": total_sale_listings,
+        "zillow_average_home_value": avg_home_value,
+        "as_of": AS_OF_MONTH,
+        "source": "RentCast Markets API",
+        "source_last_updated": rentcast_summary.get("sale_last_updated"),
+        "method": "Aggregated from selected PCS housing-market ZIPs"
+    })
+
+    updated.setdefault("metrics", {})
+    updated["metrics"].update({
+        "median_list_price": median_list_price,
+        "median_sold_price": median_sale_price,
+        "median_sale_price": median_sale_price,
+        "days_on_market": days_on_market,
+        "inventory_months": updated["metrics"].get("inventory_months"),
+        "price_per_sqft": price_per_sqft,
+        "median_rent": median_rent,
+        "active_listings_total": total_sale_listings,
+        "as_of": AS_OF_MONTH
     })
 
     updated.setdefault("rental_metrics", {})
     updated["rental_metrics"].update({
-        "average_rent": market_summary.get("average_rent"),
-        "median_rent": market_summary.get("median_rent"),
-        "rent_price_per_sqft": market_summary.get("rent_price_per_sqft"),
-        "days_on_market": market_summary.get("rent_days_on_market"),
-        "total_listings": market_summary.get("total_rental_listings"),
-        "new_listings": market_summary.get("new_rental_listings"),
-        "as_of": AS_OF,
-        "source": "RentCast",
-        "source_last_updated": market_summary.get("rental_last_updated"),
-        "method": "Aggregated from surrounding housing-market ZIPs"
+        "average_rent": average_rent,
+        "median_rent": median_rent,
+        "rent_price_per_sqft": rentcast_summary.get("rent_price_per_sqft"),
+        "days_on_market": rentcast_summary.get("rent_days_on_market"),
+        "total_listings": rentcast_summary.get("total_rental_listings"),
+        "new_listings": rentcast_summary.get("new_rental_listings"),
+        "as_of": AS_OF_MONTH,
+        "source": "RentCast Markets API",
+        "source_last_updated": rentcast_summary.get("rental_last_updated"),
+        "method": "Aggregated from selected PCS housing-market ZIPs"
+    })
+
+    updated.setdefault("housing", {})
+    updated["housing"]["median_value_owner_occupied"] = (
+        updated.get("housing", {}).get("median_value_owner_occupied")
+    )
+
+    updated["housing"].setdefault("market", {})
+    updated["housing"]["market"].update({
+        "zillow_average_home_value": avg_home_value,
+        "average_days_on_market": days_on_market,
+        "median_sale_price_current": median_sale_price,
+        "median_listing_price_realtor": median_list_price,
+        "median_listing_price_per_sqft": price_per_sqft,
+        "active_listings_total": total_sale_listings,
+        "q1_2026": {
+            "median_sale_price": median_sale_price
+        }
     })
 
     updated["market_area"] = {
-        "primary_base_zip": primary_zip,
-        "housing_market_zips": housing_zips,
-        "method": "Uses surrounding PCS buyer/renter ZIPs, not installation-only ZIP."
+        "primary_base_zip": base.get("primary_zip"),
+        "housing_market_zips": base.get("housing_market_zips", []),
+        "method": "Uses selected PCS buyer/renter ZIPs, not installation-only ZIP."
     }
 
-    updated["rentcast_zip_summaries"] = market_summary.get("zip_summaries", [])
-
-    updated.setdefault("data_quality", {})
-    updated["data_quality"]["housing_market"] = {
-        "provider": "RentCast",
-        "as_of": AS_OF,
-        "batch_id": BATCH_ID,
-        "confidence": "medium-high",
-        "method": "Surrounding housing-market ZIP aggregation",
-        "raw_files": raw_refs,
-        "notes": "Sale and rental metrics are aggregated across selected PCS housing-market ZIPs."
-    }
+    updated["rentcast_zip_summaries"] = rentcast_summary.get("zip_summaries", [])
 
     updated.setdefault("sources", {})
     updated["sources"]["housing_market"] = {
         "provider": "RentCast",
         "dataset": "RentCast Markets API",
-        "as_of": AS_OF,
+        "as_of": AS_OF_MONTH,
         "batch_id": BATCH_ID,
-        "primary_base_zip": primary_zip,
-        "housing_market_zips": housing_zips,
-        "raw_files": raw_refs,
-        "existing_json_used": existing_source_path
+        "primary_base_zip": base.get("primary_zip"),
+        "housing_market_zips": base.get("housing_market_zips", []),
+        "raw_files": raw_refs
     }
 
-    updated["last_updated_data_from_sources"] = AS_OF
+    return updated
+
+
+def apply_census(updated, census_summary, raw_ref):
+    if not census_summary:
+        return updated
+
+    updated.setdefault("snapshot", {})
+    set_if_value(
+        updated["snapshot"],
+        "population_city",
+        get_nested(census_summary, ["population", "estimate"])
+    )
+    set_if_value(
+        updated["snapshot"],
+        "median_household_income",
+        get_nested(census_summary, ["income", "median_household_income"])
+    )
+
+    for section in [
+        "population",
+        "households",
+        "income",
+        "education",
+        "veterans",
+        "immigration",
+        "labor"
+    ]:
+        updated.setdefault(section, {})
+        updated[section].update(census_summary.get(section, {}))
+
+    updated.setdefault("housing", {})
+    housing_census = census_summary.get("housing", {})
+    set_if_value(updated["housing"], "housing_units", housing_census.get("housing_units"))
+    set_if_value(
+        updated["housing"],
+        "median_value_owner_occupied",
+        housing_census.get("median_value_owner_occupied")
+    )
+
+    updated.setdefault("rental_vacancy", {})
+    updated["rental_vacancy"].update(census_summary.get("rental_vacancy", {}))
+
+    updated.setdefault("sources", {})
+    updated["sources"]["demographics"] = {
+        "provider": "US Census Bureau ACS 5-Year Profile",
+        "dataset": CENSUS_DATASET,
+        "year": CENSUS_YEAR,
+        "as_of": AS_OF_MONTH,
+        "raw_file": raw_ref
+    }
+
+    return updated
+
+
+def apply_arcgis(updated, arcgis_summary, raw_ref):
+    if not arcgis_summary:
+        return updated
+
+    updated["nearby_services_api"] = {
+        "provider": "ArcGIS Places",
+        "as_of": AS_OF_MONTH,
+        "places": arcgis_summary,
+        "note": (
+            "API-derived nearby services. Curated base_profile.major_services "
+            "remains the preferred base-specific services layer."
+        )
+    }
+
+    updated.setdefault("sources", {})
+    updated["sources"]["nearby_services"] = {
+        "provider": "ArcGIS Places",
+        "as_of": AS_OF_MONTH,
+        "raw_file": raw_ref
+    }
+
+    return updated
+
+
+def apply_data_quality(updated, base, raw_refs):
+    updated.setdefault("data_quality", {})
+    updated["data_quality"]["api_refresh"] = {
+        "batch_id": BATCH_ID,
+        "as_of": AS_OF_DATE,
+        "housing_market": {
+            "provider": "RentCast",
+            "confidence": "medium-high",
+            "method": "Selected housing-market ZIP aggregation"
+        },
+        "demographics": {
+            "provider": "US Census Bureau ACS",
+            "confidence": "high",
+            "method": "Place-level ACS profile where geo_id is available"
+        },
+        "nearby_services": {
+            "provider": "ArcGIS Places",
+            "confidence": "medium",
+            "method": "Near-point places query by base coordinates"
+        },
+        "raw_files": raw_refs,
+        "notes": [
+            "The JSON structure is preserved from the existing PCSU base file.",
+            "API values update dynamic data fields only.",
+            "Curated PCS guidance, official links, gates, and base_profile intelligence are preserved unless manually updated."
+        ]
+    }
+
+    updated.setdefault("compatibility", {})
+    updated["compatibility"]["orozco_realty_ready"] = True
+    updated["compatibility"]["pcsunited_ready"] = True
+    updated["compatibility"]["api_refresh_ready"] = True
+    updated["compatibility"]["last_api_refresh_batch"] = BATCH_ID
 
     return updated
 
@@ -640,97 +1052,217 @@ def update_base_json(base_json, base, market_summary, raw_refs, existing_source_
 # VALIDATION
 # ============================================================
 
-def validate_base_output(base, output_json):
+def validate_complete_schema(base, output_json):
     warnings = []
 
-    required_top = [
+    required_top_keys = [
         "slug",
         "name",
         "city",
+        "submarket",
+        "place",
+        "place_detail",
         "state",
         "state_code",
+        "geo_id",
+        "year",
+        "last_updated_data_from_sources",
         "zip",
+        "market_label",
+        "profile",
+        "avg_home_value",
+        "average_home_value",
+        "avgHome",
         "snapshot",
         "market_metrics",
+        "metrics",
+        "mortgage_assumptions",
+        "ownership_costs",
+        "costs",
+        "population",
+        "households",
+        "income",
+        "education",
+        "veterans",
+        "immigration",
+        "labor",
+        "crime_status",
+        "school_quality",
+        "rental_vacancy",
         "rental_metrics",
-        "sources"
+        "climate_weather",
+        "special_events",
+        "military_lifestyle_fit",
+        "financial_brief",
+        "market_bluf",
+        "scorecard",
+        "rules",
+        "summary_points",
+        "opportunities",
+        "risks",
+        "buyer_notes",
+        "seller_notes",
+        "investor_angles",
+        "neighborhoods",
+        "target_neighborhoods",
+        "buyer_guidance",
+        "seller_guidance",
+        "landlord_notes",
+        "by_bedroom",
+        "housing",
+        "base_profile",
+        "sources",
+        "compatibility"
     ]
 
-    for key in required_top:
+    for key in required_top_keys:
         if key not in output_json:
-            warnings.append(f"Missing required top-level key: {key}")
+            warnings.append(f"Missing top-level key from baseline schema: {key}")
 
     if not output_json.get("avg_home_value"):
-        warnings.append("No avg_home_value found from RentCast saleData")
+        warnings.append("Missing avg_home_value")
 
     if not output_json.get("market_metrics", {}).get("median_sale_price"):
-        warnings.append("No market_metrics.median_sale_price found from RentCast saleData")
-
-    if not output_json.get("market_metrics", {}).get("price_per_sqft"):
-        warnings.append("No market_metrics.price_per_sqft found from RentCast saleData")
-
-    if not output_json.get("rental_metrics", {}).get("average_rent"):
-        warnings.append("No rental_metrics.average_rent found from RentCast rentalData")
+        warnings.append("Missing market_metrics.median_sale_price")
 
     if not output_json.get("rental_metrics", {}).get("median_rent"):
-        warnings.append("No rental_metrics.median_rent found from RentCast rentalData")
+        warnings.append("Missing rental_metrics.median_rent")
 
-    if not output_json.get("rental_metrics", {}).get("rent_price_per_sqft"):
-        warnings.append("No rental_metrics.rent_price_per_sqft found from RentCast rentalData")
+    if not output_json.get("population", {}).get("estimate"):
+        warnings.append("Missing population.estimate from Census or baseline")
 
-    if not base.get("housing_market_zips"):
-        warnings.append("Base has no housing_market_zips in base_registry.json")
+    if not output_json.get("income", {}).get("median_household_income"):
+        warnings.append("Missing income.median_household_income from Census or baseline")
+
+    if not output_json.get("base_profile"):
+        warnings.append("Missing base_profile")
 
     return warnings
 
 
 # ============================================================
-# MAIN REFRESH
+# REFRESH ONE BASE
 # ============================================================
 
 def refresh_one_base(base):
     slug = base.get("slug") or safe_slug(base.get("name"))
     name = base.get("name") or slug
-    housing_zips = base.get("housing_market_zips") or []
 
     print(f"\n=== Refreshing {name} ===")
 
-    if not housing_zips:
-        raise RuntimeError(f"{name} has no housing_market_zips")
+    base_json, existing_source_path = load_existing_or_minimal(base)
+    updated = copy.deepcopy(base_json)
+    updated = apply_registry_identity(updated, base)
 
+    all_raw_refs = []
+    warnings = []
+
+    # ------------------------------
+    # RentCast
+    # ------------------------------
+    rentcast_raw_refs = []
     zip_payloads = []
-    raw_refs = []
 
-    for zip_code in housing_zips:
-        print(f"  RentCast market ZIP: {zip_code}")
+    housing_zips = base.get("housing_market_zips") or []
 
-        payload = fetch_rentcast_market_zip(zip_code)
-        raw_ref = save_raw_rentcast(slug, zip_code, payload)
+    if not housing_zips:
+        warnings.append("No housing_market_zips in base_registry.json")
+    else:
+        for zip_code in housing_zips:
+            print(f"  RentCast market ZIP: {zip_code}")
 
-        zip_payloads.append({
-            "zip": zip_code,
-            "payload": payload
-        })
+            payload = fetch_rentcast_market_zip(zip_code)
+            raw_ref = save_raw_payload(
+                "rentcast",
+                slug,
+                f"market-{zip_code}",
+                payload
+            )
 
-        raw_refs.append(raw_ref)
-        time.sleep(REQUEST_SLEEP_SECONDS)
+            rentcast_raw_refs.append(raw_ref)
+            all_raw_refs.append(raw_ref)
 
-    market_summary = extract_market_summary(zip_payloads)
+            zip_payloads.append({
+                "zip": zip_code,
+                "payload": payload
+            })
 
-    existing_json, existing_source_path = load_existing_or_minimal(base)
+            time.sleep(REQUEST_SLEEP_SECONDS)
 
-    output_json = update_base_json(
-        base_json=existing_json,
-        base=base,
-        market_summary=market_summary,
-        raw_refs=raw_refs,
-        existing_source_path=existing_source_path
-    )
+        rentcast_summary = extract_rentcast_summary(zip_payloads)
+        updated = apply_rentcast(
+            updated,
+            rentcast_summary,
+            base,
+            rentcast_raw_refs
+        )
 
-    warnings = validate_base_output(base, output_json)
+    # ------------------------------
+    # Census
+    # ------------------------------
+    census_raw_ref = None
+    census_summary = None
+
+    try:
+        geo_id = base.get("geo_id") or updated.get("geo_id")
+
+        if geo_id:
+            print(f"  Census profile GEOID: {geo_id}")
+
+            census_payload = fetch_census_profile_for_place(geo_id)
+            census_raw_ref = save_raw_payload(
+                "census",
+                slug,
+                f"profile-{geo_id}",
+                census_payload
+            )
+            all_raw_refs.append(census_raw_ref)
+
+            census_summary = parse_census_profile(census_payload)
+            updated = apply_census(updated, census_summary, census_raw_ref)
+        else:
+            warnings.append("No geo_id available for Census refresh")
+
+    except Exception as e:
+        warnings.append(f"Census refresh skipped/failed: {e}")
+
+    # ------------------------------
+    # ArcGIS
+    # ------------------------------
+    arcgis_raw_ref = None
+    arcgis_summary = None
+
+    try:
+        lat = safe_number(base.get("lat"))
+        lon = safe_number(base.get("lon"))
+
+        if lat is not None and lon is not None:
+            print(f"  ArcGIS near-point: {lat}, {lon}")
+
+            arcgis_payload = arcgis_places_near_point(lat, lon)
+            arcgis_raw_ref = save_raw_payload(
+                "arcgis",
+                slug,
+                "places-near-point",
+                arcgis_payload
+            )
+            all_raw_refs.append(arcgis_raw_ref)
+
+            arcgis_summary = parse_arcgis_places(arcgis_payload)
+            updated = apply_arcgis(updated, arcgis_summary, arcgis_raw_ref)
+        else:
+            warnings.append("No lat/lon available for ArcGIS refresh")
+
+    except Exception as e:
+        warnings.append(f"ArcGIS refresh skipped/failed: {e}")
+
+    updated = apply_data_quality(updated, base, all_raw_refs)
+
+    validation_warnings = validate_complete_schema(base, updated)
+    warnings.extend(validation_warnings)
 
     output_path = OUTPUT_DIR / f"{slug}.json"
-    write_json(output_path, output_json)
+    write_json(output_path, updated)
 
     return {
         "slug": slug,
@@ -739,32 +1271,34 @@ def refresh_one_base(base):
         "output_file": str(output_path.relative_to(BASE_REFRESH_DIR)),
         "existing_json_used": existing_source_path,
         "housing_market_zips": housing_zips,
-        "market_summary": {
-            "avg_home_value": market_summary.get("avg_home_value"),
-            "average_sale_price": market_summary.get("average_sale_price"),
-            "median_sale_price": market_summary.get("median_sale_price"),
-            "median_list_price": market_summary.get("median_list_price"),
-            "price_per_sqft": market_summary.get("price_per_sqft"),
-            "days_on_market": market_summary.get("days_on_market"),
-            "total_sale_listings": market_summary.get("total_sale_listings"),
-            "average_rent": market_summary.get("average_rent"),
-            "median_rent": market_summary.get("median_rent"),
-            "rent_price_per_sqft": market_summary.get("rent_price_per_sqft"),
-            "rent_days_on_market": market_summary.get("rent_days_on_market"),
-            "total_rental_listings": market_summary.get("total_rental_listings"),
-            "sale_last_updated": market_summary.get("sale_last_updated"),
-            "rental_last_updated": market_summary.get("rental_last_updated")
+        "api_sources_used": {
+            "rentcast": bool(rentcast_raw_refs),
+            "census": bool(census_raw_ref),
+            "arcgis": bool(arcgis_raw_ref)
+        },
+        "key_outputs": {
+            "avg_home_value": updated.get("avg_home_value"),
+            "median_sale_price": updated.get("market_metrics", {}).get("median_sale_price"),
+            "price_per_sqft": updated.get("market_metrics", {}).get("price_per_sqft"),
+            "median_rent": updated.get("rental_metrics", {}).get("median_rent"),
+            "average_rent": updated.get("rental_metrics", {}).get("average_rent"),
+            "population": updated.get("population", {}).get("estimate"),
+            "median_household_income": updated.get("income", {}).get("median_household_income")
         },
         "warnings": warnings,
-        "raw_files": raw_refs
+        "raw_files": all_raw_refs
     }
 
 
+# ============================================================
+# MAIN
+# ============================================================
+
 def main():
-    print("PCSUnited Base JSON Refresh")
+    print("PCSUnited Complete Base JSON Refresh")
     print(f"Base refresh folder: {BASE_REFRESH_DIR}")
     print(f"Batch ID: {BATCH_ID}")
-    print(f"As of: {AS_OF}")
+    print(f"As of: {AS_OF_DATE}")
 
     load_env()
 
@@ -778,12 +1312,13 @@ def main():
 
     report = {
         "batch_id": BATCH_ID,
-        "as_of": AS_OF,
+        "as_of": AS_OF_DATE,
         "started_at": now_iso(),
         "source_stack": {
             "housing_market": "RentCast Markets API",
-            "demographics": "Census - not enabled in this script yet",
-            "nearby_services": "ArcGIS - not enabled in this script yet"
+            "demographics": "US Census Bureau ACS 5-Year Profile",
+            "nearby_services": "ArcGIS Places API",
+            "baseline_schema": "Existing PCSU base JSON"
         },
         "total_bases": len(bases),
         "updated": [],
@@ -797,6 +1332,10 @@ def main():
 
             warning_count = len(result.get("warnings", []))
             print(f"  ✅ Done: {result['name']} | warnings: {warning_count}")
+
+            if warning_count:
+                for warning in result["warnings"]:
+                    print(f"     - {warning}")
 
         except Exception as e:
             slug = base.get("slug") or safe_slug(base.get("name", "unknown"))
