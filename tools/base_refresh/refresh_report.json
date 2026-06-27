@@ -1,11 +1,12 @@
 {
   "batch_id": "2026_06",
   "as_of": "2026-06-27",
-  "started_at": "2026-06-27T15:14:39.962805+00:00",
+  "started_at": "2026-06-27T15:42:04.633785+00:00",
   "source_stack": {
     "housing_market": "RentCast Markets API",
-    "demographics": "Census - not enabled in this script yet",
-    "nearby_services": "ArcGIS - not enabled in this script yet"
+    "demographics": "US Census Bureau ACS 5-Year Profile",
+    "nearby_services": "ArcGIS Places API",
+    "baseline_schema": "Existing PCSU base JSON"
   },
   "total_bases": 3,
   "updated": [
@@ -22,29 +23,30 @@
         "78254",
         "78227"
       ],
-      "market_summary": {
-        "avg_home_value": 319950,
-        "average_sale_price": 320390,
-        "median_sale_price": 319950,
-        "median_list_price": 319950,
-        "price_per_sqft": 155,
-        "days_on_market": 35,
-        "total_sale_listings": 4221,
-        "average_rent": 1782,
-        "median_rent": 1795,
-        "rent_price_per_sqft": 1,
-        "rent_days_on_market": 32,
-        "total_rental_listings": 2193,
-        "sale_last_updated": "2026-06-27T00:00:00.000Z",
-        "rental_last_updated": "2026-06-27T00:00:00.000Z"
+      "api_sources_used": {
+        "rentcast": true,
+        "census": true,
+        "arcgis": false
       },
-      "warnings": [],
+      "key_outputs": {
+        "avg_home_value": 319950,
+        "median_sale_price": 319950,
+        "price_per_sqft": 155,
+        "median_rent": 1795,
+        "average_rent": 1782,
+        "population": 6650,
+        "median_household_income": 110833
+      },
+      "warnings": [
+        "ArcGIS refresh skipped/failed: ArcGIS request failed: 401 - {\"error\":{\"code\":498,\"message\":\"Token Invalid.\",\"details\":[\"The required authentication information is invalid. The token is either invalid or has expired.\"],\"restInfoUrl\":\"https://places-api.arcgis.com/arcgis/rest/info\"}}"
+      ],
       "raw_files": [
         "raw/lackland-rentcast-market-78245-2026_06.json",
         "raw/lackland-rentcast-market-78251-2026_06.json",
         "raw/lackland-rentcast-market-78253-2026_06.json",
         "raw/lackland-rentcast-market-78254-2026_06.json",
-        "raw/lackland-rentcast-market-78227-2026_06.json"
+        "raw/lackland-rentcast-market-78227-2026_06.json",
+        "raw/lackland-census-profile-1600000US4840036-2026_06.json"
       ]
     },
     {
@@ -52,7 +54,7 @@
       "name": "Luke AFB",
       "status": "updated",
       "output_file": "output/luke-afb.json",
-      "existing_json_used": "/Users/macbookprom4/Programs/TheWing.ai/netlify/functions/cities/Luke.json",
+      "existing_json_used": "/Users/macbookprom4/Programs/TheWing.ai/netlify/functions/cities/luke.json",
       "housing_market_zips": [
         "85340",
         "85392",
@@ -60,29 +62,30 @@
         "85323",
         "85345"
       ],
-      "market_summary": {
-        "avg_home_value": 450000,
-        "average_sale_price": 488208,
-        "median_sale_price": 450000,
-        "median_list_price": 450000,
-        "price_per_sqft": 238,
-        "days_on_market": 37,
-        "total_sale_listings": 1749,
-        "average_rent": 2005,
-        "median_rent": 1829,
-        "rent_price_per_sqft": 1,
-        "rent_days_on_market": 1,
-        "total_rental_listings": 1256,
-        "sale_last_updated": "2026-06-27T00:00:00.000Z",
-        "rental_last_updated": "2026-06-27T00:00:00.000Z"
+      "api_sources_used": {
+        "rentcast": true,
+        "census": true,
+        "arcgis": false
       },
-      "warnings": [],
+      "key_outputs": {
+        "avg_home_value": 450000,
+        "median_sale_price": 450000,
+        "price_per_sqft": 238,
+        "median_rent": 1829,
+        "average_rent": 2005,
+        "population": 250193,
+        "median_household_income": 70139
+      },
+      "warnings": [
+        "ArcGIS refresh skipped/failed: ArcGIS request failed: 401 - {\"error\":{\"code\":498,\"message\":\"Token Invalid.\",\"details\":[\"The required authentication information is invalid. The token is either invalid or has expired.\"],\"restInfoUrl\":\"https://places-api.arcgis.com/arcgis/rest/info\"}}"
+      ],
       "raw_files": [
         "raw/luke-afb-rentcast-market-85340-2026_06.json",
         "raw/luke-afb-rentcast-market-85392-2026_06.json",
         "raw/luke-afb-rentcast-market-85395-2026_06.json",
         "raw/luke-afb-rentcast-market-85323-2026_06.json",
-        "raw/luke-afb-rentcast-market-85345-2026_06.json"
+        "raw/luke-afb-rentcast-market-85345-2026_06.json",
+        "raw/luke-afb-census-profile-1600000US0427820-2026_06.json"
       ]
     },
     {
@@ -98,32 +101,33 @@
         "89030",
         "89031"
       ],
-      "market_summary": {
-        "avg_home_value": 330000,
-        "average_sale_price": 375036,
-        "median_sale_price": 330000,
-        "median_list_price": 330000,
-        "price_per_sqft": 221,
-        "days_on_market": 38,
-        "total_sale_listings": 1222,
-        "average_rent": 1710,
-        "median_rent": 1620,
-        "rent_price_per_sqft": 1,
-        "rent_days_on_market": 25,
-        "total_rental_listings": 970,
-        "sale_last_updated": "2026-06-27T00:00:00.000Z",
-        "rental_last_updated": "2026-06-27T00:00:00.000Z"
+      "api_sources_used": {
+        "rentcast": true,
+        "census": true,
+        "arcgis": false
       },
-      "warnings": [],
+      "key_outputs": {
+        "avg_home_value": 330000,
+        "median_sale_price": 330000,
+        "price_per_sqft": 221,
+        "median_rent": 1620,
+        "average_rent": 1710,
+        "population": 650873,
+        "median_household_income": 70723
+      },
+      "warnings": [
+        "ArcGIS refresh skipped/failed: ArcGIS request failed: 401 - {\"error\":{\"code\":498,\"message\":\"Token Invalid.\",\"details\":[\"The required authentication information is invalid. The token is either invalid or has expired.\"],\"restInfoUrl\":\"https://places-api.arcgis.com/arcgis/rest/info\"}}"
+      ],
       "raw_files": [
         "raw/nellis-rentcast-market-89115-2026_06.json",
         "raw/nellis-rentcast-market-89156-2026_06.json",
         "raw/nellis-rentcast-market-89081-2026_06.json",
         "raw/nellis-rentcast-market-89030-2026_06.json",
-        "raw/nellis-rentcast-market-89031-2026_06.json"
+        "raw/nellis-rentcast-market-89031-2026_06.json",
+        "raw/nellis-census-profile-1600000US3240000-2026_06.json"
       ]
     }
   ],
   "failed": [],
-  "finished_at": "2026-06-27T15:14:55.402203+00:00"
+  "finished_at": "2026-06-27T15:42:27.259091+00:00"
 }

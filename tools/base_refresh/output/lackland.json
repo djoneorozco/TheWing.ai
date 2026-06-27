@@ -9,7 +9,7 @@
   "state_code": "TX",
   "geo_id": "1600000US4840036",
   "year": 2026,
-  "last_updated_data_from_sources": "2026-06-27",
+  "last_updated_data_from_sources": "2026-06",
   "image_url": "https://cdn.prod.website-files.com/69b6b526f23748df9f189b16/69c0dc6d478fad1e706ff1f4_dc56ce56878bed382d61aab987ab76eb_San_Antonio.png",
   "base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f75f2d5218031764a79775_Lackland.png",
   "zip": "78236",
@@ -18,11 +18,11 @@
   "avg_home_value": 319950,
   "average_home_value": 319950,
   "avgHome": 319950,
-  "city_avg_home": 275000,
+  "city_avg_home": 319950,
   "snapshot": {
-    "population_city": 5896,
+    "population_city": 6650,
     "population_metro": 2750000,
-    "median_household_income": 73646,
+    "median_household_income": 110833,
     "median_home_price": 319950,
     "market_trend_yoy": -3.0,
     "traffic_level": "High",
@@ -35,29 +35,26 @@
     "days_on_market": 35,
     "inventory_months": null,
     "price_per_sqft": 155,
-    "active_listings_total": 7450,
+    "active_listings_total": 4221,
     "market_type_summary": "Stable with healthy buyer inventory",
-    "zillow_average_home_value": 275000,
+    "zillow_average_home_value": 319950,
     "zillow_one_year_change_percent": -3.0,
-    "as_of": "2026-06-27",
-    "average_sale_price": 320390,
-    "total_listings": 4221,
-    "new_listings": 1581,
-    "source": "RentCast",
+    "as_of": "2026-06",
+    "source": "RentCast Markets API",
     "source_last_updated": "2026-06-27T00:00:00.000Z",
-    "method": "Aggregated from surrounding housing-market ZIPs"
+    "method": "Aggregated from selected PCS housing-market ZIPs"
   },
   "metrics": {
-    "median_list_price": 282667,
-    "median_sold_price": 275167,
-    "median_sale_price": 275167,
-    "days_on_market": 69,
+    "median_list_price": 319950,
+    "median_sold_price": 319950,
+    "median_sale_price": 319950,
+    "days_on_market": 35,
     "inventory_months": null,
-    "price_per_sqft": 165,
-    "median_rent": 1825,
-    "active_listings_total": 7450,
+    "price_per_sqft": 155,
+    "median_rent": 1795,
+    "active_listings_total": 4221,
     "property_tax_rate": 0.0215,
-    "as_of": "2026-03"
+    "as_of": "2026-06"
   },
   "mortgage_assumptions": {
     "apr_percent": 6.2,
@@ -94,31 +91,32 @@
     "notes": "VA loan estimate for San Antonio area"
   },
   "population": {
-    "estimate": 5896,
-    "median_age": 21.2,
-    "persons_per_household": 3.2
+    "estimate": 6650,
+    "median_age": 21.1,
+    "persons_per_household": 3.93
   },
   "households": {
-    "total_households": 1450
+    "total_households": 290
   },
   "income": {
-    "median_household_income": 73646,
-    "per_capita_income": 24500,
-    "poverty_rate_percent": 11.4
+    "median_household_income": 110833,
+    "per_capita_income": 24592,
+    "poverty_rate_percent": 3.0
   },
   "education": {
-    "high_school_grad_or_higher_percent": 97.8,
-    "bachelors_degree_or_higher_percent": 41.1
+    "high_school_grad_or_higher_percent": 97.5,
+    "bachelors_degree_or_higher_percent": 43.0
   },
   "veterans": {
-    "veteran_population_percent": 12.4
+    "veteran_population_percent": 377,
+    "veteran_population": 377
   },
   "immigration": {
-    "foreign_born_percent": 6.4
+    "foreign_born_percent": 83.0
   },
   "labor": {
-    "mean_travel_time_to_work_minutes": 18.5,
-    "unemployment_rate_percent": 4.8
+    "mean_travel_time_to_work_minutes": 10.6,
+    "unemployment_rate_percent": 6.0
   },
   "crime_status": {
     "installation": "Extremely safe; gated military access with 24/7 security.",
@@ -129,7 +127,7 @@
     "off_base": "Varies; Northside ISD is generally preferred for off-base residents."
   },
   "rental_vacancy": {
-    "rate_percent": 9.2,
+    "rate_percent": -888888888,
     "notes": "Healthy inventory for military renters in 2026."
   },
   "rental_metrics": {
@@ -141,10 +139,10 @@
     "days_on_market": 32,
     "total_listings": 2193,
     "new_listings": 698,
-    "as_of": "2026-06-27",
-    "source": "RentCast",
+    "as_of": "2026-06",
+    "source": "RentCast Markets API",
     "source_last_updated": "2026-06-27T00:00:00.000Z",
-    "method": "Aggregated from surrounding housing-market ZIPs"
+    "method": "Aggregated from selected PCS housing-market ZIPs"
   },
   "climate_weather": {
     "spring": "Warm/Humid; 70–85°F",
@@ -409,19 +407,19 @@
     }
   },
   "housing": {
-    "housing_units": 1650,
-    "median_value_owner_occupied": 275000,
+    "housing_units": 359,
+    "median_value_owner_occupied": -666666666,
     "market": {
-      "zillow_average_home_value": 275000,
+      "zillow_average_home_value": 319950,
       "zillow_one_year_change_percent": -3.0,
       "market_type_summary": "Stable with healthy buyer inventory",
-      "average_days_on_market": 69,
-      "median_sale_price_current": 275167,
-      "median_listing_price_realtor": 282667,
-      "median_listing_price_per_sqft": 165,
-      "active_listings_total": 7450,
+      "average_days_on_market": 35,
+      "median_sale_price_current": 319950,
+      "median_listing_price_realtor": 319950,
+      "median_listing_price_per_sqft": 155,
+      "active_listings_total": 4221,
       "q1_2026": {
-        "median_sale_price": 275167
+        "median_sale_price": 319950
       },
       "sale_history_36_months": [
         {
@@ -1272,8 +1270,11 @@
   },
   "sources": {
     "demographics": {
-      "provider": "US Census Bureau / World Population Review",
-      "as_of": "2026-03"
+      "provider": "US Census Bureau ACS 5-Year Profile",
+      "dataset": "acs/acs5/profile",
+      "year": "2023",
+      "as_of": "2026-06",
+      "raw_file": "raw/lackland-census-profile-1600000US4840036-2026_06.json"
     },
     "rent": {
       "provider": "Trulia / RentHop",
@@ -1286,7 +1287,7 @@
     "housing_market": {
       "provider": "RentCast",
       "dataset": "RentCast Markets API",
-      "as_of": "2026-06-27",
+      "as_of": "2026-06",
       "batch_id": "2026_06",
       "primary_base_zip": "78236",
       "housing_market_zips": [
@@ -1302,8 +1303,7 @@
         "raw/lackland-rentcast-market-78253-2026_06.json",
         "raw/lackland-rentcast-market-78254-2026_06.json",
         "raw/lackland-rentcast-market-78227-2026_06.json"
-      ],
-      "existing_json_used": "/Users/macbookprom4/Programs/TheWing.ai/netlify/functions/cities/lackland.json"
+      ]
     }
   },
   "compatibility": {
@@ -1315,7 +1315,9 @@
       "Base-facing label is set to Lackland AFB, while San Antonio is preserved as the surrounding metro/submarket context.",
       "property_tax_rate and insurance_rate are normalized to decimal form for deterministic math, with percent aliases preserved for display compatibility.",
       "This file now includes base_profile for the PCSUnited Base tab, including gate orientation, visitor control center, major services, on-base housing, recommended nearby neighborhoods, commute intelligence, BAH market guidance, PCS watchouts, and source notes."
-    ]
+    ],
+    "api_refresh_ready": true,
+    "last_api_refresh_batch": "2026_06"
   },
   "market_area": {
     "primary_base_zip": "78236",
@@ -1326,7 +1328,7 @@
       "78254",
       "78227"
     ],
-    "method": "Uses surrounding PCS buyer/renter ZIPs, not installation-only ZIP."
+    "method": "Uses selected PCS buyer/renter ZIPs, not installation-only ZIP."
   },
   "rentcast_zip_summaries": [
     {
@@ -1476,20 +1478,37 @@
     }
   ],
   "data_quality": {
-    "housing_market": {
-      "provider": "RentCast",
-      "as_of": "2026-06-27",
+    "api_refresh": {
       "batch_id": "2026_06",
-      "confidence": "medium-high",
-      "method": "Surrounding housing-market ZIP aggregation",
+      "as_of": "2026-06-27",
+      "housing_market": {
+        "provider": "RentCast",
+        "confidence": "medium-high",
+        "method": "Selected housing-market ZIP aggregation"
+      },
+      "demographics": {
+        "provider": "US Census Bureau ACS",
+        "confidence": "high",
+        "method": "Place-level ACS profile where geo_id is available"
+      },
+      "nearby_services": {
+        "provider": "ArcGIS Places",
+        "confidence": "medium",
+        "method": "Near-point places query by base coordinates"
+      },
       "raw_files": [
         "raw/lackland-rentcast-market-78245-2026_06.json",
         "raw/lackland-rentcast-market-78251-2026_06.json",
         "raw/lackland-rentcast-market-78253-2026_06.json",
         "raw/lackland-rentcast-market-78254-2026_06.json",
-        "raw/lackland-rentcast-market-78227-2026_06.json"
+        "raw/lackland-rentcast-market-78227-2026_06.json",
+        "raw/lackland-census-profile-1600000US4840036-2026_06.json"
       ],
-      "notes": "Sale and rental metrics are aggregated across selected PCS housing-market ZIPs."
+      "notes": [
+        "The JSON structure is preserved from the existing PCSU base file.",
+        "API values update dynamic data fields only.",
+        "Curated PCS guidance, official links, gates, and base_profile intelligence are preserved unless manually updated."
+      ]
     }
   }
 }

@@ -9,7 +9,7 @@
   "state_code": "NV",
   "geo_id": "1600000US3240000",
   "year": 2026,
-  "last_updated_data_from_sources": "2026-06-27",
+  "last_updated_data_from_sources": "2026-06",
   "image_url": "https://cdn.prod.website-files.com/69b6b526f23748df9f189b16/69c0dc6d478fad1e706ff1f4_dc56ce56878bed382d61aab987ab76eb_San_Antonio.png",
   "base_image_url": "",
   "zip": "89191",
@@ -18,11 +18,11 @@
   "avg_home_value": 330000,
   "average_home_value": 330000,
   "avgHome": 330000,
-  "city_avg_home": 426583,
+  "city_avg_home": 330000,
   "snapshot": {
-    "population_city": 678924,
+    "population_city": 650873,
     "population_metro": 2380237,
-    "median_household_income": 73877,
+    "median_household_income": 70723,
     "median_home_price": 330000,
     "market_trend_yoy": -2.7,
     "traffic_level": "High",
@@ -35,29 +35,26 @@
     "days_on_market": 38,
     "inventory_months": null,
     "price_per_sqft": 221,
-    "active_listings_total": null,
+    "active_listings_total": 1222,
     "market_type_summary": "Cooling but still active; buyers have more leverage than during peak pandemic-era conditions.",
-    "zillow_average_home_value": 426583,
+    "zillow_average_home_value": 330000,
     "zillow_one_year_change_percent": -2.7,
-    "as_of": "2026-06-27",
-    "average_sale_price": 375036,
-    "total_listings": 1222,
-    "new_listings": 301,
-    "source": "RentCast",
+    "as_of": "2026-06",
+    "source": "RentCast Markets API",
     "source_last_updated": "2026-06-27T00:00:00.000Z",
-    "method": "Aggregated from surrounding housing-market ZIPs"
+    "method": "Aggregated from selected PCS housing-market ZIPs"
   },
   "metrics": {
-    "median_list_price": 459900,
-    "median_sold_price": 426583,
-    "median_sale_price": 426583,
-    "days_on_market": 52,
+    "median_list_price": 330000,
+    "median_sold_price": 330000,
+    "median_sale_price": 330000,
+    "days_on_market": 38,
     "inventory_months": null,
-    "price_per_sqft": 265,
-    "median_rent": 1900,
-    "active_listings_total": null,
+    "price_per_sqft": 221,
+    "median_rent": 1620,
+    "active_listings_total": 1222,
     "property_tax_rate": 0.0064,
-    "as_of": "2026-03"
+    "as_of": "2026-06"
   },
   "mortgage_assumptions": {
     "apr_percent": 6.2,
@@ -95,32 +92,33 @@
     "notes": "Estimated VA loan all-in payment for Las Vegas area using average home value, 6.2% APR, property tax, insurance, and HOA assumptions."
   },
   "population": {
-    "estimate": 678924,
+    "estimate": 650873,
     "median_age": 38.5,
-    "persons_per_household": 2.7
+    "persons_per_household": 2.63
   },
   "households": {
-    "total_households": 253523
+    "total_households": 244429
   },
   "income": {
-    "median_household_income": 73877,
-    "per_capita_income": 39906,
-    "poverty_rate_percent": 14
+    "median_household_income": 70723,
+    "per_capita_income": 38421,
+    "poverty_rate_percent": 14.2
   },
   "education": {
-    "high_school_grad_or_higher_percent": 87.2,
-    "bachelors_degree_or_higher_percent": 28
+    "high_school_grad_or_higher_percent": 85.8,
+    "bachelors_degree_or_higher_percent": 27.3
   },
   "veterans": {
-    "veteran_population_percent": 5.9,
-    "veteran_population_estimate": 39887
+    "veteran_population_percent": 136181,
+    "veteran_population_estimate": 39887,
+    "veteran_population": 136181
   },
   "immigration": {
-    "foreign_born_percent": 20.9
+    "foreign_born_percent": 50.4
   },
   "labor": {
-    "mean_travel_time_to_work_minutes": 25.7,
-    "unemployment_rate_percent": 5.4
+    "mean_travel_time_to_work_minutes": 25.8,
+    "unemployment_rate_percent": 7.2
   },
   "crime_status": {
     "installation": "Secure military installation environment with controlled access and major Air Force mission presence.",
@@ -131,7 +129,7 @@
     "off_base": "School quality varies widely across the Las Vegas metro; Summerlin, Henderson, and selected northwest pockets are often stronger family-screening areas."
   },
   "rental_vacancy": {
-    "rate_percent": 6.5,
+    "rate_percent": -888888888,
     "notes": "Las Vegas rental market appears more balanced than peak-pandemic conditions, with rents cooling from prior highs but still elevated versus pre-pandemic levels."
   },
   "rental_metrics": {
@@ -143,10 +141,10 @@
     "days_on_market": 25,
     "total_listings": 970,
     "new_listings": 341,
-    "as_of": "2026-06-27",
-    "source": "RentCast",
+    "as_of": "2026-06",
+    "source": "RentCast Markets API",
     "source_last_updated": "2026-06-27T00:00:00.000Z",
-    "method": "Aggregated from surrounding housing-market ZIPs"
+    "method": "Aggregated from selected PCS housing-market ZIPs"
   },
   "climate_weather": {
     "spring": "Warm/Dry; 65–85°F",
@@ -423,19 +421,19 @@
     }
   },
   "housing": {
-    "housing_units": 276629,
-    "median_value_owner_occupied": 458300,
+    "housing_units": 263958,
+    "median_value_owner_occupied": 395300,
     "market": {
-      "zillow_average_home_value": 426583,
+      "zillow_average_home_value": 330000,
       "zillow_one_year_change_percent": -2.7,
       "market_type_summary": "Cooling but still active; more buyer leverage than peak market.",
-      "average_days_on_market": 52,
-      "median_sale_price_current": 426583,
-      "median_listing_price_realtor": 459900,
-      "median_listing_price_per_sqft": 265,
-      "active_listings_total": null,
+      "average_days_on_market": 38,
+      "median_sale_price_current": 330000,
+      "median_listing_price_realtor": 330000,
+      "median_listing_price_per_sqft": 221,
+      "active_listings_total": 1222,
       "q1_2026": {
-        "median_sale_price": 426583
+        "median_sale_price": 330000
       },
       "sale_history_36_months": [
         {
@@ -1024,8 +1022,11 @@
       "notes": "Used for Nellis AFB location, Clark County context, and ZIP 89191."
     },
     "demographics": {
-      "provider": "US Census Bureau QuickFacts / Census Reporter ACS",
-      "as_of": "2024 ACS / 2020-2024"
+      "provider": "US Census Bureau ACS 5-Year Profile",
+      "dataset": "acs/acs5/profile",
+      "year": "2023",
+      "as_of": "2026-06",
+      "raw_file": "raw/nellis-census-profile-1600000US3240000-2026_06.json"
     },
     "rent": {
       "provider": "Zillow Rental Manager / Apartments.com / local Las Vegas rental reports",
@@ -1042,7 +1043,7 @@
     "housing_market": {
       "provider": "RentCast",
       "dataset": "RentCast Markets API",
-      "as_of": "2026-06-27",
+      "as_of": "2026-06",
       "batch_id": "2026_06",
       "primary_base_zip": "89191",
       "housing_market_zips": [
@@ -1058,8 +1059,7 @@
         "raw/nellis-rentcast-market-89081-2026_06.json",
         "raw/nellis-rentcast-market-89030-2026_06.json",
         "raw/nellis-rentcast-market-89031-2026_06.json"
-      ],
-      "existing_json_used": "/Users/macbookprom4/Programs/TheWing.ai/netlify/functions/cities/nellis.json"
+      ]
     }
   },
   "compatibility": {
@@ -1071,7 +1071,9 @@
       "Las Vegas / North Las Vegas is preserved as the surrounding metro/submarket context; base-specific market data was retained.",
       "property_tax_rate and insurance_rate are normalized to decimal form for deterministic math, with percent aliases preserved for display compatibility.",
       "This file now includes base_profile for the PCSUnited Base tab, including gate orientation, visitor control center, major services, on-base housing, recommended nearby neighborhoods, commute intelligence, BAH market guidance, PCS watchouts, and source notes."
-    ]
+    ],
+    "api_refresh_ready": true,
+    "last_api_refresh_batch": "2026_06"
   },
   "market_area": {
     "primary_base_zip": "89191",
@@ -1082,7 +1084,7 @@
       "89030",
       "89031"
     ],
-    "method": "Uses surrounding PCS buyer/renter ZIPs, not installation-only ZIP."
+    "method": "Uses selected PCS buyer/renter ZIPs, not installation-only ZIP."
   },
   "rentcast_zip_summaries": [
     {
@@ -1232,20 +1234,37 @@
     }
   ],
   "data_quality": {
-    "housing_market": {
-      "provider": "RentCast",
-      "as_of": "2026-06-27",
+    "api_refresh": {
       "batch_id": "2026_06",
-      "confidence": "medium-high",
-      "method": "Surrounding housing-market ZIP aggregation",
+      "as_of": "2026-06-27",
+      "housing_market": {
+        "provider": "RentCast",
+        "confidence": "medium-high",
+        "method": "Selected housing-market ZIP aggregation"
+      },
+      "demographics": {
+        "provider": "US Census Bureau ACS",
+        "confidence": "high",
+        "method": "Place-level ACS profile where geo_id is available"
+      },
+      "nearby_services": {
+        "provider": "ArcGIS Places",
+        "confidence": "medium",
+        "method": "Near-point places query by base coordinates"
+      },
       "raw_files": [
         "raw/nellis-rentcast-market-89115-2026_06.json",
         "raw/nellis-rentcast-market-89156-2026_06.json",
         "raw/nellis-rentcast-market-89081-2026_06.json",
         "raw/nellis-rentcast-market-89030-2026_06.json",
-        "raw/nellis-rentcast-market-89031-2026_06.json"
+        "raw/nellis-rentcast-market-89031-2026_06.json",
+        "raw/nellis-census-profile-1600000US3240000-2026_06.json"
       ],
-      "notes": "Sale and rental metrics are aggregated across selected PCS housing-market ZIPs."
+      "notes": [
+        "The JSON structure is preserved from the existing PCSU base file.",
+        "API values update dynamic data fields only.",
+        "Curated PCS guidance, official links, gates, and base_profile intelligence are preserved unless manually updated."
+      ]
     }
   }
 }

@@ -9,7 +9,7 @@
   "state_code": "AZ",
   "geo_id": "1600000US0427820",
   "year": 2026,
-  "last_updated_data_from_sources": "2026-06-27",
+  "last_updated_data_from_sources": "2026-06",
   "image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
   "base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
   "zip": "85309",
@@ -18,11 +18,11 @@
   "avg_home_value": 450000,
   "average_home_value": 450000,
   "avgHome": 450000,
-  "city_avg_home": 408515,
+  "city_avg_home": 450000,
   "snapshot": {
-    "population_city": 255000,
+    "population_city": 250193,
     "population_metro": 5200000,
-    "median_household_income": 76000,
+    "median_household_income": 70139,
     "median_home_price": 450000,
     "market_trend_yoy": -2.0,
     "traffic_level": "Moderate to High",
@@ -35,29 +35,26 @@
     "days_on_market": 37,
     "inventory_months": null,
     "price_per_sqft": 238,
-    "active_listings_total": 1300,
+    "active_listings_total": 1749,
     "market_type_summary": "Large Phoenix West Valley fighter-training market with strong inventory depth, heat and utility exposure, HOA/new-build variation, and commute sensitivity by corridor",
-    "zillow_average_home_value": 408515,
+    "zillow_average_home_value": 450000,
     "zillow_one_year_change_percent": -2.0,
-    "as_of": "2026-06-27",
-    "average_sale_price": 488208,
-    "total_listings": 1749,
-    "new_listings": 426,
-    "source": "RentCast",
+    "as_of": "2026-06",
+    "source": "RentCast Markets API",
     "source_last_updated": "2026-06-27T00:00:00.000Z",
-    "method": "Aggregated from surrounding housing-market ZIPs"
+    "method": "Aggregated from selected PCS housing-market ZIPs"
   },
   "metrics": {
     "median_list_price": 450000,
-    "median_sold_price": 408515,
-    "median_sale_price": 408515,
-    "days_on_market": 24,
+    "median_sold_price": 450000,
+    "median_sale_price": 450000,
+    "days_on_market": 37,
     "inventory_months": null,
-    "price_per_sqft": 255,
-    "median_rent": 2450,
-    "active_listings_total": 1300,
+    "price_per_sqft": 238,
+    "median_rent": 1829,
+    "active_listings_total": 1749,
     "property_tax_rate": 0.0062,
-    "as_of": "2026-05"
+    "as_of": "2026-06"
   },
   "mortgage_assumptions": {
     "apr_percent": 6.2,
@@ -95,31 +92,32 @@
     "notes": "VA loan estimate for Glendale / Luke AFB / Phoenix West Valley area"
   },
   "population": {
-    "estimate": 255000,
-    "median_age": 35.4,
-    "persons_per_household": 2.7
+    "estimate": 250193,
+    "median_age": 34.5,
+    "persons_per_household": 2.83
   },
   "households": {
-    "total_households": 92000
+    "total_households": 86733
   },
   "income": {
-    "median_household_income": 76000,
-    "per_capita_income": 37500,
-    "poverty_rate_percent": 12.8
+    "median_household_income": 70139,
+    "per_capita_income": 31981,
+    "poverty_rate_percent": 16.2
   },
   "education": {
-    "high_school_grad_or_higher_percent": 88.5,
-    "bachelors_degree_or_higher_percent": 27.8
+    "high_school_grad_or_higher_percent": 84.5,
+    "bachelors_degree_or_higher_percent": 23.5
   },
   "veterans": {
-    "veteran_population_percent": 8.1
+    "veteran_population_percent": 42828,
+    "veteran_population": 42828
   },
   "immigration": {
-    "foreign_born_percent": 15.6
+    "foreign_born_percent": 38.5
   },
   "labor": {
-    "mean_travel_time_to_work_minutes": 28.4,
-    "unemployment_rate_percent": 3.8
+    "mean_travel_time_to_work_minutes": 28.0,
+    "unemployment_rate_percent": 5.3
   },
   "crime_status": {
     "installation": "Extremely safe; gated military access with controlled entry and 24/7 base security.",
@@ -130,7 +128,7 @@
     "off_base": "Dysart Unified, Litchfield Elementary, Agua Fria Union, Peoria Unified, Glendale Union, Deer Valley, and surrounding districts vary by exact address. Families should verify school assignment, commute, and support services before choosing housing."
   },
   "rental_vacancy": {
-    "rate_percent": 6.8,
+    "rate_percent": -888888888,
     "notes": "Rental inventory is influenced by Luke AFB, Phoenix West Valley growth, new construction, healthcare, logistics, sports/entertainment, retirees, and broader Phoenix metro demand."
   },
   "rental_metrics": {
@@ -142,10 +140,10 @@
     "days_on_market": 1,
     "total_listings": 1256,
     "new_listings": 425,
-    "as_of": "2026-06-27",
-    "source": "RentCast",
+    "as_of": "2026-06",
+    "source": "RentCast Markets API",
     "source_last_updated": "2026-06-27T00:00:00.000Z",
-    "method": "Aggregated from surrounding housing-market ZIPs"
+    "method": "Aggregated from selected PCS housing-market ZIPs"
   },
   "climate_weather": {
     "spring": "Warm/Dry; 65–88°F",
@@ -434,19 +432,19 @@
     }
   },
   "housing": {
-    "housing_units": 92000,
-    "median_value_owner_occupied": 408515,
+    "housing_units": 91847,
+    "median_value_owner_occupied": 347000,
     "market": {
-      "zillow_average_home_value": 408515,
+      "zillow_average_home_value": 450000,
       "zillow_one_year_change_percent": -2.0,
       "market_type_summary": "Phoenix West Valley military market with broad inventory, fast-moving well-priced homes, heat/utility overlays, and HOA-sensitive affordability",
-      "average_days_on_market": 24,
-      "median_sale_price_current": 408515,
+      "average_days_on_market": 37,
+      "median_sale_price_current": 450000,
       "median_listing_price_realtor": 450000,
-      "median_listing_price_per_sqft": 255,
-      "active_listings_total": 1300,
+      "median_listing_price_per_sqft": 238,
+      "active_listings_total": 1749,
       "q1_2026": {
-        "median_sale_price": 408515
+        "median_sale_price": 450000
       },
       "sale_history_36_months": [
         {
@@ -1322,8 +1320,11 @@
   },
   "sources": {
     "demographics": {
-      "provider": "US Census Bureau / Glendale, Maricopa County, and Phoenix West Valley regional planning estimates",
-      "as_of": "2026-05"
+      "provider": "US Census Bureau ACS 5-Year Profile",
+      "dataset": "acs/acs5/profile",
+      "year": "2023",
+      "as_of": "2026-06",
+      "raw_file": "raw/luke-afb-census-profile-1600000US0427820-2026_06.json"
     },
     "rent": {
       "provider": "Local rental listing estimates / Phoenix West Valley rental observations",
@@ -1336,7 +1337,7 @@
     "housing_market": {
       "provider": "RentCast",
       "dataset": "RentCast Markets API",
-      "as_of": "2026-06-27",
+      "as_of": "2026-06",
       "batch_id": "2026_06",
       "primary_base_zip": "85309",
       "housing_market_zips": [
@@ -1352,8 +1353,7 @@
         "raw/luke-afb-rentcast-market-85395-2026_06.json",
         "raw/luke-afb-rentcast-market-85323-2026_06.json",
         "raw/luke-afb-rentcast-market-85345-2026_06.json"
-      ],
-      "existing_json_used": "/Users/macbookprom4/Programs/TheWing.ai/netlify/functions/cities/Luke.json"
+      ]
     }
   },
   "compatibility": {
@@ -1366,7 +1366,9 @@
       "property_tax_rate and insurance_rate are normalized to decimal form for deterministic math, with percent aliases preserved for display compatibility.",
       "This file includes the shared placeholder base_image_url requested for bases without finished map images.",
       "Gate and housing office details are aligned to official Luke AFB, Air Force Housing, Military OneSource, and public base-directory sources as of June 27, 2026."
-    ]
+    ],
+    "api_refresh_ready": true,
+    "last_api_refresh_batch": "2026_06"
   },
   "market_area": {
     "primary_base_zip": "85309",
@@ -1377,7 +1379,7 @@
       "85323",
       "85345"
     ],
-    "method": "Uses surrounding PCS buyer/renter ZIPs, not installation-only ZIP."
+    "method": "Uses selected PCS buyer/renter ZIPs, not installation-only ZIP."
   },
   "rentcast_zip_summaries": [
     {
@@ -1527,20 +1529,37 @@
     }
   ],
   "data_quality": {
-    "housing_market": {
-      "provider": "RentCast",
-      "as_of": "2026-06-27",
+    "api_refresh": {
       "batch_id": "2026_06",
-      "confidence": "medium-high",
-      "method": "Surrounding housing-market ZIP aggregation",
+      "as_of": "2026-06-27",
+      "housing_market": {
+        "provider": "RentCast",
+        "confidence": "medium-high",
+        "method": "Selected housing-market ZIP aggregation"
+      },
+      "demographics": {
+        "provider": "US Census Bureau ACS",
+        "confidence": "high",
+        "method": "Place-level ACS profile where geo_id is available"
+      },
+      "nearby_services": {
+        "provider": "ArcGIS Places",
+        "confidence": "medium",
+        "method": "Near-point places query by base coordinates"
+      },
       "raw_files": [
         "raw/luke-afb-rentcast-market-85340-2026_06.json",
         "raw/luke-afb-rentcast-market-85392-2026_06.json",
         "raw/luke-afb-rentcast-market-85395-2026_06.json",
         "raw/luke-afb-rentcast-market-85323-2026_06.json",
-        "raw/luke-afb-rentcast-market-85345-2026_06.json"
+        "raw/luke-afb-rentcast-market-85345-2026_06.json",
+        "raw/luke-afb-census-profile-1600000US0427820-2026_06.json"
       ],
-      "notes": "Sale and rental metrics are aggregated across selected PCS housing-market ZIPs."
+      "notes": [
+        "The JSON structure is preserved from the existing PCSU base file.",
+        "API values update dynamic data fields only.",
+        "Curated PCS guidance, official links, gates, and base_profile intelligence are preserved unless manually updated."
+      ]
     }
   }
 }
