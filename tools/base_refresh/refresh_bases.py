@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """
 PCSUnited / TheWing.ai
-Base JSON Refresh Pipeline - RentCast + Census + ArcGIS
+Base JSON Refresh Pipeline - RentCast + Census Only
 
 Purpose:
 - Preserve the complete PCSU base JSON structure.
 - Use the existing/base JSON as the template.
-- Refresh only the fields that should come from APIs.
+- Refresh only valid API data fields.
 - Output a complete base.json file.
 
 API responsibility:
 - RentCast = housing market, sale metrics, rental metrics
-- Census = demographics, income, education, veterans, labor, households
-- ArcGIS = nearby services / POI context
-- Existing JSON = curated PCS guidance, base_profile, gates, watchouts, narrative
+- Census = demographics, income, education, labor, households
+- Existing JSON = curated PCS guidance, base_profile, gates, services, watchouts, narrative
 
 Run from repo root:
 
@@ -27,11 +26,11 @@ Example .env:
 
     RENTCAST_API_KEY=your_key_here
     CENSUS_API_KEY=your_key_here
-    ARCGIS_API_KEY=your_key_here
 
 Important:
 - raw/*.json stays local/private.
 - output/*.json is safe to review and push.
+- ArcGIS is intentionally removed from this refresh pipeline.
 """
 
 import os
@@ -80,10 +79,6 @@ CENSUS_YEAR = "2023"
 CENSUS_DATASET = "acs/acs5/profile"
 CENSUS_BASE_URL = f"https://api.census.gov/data/{CENSUS_YEAR}/{CENSUS_DATASET}"
 
-ARCGIS_PLACES_BASE_URL = (
-    "https://places-api.arcgis.com/arcgis/rest/services/places-service/v1"
-)
-
 REQUEST_TIMEOUT_SECONDS = 30
 REQUEST_SLEEP_SECONDS = 0.25
 
@@ -95,6 +90,14 @@ AS_OF_MONTH = datetime.now(timezone.utc).strftime("%Y-%m")
 # ============================================================
 # BASIC HELPERS
 # ============================================================
+
+CENSUS_MISSING_VALUES = {
+    -666666666,
+    -777777777,
+    -888888888,
+    -999999999
+}
+
 
 def load_env():
     if load_dotenv is None:
@@ -136,6 +139,19 @@ def now_iso():
 
 
 def safe_number(value):
+    """
+    Converts API values into numbers.
+
+    Important:
+    Census sometimes returns sentinel values such as:
+      -666666666
+      -777777777
+      -888888888
+      -999999999
+
+    Those mean missing / suppressed / not available.
+    They must never overwrite good baseline JSON values.
+    """
     if value is None:
         return None
 
@@ -143,6 +159,8 @@ def safe_number(value):
         return None
 
     if isinstance(value, (int, float)):
+        if value in CENSUS_MISSING_VALUES:
+            return None
         return value
 
     if isinstance(value, str):
@@ -153,17 +171,36 @@ def safe_number(value):
             .strip()
         )
 
-        if cleaned in ("", "null", "None", "N/A", "-"):
+        if cleaned in ("", "null", "None", "N/A", "-", "*****", "(X)"):
             return None
 
         try:
             if "." in cleaned:
-                return float(cleaned)
-            return int(cleaned)
+                num = float(cleaned)
+            else:
+                num = int(cleaned)
+
+            if num in CENSUS_MISSING_VALUES:
+                return None
+
+            return num
+
         except ValueError:
             return None
 
     return None
+
+
+def valid_percent(value):
+    num = safe_number(value)
+
+    if num is None:
+        return None
+
+    if num < 0 or num > 100:
+        return None
+
+    return num
 
 
 def round_number(value):
@@ -182,6 +219,13 @@ def round_money(value):
 
 def round_decimal(value, places=2):
     num = safe_number(value)
+    if num is None:
+        return None
+    return round(num, places)
+
+
+def round_percent(value, places=1):
+    num = valid_percent(value)
     if num is None:
         return None
     return round(num, places)
@@ -228,8 +272,26 @@ def sum_or_none(values):
 
 
 def set_if_value(target, key, value):
+    """
+    Only writes valid API values.
+    This protects baseline JSON values from being replaced by None.
+    """
     if value is not None:
         target[key] = value
+
+
+def update_section_valid(target, source):
+    """
+    Updates a dict with only non-None values.
+    """
+    if not isinstance(source, dict):
+        return target
+
+    for key, value in source.items():
+        if value is not None:
+            target[key] = value
+
+    return target
 
 
 def get_nested(data, path, default=None):
@@ -341,6 +403,7 @@ def load_existing_or_minimal(base):
         "mortgage_assumptions": {},
         "ownership_costs": {},
         "costs": {},
+        "avg_home_mortgage_monthly": {},
         "population": {},
         "households": {},
         "income": {},
@@ -601,23 +664,35 @@ def extract_rentcast_summary(zip_payloads):
 
 CENSUS_PROFILE_VARIABLES = {
     "NAME": "NAME",
+
+    # Core people / households
     "population": "DP05_0001E",
     "median_age": "DP05_0018E",
     "total_households": "DP02_0001E",
     "persons_per_household": "DP02_0016E",
+
+    # Income / economy
     "median_household_income": "DP03_0062E",
     "per_capita_income": "DP03_0088E",
     "poverty_rate_percent": "DP03_0128PE",
-    "high_school_grad_or_higher_percent": "DP02_0067PE",
-    "bachelors_degree_or_higher_percent": "DP02_0068PE",
-    "veteran_population": "DP02_0095E",
-    "veteran_population_percent": "DP02_0095PE",
-    "foreign_born_percent": "DP02_0092PE",
     "mean_travel_time_to_work_minutes": "DP03_0025E",
     "unemployment_rate_percent": "DP03_0009PE",
+
+    # Education
+    "high_school_grad_or_higher_percent": "DP02_0067PE",
+    "bachelors_degree_or_higher_percent": "DP02_0068PE",
+
+    # Housing
     "housing_units": "DP04_0001E",
     "rental_vacancy_rate_percent": "DP04_0005PE",
-    "median_value_owner_occupied": "DP04_0089E"
+    "median_value_owner_occupied": "DP04_0089E",
+
+    # Use veteran count only for now.
+    # Veteran percentage is preserved from baseline because profile variable behavior
+    # can vary by geography and should not overwrite curated baseline values.
+    "veteran_population": "DP02_0095E"
+
+    # Immigration is also preserved from baseline for now.
 }
 
 
@@ -690,150 +765,70 @@ def parse_census_profile(payload):
 
     row = dict(zip(headers, values))
 
-    def val(field_name):
+    def raw(field_name):
         variable = CENSUS_PROFILE_VARIABLES.get(field_name)
-        return safe_number(row.get(variable))
+        return row.get(variable)
 
     return {
         "name": row.get("NAME"),
 
         "population": {
-            "estimate": round_number(val("population")),
-            "median_age": round_decimal(val("median_age"), 1),
+            "estimate": round_number(raw("population")),
+            "median_age": round_decimal(raw("median_age"), 1),
             "persons_per_household": round_decimal(
-                val("persons_per_household"), 2
+                raw("persons_per_household"), 2
             )
         },
 
         "households": {
-            "total_households": round_number(val("total_households"))
+            "total_households": round_number(raw("total_households"))
         },
 
         "income": {
             "median_household_income": round_money(
-                val("median_household_income")
+                raw("median_household_income")
             ),
-            "per_capita_income": round_money(val("per_capita_income")),
-            "poverty_rate_percent": round_decimal(
-                val("poverty_rate_percent"), 1
+            "per_capita_income": round_money(raw("per_capita_income")),
+            "poverty_rate_percent": round_percent(
+                raw("poverty_rate_percent"), 1
             )
         },
 
         "education": {
-            "high_school_grad_or_higher_percent": round_decimal(
-                val("high_school_grad_or_higher_percent"), 1
+            "high_school_grad_or_higher_percent": round_percent(
+                raw("high_school_grad_or_higher_percent"), 1
             ),
-            "bachelors_degree_or_higher_percent": round_decimal(
-                val("bachelors_degree_or_higher_percent"), 1
+            "bachelors_degree_or_higher_percent": round_percent(
+                raw("bachelors_degree_or_higher_percent"), 1
             )
         },
 
         "veterans": {
-            "veteran_population": round_number(val("veteran_population")),
-            "veteran_population_percent": round_decimal(
-                val("veteran_population_percent"), 1
-            )
-        },
-
-        "immigration": {
-            "foreign_born_percent": round_decimal(
-                val("foreign_born_percent"), 1
-            )
+            "veteran_population": round_number(raw("veteran_population"))
         },
 
         "labor": {
             "mean_travel_time_to_work_minutes": round_decimal(
-                val("mean_travel_time_to_work_minutes"), 1
+                raw("mean_travel_time_to_work_minutes"), 1
             ),
-            "unemployment_rate_percent": round_decimal(
-                val("unemployment_rate_percent"), 1
+            "unemployment_rate_percent": round_percent(
+                raw("unemployment_rate_percent"), 1
             )
         },
 
         "housing": {
-            "housing_units": round_number(val("housing_units")),
+            "housing_units": round_number(raw("housing_units")),
             "median_value_owner_occupied": round_money(
-                val("median_value_owner_occupied")
+                raw("median_value_owner_occupied")
             )
         },
 
         "rental_vacancy": {
-            "rate_percent": round_decimal(
-                val("rental_vacancy_rate_percent"), 1
+            "rate_percent": round_percent(
+                raw("rental_vacancy_rate_percent"), 1
             )
         }
     }
-
-
-# ============================================================
-# ARCGIS CLIENT
-# ============================================================
-
-def arcgis_headers():
-    api_key = os.getenv("ARCGIS_API_KEY")
-
-    if not api_key:
-        raise RuntimeError(
-            "Missing ARCGIS_API_KEY. Add it to tools/base_refresh/.env"
-        )
-
-    return {
-        "Authorization": f"Bearer {api_key}",
-        "Accept": "application/json"
-    }
-
-
-def arcgis_places_near_point(lat, lon, radius=12000, limit=10):
-    url = f"{ARCGIS_PLACES_BASE_URL}/places/near-point"
-
-    params = {
-        "x": lon,
-        "y": lat,
-        "radius": radius,
-        "pageSize": limit
-    }
-
-    response = requests.get(
-        url,
-        headers=arcgis_headers(),
-        params=params,
-        timeout=REQUEST_TIMEOUT_SECONDS
-    )
-
-    if response.status_code != 200:
-        raise RuntimeError(
-            f"ArcGIS request failed: {response.status_code} - {response.text}"
-        )
-
-    return response.json()
-
-
-def parse_arcgis_places(payload):
-    results = payload.get("results") or payload.get("places") or []
-
-    compact = []
-
-    for item in results[:10]:
-        address = item.get("address")
-
-        if isinstance(address, dict):
-            clean_address = (
-                address.get("streetAddress")
-                or address.get("formattedAddress")
-                or address.get("adminRegion")
-            )
-        else:
-            clean_address = address
-
-        compact.append({
-            "name": item.get("name"),
-            "category": item.get("category") or item.get("categories"),
-            "address": clean_address,
-            "distance": item.get("distance"),
-            "place_id": item.get("placeId") or item.get("id")
-        })
-
-    return compact
 
 
 # ============================================================
@@ -864,7 +859,6 @@ def apply_registry_identity(updated, base):
 def apply_rentcast(updated, rentcast_summary, base, raw_refs):
     avg_home_value = rentcast_summary.get("avg_home_value")
     median_sale_price = rentcast_summary.get("median_sale_price")
-    average_sale_price = rentcast_summary.get("average_sale_price")
     median_list_price = rentcast_summary.get("median_list_price")
     price_per_sqft = rentcast_summary.get("price_per_sqft")
     days_on_market = rentcast_summary.get("days_on_market")
@@ -886,7 +880,7 @@ def apply_rentcast(updated, rentcast_summary, base, raw_refs):
     )
 
     updated.setdefault("market_metrics", {})
-    updated["market_metrics"].update({
+    update_section_valid(updated["market_metrics"], {
         "median_list_price": median_list_price,
         "median_sold_price": median_sale_price,
         "median_sale_price": median_sale_price,
@@ -902,7 +896,7 @@ def apply_rentcast(updated, rentcast_summary, base, raw_refs):
     })
 
     updated.setdefault("metrics", {})
-    updated["metrics"].update({
+    update_section_valid(updated["metrics"], {
         "median_list_price": median_list_price,
         "median_sold_price": median_sale_price,
         "median_sale_price": median_sale_price,
@@ -915,7 +909,7 @@ def apply_rentcast(updated, rentcast_summary, base, raw_refs):
     })
 
     updated.setdefault("rental_metrics", {})
-    updated["rental_metrics"].update({
+    update_section_valid(updated["rental_metrics"], {
         "average_rent": average_rent,
         "median_rent": median_rent,
         "rent_price_per_sqft": rentcast_summary.get("rent_price_per_sqft"),
@@ -930,17 +924,19 @@ def apply_rentcast(updated, rentcast_summary, base, raw_refs):
 
     updated.setdefault("housing", {})
     updated["housing"].setdefault("market", {})
-    updated["housing"]["market"].update({
+    update_section_valid(updated["housing"]["market"], {
         "zillow_average_home_value": avg_home_value,
         "average_days_on_market": days_on_market,
         "median_sale_price_current": median_sale_price,
         "median_listing_price_realtor": median_list_price,
         "median_listing_price_per_sqft": price_per_sqft,
-        "active_listings_total": total_sale_listings,
-        "q1_2026": {
+        "active_listings_total": total_sale_listings
+    })
+
+    if median_sale_price:
+        updated["housing"]["market"]["q1_2026"] = {
             "median_sale_price": median_sale_price
         }
-    })
 
     updated["market_area"] = {
         "primary_base_zip": base.get("primary_zip"),
@@ -986,11 +982,10 @@ def apply_census(updated, census_summary, raw_ref):
         "income",
         "education",
         "veterans",
-        "immigration",
         "labor"
     ]:
         updated.setdefault(section, {})
-        updated[section].update(census_summary.get(section, {}))
+        update_section_valid(updated[section], census_summary.get(section, {}))
 
     updated.setdefault("housing", {})
     housing_census = census_summary.get("housing", {})
@@ -1002,37 +997,16 @@ def apply_census(updated, census_summary, raw_ref):
     )
 
     updated.setdefault("rental_vacancy", {})
-    updated["rental_vacancy"].update(census_summary.get("rental_vacancy", {}))
+    update_section_valid(
+        updated["rental_vacancy"],
+        census_summary.get("rental_vacancy", {})
+    )
 
     updated.setdefault("sources", {})
     updated["sources"]["demographics"] = {
         "provider": "US Census Bureau ACS 5-Year Profile",
         "dataset": CENSUS_DATASET,
         "year": CENSUS_YEAR,
-        "as_of": AS_OF_MONTH,
-        "raw_file": raw_ref
-    }
-
-    return updated
-
-
-def apply_arcgis(updated, arcgis_summary, raw_ref):
-    if not arcgis_summary:
-        return updated
-
-    updated["nearby_services_api"] = {
-        "provider": "ArcGIS Places",
-        "as_of": AS_OF_MONTH,
-        "places": arcgis_summary,
-        "note": (
-            "API-derived nearby services. Curated base_profile.major_services "
-            "remains the preferred base-specific services layer."
-        )
-    }
-
-    updated.setdefault("sources", {})
-    updated["sources"]["nearby_services"] = {
-        "provider": "ArcGIS Places",
         "as_of": AS_OF_MONTH,
         "raw_file": raw_ref
     }
@@ -1056,15 +1030,16 @@ def apply_data_quality(updated, base, raw_refs):
             "method": "Place-level ACS profile where geo_id is available"
         },
         "nearby_services": {
-            "provider": "ArcGIS Places",
-            "confidence": "medium",
-            "method": "Near-point places query by base coordinates"
+            "provider": "Baseline JSON / official-source review",
+            "confidence": "medium-high",
+            "method": "Preserved from existing PCSU base JSON"
         },
         "raw_files": raw_refs,
         "notes": [
             "The JSON structure is preserved from the existing PCSU base file.",
-            "API values update dynamic data fields only.",
-            "Curated PCS guidance, official links, gates, and base_profile intelligence are preserved unless manually updated."
+            "RentCast updates housing, sale, and rental market fields.",
+            "Census updates demographic and economic fields only when values are valid.",
+            "Curated PCS guidance, official links, gates, major services, and base_profile intelligence are preserved unless manually updated."
         ]
     }
 
@@ -1255,33 +1230,9 @@ def refresh_one_base(base):
         warnings.append(f"Census refresh skipped/failed: {e}")
 
     # ------------------------------
-    # ArcGIS
+    # Nearby Services / Base Profile
     # ------------------------------
-    arcgis_raw_ref = None
-
-    try:
-        lat = safe_number(base.get("lat"))
-        lon = safe_number(base.get("lon"))
-
-        if lat is not None and lon is not None:
-            print(f"  ArcGIS near-point: {lat}, {lon}")
-
-            arcgis_payload = arcgis_places_near_point(lat, lon)
-            arcgis_raw_ref = save_raw_payload(
-                "arcgis",
-                slug,
-                "places-near-point",
-                arcgis_payload
-            )
-            all_raw_refs.append(arcgis_raw_ref)
-
-            arcgis_summary = parse_arcgis_places(arcgis_payload)
-            updated = apply_arcgis(updated, arcgis_summary, arcgis_raw_ref)
-        else:
-            warnings.append("No lat/lon available for ArcGIS refresh")
-
-    except Exception as e:
-        warnings.append(f"ArcGIS refresh skipped/failed: {e}")
+    print("  Nearby services, gates, and base_profile preserved from baseline JSON")
 
     updated = apply_data_quality(updated, base, all_raw_refs)
 
@@ -1301,7 +1252,7 @@ def refresh_one_base(base):
         "api_sources_used": {
             "rentcast": bool(rentcast_raw_refs),
             "census": bool(census_raw_ref),
-            "arcgis": bool(arcgis_raw_ref)
+            "nearby_services": "baseline_preserved"
         },
         "key_outputs": {
             "avg_home_value": updated.get("avg_home_value"),
@@ -1322,7 +1273,8 @@ def refresh_one_base(base):
 # ============================================================
 
 def main():
-    print("PCSUnited Complete Base JSON Refresh")
+    print("PCSUnited Base JSON Refresh")
+    print("Mode: RentCast + Census only")
     print(f"Base refresh folder: {BASE_REFRESH_DIR}")
     print(f"Batch ID: {BATCH_ID}")
     print(f"As of: {AS_OF_DATE}")
@@ -1344,7 +1296,7 @@ def main():
         "source_stack": {
             "housing_market": "RentCast Markets API",
             "demographics": "US Census Bureau ACS 5-Year Profile",
-            "nearby_services": "ArcGIS Places API",
+            "nearby_services": "Preserved from baseline JSON / official-source review",
             "baseline_schema": "Existing PCSU base JSON"
         },
         "total_bases": len(bases),
