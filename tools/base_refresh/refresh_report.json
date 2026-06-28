@@ -1,21 +1,21 @@
 {
   "batch_id": "2026_06",
-  "as_of": "2026-06-27",
-  "started_at": "2026-06-27T15:42:04.633785+00:00",
+  "as_of": "2026-06-28",
+  "started_at": "2026-06-28T22:28:51.788454+00:00",
   "source_stack": {
     "housing_market": "RentCast Markets API",
     "demographics": "US Census Bureau ACS 5-Year Profile",
-    "nearby_services": "ArcGIS Places API",
+    "nearby_services": "Preserved from baseline JSON / official-source review",
     "baseline_schema": "Existing PCSU base JSON"
   },
   "total_bases": 3,
   "updated": [
     {
-      "slug": "lackland",
+      "slug": "lackland-afb",
       "name": "Lackland AFB",
       "status": "updated",
-      "output_file": "output/lackland.json",
-      "existing_json_used": "/Users/macbookprom4/Programs/TheWing.ai/netlify/functions/cities/lackland.json",
+      "output_file": "output/lackland-afb.json",
+      "existing_json_used": "/Users/macbookprom4/Programs/TheWing.ai/netlify/functions/cities/Lackland.json",
       "housing_market_zips": [
         "78245",
         "78251",
@@ -26,27 +26,25 @@
       "api_sources_used": {
         "rentcast": true,
         "census": true,
-        "arcgis": false
+        "nearby_services": "baseline_preserved"
       },
       "key_outputs": {
-        "avg_home_value": 319950,
-        "median_sale_price": 319950,
+        "avg_home_value": 319995,
+        "median_sale_price": 319995,
         "price_per_sqft": 155,
-        "median_rent": 1795,
-        "average_rent": 1782,
+        "median_rent": 1780,
+        "average_rent": 1783,
         "population": 6650,
         "median_household_income": 110833
       },
-      "warnings": [
-        "ArcGIS refresh skipped/failed: ArcGIS request failed: 401 - {\"error\":{\"code\":498,\"message\":\"Token Invalid.\",\"details\":[\"The required authentication information is invalid. The token is either invalid or has expired.\"],\"restInfoUrl\":\"https://places-api.arcgis.com/arcgis/rest/info\"}}"
-      ],
+      "warnings": [],
       "raw_files": [
-        "raw/lackland-rentcast-market-78245-2026_06.json",
-        "raw/lackland-rentcast-market-78251-2026_06.json",
-        "raw/lackland-rentcast-market-78253-2026_06.json",
-        "raw/lackland-rentcast-market-78254-2026_06.json",
-        "raw/lackland-rentcast-market-78227-2026_06.json",
-        "raw/lackland-census-profile-1600000US4840036-2026_06.json"
+        "raw/lackland-afb-rentcast-market-78245-2026_06.json",
+        "raw/lackland-afb-rentcast-market-78251-2026_06.json",
+        "raw/lackland-afb-rentcast-market-78253-2026_06.json",
+        "raw/lackland-afb-rentcast-market-78254-2026_06.json",
+        "raw/lackland-afb-rentcast-market-78227-2026_06.json",
+        "raw/lackland-afb-census-profile-1600000US4840036-2026_06.json"
       ]
     },
     {
@@ -54,7 +52,7 @@
       "name": "Luke AFB",
       "status": "updated",
       "output_file": "output/luke-afb.json",
-      "existing_json_used": "/Users/macbookprom4/Programs/TheWing.ai/netlify/functions/cities/luke.json",
+      "existing_json_used": "/Users/macbookprom4/Programs/TheWing.ai/netlify/functions/cities/Luke.json",
       "housing_market_zips": [
         "85340",
         "85392",
@@ -65,20 +63,18 @@
       "api_sources_used": {
         "rentcast": true,
         "census": true,
-        "arcgis": false
+        "nearby_services": "baseline_preserved"
       },
       "key_outputs": {
-        "avg_home_value": 450000,
-        "median_sale_price": 450000,
-        "price_per_sqft": 238,
-        "median_rent": 1829,
-        "average_rent": 2005,
+        "avg_home_value": 449900,
+        "median_sale_price": 449900,
+        "price_per_sqft": 237,
+        "median_rent": 1845,
+        "average_rent": 2007,
         "population": 250193,
         "median_household_income": 70139
       },
-      "warnings": [
-        "ArcGIS refresh skipped/failed: ArcGIS request failed: 401 - {\"error\":{\"code\":498,\"message\":\"Token Invalid.\",\"details\":[\"The required authentication information is invalid. The token is either invalid or has expired.\"],\"restInfoUrl\":\"https://places-api.arcgis.com/arcgis/rest/info\"}}"
-      ],
+      "warnings": [],
       "raw_files": [
         "raw/luke-afb-rentcast-market-85340-2026_06.json",
         "raw/luke-afb-rentcast-market-85392-2026_06.json",
@@ -93,7 +89,7 @@
       "name": "Nellis AFB",
       "status": "updated",
       "output_file": "output/nellis.json",
-      "existing_json_used": "/Users/macbookprom4/Programs/TheWing.ai/netlify/functions/cities/nellis.json",
+      "existing_json_used": "/Users/macbookprom4/Programs/TheWing.ai/netlify/functions/cities/Nellis.json",
       "housing_market_zips": [
         "89115",
         "89156",
@@ -104,20 +100,18 @@
       "api_sources_used": {
         "rentcast": true,
         "census": true,
-        "arcgis": false
+        "nearby_services": "baseline_preserved"
       },
       "key_outputs": {
-        "avg_home_value": 330000,
-        "median_sale_price": 330000,
+        "avg_home_value": 334800,
+        "median_sale_price": 334800,
         "price_per_sqft": 221,
-        "median_rent": 1620,
-        "average_rent": 1710,
+        "median_rent": 1625,
+        "average_rent": 1711,
         "population": 650873,
         "median_household_income": 70723
       },
-      "warnings": [
-        "ArcGIS refresh skipped/failed: ArcGIS request failed: 401 - {\"error\":{\"code\":498,\"message\":\"Token Invalid.\",\"details\":[\"The required authentication information is invalid. The token is either invalid or has expired.\"],\"restInfoUrl\":\"https://places-api.arcgis.com/arcgis/rest/info\"}}"
-      ],
+      "warnings": [],
       "raw_files": [
         "raw/nellis-rentcast-market-89115-2026_06.json",
         "raw/nellis-rentcast-market-89156-2026_06.json",
@@ -129,5 +123,5 @@
     }
   ],
   "failed": [],
-  "finished_at": "2026-06-27T15:42:27.259091+00:00"
+  "finished_at": "2026-06-28T22:29:10.897271+00:00"
 }
