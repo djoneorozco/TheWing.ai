@@ -1,0 +1,34 @@
+{
+  "generated_at": "2026-06-29T05:46:21.948821+00:00",
+  "registry_path": "tools/base_refresh/base_registry.json",
+  "index_path": "tools/base_refresh/index.byBase.json",
+  "registry_count": 44,
+  "index_count": 44,
+  "passed": true,
+  "checks": {
+    "valid_json_array": true,
+    "same_base_count_as_index": true,
+    "no_missing_index_bases": true,
+    "no_extra_registry_bases": true,
+    "no_duplicate_slugs": true,
+    "no_duplicate_files": true,
+    "all_required_fields_present": true,
+    "housing_market_zips_min_3": true,
+    "primary_zip_not_empty": true,
+    "geo_id_prefix_valid": true,
+    "state_code_two_letters": true,
+    "production_files_exist": true
+  },
+  "errors": [],
+  "warnings": [
+    "Andrews AFB: production file netlify/functions/cities/Andrews.json is not valid JSON"
+  ],
+  "missing_from_registry": [],
+  "extra_in_registry": [],
+  "duplicate_slugs": [],
+  "duplicate_files": [],
+  "missing_production_files": [],
+  "empty_or_invalid_production_files": [
+    "Andrews"
+  ]
+}
