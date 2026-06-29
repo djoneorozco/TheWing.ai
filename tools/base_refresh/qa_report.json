@@ -1,28 +1,281 @@
 {
-  "qa_pass": true,
-  "checked_at": "2026-06-29T03:02:48.448486+00:00",
+  "qa_pass": false,
+  "checked_at": "2026-06-29T08:08:59.377060+00:00",
+  "registry_path": "tools/base_refresh/base_registry.json",
+  "registry_count": 44,
+  "output_count": 3,
+  "passed_count": 3,
+  "failed_count": 41,
   "files_checked": [
     {
+      "slug": "andrews-afb",
+      "name": "Andrews AFB",
+      "baseline": "netlify/functions/cities/Andrews.json",
+      "output": "tools/base_refresh/output/andrews-afb.json"
+    },
+    {
+      "slug": "barksdale-afb",
+      "name": "Barksdale AFB",
+      "baseline": "netlify/functions/cities/Barksdale.json",
+      "output": "tools/base_refresh/output/barksdale-afb.json"
+    },
+    {
+      "slug": "beale-afb",
+      "name": "Beale AFB",
+      "baseline": "netlify/functions/cities/Beale.json",
+      "output": "tools/base_refresh/output/beale-afb.json"
+    },
+    {
+      "slug": "cannon-afb",
+      "name": "Cannon AFB",
+      "baseline": "netlify/functions/cities/Cannon.json",
+      "output": "tools/base_refresh/output/cannon-afb.json"
+    },
+    {
+      "slug": "charleston-afb",
+      "name": "Charleston AFB",
+      "baseline": "netlify/functions/cities/Charleston.json",
+      "output": "tools/base_refresh/output/charleston-afb.json"
+    },
+    {
+      "slug": "davis-monthan-afb",
+      "name": "Davis-Monthan AFB",
+      "baseline": "netlify/functions/cities/Davis-Monthan.json",
+      "output": "tools/base_refresh/output/davis-monthan-afb.json"
+    },
+    {
+      "slug": "dover-afb",
+      "name": "Dover AFB",
+      "baseline": "netlify/functions/cities/Dover.json",
+      "output": "tools/base_refresh/output/dover-afb.json"
+    },
+    {
+      "slug": "dyess-afb",
+      "name": "Dyess AFB",
+      "baseline": "netlify/functions/cities/Dyess.json",
+      "output": "tools/base_refresh/output/dyess-afb.json"
+    },
+    {
+      "slug": "eglin-afb",
+      "name": "Eglin AFB",
+      "baseline": "netlify/functions/cities/Eglin.json",
+      "output": "tools/base_refresh/output/eglin-afb.json"
+    },
+    {
+      "slug": "elmendorf-afb",
+      "name": "Elmendorf AFB",
+      "baseline": "netlify/functions/cities/Elmendorf.json",
+      "output": "tools/base_refresh/output/elmendorf-afb.json"
+    },
+    {
+      "slug": "fe-warren-afb",
+      "name": "F.E-Warren AFB",
+      "baseline": "netlify/functions/cities/F.E-Warren.json",
+      "output": "tools/base_refresh/output/fe-warren-afb.json"
+    },
+    {
+      "slug": "fairchild-afb",
+      "name": "Fairchild AFB",
+      "baseline": "netlify/functions/cities/Fairchild.json",
+      "output": "tools/base_refresh/output/fairchild-afb.json"
+    },
+    {
+      "slug": "fort-sam-houston-afb",
+      "name": "Fort-Sam-Houston AFB",
+      "baseline": "netlify/functions/cities/Fort-Sam-Houston.json",
+      "output": "tools/base_refresh/output/fort-sam-houston-afb.json"
+    },
+    {
+      "slug": "holloman-afb",
+      "name": "Holloman AFB",
+      "baseline": "netlify/functions/cities/Holloman.json",
+      "output": "tools/base_refresh/output/holloman-afb.json"
+    },
+    {
+      "slug": "hurlburt-field",
+      "name": "Hurlburt AFB",
+      "baseline": "netlify/functions/cities/Hurlburt.json",
+      "output": "tools/base_refresh/output/hurlburt-field.json"
+    },
+    {
+      "slug": "keesler-afb",
+      "name": "Keesler AFB",
+      "baseline": "netlify/functions/cities/Keesler.json",
+      "output": "tools/base_refresh/output/keesler-afb.json"
+    },
+    {
+      "slug": "kirtland-afb",
+      "name": "Kirtland AFB",
+      "baseline": "netlify/functions/cities/Kirtland.json",
+      "output": "tools/base_refresh/output/kirtland-afb.json"
+    },
+    {
       "slug": "lackland-afb",
+      "name": "Lackland AFB",
       "baseline": "netlify/functions/cities/Lackland.json",
       "output": "tools/base_refresh/output/lackland-afb.json"
     },
     {
+      "slug": "langley-afb",
+      "name": "Langley AFB",
+      "baseline": "netlify/functions/cities/Langley.json",
+      "output": "tools/base_refresh/output/langley-afb.json"
+    },
+    {
+      "slug": "laughlin-afb",
+      "name": "Laughlin AFB",
+      "baseline": "netlify/functions/cities/Laughlin.json",
+      "output": "tools/base_refresh/output/laughlin-afb.json"
+    },
+    {
+      "slug": "little-rock-afb",
+      "name": "Little-Rock AFB",
+      "baseline": "netlify/functions/cities/Little-Rock.json",
+      "output": "tools/base_refresh/output/little-rock-afb.json"
+    },
+    {
       "slug": "luke-afb",
+      "name": "Luke AFB",
       "baseline": "netlify/functions/cities/Luke.json",
       "output": "tools/base_refresh/output/luke-afb.json"
     },
     {
+      "slug": "macdill-afb",
+      "name": "MacDill AFB",
+      "baseline": "netlify/functions/cities/MacDill.json",
+      "output": "tools/base_refresh/output/macdill-afb.json"
+    },
+    {
+      "slug": "malmstrom-afb",
+      "name": "Malmstrom AFB",
+      "baseline": "netlify/functions/cities/Malmstrom.json",
+      "output": "tools/base_refresh/output/malmstrom-afb.json"
+    },
+    {
+      "slug": "maxwell-afb",
+      "name": "Maxwell AFB",
+      "baseline": "netlify/functions/cities/Maxwell.json",
+      "output": "tools/base_refresh/output/maxwell-afb.json"
+    },
+    {
+      "slug": "mcconnell-afb",
+      "name": "McConnell AFB",
+      "baseline": "netlify/functions/cities/McConnell.json",
+      "output": "tools/base_refresh/output/mcconnell-afb.json"
+    },
+    {
+      "slug": "mcguire-afb",
+      "name": "McGuire AFB",
+      "baseline": "netlify/functions/cities/McGuire.json",
+      "output": "tools/base_refresh/output/mcguire-afb.json"
+    },
+    {
+      "slug": "minot-afb",
+      "name": "Minot AFB",
+      "baseline": "netlify/functions/cities/Minot.json",
+      "output": "tools/base_refresh/output/minot-afb.json"
+    },
+    {
+      "slug": "moody-afb",
+      "name": "Moody AFB",
+      "baseline": "netlify/functions/cities/Moody.json",
+      "output": "tools/base_refresh/output/moody-afb.json"
+    },
+    {
+      "slug": "mountain-home-afb",
+      "name": "Mountain-Home AFB",
+      "baseline": "netlify/functions/cities/Mountain-Home.json",
+      "output": "tools/base_refresh/output/mountain-home-afb.json"
+    },
+    {
       "slug": "nellis",
+      "name": "Nellis AFB",
       "baseline": "netlify/functions/cities/Nellis.json",
       "output": "tools/base_refresh/output/nellis.json"
+    },
+    {
+      "slug": "offutt-afb",
+      "name": "Offutt AFB",
+      "baseline": "netlify/functions/cities/Offutt.json",
+      "output": "tools/base_refresh/output/offutt-afb.json"
+    },
+    {
+      "slug": "peterson-afb",
+      "name": "Peterson AFB",
+      "baseline": "netlify/functions/cities/Peterson.json",
+      "output": "tools/base_refresh/output/peterson-afb.json"
+    },
+    {
+      "slug": "randolph-afb",
+      "name": "Randolph AFB",
+      "baseline": "netlify/functions/cities/Randolph.json",
+      "output": "tools/base_refresh/output/randolph-afb.json"
+    },
+    {
+      "slug": "robins-afb",
+      "name": "Robins AFB",
+      "baseline": "netlify/functions/cities/Robins.json",
+      "output": "tools/base_refresh/output/robins-afb.json"
+    },
+    {
+      "slug": "scott-afb",
+      "name": "Scott AFB",
+      "baseline": "netlify/functions/cities/Scott.json",
+      "output": "tools/base_refresh/output/scott-afb.json"
+    },
+    {
+      "slug": "seymour-johnson-afb",
+      "name": "Seymour-Johnson AFB",
+      "baseline": "netlify/functions/cities/Seymour-Johnson.json",
+      "output": "tools/base_refresh/output/seymour-johnson-afb.json"
+    },
+    {
+      "slug": "shaw-afb",
+      "name": "Shaw AFB",
+      "baseline": "netlify/functions/cities/Shaw.json",
+      "output": "tools/base_refresh/output/shaw-afb.json"
+    },
+    {
+      "slug": "sheppard-afb",
+      "name": "Sheppard AFB",
+      "baseline": "netlify/functions/cities/Sheppard.json",
+      "output": "tools/base_refresh/output/sheppard-afb.json"
+    },
+    {
+      "slug": "tinker-afb",
+      "name": "Tinker AFB",
+      "baseline": "netlify/functions/cities/Tinker.json",
+      "output": "tools/base_refresh/output/tinker-afb.json"
+    },
+    {
+      "slug": "travis-afb",
+      "name": "Travis AFB",
+      "baseline": "netlify/functions/cities/Travis.json",
+      "output": "tools/base_refresh/output/travis-afb.json"
+    },
+    {
+      "slug": "tyndall-afb",
+      "name": "Tyndall AFB",
+      "baseline": "netlify/functions/cities/Tyndall.json",
+      "output": "tools/base_refresh/output/tyndall-afb.json"
+    },
+    {
+      "slug": "whiteman-afb",
+      "name": "Whiteman AFB",
+      "baseline": "netlify/functions/cities/Whiteman.json",
+      "output": "tools/base_refresh/output/whiteman-afb.json"
+    },
+    {
+      "slug": "wright-patterson-afb",
+      "name": "Wright-Patterson AFB",
+      "baseline": "netlify/functions/cities/Wright-Patterson.json",
+      "output": "tools/base_refresh/output/wright-patterson-afb.json"
     }
   ],
   "pipeline_checks": {
     "refresh_script": {
       "uses_arcgis_api": false,
       "arcgis_api_patterns_found": [],
-      "arcgis_token_required": false,
       "mode_comment_present": true
     },
     "refresh_report": {
@@ -30,21 +283,440 @@
       "batch_id": "2026_06",
       "total_bases": 3,
       "failed_count": 0,
+      "updated_count": 3,
+      "expected_count": 44,
+      "refresh_failures_present": false,
+      "all_bases_updated": false,
       "nearby_services_baseline_preserved": true,
+      "failed": [],
+      "failed_slugs": [],
       "updated_slugs": [
         "lackland-afb",
         "luke-afb",
         "nellis"
       ]
     },
-    "pipeline_pass": true
+    "pipeline_pass": false
   },
   "per_base": [
     {
+      "slug": "andrews-afb",
+      "name": "Andrews AFB",
+      "file": "Andrews",
+      "baseline_file": "netlify/functions/cities/Andrews.json",
+      "output_file": "tools/base_refresh/output/andrews-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "barksdale-afb",
+      "name": "Barksdale AFB",
+      "file": "Barksdale",
+      "baseline_file": "netlify/functions/cities/Barksdale.json",
+      "output_file": "tools/base_refresh/output/barksdale-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "beale-afb",
+      "name": "Beale AFB",
+      "file": "Beale",
+      "baseline_file": "netlify/functions/cities/Beale.json",
+      "output_file": "tools/base_refresh/output/beale-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "cannon-afb",
+      "name": "Cannon AFB",
+      "file": "Cannon",
+      "baseline_file": "netlify/functions/cities/Cannon.json",
+      "output_file": "tools/base_refresh/output/cannon-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "charleston-afb",
+      "name": "Charleston AFB",
+      "file": "Charleston",
+      "baseline_file": "netlify/functions/cities/Charleston.json",
+      "output_file": "tools/base_refresh/output/charleston-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "davis-monthan-afb",
+      "name": "Davis-Monthan AFB",
+      "file": "Davis-Monthan",
+      "baseline_file": "netlify/functions/cities/Davis-Monthan.json",
+      "output_file": "tools/base_refresh/output/davis-monthan-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "dover-afb",
+      "name": "Dover AFB",
+      "file": "Dover",
+      "baseline_file": "netlify/functions/cities/Dover.json",
+      "output_file": "tools/base_refresh/output/dover-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "dyess-afb",
+      "name": "Dyess AFB",
+      "file": "Dyess",
+      "baseline_file": "netlify/functions/cities/Dyess.json",
+      "output_file": "tools/base_refresh/output/dyess-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "eglin-afb",
+      "name": "Eglin AFB",
+      "file": "Eglin",
+      "baseline_file": "netlify/functions/cities/Eglin.json",
+      "output_file": "tools/base_refresh/output/eglin-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "elmendorf-afb",
+      "name": "Elmendorf AFB",
+      "file": "Elmendorf",
+      "baseline_file": "netlify/functions/cities/Elmendorf.json",
+      "output_file": "tools/base_refresh/output/elmendorf-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "fe-warren-afb",
+      "name": "F.E-Warren AFB",
+      "file": "F.E-Warren",
+      "baseline_file": "netlify/functions/cities/F.E-Warren.json",
+      "output_file": "tools/base_refresh/output/fe-warren-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "fairchild-afb",
+      "name": "Fairchild AFB",
+      "file": "Fairchild",
+      "baseline_file": "netlify/functions/cities/Fairchild.json",
+      "output_file": "tools/base_refresh/output/fairchild-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "fort-sam-houston-afb",
+      "name": "Fort-Sam-Houston AFB",
+      "file": "Fort-Sam-Houston",
+      "baseline_file": "netlify/functions/cities/Fort-Sam-Houston.json",
+      "output_file": "tools/base_refresh/output/fort-sam-houston-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "holloman-afb",
+      "name": "Holloman AFB",
+      "file": "Holloman",
+      "baseline_file": "netlify/functions/cities/Holloman.json",
+      "output_file": "tools/base_refresh/output/holloman-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "hurlburt-field",
+      "name": "Hurlburt AFB",
+      "file": "Hurlburt",
+      "baseline_file": "netlify/functions/cities/Hurlburt.json",
+      "output_file": "tools/base_refresh/output/hurlburt-field.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "keesler-afb",
+      "name": "Keesler AFB",
+      "file": "Keesler",
+      "baseline_file": "netlify/functions/cities/Keesler.json",
+      "output_file": "tools/base_refresh/output/keesler-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "kirtland-afb",
+      "name": "Kirtland AFB",
+      "file": "Kirtland",
+      "baseline_file": "netlify/functions/cities/Kirtland.json",
+      "output_file": "tools/base_refresh/output/kirtland-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
       "slug": "lackland-afb",
+      "name": "Lackland AFB",
+      "file": "Lackland",
       "baseline_file": "netlify/functions/cities/Lackland.json",
       "output_file": "tools/base_refresh/output/lackland-afb.json",
-      "files_exist": true,
+      "output_exists": true,
+      "output_valid_json": true,
+      "baseline_valid": true,
+      "baseline_issue": null,
       "qa_pass": true,
       "missing_top_level_keys": [],
       "new_top_level_keys": [
@@ -52,233 +724,150 @@
         "market_area",
         "rentcast_zip_summaries"
       ],
-      "schema_checks": {
+      "preserved_sections": {
         "base_profile": {
-          "baseline_exists": true,
-          "output_exists": true
+          "present": true
         },
-        "compatibility": {
-          "baseline_exists": true,
-          "output_exists": true
+        "base_profile.gates": {
+          "present": true
         },
-        "sources": {
-          "baseline_exists": true,
-          "output_exists": true
+        "base_profile.major_services": {
+          "present": true
         },
-        "market_metrics": {
-          "baseline_exists": true,
-          "output_exists": true
+        "market_bluf": {
+          "present": true
         },
-        "rental_metrics": {
-          "baseline_exists": true,
-          "output_exists": true
+        "scorecard": {
+          "present": true
+        },
+        "summary_points": {
+          "present": true
+        },
+        "opportunities": {
+          "present": true
+        },
+        "risks": {
+          "present": true
+        },
+        "buyer_guidance": {
+          "present": true
+        },
+        "seller_guidance": {
+          "present": true
+        },
+        "landlord_notes": {
+          "present": true
+        },
+        "housing": {
+          "present": true
         },
         "by_bedroom": {
-          "baseline_exists": true,
-          "output_exists": true
+          "present": true
         }
       },
       "rentcast_fields": {
         "avg_home_value": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 319995
+          "present": true
         },
         "average_home_value": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 319995
+          "present": true
         },
-        "avgHome": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 319995
+        "rental_metrics": {
+          "present": true
         },
-        "city_avg_home": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 319995
-        },
-        "snapshot.median_home_price": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 319995
-        },
-        "market_metrics.median_sale_price": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 319995
-        },
-        "market_metrics.price_per_sqft": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 155
-        },
-        "market_metrics.days_on_market": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 34
-        },
-        "metrics.median_rent": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 1780
-        },
-        "rental_metrics.median_rent": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 1780
-        },
-        "rental_metrics.average_rent": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 1783
-        },
-        "housing.market.median_sale_price_current": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 319995
-        },
-        "rentcast_zip_summaries": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 5
-        }
-      },
-      "census_fields": {
-        "snapshot.population_city": {
-          "present": true,
-          "baseline_value": 5896,
-          "output_value": 1458954,
-          "changed_from_baseline": true
-        },
-        "snapshot.median_household_income": {
-          "present": true,
-          "baseline_value": 73646,
-          "output_value": 62917,
-          "changed_from_baseline": true
-        },
-        "population.estimate": {
-          "present": true,
-          "baseline_value": 5896,
-          "output_value": 1458954,
-          "changed_from_baseline": true
-        },
-        "households.total_households": {
-          "present": true,
-          "baseline_value": 1450,
-          "output_value": 547883,
-          "changed_from_baseline": true
-        },
-        "income.median_household_income": {
-          "present": true,
-          "baseline_value": 73646,
-          "output_value": 62917,
-          "changed_from_baseline": true
-        },
-        "income.per_capita_income": {
-          "present": true,
-          "baseline_value": 24500,
-          "output_value": 32983,
-          "changed_from_baseline": true
-        },
-        "education.high_school_grad_or_higher_percent": {
-          "present": true,
-          "baseline_value": 97.8,
-          "output_value": 84.3,
-          "changed_from_baseline": true
-        },
-        "education.bachelors_degree_or_higher_percent": {
-          "present": true,
-          "baseline_value": 41.1,
-          "output_value": 28.7,
-          "changed_from_baseline": true
-        },
-        "labor.mean_travel_time_to_work_minutes": {
-          "present": true,
-          "baseline_value": 18.5,
-          "output_value": 24.6,
-          "changed_from_baseline": true
-        },
-        "labor.unemployment_rate_percent": {
-          "present": true,
-          "baseline_value": 4.8,
-          "output_value": 5.8,
-          "changed_from_baseline": true
-        }
-      },
-      "preserved_sections": {
-        "base_profile.gates": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.major_services": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.visitor_control_center": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.recommended_neighborhoods": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.commute_intelligence": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.bah_market_reality": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.arrival_checklist": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "market_bluf": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "scorecard": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "summary_points": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "opportunities": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "risks": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "buyer_guidance": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "seller_guidance": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "landlord_notes": {
-          "present": true,
-          "matches_baseline": true
+        "market_metrics": {
+          "present": true
         }
       },
       "bad_census_values_found": [],
       "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": "updated",
       "warnings": [],
       "errors": []
+    },
+    {
+      "slug": "langley-afb",
+      "name": "Langley AFB",
+      "file": "Langley",
+      "baseline_file": "netlify/functions/cities/Langley.json",
+      "output_file": "tools/base_refresh/output/langley-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "laughlin-afb",
+      "name": "Laughlin AFB",
+      "file": "Laughlin",
+      "baseline_file": "netlify/functions/cities/Laughlin.json",
+      "output_file": "tools/base_refresh/output/laughlin-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "little-rock-afb",
+      "name": "Little-Rock AFB",
+      "file": "Little-Rock",
+      "baseline_file": "netlify/functions/cities/Little-Rock.json",
+      "output_file": "tools/base_refresh/output/little-rock-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
     },
     {
       "slug": "luke-afb",
+      "name": "Luke AFB",
+      "file": "Luke",
       "baseline_file": "netlify/functions/cities/Luke.json",
       "output_file": "tools/base_refresh/output/luke-afb.json",
-      "files_exist": true,
+      "output_exists": true,
+      "output_valid_json": true,
+      "baseline_valid": true,
+      "baseline_issue": null,
       "qa_pass": true,
       "missing_top_level_keys": [],
       "new_top_level_keys": [
@@ -286,233 +875,270 @@
         "market_area",
         "rentcast_zip_summaries"
       ],
-      "schema_checks": {
+      "preserved_sections": {
         "base_profile": {
-          "baseline_exists": true,
-          "output_exists": true
+          "present": true
         },
-        "compatibility": {
-          "baseline_exists": true,
-          "output_exists": true
+        "base_profile.gates": {
+          "present": true
         },
-        "sources": {
-          "baseline_exists": true,
-          "output_exists": true
+        "base_profile.major_services": {
+          "present": true
         },
-        "market_metrics": {
-          "baseline_exists": true,
-          "output_exists": true
+        "market_bluf": {
+          "present": true
         },
-        "rental_metrics": {
-          "baseline_exists": true,
-          "output_exists": true
+        "scorecard": {
+          "present": true
+        },
+        "summary_points": {
+          "present": true
+        },
+        "opportunities": {
+          "present": true
+        },
+        "risks": {
+          "present": true
+        },
+        "buyer_guidance": {
+          "present": true
+        },
+        "seller_guidance": {
+          "present": true
+        },
+        "landlord_notes": {
+          "present": true
+        },
+        "housing": {
+          "present": true
         },
         "by_bedroom": {
-          "baseline_exists": true,
-          "output_exists": true
+          "present": true
         }
       },
       "rentcast_fields": {
         "avg_home_value": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 449900
+          "present": true
         },
         "average_home_value": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 449900
+          "present": true
         },
-        "avgHome": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 449900
+        "rental_metrics": {
+          "present": true
         },
-        "city_avg_home": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 449900
-        },
-        "snapshot.median_home_price": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 449900
-        },
-        "market_metrics.median_sale_price": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 449900
-        },
-        "market_metrics.price_per_sqft": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 237
-        },
-        "market_metrics.days_on_market": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 37
-        },
-        "metrics.median_rent": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 1845
-        },
-        "rental_metrics.median_rent": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 1845
-        },
-        "rental_metrics.average_rent": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 2007
-        },
-        "housing.market.median_sale_price_current": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 449900
-        },
-        "rentcast_zip_summaries": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 5
-        }
-      },
-      "census_fields": {
-        "snapshot.population_city": {
-          "present": true,
-          "baseline_value": 255000,
-          "output_value": 250193,
-          "changed_from_baseline": true
-        },
-        "snapshot.median_household_income": {
-          "present": true,
-          "baseline_value": 76000,
-          "output_value": 70139,
-          "changed_from_baseline": true
-        },
-        "population.estimate": {
-          "present": true,
-          "baseline_value": 255000,
-          "output_value": 250193,
-          "changed_from_baseline": true
-        },
-        "households.total_households": {
-          "present": true,
-          "baseline_value": 92000,
-          "output_value": 86733,
-          "changed_from_baseline": true
-        },
-        "income.median_household_income": {
-          "present": true,
-          "baseline_value": 76000,
-          "output_value": 70139,
-          "changed_from_baseline": true
-        },
-        "income.per_capita_income": {
-          "present": true,
-          "baseline_value": 37500,
-          "output_value": 31981,
-          "changed_from_baseline": true
-        },
-        "education.high_school_grad_or_higher_percent": {
-          "present": true,
-          "baseline_value": 88.5,
-          "output_value": 84.5,
-          "changed_from_baseline": true
-        },
-        "education.bachelors_degree_or_higher_percent": {
-          "present": true,
-          "baseline_value": 27.8,
-          "output_value": 23.5,
-          "changed_from_baseline": true
-        },
-        "labor.mean_travel_time_to_work_minutes": {
-          "present": true,
-          "baseline_value": 28.4,
-          "output_value": 28.0,
-          "changed_from_baseline": true
-        },
-        "labor.unemployment_rate_percent": {
-          "present": true,
-          "baseline_value": 3.8,
-          "output_value": 5.3,
-          "changed_from_baseline": true
-        }
-      },
-      "preserved_sections": {
-        "base_profile.gates": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.major_services": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.visitor_control_center": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.recommended_neighborhoods": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.commute_intelligence": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.bah_market_reality": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.arrival_checklist": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "market_bluf": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "scorecard": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "summary_points": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "opportunities": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "risks": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "buyer_guidance": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "seller_guidance": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "landlord_notes": {
-          "present": true,
-          "matches_baseline": true
+        "market_metrics": {
+          "present": true
         }
       },
       "bad_census_values_found": [],
       "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": "updated",
       "warnings": [],
       "errors": []
     },
     {
+      "slug": "macdill-afb",
+      "name": "MacDill AFB",
+      "file": "MacDill",
+      "baseline_file": "netlify/functions/cities/MacDill.json",
+      "output_file": "tools/base_refresh/output/macdill-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "malmstrom-afb",
+      "name": "Malmstrom AFB",
+      "file": "Malmstrom",
+      "baseline_file": "netlify/functions/cities/Malmstrom.json",
+      "output_file": "tools/base_refresh/output/malmstrom-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "maxwell-afb",
+      "name": "Maxwell AFB",
+      "file": "Maxwell",
+      "baseline_file": "netlify/functions/cities/Maxwell.json",
+      "output_file": "tools/base_refresh/output/maxwell-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "mcconnell-afb",
+      "name": "McConnell AFB",
+      "file": "McConnell",
+      "baseline_file": "netlify/functions/cities/McConnell.json",
+      "output_file": "tools/base_refresh/output/mcconnell-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "mcguire-afb",
+      "name": "McGuire AFB",
+      "file": "McGuire",
+      "baseline_file": "netlify/functions/cities/McGuire.json",
+      "output_file": "tools/base_refresh/output/mcguire-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "minot-afb",
+      "name": "Minot AFB",
+      "file": "Minot",
+      "baseline_file": "netlify/functions/cities/Minot.json",
+      "output_file": "tools/base_refresh/output/minot-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "moody-afb",
+      "name": "Moody AFB",
+      "file": "Moody",
+      "baseline_file": "netlify/functions/cities/Moody.json",
+      "output_file": "tools/base_refresh/output/moody-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "mountain-home-afb",
+      "name": "Mountain-Home AFB",
+      "file": "Mountain-Home",
+      "baseline_file": "netlify/functions/cities/Mountain-Home.json",
+      "output_file": "tools/base_refresh/output/mountain-home-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
       "slug": "nellis",
+      "name": "Nellis AFB",
+      "file": "Nellis",
       "baseline_file": "netlify/functions/cities/Nellis.json",
       "output_file": "tools/base_refresh/output/nellis.json",
-      "files_exist": true,
+      "output_exists": true,
+      "output_valid_json": true,
+      "baseline_valid": true,
+      "baseline_issue": null,
       "qa_pass": true,
       "missing_top_level_keys": [],
       "new_top_level_keys": [
@@ -520,245 +1146,742 @@
         "market_area",
         "rentcast_zip_summaries"
       ],
-      "schema_checks": {
+      "preserved_sections": {
         "base_profile": {
-          "baseline_exists": true,
-          "output_exists": true
+          "present": true
         },
-        "compatibility": {
-          "baseline_exists": true,
-          "output_exists": true
+        "base_profile.gates": {
+          "present": true
         },
-        "sources": {
-          "baseline_exists": true,
-          "output_exists": true
+        "base_profile.major_services": {
+          "present": true
         },
-        "market_metrics": {
-          "baseline_exists": true,
-          "output_exists": true
+        "market_bluf": {
+          "present": true
         },
-        "rental_metrics": {
-          "baseline_exists": true,
-          "output_exists": true
+        "scorecard": {
+          "present": true
+        },
+        "summary_points": {
+          "present": true
+        },
+        "opportunities": {
+          "present": true
+        },
+        "risks": {
+          "present": true
+        },
+        "buyer_guidance": {
+          "present": true
+        },
+        "seller_guidance": {
+          "present": true
+        },
+        "landlord_notes": {
+          "present": true
+        },
+        "housing": {
+          "present": true
         },
         "by_bedroom": {
-          "baseline_exists": true,
-          "output_exists": true
+          "present": true
         }
       },
       "rentcast_fields": {
         "avg_home_value": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 334800
+          "present": true
         },
         "average_home_value": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 334800
+          "present": true
         },
-        "avgHome": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 334800
+        "rental_metrics": {
+          "present": true
         },
-        "city_avg_home": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 334800
-        },
-        "snapshot.median_home_price": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 334800
-        },
-        "market_metrics.median_sale_price": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 334800
-        },
-        "market_metrics.price_per_sqft": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 221
-        },
-        "market_metrics.days_on_market": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 37
-        },
-        "metrics.median_rent": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 1625
-        },
-        "rental_metrics.median_rent": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 1625
-        },
-        "rental_metrics.average_rent": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 1711
-        },
-        "housing.market.median_sale_price_current": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 334800
-        },
-        "rentcast_zip_summaries": {
-          "present": true,
-          "refreshed_from_baseline": true,
-          "value": 5
-        }
-      },
-      "census_fields": {
-        "snapshot.population_city": {
-          "present": true,
-          "baseline_value": 678924,
-          "output_value": 650873,
-          "changed_from_baseline": true
-        },
-        "snapshot.median_household_income": {
-          "present": true,
-          "baseline_value": 73877,
-          "output_value": 70723,
-          "changed_from_baseline": true
-        },
-        "population.estimate": {
-          "present": true,
-          "baseline_value": 678924,
-          "output_value": 650873,
-          "changed_from_baseline": true
-        },
-        "households.total_households": {
-          "present": true,
-          "baseline_value": 253523,
-          "output_value": 244429,
-          "changed_from_baseline": true
-        },
-        "income.median_household_income": {
-          "present": true,
-          "baseline_value": 73877,
-          "output_value": 70723,
-          "changed_from_baseline": true
-        },
-        "income.per_capita_income": {
-          "present": true,
-          "baseline_value": 39906,
-          "output_value": 38421,
-          "changed_from_baseline": true
-        },
-        "education.high_school_grad_or_higher_percent": {
-          "present": true,
-          "baseline_value": 87.2,
-          "output_value": 85.8,
-          "changed_from_baseline": true
-        },
-        "education.bachelors_degree_or_higher_percent": {
-          "present": true,
-          "baseline_value": 28,
-          "output_value": 27.3,
-          "changed_from_baseline": true
-        },
-        "labor.mean_travel_time_to_work_minutes": {
-          "present": true,
-          "baseline_value": 25.7,
-          "output_value": 25.8,
-          "changed_from_baseline": true
-        },
-        "labor.unemployment_rate_percent": {
-          "present": true,
-          "baseline_value": 5.4,
-          "output_value": 7.2,
-          "changed_from_baseline": true
-        }
-      },
-      "preserved_sections": {
-        "base_profile.gates": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.major_services": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.visitor_control_center": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.recommended_neighborhoods": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.commute_intelligence": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.bah_market_reality": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "base_profile.arrival_checklist": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "market_bluf": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "scorecard": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "summary_points": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "opportunities": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "risks": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "buyer_guidance": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "seller_guidance": {
-          "present": true,
-          "matches_baseline": true
-        },
-        "landlord_notes": {
-          "present": true,
-          "matches_baseline": true
+        "market_metrics": {
+          "present": true
         }
       },
       "bad_census_values_found": [],
       "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": "updated",
       "warnings": [],
       "errors": []
+    },
+    {
+      "slug": "offutt-afb",
+      "name": "Offutt AFB",
+      "file": "Offutt",
+      "baseline_file": "netlify/functions/cities/Offutt.json",
+      "output_file": "tools/base_refresh/output/offutt-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "peterson-afb",
+      "name": "Peterson AFB",
+      "file": "Peterson",
+      "baseline_file": "netlify/functions/cities/Peterson.json",
+      "output_file": "tools/base_refresh/output/peterson-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "randolph-afb",
+      "name": "Randolph AFB",
+      "file": "Randolph",
+      "baseline_file": "netlify/functions/cities/Randolph.json",
+      "output_file": "tools/base_refresh/output/randolph-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "robins-afb",
+      "name": "Robins AFB",
+      "file": "Robins",
+      "baseline_file": "netlify/functions/cities/Robins.json",
+      "output_file": "tools/base_refresh/output/robins-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "scott-afb",
+      "name": "Scott AFB",
+      "file": "Scott",
+      "baseline_file": "netlify/functions/cities/Scott.json",
+      "output_file": "tools/base_refresh/output/scott-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "seymour-johnson-afb",
+      "name": "Seymour-Johnson AFB",
+      "file": "Seymour-Johnson",
+      "baseline_file": "netlify/functions/cities/Seymour-Johnson.json",
+      "output_file": "tools/base_refresh/output/seymour-johnson-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "shaw-afb",
+      "name": "Shaw AFB",
+      "file": "Shaw",
+      "baseline_file": "netlify/functions/cities/Shaw.json",
+      "output_file": "tools/base_refresh/output/shaw-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "sheppard-afb",
+      "name": "Sheppard AFB",
+      "file": "Sheppard",
+      "baseline_file": "netlify/functions/cities/Sheppard.json",
+      "output_file": "tools/base_refresh/output/sheppard-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "tinker-afb",
+      "name": "Tinker AFB",
+      "file": "Tinker",
+      "baseline_file": "netlify/functions/cities/Tinker.json",
+      "output_file": "tools/base_refresh/output/tinker-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "travis-afb",
+      "name": "Travis AFB",
+      "file": "Travis",
+      "baseline_file": "netlify/functions/cities/Travis.json",
+      "output_file": "tools/base_refresh/output/travis-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "tyndall-afb",
+      "name": "Tyndall AFB",
+      "file": "Tyndall",
+      "baseline_file": "netlify/functions/cities/Tyndall.json",
+      "output_file": "tools/base_refresh/output/tyndall-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "whiteman-afb",
+      "name": "Whiteman AFB",
+      "file": "Whiteman",
+      "baseline_file": "netlify/functions/cities/Whiteman.json",
+      "output_file": "tools/base_refresh/output/whiteman-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
+    },
+    {
+      "slug": "wright-patterson-afb",
+      "name": "Wright-Patterson AFB",
+      "file": "Wright-Patterson",
+      "baseline_file": "netlify/functions/cities/Wright-Patterson.json",
+      "output_file": "tools/base_refresh/output/wright-patterson-afb.json",
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "baseline_issue": null,
+      "qa_pass": false,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [],
+      "preserved_sections": {},
+      "rentcast_fields": {},
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "skipped_rentcast_zips": [],
+      "refresh_status": null,
+      "warnings": [],
+      "errors": [
+        "Output JSON issue: missing"
+      ]
     }
   ],
-  "missing_keys": {
-    "lackland-afb": [],
-    "luke-afb": [],
-    "nellis": []
+  "summary_by_slug": {
+    "andrews-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "barksdale-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "beale-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "cannon-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "charleston-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "davis-monthan-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "dover-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "dyess-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "eglin-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "elmendorf-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "fe-warren-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "fairchild-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "fort-sam-houston-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "holloman-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "hurlburt-field": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "keesler-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "kirtland-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "lackland-afb": {
+      "qa_pass": true,
+      "output_exists": true,
+      "output_valid_json": true,
+      "baseline_valid": true,
+      "error_count": 0,
+      "warning_count": 0
+    },
+    "langley-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "laughlin-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "little-rock-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "luke-afb": {
+      "qa_pass": true,
+      "output_exists": true,
+      "output_valid_json": true,
+      "baseline_valid": true,
+      "error_count": 0,
+      "warning_count": 0
+    },
+    "macdill-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "malmstrom-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "maxwell-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "mcconnell-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "mcguire-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "minot-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "moody-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "mountain-home-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "nellis": {
+      "qa_pass": true,
+      "output_exists": true,
+      "output_valid_json": true,
+      "baseline_valid": true,
+      "error_count": 0,
+      "warning_count": 0
+    },
+    "offutt-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "peterson-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "randolph-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "robins-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "scott-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "seymour-johnson-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "shaw-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "sheppard-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "tinker-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "travis-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "tyndall-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "whiteman-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "wright-patterson-afb": {
+      "qa_pass": false,
+      "output_exists": false,
+      "output_valid_json": false,
+      "baseline_valid": false,
+      "error_count": 1,
+      "warning_count": 0
+    }
   },
-  "bad_census_values_found": {
-    "lackland-afb": [],
-    "luke-afb": [],
-    "nellis": []
-  },
+  "missing_keys": {},
+  "bad_census_values_found": {},
+  "missing_required_sections": {},
+  "skipped_rentcast_zips": {},
   "stray_output_bad_census_values": [],
-  "missing_required_sections": {
-    "lackland-afb": [],
-    "luke-afb": [],
-    "nellis": []
-  },
-  "warnings": [],
-  "recommendation": "PASS — All three test-base output files are safe to promote to netlify/functions/cities when ready."
+  "warnings": [
+    "refresh_report.json updated count (3) does not match registry count (44)."
+  ],
+  "recommendation": "FAIL — Do not promote outputs to netlify/functions/cities. 3/44 bases passed QA; 41 failed. Fix errors, rerun refresh, then QA."
 }
