@@ -7,7 +7,7 @@
   "place_detail": "San Antonio, TX",
   "state": "Texas",
   "state_code": "TX",
-  "geo_id": "1600000US4840036",
+  "geo_id": "1600000US4865000",
   "year": 2026,
   "last_updated_data_from_sources": "2026-06",
   "image_url": "https://cdn.prod.website-files.com/69b6b526f23748df9f189b16/69c0dc6d478fad1e706ff1f4_dc56ce56878bed382d61aab987ab76eb_San_Antonio.png",
@@ -20,9 +20,9 @@
   "avgHome": 319995,
   "city_avg_home": 319995,
   "snapshot": {
-    "population_city": 6650,
+    "population_city": 1458954,
     "population_metro": 2750000,
-    "median_household_income": 110833,
+    "median_household_income": 62917,
     "median_home_price": 319995,
     "market_trend_yoy": -3.0,
     "traffic_level": "High",
@@ -91,32 +91,32 @@
     "notes": "VA loan estimate for San Antonio area"
   },
   "population": {
-    "estimate": 6650,
-    "median_age": 21.1,
-    "persons_per_household": 3.93
+    "estimate": 1458954,
+    "median_age": 34.6,
+    "persons_per_household": 2.62
   },
   "households": {
-    "total_households": 290
+    "total_households": 547883
   },
   "income": {
-    "median_household_income": 110833,
-    "per_capita_income": 24592,
-    "poverty_rate_percent": 3.0
+    "median_household_income": 62917,
+    "per_capita_income": 32983,
+    "poverty_rate_percent": 17.1
   },
   "education": {
-    "high_school_grad_or_higher_percent": 97.5,
-    "bachelors_degree_or_higher_percent": 43.0
+    "high_school_grad_or_higher_percent": 84.3,
+    "bachelors_degree_or_higher_percent": 28.7
   },
   "veterans": {
     "veteran_population_percent": 12.4,
-    "veteran_population": 377
+    "veteran_population": 209130
   },
   "immigration": {
     "foreign_born_percent": 6.4
   },
   "labor": {
-    "mean_travel_time_to_work_minutes": 10.6,
-    "unemployment_rate_percent": 6.0
+    "mean_travel_time_to_work_minutes": 24.6,
+    "unemployment_rate_percent": 5.8
   },
   "crime_status": {
     "installation": "Extremely safe; gated military access with 24/7 security.",
@@ -407,8 +407,8 @@
     }
   },
   "housing": {
-    "housing_units": 359,
-    "median_value_owner_occupied": 275000,
+    "housing_units": 603213,
+    "median_value_owner_occupied": 219700,
     "market": {
       "zillow_average_home_value": 319995,
       "zillow_one_year_change_percent": -3.0,
@@ -1274,7 +1274,7 @@
       "dataset": "acs/acs5/profile",
       "year": "2023",
       "as_of": "2026-06",
-      "raw_file": "raw/lackland-afb-census-profile-1600000US4840036-2026_06.json"
+      "raw_file": "raw/lackland-afb-census-profile-1600000US4865000-2026_06.json"
     },
     "rent": {
       "provider": "Trulia / RentHop",
@@ -1480,7 +1480,7 @@
   "data_quality": {
     "api_refresh": {
       "batch_id": "2026_06",
-      "as_of": "2026-06-28",
+      "as_of": "2026-06-29",
       "housing_market": {
         "provider": "RentCast",
         "confidence": "medium-high",
@@ -1502,7 +1502,7 @@
         "raw/lackland-afb-rentcast-market-78253-2026_06.json",
         "raw/lackland-afb-rentcast-market-78254-2026_06.json",
         "raw/lackland-afb-rentcast-market-78227-2026_06.json",
-        "raw/lackland-afb-census-profile-1600000US4840036-2026_06.json"
+        "raw/lackland-afb-census-profile-1600000US4865000-2026_06.json"
       ],
       "notes": [
         "The JSON structure is preserved from the existing PCSU base file.",

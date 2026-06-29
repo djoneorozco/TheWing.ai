@@ -1,0 +1,764 @@
+{
+  "qa_pass": true,
+  "checked_at": "2026-06-29T03:02:48.448486+00:00",
+  "files_checked": [
+    {
+      "slug": "lackland-afb",
+      "baseline": "netlify/functions/cities/Lackland.json",
+      "output": "tools/base_refresh/output/lackland-afb.json"
+    },
+    {
+      "slug": "luke-afb",
+      "baseline": "netlify/functions/cities/Luke.json",
+      "output": "tools/base_refresh/output/luke-afb.json"
+    },
+    {
+      "slug": "nellis",
+      "baseline": "netlify/functions/cities/Nellis.json",
+      "output": "tools/base_refresh/output/nellis.json"
+    }
+  ],
+  "pipeline_checks": {
+    "refresh_script": {
+      "uses_arcgis_api": false,
+      "arcgis_api_patterns_found": [],
+      "arcgis_token_required": false,
+      "mode_comment_present": true
+    },
+    "refresh_report": {
+      "report_exists": true,
+      "batch_id": "2026_06",
+      "total_bases": 3,
+      "failed_count": 0,
+      "nearby_services_baseline_preserved": true,
+      "updated_slugs": [
+        "lackland-afb",
+        "luke-afb",
+        "nellis"
+      ]
+    },
+    "pipeline_pass": true
+  },
+  "per_base": [
+    {
+      "slug": "lackland-afb",
+      "baseline_file": "netlify/functions/cities/Lackland.json",
+      "output_file": "tools/base_refresh/output/lackland-afb.json",
+      "files_exist": true,
+      "qa_pass": true,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [
+        "data_quality",
+        "market_area",
+        "rentcast_zip_summaries"
+      ],
+      "schema_checks": {
+        "base_profile": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "compatibility": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "sources": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "market_metrics": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "rental_metrics": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "by_bedroom": {
+          "baseline_exists": true,
+          "output_exists": true
+        }
+      },
+      "rentcast_fields": {
+        "avg_home_value": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 319995
+        },
+        "average_home_value": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 319995
+        },
+        "avgHome": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 319995
+        },
+        "city_avg_home": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 319995
+        },
+        "snapshot.median_home_price": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 319995
+        },
+        "market_metrics.median_sale_price": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 319995
+        },
+        "market_metrics.price_per_sqft": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 155
+        },
+        "market_metrics.days_on_market": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 34
+        },
+        "metrics.median_rent": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 1780
+        },
+        "rental_metrics.median_rent": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 1780
+        },
+        "rental_metrics.average_rent": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 1783
+        },
+        "housing.market.median_sale_price_current": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 319995
+        },
+        "rentcast_zip_summaries": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 5
+        }
+      },
+      "census_fields": {
+        "snapshot.population_city": {
+          "present": true,
+          "baseline_value": 5896,
+          "output_value": 1458954,
+          "changed_from_baseline": true
+        },
+        "snapshot.median_household_income": {
+          "present": true,
+          "baseline_value": 73646,
+          "output_value": 62917,
+          "changed_from_baseline": true
+        },
+        "population.estimate": {
+          "present": true,
+          "baseline_value": 5896,
+          "output_value": 1458954,
+          "changed_from_baseline": true
+        },
+        "households.total_households": {
+          "present": true,
+          "baseline_value": 1450,
+          "output_value": 547883,
+          "changed_from_baseline": true
+        },
+        "income.median_household_income": {
+          "present": true,
+          "baseline_value": 73646,
+          "output_value": 62917,
+          "changed_from_baseline": true
+        },
+        "income.per_capita_income": {
+          "present": true,
+          "baseline_value": 24500,
+          "output_value": 32983,
+          "changed_from_baseline": true
+        },
+        "education.high_school_grad_or_higher_percent": {
+          "present": true,
+          "baseline_value": 97.8,
+          "output_value": 84.3,
+          "changed_from_baseline": true
+        },
+        "education.bachelors_degree_or_higher_percent": {
+          "present": true,
+          "baseline_value": 41.1,
+          "output_value": 28.7,
+          "changed_from_baseline": true
+        },
+        "labor.mean_travel_time_to_work_minutes": {
+          "present": true,
+          "baseline_value": 18.5,
+          "output_value": 24.6,
+          "changed_from_baseline": true
+        },
+        "labor.unemployment_rate_percent": {
+          "present": true,
+          "baseline_value": 4.8,
+          "output_value": 5.8,
+          "changed_from_baseline": true
+        }
+      },
+      "preserved_sections": {
+        "base_profile.gates": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.major_services": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.visitor_control_center": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.recommended_neighborhoods": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.commute_intelligence": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.bah_market_reality": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.arrival_checklist": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "market_bluf": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "scorecard": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "summary_points": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "opportunities": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "risks": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "buyer_guidance": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "seller_guidance": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "landlord_notes": {
+          "present": true,
+          "matches_baseline": true
+        }
+      },
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "warnings": [],
+      "errors": []
+    },
+    {
+      "slug": "luke-afb",
+      "baseline_file": "netlify/functions/cities/Luke.json",
+      "output_file": "tools/base_refresh/output/luke-afb.json",
+      "files_exist": true,
+      "qa_pass": true,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [
+        "data_quality",
+        "market_area",
+        "rentcast_zip_summaries"
+      ],
+      "schema_checks": {
+        "base_profile": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "compatibility": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "sources": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "market_metrics": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "rental_metrics": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "by_bedroom": {
+          "baseline_exists": true,
+          "output_exists": true
+        }
+      },
+      "rentcast_fields": {
+        "avg_home_value": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 449900
+        },
+        "average_home_value": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 449900
+        },
+        "avgHome": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 449900
+        },
+        "city_avg_home": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 449900
+        },
+        "snapshot.median_home_price": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 449900
+        },
+        "market_metrics.median_sale_price": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 449900
+        },
+        "market_metrics.price_per_sqft": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 237
+        },
+        "market_metrics.days_on_market": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 37
+        },
+        "metrics.median_rent": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 1845
+        },
+        "rental_metrics.median_rent": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 1845
+        },
+        "rental_metrics.average_rent": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 2007
+        },
+        "housing.market.median_sale_price_current": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 449900
+        },
+        "rentcast_zip_summaries": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 5
+        }
+      },
+      "census_fields": {
+        "snapshot.population_city": {
+          "present": true,
+          "baseline_value": 255000,
+          "output_value": 250193,
+          "changed_from_baseline": true
+        },
+        "snapshot.median_household_income": {
+          "present": true,
+          "baseline_value": 76000,
+          "output_value": 70139,
+          "changed_from_baseline": true
+        },
+        "population.estimate": {
+          "present": true,
+          "baseline_value": 255000,
+          "output_value": 250193,
+          "changed_from_baseline": true
+        },
+        "households.total_households": {
+          "present": true,
+          "baseline_value": 92000,
+          "output_value": 86733,
+          "changed_from_baseline": true
+        },
+        "income.median_household_income": {
+          "present": true,
+          "baseline_value": 76000,
+          "output_value": 70139,
+          "changed_from_baseline": true
+        },
+        "income.per_capita_income": {
+          "present": true,
+          "baseline_value": 37500,
+          "output_value": 31981,
+          "changed_from_baseline": true
+        },
+        "education.high_school_grad_or_higher_percent": {
+          "present": true,
+          "baseline_value": 88.5,
+          "output_value": 84.5,
+          "changed_from_baseline": true
+        },
+        "education.bachelors_degree_or_higher_percent": {
+          "present": true,
+          "baseline_value": 27.8,
+          "output_value": 23.5,
+          "changed_from_baseline": true
+        },
+        "labor.mean_travel_time_to_work_minutes": {
+          "present": true,
+          "baseline_value": 28.4,
+          "output_value": 28.0,
+          "changed_from_baseline": true
+        },
+        "labor.unemployment_rate_percent": {
+          "present": true,
+          "baseline_value": 3.8,
+          "output_value": 5.3,
+          "changed_from_baseline": true
+        }
+      },
+      "preserved_sections": {
+        "base_profile.gates": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.major_services": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.visitor_control_center": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.recommended_neighborhoods": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.commute_intelligence": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.bah_market_reality": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.arrival_checklist": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "market_bluf": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "scorecard": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "summary_points": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "opportunities": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "risks": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "buyer_guidance": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "seller_guidance": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "landlord_notes": {
+          "present": true,
+          "matches_baseline": true
+        }
+      },
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "warnings": [],
+      "errors": []
+    },
+    {
+      "slug": "nellis",
+      "baseline_file": "netlify/functions/cities/Nellis.json",
+      "output_file": "tools/base_refresh/output/nellis.json",
+      "files_exist": true,
+      "qa_pass": true,
+      "missing_top_level_keys": [],
+      "new_top_level_keys": [
+        "data_quality",
+        "market_area",
+        "rentcast_zip_summaries"
+      ],
+      "schema_checks": {
+        "base_profile": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "compatibility": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "sources": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "market_metrics": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "rental_metrics": {
+          "baseline_exists": true,
+          "output_exists": true
+        },
+        "by_bedroom": {
+          "baseline_exists": true,
+          "output_exists": true
+        }
+      },
+      "rentcast_fields": {
+        "avg_home_value": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 334800
+        },
+        "average_home_value": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 334800
+        },
+        "avgHome": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 334800
+        },
+        "city_avg_home": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 334800
+        },
+        "snapshot.median_home_price": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 334800
+        },
+        "market_metrics.median_sale_price": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 334800
+        },
+        "market_metrics.price_per_sqft": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 221
+        },
+        "market_metrics.days_on_market": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 37
+        },
+        "metrics.median_rent": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 1625
+        },
+        "rental_metrics.median_rent": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 1625
+        },
+        "rental_metrics.average_rent": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 1711
+        },
+        "housing.market.median_sale_price_current": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 334800
+        },
+        "rentcast_zip_summaries": {
+          "present": true,
+          "refreshed_from_baseline": true,
+          "value": 5
+        }
+      },
+      "census_fields": {
+        "snapshot.population_city": {
+          "present": true,
+          "baseline_value": 678924,
+          "output_value": 650873,
+          "changed_from_baseline": true
+        },
+        "snapshot.median_household_income": {
+          "present": true,
+          "baseline_value": 73877,
+          "output_value": 70723,
+          "changed_from_baseline": true
+        },
+        "population.estimate": {
+          "present": true,
+          "baseline_value": 678924,
+          "output_value": 650873,
+          "changed_from_baseline": true
+        },
+        "households.total_households": {
+          "present": true,
+          "baseline_value": 253523,
+          "output_value": 244429,
+          "changed_from_baseline": true
+        },
+        "income.median_household_income": {
+          "present": true,
+          "baseline_value": 73877,
+          "output_value": 70723,
+          "changed_from_baseline": true
+        },
+        "income.per_capita_income": {
+          "present": true,
+          "baseline_value": 39906,
+          "output_value": 38421,
+          "changed_from_baseline": true
+        },
+        "education.high_school_grad_or_higher_percent": {
+          "present": true,
+          "baseline_value": 87.2,
+          "output_value": 85.8,
+          "changed_from_baseline": true
+        },
+        "education.bachelors_degree_or_higher_percent": {
+          "present": true,
+          "baseline_value": 28,
+          "output_value": 27.3,
+          "changed_from_baseline": true
+        },
+        "labor.mean_travel_time_to_work_minutes": {
+          "present": true,
+          "baseline_value": 25.7,
+          "output_value": 25.8,
+          "changed_from_baseline": true
+        },
+        "labor.unemployment_rate_percent": {
+          "present": true,
+          "baseline_value": 5.4,
+          "output_value": 7.2,
+          "changed_from_baseline": true
+        }
+      },
+      "preserved_sections": {
+        "base_profile.gates": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.major_services": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.visitor_control_center": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.recommended_neighborhoods": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.commute_intelligence": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.bah_market_reality": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "base_profile.arrival_checklist": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "market_bluf": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "scorecard": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "summary_points": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "opportunities": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "risks": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "buyer_guidance": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "seller_guidance": {
+          "present": true,
+          "matches_baseline": true
+        },
+        "landlord_notes": {
+          "present": true,
+          "matches_baseline": true
+        }
+      },
+      "bad_census_values_found": [],
+      "missing_required_sections": [],
+      "warnings": [],
+      "errors": []
+    }
+  ],
+  "missing_keys": {
+    "lackland-afb": [],
+    "luke-afb": [],
+    "nellis": []
+  },
+  "bad_census_values_found": {
+    "lackland-afb": [],
+    "luke-afb": [],
+    "nellis": []
+  },
+  "stray_output_bad_census_values": [],
+  "missing_required_sections": {
+    "lackland-afb": [],
+    "luke-afb": [],
+    "nellis": []
+  },
+  "warnings": [],
+  "recommendation": "PASS — All three test-base output files are safe to promote to netlify/functions/cities when ready."
+}
