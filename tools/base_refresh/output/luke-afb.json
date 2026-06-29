@@ -1531,7 +1531,7 @@
   "data_quality": {
     "api_refresh": {
       "batch_id": "2026_06",
-      "as_of": "2026-06-28",
+      "as_of": "2026-06-29",
       "housing_market": {
         "provider": "RentCast",
         "confidence": "medium-high",

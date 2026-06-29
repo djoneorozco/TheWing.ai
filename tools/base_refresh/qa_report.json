@@ -1,6 +1,6 @@
 {
   "qa_pass": true,
-  "checked_at": "2026-06-28T22:49:25.917877+00:00",
+  "checked_at": "2026-06-29T03:02:48.448486+00:00",
   "files_checked": [
     {
       "slug": "lackland-afb",
@@ -149,61 +149,61 @@
         "snapshot.population_city": {
           "present": true,
           "baseline_value": 5896,
-          "output_value": 6650,
+          "output_value": 1458954,
           "changed_from_baseline": true
         },
         "snapshot.median_household_income": {
           "present": true,
           "baseline_value": 73646,
-          "output_value": 110833,
+          "output_value": 62917,
           "changed_from_baseline": true
         },
         "population.estimate": {
           "present": true,
           "baseline_value": 5896,
-          "output_value": 6650,
+          "output_value": 1458954,
           "changed_from_baseline": true
         },
         "households.total_households": {
           "present": true,
           "baseline_value": 1450,
-          "output_value": 290,
+          "output_value": 547883,
           "changed_from_baseline": true
         },
         "income.median_household_income": {
           "present": true,
           "baseline_value": 73646,
-          "output_value": 110833,
+          "output_value": 62917,
           "changed_from_baseline": true
         },
         "income.per_capita_income": {
           "present": true,
           "baseline_value": 24500,
-          "output_value": 24592,
+          "output_value": 32983,
           "changed_from_baseline": true
         },
         "education.high_school_grad_or_higher_percent": {
           "present": true,
           "baseline_value": 97.8,
-          "output_value": 97.5,
+          "output_value": 84.3,
           "changed_from_baseline": true
         },
         "education.bachelors_degree_or_higher_percent": {
           "present": true,
           "baseline_value": 41.1,
-          "output_value": 43.0,
+          "output_value": 28.7,
           "changed_from_baseline": true
         },
         "labor.mean_travel_time_to_work_minutes": {
           "present": true,
           "baseline_value": 18.5,
-          "output_value": 10.6,
+          "output_value": 24.6,
           "changed_from_baseline": true
         },
         "labor.unemployment_rate_percent": {
           "present": true,
           "baseline_value": 4.8,
-          "output_value": 6.0,
+          "output_value": 5.8,
           "changed_from_baseline": true
         }
       },
@@ -271,9 +271,7 @@
       },
       "bad_census_values_found": [],
       "missing_required_sections": [],
-      "warnings": [
-        "Lackland households.total_households dropped sharply (1450 -> 290). Review Census place geo_id."
-      ],
+      "warnings": [],
       "errors": []
     },
     {
@@ -755,30 +753,12 @@
     "luke-afb": [],
     "nellis": []
   },
-  "stray_output_bad_census_values": [
-    {
-      "file": "tools/base_refresh/output/lackland.json",
-      "values": [
-        {
-          "path": "rental_vacancy.rate_percent",
-          "value": -888888888
-        },
-        {
-          "path": "housing.median_value_owner_occupied",
-          "value": -666666666
-        }
-      ]
-    }
-  ],
+  "stray_output_bad_census_values": [],
   "missing_required_sections": {
     "lackland-afb": [],
     "luke-afb": [],
     "nellis": []
   },
-  "warnings": [
-    "ArcGIS reference found in output file not in QA pair list: lackland.json",
-    "Sentinel Census values found in non-canonical output files: tools/base_refresh/output/lackland.json",
-    "Lackland households.total_households dropped sharply (1450 -> 290). Review Census place geo_id."
-  ],
-  "recommendation": "PASS with warnings — The three registry output files are safe to promote after removing or ignoring stale output artifacts and reviewing flagged warnings."
+  "warnings": [],
+  "recommendation": "PASS — All three test-base output files are safe to promote to netlify/functions/cities when ready."
 }

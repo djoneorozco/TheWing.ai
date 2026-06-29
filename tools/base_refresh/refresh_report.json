@@ -1,7 +1,7 @@
 {
   "batch_id": "2026_06",
-  "as_of": "2026-06-28",
-  "started_at": "2026-06-28T22:28:51.788454+00:00",
+  "as_of": "2026-06-29",
+  "started_at": "2026-06-29T02:55:28.814340+00:00",
   "source_stack": {
     "housing_market": "RentCast Markets API",
     "demographics": "US Census Bureau ACS 5-Year Profile",
@@ -34,8 +34,8 @@
         "price_per_sqft": 155,
         "median_rent": 1780,
         "average_rent": 1783,
-        "population": 6650,
-        "median_household_income": 110833
+        "population": 1458954,
+        "median_household_income": 62917
       },
       "warnings": [],
       "raw_files": [
@@ -44,7 +44,7 @@
         "raw/lackland-afb-rentcast-market-78253-2026_06.json",
         "raw/lackland-afb-rentcast-market-78254-2026_06.json",
         "raw/lackland-afb-rentcast-market-78227-2026_06.json",
-        "raw/lackland-afb-census-profile-1600000US4840036-2026_06.json"
+        "raw/lackland-afb-census-profile-1600000US4865000-2026_06.json"
       ]
     },
     {
@@ -123,5 +123,5 @@
     }
   ],
   "failed": [],
-  "finished_at": "2026-06-28T22:29:10.897271+00:00"
+  "finished_at": "2026-06-29T02:55:48.782029+00:00"
 }
