@@ -56,14 +56,14 @@
     "state": "California",
     "state_code": "CA",
     "geo_id": "1600000US0646170",
-    "primary_zip": "95903",
+    "primary_zip": "95901",
     "market_label": "Yuba City-Marysville Metro",
     "housing_market_zips": [
       "95901",
-      "95903",
       "95961",
       "95692",
-      "95918"
+      "95918",
+      "95993"
     ],
     "lat": 39.1361,
     "lon": -121.4366
@@ -86,7 +86,7 @@
       "88130",
       "88240",
       "88203",
-      "88102"
+      "88201"
     ],
     "lat": 34.3828,
     "lon": -103.3221
@@ -240,14 +240,14 @@
     "state": "Wyoming",
     "state_code": "WY",
     "geo_id": "1600000US5613900",
-    "primary_zip": "82005",
+    "primary_zip": "82001",
     "market_label": "Cheyenne / Laramie County Metro",
     "housing_market_zips": [
       "82001",
       "82009",
       "82007",
       "82070",
-      "82005"
+      "82082"
     ],
     "lat": 41.1333,
     "lon": -104.8667
@@ -309,14 +309,14 @@
     "state": "New Mexico",
     "state_code": "NM",
     "geo_id": "1600000US3501780",
-    "primary_zip": "88330",
+    "primary_zip": "88310",
     "market_label": "Alamogordo / Otero County Metro",
     "housing_market_zips": [
       "88310",
       "88325",
       "88345",
       "88339",
-      "88330"
+      "88355"
     ],
     "lat": 32.8525,
     "lon": -106.1066
@@ -539,14 +539,14 @@
     "state": "Montana",
     "state_code": "MT",
     "geo_id": "1600000US3032800",
-    "primary_zip": "59402",
+    "primary_zip": "59405",
     "market_label": "Great Falls Metro - Cascade County",
     "housing_market_zips": [
       "59404",
       "59405",
       "59401",
       "59414",
-      "59402"
+      "59403"
     ],
     "lat": 47.5047,
     "lon": -111.1873
@@ -631,14 +631,14 @@
     "state": "North Dakota",
     "state_code": "ND",
     "geo_id": "1600000US3853060",
-    "primary_zip": "58705",
+    "primary_zip": "58701",
     "market_label": "Minot Metro - Ward County",
     "housing_market_zips": [
       "58701",
       "58703",
       "58704",
       "58702",
-      "58705"
+      "58707"
     ],
     "lat": 48.4156,
     "lon": -101.358
@@ -660,7 +660,7 @@
       "31601",
       "31602",
       "31605",
-      "31698",
+      "31632",
       "31699"
     ],
     "lat": 30.9678,
@@ -677,14 +677,14 @@
     "state": "Idaho",
     "state_code": "ID",
     "geo_id": "1600000US1654730",
-    "primary_zip": "83648",
+    "primary_zip": "83647",
     "market_label": "Mountain Home Metro",
     "housing_market_zips": [
       "83647",
       "83642",
       "83616",
-      "83648",
-      "83651"
+      "83651",
+      "83644"
     ],
     "lat": 43.0436,
     "lon": -115.8724
@@ -976,13 +976,13 @@
     "state": "Missouri",
     "state_code": "MO",
     "geo_id": "1600000US2939332",
-    "primary_zip": "65305",
+    "primary_zip": "64093",
     "market_label": "Warrensburg Metro",
     "housing_market_zips": [
       "64093",
       "65301",
       "65336",
-      "65305",
+      "65324",
       "64040"
     ],
     "lat": 38.7303,
