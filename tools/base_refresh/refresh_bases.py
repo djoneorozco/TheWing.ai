@@ -483,9 +483,39 @@ def rentcast_get(endpoint, params=None):
 
 
 def fetch_rentcast_market_zip(zip_code):
-    return rentcast_get(
-        RENTCAST_MARKET_ENDPOINT,
-        params={"zipCode": str(zip_code)}
+    url = f"{RENTCAST_BASE_URL}{RENTCAST_MARKET_ENDPOINT}"
+
+    response = requests.get(
+        url,
+        headers=rentcast_headers(),
+        params={"zipCode": str(zip_code)},
+        timeout=REQUEST_TIMEOUT_SECONDS
+    )
+
+    if response.status_code == 404:
+        return None
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"RentCast request failed: {response.status_code} - {response.text}"
+        )
+
+    return response.json()
+
+
+def rentcast_payload_is_usable(payload):
+    if not isinstance(payload, dict):
+        return False
+
+    values = extract_zip_market_values(payload)
+    return any(
+        values.get(key) is not None
+        for key in (
+            "sale_median_price",
+            "sale_average_price",
+            "rent_median_price",
+            "rent_average_price",
+        )
     )
 
 
@@ -1166,6 +1196,7 @@ def refresh_one_base(base):
     # ------------------------------
     rentcast_raw_refs = []
     zip_payloads = []
+    skipped_rentcast_zips = []
 
     housing_zips = base.get("housing_market_zips") or []
 
@@ -1176,6 +1207,29 @@ def refresh_one_base(base):
             print(f"  RentCast market ZIP: {zip_code}")
 
             payload = fetch_rentcast_market_zip(zip_code)
+
+            if payload is None:
+                skip_reason = "RentCast returned 404 (unsupported ZIP)"
+                skipped_rentcast_zips.append({
+                    "zip": str(zip_code),
+                    "reason": skip_reason
+                })
+                warnings.append(f"RentCast skipped ZIP {zip_code}: {skip_reason}")
+                print(f"    ⚠ Skipped ZIP {zip_code}: {skip_reason}")
+                time.sleep(REQUEST_SLEEP_SECONDS)
+                continue
+
+            if not rentcast_payload_is_usable(payload):
+                skip_reason = "RentCast returned no usable sale or rental market data"
+                skipped_rentcast_zips.append({
+                    "zip": str(zip_code),
+                    "reason": skip_reason
+                })
+                warnings.append(f"RentCast skipped ZIP {zip_code}: {skip_reason}")
+                print(f"    ⚠ Skipped ZIP {zip_code}: {skip_reason}")
+                time.sleep(REQUEST_SLEEP_SECONDS)
+                continue
+
             raw_ref = save_raw_payload(
                 "rentcast",
                 slug,
@@ -1192,6 +1246,11 @@ def refresh_one_base(base):
             })
 
             time.sleep(REQUEST_SLEEP_SECONDS)
+
+        if not zip_payloads:
+            raise RuntimeError(
+                "RentCast refresh failed: no housing_market_zips returned usable data"
+            )
 
         rentcast_summary = extract_rentcast_summary(zip_payloads)
         updated = apply_rentcast(
@@ -1249,6 +1308,8 @@ def refresh_one_base(base):
         "output_file": str(output_path.relative_to(BASE_REFRESH_DIR)),
         "existing_json_used": existing_source_path,
         "housing_market_zips": housing_zips,
+        "rentcast_zips_used": [item.get("zip") for item in zip_payloads],
+        "skipped_rentcast_zips": skipped_rentcast_zips,
         "api_sources_used": {
             "rentcast": bool(rentcast_raw_refs),
             "census": bool(census_raw_ref),
