@@ -1,7 +1,7 @@
 {
-  "slug": "nellis-afb",
+  "slug": "nellis",
   "name": "Nellis AFB",
-  "city": "Nellis AFB",
+  "city": "Las Vegas",
   "submarket": "Las Vegas",
   "place": "Nellis AFB, NV",
   "place_detail": "Las Vegas, NV",
@@ -9,49 +9,52 @@
   "state_code": "NV",
   "geo_id": "1600000US3240000",
   "year": 2026,
-  "last_updated_data_from_sources": "March 2026",
+  "last_updated_data_from_sources": "2026-06",
   "image_url": "https://cdn.prod.website-files.com/69b6b526f23748df9f189b16/69c0dc6d478fad1e706ff1f4_dc56ce56878bed382d61aab987ab76eb_San_Antonio.png",
   "base_image_url": "",
   "zip": "89191",
   "market_label": "Las Vegas Metro",
   "profile": "Military-heavy Las Vegas housing snapshot anchored by Nellis AFB, built for PCSUnited base-level market overviews with affordability, rent, ownership, and military-fit context.",
-  "avg_home_value": 426583,
-  "average_home_value": 426583,
-  "avgHome": 426583,
-  "city_avg_home": 426583,
+  "avg_home_value": 334800,
+  "average_home_value": 334800,
+  "avgHome": 334800,
+  "city_avg_home": 334800,
   "snapshot": {
-    "population_city": 678924,
+    "population_city": 650873,
     "population_metro": 2380237,
-    "median_household_income": 73877,
-    "median_home_price": 426583,
+    "median_household_income": 70723,
+    "median_home_price": 334800,
     "market_trend_yoy": -2.7,
     "traffic_level": "High",
     "employment_status": "Stable"
   },
   "market_metrics": {
-    "median_list_price": 459900,
-    "median_sold_price": 426583,
-    "median_sale_price": 426583,
-    "days_on_market": 52,
+    "median_list_price": 334800,
+    "median_sold_price": 334800,
+    "median_sale_price": 334800,
+    "days_on_market": 37,
     "inventory_months": null,
-    "price_per_sqft": 265,
-    "active_listings_total": null,
+    "price_per_sqft": 221,
+    "active_listings_total": 1225,
     "market_type_summary": "Cooling but still active; buyers have more leverage than during peak pandemic-era conditions.",
-    "zillow_average_home_value": 426583,
+    "zillow_average_home_value": 334800,
     "zillow_one_year_change_percent": -2.7,
-    "as_of": "2026-03"
+    "as_of": "2026-06",
+    "source": "RentCast Markets API",
+    "source_last_updated": "2026-06-28T00:00:00.000Z",
+    "method": "Aggregated from selected PCS housing-market ZIPs"
   },
   "metrics": {
-    "median_list_price": 459900,
-    "median_sold_price": 426583,
-    "median_sale_price": 426583,
-    "days_on_market": 52,
+    "median_list_price": 334800,
+    "median_sold_price": 334800,
+    "median_sale_price": 334800,
+    "days_on_market": 37,
     "inventory_months": null,
-    "price_per_sqft": 265,
-    "median_rent": 1900,
-    "active_listings_total": null,
+    "price_per_sqft": 221,
+    "median_rent": 1625,
+    "active_listings_total": 1225,
     "property_tax_rate": 0.0064,
-    "as_of": "2026-03"
+    "as_of": "2026-06"
   },
   "mortgage_assumptions": {
     "apr_percent": 6.2,
@@ -89,32 +92,33 @@
     "notes": "Estimated VA loan all-in payment for Las Vegas area using average home value, 6.2% APR, property tax, insurance, and HOA assumptions."
   },
   "population": {
-    "estimate": 678924,
+    "estimate": 650873,
     "median_age": 38.5,
-    "persons_per_household": 2.7
+    "persons_per_household": 2.63
   },
   "households": {
-    "total_households": 253523
+    "total_households": 244429
   },
   "income": {
-    "median_household_income": 73877,
-    "per_capita_income": 39906,
-    "poverty_rate_percent": 14
+    "median_household_income": 70723,
+    "per_capita_income": 38421,
+    "poverty_rate_percent": 14.2
   },
   "education": {
-    "high_school_grad_or_higher_percent": 87.2,
-    "bachelors_degree_or_higher_percent": 28
+    "high_school_grad_or_higher_percent": 85.8,
+    "bachelors_degree_or_higher_percent": 27.3
   },
   "veterans": {
     "veteran_population_percent": 5.9,
-    "veteran_population_estimate": 39887
+    "veteran_population_estimate": 39887,
+    "veteran_population": 136181
   },
   "immigration": {
     "foreign_born_percent": 20.9
   },
   "labor": {
-    "mean_travel_time_to_work_minutes": 25.7,
-    "unemployment_rate_percent": 5.4
+    "mean_travel_time_to_work_minutes": 25.8,
+    "unemployment_rate_percent": 7.2
   },
   "crime_status": {
     "installation": "Secure military installation environment with controlled access and major Air Force mission presence.",
@@ -129,9 +133,18 @@
     "notes": "Las Vegas rental market appears more balanced than peak-pandemic conditions, with rents cooling from prior highs but still elevated versus pre-pandemic levels."
   },
   "rental_metrics": {
-    "median_rent": 1900,
+    "median_rent": 1625,
     "vacancy_rate_percent": 6.5,
-    "notes": "Based on Las Vegas 2026 rental-market ranges, with apartment averages lower and single-family rentals higher depending on bedroom count and neighborhood."
+    "notes": "Based on Las Vegas 2026 rental-market ranges, with apartment averages lower and single-family rentals higher depending on bedroom count and neighborhood.",
+    "average_rent": 1711,
+    "rent_price_per_sqft": 1,
+    "days_on_market": 26,
+    "total_listings": 958,
+    "new_listings": 344,
+    "as_of": "2026-06",
+    "source": "RentCast Markets API",
+    "source_last_updated": "2026-06-28T00:00:00.000Z",
+    "method": "Aggregated from selected PCS housing-market ZIPs"
   },
   "climate_weather": {
     "spring": "Warm/Dry; 65–85°F",
@@ -408,19 +421,19 @@
     }
   },
   "housing": {
-    "housing_units": 276629,
-    "median_value_owner_occupied": 458300,
+    "housing_units": 263958,
+    "median_value_owner_occupied": 395300,
     "market": {
-      "zillow_average_home_value": 426583,
+      "zillow_average_home_value": 334800,
       "zillow_one_year_change_percent": -2.7,
       "market_type_summary": "Cooling but still active; more buyer leverage than peak market.",
-      "average_days_on_market": 52,
-      "median_sale_price_current": 426583,
-      "median_listing_price_realtor": 459900,
-      "median_listing_price_per_sqft": 265,
-      "active_listings_total": null,
+      "average_days_on_market": 37,
+      "median_sale_price_current": 334800,
+      "median_listing_price_realtor": 334800,
+      "median_listing_price_per_sqft": 221,
+      "active_listings_total": 1225,
       "q1_2026": {
-        "median_sale_price": 426583
+        "median_sale_price": 334800
       },
       "sale_history_36_months": [
         {
@@ -1009,8 +1022,11 @@
       "notes": "Used for Nellis AFB location, Clark County context, and ZIP 89191."
     },
     "demographics": {
-      "provider": "US Census Bureau QuickFacts / Census Reporter ACS",
-      "as_of": "2024 ACS / 2020-2024"
+      "provider": "US Census Bureau ACS 5-Year Profile",
+      "dataset": "acs/acs5/profile",
+      "year": "2023",
+      "as_of": "2026-06",
+      "raw_file": "raw/nellis-census-profile-1600000US3240000-2026_06.json"
     },
     "rent": {
       "provider": "Zillow Rental Manager / Apartments.com / local Las Vegas rental reports",
@@ -1023,6 +1039,27 @@
     "base_profile": {
       "provider": "PCSUnited planning profile using public-facing installation, housing, and market research structure",
       "as_of": "2026-06"
+    },
+    "housing_market": {
+      "provider": "RentCast",
+      "dataset": "RentCast Markets API",
+      "as_of": "2026-06",
+      "batch_id": "2026_06",
+      "primary_base_zip": "89191",
+      "housing_market_zips": [
+        "89115",
+        "89156",
+        "89081",
+        "89030",
+        "89031"
+      ],
+      "raw_files": [
+        "raw/nellis-rentcast-market-89115-2026_06.json",
+        "raw/nellis-rentcast-market-89156-2026_06.json",
+        "raw/nellis-rentcast-market-89081-2026_06.json",
+        "raw/nellis-rentcast-market-89030-2026_06.json",
+        "raw/nellis-rentcast-market-89031-2026_06.json"
+      ]
     }
   },
   "compatibility": {
@@ -1034,6 +1071,201 @@
       "Las Vegas / North Las Vegas is preserved as the surrounding metro/submarket context; base-specific market data was retained.",
       "property_tax_rate and insurance_rate are normalized to decimal form for deterministic math, with percent aliases preserved for display compatibility.",
       "This file now includes base_profile for the PCSUnited Base tab, including gate orientation, visitor control center, major services, on-base housing, recommended nearby neighborhoods, commute intelligence, BAH market guidance, PCS watchouts, and source notes."
-    ]
+    ],
+    "api_refresh_ready": true,
+    "last_api_refresh_batch": "2026_06"
+  },
+  "market_area": {
+    "primary_base_zip": "89191",
+    "housing_market_zips": [
+      "89115",
+      "89156",
+      "89081",
+      "89030",
+      "89031"
+    ],
+    "method": "Uses selected PCS buyer/renter ZIPs, not installation-only ZIP."
+  },
+  "rentcast_zip_summaries": [
+    {
+      "sale_last_updated": "2026-06-28T00:00:00.000Z",
+      "rental_last_updated": "2026-06-28T00:00:00.000Z",
+      "sale_average_price": 322015,
+      "sale_median_price": 310000,
+      "sale_min_price": 30000,
+      "sale_max_price": 2578752,
+      "sale_average_price_per_sqft": 197.56,
+      "sale_median_price_per_sqft": 201.14,
+      "sale_average_sqft": 1424,
+      "sale_median_sqft": 1195,
+      "sale_average_days_on_market": 77,
+      "sale_median_days_on_market": 45,
+      "sale_new_listings": 49,
+      "sale_total_listings": 223,
+      "rent_average_price": 1422,
+      "rent_median_price": 1350,
+      "rent_min_price": 699,
+      "rent_max_price": 3300,
+      "rent_average_price_per_sqft": 1.22,
+      "rent_median_price_per_sqft": 1.26,
+      "rent_average_sqft": 1449,
+      "rent_median_sqft": 1100,
+      "rent_average_days_on_market": 65,
+      "rent_median_days_on_market": 50,
+      "rent_new_listings": 45,
+      "rent_total_listings": 210,
+      "zip": "89115"
+    },
+    {
+      "sale_last_updated": "2026-06-28T00:00:00.000Z",
+      "rental_last_updated": "2026-06-28T00:00:00.000Z",
+      "sale_average_price": 381003,
+      "sale_median_price": 334800,
+      "sale_min_price": 85000,
+      "sale_max_price": 4300000,
+      "sale_average_price_per_sqft": 229.5,
+      "sale_median_price_per_sqft": 218.8,
+      "sale_average_sqft": 1636,
+      "sale_median_sqft": 1344,
+      "sale_average_days_on_market": 63,
+      "sale_median_days_on_market": 37,
+      "sale_new_listings": 47,
+      "sale_total_listings": 163,
+      "rent_average_price": 1569,
+      "rent_median_price": 1625,
+      "rent_min_price": 850,
+      "rent_max_price": 2835,
+      "rent_average_price_per_sqft": 1.11,
+      "rent_median_price_per_sqft": 1.19,
+      "rent_average_sqft": 1746,
+      "rent_median_sqft": 1342,
+      "rent_average_days_on_market": 52,
+      "rent_median_days_on_market": 26,
+      "rent_new_listings": 41,
+      "rent_total_listings": 123,
+      "zip": "89156"
+    },
+    {
+      "sale_last_updated": "2026-06-28T00:00:00.000Z",
+      "rental_last_updated": "2026-06-28T00:00:00.000Z",
+      "sale_average_price": 436546,
+      "sale_median_price": 439000,
+      "sale_min_price": 165000,
+      "sale_max_price": 649999,
+      "sale_average_price_per_sqft": 223.38,
+      "sale_median_price_per_sqft": 220.78,
+      "sale_average_sqft": 2021,
+      "sale_median_sqft": 1918,
+      "sale_average_days_on_market": 53,
+      "sale_median_days_on_market": 33,
+      "sale_new_listings": 66,
+      "sale_total_listings": 249,
+      "rent_average_price": 2135,
+      "rent_median_price": 2100,
+      "rent_min_price": 595,
+      "rent_max_price": 6200,
+      "rent_average_price_per_sqft": 1.18,
+      "rent_median_price_per_sqft": 1.18,
+      "rent_average_sqft": 1885,
+      "rent_median_sqft": 1865,
+      "rent_average_days_on_market": 31,
+      "rent_median_days_on_market": 15,
+      "rent_new_listings": 75,
+      "rent_total_listings": 179,
+      "zip": "89081"
+    },
+    {
+      "sale_last_updated": "2026-06-28T00:00:00.000Z",
+      "rental_last_updated": "2026-06-28T00:00:00.000Z",
+      "sale_average_price": 289670,
+      "sale_median_price": 315000,
+      "sale_min_price": 12888,
+      "sale_max_price": 1750000,
+      "sale_average_price_per_sqft": 237.01,
+      "sale_median_price_per_sqft": 233.93,
+      "sale_average_sqft": 1456,
+      "sale_median_sqft": 1300,
+      "sale_average_days_on_market": 97,
+      "sale_median_days_on_market": 68,
+      "sale_new_listings": 33,
+      "sale_total_listings": 164,
+      "rent_average_price": 1307,
+      "rent_median_price": 1225,
+      "rent_min_price": 700,
+      "rent_max_price": 3095,
+      "rent_average_price_per_sqft": 1.28,
+      "rent_median_price_per_sqft": 1.33,
+      "rent_average_sqft": 1360,
+      "rent_median_sqft": 996,
+      "rent_average_days_on_market": 63,
+      "rent_median_days_on_market": 34,
+      "rent_new_listings": 29,
+      "rent_total_listings": 100,
+      "zip": "89030"
+    },
+    {
+      "sale_last_updated": "2026-06-28T00:00:00.000Z",
+      "rental_last_updated": "2026-06-28T00:00:00.000Z",
+      "sale_average_price": 445709,
+      "sale_median_price": 430000,
+      "sale_min_price": 239999,
+      "sale_max_price": 1700000,
+      "sale_average_price_per_sqft": 240.17,
+      "sale_median_price_per_sqft": 239.23,
+      "sale_average_sqft": 1913,
+      "sale_median_sqft": 1805,
+      "sale_average_days_on_market": 51,
+      "sale_median_days_on_market": 30,
+      "sale_new_listings": 124,
+      "sale_total_listings": 426,
+      "rent_average_price": 2120,
+      "rent_median_price": 2085,
+      "rent_min_price": 650,
+      "rent_max_price": 5600,
+      "rent_average_price_per_sqft": 1.28,
+      "rent_median_price_per_sqft": 1.25,
+      "rent_average_sqft": 1741,
+      "rent_median_sqft": 1703,
+      "rent_average_days_on_market": 26,
+      "rent_median_days_on_market": 10,
+      "rent_new_listings": 154,
+      "rent_total_listings": 346,
+      "zip": "89031"
+    }
+  ],
+  "data_quality": {
+    "api_refresh": {
+      "batch_id": "2026_06",
+      "as_of": "2026-06-29",
+      "housing_market": {
+        "provider": "RentCast",
+        "confidence": "medium-high",
+        "method": "Selected housing-market ZIP aggregation"
+      },
+      "demographics": {
+        "provider": "US Census Bureau ACS",
+        "confidence": "high",
+        "method": "Place-level ACS profile where geo_id is available"
+      },
+      "nearby_services": {
+        "provider": "Baseline JSON / official-source review",
+        "confidence": "medium-high",
+        "method": "Preserved from existing PCSU base JSON"
+      },
+      "raw_files": [
+        "raw/nellis-rentcast-market-89115-2026_06.json",
+        "raw/nellis-rentcast-market-89156-2026_06.json",
+        "raw/nellis-rentcast-market-89081-2026_06.json",
+        "raw/nellis-rentcast-market-89030-2026_06.json",
+        "raw/nellis-rentcast-market-89031-2026_06.json",
+        "raw/nellis-census-profile-1600000US3240000-2026_06.json"
+      ],
+      "notes": [
+        "The JSON structure is preserved from the existing PCSU base file.",
+        "RentCast updates housing, sale, and rental market fields.",
+        "Census updates demographic and economic fields only when values are valid.",
+        "Curated PCS guidance, official links, gates, major services, and base_profile intelligence are preserved unless manually updated."
+      ]
+    }
   }
 }
