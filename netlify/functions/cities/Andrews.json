@@ -1,1 +1,215 @@
+{
+  "slug": "andrews-afb",
+  "name": "Joint Base Andrews",
+  "city": "Camp Springs MD",
+  "submarket": "Camp Springs / Clinton / Upper Marlboro / Fort Washington / Suitland",
+  "place": "Joint Base Andrews, MD",
+  "place_detail": "Camp Springs / Prince George's County, MD",
+  "state": "Maryland",
+  "state_code": "MD",
+  "geo_id": "1600000US2412600",
+  "year": 2026,
+  "last_updated_data_from_sources": "March 2026",
+  "image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69fa09d3d058341f42f5d041_Eglin%20FL.png",
+  "base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f9fff6bfd3dd6580612034_Eglin%20AFB.png",
+  "zip": "20762",
+  "market_label": "Washington-Arlington-Alexandria Metro",
+  "profile": "Military-friendly Joint Base Andrews housing snapshot anchored to Camp Springs, Clinton, Upper Marlboro, Fort Washington, Suitland, and Prince George's County, built for PCSUnited base-level market overviews.",
 
+  "avg_home_value": 398000,
+  "average_home_value": 398000,
+  "avgHome": 398000,
+  "city_avg_home": 398000,
+
+  "snapshot": {
+    "population_city": 23000,
+    "population_metro": 6300000,
+    "median_household_income": 120000,
+    "median_home_price": 398493,
+    "market_trend_yoy": -3.8,
+    "traffic_level": "Extremely High (D.C. Metro)",
+    "employment_status": "Robust"
+  },
+
+  "market_metrics": {
+    "median_list_price": 418300,
+    "median_sold_price": 398493,
+    "median_sale_price": 398493,
+    "days_on_market": 34,
+    "inventory_months": null,
+    "price_per_sqft": 232,
+    "active_listings_total": 520,
+    "market_type_summary": "National Capital military market with fierce inventory competition, severe rush-hour traffic pressures, and high dependency on rank-based BAH adjustments",
+    "zillow_average_home_value": 398493,
+    "zillow_one_year_change_percent": -3.8,
+    "as_of": "2026-03"
+  },
+
+  "metrics": {
+    "median_list_price": 418300,
+    "median_sold_price": 398493,
+    "median_sale_price": 398493,
+    "days_on_market": 34,
+    "inventory_months": null,
+    "price_per_sqft": 232,
+    "median_rent": 2400,
+    "active_listings_total": 520,
+    "property_tax_rate": 0.0112,
+    "as_of": "2026-03"
+  },
+
+  "mortgage_assumptions": {
+    "apr_percent": 6.25,
+    "term_years": 30,
+    "down_payment_percent": 0,
+    "includes": "va_loan_all_in",
+    "defaults_note": "Based on March 2026 Maryland VA loan planning assumptions."
+  },
+
+  "property_tax_rate": 0.0112,
+  "property_tax_rate_percent": 1.12,
+  "insurance_rate": 0.005,
+  "insurance_rate_percent": 0.5,
+  "hoa_monthly": 45,
+
+  "ownership_costs": {
+    "property_tax_rate": 0.0112,
+    "property_tax_rate_percent": 1.12,
+    "insurance_rate_estimate": 0.005,
+    "insurance_rate_percent": 0.5,
+    "insurance_annual_default": 1990,
+    "hoa_monthly_default": 45,
+    "notes": [
+      "Maryland property taxes are structurally higher than national averages, heavily influencing final monthly payments in Prince George's County.",
+      "Joint Base Andrews buyers must weigh home pricing against extreme National Capital Region transit corridors like I-495 and the Suitland Parkway.",
+      "Camp Springs, Clinton, Fort Washington, and Upper Marlboro introduce deeply localized school assignments and lifestyle dynamics."
+    ]
+  },
+
+  "costs": {
+    "property_tax_rate": 0.0112,
+    "insurance_annual_default": 1990,
+    "hoa_monthly_default": 45
+  },
+
+  "avg_home_mortgage_monthly": {
+    "avg": 2850,
+    "as_of": "2026-03",
+    "notes": "VA loan planning estimate for National Capital Region / Prince George's County housing, reflecting local baseline structural configurations."
+  },
+
+  "population": {
+    "estimate": 23000,
+    "median_age": 41.3,
+    "persons_per_household": 2.6
+  },
+
+  "households": {
+    "total_households": 8500
+  },
+
+  "income": {
+    "median_household_income": 120000,
+    "per_capita_income": 51000,
+    "poverty_rate_percent": 7.2
+  },
+
+  "education": {
+    "high_school_grad_or_higher_percent": 91.5,
+    "bachelors_degree_or_higher_percent": 31.2
+  },
+
+  "veterans": {
+    "veteran_population_percent": 11.4
+  },
+
+  "immigration": {
+    "foreign_born_percent": 11.5
+  },
+
+  "labor": {
+    "mean_travel_time_to_work_minutes": 34.0,
+    "unemployment_rate_percent": 4.9
+  },
+
+  "crime_status": {
+    "installation": "Extremely safe; gated military installation with controlled access.",
+    "metro_okaloosa_emerald_coast": "Safety profiles fluctuate markedly by zip code across Prince George's County. High occurrences of property-level offenses command diligent geographic screening by home-seeking personnel."
+  },
+
+  "school_quality": {
+    "on_base": "On-base command points route student placements into the local municipal county networks; families must map exact coordinate addresses to establish verification.",
+    "off_base": "Prince George's County public school options showcase dynamic variation across administrative clusters. Cross-referencing target zones remains vital."
+  },
+
+  "rental_vacancy": {
+    "rate_percent": 4.8,
+    "notes": "Rental demand scales tightly against the regional Washington MHA assignment parameters and incoming rotation waves."
+  },
+
+  "rental_metrics": {
+    "median_rent": 2400,
+    "vacancy_rate_percent": 4.8,
+    "notes": "Baseline estimate grounded within immediate civilian boundary sectors surrounding the complex perimeter gates."
+  },
+
+  "climate_weather": {
+    "spring": "Mild/Variable; 45–68°F",
+    "summer": "Hot/Humid; 70–89°F",
+    "fall": "Cool/Crisp; 48–70°F",
+    "winter": "Cold/Chilly; 28–46°F"
+  },
+
+  "special_events": [
+    "Joint Base Andrews Air Show when scheduled",
+    "Prince George's County Fair",
+    "National Cherry Blossom Festival metro area highlights",
+    "Washington D.C. Capital Region event itineraries",
+    "Upper Marlboro annual community programs",
+    "Morningside local area seasonal celebrations"
+  ],
+
+  "military_lifestyle_fit": {
+    "rating": "Exceptional",
+    "description": "High-visibility strategic hub hosting presidential transport wings alongside core inter-service units, integrated smoothly into the broader National Capital Region grid."
+  },
+
+  "financial_brief": {
+    "bah_vs_buy_position": "Balanced with thorough calculations",
+    "bah_vs_rent_position": "Highly competitive",
+    "affordability_summary": "Substantial Washington-area BAH tiers shield personnel from severe capital pricing, though local property taxes and gridlock trade-offs dictate careful asset balancing.",
+    "buyer_opportunity": "Favorable for VA participants prioritizing robust suburban subdivisions spanning the eastern periphery lanes of the Capital Beltway.",
+    "renter_advantage": false
+  },
+
+  "market_bluf": {
+    "bluf_headline": "National Capital Strategic Power Market",
+    "bluf_summary": "Joint Base Andrews places incoming personnel inside a highly compensated but competitive market, demanding acute awareness of infrastructure routes and localized tax schedules.",
+    "status": "Balanced",
+    "inventory_trend": "Stable",
+    "buyer_leverage": "Medium",
+    "verdict": "BUY SELECTIVELY",
+    "verdict_color": "green",
+    "confidence_score": 83
+  },
+
+  "scorecard": {
+    "affordability_score": 55,
+    "growth_score": 81,
+    "stability_score": 92,
+    "military_fit_score": 96,
+    "overall_score": 81
+  },
+
+  "rules": {
+    "max_safe_housing_ratio": 0.3,
+    "warning_ratio": 0.35,
+    "danger_ratio": 0.4
+  },
+
+  "summary_points": [
+    "Joint Base Andrews is enveloped by the high-velocity, premium real estate network of the Washington metropolitan region.",
+    "Camp Springs, Clinton, Upper Marlboro, and Fort Washington present contrasting commutes and local municipal asset dynamics.",
+    "Elevated property tax assessments and regional highway gridlock constitute the principal financial and lifestyle considerations."
+  ]
+}
