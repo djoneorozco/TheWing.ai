@@ -5,7 +5,7 @@
    PURPOSE
    - Loads PCSUnited base JSON files
    - Reads files from netlify/functions/cities/
-   - Uses ES Modules
+   - Compatible with the repository's ES module setup
    - Returns CORS headers for Webflow
 
    EXAMPLE
@@ -13,6 +13,7 @@
 ============================================================ */
 
 import fs from "node:fs/promises";
+import path from "node:path";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -42,7 +43,9 @@ function sanitizeFileName(value){
   }
 
   /*
-    Prevent paths such as:
+    Block path traversal and folder paths.
+
+    Rejected examples:
     ../Lackland.json
     cities/Lackland.json
     /Lackland.json
@@ -67,10 +70,102 @@ function sanitizeFileName(value){
   return fileName;
 }
 
+async function readBaseFile(fileName){
+
+  /*
+    Netlify may place included files in either of these locations,
+    depending on how the function is bundled.
+
+    Primary:
+    /var/task/netlify/functions/cities/Lackland.json
+
+    Fallback:
+    /var/task/cities/Lackland.json
+  */
+
+  const candidatePaths = [
+
+    path.join(
+      process.cwd(),
+      "netlify",
+      "functions",
+      "cities",
+      fileName
+    ),
+
+    path.join(
+      process.cwd(),
+      "cities",
+      fileName
+    ),
+
+    path.join(
+      "/var/task",
+      "netlify",
+      "functions",
+      "cities",
+      fileName
+    ),
+
+    path.join(
+      "/var/task",
+      "cities",
+      fileName
+    )
+
+  ];
+
+  let lastError =
+    null;
+
+  for(const filePath of candidatePaths){
+
+    try{
+
+      const raw =
+        await fs.readFile(
+          filePath,
+          "utf8"
+        );
+
+      return {
+        raw,
+        filePath
+      };
+
+    }catch(error){
+
+      lastError =
+        error;
+
+      if(error?.code !== "ENOENT"){
+        throw error;
+      }
+    }
+  }
+
+  const notFoundError =
+    new Error(
+      `Base JSON file not found: ${fileName}`
+    );
+
+  notFoundError.code =
+    "ENOENT";
+
+  notFoundError.candidatePaths =
+    candidatePaths;
+
+  notFoundError.cause =
+    lastError;
+
+  throw notFoundError;
+}
+
 export async function handler(event){
 
   const method =
-    event?.httpMethod || "GET";
+    event?.httpMethod ||
+    "GET";
 
   if(method === "OPTIONS"){
 
@@ -112,33 +207,16 @@ export async function handler(event){
     );
   }
 
-  /*
-    base-data.js is located in:
-
-    netlify/functions/base-data.js
-
-    JSON files are located in:
-
-    netlify/functions/cities/Lackland.json
-  */
-
-  const fileUrl =
-    new URL(
-      `./cities/${fileName}`,
-      import.meta.url
-    );
-
   try{
 
-    const raw =
-      await fs.readFile(
-        fileUrl,
-        "utf8"
+    const result =
+      await readBaseFile(
+        fileName
       );
 
     const data =
       JSON.parse(
-        raw
+        result.raw
       );
 
     return createResponse(
@@ -154,6 +232,16 @@ export async function handler(event){
 
     if(error?.code === "ENOENT"){
 
+      console.warn(
+        "[TheWing Base Data] File not found:",
+        {
+          file:fileName,
+          checked:
+            error.candidatePaths ||
+            []
+        }
+      );
+
       return createResponse(
         404,
         {
@@ -165,6 +253,14 @@ export async function handler(event){
     }
 
     if(error instanceof SyntaxError){
+
+      console.error(
+        "[TheWing Base Data] Invalid JSON:",
+        {
+          file:fileName,
+          message:error.message
+        }
+      );
 
       return createResponse(
         500,
