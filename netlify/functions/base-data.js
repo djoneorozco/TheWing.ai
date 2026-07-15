@@ -1,140 +1,180 @@
-// ==========================================================
-// TheWing.ai
-// /api/base-data
-//
-// Returns a PCSUnited Base JSON file
-//
-// Example:
-// /api/base-data?file=Lackland.json
-// /api/base-data?file=Cannon.json
-// ==========================================================
+/* ============================================================
+   TheWing.ai • Base Data API
+   netlify/functions/base-data.js
 
-const fs = require("fs");
-const path = require("path");
+   PURPOSE
+   - Safely loads PCSUnited base JSON files
+   - Reads files from netlify/functions/cities/
+   - Supports ES Modules
+   - Returns Webflow-safe CORS headers
 
-exports.handler = async (event) => {
+   EXAMPLE
+   /api/base-data?file=Lackland.json
+============================================================ */
 
-  try {
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-    const file =
-      String(event.queryStringParameters?.file || "")
-        .trim();
+const __filename =
+  fileURLToPath(import.meta.url);
 
-    if (!file) {
-      return {
-        statusCode: 400,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        },
-        body: JSON.stringify({
-          success: false,
-          error: "Missing file parameter."
-        })
-      };
-    }
+const __dirname =
+  path.dirname(__filename);
 
-    // ------------------------------------------------------
-    // Prevent directory traversal
-    // ------------------------------------------------------
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Content-Type": "application/json; charset=utf-8",
+  "Cache-Control": "public, max-age=300"
+};
 
-    const safeFile =
-      path.basename(file);
+function response(statusCode, body){
 
-    if (!safeFile.toLowerCase().endsWith(".json")) {
-      return {
-        statusCode: 400,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        },
-        body: JSON.stringify({
-          success: false,
-          error: "Only JSON files are allowed."
-        })
-      };
-    }
+  return {
+    statusCode,
+    headers:CORS_HEADERS,
+    body:JSON.stringify(body)
+  };
+}
 
-    // ------------------------------------------------------
-    // Cities folder
-    // ------------------------------------------------------
+function sanitizeFileName(value){
 
-    const jsonPath = path.join(
+  const fileName =
+    String(value || "")
+      .trim();
+
+  if(!fileName){
+    return "";
+  }
+
+  const safeName =
+    path.basename(fileName);
+
+  if(
+    safeName !== fileName ||
+    !/^[a-zA-Z0-9._-]+\.json$/i.test(safeName)
+  ){
+    return "";
+  }
+
+  return safeName;
+}
+
+export async function handler(event){
+
+  if(event.httpMethod === "OPTIONS"){
+
+    return {
+      statusCode:204,
+      headers:CORS_HEADERS,
+      body:""
+    };
+  }
+
+  if(event.httpMethod !== "GET"){
+
+    return response(
+      405,
+      {
+        ok:false,
+        error:"Method not allowed."
+      }
+    );
+  }
+
+  const requestedFile =
+    event.queryStringParameters?.file;
+
+  const fileName =
+    sanitizeFileName(requestedFile);
+
+  if(!fileName){
+
+    return response(
+      400,
+      {
+        ok:false,
+        error:"A valid JSON filename is required.",
+        example:"/api/base-data?file=Lackland.json"
+      }
+    );
+  }
+
+  const citiesDirectory =
+    path.join(
       __dirname,
-      "cities",
-      safeFile
+      "cities"
     );
 
-    if (!fs.existsSync(jsonPath)) {
+  const filePath =
+    path.join(
+      citiesDirectory,
+      fileName
+    );
 
-      return {
-        statusCode: 404,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        },
-        body: JSON.stringify({
-          success: false,
-          error: "Base JSON not found.",
-          file: safeFile
-        })
-      };
+  try{
 
-    }
-
-    const json =
-      fs.readFileSync(
-        jsonPath,
+    const raw =
+      await fs.readFile(
+        filePath,
         "utf8"
       );
 
-    return {
+    const data =
+      JSON.parse(raw);
 
-      statusCode: 200,
+    return response(
+      200,
+      {
+        ok:true,
+        file:fileName,
+        data
+      }
+    );
 
-      headers: {
+  }catch(error){
 
-        "Content-Type": "application/json",
+    if(error?.code === "ENOENT"){
 
-        "Cache-Control":
-          "public, max-age=300",
+      return response(
+        404,
+        {
+          ok:false,
+          error:"Base JSON file not found.",
+          file:fileName
+        }
+      );
+    }
 
-        "Access-Control-Allow-Origin": "*"
+    if(error instanceof SyntaxError){
 
-      },
+      return response(
+        500,
+        {
+          ok:false,
+          error:"The base JSON file contains invalid JSON.",
+          file:fileName
+        }
+      );
+    }
 
-      body: json
+    console.error(
+      "[TheWing Base Data] Failed to load base JSON:",
+      {
+        file:fileName,
+        message:error?.message || String(error)
+      }
+    );
 
-    };
-
+    return response(
+      500,
+      {
+        ok:false,
+        error:"Unable to load base data.",
+        file:fileName
+      }
+    );
   }
-
-  catch (err) {
-
-    console.error(err);
-
-    return {
-
-      statusCode: 500,
-
-      headers: {
-
-        "Content-Type": "application/json",
-
-        "Access-Control-Allow-Origin": "*"
-
-      },
-
-      body: JSON.stringify({
-
-        success: false,
-
-        error: err.message
-
-      })
-
-    };
-
-  }
-
-};
+}
