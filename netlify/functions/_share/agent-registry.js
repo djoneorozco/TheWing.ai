@@ -107,8 +107,9 @@ const TOOL_DEFINITIONS = [
       "general_guidance"
     ],
     contextFunctions: [
-      "computeAffordability",
+      "safeCalculateAffordability",
       "calculateAffordability",
+      "computeAffordability",
       "scoreAffordability",
       "buildAffordability",
       "affordabilityEngine"
@@ -129,6 +130,8 @@ const TOOL_DEFINITIONS = [
       "general_guidance"
     ],
     contextFunctions: [
+      "safeEvaluateDecision",
+      "evaluateDecision",
       "computeVerdict",
       "getVerdict",
       "scoreDecision",
@@ -1163,7 +1166,12 @@ function normalizeMortgagePacket(raw, input = {}) {
       raw.pi,
       raw.p_and_i,
       raw.monthlyPI,
-      raw.breakdown?.principalInterest
+      raw.monthly?.principal_interest,
+      raw.monthly?.principalInterest,
+      raw.monthly?.pi,
+      raw.breakdown?.principalInterest,
+      raw.breakdown?.principal_interest,
+      raw.breakdown?.pi
     )
   );
 
@@ -1173,7 +1181,13 @@ function normalizeMortgagePacket(raw, input = {}) {
       raw.tax,
       raw.property_tax,
       raw.propertyTax,
-      raw.breakdown?.taxes
+      raw.monthly?.taxes,
+      raw.monthly?.property_tax,
+      raw.monthly?.propertyTax,
+      raw.monthly?.tax,
+      raw.breakdown?.taxes,
+      raw.breakdown?.tax,
+      raw.breakdown?.property_tax
     )
   );
 
@@ -1182,15 +1196,25 @@ function normalizeMortgagePacket(raw, input = {}) {
       raw.insurance,
       raw.home_insurance,
       raw.homeownersInsurance,
+      raw.monthly?.insurance,
+      raw.monthly?.homeowners_insurance,
       raw.breakdown?.insurance
     )
   );
 
   const hoa = num(
-    pickFirst(raw.hoa, raw.hoa_monthly, raw.hoaMonthly, raw.breakdown?.hoa)
+    pickFirst(
+      raw.hoa,
+      raw.hoa_monthly,
+      raw.hoaMonthly,
+      raw.monthly?.hoa,
+      raw.breakdown?.hoa
+    )
   );
 
-  const pmi = num(pickFirst(raw.pmi, raw.PMI, raw.breakdown?.pmi));
+  const pmi = num(
+    pickFirst(raw.pmi, raw.PMI, raw.monthly?.pmi, raw.breakdown?.pmi)
+  );
 
   const allIn = num(
     pickFirst(
@@ -1202,7 +1226,14 @@ function normalizeMortgagePacket(raw, input = {}) {
       raw.payment,
       raw.monthlyPayment,
       raw.allInMonthly,
+      raw.monthly?.all_in,
+      raw.monthly?.allIn,
+      raw.monthly?.total,
+      raw.monthly?.totalMonthly,
       raw.breakdown?.allIn,
+      raw.breakdown?.all_in,
+      raw.breakdown?.total,
+      raw.summary?.monthlyPayment,
       [principalInterest, taxes, insurance, hoa, pmi]
         .filter((x) => Number.isFinite(x))
         .reduce((a, b) => a + b, 0)
@@ -1216,7 +1247,7 @@ function normalizeMortgagePacket(raw, input = {}) {
     });
   }
 
-  return stripEmpty({
+  const packet = {
     ok: raw.ok !== false,
     price: roundMoney(
       pickFirst(raw.price, raw.homePrice, input?.scenario?.price)
@@ -1229,15 +1260,21 @@ function normalizeMortgagePacket(raw, input = {}) {
     ),
     apr: num(pickFirst(raw.apr, raw.rate, raw.apr_percent, raw.aprPct)),
     term_years: num(pickFirst(raw.term_years, raw.termYears)),
-    principal_interest: roundMoney(principalInterest),
-    taxes: roundMoney(taxes),
-    insurance: roundMoney(insurance),
-    hoa: roundMoney(hoa),
-    pmi: roundMoney(pmi),
     all_in_monthly: roundMoney(allIn),
     source: safeStr(pickFirst(raw.source, "TheWing mortgage-engine")),
     note: safeStr(pickFirst(raw.note, raw.reason))
-  });
+  };
+
+  // Omit unknown components rather than returning misleading zeros.
+  if (principalInterest && principalInterest > 0) {
+    packet.principal_interest = roundMoney(principalInterest);
+  }
+  if (taxes && taxes > 0) packet.taxes = roundMoney(taxes);
+  if (insurance && insurance > 0) packet.insurance = roundMoney(insurance);
+  if (hoa !== null && hoa >= 0) packet.hoa = roundMoney(hoa);
+  if (pmi !== null && pmi >= 0) packet.pmi = roundMoney(pmi);
+
+  return stripEmpty(packet);
 }
 
 function normalizeAffordabilityPacket(raw, input = {}) {
