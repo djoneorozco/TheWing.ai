@@ -19,7 +19,7 @@
   const STYLE_ID = "pcsu-amy-brief-styles-v110";
   const ROOT_ID = "pcsu-amy-brief-root";
   const AMY_AVATAR_URL =
-    "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69eb162637c57d450e0e1a85_94812a489939880e6ee2d3e48242d7fb_facebook-icon-dark.jpg";
+    "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/6a5e2a4f8a0acd7d99420c0d_1f19deddafa230e0f801d99434aad586_Bento%20Icon%205.png";
 
   const DEFAULT_COMP_ACTIONS = [
     "Base Demographics",
