@@ -44,8 +44,8 @@ import * as mortgageEngine from "./_share/mortgage-engine.js";
 import * as vaLoans from "./_share/va-loans.js";
 import * as officialBah from "./_share/official-bah.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const moduleFilename = fileURLToPath(import.meta.url);
+const moduleDir = path.dirname(moduleFilename);
 
 // ============================================================
 // //#1 CONFIG
@@ -1740,7 +1740,7 @@ async function loadBaseIndex() {
   const candidates = [
     path.join(process.cwd(), "netlify", "functions", "cities", "index.byBase.json"),
     path.join(process.cwd(), "cities", "index.byBase.json"),
-    path.join(__dirname, "cities", "index.byBase.json")
+    path.join(moduleDir, "cities", "index.byBase.json")
   ];
 
   for (const candidate of candidates) {
