@@ -2,22 +2,35 @@
   "use strict";
 
   /* ============================================================
-     PCSUnited • Amy Brief Framework
-     Phase 1 • Presentation layer only
+     PCSUnited • Amy Brief
+     Phase 2 • Compensation presentation
 
      Amy Brief is NOT chat.
      Amy Brief is NOT BasicBrain.
      Amy Brief is NOT a calculator.
 
-     It only renders a normalized brief object that already exists.
+     It only paints a normalized brief object that already exists.
      ============================================================ */
 
-  if (window.__PCSU_AMY_BRIEF_V100) return;
-  window.__PCSU_AMY_BRIEF_V100 = true;
+  if (window.__PCSU_AMY_BRIEF_V110) return;
+  window.__PCSU_AMY_BRIEF_V110 = true;
 
-  const VERSION = "1.0.0-phase1";
-  const STYLE_ID = "pcsu-amy-brief-styles-v100";
+  const VERSION = "1.1.0-compensation";
+  const STYLE_ID = "pcsu-amy-brief-styles-v110";
   const ROOT_ID = "pcsu-amy-brief-root";
+  const AMY_AVATAR_URL =
+    "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/6a3334f99ed5987c434df57f_Face.jpg";
+
+  const DEFAULT_COMP_ACTIONS = [
+    "Base Demographics",
+    "Mortgage Calculator",
+    "Housing Quiz",
+    "Financial Analysis"
+  ];
+
+  const DEFAULT_COMP_DISCLAIMER =
+    "PCSUnited and TheWing provide planning estimates and educational guidance. " +
+    "Results are not lending approval and do not replace official finance, legal, tax, or benefits guidance.";
 
   let mountedContainer = null;
   let rootEl = null;
@@ -33,6 +46,59 @@
       typeof value === "object" &&
       !Array.isArray(value)
     );
+  }
+
+  function pickFirstString(...values) {
+    for (const value of values) {
+      const text = safeString(value);
+      if (text) return text;
+    }
+    return "";
+  }
+
+  function readProvidedAmount(...values) {
+    for (const value of values) {
+      if (value === undefined || value === null || value === "") {
+        continue;
+      }
+
+      if (typeof value === "number") {
+        if (!Number.isFinite(value) || value === 0) continue;
+        return value;
+      }
+
+      const text = safeString(value).replace(/[$,\s]/g, "");
+      if (!text) continue;
+
+      const num = Number(text);
+      if (!Number.isFinite(num) || num === 0) continue;
+      return num;
+    }
+
+    return null;
+  }
+
+  function formatMoney(amount) {
+    if (amount === null || amount === undefined) return "";
+
+    try {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(amount);
+    } catch (_) {
+      return "$" + String(Math.round(Number(amount)));
+    }
+  }
+
+  function escapeHtml(value) {
+    return safeString(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   function ensureStyles() {
@@ -88,29 +154,46 @@
         overflow: hidden;
       }
 
-      .pcsu-amy-brief-header {
+      .pcsu-amy-brief-greeting-row {
         display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 10px;
-        padding: 12px 14px 10px;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 14px 12px;
         border-bottom: 1px solid var(--pcsu-brief-line-soft);
       }
 
-      .pcsu-amy-brief-kicker {
-        color: var(--pcsu-brief-gold2);
-        font-size: 10px;
-        font-weight: 900;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
+      .pcsu-amy-brief-avatar {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 auto;
+        border-radius: 999px;
+        background-size: cover;
+        background-position: center;
+        border: 1px solid rgba(231, 181, 83, 0.6);
+        box-shadow:
+          0 0 0 2px rgba(0, 0, 0, 0.35),
+          0 0 20px rgba(231, 181, 83, 0.14);
       }
 
-      .pcsu-amy-brief-type {
-        color: var(--pcsu-brief-muted);
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+      .pcsu-amy-brief-greeting-copy {
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
+      .pcsu-amy-brief-greeting-title {
+        margin: 0;
+        color: var(--pcsu-brief-ink);
+        font-size: 15px;
+        font-weight: 900;
+        line-height: 1.25;
+      }
+
+      .pcsu-amy-brief-greeting-subtitle {
+        margin: 6px 0 0;
+        color: var(--pcsu-brief-muted-strong);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.4;
       }
 
       .pcsu-amy-brief-section {
@@ -123,7 +206,7 @@
       }
 
       .pcsu-amy-brief-label {
-        margin: 0 0 6px;
+        margin: 0 0 8px;
         color: var(--pcsu-brief-muted);
         font-size: 10px;
         font-weight: 900;
@@ -131,37 +214,73 @@
         text-transform: uppercase;
       }
 
-      .pcsu-amy-brief-body {
-        margin: 0;
-        color: var(--pcsu-brief-ink);
-        font-size: 13px;
-        font-weight: 700;
-        line-height: 1.45;
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
+      .pcsu-amy-brief-comp-rows {
+        display: grid;
+        gap: 8px;
       }
 
-      .pcsu-amy-brief-body.is-placeholder {
+      .pcsu-amy-brief-comp-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .pcsu-amy-brief-comp-row.is-total {
+        padding-top: 8px;
+        border-top: 1px solid var(--pcsu-brief-line-soft);
+      }
+
+      .pcsu-amy-brief-comp-name {
         color: var(--pcsu-brief-muted-strong);
-        font-weight: 700;
+        font-size: 12px;
+        font-weight: 800;
       }
 
-      .pcsu-amy-brief-list {
-        margin: 0;
-        padding-left: 18px;
+      .pcsu-amy-brief-comp-value {
         color: var(--pcsu-brief-ink);
         font-size: 13px;
-        font-weight: 700;
-        line-height: 1.45;
+        font-weight: 900;
+        white-space: nowrap;
       }
 
-      .pcsu-amy-brief-list li + li {
-        margin-top: 4px;
+      .pcsu-amy-brief-comp-row.is-total .pcsu-amy-brief-comp-name,
+      .pcsu-amy-brief-comp-row.is-total .pcsu-amy-brief-comp-value {
+        color: var(--pcsu-brief-gold2);
       }
 
-      .pcsu-amy-brief-disclaimer .pcsu-amy-brief-body {
+      .pcsu-amy-brief-actions {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .pcsu-amy-brief-action {
+        display: block;
+        padding: 10px 11px;
+        border: 1px solid var(--pcsu-brief-line-soft);
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--pcsu-brief-ink);
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.3;
+      }
+
+      .pcsu-amy-brief-disclaimer {
         color: var(--pcsu-brief-muted);
         font-size: 11px;
+        font-weight: 700;
+        line-height: 1.45;
+        margin: 0;
+      }
+
+      .pcsu-amy-brief-empty {
+        padding: 14px;
+        color: var(--pcsu-brief-muted-strong);
+        font-size: 12px;
         font-weight: 700;
       }
     `;
@@ -172,175 +291,211 @@
   function buildShell() {
     const root = document.createElement("div");
     root.id = ROOT_ID;
-    root.setAttribute("data-empty", "0");
+    root.setAttribute("data-empty", "1");
     root.setAttribute("data-version", VERSION);
     root.setAttribute("aria-label", "Amy Brief");
-
-    root.innerHTML = `
-      <div class="pcsu-amy-brief-card">
-        <div class="pcsu-amy-brief-header">
-          <div class="pcsu-amy-brief-kicker">Amy Brief Initialized</div>
-          <div class="pcsu-amy-brief-type" data-pcsu-brief-type>phase1</div>
-        </div>
-
-        <section class="pcsu-amy-brief-section" data-pcsu-brief-section="greeting">
-          <h3 class="pcsu-amy-brief-label">Greeting</h3>
-          <p class="pcsu-amy-brief-body is-placeholder" data-pcsu-brief-greeting>
-            Placeholder greeting
-          </p>
-        </section>
-
-        <section class="pcsu-amy-brief-section" data-pcsu-brief-section="summary">
-          <h3 class="pcsu-amy-brief-label">Summary</h3>
-          <p class="pcsu-amy-brief-body is-placeholder" data-pcsu-brief-summary>
-            Placeholder summary
-          </p>
-        </section>
-
-        <section class="pcsu-amy-brief-section" data-pcsu-brief-section="actions">
-          <h3 class="pcsu-amy-brief-label">Suggested Actions</h3>
-          <ul class="pcsu-amy-brief-list is-placeholder" data-pcsu-brief-actions>
-            <li>Placeholder action</li>
-          </ul>
-        </section>
-
-        <section class="pcsu-amy-brief-section pcsu-amy-brief-disclaimer" data-pcsu-brief-section="disclaimer">
-          <h3 class="pcsu-amy-brief-label">Disclaimer</h3>
-          <p class="pcsu-amy-brief-body is-placeholder" data-pcsu-brief-disclaimer>
-            Placeholder disclaimer
-          </p>
-        </section>
-      </div>
-    `;
-
+    root.innerHTML = `<div class="pcsu-amy-brief-card" data-pcsu-brief-card></div>`;
     return root;
   }
 
-  function paintPlaceholder() {
-    if (!rootEl) return;
-
-    const typeEl = rootEl.querySelector("[data-pcsu-brief-type]");
-    const greetingEl = rootEl.querySelector("[data-pcsu-brief-greeting]");
-    const summaryEl = rootEl.querySelector("[data-pcsu-brief-summary]");
-    const actionsEl = rootEl.querySelector("[data-pcsu-brief-actions]");
-    const disclaimerEl = rootEl.querySelector("[data-pcsu-brief-disclaimer]");
-
-    if (typeEl) typeEl.textContent = "phase1";
-    if (greetingEl) {
-      greetingEl.textContent = "Placeholder greeting";
-      greetingEl.classList.add("is-placeholder");
-    }
-    if (summaryEl) {
-      summaryEl.textContent = "Placeholder summary";
-      summaryEl.classList.add("is-placeholder");
-    }
-    if (actionsEl) {
-      actionsEl.innerHTML = "<li>Placeholder action</li>";
-      actionsEl.classList.add("is-placeholder");
-    }
-    if (disclaimerEl) {
-      disclaimerEl.textContent = "Placeholder disclaimer";
-      disclaimerEl.classList.add("is-placeholder");
-    }
-
-    rootEl.setAttribute("data-empty", "0");
+  function getCard() {
+    return rootEl
+      ? rootEl.querySelector("[data-pcsu-brief-card]")
+      : null;
   }
 
-  function paintData(data) {
-    if (!rootEl) return;
+  function setCardHtml(html) {
+    const card = getCard();
+    if (!card) return null;
+    card.innerHTML = html;
+    rootEl.setAttribute("data-empty", "0");
+    return rootEl;
+  }
+
+  function actionLabel(item) {
+    if (typeof item === "string") return safeString(item);
+    if (!isPlainObject(item)) return "";
+    return pickFirstString(item.label, item.title, item.text, item.name);
+  }
+
+  function renderActionList(actions) {
+    const labels = (Array.isArray(actions) ? actions : [])
+      .map(actionLabel)
+      .filter(Boolean);
+
+    const finalLabels = labels.length ? labels : DEFAULT_COMP_ACTIONS;
+
+    return (
+      '<ul class="pcsu-amy-brief-actions">' +
+      finalLabels
+        .map(
+          (label) =>
+            '<li class="pcsu-amy-brief-action">' +
+            escapeHtml(label) +
+            "</li>"
+        )
+        .join("") +
+      "</ul>"
+    );
+  }
+
+  function renderCompensationRows(compensation) {
+    const packet = isPlainObject(compensation) ? compensation : {};
+    const monthly = isPlainObject(packet.monthly) ? packet.monthly : {};
+
+    const rows = [
+      {
+        key: "basePay",
+        label: "Base Pay",
+        amount: readProvidedAmount(
+          packet.basePay,
+          packet.base_pay,
+          packet.basicPay,
+          packet.basic_pay,
+          monthly.basePay,
+          monthly.base_pay
+        )
+      },
+      {
+        key: "bah",
+        label: "BAH",
+        amount: readProvidedAmount(
+          packet.bah,
+          packet.BAH,
+          monthly.bah,
+          monthly.BAH
+        )
+      },
+      {
+        key: "bas",
+        label: "BAS",
+        amount: readProvidedAmount(
+          packet.bas,
+          packet.BAS,
+          monthly.bas,
+          monthly.BAS
+        )
+      },
+      {
+        key: "total",
+        label: "Total Monthly Compensation",
+        amount: readProvidedAmount(
+          packet.totalMonthlyCompensation,
+          packet.total_monthly_compensation,
+          packet.total,
+          packet.totalPay,
+          monthly.total,
+          monthly.totalMonthlyCompensation
+        ),
+        isTotal: true
+      }
+    ].filter((row) => row.amount !== null);
+
+    if (!rows.length) {
+      return '<p class="pcsu-amy-brief-empty">No compensation values were provided for this brief.</p>';
+    }
+
+    return (
+      '<div class="pcsu-amy-brief-comp-rows">' +
+      rows
+        .map((row) => {
+          return (
+            '<div class="pcsu-amy-brief-comp-row' +
+            (row.isTotal ? " is-total" : "") +
+            '">' +
+            '<span class="pcsu-amy-brief-comp-name">' +
+            escapeHtml(row.label) +
+            "</span>" +
+            '<span class="pcsu-amy-brief-comp-value">' +
+            escapeHtml(formatMoney(row.amount)) +
+            "</span>" +
+            "</div>"
+          );
+        })
+        .join("") +
+      "</div>"
+    );
+  }
+
+  function resolveRankTitle(profile) {
+    const packet = isPlainObject(profile) ? profile : {};
+    return pickFirstString(
+      packet.rankTitle,
+      packet.rank_title,
+      packet.title,
+      packet.rankDisplay,
+      packet.rank_display,
+      packet.rankName,
+      packet.rank_name,
+      packet.rank
+    );
+  }
+
+  function renderCompensation(data) {
+    if (!rootEl) return null;
 
     const brief = isPlainObject(data) ? data : {};
-    const greeting = isPlainObject(brief.greeting) ? brief.greeting : {};
-    const summary = isPlainObject(brief.summary) ? brief.summary : {};
-    const actions = Array.isArray(brief.actions) ? brief.actions : [];
+    const profile = isPlainObject(brief.profile) ? brief.profile : {};
+    const compensation = isPlainObject(brief.compensation)
+      ? brief.compensation
+      : {};
+    const rankTitle = resolveRankTitle(profile);
 
-    const typeEl = rootEl.querySelector("[data-pcsu-brief-type]");
-    const greetingEl = rootEl.querySelector("[data-pcsu-brief-greeting]");
-    const summaryEl = rootEl.querySelector("[data-pcsu-brief-summary]");
-    const actionsEl = rootEl.querySelector("[data-pcsu-brief-actions]");
-    const disclaimerEl = rootEl.querySelector("[data-pcsu-brief-disclaimer]");
+    const greetingTitle = rankTitle
+      ? "Hello " + rankTitle + "!"
+      : "Hello!";
 
-    const typeText = safeString(brief.type) || "brief";
-    const greetingText =
-      safeString(greeting.title) ||
-      safeString(greeting.subtitle) ||
-      "Greeting unavailable";
-    const summaryText =
-      safeString(summary.text) ||
-      safeString(summary.bluf) ||
-      safeString(summary.message) ||
-      (Object.keys(summary).length
-        ? JSON.stringify(summary)
-        : "Summary unavailable");
-    const disclaimerText =
-      safeString(brief.disclaimer) || "Disclaimer unavailable";
+    const greetingSubtitle =
+      "I've reviewed your current PCSUnited compensation package.";
 
-    if (typeEl) typeEl.textContent = typeText;
+    const disclaimer =
+      safeString(brief.disclaimer) || DEFAULT_COMP_DISCLAIMER;
 
-    if (greetingEl) {
-      const subtitle = safeString(greeting.subtitle);
-      greetingEl.textContent = subtitle && safeString(greeting.title)
-        ? safeString(greeting.title) + "\n" + subtitle
-        : greetingText;
-      greetingEl.classList.toggle(
-        "is-placeholder",
-        !safeString(greeting.title) && !safeString(greeting.subtitle)
-      );
-    }
+    const html =
+      '<div class="pcsu-amy-brief-greeting-row">' +
+      '<div class="pcsu-amy-brief-avatar" style="background-image:url(\'' +
+      AMY_AVATAR_URL +
+      '\')" aria-hidden="true"></div>' +
+      '<div class="pcsu-amy-brief-greeting-copy">' +
+      '<p class="pcsu-amy-brief-greeting-title">' +
+      escapeHtml(greetingTitle) +
+      "</p>" +
+      '<p class="pcsu-amy-brief-greeting-subtitle">' +
+      escapeHtml(greetingSubtitle) +
+      "</p>" +
+      "</div>" +
+      "</div>" +
+      '<section class="pcsu-amy-brief-section">' +
+      '<h3 class="pcsu-amy-brief-label">Current Monthly Compensation</h3>' +
+      renderCompensationRows(compensation) +
+      "</section>" +
+      '<section class="pcsu-amy-brief-section">' +
+      '<h3 class="pcsu-amy-brief-label">Recommended Next Steps</h3>' +
+      renderActionList(brief.actions) +
+      "</section>" +
+      '<section class="pcsu-amy-brief-section">' +
+      '<p class="pcsu-amy-brief-disclaimer">' +
+      escapeHtml(disclaimer) +
+      "</p>" +
+      "</section>";
 
-    if (summaryEl) {
-      summaryEl.textContent = summaryText;
-      summaryEl.classList.toggle(
-        "is-placeholder",
-        !(
-          safeString(summary.text) ||
-          safeString(summary.bluf) ||
-          safeString(summary.message) ||
-          Object.keys(summary).length
-        )
-      );
-    }
+    return setCardHtml(html);
+  }
 
-    if (actionsEl) {
-      actionsEl.innerHTML = "";
-      const labels = actions
-        .map((item) => {
-          if (typeof item === "string") return safeString(item);
-          if (isPlainObject(item)) {
-            return (
-              safeString(item.label) ||
-              safeString(item.title) ||
-              safeString(item.text)
-            );
-          }
-          return "";
-        })
-        .filter(Boolean);
+  /* Future specialized renderers:
+     renderMortgage()
+     renderFinancial()
+     renderHousing()
+     renderBaseResearch()
+  */
 
-      if (!labels.length) {
-        const li = document.createElement("li");
-        li.textContent = "No suggested actions";
-        actionsEl.appendChild(li);
-        actionsEl.classList.add("is-placeholder");
-      } else {
-        labels.forEach((label) => {
-          const li = document.createElement("li");
-          li.textContent = label;
-          actionsEl.appendChild(li);
-        });
-        actionsEl.classList.remove("is-placeholder");
-      }
-    }
-
-    if (disclaimerEl) {
-      disclaimerEl.textContent = disclaimerText;
-      disclaimerEl.classList.toggle(
-        "is-placeholder",
-        !safeString(brief.disclaimer)
-      );
-    }
-
-    rootEl.setAttribute("data-empty", "0");
+  function renderUnsupported(data) {
+    const type = safeString(data && data.type) || "unknown";
+    return setCardHtml(
+      '<p class="pcsu-amy-brief-empty">Amy Brief type "' +
+        escapeHtml(type) +
+        '" is not supported yet.</p>'
+    );
   }
 
   function initialize(container) {
@@ -366,15 +521,16 @@
     if (existing) {
       rootEl = existing;
       mountedContainer = host;
-      paintPlaceholder();
       currentData = null;
+      rootEl.setAttribute("data-empty", "1");
+      const card = getCard();
+      if (card) card.innerHTML = "";
       return rootEl;
     }
 
     rootEl = buildShell();
     host.appendChild(rootEl);
     mountedContainer = host;
-    paintPlaceholder();
     currentData = null;
 
     return rootEl;
@@ -391,12 +547,18 @@
     currentData = isPlainObject(data) ? data : null;
 
     if (!currentData) {
-      paintPlaceholder();
+      rootEl.setAttribute("data-empty", "1");
+      const card = getCard();
+      if (card) card.innerHTML = "";
       return rootEl;
     }
 
-    paintData(currentData);
-    return rootEl;
+    switch (safeString(currentData.type)) {
+      case "compensation":
+        return renderCompensation(currentData);
+      default:
+        return renderUnsupported(currentData);
+    }
   }
 
   function update(data) {
@@ -408,7 +570,8 @@
 
     if (!rootEl) return;
 
-    paintPlaceholder();
+    const card = getCard();
+    if (card) card.innerHTML = "";
     rootEl.setAttribute("data-empty", "1");
   }
 
