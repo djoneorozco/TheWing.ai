@@ -36,16 +36,12 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import * as agentRegistry from "./_share/agent-registry.js";
 import * as compensationContext from "./_share/compensation-context.js";
 import * as mortgageEngine from "./_share/mortgage-engine.js";
 import * as vaLoans from "./_share/va-loans.js";
 import * as officialBah from "./_share/official-bah.js";
-
-const moduleFilename = fileURLToPath(import.meta.url);
-const moduleDir = path.dirname(moduleFilename);
 
 // ============================================================
 // //#1 CONFIG
@@ -1737,11 +1733,16 @@ async function loadBaseIndex() {
   if (BASE_INDEX_LOADED) return BASE_INDEX_CACHE;
   BASE_INDEX_LOADED = true;
 
-  const candidates = [
-    path.join(process.cwd(), "netlify", "functions", "cities", "index.byBase.json"),
-    path.join(process.cwd(), "cities", "index.byBase.json"),
-    path.join(moduleDir, "cities", "index.byBase.json")
-  ];
+ const candidates = [
+  path.join(
+    process.cwd(),
+    "netlify",
+    "functions",
+    "cities",
+    "index.byBase.json"
+  ),
+  path.join(process.cwd(), "cities", "index.byBase.json")
+];
 
   for (const candidate of candidates) {
     try {
