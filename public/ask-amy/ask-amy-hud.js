@@ -1,197 +1,24 @@
 (() => {
-
   "use strict";
 
-  if (window.__PCSU_ASK_AMY_HUD_V120) return;
-
-  window.__PCSU_ASK_AMY_HUD_V120 = true;
-
-  const root = document.getElementById(
-
-    "pcsu-ask-amy-hud-widget"
-
-  );
-
-  if (!root) {
-
-    console.warn("PCSUnited Ask Amy mount element was not found.");
-
-    return;
-
-  }
-
-  root.innerHTML = `
-
-    <div
-
-      id="pcsu-amy-hud"
-
-      data-open="0"
-
-      role="dialog"
-
-      aria-modal="false"
-
-      aria-label="Ask Amy"
-
-      aria-live="polite"
-
-    >
-
-      <div id="pcsu-amy-panel">
-
-        <div class="pcsu-amy-header">
-
-          <div class="pcsu-amy-titlewrap">
-
-            <div
-
-              class="pcsu-amy-avatar"
-
-              aria-hidden="true"
-
-            ></div>
-
-            <div style="min-width:0;">
-
-              <div class="pcsu-amy-title">
-
-                Ask Amy
-
-              </div>
-
-              <div class="pcsu-amy-sub">
-
-                Powered by TheWing • PCSUnited Decision Guidance
-
-              </div>
-
-            </div>
-
-          </div>
-
-          <button
-
-            class="pcsu-amy-close"
-
-            id="pcsu-amy-close"
-
-            type="button"
-
-            aria-label="Close Ask Amy"
-
-          >
-
-            ×
-
-          </button>
-
-        </div>
-
-        <div class="pcsu-amy-info">
-
-          <div
-
-            class="pcsu-amy-info-icon"
-
-            aria-hidden="true"
-
-          >
-
-            i
-
-          </div>
-
-          <div class="pcsu-amy-info-copy">
-
-            <strong>TheWing calculates. Amy explains.</strong>
-
-            Ask about PCS planning, military compensation,
-
-            BAH, housing, mortgages, VA loans, financial
-
-            readiness, or your next step.
-
-          </div>
-
-        </div>
-
-        <div
-
-          class="pcsu-amy-chat"
-
-          id="pcsu-amy-chat"
-
-          aria-label="Ask Amy conversation"
-
-        ></div>
-
-        <div class="pcsu-amy-footer-wrap">
-
-          <div class="pcsu-amy-footer">
-
-            <input
-
-              id="pcsu-amy-input"
-
-              class="pcsu-amy-input"
-
-              type="text"
-
-              placeholder="Ask Amy about your PCS, BAH, housing, mortgage, or next step…"
-
-              autocomplete="off"
-
-              maxlength="5000"
-
-              aria-label="Ask Amy a question"
-
-            >
-
-            <button
-
-              id="pcsu-amy-send"
-
-              class="pcsu-amy-send"
-
-              type="button"
-
-            >
-
-              Send
-
-            </button>
-
-          </div>
-
-          <div class="pcsu-amy-disclosure">
-
-            PCSUnited and TheWing provide planning estimates
-
-            and educational guidance.
-
-            <strong>Results are not lending approval</strong>
-
-            and do not replace official finance, legal, tax,
-
-            or benefits guidance.
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  `;
-  
-<div
-  id="pcsu-ask-amy-hud-widget"
-  data-endpoint="https://thewing.netlify.app/.netlify/functions/agent-amy-public"
-  style="all: initial;"
->
-  <style>
+/* ========================================================
+         1. SINGLE-LOAD GUARD
+      ======================================================== */
+
+      if (window.__PCSU_ASK_AMY_HUD_V121) return;
+      window.__PCSU_ASK_AMY_HUD_V121 = true;
+
+      const root = document.getElementById("pcsu-ask-amy-hud-widget");
+
+      if (!root) {
+        console.warn("PCSUnited Ask Amy HUD mount element #pcsu-ask-amy-hud-widget was not found.");
+        return;
+      }
+
+      if (!document.getElementById("pcsu-ask-amy-hud-styles-v121")) {
+        const style = document.createElement("style");
+        style.id = "pcsu-ask-amy-hud-styles-v121";
+        style.textContent = `
     #pcsu-ask-amy-hud-widget,
     #pcsu-ask-amy-hud-widget * {
       box-sizing: border-box;
@@ -647,9 +474,11 @@
         animation: none;
       }
     }
-  </style>
+  `;
+        document.head.appendChild(style);
+      }
 
-  <div
+      root.innerHTML = `<div
     id="pcsu-amy-hud"
     data-open="0"
     role="dialog"
@@ -725,26 +554,12 @@
         </div>
       </div>
     </div>
-  </div>
+  </div>`;
 
-  <script>
-    (() => {
-      "use strict";
-
-      /* ========================================================
-         1. SINGLE-LOAD GUARD
-      ======================================================== */
-
-      if (window.__PCSU_ASK_AMY_HUD_V120) return;
-      window.__PCSU_ASK_AMY_HUD_V120 = true;
 
       /* ========================================================
          2. ELEMENTS / CONFIG
       ======================================================== */
-
-      const root = document.getElementById("pcsu-ask-amy-hud-widget");
-
-      if (!root) return;
 
       const endpoint =
         String(root.getAttribute("data-endpoint") || "").trim() ||
@@ -1790,7 +1605,7 @@
             source: "web",
             widget: "pcsunited-ask-amy-hud",
             product: "pcsunited",
-            version: "pcsu-ask-amy-hud-v1.2.0",
+            version: "pcsu-ask-amy-hud-v1.2.1",
             response_contract: "ask-amy-response-v1",
 
             page: {
@@ -1847,7 +1662,7 @@
 
             role: "pcsu_public_resources_helper",
 
-            requested_mode: "member_guidance",
+            requested_mode: "public_resources_guidance",
 
             styleGuide: {
               rules: [
@@ -2099,4 +1914,4 @@
       window.PCSUnitedAskAmy.getContext = () => getPCSContext();
       window.PCSUnitedAskAmy.getPublicSession = () =>
         loadPublicSession();
-    })();
+})();
