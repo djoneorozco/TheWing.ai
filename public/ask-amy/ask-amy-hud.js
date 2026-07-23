@@ -625,6 +625,130 @@
         }
       }
 
+      function firstDefined(...values) {
+        for (const value of values) {
+          if (value !== undefined && value !== null && value !== "") {
+            return value;
+          }
+        }
+
+        return undefined;
+      }
+
+      function buildCompensationBriefData() {
+        const context = getPCSContext();
+
+        const profile =
+          isPlainObject(context.profile)
+            ? context.profile
+            : {};
+
+        const compensation =
+          isPlainObject(context.compensation)
+            ? context.compensation
+            : {};
+
+        const basicbrain =
+          isPlainObject(context.basicbrain)
+            ? context.basicbrain
+            : {};
+
+        const selectedBase =
+          (isPlainObject(basicbrain.selectedBase) && basicbrain.selectedBase) ||
+          (isPlainObject(profile.selectedBase) && profile.selectedBase) ||
+          {};
+
+        const normalizedProfile = {
+          rankTitle: firstDefined(
+            profile.rankTitle,
+            profile.rank_title,
+            profile.rankDisplay,
+            profile.rank_display,
+            profile.rankName,
+            profile.rank_name,
+            profile.rank,
+            basicbrain.rankTitle,
+            basicbrain.rank
+          ),
+
+          selectedBase: firstDefined(
+            selectedBase.name,
+            selectedBase.base,
+            profile.selected_base,
+            profile.base,
+            basicbrain.selected_base,
+            basicbrain.base
+          )
+        };
+
+        const normalizedCompensation = {
+          basePay: firstDefined(
+            compensation.basePay,
+            compensation.base_pay,
+            compensation.basicPay,
+            compensation.basic_pay
+          ),
+
+          bah: firstDefined(
+            compensation.bah,
+            compensation.BAH
+          ),
+
+          bas: firstDefined(
+            compensation.bas,
+            compensation.BAS
+          ),
+
+          totalMonthlyCompensation: firstDefined(
+            compensation.totalMonthlyCompensation,
+            compensation.total_monthly_compensation,
+            compensation.total
+          )
+        };
+
+        const hasCompensation = Object.values(normalizedCompensation).some(
+          (value) => value !== undefined && value !== null && value !== ""
+        );
+
+        if (!hasCompensation) {
+          return null;
+        }
+
+        return {
+          type: "compensation",
+
+          profile: normalizedProfile,
+
+          compensation: normalizedCompensation,
+
+          selectedBase,
+
+          actions: [
+            "Base Demographics",
+            "Mortgage Calculator",
+            "Housing Quiz",
+            "Financial Analysis"
+          ]
+        };
+      }
+
+      function refreshAmyBrief(options = {}) {
+        const briefData = buildCompensationBriefData();
+
+        if (!briefData) {
+          hideAmyBrief();
+          return false;
+        }
+
+        showAmyBrief(briefData);
+
+        if (options.open === true) {
+          openAmy();
+        }
+
+        return true;
+      }
+
       /* ========================================================
          3. STORAGE KEYS
       ======================================================== */
@@ -1210,6 +1334,17 @@
         }
 
         absorbBasicBrainHandoff();
+
+        const shouldOpen =
+          !isOpen() &&
+          (
+            type === "pcsunited:compensation-ready" ||
+            type === "pcsunited:basicbrain-updated"
+          );
+
+        refreshAmyBrief({
+          open: shouldOpen
+        });
       }
 
       function bindResourcesContextListeners() {
@@ -1854,6 +1989,7 @@
       }
 
       function resetAmy() {
+        hideAmyBrief();
         startFreshPublicSession();
 
         pushMsg(
@@ -1902,14 +2038,25 @@
 
       bindResourcesContextListeners();
 
-      // Every Resources page load starts as a first-time visitor.
-      // Do not render prior threads and do not show "/reset completed".
-      startFreshPublicSession();
+      // Fresh conversation each page load. Optionally import a current-page
+      // BasicBrain handoff, then sync live runtime context into the session.
+      startFreshPublicSession({
+        importHandoff: true
+      });
+      absorbBasicBrainHandoff();
+      syncLiveRuntimeContext();
+
+      const initialBriefRendered = refreshAmyBrief({
+        open: false
+      });
+
       renderThread();
 
       pushMsg(
         "assistant",
-        "Hi, I’m Amy. TheWing gives me access to PCSUnited’s military compensation, housing, mortgage, VA loan, and readiness tools. What would you like to work through?",
+        initialBriefRendered
+          ? "I’ve reviewed the compensation package shown above. Ask me what it means for housing, affordability, or your next PCS decision."
+          : "Hi, I’m Amy. TheWing gives me access to PCSUnited’s military compensation, housing, mortgage, VA loan, and readiness tools. What would you like to work through?",
         {
           typewriter: true,
           speed: 18,
@@ -1957,4 +2104,5 @@
         loadPublicSession();
       window.PCSUnitedAskAmy.showBrief = showAmyBrief;
       window.PCSUnitedAskAmy.hideBrief = hideAmyBrief;
+      window.PCSUnitedAskAmy.refreshBrief = refreshAmyBrief;
 })();
