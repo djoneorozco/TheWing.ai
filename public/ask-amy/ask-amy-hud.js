@@ -154,8 +154,8 @@
     }
 
     .pcsu-amy-avatar {
-      width: 42px;
-      height: 42px;
+      width: 60px;
+      height: 60px;
       border-radius: 999px;
       flex: 0 0 auto;
       background-image: url("https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/6a3334f99ed5987c434df57f_Face.jpg");
