@@ -1695,27 +1695,52 @@ function parseExplicitPriceFromMessage(message) {
 // //#9 BASE LOOKUP (existing city index + official-bah)
 // ============================================================
 
-let BASE_INDEX_CACHE = null;
-
 async function loadBaseIndex() {
   if (BASE_INDEX_CACHE) return BASE_INDEX_CACHE;
 
   const candidates = [
-    path.join(process.cwd(), "netlify", "functions", "cities", "index.byBase.json"),
-    path.join(process.cwd(), "cities", "index.byBase.json"),
-    path.join(path.dirname(new URL(import.meta.url).pathname), "cities", "index.byBase.json")
+    path.join(
+      process.cwd(),
+      "netlify",
+      "functions",
+      "cities",
+      "index.byBase.json"
+    ),
+    path.join(
+      process.cwd(),
+      "cities",
+      "index.byBase.json"
+    )
   ];
+
+  try {
+    if (typeof import.meta.url === "string" && import.meta.url.length > 0) {
+      candidates.push(
+        path.join(
+          path.dirname(new URL(import.meta.url).pathname),
+          "cities",
+          "index.byBase.json"
+        )
+      );
+    }
+  } catch (error) {
+    console.warn(
+      "Unable to build import.meta.url base-index path:",
+      error?.message || error
+    );
+  }
 
   for (const candidate of candidates) {
     try {
       const raw = await fs.readFile(candidate, "utf8");
       const parsed = JSON.parse(raw);
+
       if (parsed && typeof parsed === "object" && parsed.bases) {
         BASE_INDEX_CACHE = parsed;
         return BASE_INDEX_CACHE;
       }
     } catch (_) {
-      // try next path
+      // Try the next path.
     }
   }
 
