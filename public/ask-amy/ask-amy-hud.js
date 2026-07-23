@@ -230,8 +230,8 @@
     }
 
     .pcsu-amy-info-icon {
-      width: 20px;
-      height: 20px;
+      width: 40px;
+      height: 40px;
       flex: 0 0 auto;
       display: grid;
       place-items: center;
