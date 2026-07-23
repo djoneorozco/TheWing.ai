@@ -163,13 +163,13 @@
       }
 
       .pcsu-amy-brief-avatar {
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
         flex: 0 0 auto;
         border-radius: 999px;
         background-size: cover;
         background-position: center;
-        border: 1px solid rgba(231, 181, 83, 0.6);
+        border: 2px solid rgba(231, 181, 83, 0.6);
         box-shadow:
           0 0 0 2px rgba(0, 0, 0, 0.35),
           0 0 20px rgba(231, 181, 83, 0.14);
@@ -446,7 +446,7 @@
       : "Hello!";
 
     const greetingSubtitle =
-      "I've reviewed your current PCSUnited compensation package.";
+      "I'm Amy, The A.I Concierge for PCSUnited. Thank you for service, I've reviewed your current PCSUnited compensation package. Below is your Total Monthly income.";
 
     const disclaimer =
       safeString(brief.disclaimer) || DEFAULT_COMP_DISCLAIMER;
