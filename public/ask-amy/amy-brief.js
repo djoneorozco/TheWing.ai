@@ -19,7 +19,7 @@
   const STYLE_ID = "pcsu-amy-brief-styles-v110";
   const ROOT_ID = "pcsu-amy-brief-root";
   const AMY_AVATAR_URL =
-    "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/6a3334f99ed5987c434df57f_Face.jpg";
+    "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/6a6035240318fc71c4a96263_941b301c606884bae101cf5a1130fdea_6748cdb36050e7ba14e90bb5_Frame%208.jpg";
 
   const DEFAULT_COMP_ACTIONS = [
     "Base Demographics",
