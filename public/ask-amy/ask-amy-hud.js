@@ -256,6 +256,20 @@
       font-weight: 900;
     }
 
+    .pcsu-amy-brief-container {
+      display: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .pcsu-amy-brief-container[data-visible="1"] {
+      display: block;
+    }
+
+    #pcsu-amy-panel:has(.pcsu-amy-brief-container[data-visible="1"]) {
+      grid-template-rows: auto auto auto 1fr auto;
+    }
+
     .pcsu-amy-chat {
       padding: 18px;
       overflow: auto;
@@ -521,6 +535,11 @@
       </div>
 
       <div
+        id="pcsu-amy-brief-container"
+        class="pcsu-amy-brief-container"
+      ></div>
+
+      <div
         class="pcsu-amy-chat"
         id="pcsu-amy-chat"
         aria-label="Ask Amy conversation"
@@ -568,6 +587,7 @@
       const hud = root.querySelector("#pcsu-amy-hud");
       const panel = root.querySelector("#pcsu-amy-panel");
       const closeBtn = root.querySelector("#pcsu-amy-close");
+      const briefContainer = root.querySelector("#pcsu-amy-brief-container");
       const chatEl = root.querySelector("#pcsu-amy-chat");
       const inputEl = root.querySelector("#pcsu-amy-input");
       const sendBtn = root.querySelector("#pcsu-amy-send");
@@ -582,6 +602,27 @@
       ) {
         console.warn("PCSUnited Ask Amy HUD could not initialize.");
         return;
+      }
+
+      if (window.PCSUnitedAmyBrief && briefContainer) {
+        window.PCSUnitedAmyBrief.initialize(briefContainer);
+      }
+
+      function showAmyBrief(data) {
+        if (window.PCSUnitedAmyBrief && briefContainer) {
+          briefContainer.setAttribute("data-visible", "1");
+          window.PCSUnitedAmyBrief.render(data);
+        }
+      }
+
+      function hideAmyBrief() {
+        if (window.PCSUnitedAmyBrief) {
+          window.PCSUnitedAmyBrief.clear();
+        }
+
+        if (briefContainer) {
+          briefContainer.setAttribute("data-visible", "0");
+        }
       }
 
       /* ========================================================
@@ -1914,4 +1955,6 @@
       window.PCSUnitedAskAmy.getContext = () => getPCSContext();
       window.PCSUnitedAskAmy.getPublicSession = () =>
         loadPublicSession();
+      window.PCSUnitedAskAmy.showBrief = showAmyBrief;
+      window.PCSUnitedAskAmy.hideBrief = hideAmyBrief;
 })();
