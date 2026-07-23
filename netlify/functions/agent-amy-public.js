@@ -1695,6 +1695,8 @@ function parseExplicitPriceFromMessage(message) {
 // //#9 BASE LOOKUP (existing city index + official-bah)
 // ============================================================
 
+let BASE_INDEX_CACHE = null;
+
 async function loadBaseIndex() {
   if (BASE_INDEX_CACHE) return BASE_INDEX_CACHE;
 
