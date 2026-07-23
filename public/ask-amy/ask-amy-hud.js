@@ -5,8 +5,8 @@
          1. SINGLE-LOAD GUARD
       ======================================================== */
 
-      if (window.__PCSU_ASK_AMY_HUD_V121) return;
-      window.__PCSU_ASK_AMY_HUD_V121 = true;
+      if (window.__PCSU_ASK_AMY_HUD_V123) return;
+      window.__PCSU_ASK_AMY_HUD_V123 = true;
 
       const root = document.getElementById("pcsu-ask-amy-hud-widget");
 
@@ -15,9 +15,9 @@
         return;
       }
 
-      if (!document.getElementById("pcsu-ask-amy-hud-styles-v121")) {
+      if (!document.getElementById("pcsu-ask-amy-hud-styles-v123")) {
         const style = document.createElement("style");
-        style.id = "pcsu-ask-amy-hud-styles-v121";
+        style.id = "pcsu-ask-amy-hud-styles-v123";
         style.textContent = `
     #pcsu-ask-amy-hud-widget,
     #pcsu-ask-amy-hud-widget * {
@@ -258,16 +258,14 @@
 
     .pcsu-amy-brief-container {
       display: none;
+      width: 100%;
+      flex: 0 0 auto;
       padding: 0;
       margin: 0;
     }
 
     .pcsu-amy-brief-container[data-visible="1"] {
       display: block;
-    }
-
-    #pcsu-amy-panel:has(.pcsu-amy-brief-container[data-visible="1"]) {
-      grid-template-rows: auto auto auto 1fr auto;
     }
 
     .pcsu-amy-chat {
@@ -535,15 +533,15 @@
       </div>
 
       <div
-        id="pcsu-amy-brief-container"
-        class="pcsu-amy-brief-container"
-      ></div>
-
-      <div
         class="pcsu-amy-chat"
         id="pcsu-amy-chat"
         aria-label="Ask Amy conversation"
-      ></div>
+      >
+        <div
+          id="pcsu-amy-brief-container"
+          class="pcsu-amy-brief-container"
+        ></div>
+      </div>
 
       <div class="pcsu-amy-footer-wrap">
         <div class="pcsu-amy-footer">
@@ -1781,7 +1779,7 @@
             source: "web",
             widget: "pcsunited-ask-amy-hud",
             product: "pcsunited",
-            version: "pcsu-ask-amy-hud-v1.2.1",
+            version: "pcsu-ask-amy-hud-v1.2.3",
             response_contract: "ask-amy-response-v1",
 
             page: {
@@ -1969,7 +1967,12 @@
         window.__PCSU_AMY_MEMORY = {};
         window.__PCSU_AMY_CID = "";
 
-        chatEl.innerHTML = "";
+        // Preserve the Amy Brief mount node inside the shared transcript.
+        Array.from(chatEl.children).forEach((child) => {
+          if (child !== briefContainer) {
+            child.remove();
+          }
+        });
         inputEl.value = "";
       }
 
