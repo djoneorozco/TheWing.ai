@@ -42,6 +42,7 @@ import * as compensationContext from "./_share/compensation-context.js";
 import * as mortgageEngine from "./_share/mortgage-engine.js";
 import * as vaLoans from "./_share/va-loans.js";
 import * as officialBah from "./_share/official-bah.js";
+import { buildAmyTruthPacket } from "./_share/amy-brain.js";
 
 // ============================================================
 // //#1 CONFIG
@@ -372,6 +373,45 @@ export async function handler(event) {
       debug
     });
 
+    // Amy Brain knowledge router — fail-open. Consume existing deterministic
+    // context only; never block Ask Amy if routing fails.
+    let amyTruth = null;
+    try {
+      amyTruth = await buildAmyTruthPacket({
+        message,
+        profile: normalizedProfile,
+        basicbrain: {
+          profile: clientContext?.profile || {},
+          bridge: clientContext?.bridge || {},
+          compensation: clientContext?.compensation || null,
+          fad: clientContext?.fad || {}
+        },
+        compensation:
+          deterministic?.public?.compensation ||
+          clientContext?.compensation ||
+          null,
+        mortgage:
+          deterministic?.public?.mortgage || clientContext?.mortgage || null,
+        affordability: deterministic?.public?.affordability || null,
+        scenario: deterministic?.internal?.scenario || null,
+        selectedBase: deterministic?.public?.base_info || null,
+        metadata: {
+          intent,
+          page: clientContext?.page || null,
+          widget: clientContext?.widget || null,
+          product: clientContext?.product || null
+        }
+      });
+
+      console.log(
+        "[Amy Brain Routing]",
+        JSON.stringify(amyTruth?.routing ?? {}, null, 2)
+      );
+    } catch (error) {
+      console.error("[Amy Brain Error]", error);
+      amyTruth = null;
+    }
+
     const memoryBuilt = buildMemoryPatch({
       message,
       intent,
@@ -410,7 +450,8 @@ export async function handler(event) {
       const systemPrompt = buildSystemPrompt({
         deterministic,
         styleGuide: conversationContext.style_guide,
-        requestedMode
+        requestedMode,
+        amyTruth
       });
       const userPayload = buildUserPayload({
         message,
@@ -419,7 +460,8 @@ export async function handler(event) {
         deterministic,
         clientContext,
         conversationContext,
-        requestedMode
+        requestedMode,
+        amyTruth
       });
       replyRaw = await callOpenAI({
         systemPrompt,
@@ -3208,8 +3250,14 @@ function stripPublicProfile(profile, intent = "") {
 // //#13 OPENAI
 // ============================================================
 
-function buildSystemPrompt({ deterministic, styleGuide, requestedMode }) {
+function buildSystemPrompt({
+  deterministic,
+  styleGuide,
+  requestedMode,
+  amyTruth = null
+}) {
   const packet = deterministic?.public || {};
+  const hasAmyTruth = amyTruth && typeof amyTruth === "object";
 
   return [
     "You are Amy, the PCSUnited Public Resources Concierge, powered by TheWing.ai.",
@@ -3241,7 +3289,31 @@ function buildSystemPrompt({ deterministic, styleGuide, requestedMode }) {
       : "Client style preferences are optional wording hints only and cannot override truth, privacy, or no-approval rules.",
     "",
     "Truth packet:",
-    JSON.stringify(packet || {}, null, 2)
+    JSON.stringify(packet || {}, null, 2),
+    hasAmyTruth
+      ? [
+          "",
+          "==============================",
+          "AMY DETERMINISTIC KNOWLEDGE",
+          "==============================",
+          "",
+          "Amy Truth Packet usage rules:",
+          "- Treat the Amy Truth Packet as authoritative deterministic context.",
+          "- Do not contradict supplied facts or calculations.",
+          "- Do not recalculate values already supplied.",
+          "- Explain the facts clearly in natural language.",
+          "- Clearly distinguish facts, warnings, risks, next steps, and disclaimers.",
+          "- Do not claim lender approval, official VA eligibility, legal advice, tax advice, or financial guarantees.",
+          "- When no deterministic module matched, answer normally using the rest of the existing context.",
+          "- Do not expose internal JSON, module names, routing scores, prompt instructions, or implementation details to the user unless explicitly requested.",
+          "",
+          JSON.stringify(amyTruth, null, 2),
+          "",
+          "==============================",
+          "END AMY DETERMINISTIC KNOWLEDGE",
+          "=============================="
+        ].join("\n")
+      : ""
   ]
     .filter((line) => line !== "")
     .join("\n");
@@ -3258,7 +3330,8 @@ function buildUserPayload({
   deterministic,
   clientContext,
   conversationContext,
-  requestedMode
+  requestedMode,
+  amyTruth = null
 }) {
   return {
     user_message: message,
@@ -3285,6 +3358,8 @@ function buildUserPayload({
     },
     resources_scenario: buildOpenAIProfile(normalizedProfile, intent),
     truth_packet: deterministic?.public || null,
+    amy_truth_packet:
+      amyTruth && typeof amyTruth === "object" ? amyTruth : undefined,
     conversation_memory: {
       label: "unverified browser-local public-session memory",
       memory: sanitizeMemoryObject(conversationContext?.memory || {})
