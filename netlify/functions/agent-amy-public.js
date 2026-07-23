@@ -362,6 +362,20 @@ export async function handler(event) {
 
     // Amy Brain knowledge router — fail-open. Consume existing deterministic
     // context only; never block Ask Amy if routing fails.
+   
+  console.log("========== AMY BRAIN INPUT ==========");
+  console.log({
+  message,
+  profile: normalizedProfile,
+  compensation: deterministic?.public?.compensation,
+  mortgage: deterministic?.public?.mortgage,
+  affordability: deterministic?.public?.affordability,
+  scenario: deterministic?.internal?.scenario,
+  clientContext
+});
+
+console.log("====================================");
+    
     let amyTruth = null;
     try {
       amyTruth = await buildAmyTruthPacket({
