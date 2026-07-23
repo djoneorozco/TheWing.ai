@@ -163,8 +163,8 @@
       }
 
       .pcsu-amy-brief-avatar {
-        width: 42px;
-        height: 42px;
+        width: 100px;
+        height: 100px;
         flex: 0 0 auto;
         border-radius: 999px;
         background-size: cover;
