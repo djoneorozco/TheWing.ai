@@ -5,8 +5,8 @@
          1. SINGLE-LOAD GUARD
       ======================================================== */
 
-      if (window.__PCSU_ASK_AMY_HUD_V123) return;
-      window.__PCSU_ASK_AMY_HUD_V123 = true;
+      if (window.__PCSU_ASK_AMY_HUD_V130) return;
+      window.__PCSU_ASK_AMY_HUD_V130 = true;
 
       const root = document.getElementById("pcsu-ask-amy-hud-widget");
 
@@ -602,25 +602,50 @@
         return;
       }
 
-      if (window.PCSUnitedAmyBrief && briefContainer) {
-        window.PCSUnitedAmyBrief.initialize(briefContainer);
+      /* ========================================================
+         2b. DUAL BRIEF CONTROLLER
+         Compensation: window.PCSUnitedAmyBrief
+         Mortgage:     window.PCSUnitedAmyMortgageBrief
+
+         Mortgage Brief activates only after a user-initiated
+         pcsunited:financial-input-updated event, once the Header
+         Strip is confirmed in "financial" mode.
+      ======================================================== */
+
+      let activeBriefType = null;
+      let mortgageBriefActivated = false;
+      let latestMortgageBriefData = null;
+      let pendingMortgageActivationTimer = null;
+      let compensationBriefInitialized = false;
+      let mortgageBriefInitialized = false;
+      let warnedMissingMortgageBrief = false;
+
+      function getMortgageBriefApi() {
+        return window.PCSUnitedAmyMortgageBrief || null;
       }
 
-      function showAmyBrief(data) {
-        if (window.PCSUnitedAmyBrief && briefContainer) {
-          briefContainer.setAttribute("data-visible", "1");
-          window.PCSUnitedAmyBrief.render(data);
+      function cancelPendingMortgageActivation() {
+        if (pendingMortgageActivationTimer != null) {
+          clearTimeout(pendingMortgageActivationTimer);
+          pendingMortgageActivationTimer = null;
         }
       }
 
-      function hideAmyBrief() {
-        if (window.PCSUnitedAmyBrief) {
-          window.PCSUnitedAmyBrief.clear();
+      function initializeBriefRenderers() {
+        if (!briefContainer) return false;
+
+        if (window.PCSUnitedAmyBrief && !compensationBriefInitialized) {
+          window.PCSUnitedAmyBrief.initialize(briefContainer);
+          compensationBriefInitialized = true;
         }
 
-        if (briefContainer) {
-          briefContainer.setAttribute("data-visible", "0");
+        const mortgageApi = getMortgageBriefApi();
+        if (mortgageApi && !mortgageBriefInitialized) {
+          mortgageApi.initialize(briefContainer);
+          mortgageBriefInitialized = true;
         }
+
+        return true;
       }
 
       function firstDefined(...values) {
@@ -631,6 +656,224 @@
         }
 
         return undefined;
+      }
+
+      function firstPositiveNumber(...values) {
+        for (const value of values) {
+          if (value === undefined || value === null || value === "") {
+            continue;
+          }
+
+          if (typeof value === "number") {
+            if (Number.isFinite(value) && value > 0) return value;
+            continue;
+          }
+
+          const text = String(value).replace(/[$,%\s,]/g, "");
+          if (!text) continue;
+          const num = Number(text);
+          if (Number.isFinite(num) && num > 0) return num;
+        }
+
+        return null;
+      }
+
+      function getHeaderStripMode() {
+        try {
+          const mode =
+            window.PCSU_HEADER_COMP_BASICBRAIN &&
+            typeof window.PCSU_HEADER_COMP_BASICBRAIN.getMode === "function"
+              ? window.PCSU_HEADER_COMP_BASICBRAIN.getMode()
+              : "";
+          return safeString(mode).toLowerCase();
+        } catch (_) {
+          return "";
+        }
+      }
+
+      function isHeaderFinancialMode() {
+        return getHeaderStripMode() === "financial";
+      }
+
+      function hasPositiveBasicBrainIncome(detail) {
+        const d = isPlainObject(detail) ? detail : {};
+        const headerSnapshot = isPlainObject(d.headerSnapshot)
+          ? d.headerSnapshot
+          : {};
+        const eventCompensation = isPlainObject(d.compensation)
+          ? d.compensation
+          : {};
+        const sessionCompensation = isPlainObject(getCompensation())
+          ? getCompensation()
+          : {};
+
+        return (
+          firstPositiveNumber(
+            d.totalIncome,
+            d.basicIncome,
+            headerSnapshot.income,
+            eventCompensation.total,
+            eventCompensation.totalMonthly,
+            eventCompensation.total_monthly,
+            eventCompensation.totalMonthlyCompensation,
+            sessionCompensation.total,
+            sessionCompensation.totalMonthly,
+            sessionCompensation.total_monthly,
+            sessionCompensation.totalMonthlyCompensation
+          ) !== null
+        );
+      }
+
+      function readFinancialPanelInputs() {
+        try {
+          const panel = window.PCSU_FINANCIAL_INPUT_PANEL;
+          if (
+            panel &&
+            typeof panel.getInputs === "function"
+          ) {
+            const inputs = panel.getInputs();
+            return isPlainObject(inputs) ? inputs : {};
+          }
+        } catch (_) {}
+
+        return {};
+      }
+
+      function patchPublicSessionFromFinancialDetail(detail) {
+        if (!isPlainObject(detail)) {
+          return loadPublicSession();
+        }
+
+        const mortgagePacket =
+          (isPlainObject(detail.mortgageApiResult) &&
+            detail.mortgageApiResult) ||
+          (isPlainObject(detail.mortgage) && detail.mortgage) ||
+          detail;
+
+        return patchPublicSession({
+          financial_intake: detail,
+          user_financial_inputs: detail,
+          mortgage: mortgagePacket
+        });
+      }
+
+      function buildMortgageBriefData(eventDetail) {
+        const detail = isPlainObject(eventDetail) ? eventDetail : {};
+        const panelInputs = readFinancialPanelInputs();
+        const session = loadPublicSession();
+
+        // Preferred source order (later wins):
+        // session mortgage → user_financial_inputs → financial_intake
+        // → panel getInputs() → qualifying event detail
+        return {
+          ...(isPlainObject(session.mortgage) ? session.mortgage : {}),
+          ...(isPlainObject(session.user_financial_inputs)
+            ? session.user_financial_inputs
+            : {}),
+          ...(isPlainObject(session.financial_intake)
+            ? session.financial_intake
+            : {}),
+          ...panelInputs,
+          ...detail,
+          compensation: firstDefined(
+            detail.compensation,
+            getCompensation()
+          ),
+          basicbrain: firstDefined(
+            detail.basicbrain,
+            session.basicbrain
+          ),
+          mortgageApiResult: firstDefined(
+            detail.mortgageApiResult,
+            isPlainObject(detail.mortgage) ? detail.mortgage : undefined,
+            isPlainObject(session.mortgage) ? session.mortgage : undefined
+          )
+        };
+      }
+
+      function hideAllBriefs() {
+        if (window.PCSUnitedAmyBrief) {
+          window.PCSUnitedAmyBrief.clear();
+        }
+
+        const mortgageApi = getMortgageBriefApi();
+        if (mortgageApi && typeof mortgageApi.clear === "function") {
+          mortgageApi.clear();
+        }
+
+        if (briefContainer) {
+          briefContainer.setAttribute("data-visible", "0");
+        }
+
+        activeBriefType = null;
+      }
+
+      function showCompensationBrief(data) {
+        initializeBriefRenderers();
+
+        if (!window.PCSUnitedAmyBrief || !briefContainer || !data) {
+          return false;
+        }
+
+        const mortgageApi = getMortgageBriefApi();
+        if (mortgageApi && typeof mortgageApi.clear === "function") {
+          mortgageApi.clear();
+        }
+
+        briefContainer.setAttribute("data-visible", "1");
+        window.PCSUnitedAmyBrief.render(data);
+        activeBriefType = "compensation";
+        return true;
+      }
+
+      function showMortgageBrief(data, options = {}) {
+        initializeBriefRenderers();
+
+        const mortgageApi = getMortgageBriefApi();
+        if (!mortgageApi || !briefContainer) {
+          if (!warnedMissingMortgageBrief) {
+            console.warn(
+              "PCSUnited Ask Amy HUD: Mortgage Brief renderer is unavailable. Keeping Compensation Brief."
+            );
+            warnedMissingMortgageBrief = true;
+          }
+          return false;
+        }
+
+        if (!data || typeof data !== "object") {
+          return false;
+        }
+
+        if (window.PCSUnitedAmyBrief) {
+          window.PCSUnitedAmyBrief.clear();
+        }
+
+        briefContainer.setAttribute("data-visible", "1");
+
+        const alreadyActive =
+          activeBriefType === "mortgage" && mortgageBriefActivated;
+
+        if (alreadyActive && typeof mortgageApi.update === "function") {
+          mortgageApi.update(data);
+        } else if (typeof mortgageApi.render === "function") {
+          mortgageApi.render(data);
+        } else {
+          return false;
+        }
+
+        latestMortgageBriefData = data;
+        activeBriefType = "mortgage";
+
+        const firstTransition = !mortgageBriefActivated;
+        if (firstTransition) {
+          mortgageBriefActivated = true;
+
+          if (options.openIfFirst !== false && !isOpen()) {
+            openAmy();
+          }
+        }
+
+        return true;
       }
 
       function buildCompensationBriefData() {
@@ -730,15 +973,27 @@
         };
       }
 
-      function refreshAmyBrief(options = {}) {
+      function refreshActiveBrief(options = {}) {
+        initializeBriefRenderers();
+
+        if (
+          (activeBriefType === "mortgage" || mortgageBriefActivated) &&
+          latestMortgageBriefData
+        ) {
+          showMortgageBrief(latestMortgageBriefData, {
+            openIfFirst: false
+          });
+          return true;
+        }
+
         const briefData = buildCompensationBriefData();
 
         if (!briefData) {
-          hideAmyBrief();
+          hideAllBriefs();
           return false;
         }
 
-        showAmyBrief(briefData);
+        showCompensationBrief(briefData);
 
         if (options.open === true) {
           openAmy();
@@ -746,6 +1001,75 @@
 
         return true;
       }
+
+      function refreshAmyBrief(options = {}) {
+        return refreshActiveBrief(options);
+      }
+
+      function showAmyBrief(data) {
+        if (isPlainObject(data) && safeString(data.type) === "mortgage") {
+          return showMortgageBrief(data, { openIfFirst: false });
+        }
+
+        return showCompensationBrief(data);
+      }
+
+      function hideAmyBrief() {
+        hideAllBriefs();
+      }
+
+      function activateMortgageBriefFromFinancialEvent(event) {
+        const detail =
+          event && isPlainObject(event.detail) ? event.detail : null;
+
+        if (!detail) return;
+
+        patchPublicSessionFromFinancialDetail(detail);
+
+        const briefData = buildMortgageBriefData(detail);
+        latestMortgageBriefData = briefData;
+
+        if (detail.userInitiated !== true) {
+          return;
+        }
+
+        if (!hasPositiveBasicBrainIncome(detail)) {
+          return;
+        }
+
+        cancelPendingMortgageActivation();
+
+        let attempts = 0;
+        const maxAttempts = 5;
+
+        const attemptActivation = () => {
+          attempts += 1;
+
+          if (isHeaderFinancialMode()) {
+            showMortgageBrief(latestMortgageBriefData || briefData, {
+              openIfFirst: true
+            });
+            return;
+          }
+
+          if (attempts >= maxAttempts) {
+            return;
+          }
+
+          pendingMortgageActivationTimer = setTimeout(() => {
+            pendingMortgageActivationTimer = null;
+            attemptActivation();
+          }, attempts === 1 ? 0 : 25);
+        };
+
+        // Wait until the current event dispatch finishes, then verify the
+        // Header Strip has entered financial mode before switching Briefs.
+        queueMicrotask(() => {
+          requestAnimationFrame(attemptActivation);
+        });
+      }
+
+      initializeBriefRenderers();
 
       /* ========================================================
          3. STORAGE KEYS
@@ -1325,6 +1649,27 @@
             (isPlainObject(detail.mortgage) && detail.mortgage) ||
             (isPlainObject(detail.result) && detail.result) ||
             detail;
+
+          if (Object.keys(patch).length) {
+            patchPublicSession(patch);
+          }
+
+          // Enrich an already-active Mortgage Brief. Never activate from
+          // mortgage-ready / mortgage-health-ready alone.
+          if (mortgageBriefActivated || activeBriefType === "mortgage") {
+            latestMortgageBriefData = buildMortgageBriefData({
+              ...(isPlainObject(latestMortgageBriefData)
+                ? latestMortgageBriefData
+                : {}),
+              ...detail,
+              mortgageApiResult: patch.mortgage
+            });
+            showMortgageBrief(latestMortgageBriefData, {
+              openIfFirst: false
+            });
+          }
+
+          return;
         }
 
         if (Object.keys(patch).length) {
@@ -1333,6 +1678,13 @@
 
         absorbBasicBrainHandoff();
 
+        // After Mortgage Brief is active, keep it sticky. Compensation /
+        // BasicBrain events may still update the public session above.
+        if (mortgageBriefActivated || activeBriefType === "mortgage") {
+          refreshActiveBrief({ open: false });
+          return;
+        }
+
         const shouldOpen =
           !isOpen() &&
           (
@@ -1340,9 +1692,23 @@
             type === "pcsunited:basicbrain-updated"
           );
 
-        refreshAmyBrief({
+        refreshActiveBrief({
           open: shouldOpen
         });
+      }
+
+      function onFinancialInputUpdated(event) {
+        activateMortgageBriefFromFinancialEvent(event);
+      }
+
+      function onFinancialInputPreloaded(event) {
+        const detail =
+          event && isPlainObject(event.detail) ? event.detail : null;
+
+        if (!detail) return;
+
+        // Preload may update session state only. Never activate Mortgage Brief.
+        patchPublicSessionFromFinancialDetail(detail);
       }
 
       function bindResourcesContextListeners() {
@@ -1359,6 +1725,21 @@
         events.forEach((name) => {
           window.addEventListener(name, onResourcesContextEvent);
         });
+
+        window.addEventListener(
+          "pcsunited:financial-input-updated",
+          onFinancialInputUpdated
+        );
+
+        window.addEventListener(
+          "pcsunited:financial-input-preloaded",
+          onFinancialInputPreloaded
+        );
+
+        window.addEventListener(
+          "pcsunited:mortgage-input-preloaded",
+          onFinancialInputPreloaded
+        );
       }
 
       function getProfile() {
@@ -1779,7 +2160,7 @@
             source: "web",
             widget: "pcsunited-ask-amy-hud",
             product: "pcsunited",
-            version: "pcsu-ask-amy-hud-v1.2.3",
+            version: "pcsu-ask-amy-hud-v1.3.0",
             response_contract: "ask-amy-response-v1",
 
             page: {
@@ -1992,7 +2373,10 @@
       }
 
       function resetAmy() {
-        hideAmyBrief();
+        cancelPendingMortgageActivation();
+        latestMortgageBriefData = null;
+        mortgageBriefActivated = false;
+        hideAllBriefs();
         startFreshPublicSession();
 
         pushMsg(
@@ -2049,7 +2433,7 @@
       absorbBasicBrainHandoff();
       syncLiveRuntimeContext();
 
-      const initialBriefRendered = refreshAmyBrief({
+      const initialBriefRendered = refreshActiveBrief({
         open: false
       });
 
@@ -2107,5 +2491,6 @@
         loadPublicSession();
       window.PCSUnitedAskAmy.showBrief = showAmyBrief;
       window.PCSUnitedAskAmy.hideBrief = hideAmyBrief;
-      window.PCSUnitedAskAmy.refreshBrief = refreshAmyBrief;
+      window.PCSUnitedAskAmy.refreshBrief = refreshActiveBrief;
+      window.PCSUnitedAskAmy.getActiveBriefType = () => activeBriefType;
 })();
