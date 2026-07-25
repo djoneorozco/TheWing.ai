@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="description"
+    content="PCSUnited Monthly Budget Builder"
+  >
+
+  <title>Monthly Budget Builder | PCSUnited Financial</title>
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=PT+Serif:wght@400;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- App stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+  <div class="budget-app" id="budgetApp">
+
+    <!-- =====================================================
+      APP CONTENT
+    ====================================================== -->
+    <main class="budget-app__main">
+
+      <!-- ===================================================
+        LEFT WORKSPACE
+      ==================================================== -->
+      <section class="budget-workspace">
+
+        <!-- Header -->
+        <header class="budget-header">
+
+          <div class="budget-header__copy">
+
+            <p class="budget-header__eyebrow">
+              PCSUnited Financial
+            </p>
+
+            <h1 class="budget-header__title">
+              Monthly Budget Builder
+            </h1>
+
+            <p class="budget-header__subtitle">
+              Adjust each category to match your typical monthly spending.
+            </p>
+
+          </div>
+
+          <div
+            class="live-update-pill"
+            aria-label="All changes update in real time"
+          >
+            <span class="live-update-pill__icon">
+              <i data-lucide="sparkles" aria-hidden="true"></i>
+            </span>
+
+            <span class="live-update-pill__text">
+              All changes update in real time
+            </span>
+          </div>
+
+        </header>
+
+
+        <!-- =================================================
+          CATEGORY NAVIGATION
+        ================================================== -->
+        <nav
+          class="category-navigation"
+          aria-label="Budget categories"
+        >
+
+          <button
+            class="category-tab category-tab--active"
+            type="button"
+            data-category="monthly-expenses"
+            aria-pressed="true"
+          >
+            <i data-lucide="chart-no-axes-column" aria-hidden="true"></i>
+            <span>Monthly Expenses</span>
+          </button>
+
+          <button
+            class="category-tab"
+            type="button"
+            data-category="debt"
+            aria-pressed="false"
+          >
+            <i data-lucide="house" aria-hidden="true"></i>
+            <span>Debt</span>
+          </button>
+
+          <button
+            class="category-tab"
+            type="button"
+            data-category="lifestyle"
+            aria-pressed="false"
+          >
+            <i data-lucide="shopping-bag" aria-hidden="true"></i>
+            <span>Lifestyle</span>
+          </button>
+
+          <button
+            class="category-tab"
+            type="button"
+            data-category="other"
+            aria-pressed="false"
+          >
+            <i data-lucide="ellipsis" aria-hidden="true"></i>
+            <span>Other</span>
+          </button>
+
+        </nav>
+
+
+        <!-- =================================================
+          BUDGET EDITOR CARD
+        ================================================== -->
+        <section
+          class="budget-editor-card"
+          aria-labelledby="expenseEditorTitle"
+        >
+
+          <!-- Card toolbar -->
+          <header class="budget-editor-card__header">
+
+            <h2
+              class="budget-editor-card__title"
+              id="expenseEditorTitle"
+            >
+              Adjust your monthly expenses
+            </h2>
+
+            <div class="sort-control">
+
+              <label class="sr-only" for="expenseSort">
+                Sort expenses
+              </label>
+
+              <select id="expenseSort" name="expenseSort">
+                <option value="high-low">
+                  Sort: High to Low
+                </option>
+
+                <option value="low-high">
+                  Sort: Low to High
+                </option>
+
+                <option value="alphabetical">
+                  Sort: A to Z
+                </option>
+              </select>
+
+              <i data-lucide="chevron-down" aria-hidden="true"></i>
+
+            </div>
+
+          </header>
+
+
+          <!-- Drag helper -->
+          <div class="slider-helper" aria-hidden="true">
+
+            <span class="slider-helper__arrow">
+              ←
+            </span>
+
+            <span class="slider-helper__text">
+              Drag to adjust
+            </span>
+
+            <span class="slider-helper__arrow">
+              →
+            </span>
+
+          </div>
+
+
+          <!-- ===============================================
+            EXPENSE LIST
+          ================================================ -->
+          <div class="expense-list" id="expenseList">
+
+
+            <!-- Groceries -->
+            <article
+              class="expense-row"
+              data-expense-id="groceries"
+              data-value="650"
+              data-min="200"
+              data-max="1500"
+              data-step="10"
+              data-color="purple"
+            >
+
+              <div class="expense-row__identity">
+
+                <div class="expense-icon expense-icon--purple">
+                  <i data-lucide="utensils" aria-hidden="true"></i>
+                </div>
+
+                <h3 class="expense-row__name">
+                  Groceries
+                </h3>
+
+              </div>
+
+              <div class="expense-row__slider">
+
+                <output
+                  class="slider-value-bubble slider-value-bubble--purple"
+                  for="groceriesRange"
+                  id="groceriesBubble"
+                >
+                  $650
+                </output>
+
+                <input
+                  class="expense-range expense-range--purple"
+                  id="groceriesRange"
+                  name="groceries"
+                  type="range"
+                  min="200"
+                  max="1500"
+                  step="10"
+                  value="650"
+                  aria-label="Monthly groceries expense"
+                  data-output="groceriesValue"
+                  data-bubble="groceriesBubble"
+                >
+
+                <div class="expense-range-labels">
+                  <span>$200</span>
+                  <span>$1,500</span>
+                </div>
+
+              </div>
+
+              <div class="expense-row__amount">
+
+                <label class="sr-only" for="groceriesValue">
+                  Groceries monthly amount
+                </label>
+
+                <div class="expense-amount-input expense-amount-input--purple">
+                  <span class="expense-amount-input__currency">$</span>
+
+                  <input
+                    id="groceriesValue"
+                    type="number"
+                    min="200"
+                    max="1500"
+                    step="10"
+                    value="650"
+                    inputmode="numeric"
+                    aria-label="Groceries amount"
+                  >
+
+                  <span class="expense-amount-input__suffix">
+                    /mo
+                  </span>
+                </div>
+
+              </div>
+
+              <button
+                class="expense-row__expand"
+                type="button"
+                aria-label="Expand groceries options"
+                aria-expanded="false"
+              >
+                <i data-lucide="chevron-down" aria-hidden="true"></i>
+              </button>
+
+            </article>
+
+
+            <!-- Utilities -->
+            <article
+              class="expense-row"
+              data-expense-id="utilities"
+              data-value="280"
+              data-min="80"
+              data-max="600"
+              data-step="10"
+              data-color="blue"
+            >
+
+              <div class="expense-row__identity">
+
+                <div class="expense-icon expense-icon--blue">
+                  <i data-lucide="zap" aria-hidden="true"></i>
+                </div>
+
+                <h3 class="expense-row__name">
+                  Utilities
+                </h3>
+
+              </div>
+
+              <div class="expense-row__slider">
+
+                <output
+                  class="slider-value-bubble slider-value-bubble--blue"
+                  for="utilitiesRange"
+                  id="utilitiesBubble"
+                >
+                  $280
+                </output>
+
+                <input
+                  class="expense-range expense-range--blue"
+                  id="utilitiesRange"
+                  name="utilities"
+                  type="range"
+                  min="80"
+                  max="600"
+                  step="10"
+                  value="280"
+                  aria-label="Monthly utilities expense"
+                  data-output="utilitiesValue"
+                  data-bubble="utilitiesBubble"
+                >
+
+                <div class="expense-range-labels">
+                  <span>$80</span>
+                  <span>$600</span>
+                </div>
+
+              </div>
+
+              <div class="expense-row__amount">
+
+                <label class="sr-only" for="utilitiesValue">
+                  Utilities monthly amount
+                </label>
+
+                <div class="expense-amount-input expense-amount-input--blue">
+                  <span class="expense-amount-input__currency">$</span>
+
+                  <input
+                    id="utilitiesValue"
+                    type="number"
+                    min="80"
+                    max="600"
+                    step="10"
+                    value="280"
+                    inputmode="numeric"
+                    aria-label="Utilities amount"
+                  >
+
+                  <span class="expense-amount-input__suffix">
+                    /mo
+                  </span>
+                </div>
+
+              </div>
+
+              <button
+                class="expense-row__expand"
+                type="button"
+                aria-label="Expand utilities options"
+                aria-expanded="false"
+              >
+                <i data-lucide="chevron-down" aria-hidden="true"></i>
+              </button>
+
+            </article>
+
+
+            <!-- Phone / Internet -->
+            <article
+              class="expense-row"
+              data-expense-id="phone-internet"
+              data-value="120"
+              data-min="40"
+              data-max="250"
+              data-step="5"
+              data-color="teal"
+            >
+
+              <div class="expense-row__identity">
+
+                <div class="expense-icon expense-icon--teal">
+                  <i data-lucide="smartphone" aria-hidden="true"></i>
+                </div>
+
+                <h3 class="expense-row__name">
+                  Phone / Internet
+                </h3>
+
+              </div>
+
+              <div class="expense-row__slider">
+
+                <output
+                  class="slider-value-bubble slider-value-bubble--teal"
+                  for="phoneInternetRange"
+                  id="phoneInternetBubble"
+                >
+                  $120
+                </output>
+
+                <input
+                  class="expense-range expense-range--teal"
+                  id="phoneInternetRange"
+                  name="phoneInternet"
+                  type="range"
+                  min="40"
+                  max="250"
+                  step="5"
+                  value="120"
+                  aria-label="Monthly phone and internet expense"
+                  data-output="phoneInternetValue"
+                  data-bubble="phoneInternetBubble"
+                >
+
+                <div class="expense-range-labels">
+                  <span>$40</span>
+                  <span>$250</span>
+                </div>
+
+              </div>
+
+              <div class="expense-row__amount">
+
+                <label class="sr-only" for="phoneInternetValue">
+                  Phone and internet monthly amount
+                </label>
+
+                <div class="expense-amount-input expense-amount-input--teal">
+                  <span class="expense-amount-input__currency">$</span>
+
+                  <input
+                    id="phoneInternetValue"
+                    type="number"
+                    min="40"
+                    max="250"
+                    step="5"
+                    value="120"
+                    inputmode="numeric"
+                    aria-label="Phone and internet amount"
+                  >
+
+                  <span class="expense-amount-input__suffix">
+                    /mo
+                  </span>
+                </div>
+
+              </div>
+
+              <button
+                class="expense-row__expand"
+                type="button"
+                aria-label="Expand phone and internet options"
+                aria-expanded="false"
+              >
+                <i data-lucide="chevron-down" aria-hidden="true"></i>
+              </button>
+
+            </article>
+
+
+            <!-- Entertainment -->
+            <article
+              class="expense-row"
+              data-expense-id="entertainment"
+              data-value="150"
+              data-min="0"
+              data-max="400"
+              data-step="5"
+              data-color="pink"
+            >
+
+              <div class="expense-row__identity">
+
+                <div class="expense-icon expense-icon--pink">
+                  <i data-lucide="monitor-play" aria-hidden="true"></i>
+                </div>
+
+                <h3 class="expense-row__name">
+                  Entertainment
+                </h3>
+
+              </div>
+
+              <div class="expense-row__slider">
+
+                <output
+                  class="slider-value-bubble slider-value-bubble--pink"
+                  for="entertainmentRange"
+                  id="entertainmentBubble"
+                >
+                  $150
+                </output>
+
+                <input
+                  class="expense-range expense-range--pink"
+                  id="entertainmentRange"
+                  name="entertainment"
+                  type="range"
+                  min="0"
+                  max="400"
+                  step="5"
+                  value="150"
+                  aria-label="Monthly entertainment expense"
+                  data-output="entertainmentValue"
+                  data-bubble="entertainmentBubble"
+                >
+
+                <div class="expense-range-labels">
+                  <span>$0</span>
+                  <span>$400</span>
+                </div>
+
+              </div>
+
+              <div class="expense-row__amount">
+
+                <label class="sr-only" for="entertainmentValue">
+                  Entertainment monthly amount
+                </label>
+
+                <div class="expense-amount-input expense-amount-input--pink">
+                  <span class="expense-amount-input__currency">$</span>
+
+                  <input
+                    id="entertainmentValue"
+                    type="number"
+                    min="0"
+                    max="400"
+                    step="5"
+                    value="150"
+                    inputmode="numeric"
+                    aria-label="Entertainment amount"
+                  >
+
+                  <span class="expense-amount-input__suffix">
+                    /mo
+                  </span>
+                </div>
+
+              </div>
+
+              <button
+                class="expense-row__expand"
+                type="button"
+                aria-label="Expand entertainment options"
+                aria-expanded="false"
+              >
+                <i data-lucide="chevron-down" aria-hidden="true"></i>
+              </button>
+
+            </article>
+
+
+            <!-- Insurance Other -->
+            <article
+              class="expense-row"
+              data-expense-id="insurance-other"
+              data-value="195"
+              data-min="50"
+              data-max="500"
+              data-step="5"
+              data-color="orange"
+            >
+
+              <div class="expense-row__identity">
+
+                <div class="expense-icon expense-icon--orange">
+                  <i data-lucide="shield-check" aria-hidden="true"></i>
+                </div>
+
+                <h3 class="expense-row__name">
+                  Insurance (Other)
+                </h3>
+
+              </div>
+
+              <div class="expense-row__slider">
+
+                <output
+                  class="slider-value-bubble slider-value-bubble--orange"
+                  for="insuranceOtherRange"
+                  id="insuranceOtherBubble"
+                >
+                  $195
+                </output>
+
+                <input
+                  class="expense-range expense-range--orange"
+                  id="insuranceOtherRange"
+                  name="insuranceOther"
+                  type="range"
+                  min="50"
+                  max="500"
+                  step="5"
+                  value="195"
+                  aria-label="Other monthly insurance expense"
+                  data-output="insuranceOtherValue"
+                  data-bubble="insuranceOtherBubble"
+                >
+
+                <div class="expense-range-labels">
+                  <span>$50</span>
+                  <span>$500</span>
+                </div>
+
+              </div>
+
+              <div class="expense-row__amount">
+
+                <label class="sr-only" for="insuranceOtherValue">
+                  Other insurance monthly amount
+                </label>
+
+                <div class="expense-amount-input expense-amount-input--orange">
+                  <span class="expense-amount-input__currency">$</span>
+
+                  <input
+                    id="insuranceOtherValue"
+                    type="number"
+                    min="50"
+                    max="500"
+                    step="5"
+                    value="195"
+                    inputmode="numeric"
+                    aria-label="Other insurance amount"
+                  >
+
+                  <span class="expense-amount-input__suffix">
+                    /mo
+                  </span>
+                </div>
+
+              </div>
+
+              <button
+                class="expense-row__expand"
+                type="button"
+                aria-label="Expand other insurance options"
+                aria-expanded="false"
+              >
+                <i data-lucide="chevron-down" aria-hidden="true"></i>
+              </button>
+
+            </article>
+
+
+            <!-- Childcare Education -->
+            <article
+              class="expense-row"
+              data-expense-id="childcare-education"
+              data-value="450"
+              data-min="0"
+              data-max="1200"
+              data-step="10"
+              data-color="purple"
+            >
+
+              <div class="expense-row__identity">
+
+                <div class="expense-icon expense-icon--purple">
+                  <i data-lucide="graduation-cap" aria-hidden="true"></i>
+                </div>
+
+                <h3 class="expense-row__name">
+                  Childcare / Education
+                </h3>
+
+              </div>
+
+              <div class="expense-row__slider">
+
+                <output
+                  class="slider-value-bubble slider-value-bubble--purple"
+                  for="childcareEducationRange"
+                  id="childcareEducationBubble"
+                >
+                  $450
+                </output>
+
+                <input
+                  class="expense-range expense-range--purple"
+                  id="childcareEducationRange"
+                  name="childcareEducation"
+                  type="range"
+                  min="0"
+                  max="1200"
+                  step="10"
+                  value="450"
+                  aria-label="Monthly childcare and education expense"
+                  data-output="childcareEducationValue"
+                  data-bubble="childcareEducationBubble"
+                >
+
+                <div class="expense-range-labels">
+                  <span>$0</span>
+                  <span>$1,200</span>
+                </div>
+
+              </div>
+
+              <div class="expense-row__amount">
+
+                <label class="sr-only" for="childcareEducationValue">
+                  Childcare and education monthly amount
+                </label>
+
+                <div class="expense-amount-input expense-amount-input--purple">
+                  <span class="expense-amount-input__currency">$</span>
+
+                  <input
+                    id="childcareEducationValue"
+                    type="number"
+                    min="0"
+                    max="1200"
+                    step="10"
+                    value="450"
+                    inputmode="numeric"
+                    aria-label="Childcare and education amount"
+                  >
+
+                  <span class="expense-amount-input__suffix">
+                    /mo
+                  </span>
+                </div>
+
+              </div>
+
+              <button
+                class="expense-row__expand"
+                type="button"
+                aria-label="Expand childcare and education options"
+                aria-expanded="false"
+              >
+                <i data-lucide="chevron-down" aria-hidden="true"></i>
+              </button>
+
+            </article>
+
+
+            <!-- Health Medical -->
+            <article
+              class="expense-row"
+              data-expense-id="health-medical"
+              data-value="150"
+              data-min="50"
+              data-max="600"
+              data-step="5"
+              data-color="red"
+            >
+
+              <div class="expense-row__identity">
+
+                <div class="expense-icon expense-icon--red">
+                  <i data-lucide="heart-pulse" aria-hidden="true"></i>
+                </div>
+
+                <h3 class="expense-row__name">
+                  Health / Medical
+                </h3>
+
+              </div>
+
+              <div class="expense-row__slider">
+
+                <output
+                  class="slider-value-bubble slider-value-bubble--red"
+                  for="healthMedicalRange"
+                  id="healthMedicalBubble"
+                >
+                  $150
+                </output>
+
+                <input
+                  class="expense-range expense-range--red"
+                  id="healthMedicalRange"
+                  name="healthMedical"
+                  type="range"
+                  min="50"
+                  max="600"
+                  step="5"
+                  value="150"
+                  aria-label="Monthly health and medical expense"
+                  data-output="healthMedicalValue"
+                  data-bubble="healthMedicalBubble"
+                >
+
+                <div class="expense-range-labels">
+                  <span>$50</span>
+                  <span>$600</span>
+                </div>
+
+              </div>
+
+              <div class="expense-row__amount">
+
+                <label class="sr-only" for="healthMedicalValue">
+                  Health and medical monthly amount
+                </label>
+
+                <div class="expense-amount-input expense-amount-input--red">
+                  <span class="expense-amount-input__currency">$</span>
+
+                  <input
+                    id="healthMedicalValue"
+                    type="number"
+                    min="50"
+                    max="600"
+                    step="5"
+                    value="150"
+                    inputmode="numeric"
+                    aria-label="Health and medical amount"
+                  >
+
+                  <span class="expense-amount-input__suffix">
+                    /mo
+                  </span>
+                </div>
+
+              </div>
+
+              <button
+                class="expense-row__expand"
+                type="button"
+                aria-label="Expand health and medical options"
+                aria-expanded="false"
+              >
+                <i data-lucide="chevron-down" aria-hidden="true"></i>
+              </button>
+
+            </article>
+
+
+            <!-- Personal Misc -->
+            <article
+              class="expense-row"
+              data-expense-id="personal-misc"
+              data-value="165"
+              data-min="50"
+              data-max="600"
+              data-step="5"
+              data-color="slate"
+            >
+
+              <div class="expense-row__identity">
+
+                <div class="expense-icon expense-icon--slate">
+                  <i data-lucide="ellipsis" aria-hidden="true"></i>
+                </div>
+
+                <h3 class="expense-row__name">
+                  Personal / Misc.
+                </h3>
+
+              </div>
+
+              <div class="expense-row__slider">
+
+                <output
+                  class="slider-value-bubble slider-value-bubble--slate"
+                  for="personalMiscRange"
+                  id="personalMiscBubble"
+                >
+                  $165
+                </output>
+
+                <input
+                  class="expense-range expense-range--slate"
+                  id="personalMiscRange"
+                  name="personalMisc"
+                  type="range"
+                  min="50"
+                  max="600"
+                  step="5"
+                  value="165"
+                  aria-label="Monthly personal and miscellaneous expense"
+                  data-output="personalMiscValue"
+                  data-bubble="personalMiscBubble"
+                >
+
+                <div class="expense-range-labels">
+                  <span>$50</span>
+                  <span>$600</span>
+                </div>
+
+              </div>
+
+              <div class="expense-row__amount">
+
+                <label class="sr-only" for="personalMiscValue">
+                  Personal and miscellaneous monthly amount
+                </label>
+
+                <div class="expense-amount-input expense-amount-input--slate">
+                  <span class="expense-amount-input__currency">$</span>
+
+                  <input
+                    id="personalMiscValue"
+                    type="number"
+                    min="50"
+                    max="600"
+                    step="5"
+                    value="165"
+                    inputmode="numeric"
+                    aria-label="Personal and miscellaneous amount"
+                  >
+
+                  <span class="expense-amount-input__suffix">
+                    /mo
+                  </span>
+                </div>
+
+              </div>
+
+              <button
+                class="expense-row__expand"
+                type="button"
+                aria-label="Expand personal and miscellaneous options"
+                aria-expanded="false"
+              >
+                <i data-lucide="chevron-down" aria-hidden="true"></i>
+              </button>
+
+            </article>
+
+          </div>
+
+
+          <!-- Add custom expense -->
+          <button
+            class="add-expense-button"
+            id="addExpenseButton"
+            type="button"
+          >
+
+            <span class="add-expense-button__icon">
+              <i data-lucide="plus" aria-hidden="true"></i>
+            </span>
+
+            <span class="add-expense-button__label">
+              Add Custom Expense
+            </span>
+
+          </button>
+
+        </section>
+
+      </section>
+
+
+      <!-- ===================================================
+        RIGHT FINANCIAL SIDEBAR
+      ==================================================== -->
+      <aside
+        class="financial-sidebar"
+        aria-label="Monthly financial summary"
+      >
+
+        <!-- Location -->
+        <button
+          class="location-selector"
+          id="locationSelector"
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+        >
+
+          <span class="location-selector__content">
+
+            <span class="location-selector__eyebrow">
+              Viewing as
+            </span>
+
+            <span class="location-selector__value">
+              <i data-lucide="map-pin" aria-hidden="true"></i>
+              <span id="selectedLocation">Lackland AFB, TX</span>
+            </span>
+
+          </span>
+
+          <i
+            class="location-selector__chevron"
+            data-lucide="chevron-down"
+            aria-hidden="true"
+          ></i>
+
+        </button>
+
+
+        <!-- Cash flow card -->
+        <section
+          class="cash-flow-card"
+          aria-labelledby="cashFlowTitle"
+        >
+
+          <header class="cash-flow-card__header">
+
+            <div class="card-heading-with-info">
+
+              <h2 id="cashFlowTitle">
+                Financial Snapshot
+              </h2>
+
+              <button
+                class="info-button"
+                type="button"
+                aria-label="About monthly cash flow"
+              >
+                <i data-lucide="info" aria-hidden="true"></i>
+              </button>
+
+            </div>
+
+          </header>
+
+
+          <div class="cash-flow-card__hero">
+
+            <div class="cash-flow-summary">
+
+              <strong
+                class="cash-flow-summary__amount"
+                id="cashFlowAmount"
+              >
+                $1,720
+              </strong>
+
+              <span class="cash-flow-summary__label">
+                Monthly Cash Remaining
+              </span>
+
+              <span
+                class="cash-flow-summary__percentage"
+                id="cashFlowPercentage"
+              >
+                21.7% of income
+              </span>
+
+            </div>
+
+
+            <!-- Donut chart -->
+            <div
+              class="income-donut"
+              role="img"
+              aria-label="$7,910 monthly income represented as a financial distribution chart"
+            >
+
+              <svg
+                class="income-donut__svg"
+                viewBox="0 0 160 160"
+                aria-hidden="true"
+              >
+
+                <circle
+                  class="income-donut__track"
+                  cx="80"
+                  cy="80"
+                  r="64"
+                ></circle>
+
+                <circle
+                  class="income-donut__segment income-donut__segment--income"
+                  cx="80"
+                  cy="80"
+                  r="64"
+                  pathLength="100"
+                  stroke-dasharray="38 62"
+                  stroke-dashoffset="0"
+                ></circle>
+
+                <circle
+                  class="income-donut__segment income-donut__segment--debt"
+                  cx="80"
+                  cy="80"
+                  r="64"
+                  pathLength="100"
+                  stroke-dasharray="11 89"
+                  stroke-dashoffset="-38"
+                ></circle>
+
+                <circle
+                  class="income-donut__segment income-donut__segment--expenses"
+                  cx="80"
+                  cy="80"
+                  r="64"
+                  pathLength="100"
+                  stroke-dasharray="51 49"
+                  stroke-dashoffset="-49"
+                ></circle>
+
+              </svg>
+
+              <div class="income-donut__center">
+
+                <strong id="monthlyIncomeDonut">
+                  $7,910
+                </strong>
+
+                <span>
+                  Income
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="cash-flow-breakdown">
+
+            <div class="cash-flow-breakdown__row">
+
+              <span class="cash-flow-breakdown__label">
+
+                <span
+                  class="breakdown-dot breakdown-dot--income"
+                  aria-hidden="true"
+                ></span>
+
+                Monthly Income
+              </span>
+
+              <strong
+                class="cash-flow-breakdown__value cash-flow-breakdown__value--positive"
+                id="monthlyIncomeValue"
+              >
+                $7,910
+              </strong>
+
+            </div>
+
+
+            <div class="cash-flow-breakdown__row">
+
+              <span class="cash-flow-breakdown__label">
+
+                <span
+                  class="breakdown-dot breakdown-dot--expenses"
+                  aria-hidden="true"
+                ></span>
+
+                Total Expenses
+              </span>
+
+              <strong
+                class="cash-flow-breakdown__value cash-flow-breakdown__value--negative"
+                id="totalExpensesValue"
+              >
+                -$4,870
+              </strong>
+
+            </div>
+
+
+            <div class="cash-flow-breakdown__row">
+
+              <span class="cash-flow-breakdown__label">
+
+                <span
+                  class="breakdown-dot breakdown-dot--debt"
+                  aria-hidden="true"
+                ></span>
+
+                Total Debt
+              </span>
+
+              <strong
+                class="cash-flow-breakdown__value cash-flow-breakdown__value--negative"
+                id="totalDebtValue"
+              >
+                -$1,320
+              </strong>
+
+            </div>
+
+
+            <div class="cash-flow-breakdown__row">
+
+              <span class="cash-flow-breakdown__label">
+
+                <span
+                  class="breakdown-dot breakdown-dot--savings"
+                  aria-hidden="true"
+                ></span>
+
+                Total Savings
+              </span>
+
+              <strong
+                class="cash-flow-breakdown__value cash-flow-breakdown__value--savings"
+                id="totalSavingsValue"
+              >
+                -$0
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <footer class="cash-flow-card__footer">
+
+            <span>
+              Monthly Cash Flow
+            </span>
+
+            <strong id="cashFlowFooterAmount">
+              $1,720
+            </strong>
+
+          </footer>
+
+        </section>
+
+
+        <!-- Expenses percentage card -->
+        <section
+          class="health-metric-card health-metric-card--expenses"
+          aria-labelledby="expensesRatioTitle"
+        >
+
+          <div class="health-metric-card__icon">
+            <i data-lucide="chart-pie" aria-hidden="true"></i>
+          </div>
+
+          <div class="health-metric-card__content">
+
+            <div class="health-metric-card__heading">
+
+              <div class="card-heading-with-info">
+
+                <h2 id="expensesRatioTitle">
+                  Expenses as % of Income
+                </h2>
+
+                <button
+                  class="info-button"
+                  type="button"
+                  aria-label="About expenses as a percentage of income"
+                >
+                  <i data-lucide="info" aria-hidden="true"></i>
+                </button>
+
+              </div>
+
+            </div>
+
+            <strong
+              class="health-metric-card__value"
+              id="expensesIncomeRatio"
+            >
+              61.5%
+            </strong>
+
+            <span class="health-metric-card__recommendation">
+              Recommended: Below 70%
+            </span>
+
+          </div>
+
+          <span class="health-status health-status--good">
+            Good
+          </span>
+
+        </section>
+
+
+        <!-- Emergency fund card -->
+        <section
+          class="health-metric-card health-metric-card--emergency"
+          aria-labelledby="emergencyFundTitle"
+        >
+
+          <div class="health-metric-card__icon">
+            <i data-lucide="piggy-bank" aria-hidden="true"></i>
+          </div>
+
+          <div class="health-metric-card__content">
+
+            <div class="health-metric-card__heading">
+
+              <div class="card-heading-with-info">
+
+                <h2 id="emergencyFundTitle">
+                  Emergency Fund
+                </h2>
+
+                <button
+                  class="info-button"
+                  type="button"
+                  aria-label="About emergency fund"
+                >
+                  <i data-lucide="info" aria-hidden="true"></i>
+                </button>
+
+              </div>
+
+            </div>
+
+            <strong
+              class="health-metric-card__value"
+              id="emergencyFundAmount"
+            >
+              $6,000
+            </strong>
+
+            <span class="health-metric-card__recommendation">
+              Recommended: 3–6 months
+            </span>
+
+          </div>
+
+          <span
+            class="health-status health-status--months"
+            id="emergencyFundMonths"
+          >
+            3.2 months
+          </span>
+
+        </section>
+
+
+        <!-- Debt ratio card -->
+        <section
+          class="health-metric-card health-metric-card--debt"
+          aria-labelledby="debtRatioTitle"
+        >
+
+          <div class="health-metric-card__icon">
+            <i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>
+          </div>
+
+          <div class="health-metric-card__content">
+
+            <div class="health-metric-card__heading">
+
+              <div class="card-heading-with-info">
+
+                <h2 id="debtRatioTitle">
+                  Debt to Income Ratio
+                </h2>
+
+                <button
+                  class="info-button"
+                  type="button"
+                  aria-label="About debt-to-income ratio"
+                >
+                  <i data-lucide="info" aria-hidden="true"></i>
+                </button>
+
+              </div>
+
+            </div>
+
+            <strong
+              class="health-metric-card__value"
+              id="debtIncomeRatio"
+            >
+              16.7%
+            </strong>
+
+            <span class="health-metric-card__recommendation">
+              Recommended: Below 36%
+            </span>
+
+          </div>
+
+          <span class="health-status health-status--low">
+            Low
+          </span>
+
+        </section>
+
+      </aside>
+
+    </main>
+
+
+    <!-- =====================================================
+      BOTTOM NAVIGATION
+    ====================================================== -->
+    <footer class="app-footer">
+
+      <div class="privacy-message">
+
+        <i data-lucide="shield-check" aria-hidden="true"></i>
+
+        <span>
+          Your data is private and secure.
+        </span>
+
+      </div>
+
+
+      <nav
+        class="step-navigation"
+        aria-label="Financial setup progress"
+      >
+
+        <button
+          class="step-item step-item--complete"
+          type="button"
+          data-step="income"
+        >
+          <span class="step-item__number">1</span>
+          <span class="step-item__label">Income</span>
+        </button>
+
+        <span class="step-connector" aria-hidden="true"></span>
+
+        <button
+          class="step-item step-item--active"
+          type="button"
+          data-step="expenses"
+          aria-current="step"
+        >
+          <span class="step-item__number">2</span>
+          <span class="step-item__label">Expenses</span>
+        </button>
+
+        <span class="step-connector" aria-hidden="true"></span>
+
+        <button
+          class="step-item"
+          type="button"
+          data-step="debt"
+        >
+          <span class="step-item__number">3</span>
+          <span class="step-item__label">Debt</span>
+        </button>
+
+        <span class="step-connector" aria-hidden="true"></span>
+
+        <button
+          class="step-item"
+          type="button"
+          data-step="savings"
+        >
+          <span class="step-item__number">4</span>
+          <span class="step-item__label">Savings</span>
+        </button>
+
+        <span class="step-connector" aria-hidden="true"></span>
+
+        <button
+          class="step-item"
+          type="button"
+          data-step="summary"
+        >
+          <span class="step-item__number">5</span>
+          <span class="step-item__label">Summary</span>
+        </button>
+
+      </nav>
+
+
+      <button
+        class="next-step-button"
+        id="nextStepButton"
+        type="button"
+      >
+
+        <span>
+          Next: Add Debt
+        </span>
+
+        <i data-lucide="arrow-right" aria-hidden="true"></i>
+
+      </button>
+
+    </footer>
+
+  </div>
+
+
+  <!-- =====================================================
+    CUSTOM EXPENSE MODAL
+  ====================================================== -->
+  <div
+    class="modal-backdrop"
+    id="customExpenseModal"
+    hidden
+  >
+
+    <section
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="customExpenseTitle"
+    >
+
+      <header class="modal__header">
+
+        <div>
+          <p class="modal__eyebrow">
+            Monthly expense
+          </p>
+
+          <h2 id="customExpenseTitle">
+            Add Custom Expense
+          </h2>
+        </div>
+
+        <button
+          class="modal__close"
+          id="closeExpenseModal"
+          type="button"
+          aria-label="Close custom expense dialog"
+        >
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+
+      </header>
+
+
+      <form id="customExpenseForm">
+
+        <div class="form-field">
+
+          <label for="customExpenseName">
+            Expense name
+          </label>
+
+          <input
+            id="customExpenseName"
+            name="customExpenseName"
+            type="text"
+            placeholder="Example: Pet care"
+            autocomplete="off"
+            required
+          >
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label for="customExpenseAmount">
+            Monthly amount
+          </label>
+
+          <div class="currency-field">
+            <span>$</span>
+
+            <input
+              id="customExpenseAmount"
+              name="customExpenseAmount"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="0"
+              inputmode="decimal"
+              required
+            >
+          </div>
+
+        </div>
+
+
+        <div class="modal__actions">
+
+          <button
+            class="button button--secondary"
+            id="cancelExpenseModal"
+            type="button"
+          >
+            Cancel
+          </button>
+
+          <button
+            class="button button--primary"
+            type="submit"
+          >
+            Add Expense
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+  </div>
+
+
+  <!-- App JavaScript -->
+  <script src="app.js"></script>
+
+  <!-- Initialize icon library -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.lucide) {
+        window.lucide.createIcons({
+          attrs: {
+            "stroke-width": 2
+          }
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
