@@ -769,6 +769,18 @@ textarea:focus-visible {
   background: rgba(36, 153, 99, 0.2);
 }
 
+.hero-status--caution,
+.hero-status--warning {
+  color: #f0d39a;
+  background: rgba(212, 170, 71, 0.18);
+}
+
+.hero-status--danger,
+.hero-status--weak {
+  color: #f0b4b8;
+  background: rgba(214, 94, 103, 0.18);
+}
+
 .affordability-score {
   align-items: center;
   text-align: center;
