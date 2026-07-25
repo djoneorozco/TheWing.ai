@@ -1,53 +1,45 @@
 /* ============================================================
    PCSUnited Financial
    Monthly Budget Builder
-   app.js
+   app.js — CATEGORY-BASED BUILD v2.0.0
 
-   Responsibilities
-   - Initialize sliders and value bubbles
-   - Synchronize sliders and number inputs
-   - Recalculate cash flow and financial metrics
-   - Sort expense rows
-   - Manage category tabs
-   - Add custom expenses
-   - Manage modal behavior
-   - Manage step navigation
-   - Save the current session locally
+   REPLACES THE CURRENT app.js
+
+   INCLUDED CATEGORIES
+   - Monthly Expenses
+   - Debt
+   - Lifestyle
+   - Other
+
+   CORE RULE
+   - Monthly Expenses, Lifestyle, and Other count toward Total Expenses.
+   - Debt payments count toward Total Debt.
+   - All values update cash flow in real time.
    ============================================================ */
 
 "use strict";
 
 
 /* ============================================================
-   1. APPLICATION CONFIGURATION
+   1. CONFIGURATION
    ============================================================ */
 
 const PCSU_CONFIG = Object.freeze({
   locale: "en-US",
   currency: "USD",
-
-  storageKey: "pcsunited.financialBudget.v1",
+  storageKey: "pcsunited.financialBudget.v2",
 
   monthlyIncome: 7910,
-  totalDebt: 1320,
   totalSavings: 0,
   emergencyFund: 6000,
-
-  /*
-   * The expense rows visible in the reference image total $2,160.
-   * The image displays total monthly expenses of $4,870.
-   *
-   * This $2,710 baseline represents expenses located in the other
-   * category tabs, such as Housing, Transportation, Lifestyle,
-   * and Other.
-   */
-  hiddenCategoryExpenses: 2710,
-
-  /*
-   * Used to reproduce the initial emergency-fund display of
-   * approximately 3.2 months from the reference design.
-   */
   essentialMonthlyExpenses: 1875,
+
+  categoryOrder: [
+    "monthly-expenses",
+    "debt",
+    "lifestyle",
+    "other"
+  ],
 
   categoryLabels: {
     "monthly-expenses": "Adjust your monthly expenses",
@@ -56,26 +48,321 @@ const PCSU_CONFIG = Object.freeze({
     other: "Adjust your other monthly expenses"
   },
 
-  categoryEmptyMessages: {
-    "monthly-expenses": "Adjust your monthly expenses",
-    debt: "Adjust your monthly debt payments",
-    lifestyle: "Adjust your lifestyle spending",
-    other: "Adjust your other monthly expenses"
+  addButtonLabels: {
+    "monthly-expenses": "Add Custom Expense",
+    debt: "Add Custom Debt",
+    lifestyle: "Add Lifestyle Expense",
+    other: "Add Other Expense"
   }
 });
 
 
 /* ============================================================
-   2. NUMBER FORMATTERS
+   2. DEFAULT CATEGORY DATA
+   ============================================================ */
+
+const DEFAULT_ITEMS = Object.freeze({
+  "monthly-expenses": [
+    {
+      id: "groceries",
+      label: "Groceries",
+      icon: "utensils",
+      color: "purple",
+      value: 650,
+      min: 200,
+      max: 1500,
+      step: 10
+    },
+    {
+      id: "utilities",
+      label: "Utilities",
+      icon: "zap",
+      color: "blue",
+      value: 280,
+      min: 80,
+      max: 600,
+      step: 10
+    },
+    {
+      id: "phone-internet",
+      label: "Phone / Internet",
+      icon: "smartphone",
+      color: "teal",
+      value: 120,
+      min: 40,
+      max: 250,
+      step: 5
+    },
+    {
+      id: "childcare-education",
+      label: "Childcare / Education",
+      icon: "graduation-cap",
+      color: "purple",
+      value: 450,
+      min: 0,
+      max: 1200,
+      step: 10
+    },
+    {
+      id: "health-medical",
+      label: "Health / Medical",
+      icon: "heart-pulse",
+      color: "red",
+      value: 150,
+      min: 50,
+      max: 600,
+      step: 5
+    },
+    {
+      id: "insurance-other",
+      label: "Insurance (Other)",
+      icon: "shield-check",
+      color: "orange",
+      value: 195,
+      min: 50,
+      max: 500,
+      step: 5
+    },
+    {
+      id: "personal-misc",
+      label: "Personal / Misc.",
+      icon: "ellipsis",
+      color: "slate",
+      value: 165,
+      min: 50,
+      max: 600,
+      step: 5
+    }
+  ],
+
+  debt: [
+    {
+      id: "mortgage",
+      label: "Mortgage / Home Loan",
+      icon: "house",
+      color: "purple",
+      value: 0,
+      min: 0,
+      max: 4000,
+      step: 25
+    },
+    {
+      id: "auto-loan",
+      label: "Auto Loan",
+      icon: "car-front",
+      color: "blue",
+      value: 620,
+      min: 0,
+      max: 1800,
+      step: 10
+    },
+    {
+      id: "credit-cards",
+      label: "Credit Card Minimums",
+      icon: "credit-card",
+      color: "red",
+      value: 250,
+      min: 0,
+      max: 1500,
+      step: 10
+    },
+    {
+      id: "student-loans",
+      label: "Student Loans",
+      icon: "graduation-cap",
+      color: "teal",
+      value: 250,
+      min: 0,
+      max: 1800,
+      step: 10
+    },
+    {
+      id: "personal-loans",
+      label: "Personal Loans",
+      icon: "landmark",
+      color: "orange",
+      value: 200,
+      min: 0,
+      max: 1500,
+      step: 10
+    },
+    {
+      id: "other-debt",
+      label: "Other Debt Payments",
+      icon: "receipt-text",
+      color: "slate",
+      value: 0,
+      min: 0,
+      max: 1500,
+      step: 10
+    }
+  ],
+
+  lifestyle: [
+    {
+      id: "dining-out",
+      label: "Dining Out",
+      icon: "utensils-crossed",
+      color: "orange",
+      value: 250,
+      min: 0,
+      max: 1000,
+      step: 10
+    },
+    {
+      id: "entertainment",
+      label: "Entertainment",
+      icon: "monitor-play",
+      color: "pink",
+      value: 150,
+      min: 0,
+      max: 800,
+      step: 5
+    },
+    {
+      id: "subscriptions",
+      label: "Subscriptions",
+      icon: "repeat-2",
+      color: "purple",
+      value: 85,
+      min: 0,
+      max: 400,
+      step: 5
+    },
+    {
+      id: "fitness-wellness",
+      label: "Fitness / Wellness",
+      icon: "dumbbell",
+      color: "blue",
+      value: 75,
+      min: 0,
+      max: 500,
+      step: 5
+    },
+    {
+      id: "shopping",
+      label: "Shopping",
+      icon: "shopping-bag",
+      color: "pink",
+      value: 150,
+      min: 0,
+      max: 1200,
+      step: 10
+    },
+    {
+      id: "travel-vacation",
+      label: "Travel / Vacation",
+      icon: "plane",
+      color: "teal",
+      value: 100,
+      min: 0,
+      max: 1500,
+      step: 10
+    },
+    {
+      id: "hobbies-recreation",
+      label: "Hobbies / Recreation",
+      icon: "gamepad-2",
+      color: "purple",
+      value: 100,
+      min: 0,
+      max: 800,
+      step: 10
+    },
+    {
+      id: "pet-care",
+      label: "Pet Care",
+      icon: "paw-print",
+      color: "slate",
+      value: 75,
+      min: 0,
+      max: 600,
+      step: 5
+    }
+  ],
+
+  other: [
+    {
+      id: "rent",
+      label: "Rent",
+      icon: "building-2",
+      color: "purple",
+      value: 0,
+      min: 0,
+      max: 4000,
+      step: 25
+    },
+    {
+      id: "gas-fuel",
+      label: "Gas / Fuel",
+      icon: "fuel",
+      color: "orange",
+      value: 250,
+      min: 0,
+      max: 1000,
+      step: 10
+    },
+    {
+      id: "vehicle-maintenance",
+      label: "Vehicle Maintenance",
+      icon: "wrench",
+      color: "blue",
+      value: 100,
+      min: 0,
+      max: 800,
+      step: 10
+    },
+    {
+      id: "parking-tolls",
+      label: "Parking / Tolls",
+      icon: "circle-parking",
+      color: "teal",
+      value: 50,
+      min: 0,
+      max: 500,
+      step: 5
+    },
+    {
+      id: "giving-charity",
+      label: "Giving / Charity",
+      icon: "hand-heart",
+      color: "red",
+      value: 100,
+      min: 0,
+      max: 1500,
+      step: 10
+    },
+    {
+      id: "support-payments",
+      label: "Support Payments",
+      icon: "users",
+      color: "slate",
+      value: 0,
+      min: 0,
+      max: 2500,
+      step: 25
+    },
+    {
+      id: "storage-fees",
+      label: "Storage / Recurring Fees",
+      icon: "archive",
+      color: "purple",
+      value: 0,
+      min: 0,
+      max: 800,
+      step: 10
+    }
+  ]
+});
+
+
+/* ============================================================
+   3. FORMATTERS
    ============================================================ */
 
 const currencyFormatter = new Intl.NumberFormat(PCSU_CONFIG.locale, {
   style: "currency",
   currency: PCSU_CONFIG.currency,
-  maximumFractionDigits: 0
-});
-
-const numberFormatter = new Intl.NumberFormat(PCSU_CONFIG.locale, {
   maximumFractionDigits: 0
 });
 
@@ -86,56 +373,63 @@ const percentageFormatter = new Intl.NumberFormat(PCSU_CONFIG.locale, {
 
 
 /* ============================================================
-   3. APPLICATION STATE
+   4. STATE
    ============================================================ */
 
 const state = {
   activeCategory: "monthly-expenses",
-
+  currentStep: "expenses",
   monthlyIncome: PCSU_CONFIG.monthlyIncome,
-  totalDebt: PCSU_CONFIG.totalDebt,
   totalSavings: PCSU_CONFIG.totalSavings,
   emergencyFund: PCSU_CONFIG.emergencyFund,
-
-  hiddenCategoryExpenses: PCSU_CONFIG.hiddenCategoryExpenses,
   essentialMonthlyExpenses: PCSU_CONFIG.essentialMonthlyExpenses,
-
-  currentStep: "expenses",
-
-  expenses: {}
+  sortMode: "high-low",
+  categories: createDefaultCategoryState()
 };
 
 
+function createDefaultCategoryState() {
+  const categories = {};
+
+  for (const category of PCSU_CONFIG.categoryOrder) {
+    categories[category] = DEFAULT_ITEMS[category].map((item) => ({
+      ...item,
+      category,
+      custom: false
+    }));
+  }
+
+  return categories;
+}
+
+
 /* ============================================================
-   4. DOM REFERENCES
+   5. DOM
    ============================================================ */
 
 const DOM = {
-  budgetApp: null,
-
   categoryTabs: [],
   editorTitle: null,
   expenseList: null,
   expenseSort: null,
-
   addExpenseButton: null,
+
   customExpenseModal: null,
   customExpenseForm: null,
   customExpenseName: null,
   customExpenseAmount: null,
   closeExpenseModal: null,
   cancelExpenseModal: null,
+  customExpenseTitle: null,
 
   cashFlowAmount: null,
   cashFlowFooterAmount: null,
   cashFlowPercentage: null,
-
   monthlyIncomeDonut: null,
   monthlyIncomeValue: null,
   totalExpensesValue: null,
   totalDebtValue: null,
   totalSavingsValue: null,
-
   expensesIncomeRatio: null,
   emergencyFundAmount: null,
   emergencyFundMonths: null,
@@ -143,454 +437,117 @@ const DOM = {
 
   stepItems: [],
   nextStepButton: null,
-
   locationSelector: null,
   selectedLocation: null
 };
 
 
 /* ============================================================
-   5. GENERAL HELPERS
+   6. HELPERS
    ============================================================ */
 
-function clamp(value, minimum, maximum) {
-  return Math.min(Math.max(value, minimum), maximum);
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 
-function parseNumericValue(value, fallback = 0) {
+function toNumber(value, fallback = 0) {
   const parsed = Number.parseFloat(value);
-
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 
 function formatCurrency(value) {
-  return currencyFormatter.format(parseNumericValue(value));
+  return currencyFormatter.format(toNumber(value));
 }
 
 
-function formatSignedCurrency(value, options = {}) {
-  const {
-    forceNegative = false,
-    preserveNegativeZero = false
-  } = options;
-
-  const numericValue = parseNumericValue(value);
-
-  if (preserveNegativeZero && numericValue === 0) {
-    return "-$0";
-  }
-
-  if (forceNegative) {
-    return `-${formatCurrency(Math.abs(numericValue))}`;
-  }
-
-  return formatCurrency(numericValue);
-}
-
-
-function formatPlainNumber(value) {
-  return numberFormatter.format(parseNumericValue(value));
+function formatNegativeCurrency(value) {
+  return `-${formatCurrency(Math.abs(toNumber(value)))}`;
 }
 
 
 function formatPercentage(value) {
-  return `${percentageFormatter.format(parseNumericValue(value))}%`;
+  return `${percentageFormatter.format(toNumber(value))}%`;
 }
 
 
-function createUniqueId(prefix = "item") {
-  const randomPart = Math.random().toString(36).slice(2, 8);
-  const timePart = Date.now().toString(36);
+function snapToStep(value, step, min = 0) {
+  if (!Number.isFinite(step) || step <= 0) return value;
 
-  return `${prefix}-${timePart}-${randomPart}`;
-}
-
-
-function announce(message) {
-  let liveRegion = document.getElementById("pcsuLiveRegion");
-
-  if (!liveRegion) {
-    liveRegion = document.createElement("div");
-    liveRegion.id = "pcsuLiveRegion";
-    liveRegion.className = "sr-only";
-    liveRegion.setAttribute("aria-live", "polite");
-    liveRegion.setAttribute("aria-atomic", "true");
-    document.body.appendChild(liveRegion);
-  }
-
-  liveRegion.textContent = "";
-
-  window.setTimeout(() => {
-    liveRegion.textContent = message;
-  }, 40);
-}
-
-
-/* ============================================================
-   6. EXPENSE STATE
-   ============================================================ */
-
-function readExpenseRowsFromDOM() {
-  const rows = [...document.querySelectorAll(".expense-row")];
-
-  rows.forEach((row) => {
-    registerExpenseRow(row);
-  });
-}
-
-
-function registerExpenseRow(row) {
-  if (!(row instanceof HTMLElement)) {
-    return;
-  }
-
-  const id = row.dataset.expenseId;
-
-  if (!id) {
-    return;
-  }
-
-  const range = row.querySelector(".expense-range");
-  const amountInput = row.querySelector(
-    ".expense-amount-input input[type='number']"
-  );
-  const bubble = row.querySelector(".slider-value-bubble");
-  const label = row.querySelector(".expense-row__name");
-
-  if (!range || !amountInput || !bubble || !label) {
-    console.warn(`Expense row "${id}" is missing required controls.`);
-    return;
-  }
-
-  const minimum = parseNumericValue(
-    range.min,
-    parseNumericValue(row.dataset.min, 0)
-  );
-
-  const maximum = parseNumericValue(
-    range.max,
-    parseNumericValue(row.dataset.max, 1000)
-  );
-
-  const step = parseNumericValue(
-    range.step,
-    parseNumericValue(row.dataset.step, 1)
-  );
-
-  const value = clamp(
-    parseNumericValue(range.value, minimum),
-    minimum,
-    maximum
-  );
-
-  state.expenses[id] = {
-    id,
-    label: label.textContent.trim(),
-    value,
-    minimum,
-    maximum,
-    step,
-    color: row.dataset.color || "purple",
-    custom: row.dataset.custom === "true"
-  };
-
-  range.value = String(value);
-  amountInput.value = String(value);
-
-  bindExpenseRowEvents(row);
-  updateExpenseRowVisuals(row, value);
-}
-
-
-function bindExpenseRowEvents(row) {
-  if (row.dataset.eventsBound === "true") {
-    return;
-  }
-
-  const range = row.querySelector(".expense-range");
-  const amountInput = row.querySelector(
-    ".expense-amount-input input[type='number']"
-  );
-  const expandButton = row.querySelector(".expense-row__expand");
-
-  range?.addEventListener("input", handleRangeInput);
-  range?.addEventListener("change", handleRangeChange);
-
-  amountInput?.addEventListener("input", handleAmountInput);
-  amountInput?.addEventListener("change", handleAmountChange);
-  amountInput?.addEventListener("blur", handleAmountBlur);
-  amountInput?.addEventListener("keydown", handleAmountKeydown);
-
-  expandButton?.addEventListener("click", handleExpenseExpand);
-
-  row.dataset.eventsBound = "true";
-}
-
-
-function handleRangeInput(event) {
-  const range = event.currentTarget;
-  const row = range.closest(".expense-row");
-
-  if (!row) {
-    return;
-  }
-
-  const expense = state.expenses[row.dataset.expenseId];
-
-  if (!expense) {
-    return;
-  }
-
-  const value = clamp(
-    parseNumericValue(range.value, expense.minimum),
-    expense.minimum,
-    expense.maximum
-  );
-
-  setExpenseValue(row, value, {
-    updateRange: false,
-    updateAmount: true,
-    calculate: true,
-    save: false
-  });
-}
-
-
-function handleRangeChange(event) {
-  const range = event.currentTarget;
-  const row = range.closest(".expense-row");
-
-  if (!row) {
-    return;
-  }
-
-  saveState();
-
-  const expense = state.expenses[row.dataset.expenseId];
-
-  if (expense) {
-    announce(`${expense.label} updated to ${formatCurrency(expense.value)}.`);
-  }
-}
-
-
-function handleAmountInput(event) {
-  const input = event.currentTarget;
-  const row = input.closest(".expense-row");
-
-  if (!row) {
-    return;
-  }
-
-  const expense = state.expenses[row.dataset.expenseId];
-
-  if (!expense || input.value.trim() === "") {
-    return;
-  }
-
-  const value = clamp(
-    parseNumericValue(input.value, expense.minimum),
-    expense.minimum,
-    expense.maximum
-  );
-
-  setExpenseValue(row, value, {
-    updateRange: true,
-    updateAmount: false,
-    calculate: true,
-    save: false
-  });
-}
-
-
-function handleAmountChange(event) {
-  normalizeAmountInput(event.currentTarget);
-  saveState();
-}
-
-
-function handleAmountBlur(event) {
-  normalizeAmountInput(event.currentTarget);
-}
-
-
-function handleAmountKeydown(event) {
-  if (event.key === "Enter") {
-    event.preventDefault();
-    event.currentTarget.blur();
-  }
-}
-
-
-function normalizeAmountInput(input) {
-  const row = input.closest(".expense-row");
-
-  if (!row) {
-    return;
-  }
-
-  const expense = state.expenses[row.dataset.expenseId];
-
-  if (!expense) {
-    return;
-  }
-
-  let value = parseNumericValue(input.value, expense.value);
-
-  value = snapToStep(
-    clamp(value, expense.minimum, expense.maximum),
-    expense.step,
-    expense.minimum
-  );
-
-  setExpenseValue(row, value, {
-    updateRange: true,
-    updateAmount: true,
-    calculate: true,
-    save: false
-  });
-}
-
-
-function snapToStep(value, step, minimum = 0) {
-  if (!Number.isFinite(step) || step <= 0) {
-    return value;
-  }
-
-  const snapped = Math.round((value - minimum) / step) * step + minimum;
-
+  const snapped = Math.round((value - min) / step) * step + min;
   return Number(snapped.toFixed(8));
 }
 
 
-function setExpenseValue(row, value, options = {}) {
-  const {
-    updateRange = true,
-    updateAmount = true,
-    calculate = true,
-    save = false
-  } = options;
+function escapeHTML(value) {
+  const node = document.createElement("div");
+  node.textContent = String(value);
+  return node.innerHTML;
+}
 
-  const id = row.dataset.expenseId;
-  const expense = state.expenses[id];
 
-  if (!expense) {
-    return;
-  }
+function escapeAttribute(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
 
-  const normalizedValue = snapToStep(
-    clamp(
-      parseNumericValue(value, expense.value),
-      expense.minimum,
-      expense.maximum
-    ),
-    expense.step,
-    expense.minimum
-  );
 
-  expense.value = normalizedValue;
-  row.dataset.value = String(normalizedValue);
+function createUniqueId(prefix = "custom") {
+  return `${prefix}-${Date.now().toString(36)}-${Math.random()
+    .toString(36)
+    .slice(2, 8)}`;
+}
 
-  const range = row.querySelector(".expense-range");
-  const amountInput = row.querySelector(
-    ".expense-amount-input input[type='number']"
-  );
 
-  if (updateRange && range) {
-    range.value = String(normalizedValue);
-  }
+function getActiveItems() {
+  return state.categories[state.activeCategory] || [];
+}
 
-  if (updateAmount && amountInput) {
-    amountInput.value = String(normalizedValue);
-  }
 
-  updateExpenseRowVisuals(row, normalizedValue);
+function findItem(category, id) {
+  return state.categories[category]?.find((item) => item.id === id);
+}
 
-  if (calculate) {
-    recalculateFinancialSummary();
-  }
 
-  if (save) {
-    saveState();
-  }
+function setText(element, value) {
+  if (element) element.textContent = value;
 }
 
 
 /* ============================================================
-   7. SLIDER VISUALS
+   7. CATEGORY TOTALS
    ============================================================ */
 
-function updateExpenseRowVisuals(row, value) {
-  const range = row.querySelector(".expense-range");
-  const bubble = row.querySelector(".slider-value-bubble");
-
-  if (!range || !bubble) {
-    return;
-  }
-
-  const minimum = parseNumericValue(range.min, 0);
-  const maximum = parseNumericValue(range.max, 100);
-
-  const percentage =
-    maximum === minimum
-      ? 0
-      : ((value - minimum) / (maximum - minimum)) * 100;
-
-  const safePercentage = clamp(percentage, 0, 100);
-
-  range.style.setProperty("--range-progress", `${safePercentage}%`);
-
-  /*
-   * The bubble uses the slider percentage, with a small compensation
-   * for the width of the slider thumb so it remains centered.
-   */
-  const thumbWidth = 30;
-  const compensatedPosition = `calc(
-    ${safePercentage}% +
-    (${thumbWidth / 2}px - ${safePercentage * thumbWidth / 100}px)
-  )`;
-
-  bubble.style.left = compensatedPosition;
-  bubble.textContent = formatCurrency(value);
-  bubble.value = String(value);
-}
-
-
-function initializeSliderVisuals() {
-  document.querySelectorAll(".expense-row").forEach((row) => {
-    const id = row.dataset.expenseId;
-    const expense = state.expenses[id];
-
-    if (expense) {
-      updateExpenseRowVisuals(row, expense.value);
-    }
-  });
-}
-
-
-/* ============================================================
-   8. FINANCIAL CALCULATIONS
-   ============================================================ */
-
-function getVisibleExpenseTotal() {
-  return Object.values(state.expenses).reduce(
-    (total, expense) => total + parseNumericValue(expense.value),
+function sumCategory(category) {
+  return (state.categories[category] || []).reduce(
+    (sum, item) => sum + toNumber(item.value),
     0
   );
 }
 
 
-function getTotalMonthlyExpenses() {
-  return getVisibleExpenseTotal() + state.hiddenCategoryExpenses;
+function getTotalExpenses() {
+  return (
+    sumCategory("monthly-expenses") +
+    sumCategory("lifestyle") +
+    sumCategory("other")
+  );
 }
 
 
-function calculateFinancialMetrics() {
+function getTotalDebt() {
+  return sumCategory("debt");
+}
+
+
+function calculateMetrics() {
   const monthlyIncome = state.monthlyIncome;
-  const totalExpenses = getTotalMonthlyExpenses();
-  const totalDebt = state.totalDebt;
+  const totalExpenses = getTotalExpenses();
+  const totalDebt = getTotalDebt();
   const totalSavings = state.totalSavings;
 
   const cashFlow =
@@ -599,55 +556,514 @@ function calculateFinancialMetrics() {
     totalDebt -
     totalSavings;
 
-  const expensesIncomeRatio =
-    monthlyIncome > 0
-      ? (totalExpenses / monthlyIncome) * 100
-      : 0;
-
-  const debtIncomeRatio =
-    monthlyIncome > 0
-      ? (totalDebt / monthlyIncome) * 100
-      : 0;
-
-  const cashFlowPercentage =
-    monthlyIncome > 0
-      ? (cashFlow / monthlyIncome) * 100
-      : 0;
-
-  const emergencyFundMonths =
-    state.essentialMonthlyExpenses > 0
-      ? state.emergencyFund / state.essentialMonthlyExpenses
-      : 0;
-
   return {
     monthlyIncome,
     totalExpenses,
     totalDebt,
     totalSavings,
     cashFlow,
-    expensesIncomeRatio,
-    debtIncomeRatio,
-    cashFlowPercentage,
-    emergencyFundMonths
+
+    cashFlowPercentage:
+      monthlyIncome > 0 ? (cashFlow / monthlyIncome) * 100 : 0,
+
+    expensesIncomeRatio:
+      monthlyIncome > 0 ? (totalExpenses / monthlyIncome) * 100 : 0,
+
+    debtIncomeRatio:
+      monthlyIncome > 0 ? (totalDebt / monthlyIncome) * 100 : 0,
+
+    emergencyFundMonths:
+      state.essentialMonthlyExpenses > 0
+        ? state.emergencyFund / state.essentialMonthlyExpenses
+        : 0
   };
 }
 
 
-function recalculateFinancialSummary() {
-  const metrics = calculateFinancialMetrics();
+/* ============================================================
+   8. RENDER ACTIVE CATEGORY
+   ============================================================ */
 
-  updateCashFlowDisplay(metrics);
-  updateMetricCards(metrics);
-  updateCashFlowDonut(metrics);
-  updateFinancialHealthStatuses(metrics);
+function renderActiveCategory() {
+  if (!DOM.expenseList) return;
+
+  const items = sortItems([...getActiveItems()], state.sortMode);
+
+  DOM.expenseList.innerHTML = items.map(createExpenseRowHTML).join("");
+
+  if (DOM.editorTitle) {
+    DOM.editorTitle.textContent =
+      PCSU_CONFIG.categoryLabels[state.activeCategory];
+  }
+
+  if (DOM.addExpenseButton) {
+    const label = DOM.addExpenseButton.querySelector(
+      ".add-expense-button__label"
+    );
+
+    if (label) {
+      label.textContent =
+        PCSU_CONFIG.addButtonLabels[state.activeCategory];
+    }
+
+    DOM.addExpenseButton.hidden = false;
+  }
+
+  updateAllSliderVisuals();
+
+  if (window.lucide) {
+    window.lucide.createIcons({
+      attrs: {
+        "stroke-width": 2
+      }
+    });
+  }
 }
 
 
-function updateCashFlowDisplay(metrics) {
-  const cashFlowText = formatCurrency(metrics.cashFlow);
+function sortItems(items, mode) {
+  if (mode === "low-high") {
+    return items.sort((a, b) => a.value - b.value);
+  }
 
-  setText(DOM.cashFlowAmount, cashFlowText);
-  setText(DOM.cashFlowFooterAmount, cashFlowText);
+  if (mode === "alphabetical") {
+    return items.sort((a, b) =>
+      a.label.localeCompare(b.label, PCSU_CONFIG.locale)
+    );
+  }
+
+  return items.sort((a, b) => b.value - a.value);
+}
+
+
+function createExpenseRowHTML(item) {
+  const rangeId = `${item.category}-${item.id}-range`;
+  const valueId = `${item.category}-${item.id}-value`;
+  const bubbleId = `${item.category}-${item.id}-bubble`;
+
+  return `
+    <article
+      class="expense-row"
+      data-category="${escapeAttribute(item.category)}"
+      data-expense-id="${escapeAttribute(item.id)}"
+      data-color="${escapeAttribute(item.color)}"
+      data-custom="${item.custom ? "true" : "false"}"
+    >
+      <div class="expense-row__identity">
+        <div class="expense-icon expense-icon--${escapeAttribute(item.color)}">
+          <i data-lucide="${escapeAttribute(item.icon)}" aria-hidden="true"></i>
+        </div>
+
+        <h3 class="expense-row__name">
+          ${escapeHTML(item.label)}
+        </h3>
+      </div>
+
+      <div class="expense-row__slider">
+        <output
+          class="slider-value-bubble slider-value-bubble--${escapeAttribute(item.color)}"
+          id="${escapeAttribute(bubbleId)}"
+          for="${escapeAttribute(rangeId)}"
+        >
+          ${formatCurrency(item.value)}
+        </output>
+
+        <input
+          class="expense-range expense-range--${escapeAttribute(item.color)}"
+          id="${escapeAttribute(rangeId)}"
+          type="range"
+          min="${item.min}"
+          max="${item.max}"
+          step="${item.step}"
+          value="${item.value}"
+          aria-label="${escapeAttribute(item.label)} monthly amount"
+        >
+
+        <div class="expense-range-labels">
+          <span>${formatCurrency(item.min)}</span>
+          <span>${formatCurrency(item.max)}</span>
+        </div>
+      </div>
+
+      <div class="expense-row__amount">
+        <label class="sr-only" for="${escapeAttribute(valueId)}">
+          ${escapeHTML(item.label)} monthly amount
+        </label>
+
+        <div class="expense-amount-input expense-amount-input--${escapeAttribute(item.color)}">
+          <span class="expense-amount-input__currency">$</span>
+
+          <input
+            id="${escapeAttribute(valueId)}"
+            type="number"
+            min="${item.min}"
+            max="${item.max}"
+            step="${item.step}"
+            value="${item.value}"
+            inputmode="numeric"
+            aria-label="${escapeAttribute(item.label)} amount"
+          >
+
+          <span class="expense-amount-input__suffix">/mo</span>
+        </div>
+      </div>
+
+      <button
+        class="expense-row__expand"
+        type="button"
+        aria-label="${
+          item.custom
+            ? `Remove ${escapeAttribute(item.label)}`
+            : `View ${escapeAttribute(item.label)} details`
+        }"
+        aria-expanded="false"
+      >
+        <i
+          data-lucide="${item.custom ? "trash-2" : "chevron-down"}"
+          aria-hidden="true"
+        ></i>
+      </button>
+    </article>
+  `;
+}
+
+
+/* ============================================================
+   9. SLIDER INTERACTIONS
+   ============================================================ */
+
+function handleExpenseListInput(event) {
+  const row = event.target.closest(".expense-row");
+  if (!row) return;
+
+  const category = row.dataset.category;
+  const id = row.dataset.expenseId;
+  const item = findItem(category, id);
+  if (!item) return;
+
+  if (event.target.matches(".expense-range")) {
+    setItemValue(
+      item,
+      event.target.value,
+      row,
+      "range"
+    );
+  }
+
+  if (
+    event.target.matches(
+      ".expense-amount-input input[type='number']"
+    )
+  ) {
+    if (event.target.value.trim() === "") return;
+
+    setItemValue(
+      item,
+      event.target.value,
+      row,
+      "number"
+    );
+  }
+}
+
+
+function handleExpenseListChange(event) {
+  const row = event.target.closest(".expense-row");
+  if (!row) return;
+
+  const item = findItem(
+    row.dataset.category,
+    row.dataset.expenseId
+  );
+
+  if (!item) return;
+
+  if (
+    event.target.matches(".expense-range") ||
+    event.target.matches(
+      ".expense-amount-input input[type='number']"
+    )
+  ) {
+    const normalized = normalizeItemValue(
+      item,
+      event.target.value
+    );
+
+    item.value = normalized;
+
+    const range = row.querySelector(".expense-range");
+    const numberInput = row.querySelector(
+      ".expense-amount-input input[type='number']"
+    );
+
+    if (range) range.value = String(normalized);
+    if (numberInput) numberInput.value = String(normalized);
+
+    updateSliderVisual(row, item);
+    updateFinancialSummary();
+    saveState();
+  }
+}
+
+
+function handleExpenseListClick(event) {
+  const button = event.target.closest(".expense-row__expand");
+  if (!button) return;
+
+  const row = button.closest(".expense-row");
+  if (!row) return;
+
+  const category = row.dataset.category;
+  const id = row.dataset.expenseId;
+  const item = findItem(category, id);
+
+  if (!item) return;
+
+  if (item.custom) {
+    const shouldDelete = window.confirm(
+      `Remove "${item.label}" from this category?`
+    );
+
+    if (!shouldDelete) return;
+
+    state.categories[category] =
+      state.categories[category].filter(
+        (candidate) => candidate.id !== id
+      );
+
+    renderActiveCategory();
+    updateFinancialSummary();
+    saveState();
+    return;
+  }
+
+  const expanded = button.getAttribute("aria-expanded") === "true";
+  button.setAttribute("aria-expanded", String(!expanded));
+
+  const svg = button.querySelector("svg");
+  if (svg) {
+    svg.style.transition = "transform 160ms ease";
+    svg.style.transform = expanded
+      ? "rotate(0deg)"
+      : "rotate(180deg)";
+  }
+}
+
+
+function setItemValue(item, rawValue, row, source) {
+  const normalized = normalizeItemValue(item, rawValue);
+  item.value = normalized;
+
+  const range = row.querySelector(".expense-range");
+  const numberInput = row.querySelector(
+    ".expense-amount-input input[type='number']"
+  );
+
+  if (source !== "range" && range) {
+    range.value = String(normalized);
+  }
+
+  if (source !== "number" && numberInput) {
+    numberInput.value = String(normalized);
+  }
+
+  updateSliderVisual(row, item);
+  updateFinancialSummary();
+}
+
+
+function normalizeItemValue(item, rawValue) {
+  const clamped = clamp(
+    toNumber(rawValue, item.value),
+    item.min,
+    item.max
+  );
+
+  return snapToStep(clamped, item.step, item.min);
+}
+
+
+function updateAllSliderVisuals() {
+  DOM.expenseList
+    ?.querySelectorAll(".expense-row")
+    .forEach((row) => {
+      const item = findItem(
+        row.dataset.category,
+        row.dataset.expenseId
+      );
+
+      if (item) updateSliderVisual(row, item);
+    });
+}
+
+
+function updateSliderVisual(row, item) {
+  const range = row.querySelector(".expense-range");
+  const bubble = row.querySelector(".slider-value-bubble");
+
+  if (!range || !bubble) return;
+
+  const percentage =
+    item.max === item.min
+      ? 0
+      : ((item.value - item.min) /
+          (item.max - item.min)) *
+        100;
+
+  const safePercentage = clamp(percentage, 0, 100);
+
+  range.style.setProperty(
+    "--range-progress",
+    `${safePercentage}%`
+  );
+
+  const thumbWidth = 30;
+
+  bubble.style.left = `calc(
+    ${safePercentage}% +
+    (${thumbWidth / 2}px -
+    ${safePercentage * thumbWidth / 100}px)
+  )`;
+
+  bubble.textContent = formatCurrency(item.value);
+}
+
+
+/* ============================================================
+   10. CATEGORY TABS
+   ============================================================ */
+
+function handleCategoryTabClick(event) {
+  const tab = event.currentTarget;
+  const category = tab.dataset.category;
+
+  if (!PCSU_CONFIG.categoryOrder.includes(category)) return;
+
+  state.activeCategory = category;
+
+  DOM.categoryTabs.forEach((candidate) => {
+    const active = candidate.dataset.category === category;
+
+    candidate.classList.toggle(
+      "category-tab--active",
+      active
+    );
+
+    candidate.setAttribute(
+      "aria-pressed",
+      String(active)
+    );
+  });
+
+  renderActiveCategory();
+  saveState();
+}
+
+
+/* ============================================================
+   11. SORTING
+   ============================================================ */
+
+function handleSortChange() {
+  state.sortMode = DOM.expenseSort?.value || "high-low";
+  renderActiveCategory();
+  saveState();
+}
+
+
+/* ============================================================
+   12. CUSTOM ITEM MODAL
+   ============================================================ */
+
+function openCustomItemModal() {
+  if (!DOM.customExpenseModal) return;
+
+  const categoryName =
+    state.activeCategory === "debt"
+      ? "Debt"
+      : state.activeCategory === "lifestyle"
+        ? "Lifestyle Expense"
+        : state.activeCategory === "other"
+          ? "Other Expense"
+          : "Custom Expense";
+
+  if (DOM.customExpenseTitle) {
+    DOM.customExpenseTitle.textContent = `Add ${categoryName}`;
+  }
+
+  DOM.customExpenseModal.hidden = false;
+  document.body.style.overflow = "hidden";
+
+  window.requestAnimationFrame(() => {
+    DOM.customExpenseName?.focus();
+  });
+}
+
+
+function closeCustomItemModal() {
+  if (!DOM.customExpenseModal) return;
+
+  DOM.customExpenseModal.hidden = true;
+  document.body.style.overflow = "";
+  DOM.customExpenseForm?.reset();
+  DOM.addExpenseButton?.focus();
+}
+
+
+function handleCustomItemSubmit(event) {
+  event.preventDefault();
+
+  const label = DOM.customExpenseName?.value.trim();
+  const value = Math.max(
+    0,
+    toNumber(DOM.customExpenseAmount?.value, 0)
+  );
+
+  if (!label) {
+    DOM.customExpenseName?.focus();
+    return;
+  }
+
+  const max = Math.max(
+    state.activeCategory === "debt" ? 1500 : 500,
+    Math.ceil((value * 2.5) / 100) * 100
+  );
+
+  state.categories[state.activeCategory].push({
+    id: createUniqueId(state.activeCategory),
+    category: state.activeCategory,
+    label,
+    icon:
+      state.activeCategory === "debt"
+        ? "receipt-text"
+        : "circle-dollar-sign",
+    color: "slate",
+    value,
+    min: 0,
+    max,
+    step: 5,
+    custom: true
+  });
+
+  closeCustomItemModal();
+  renderActiveCategory();
+  updateFinancialSummary();
+  saveState();
+}
+
+
+/* ============================================================
+   13. FINANCIAL SUMMARY
+   ============================================================ */
+
+function updateFinancialSummary() {
+  const metrics = calculateMetrics();
+
+  setText(DOM.cashFlowAmount, formatCurrency(metrics.cashFlow));
+  setText(
+    DOM.cashFlowFooterAmount,
+    formatCurrency(metrics.cashFlow)
+  );
 
   setText(
     DOM.cashFlowPercentage,
@@ -666,35 +1082,62 @@ function updateCashFlowDisplay(metrics) {
 
   setText(
     DOM.totalExpensesValue,
-    formatSignedCurrency(metrics.totalExpenses, {
-      forceNegative: true
-    })
+    formatNegativeCurrency(metrics.totalExpenses)
   );
 
   setText(
     DOM.totalDebtValue,
-    formatSignedCurrency(metrics.totalDebt, {
-      forceNegative: true
-    })
+    formatNegativeCurrency(metrics.totalDebt)
   );
 
   setText(
     DOM.totalSavingsValue,
-    formatSignedCurrency(metrics.totalSavings, {
-      forceNegative: true,
-      preserveNegativeZero: true
-    })
+    metrics.totalSavings === 0
+      ? "-$0"
+      : formatNegativeCurrency(metrics.totalSavings)
   );
 
+  setText(
+    DOM.expensesIncomeRatio,
+    formatPercentage(metrics.expensesIncomeRatio)
+  );
+
+  setText(
+    DOM.emergencyFundAmount,
+    formatCurrency(state.emergencyFund)
+  );
+
+  setText(
+    DOM.emergencyFundMonths,
+    `${percentageFormatter.format(
+      metrics.emergencyFundMonths
+    )} months`
+  );
+
+  setText(
+    DOM.debtIncomeRatio,
+    formatPercentage(metrics.debtIncomeRatio)
+  );
+
+  updateCashFlowAppearance(metrics);
+  updateHealthStatuses(metrics);
+  updateDonut(metrics);
+}
+
+
+function updateCashFlowAppearance(metrics) {
   const positive = metrics.cashFlow >= 0;
 
-  [DOM.cashFlowAmount, DOM.cashFlowFooterAmount].forEach((element) => {
-    if (!element) {
-      return;
+  for (const element of [
+    DOM.cashFlowAmount,
+    DOM.cashFlowFooterAmount
+  ]) {
+    if (element) {
+      element.style.color = positive
+        ? "var(--green)"
+        : "var(--red)";
     }
-
-    element.style.color = positive ? "var(--green)" : "var(--red)";
-  });
+  }
 
   if (DOM.cashFlowPercentage) {
     DOM.cashFlowPercentage.style.color = positive
@@ -708,138 +1151,21 @@ function updateCashFlowDisplay(metrics) {
 }
 
 
-function updateMetricCards(metrics) {
-  setText(
-    DOM.expensesIncomeRatio,
-    formatPercentage(metrics.expensesIncomeRatio)
-  );
+function updateHealthStatuses(metrics) {
+  const expenseStatus =
+    DOM.expensesIncomeRatio
+      ?.closest(".health-metric-card")
+      ?.querySelector(".health-status");
 
-  setText(
-    DOM.emergencyFundAmount,
-    formatCurrency(state.emergencyFund)
-  );
+  const emergencyStatus =
+    DOM.emergencyFundMonths
+      ?.closest(".health-metric-card")
+      ?.querySelector(".health-status");
 
-  setText(
-    DOM.emergencyFundMonths,
-    `${percentageFormatter.format(metrics.emergencyFundMonths)} months`
-  );
-
-  setText(
-    DOM.debtIncomeRatio,
-    formatPercentage(metrics.debtIncomeRatio)
-  );
-}
-
-
-function setText(element, text) {
-  if (element) {
-    element.textContent = text;
-  }
-}
-
-
-/* ============================================================
-   9. DONUT CHART
-   ============================================================ */
-
-function updateCashFlowDonut(metrics) {
-  const donut = document.querySelector(".income-donut");
-
-  if (!donut || metrics.monthlyIncome <= 0) {
-    return;
-  }
-
-  const expensePercentage = clamp(
-    (metrics.totalExpenses / metrics.monthlyIncome) * 100,
-    0,
-    100
-  );
-
-  const debtPercentage = clamp(
-    (metrics.totalDebt / metrics.monthlyIncome) * 100,
-    0,
-    100
-  );
-
-  const savingsPercentage = clamp(
-    (metrics.totalSavings / metrics.monthlyIncome) * 100,
-    0,
-    100
-  );
-
-  const usedPercentage = clamp(
-    expensePercentage + debtPercentage + savingsPercentage,
-    0,
-    100
-  );
-
-  const remainingPercentage = clamp(100 - usedPercentage, 0, 100);
-
-  const expenseSegment = donut.querySelector(
-    ".income-donut__segment--expenses"
-  );
-
-  const debtSegment = donut.querySelector(
-    ".income-donut__segment--debt"
-  );
-
-  const incomeSegment = donut.querySelector(
-    ".income-donut__segment--income"
-  );
-
-  if (expenseSegment) {
-    expenseSegment.style.strokeDasharray =
-      `${expensePercentage} ${100 - expensePercentage}`;
-
-    expenseSegment.style.strokeDashoffset = "0";
-  }
-
-  if (debtSegment) {
-    debtSegment.style.strokeDasharray =
-      `${debtPercentage} ${100 - debtPercentage}`;
-
-    debtSegment.style.strokeDashoffset =
-      String(-expensePercentage);
-  }
-
-  if (incomeSegment) {
-    incomeSegment.style.strokeDasharray =
-      `${remainingPercentage} ${100 - remainingPercentage}`;
-
-    incomeSegment.style.strokeDashoffset =
-      String(-(expensePercentage + debtPercentage + savingsPercentage));
-  }
-
-  donut.setAttribute(
-    "aria-label",
-    `${formatCurrency(metrics.monthlyIncome)} monthly income. ` +
-    `${formatCurrency(metrics.totalExpenses)} in expenses, ` +
-    `${formatCurrency(metrics.totalDebt)} in debt payments, and ` +
-    `${formatCurrency(metrics.cashFlow)} remaining cash flow.`
-  );
-}
-
-
-/* ============================================================
-   10. HEALTH STATUS LABELS
-   ============================================================ */
-
-function updateFinancialHealthStatuses(metrics) {
-  const expensesCard = DOM.expensesIncomeRatio?.closest(
-    ".health-metric-card"
-  );
-
-  const emergencyCard = DOM.emergencyFundMonths?.closest(
-    ".health-metric-card"
-  );
-
-  const debtCard = DOM.debtIncomeRatio?.closest(
-    ".health-metric-card"
-  );
-
-  const expenseStatus = expensesCard?.querySelector(".health-status");
-  const emergencyStatus = emergencyCard?.querySelector(".health-status");
-  const debtStatus = debtCard?.querySelector(".health-status");
+  const debtStatus =
+    DOM.debtIncomeRatio
+      ?.closest(".health-metric-card")
+      ?.querySelector(".health-status");
 
   if (expenseStatus) {
     if (metrics.expensesIncomeRatio < 60) {
@@ -855,17 +1181,18 @@ function updateFinancialHealthStatuses(metrics) {
 
   if (emergencyStatus) {
     emergencyStatus.textContent =
-      `${percentageFormatter.format(metrics.emergencyFundMonths)} months`;
+      `${percentageFormatter.format(
+        metrics.emergencyFundMonths
+      )} months`;
 
-    if (metrics.emergencyFundMonths >= 6) {
-      applyStatusAppearance(emergencyStatus, "good");
-    } else if (metrics.emergencyFundMonths >= 3) {
-      applyStatusAppearance(emergencyStatus, "good");
-    } else if (metrics.emergencyFundMonths >= 1) {
-      applyStatusAppearance(emergencyStatus, "warning");
-    } else {
-      applyStatusAppearance(emergencyStatus, "danger");
-    }
+    applyStatusStyle(
+      emergencyStatus,
+      metrics.emergencyFundMonths >= 3
+        ? "good"
+        : metrics.emergencyFundMonths >= 1
+          ? "warning"
+          : "danger"
+    );
   }
 
   if (debtStatus) {
@@ -884,430 +1211,93 @@ function updateFinancialHealthStatuses(metrics) {
 
 function setStatus(element, text, type) {
   element.textContent = text;
-  applyStatusAppearance(element, type);
+  applyStatusStyle(element, type);
 }
 
 
-function applyStatusAppearance(element, type) {
-  const appearances = {
+function applyStatusStyle(element, type) {
+  const styles = {
     good: {
       color: "#278744",
-      background: "rgba(230, 247, 233, 0.95)"
+      background: "rgba(230,247,233,.95)"
     },
-
     warning: {
       color: "#a66508",
-      background: "rgba(255, 244, 220, 0.98)"
+      background: "rgba(255,244,220,.98)"
     },
-
     danger: {
       color: "#c92d45",
-      background: "rgba(255, 233, 238, 0.98)"
+      background: "rgba(255,233,238,.98)"
     }
   };
 
-  const appearance = appearances[type] || appearances.good;
+  const style = styles[type] || styles.good;
 
-  element.style.color = appearance.color;
-  element.style.background = appearance.background;
+  element.style.color = style.color;
+  element.style.background = style.background;
 }
 
 
-/* ============================================================
-   11. SORTING
-   ============================================================ */
+function updateDonut(metrics) {
+  const donut = document.querySelector(".income-donut");
+  if (!donut || metrics.monthlyIncome <= 0) return;
 
-function handleExpenseSort() {
-  const sortMode = DOM.expenseSort?.value || "high-low";
-  const rows = [...DOM.expenseList.querySelectorAll(".expense-row")];
-
-  rows.sort((firstRow, secondRow) => {
-    const firstExpense = state.expenses[firstRow.dataset.expenseId];
-    const secondExpense = state.expenses[secondRow.dataset.expenseId];
-
-    if (!firstExpense || !secondExpense) {
-      return 0;
-    }
-
-    if (sortMode === "low-high") {
-      return firstExpense.value - secondExpense.value;
-    }
-
-    if (sortMode === "alphabetical") {
-      return firstExpense.label.localeCompare(
-        secondExpense.label,
-        PCSU_CONFIG.locale
-      );
-    }
-
-    return secondExpense.value - firstExpense.value;
-  });
-
-  rows.forEach((row) => DOM.expenseList.appendChild(row));
-  saveState();
-}
-
-
-/* ============================================================
-   12. CATEGORY TABS
-   ============================================================ */
-
-function handleCategoryTabClick(event) {
-  const button = event.currentTarget;
-  const category = button.dataset.category;
-
-  if (!category) {
-    return;
-  }
-
-  state.activeCategory = category;
-
-  DOM.categoryTabs.forEach((tab) => {
-    const active = tab === button;
-
-    tab.classList.toggle("category-tab--active", active);
-    tab.setAttribute("aria-pressed", String(active));
-  });
-
-  if (DOM.editorTitle) {
-    DOM.editorTitle.textContent =
-      PCSU_CONFIG.categoryLabels[category] ||
-      "Adjust your monthly expenses";
-  }
-
-  /*
-   * The initial build currently contains the Monthly Expenses rows.
-   * Other tabs retain the complete shell and can be populated later.
-   */
-  document
-    .querySelectorAll(".expense-row")
-    .forEach((row) => {
-      row.hidden = category !== "monthly-expenses";
-    });
-
-  if (DOM.addExpenseButton) {
-    DOM.addExpenseButton.hidden = category !== "monthly-expenses";
-  }
-
-  toggleEmptyCategoryMessage(category);
-
-  saveState();
-}
-
-
-function toggleEmptyCategoryMessage(category) {
-  let message = document.getElementById("categoryEmptyState");
-
-  if (category === "monthly-expenses") {
-    message?.remove();
-    return;
-  }
-
-  if (!message) {
-    message = document.createElement("div");
-    message.id = "categoryEmptyState";
-    message.setAttribute("role", "status");
-
-    Object.assign(message.style, {
-      minHeight: "420px",
-      display: "grid",
-      placeItems: "center",
-      padding: "40px 20px",
-      color: "#7b8294",
-      fontSize: "0.95rem",
-      textAlign: "center",
-      borderTop: "1px solid var(--border-soft)"
-    });
-
-    DOM.expenseList.appendChild(message);
-  }
-
-  message.textContent =
-    PCSU_CONFIG.categoryEmptyMessages[category] ||
-    "This category will be available soon.";
-}
-
-
-/* ============================================================
-   13. CUSTOM EXPENSE MODAL
-   ============================================================ */
-
-function openCustomExpenseModal() {
-  if (!DOM.customExpenseModal) {
-    return;
-  }
-
-  DOM.customExpenseModal.hidden = false;
-  document.body.style.overflow = "hidden";
-
-  window.requestAnimationFrame(() => {
-    DOM.customExpenseName?.focus();
-  });
-}
-
-
-function closeCustomExpenseModal() {
-  if (!DOM.customExpenseModal) {
-    return;
-  }
-
-  DOM.customExpenseModal.hidden = true;
-  document.body.style.overflow = "";
-
-  DOM.customExpenseForm?.reset();
-  DOM.addExpenseButton?.focus();
-}
-
-
-function handleModalBackdropClick(event) {
-  if (event.target === DOM.customExpenseModal) {
-    closeCustomExpenseModal();
-  }
-}
-
-
-function handleModalKeydown(event) {
-  if (
-    event.key === "Escape" &&
-    DOM.customExpenseModal &&
-    !DOM.customExpenseModal.hidden
-  ) {
-    closeCustomExpenseModal();
-  }
-}
-
-
-function handleCustomExpenseSubmit(event) {
-  event.preventDefault();
-
-  const name = DOM.customExpenseName?.value.trim();
-  const amount = parseNumericValue(
-    DOM.customExpenseAmount?.value,
-    0
+  const expensePercent = clamp(
+    (metrics.totalExpenses / metrics.monthlyIncome) * 100,
+    0,
+    100
   );
 
-  if (!name) {
-    DOM.customExpenseName?.focus();
-    return;
+  const debtPercent = clamp(
+    (metrics.totalDebt / metrics.monthlyIncome) * 100,
+    0,
+    100
+  );
+
+  const used = clamp(
+    expensePercent + debtPercent,
+    0,
+    100
+  );
+
+  const remaining = 100 - used;
+
+  const expenseSegment = donut.querySelector(
+    ".income-donut__segment--expenses"
+  );
+
+  const debtSegment = donut.querySelector(
+    ".income-donut__segment--debt"
+  );
+
+  const incomeSegment = donut.querySelector(
+    ".income-donut__segment--income"
+  );
+
+  if (expenseSegment) {
+    expenseSegment.style.strokeDasharray =
+      `${expensePercent} ${100 - expensePercent}`;
+    expenseSegment.style.strokeDashoffset = "0";
   }
 
-  if (amount < 0) {
-    DOM.customExpenseAmount?.focus();
-    return;
+  if (debtSegment) {
+    debtSegment.style.strokeDasharray =
+      `${debtPercent} ${100 - debtPercent}`;
+    debtSegment.style.strokeDashoffset =
+      String(-expensePercent);
   }
 
-  const row = createCustomExpenseRow({
-    name,
-    value: amount
-  });
-
-  DOM.expenseList.appendChild(row);
-  registerExpenseRow(row);
-
-  /*
-   * Refresh Lucide icons after dynamic HTML has been added.
-   */
-  if (window.lucide) {
-    window.lucide.createIcons({
-      attrs: {
-        "stroke-width": 2
-      }
-    });
-  }
-
-  recalculateFinancialSummary();
-  saveState();
-  closeCustomExpenseModal();
-
-  announce(`${name} added at ${formatCurrency(amount)} per month.`);
-}
-
-
-function createCustomExpenseRow({
-  id = createUniqueId("custom-expense"),
-  name,
-  value,
-  minimum = 0,
-  maximum,
-  step = 5,
-  color = "slate"
-}) {
-  const safeValue = Math.max(0, parseNumericValue(value, 0));
-
-  const calculatedMaximum =
-    maximum ??
-    Math.max(
-      500,
-      Math.ceil((safeValue * 2.5) / 100) * 100
-    );
-
-  const row = document.createElement("article");
-
-  row.className = "expense-row";
-  row.dataset.expenseId = id;
-  row.dataset.value = String(safeValue);
-  row.dataset.min = String(minimum);
-  row.dataset.max = String(calculatedMaximum);
-  row.dataset.step = String(step);
-  row.dataset.color = color;
-  row.dataset.custom = "true";
-
-  const rangeId = `${id}Range`;
-  const bubbleId = `${id}Bubble`;
-  const valueId = `${id}Value`;
-
-  row.innerHTML = `
-    <div class="expense-row__identity">
-      <div class="expense-icon expense-icon--${escapeAttribute(color)}">
-        <i data-lucide="circle-dollar-sign" aria-hidden="true"></i>
-      </div>
-
-      <h3 class="expense-row__name">
-        ${escapeHTML(name)}
-      </h3>
-    </div>
-
-    <div class="expense-row__slider">
-      <output
-        class="slider-value-bubble slider-value-bubble--${escapeAttribute(color)}"
-        for="${escapeAttribute(rangeId)}"
-        id="${escapeAttribute(bubbleId)}"
-      >
-        ${formatCurrency(safeValue)}
-      </output>
-
-      <input
-        class="expense-range expense-range--${escapeAttribute(color)}"
-        id="${escapeAttribute(rangeId)}"
-        name="${escapeAttribute(id)}"
-        type="range"
-        min="${minimum}"
-        max="${calculatedMaximum}"
-        step="${step}"
-        value="${safeValue}"
-        aria-label="${escapeAttribute(name)} monthly expense"
-        data-output="${escapeAttribute(valueId)}"
-        data-bubble="${escapeAttribute(bubbleId)}"
-      >
-
-      <div class="expense-range-labels">
-        <span>${formatCurrency(minimum)}</span>
-        <span>${formatCurrency(calculatedMaximum)}</span>
-      </div>
-    </div>
-
-    <div class="expense-row__amount">
-      <label class="sr-only" for="${escapeAttribute(valueId)}">
-        ${escapeHTML(name)} monthly amount
-      </label>
-
-      <div class="expense-amount-input expense-amount-input--${escapeAttribute(color)}">
-        <span class="expense-amount-input__currency">$</span>
-
-        <input
-          id="${escapeAttribute(valueId)}"
-          type="number"
-          min="${minimum}"
-          max="${calculatedMaximum}"
-          step="${step}"
-          value="${safeValue}"
-          inputmode="numeric"
-          aria-label="${escapeAttribute(name)} amount"
-        >
-
-        <span class="expense-amount-input__suffix">
-          /mo
-        </span>
-      </div>
-    </div>
-
-    <button
-      class="expense-row__expand"
-      type="button"
-      aria-label="Manage ${escapeAttribute(name)}"
-      aria-expanded="false"
-      data-custom-expense-action="true"
-    >
-      <i data-lucide="trash-2" aria-hidden="true"></i>
-    </button>
-  `;
-
-  return row;
-}
-
-
-function escapeHTML(value) {
-  const element = document.createElement("div");
-  element.textContent = String(value);
-  return element.innerHTML;
-}
-
-
-function escapeAttribute(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-
-/* ============================================================
-   14. EXPENSE EXPAND / DELETE
-   ============================================================ */
-
-function handleExpenseExpand(event) {
-  const button = event.currentTarget;
-  const row = button.closest(".expense-row");
-
-  if (!row) {
-    return;
-  }
-
-  const id = row.dataset.expenseId;
-  const expense = state.expenses[id];
-
-  if (!expense) {
-    return;
-  }
-
-  if (expense.custom) {
-    const confirmed = window.confirm(
-      `Remove "${expense.label}" from your monthly expenses?`
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    delete state.expenses[id];
-    row.remove();
-
-    recalculateFinancialSummary();
-    saveState();
-
-    announce(`${expense.label} removed.`);
-    return;
-  }
-
-  const expanded = button.getAttribute("aria-expanded") === "true";
-
-  button.setAttribute("aria-expanded", String(!expanded));
-
-  const icon = button.querySelector("svg");
-
-  if (icon) {
-    icon.style.transform = expanded
-      ? "rotate(0deg)"
-      : "rotate(180deg)";
-
-    icon.style.transition = "transform 160ms ease";
+  if (incomeSegment) {
+    incomeSegment.style.strokeDasharray =
+      `${remaining} ${100 - remaining}`;
+    incomeSegment.style.strokeDashoffset =
+      String(-(expensePercent + debtPercent));
   }
 }
 
 
 /* ============================================================
-   15. STEP NAVIGATION
+   14. STEP NAVIGATION
    ============================================================ */
 
 const STEP_ORDER = [
@@ -1319,59 +1309,40 @@ const STEP_ORDER = [
 ];
 
 
-function handleStepClick(event) {
-  const button = event.currentTarget;
-  const step = button.dataset.step;
-
-  if (!step) {
-    return;
-  }
-
-  setCurrentStep(step);
-}
-
-
 function setCurrentStep(step) {
-  if (!STEP_ORDER.includes(step)) {
-    return;
-  }
+  if (!STEP_ORDER.includes(step)) return;
 
   state.currentStep = step;
-
   const activeIndex = STEP_ORDER.indexOf(step);
 
   DOM.stepItems.forEach((button) => {
-    const itemStep = button.dataset.step;
-    const itemIndex = STEP_ORDER.indexOf(itemStep);
+    const buttonStep = button.dataset.step;
+    const buttonIndex = STEP_ORDER.indexOf(buttonStep);
 
     button.classList.toggle(
       "step-item--complete",
-      itemIndex < activeIndex
+      buttonIndex < activeIndex
     );
 
     button.classList.toggle(
       "step-item--active",
-      itemStep === step
+      buttonStep === step
     );
 
-    if (itemStep === step) {
+    if (buttonStep === step) {
       button.setAttribute("aria-current", "step");
     } else {
       button.removeAttribute("aria-current");
     }
   });
 
-  updateNextButton(step);
+  updateNextButton();
   saveState();
 }
 
 
-function updateNextButton(step) {
-  if (!DOM.nextStepButton) {
-    return;
-  }
-
-  const label = DOM.nextStepButton.querySelector("span");
+function updateNextButton() {
+  if (!DOM.nextStepButton) return;
 
   const labels = {
     income: "Next: Add Expenses",
@@ -1381,404 +1352,276 @@ function updateNextButton(step) {
     summary: "Financial Setup Complete"
   };
 
-  if (label) {
-    label.textContent = labels[step] || "Continue";
-  }
+  const label = DOM.nextStepButton.querySelector("span");
 
-  DOM.nextStepButton.disabled = false;
-  DOM.nextStepButton.style.opacity = "1";
+  if (label) {
+    label.textContent =
+      labels[state.currentStep] || "Continue";
+  }
 }
 
 
 function handleNextStep() {
-  const currentIndex = STEP_ORDER.indexOf(state.currentStep);
+  const currentIndex =
+    STEP_ORDER.indexOf(state.currentStep);
 
-  if (currentIndex < 0) {
-    setCurrentStep("expenses");
-    return;
-  }
+  if (currentIndex >= STEP_ORDER.length - 1) return;
 
-  if (currentIndex === STEP_ORDER.length - 1) {
-    announce("Your financial setup is complete.");
-    return;
-  }
-
-  const nextStep = STEP_ORDER[currentIndex + 1];
-  setCurrentStep(nextStep);
-
-  const nextButton = DOM.stepItems.find(
-    (button) => button.dataset.step === nextStep
-  );
-
-  nextButton?.focus();
-
-  announce(
-    `${nextStep.charAt(0).toUpperCase() + nextStep.slice(1)} step selected.`
-  );
+  setCurrentStep(STEP_ORDER[currentIndex + 1]);
 }
 
 
 /* ============================================================
-   16. LOCATION SELECTOR
-   ============================================================ */
-
-function handleLocationSelector() {
-  if (!DOM.locationSelector) {
-    return;
-  }
-
-  const expanded =
-    DOM.locationSelector.getAttribute("aria-expanded") === "true";
-
-  DOM.locationSelector.setAttribute(
-    "aria-expanded",
-    String(!expanded)
-  );
-
-  /*
-   * The location menu is intentionally deferred until base-selection
-   * data is connected. This feedback confirms the control is active.
-   */
-  if (!expanded) {
-    announce(
-      `Currently viewing as ${DOM.selectedLocation?.textContent || "selected location"}.`
-    );
-  }
-}
-
-
-/* ============================================================
-   17. LOCAL STORAGE
+   15. STORAGE
    ============================================================ */
 
 function saveState() {
   try {
-    const payload = {
-      version: 1,
-      activeCategory: state.activeCategory,
-      currentStep: state.currentStep,
-
-      monthlyIncome: state.monthlyIncome,
-      totalDebt: state.totalDebt,
-      totalSavings: state.totalSavings,
-      emergencyFund: state.emergencyFund,
-
-      hiddenCategoryExpenses: state.hiddenCategoryExpenses,
-      essentialMonthlyExpenses: state.essentialMonthlyExpenses,
-
-      expenseSort: DOM.expenseSort?.value || "high-low",
-
-      expenses: Object.values(state.expenses).map((expense) => ({
-        id: expense.id,
-        label: expense.label,
-        value: expense.value,
-        minimum: expense.minimum,
-        maximum: expense.maximum,
-        step: expense.step,
-        color: expense.color,
-        custom: expense.custom
-      }))
-    };
-
     window.localStorage.setItem(
       PCSU_CONFIG.storageKey,
-      JSON.stringify(payload)
+      JSON.stringify({
+        version: 2,
+        ...state
+      })
     );
   } catch (error) {
-    console.warn("PCSUnited budget state could not be saved.", error);
+    console.warn("Budget state could not be saved.", error);
   }
 }
 
 
-function loadSavedState() {
+function loadState() {
   try {
-    const stored = window.localStorage.getItem(
+    const raw = window.localStorage.getItem(
       PCSU_CONFIG.storageKey
     );
 
-    if (!stored) {
-      return null;
-    }
+    if (!raw) return;
 
-    const parsed = JSON.parse(stored);
+    const saved = JSON.parse(raw);
 
     if (
-      !parsed ||
-      typeof parsed !== "object" ||
-      parsed.version !== 1
+      !saved ||
+      saved.version !== 2 ||
+      !saved.categories
     ) {
-      return null;
+      return;
     }
 
-    return parsed;
-  } catch (error) {
-    console.warn("PCSUnited budget state could not be loaded.", error);
-    return null;
-  }
-}
+    state.activeCategory =
+      PCSU_CONFIG.categoryOrder.includes(
+        saved.activeCategory
+      )
+        ? saved.activeCategory
+        : state.activeCategory;
 
+    state.currentStep =
+      STEP_ORDER.includes(saved.currentStep)
+        ? saved.currentStep
+        : state.currentStep;
 
-function restoreSavedState(savedState) {
-  if (!savedState) {
-    return;
-  }
-
-  state.monthlyIncome = parseNumericValue(
-    savedState.monthlyIncome,
-    state.monthlyIncome
-  );
-
-  state.totalDebt = parseNumericValue(
-    savedState.totalDebt,
-    state.totalDebt
-  );
-
-  state.totalSavings = parseNumericValue(
-    savedState.totalSavings,
-    state.totalSavings
-  );
-
-  state.emergencyFund = parseNumericValue(
-    savedState.emergencyFund,
-    state.emergencyFund
-  );
-
-  state.hiddenCategoryExpenses = parseNumericValue(
-    savedState.hiddenCategoryExpenses,
-    state.hiddenCategoryExpenses
-  );
-
-  state.essentialMonthlyExpenses = parseNumericValue(
-    savedState.essentialMonthlyExpenses,
-    state.essentialMonthlyExpenses
-  );
-
-  if (Array.isArray(savedState.expenses)) {
-    savedState.expenses.forEach((savedExpense) => {
-      if (!savedExpense?.id) {
-        return;
-      }
-
-      const existingRow = DOM.expenseList.querySelector(
-        `.expense-row[data-expense-id="${CSS.escape(savedExpense.id)}"]`
-      );
-
-      if (existingRow) {
-        const expense = state.expenses[savedExpense.id];
-
-        if (expense) {
-          setExpenseValue(existingRow, savedExpense.value, {
-            updateRange: true,
-            updateAmount: true,
-            calculate: false,
-            save: false
-          });
-        }
-
-        return;
-      }
-
-      if (savedExpense.custom) {
-        const customRow = createCustomExpenseRow({
-          id: savedExpense.id,
-          name: savedExpense.label || "Custom Expense",
-          value: savedExpense.value,
-          minimum: savedExpense.minimum,
-          maximum: savedExpense.maximum,
-          step: savedExpense.step,
-          color: savedExpense.color || "slate"
-        });
-
-        DOM.expenseList.appendChild(customRow);
-        registerExpenseRow(customRow);
-      }
-    });
-  }
-
-  if (DOM.expenseSort && savedState.expenseSort) {
-    DOM.expenseSort.value = savedState.expenseSort;
-    handleExpenseSort();
-  }
-
-  if (
-    savedState.activeCategory &&
-    PCSU_CONFIG.categoryLabels[savedState.activeCategory]
-  ) {
-    const categoryButton = DOM.categoryTabs.find(
-      (button) =>
-        button.dataset.category === savedState.activeCategory
+    state.monthlyIncome = toNumber(
+      saved.monthlyIncome,
+      state.monthlyIncome
     );
 
-    categoryButton?.click();
-  }
+    state.totalSavings = toNumber(
+      saved.totalSavings,
+      state.totalSavings
+    );
 
-  if (STEP_ORDER.includes(savedState.currentStep)) {
-    setCurrentStep(savedState.currentStep);
+    state.emergencyFund = toNumber(
+      saved.emergencyFund,
+      state.emergencyFund
+    );
+
+    state.essentialMonthlyExpenses = toNumber(
+      saved.essentialMonthlyExpenses,
+      state.essentialMonthlyExpenses
+    );
+
+    state.sortMode = saved.sortMode || state.sortMode;
+
+    for (const category of PCSU_CONFIG.categoryOrder) {
+      if (Array.isArray(saved.categories[category])) {
+        state.categories[category] =
+          saved.categories[category];
+      }
+    }
+  } catch (error) {
+    console.warn("Budget state could not be loaded.", error);
   }
 }
 
 
 /* ============================================================
-   18. DOM CACHE
+   16. DOM CACHE
    ============================================================ */
 
-function cacheDOMReferences() {
-  DOM.budgetApp = document.getElementById("budgetApp");
-
+function cacheDOM() {
   DOM.categoryTabs = [
     ...document.querySelectorAll(".category-tab")
   ];
 
-  DOM.editorTitle = document.getElementById("expenseEditorTitle");
-  DOM.expenseList = document.getElementById("expenseList");
-  DOM.expenseSort = document.getElementById("expenseSort");
+  DOM.editorTitle =
+    document.getElementById("expenseEditorTitle");
 
-  DOM.addExpenseButton = document.getElementById(
-    "addExpenseButton"
-  );
+  DOM.expenseList =
+    document.getElementById("expenseList");
 
-  DOM.customExpenseModal = document.getElementById(
-    "customExpenseModal"
-  );
+  DOM.expenseSort =
+    document.getElementById("expenseSort");
 
-  DOM.customExpenseForm = document.getElementById(
-    "customExpenseForm"
-  );
+  DOM.addExpenseButton =
+    document.getElementById("addExpenseButton");
 
-  DOM.customExpenseName = document.getElementById(
-    "customExpenseName"
-  );
+  DOM.customExpenseModal =
+    document.getElementById("customExpenseModal");
 
-  DOM.customExpenseAmount = document.getElementById(
-    "customExpenseAmount"
-  );
+  DOM.customExpenseForm =
+    document.getElementById("customExpenseForm");
 
-  DOM.closeExpenseModal = document.getElementById(
-    "closeExpenseModal"
-  );
+  DOM.customExpenseName =
+    document.getElementById("customExpenseName");
 
-  DOM.cancelExpenseModal = document.getElementById(
-    "cancelExpenseModal"
-  );
+  DOM.customExpenseAmount =
+    document.getElementById("customExpenseAmount");
 
-  DOM.cashFlowAmount = document.getElementById(
-    "cashFlowAmount"
-  );
+  DOM.closeExpenseModal =
+    document.getElementById("closeExpenseModal");
 
-  DOM.cashFlowFooterAmount = document.getElementById(
-    "cashFlowFooterAmount"
-  );
+  DOM.cancelExpenseModal =
+    document.getElementById("cancelExpenseModal");
 
-  DOM.cashFlowPercentage = document.getElementById(
-    "cashFlowPercentage"
-  );
+  DOM.customExpenseTitle =
+    document.getElementById("customExpenseTitle");
 
-  DOM.monthlyIncomeDonut = document.getElementById(
-    "monthlyIncomeDonut"
-  );
+  DOM.cashFlowAmount =
+    document.getElementById("cashFlowAmount");
 
-  DOM.monthlyIncomeValue = document.getElementById(
-    "monthlyIncomeValue"
-  );
+  DOM.cashFlowFooterAmount =
+    document.getElementById("cashFlowFooterAmount");
 
-  DOM.totalExpensesValue = document.getElementById(
-    "totalExpensesValue"
-  );
+  DOM.cashFlowPercentage =
+    document.getElementById("cashFlowPercentage");
 
-  DOM.totalDebtValue = document.getElementById(
-    "totalDebtValue"
-  );
+  DOM.monthlyIncomeDonut =
+    document.getElementById("monthlyIncomeDonut");
 
-  DOM.totalSavingsValue = document.getElementById(
-    "totalSavingsValue"
-  );
+  DOM.monthlyIncomeValue =
+    document.getElementById("monthlyIncomeValue");
 
-  DOM.expensesIncomeRatio = document.getElementById(
-    "expensesIncomeRatio"
-  );
+  DOM.totalExpensesValue =
+    document.getElementById("totalExpensesValue");
 
-  DOM.emergencyFundAmount = document.getElementById(
-    "emergencyFundAmount"
-  );
+  DOM.totalDebtValue =
+    document.getElementById("totalDebtValue");
 
-  DOM.emergencyFundMonths = document.getElementById(
-    "emergencyFundMonths"
-  );
+  DOM.totalSavingsValue =
+    document.getElementById("totalSavingsValue");
 
-  DOM.debtIncomeRatio = document.getElementById(
-    "debtIncomeRatio"
-  );
+  DOM.expensesIncomeRatio =
+    document.getElementById("expensesIncomeRatio");
+
+  DOM.emergencyFundAmount =
+    document.getElementById("emergencyFundAmount");
+
+  DOM.emergencyFundMonths =
+    document.getElementById("emergencyFundMonths");
+
+  DOM.debtIncomeRatio =
+    document.getElementById("debtIncomeRatio");
 
   DOM.stepItems = [
     ...document.querySelectorAll(".step-item")
   ];
 
-  DOM.nextStepButton = document.getElementById(
-    "nextStepButton"
-  );
+  DOM.nextStepButton =
+    document.getElementById("nextStepButton");
 
-  DOM.locationSelector = document.getElementById(
-    "locationSelector"
-  );
+  DOM.locationSelector =
+    document.getElementById("locationSelector");
 
-  DOM.selectedLocation = document.getElementById(
-    "selectedLocation"
-  );
+  DOM.selectedLocation =
+    document.getElementById("selectedLocation");
 }
 
 
 /* ============================================================
-   19. GLOBAL EVENT BINDING
+   17. EVENTS
    ============================================================ */
 
-function bindGlobalEvents() {
-  DOM.expenseSort?.addEventListener(
-    "change",
-    handleExpenseSort
-  );
-
-  DOM.categoryTabs.forEach((button) => {
-    button.addEventListener(
+function bindEvents() {
+  DOM.categoryTabs.forEach((tab) => {
+    tab.addEventListener(
       "click",
       handleCategoryTabClick
     );
   });
 
+  DOM.expenseSort?.addEventListener(
+    "change",
+    handleSortChange
+  );
+
+  DOM.expenseList?.addEventListener(
+    "input",
+    handleExpenseListInput
+  );
+
+  DOM.expenseList?.addEventListener(
+    "change",
+    handleExpenseListChange
+  );
+
+  DOM.expenseList?.addEventListener(
+    "click",
+    handleExpenseListClick
+  );
+
   DOM.addExpenseButton?.addEventListener(
     "click",
-    openCustomExpenseModal
+    openCustomItemModal
   );
 
   DOM.closeExpenseModal?.addEventListener(
     "click",
-    closeCustomExpenseModal
+    closeCustomItemModal
   );
 
   DOM.cancelExpenseModal?.addEventListener(
     "click",
-    closeCustomExpenseModal
+    closeCustomItemModal
   );
 
   DOM.customExpenseModal?.addEventListener(
     "click",
-    handleModalBackdropClick
+    (event) => {
+      if (event.target === DOM.customExpenseModal) {
+        closeCustomItemModal();
+      }
+    }
   );
 
   DOM.customExpenseForm?.addEventListener(
     "submit",
-    handleCustomExpenseSubmit
+    handleCustomItemSubmit
   );
 
-  document.addEventListener(
-    "keydown",
-    handleModalKeydown
-  );
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      DOM.customExpenseModal &&
+      !DOM.customExpenseModal.hidden
+    ) {
+      closeCustomItemModal();
+    }
+  });
 
   DOM.stepItems.forEach((button) => {
-    button.addEventListener(
-      "click",
-      handleStepClick
-    );
+    button.addEventListener("click", () => {
+      setCurrentStep(button.dataset.step);
+    });
   });
 
   DOM.nextStepButton?.addEventListener(
@@ -1786,130 +1629,125 @@ function bindGlobalEvents() {
     handleNextStep
   );
 
-  DOM.locationSelector?.addEventListener(
-    "click",
-    handleLocationSelector
-  );
-
   window.addEventListener(
     "resize",
-    initializeSliderVisuals,
+    updateAllSliderVisuals,
     { passive: true }
   );
 
-  window.addEventListener("beforeunload", saveState);
+  window.addEventListener(
+    "beforeunload",
+    saveState
+  );
 }
 
 
 /* ============================================================
-   20. PUBLIC API
+   18. INITIALIZE ACTIVE UI
+   ============================================================ */
+
+function syncActiveCategoryTab() {
+  DOM.categoryTabs.forEach((tab) => {
+    const active =
+      tab.dataset.category === state.activeCategory;
+
+    tab.classList.toggle(
+      "category-tab--active",
+      active
+    );
+
+    tab.setAttribute(
+      "aria-pressed",
+      String(active)
+    );
+  });
+}
+
+
+/* ============================================================
+   19. PUBLIC API
    ============================================================ */
 
 window.PCSUnitedFinancial = {
   getState() {
-    return structuredClone
-      ? structuredClone(state)
-      : JSON.parse(JSON.stringify(state));
+    return JSON.parse(JSON.stringify(state));
   },
 
   getMetrics() {
-    return calculateFinancialMetrics();
+    return calculateMetrics();
   },
 
   updateIncome(value) {
     state.monthlyIncome = Math.max(
       0,
-      parseNumericValue(value, state.monthlyIncome)
+      toNumber(value, state.monthlyIncome)
     );
 
-    recalculateFinancialSummary();
-    saveState();
-  },
-
-  updateDebt(value) {
-    state.totalDebt = Math.max(
-      0,
-      parseNumericValue(value, state.totalDebt)
-    );
-
-    recalculateFinancialSummary();
+    updateFinancialSummary();
     saveState();
   },
 
   updateSavings(value) {
     state.totalSavings = Math.max(
       0,
-      parseNumericValue(value, state.totalSavings)
+      toNumber(value, state.totalSavings)
     );
 
-    recalculateFinancialSummary();
+    updateFinancialSummary();
     saveState();
   },
 
   updateEmergencyFund(value) {
     state.emergencyFund = Math.max(
       0,
-      parseNumericValue(value, state.emergencyFund)
+      toNumber(value, state.emergencyFund)
     );
 
-    recalculateFinancialSummary();
+    updateFinancialSummary();
     saveState();
   },
 
   reset() {
-    try {
-      window.localStorage.removeItem(PCSU_CONFIG.storageKey);
-      window.location.reload();
-    } catch (error) {
-      console.warn("PCSUnited budget could not be reset.", error);
-    }
+    window.localStorage.removeItem(
+      PCSU_CONFIG.storageKey
+    );
+
+    window.location.reload();
   }
 };
 
 
 /* ============================================================
-   21. INITIALIZATION
+   20. INITIALIZATION
    ============================================================ */
 
 function initializeApplication() {
-  cacheDOMReferences();
+  cacheDOM();
 
-  if (!DOM.budgetApp || !DOM.expenseList) {
+  if (!DOM.expenseList) {
     console.error(
-      "PCSUnited Financial could not initialize because required DOM elements are missing."
+      "PCSUnited Financial could not initialize: #expenseList is missing."
     );
-
     return;
   }
 
-  readExpenseRowsFromDOM();
-  bindGlobalEvents();
+  loadState();
+  bindEvents();
 
-  const savedState = loadSavedState();
-
-  restoreSavedState(savedState);
-
-  initializeSliderVisuals();
-  recalculateFinancialSummary();
-
-  /*
-   * Recreate icons after any custom rows have been restored.
-   */
-  if (window.lucide) {
-    window.lucide.createIcons({
-      attrs: {
-        "stroke-width": 2
-      }
-    });
+  if (DOM.expenseSort) {
+    DOM.expenseSort.value = state.sortMode;
   }
 
-  document.documentElement.classList.add("pcsu-financial-ready");
+  syncActiveCategoryTab();
+  renderActiveCategory();
+  setCurrentStep(state.currentStep);
+  updateFinancialSummary();
 
   window.dispatchEvent(
     new CustomEvent("pcsunited:financial-ready", {
       detail: {
         state: window.PCSUnitedFinancial.getState(),
-        metrics: calculateFinancialMetrics()
+        metrics: calculateMetrics()
       }
     })
   );
