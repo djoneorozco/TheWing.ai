@@ -51,17 +51,16 @@ const PCSU_CONFIG = Object.freeze({
 
   categoryLabels: {
     "monthly-expenses": "Adjust your monthly expenses",
-    housing: "Adjust your monthly housing costs",
-    transportation: "Adjust your transportation costs",
+    debt: "Adjust your monthly debt payments",
     lifestyle: "Adjust your lifestyle spending",
     other: "Adjust your other monthly expenses"
   },
 
   categoryEmptyMessages: {
-    housing: "Housing expenses will appear here.",
-    transportation: "Transportation expenses will appear here.",
-    lifestyle: "Lifestyle expenses will appear here.",
-    other: "Other monthly expenses will appear here."
+    "monthly-expenses": "Adjust your monthly expenses",
+    debt: "Adjust your monthly debt payments",
+    lifestyle: "Adjust your lifestyle spending",
+    other: "Adjust your other monthly expenses"
   }
 });
 
