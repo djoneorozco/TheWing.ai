@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="description"
+    content="PCSUnited Home Buying Financial Analysis"
+  >
+
+  <title>Home Buying Financial Analysis | PCSUnited</title>
+
+  <!-- =======================================================
+    PCSUnited Analysis Stylesheet
+  ======================================================== -->
+  <link rel="stylesheet" href="./style.css">
+
+  <!-- =======================================================
+    Lucide Icons
+  ======================================================== -->
+  <script
+    src="https://unpkg.com/lucide@latest"
+    defer
+  ></script>
+</head>
+
+<body>
+
+  <!-- =======================================================
+    PCSUNITED ANALYSIS APPLICATION
+  ======================================================== -->
+  <div
+    class="analysis-app"
+    id="pcsuAnalysisApp"
+  >
+
+
+    <!-- =====================================================
+      TOP APPLICATION HEADER
+    ====================================================== -->
+    <header class="analysis-header">
+
+      <!-- PCSUnited Brand -->
+      <a
+        class="analysis-brand"
+        href="../"
+        aria-label="Return to PCSUnited Financial"
+      >
+
+        <div
+          class="analysis-brand__mark"
+          aria-hidden="true"
+        >
+          <span class="analysis-brand__wing analysis-brand__wing--left"></span>
+
+          <span class="analysis-brand__star">
+            <i data-lucide="star"></i>
+          </span>
+
+          <span class="analysis-brand__wing analysis-brand__wing--right"></span>
+        </div>
+
+        <div class="analysis-brand__copy">
+          <strong class="analysis-brand__name">
+            PCSUNITED
+          </strong>
+
+          <span class="analysis-brand__tagline">
+            MOVE SMARTER.
+          </span>
+        </div>
+
+      </a>
+
+
+      <div
+        class="analysis-header__divider"
+        aria-hidden="true"
+      ></div>
+
+
+      <!-- Page Title -->
+      <div class="analysis-header__title-group">
+
+        <h1 class="analysis-header__title">
+          Home Buying Financial Analysis
+        </h1>
+
+        <p class="analysis-header__subtitle">
+          Here’s your complete picture for buying the home you selected.
+        </p>
+
+      </div>
+
+
+      <!-- Selected Home Summary -->
+      <section
+        class="selected-home-card"
+        aria-labelledby="selectedHomeHeading"
+      >
+
+        <div class="selected-home-card__image-wrap">
+
+          <img
+            class="selected-home-card__image"
+            id="selectedHomeImage"
+            src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=600&q=85"
+            alt="Selected home"
+          >
+
+        </div>
+
+        <div class="selected-home-card__content">
+
+          <span
+            class="selected-home-card__eyebrow"
+            id="selectedHomeHeading"
+          >
+            Selected Home
+          </span>
+
+          <strong
+            class="selected-home-card__price"
+            id="selectedHomePrice"
+          >
+            $475,000
+          </strong>
+
+          <div class="selected-home-card__details">
+
+            <span id="selectedHomeBedrooms">
+              4 bd
+            </span>
+
+            <span
+              class="selected-home-card__separator"
+              aria-hidden="true"
+            >
+              |
+            </span>
+
+            <span id="selectedHomeBathrooms">
+              2.5 ba
+            </span>
+
+            <span
+              class="selected-home-card__separator"
+              aria-hidden="true"
+            >
+              |
+            </span>
+
+            <span id="selectedHomeSquareFeet">
+              2,100 sq ft
+            </span>
+
+          </div>
+
+          <span
+            class="selected-home-card__location"
+            id="selectedHomeLocation"
+          >
+            San Antonio, TX
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <!-- User Profile Summary -->
+      <section
+        class="analysis-user"
+        aria-label="Current user and military profile"
+      >
+
+        <div class="analysis-user__avatar-wrap">
+
+          <img
+            class="analysis-user__avatar"
+            id="analysisUserAvatar"
+            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=85"
+            alt="PCSUnited financial guide"
+          >
+
+        </div>
+
+        <div class="analysis-user__content">
+
+          <strong
+            class="analysis-user__greeting"
+            id="analysisUserGreeting"
+          >
+            Good afternoon, John!
+          </strong>
+
+          <span class="analysis-user__detail">
+            <i
+              data-lucide="badge-check"
+              aria-hidden="true"
+            ></i>
+
+            <span id="analysisUserRank">
+              Master Sergeant (E7)
+            </span>
+          </span>
+
+          <span class="analysis-user__detail">
+            <i
+              data-lucide="map-pin"
+              aria-hidden="true"
+            ></i>
+
+            <span id="analysisUserBase">
+              Lackland AFB, TX
+            </span>
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <!-- Ask Amy -->
+      <button
+        class="ask-amy-button"
+        id="askAmyButton"
+        type="button"
+      >
+        <span class="ask-amy-button__icon">
+          <i
+            data-lucide="message-circle"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <span>
+          Ask Amy
+        </span>
+      </button>
+
+    </header>
+
+
+    <!-- =====================================================
+      MAIN DASHBOARD GRID
+    ====================================================== -->
+    <main class="analysis-main">
+
+
+      <!-- ===================================================
+        AFFORDABILITY HERO
+      ==================================================== -->
+      <section
+        class="affordability-hero"
+        aria-labelledby="affordabilityHeroTitle"
+      >
+
+        <!-- Final Verdict -->
+        <div class="affordability-verdict">
+
+          <h2
+            class="affordability-verdict__title"
+            id="affordabilityHeroTitle"
+          >
+            Can you afford this home?
+          </h2>
+
+          <div
+            class="affordability-verdict__ring"
+            role="img"
+            aria-label="Yes, this home is affordable"
+          >
+
+            <div class="affordability-verdict__ring-inner">
+
+              <strong
+                class="affordability-verdict__answer"
+                id="affordabilityAnswer"
+              >
+                YES
+              </strong>
+
+              <span
+                class="affordability-verdict__message"
+                id="affordabilityPosition"
+              >
+                You’re in a<br>
+                Strong Position
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Hero Metric: Monthly Payment -->
+        <article class="hero-metric">
+
+          <span class="hero-metric__label">
+            Monthly Home Payment
+          </span>
+
+          <div class="hero-metric__value-row">
+
+            <strong
+              class="hero-metric__value"
+              id="heroMonthlyPayment"
+            >
+              $2,580
+            </strong>
+
+            <span class="hero-metric__suffix">
+              /mo
+            </span>
+
+          </div>
+
+          <span
+            class="hero-metric__description"
+            id="heroHousingRatio"
+          >
+            31% of your take-home pay
+          </span>
+
+          <span
+            class="hero-status hero-status--healthy"
+            id="heroPaymentStatus"
+          >
+            Healthy
+          </span>
+
+        </article>
+
+
+        <!-- Hero Metric: Cash Left Over -->
+        <article class="hero-metric">
+
+          <span class="hero-metric__label">
+            Cash Left Over
+          </span>
+
+          <div class="hero-metric__value-row">
+
+            <strong
+              class="hero-metric__value"
+              id="heroCashLeft"
+            >
+              $1,720
+            </strong>
+
+            <span class="hero-metric__suffix">
+              /mo
+            </span>
+
+          </div>
+
+          <span class="hero-metric__description">
+            After all expenses &amp; housing
+          </span>
+
+          <span
+            class="hero-status hero-status--strong"
+            id="heroCashStatus"
+          >
+            Strong
+          </span>
+
+        </article>
+
+
+        <!-- Hero Metric: Down Payment -->
+        <article class="hero-metric">
+
+          <span class="hero-metric__label">
+            Down Payment
+          </span>
+
+          <strong
+            class="hero-metric__value"
+            id="heroDownPayment"
+          >
+            $47,500
+          </strong>
+
+          <span
+            class="hero-metric__description"
+            id="heroDownPaymentPercent"
+          >
+            10% of home price
+          </span>
+
+          <span
+            class="hero-status hero-status--good"
+            id="heroDownPaymentStatus"
+          >
+            Good
+          </span>
+
+        </article>
+
+
+        <!-- Hero Metric: Closing Costs -->
+        <article class="hero-metric">
+
+          <span class="hero-metric__label">
+            Closing Costs
+          </span>
+
+          <strong
+            class="hero-metric__value"
+            id="heroClosingCosts"
+          >
+            $14,250
+          </strong>
+
+          <span class="hero-metric__description">
+            Estimated
+          </span>
+
+          <span class="hero-metric__note">
+            Included in analysis
+          </span>
+
+        </article>
+
+
+        <!-- Affordability Score -->
+        <article class="affordability-score">
+
+          <span class="affordability-score__label">
+            Home Affordability<br>
+            Score
+          </span>
+
+          <div
+            class="affordability-score__ring"
+            role="img"
+            aria-label="Affordability score 92, excellent"
+          >
+
+            <div class="affordability-score__inner">
+
+              <strong
+                class="affordability-score__value"
+                id="affordabilityScore"
+              >
+                92
+              </strong>
+
+              <span
+                class="affordability-score__rating"
+                id="affordabilityScoreRating"
+              >
+                Excellent
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- ===================================================
+        PRIMARY DASHBOARD CONTENT
+      ==================================================== -->
+      <div class="analysis-content-grid">
+
+
+        <!-- =================================================
+          LEFT AND CENTER CONTENT
+        ================================================== -->
+        <div class="analysis-content-grid__main">
+
+
+          <!-- ===============================================
+            HOUSING PAYMENT BREAKDOWN
+          ================================================ -->
+          <section
+            class="analysis-card payment-breakdown-card"
+            aria-labelledby="paymentBreakdownTitle"
+          >
+
+            <header class="analysis-card__header">
+
+              <h2
+                class="analysis-card__title"
+                id="paymentBreakdownTitle"
+              >
+                Monthly Housing Payment Breakdown
+              </h2>
+
+            </header>
+
+
+            <div class="payment-breakdown-card__body">
+
+              <!-- Donut -->
+              <div class="payment-donut">
+
+                <svg
+                  class="payment-donut__svg"
+                  viewBox="0 0 220 220"
+                  aria-hidden="true"
+                >
+
+                  <circle
+                    class="payment-donut__track"
+                    cx="110"
+                    cy="110"
+                    r="82"
+                  ></circle>
+
+                  <circle
+                    class="payment-donut__segment payment-donut__segment--principal"
+                    cx="110"
+                    cy="110"
+                    r="82"
+                    pathLength="100"
+                    stroke-dasharray="74 26"
+                    stroke-dashoffset="0"
+                  ></circle>
+
+                  <circle
+                    class="payment-donut__segment payment-donut__segment--taxes"
+                    cx="110"
+                    cy="110"
+                    r="82"
+                    pathLength="100"
+                    stroke-dasharray="15 85"
+                    stroke-dashoffset="-74"
+                  ></circle>
+
+                  <circle
+                    class="payment-donut__segment payment-donut__segment--insurance"
+                    cx="110"
+                    cy="110"
+                    r="82"
+                    pathLength="100"
+                    stroke-dasharray="6 94"
+                    stroke-dashoffset="-89"
+                  ></circle>
+
+                  <circle
+                    class="payment-donut__segment payment-donut__segment--hoa"
+                    cx="110"
+                    cy="110"
+                    r="82"
+                    pathLength="100"
+                    stroke-dasharray="4 96"
+                    stroke-dashoffset="-95"
+                  ></circle>
+
+                  <circle
+                    class="payment-donut__segment payment-donut__segment--pmi"
+                    cx="110"
+                    cy="110"
+                    r="82"
+                    pathLength="100"
+                    stroke-dasharray="1 99"
+                    stroke-dashoffset="-99"
+                  ></circle>
+
+                </svg>
+
+                <div class="payment-donut__center">
+
+                  <strong
+                    class="payment-donut__value"
+                    id="paymentDonutTotal"
+                  >
+                    $2,580
+                  </strong>
+
+                  <span class="payment-donut__label">
+                    Total / month
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <!-- Payment Legend -->
+              <div class="payment-breakdown-list">
+
+                <div class="payment-breakdown-item">
+
+                  <span
+                    class="payment-breakdown-item__dot payment-breakdown-item__dot--principal"
+                    aria-hidden="true"
+                  ></span>
+
+                  <span class="payment-breakdown-item__label">
+                    Principal &amp; Interest
+                  </span>
+
+                  <strong
+                    class="payment-breakdown-item__amount"
+                    id="principalInterestAmount"
+                  >
+                    $1,910
+                  </strong>
+
+                  <span
+                    class="payment-breakdown-item__percentage"
+                    id="principalInterestPercentage"
+                  >
+                    74%
+                  </span>
+
+                </div>
+
+
+                <div class="payment-breakdown-item">
+
+                  <span
+                    class="payment-breakdown-item__dot payment-breakdown-item__dot--taxes"
+                    aria-hidden="true"
+                  ></span>
+
+                  <span class="payment-breakdown-item__label">
+                    Property Taxes
+                  </span>
+
+                  <strong
+                    class="payment-breakdown-item__amount"
+                    id="propertyTaxesAmount"
+                  >
+                    $380
+                  </strong>
+
+                  <span
+                    class="payment-breakdown-item__percentage"
+                    id="propertyTaxesPercentage"
+                  >
+                    15%
+                  </span>
+
+                </div>
+
+
+                <div class="payment-breakdown-item">
+
+                  <span
+                    class="payment-breakdown-item__dot payment-breakdown-item__dot--insurance"
+                    aria-hidden="true"
+                  ></span>
+
+                  <span class="payment-breakdown-item__label">
+                    Homeowner's Insurance
+                  </span>
+
+                  <strong
+                    class="payment-breakdown-item__amount"
+                    id="homeInsuranceAmount"
+                  >
+                    $150
+                  </strong>
+
+                  <span
+                    class="payment-breakdown-item__percentage"
+                    id="homeInsurancePercentage"
+                  >
+                    6%
+                  </span>
+
+                </div>
+
+
+                <div class="payment-breakdown-item">
+
+                  <span
+                    class="payment-breakdown-item__dot payment-breakdown-item__dot--hoa"
+                    aria-hidden="true"
+                  ></span>
+
+                  <span class="payment-breakdown-item__label">
+                    HOA Fees
+                  </span>
+
+                  <strong
+                    class="payment-breakdown-item__amount"
+                    id="hoaFeesAmount"
+                  >
+                    $100
+                  </strong>
+
+                  <span
+                    class="payment-breakdown-item__percentage"
+                    id="hoaFeesPercentage"
+                  >
+                    4%
+                  </span>
+
+                </div>
+
+
+                <div class="payment-breakdown-item">
+
+                  <span
+                    class="payment-breakdown-item__dot payment-breakdown-item__dot--pmi"
+                    aria-hidden="true"
+                  ></span>
+
+                  <span class="payment-breakdown-item__label">
+                    PMI
+                  </span>
+
+                  <strong
+                    class="payment-breakdown-item__amount"
+                    id="pmiAmount"
+                  >
+                    $40
+                  </strong>
+
+                  <span
+                    class="payment-breakdown-item__percentage"
+                    id="pmiPercentage"
+                  >
+                    1%
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <footer class="payment-breakdown-card__footer">
+
+              <span>
+                Interest Rate Assumption:
+                <strong id="interestRateAssumption">
+                  6.375%
+                </strong>
+              </span>
+
+              <span>
+                Loan Program:
+                <strong id="loanProgram">
+                  VA Loan
+                </strong>
+              </span>
+
+            </footer>
+
+          </section>
+
+
+          <!-- ===============================================
+            MONTHLY CASH FLOW
+          ================================================ -->
+          <section
+            class="analysis-card monthly-flow-card"
+            aria-labelledby="monthlyFlowTitle"
+          >
+
+            <header class="analysis-card__header monthly-flow-card__header">
+
+              <div>
+
+                <h2
+                  class="analysis-card__title"
+                  id="monthlyFlowTitle"
+                >
+                  Monthly Cash Flow
+                  <span class="analysis-card__title-note">
+                    (After Housing)
+                  </span>
+                </h2>
+
+                <p class="analysis-card__subtitle">
+                  Where your money goes each month.
+                </p>
+
+              </div>
+
+              <label class="analysis-select">
+
+                <span class="sr-only">
+                  Cash-flow period
+                </span>
+
+                <select
+                  id="cashFlowPeriod"
+                  name="cashFlowPeriod"
+                >
+                  <option value="monthly">
+                    Monthly
+                  </option>
+
+                  <option value="annual">
+                    Annual
+                  </option>
+                </select>
+
+                <i
+                  data-lucide="chevron-down"
+                  aria-hidden="true"
+                ></i>
+
+              </label>
+
+            </header>
+
+
+            <div
+              class="waterfall-chart"
+              id="cashFlowWaterfall"
+              aria-label="Monthly cash flow waterfall chart"
+            >
+
+              <!-- Monthly Income -->
+              <div
+                class="waterfall-column waterfall-column--income"
+                data-waterfall-item="income"
+              >
+
+                <strong
+                  class="waterfall-column__value"
+                  id="waterfallIncomeValue"
+                >
+                  $7,910
+                </strong>
+
+                <div
+                  class="waterfall-column__bar"
+                  id="waterfallIncomeBar"
+                ></div>
+
+                <span class="waterfall-column__label">
+                  Monthly<br>
+                  Income
+                </span>
+
+              </div>
+
+
+              <!-- Housing -->
+              <div
+                class="waterfall-column waterfall-column--housing"
+                data-waterfall-item="housing"
+              >
+
+                <div
+                  class="waterfall-column__bar"
+                  id="waterfallHousingBar"
+                ></div>
+
+                <strong
+                  class="waterfall-column__value"
+                  id="waterfallHousingValue"
+                >
+                  -$2,580
+                </strong>
+
+                <span class="waterfall-column__label">
+                  Housing<br>
+                  Payment
+                </span>
+
+              </div>
+
+
+              <!-- Other Expenses -->
+              <div
+                class="waterfall-column waterfall-column--expenses"
+                data-waterfall-item="expenses"
+              >
+
+                <div
+                  class="waterfall-column__bar"
+                  id="waterfallExpensesBar"
+                ></div>
+
+                <strong
+                  class="waterfall-column__value"
+                  id="waterfallExpensesValue"
+                >
+                  -$1,890
+                </strong>
+
+                <span class="waterfall-column__label">
+                  Other<br>
+                  Expenses
+                </span>
+
+              </div>
+
+
+              <!-- Debt -->
+              <div
+                class="waterfall-column waterfall-column--debt"
+                data-waterfall-item="debt"
+              >
+
+                <div
+                  class="waterfall-column__bar"
+                  id="waterfallDebtBar"
+                ></div>
+
+                <strong
+                  class="waterfall-column__value"
+                  id="waterfallDebtValue"
+                >
+                  -$450
+                </strong>
+
+                <span class="waterfall-column__label">
+                  Debt<br>
+                  Payments
+                </span>
+
+              </div>
+
+
+              <!-- Savings -->
+              <div
+                class="waterfall-column waterfall-column--savings"
+                data-waterfall-item="savings"
+              >
+
+                <div
+                  class="waterfall-column__bar"
+                  id="waterfallSavingsBar"
+                ></div>
+
+                <strong
+                  class="waterfall-column__value"
+                  id="waterfallSavingsValue"
+                >
+                  -$1,270
+                </strong>
+
+                <span class="waterfall-column__label">
+                  Savings
+                </span>
+
+              </div>
+
+
+              <!-- Cash Left -->
+              <div
+                class="waterfall-column waterfall-column--remaining"
+                data-waterfall-item="remaining"
+              >
+
+                <strong
+                  class="waterfall-column__value"
+                  id="waterfallRemainingValue"
+                >
+                  $1,720
+                </strong>
+
+                <div
+                  class="waterfall-column__bar"
+                  id="waterfallRemainingBar"
+                ></div>
+
+                <span class="waterfall-column__label">
+                  Cash Left<br>
+                  Over
+                </span>
+
+              </div>
+
+
+              <!-- Connecting Line -->
+              <svg
+                class="waterfall-chart__connector"
+                id="waterfallConnector"
+                viewBox="0 0 700 250"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path
+                  id="waterfallConnectorPath"
+                  d="M85 70 L210 130 L335 165 L460 185 L585 215"
+                ></path>
+              </svg>
+
+            </div>
+
+
+            <div class="monthly-flow-insight">
+
+              <span class="monthly-flow-insight__icon">
+                <i
+                  data-lucide="trending-up"
+                  aria-hidden="true"
+                ></i>
+              </span>
+
+              <p>
+                You keep
+                <strong id="monthlyFlowInsightAmount">
+                  $1,720
+                </strong>
+                each month after everything, including this home.
+              </p>
+
+            </div>
+
+          </section>
+
+
+          <!-- ===============================================
+            LOWER SUMMARY CARDS
+          ================================================ -->
+          <div class="analysis-summary-grid">
+
+
+            <!-- Debt Summary -->
+            <section
+              class="analysis-card summary-card"
+              aria-labelledby="debtSummaryTitle"
+            >
+
+              <header class="summary-card__header">
+
+                <div class="summary-card__heading">
+
+                  <h2
+                    class="summary-card__title"
+                    id="debtSummaryTitle"
+                  >
+                    Debt Summary
+                  </h2>
+
+                  <button
+                    class="info-button"
+                    type="button"
+                    aria-label="About debt summary"
+                  >
+                    <i
+                      data-lucide="info"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+
+                </div>
+
+              </header>
+
+
+              <div class="summary-list">
+
+                <div class="summary-list__row">
+
+                  <span>
+                    Total Monthly Debt
+                  </span>
+
+                  <strong id="debtSummaryMonthly">
+                    $450
+                  </strong>
+
+                </div>
+
+                <div class="summary-list__row">
+
+                  <span>
+                    Debt-to-Income Ratio
+                  </span>
+
+                  <strong id="debtSummaryRatio">
+                    16%
+                  </strong>
+
+                  <span
+                    class="compact-status compact-status--excellent"
+                    id="debtSummaryRatioStatus"
+                  >
+                    Excellent
+                  </span>
+
+                </div>
+
+                <div class="summary-list__row">
+
+                  <span>
+                    VA Loan Funding Fee
+                  </span>
+
+                  <strong id="vaFundingFee">
+                    $0
+                  </strong>
+
+                  <span
+                    class="compact-status compact-status--good"
+                    id="vaFundingFeeStatus"
+                  >
+                    Exempt
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <button
+                class="summary-card__link"
+                id="viewDebtDetailsButton"
+                type="button"
+              >
+                <span>
+                  View Debt Details
+                </span>
+
+                <i
+                  data-lucide="arrow-right"
+                  aria-hidden="true"
+                ></i>
+              </button>
+
+            </section>
+
+
+            <!-- Upfront Costs -->
+            <section
+              class="analysis-card summary-card"
+              aria-labelledby="upfrontCostsTitle"
+            >
+
+              <header class="summary-card__header">
+
+                <h2
+                  class="summary-card__title"
+                  id="upfrontCostsTitle"
+                >
+                  Upfront Costs Needed
+                </h2>
+
+              </header>
+
+
+              <div class="summary-list">
+
+                <div class="summary-list__row">
+
+                  <span id="downPaymentSummaryLabel">
+                    Down Payment (10%)
+                  </span>
+
+                  <strong id="downPaymentSummaryAmount">
+                    $47,500
+                  </strong>
+
+                </div>
+
+                <div class="summary-list__row">
+
+                  <span>
+                    Closing Costs (Est.)
+                  </span>
+
+                  <strong id="closingCostsSummary">
+                    $14,250
+                  </strong>
+
+                </div>
+
+                <div class="summary-list__row">
+
+                  <span>
+                    Prepaids &amp; Escrow (Est.)
+                  </span>
+
+                  <strong id="prepaidsEscrowAmount">
+                    $3,100
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              <footer class="upfront-total">
+
+                <span>
+                  Total Due at Closing
+                </span>
+
+                <strong id="totalDueAtClosing">
+                  $64,850
+                </strong>
+
+              </footer>
+
+            </section>
+
+
+            <!-- Reserves -->
+            <section
+              class="analysis-card reserves-card"
+              aria-labelledby="reservesTitle"
+            >
+
+              <header class="summary-card__header">
+
+                <h2
+                  class="summary-card__title"
+                  id="reservesTitle"
+                >
+                  Reserves After Closing
+                </h2>
+
+              </header>
+
+
+              <div class="reserves-card__content">
+
+                <div class="reserves-card__icon">
+                  <i
+                    data-lucide="piggy-bank"
+                    aria-hidden="true"
+                  ></i>
+                </div>
+
+                <div class="reserves-card__value-group">
+
+                  <strong
+                    class="reserves-card__value"
+                    id="reservesAfterClosing"
+                  >
+                    $18,750
+                  </strong>
+
+                  <span class="reserves-card__label">
+                    Cash reserves remaining
+                  </span>
+
+                  <span
+                    class="compact-status compact-status--good"
+                    id="reservesStatus"
+                  >
+                    Good
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <p
+                class="reserves-card__description"
+                id="reservesDescription"
+              >
+                You’ll have 4.2 months of expenses in reserve.
+              </p>
+
+            </section>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+          RIGHT SIDEBAR
+        ================================================== -->
+        <aside class="analysis-content-grid__sidebar">
+
+
+          <!-- ===============================================
+            AFFORDABILITY RESULT
+          ================================================ -->
+          <section
+            class="analysis-card affordability-result-card"
+            aria-labelledby="affordabilityResultTitle"
+          >
+
+            <header class="affordability-result-card__header">
+
+              <span class="affordability-result-card__icon">
+                <i
+                  data-lucide="house-check"
+                  aria-hidden="true"
+                ></i>
+              </span>
+
+              <div>
+
+                <h2
+                  class="affordability-result-card__title"
+                  id="affordabilityResultTitle"
+                >
+                  Home Affordability Result
+                </h2>
+
+                <strong
+                  class="affordability-result-card__headline"
+                  id="affordabilityResultHeadline"
+                >
+                  You can comfortably afford this home.
+                </strong>
+
+              </div>
+
+            </header>
+
+
+            <p
+              class="affordability-result-card__copy"
+              id="affordabilityResultCopy"
+            >
+              Based on your income, expenses, debt, and current interest
+              rates, this home fits well within your financial picture.
+            </p>
+
+
+            <div class="affordability-gauge">
+
+              <svg
+                class="affordability-gauge__svg"
+                viewBox="0 0 320 180"
+                aria-hidden="true"
+              >
+
+                <path
+                  class="affordability-gauge__segment affordability-gauge__segment--danger"
+                  d="M40 155 A120 120 0 0 1 62 90"
+                ></path>
+
+                <path
+                  class="affordability-gauge__segment affordability-gauge__segment--warning"
+                  d="M69 78 A120 120 0 0 1 130 40"
+                ></path>
+
+                <path
+                  class="affordability-gauge__segment affordability-gauge__segment--healthy"
+                  d="M143 35 A120 120 0 0 1 280 155"
+                ></path>
+
+                <circle
+                  class="affordability-gauge__pivot"
+                  cx="160"
+                  cy="150"
+                  r="10"
+                ></circle>
+
+                <line
+                  class="affordability-gauge__needle"
+                  id="affordabilityGaugeNeedle"
+                  x1="160"
+                  y1="150"
+                  x2="230"
+                  y2="108"
+                ></line>
+
+              </svg>
+
+
+              <div class="affordability-gauge__value">
+
+                <strong id="affordabilityGaugePercentage">
+                  31%
+                </strong>
+
+                <span>
+                  of take-home pay
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <span
+              class="affordability-result-card__status"
+              id="affordabilityGaugeStatus"
+            >
+              Within the healthy range (Below 36%)
+            </span>
+
+          </section>
+
+
+          <!-- ===============================================
+            HOME PRICE SCENARIOS
+          ================================================ -->
+          <section
+            class="analysis-card price-scenarios-card"
+            aria-labelledby="priceScenariosTitle"
+          >
+
+            <header class="price-scenarios-card__header">
+
+              <h2
+                class="price-scenarios-card__title"
+                id="priceScenariosTitle"
+              >
+                Home Price Scenarios
+              </h2>
+
+              <button
+                class="price-scenarios-card__toggle"
+                id="priceScenariosToggle"
+                type="button"
+                aria-label="Toggle home price scenarios"
+                aria-expanded="true"
+              >
+                <i
+                  data-lucide="chevron-down"
+                  aria-hidden="true"
+                ></i>
+              </button>
+
+            </header>
+
+
+            <div
+              class="price-scenarios-list"
+              id="priceScenariosList"
+            >
+
+              <div
+                class="price-scenario"
+                data-price-scenario="lower"
+              >
+
+                <span class="price-scenario__label">
+                  Lower Price
+                </span>
+
+                <strong
+                  class="price-scenario__price"
+                  id="lowerScenarioPrice"
+                >
+                  $425,000
+                </strong>
+
+                <strong
+                  class="price-scenario__payment"
+                  id="lowerScenarioPayment"
+                >
+                  $2,310
+                  <span>/mo</span>
+                </strong>
+
+                <span
+                  class="price-scenario__ratio price-scenario__ratio--healthy"
+                  id="lowerScenarioRatio"
+                >
+                  27%
+                </span>
+
+              </div>
+
+
+              <div
+                class="price-scenario price-scenario--selected"
+                data-price-scenario="selected"
+              >
+
+                <span class="price-scenario__label">
+                  Selected Home
+                </span>
+
+                <strong
+                  class="price-scenario__price"
+                  id="selectedScenarioPrice"
+                >
+                  $475,000
+                </strong>
+
+                <strong
+                  class="price-scenario__payment"
+                  id="selectedScenarioPayment"
+                >
+                  $2,580
+                  <span>/mo</span>
+                </strong>
+
+                <span
+                  class="price-scenario__ratio price-scenario__ratio--healthy"
+                  id="selectedScenarioRatio"
+                >
+                  31%
+                </span>
+
+              </div>
+
+
+              <div
+                class="price-scenario"
+                data-price-scenario="higher"
+              >
+
+                <span class="price-scenario__label">
+                  Higher Price
+                </span>
+
+                <strong
+                  class="price-scenario__price"
+                  id="higherScenarioPrice"
+                >
+                  $525,000
+                </strong>
+
+                <strong
+                  class="price-scenario__payment"
+                  id="higherScenarioPayment"
+                >
+                  $2,840
+                  <span>/mo</span>
+                </strong>
+
+                <span
+                  class="price-scenario__ratio price-scenario__ratio--caution"
+                  id="higherScenarioRatio"
+                >
+                  34%
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <footer class="price-scenarios-card__footer">
+              Keep housing under 36% of take-home pay.
+            </footer>
+
+          </section>
+
+
+          <!-- ===============================================
+            KEY TAKEAWAYS
+          ================================================ -->
+          <section
+            class="analysis-card key-takeaways-card"
+            aria-labelledby="keyTakeawaysTitle"
+          >
+
+            <header class="summary-card__header">
+
+              <h2
+                class="summary-card__title"
+                id="keyTakeawaysTitle"
+              >
+                Key Takeaways
+              </h2>
+
+            </header>
+
+
+            <ul
+              class="key-takeaways-list"
+              id="keyTakeawaysList"
+            >
+
+              <li class="key-takeaway">
+
+                <span class="key-takeaway__icon">
+                  <i
+                    data-lucide="check"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+
+                <span id="takeawayAffordability">
+                  This home fits well within your budget.
+                </span>
+
+              </li>
+
+              <li class="key-takeaway">
+
+                <span class="key-takeaway__icon">
+                  <i
+                    data-lucide="check"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+
+                <span id="takeawayCashFlow">
+                  You’ll have $1,720 left over each month.
+                </span>
+
+              </li>
+
+              <li class="key-takeaway">
+
+                <span class="key-takeaway__icon">
+                  <i
+                    data-lucide="check"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+
+                <span id="takeawayReserves">
+                  Your reserves are solid at 4.2 months.
+                </span>
+
+              </li>
+
+              <li class="key-takeaway">
+
+                <span class="key-takeaway__icon">
+                  <i
+                    data-lucide="check"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+
+                <span id="takeawayVALoan">
+                  You’re using VA benefits to maximize buying power.
+                </span>
+
+              </li>
+
+            </ul>
+
+
+            <button
+              class="key-takeaways-card__link"
+              id="fullAnalysisReportButton"
+              type="button"
+            >
+              <span>
+                See Full Analysis Report
+              </span>
+
+              <i
+                data-lucide="arrow-right"
+                aria-hidden="true"
+              ></i>
+            </button>
+
+          </section>
+
+        </aside>
+
+      </div>
+
+    </main>
+
+
+    <!-- =====================================================
+      BOTTOM APPLICATION NAVIGATION
+    ====================================================== -->
+    <footer class="analysis-footer">
+
+
+      <!-- Progress -->
+      <nav
+        class="analysis-progress"
+        aria-label="PCSUnited financial process"
+      >
+
+        <button
+          class="analysis-progress__step analysis-progress__step--complete"
+          type="button"
+          data-analysis-step="profile"
+        >
+          <span class="analysis-progress__number">
+            1
+          </span>
+
+          <span class="analysis-progress__label">
+            Profile
+          </span>
+
+          <span class="analysis-progress__check">
+            <i
+              data-lucide="check"
+              aria-hidden="true"
+            ></i>
+          </span>
+        </button>
+
+
+        <span
+          class="analysis-progress__connector"
+          aria-hidden="true"
+        ></span>
+
+
+        <button
+          class="analysis-progress__step analysis-progress__step--complete"
+          type="button"
+          data-analysis-step="income"
+        >
+          <span class="analysis-progress__number">
+            2
+          </span>
+
+          <span class="analysis-progress__label">
+            Income
+          </span>
+
+          <span class="analysis-progress__check">
+            <i
+              data-lucide="check"
+              aria-hidden="true"
+            ></i>
+          </span>
+        </button>
+
+
+        <span
+          class="analysis-progress__connector"
+          aria-hidden="true"
+        ></span>
+
+
+        <button
+          class="analysis-progress__step analysis-progress__step--complete"
+          type="button"
+          data-analysis-step="expenses"
+        >
+          <span class="analysis-progress__number">
+            3
+          </span>
+
+          <span class="analysis-progress__label">
+            Expenses
+          </span>
+
+          <span class="analysis-progress__check">
+            <i
+              data-lucide="check"
+              aria-hidden="true"
+            ></i>
+          </span>
+        </button>
+
+
+        <span
+          class="analysis-progress__connector"
+          aria-hidden="true"
+        ></span>
+
+
+        <button
+          class="analysis-progress__step analysis-progress__step--active"
+          type="button"
+          data-analysis-step="analysis"
+          aria-current="step"
+        >
+          <span class="analysis-progress__number">
+            4
+          </span>
+
+          <span class="analysis-progress__label">
+            Home Analysis
+          </span>
+
+          <span class="analysis-progress__check">
+            <i
+              data-lucide="check"
+              aria-hidden="true"
+            ></i>
+          </span>
+        </button>
+
+
+        <span
+          class="analysis-progress__connector"
+          aria-hidden="true"
+        ></span>
+
+
+        <button
+          class="analysis-progress__step"
+          type="button"
+          data-analysis-step="summary"
+        >
+          <span class="analysis-progress__number">
+            5
+          </span>
+
+          <span class="analysis-progress__label">
+            Summary
+          </span>
+
+          <span class="analysis-progress__check">
+            <i
+              data-lucide="check"
+              aria-hidden="true"
+            ></i>
+          </span>
+        </button>
+
+      </nav>
+
+
+      <!-- Save and Continue -->
+      <button
+        class="analysis-next-button"
+        id="analysisNextButton"
+        type="button"
+      >
+        <span>
+          Next: Save &amp; Continue
+        </span>
+
+        <i
+          data-lucide="arrow-right"
+          aria-hidden="true"
+        ></i>
+      </button>
+
+    </footer>
+
+
+    <!-- =====================================================
+      ASK AMY PANEL
+    ====================================================== -->
+    <div
+      class="amy-panel-backdrop"
+      id="amyPanelBackdrop"
+      hidden
+    >
+
+      <aside
+        class="amy-panel"
+        id="amyPanel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="amyPanelTitle"
+      >
+
+        <header class="amy-panel__header">
+
+          <div class="amy-panel__identity">
+
+            <img
+              class="amy-panel__avatar"
+              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=85"
+              alt="Amy"
+            >
+
+            <div>
+
+              <span class="amy-panel__eyebrow">
+                PCSUnited Financial Guide
+              </span>
+
+              <h2
+                class="amy-panel__title"
+                id="amyPanelTitle"
+              >
+                Ask Amy
+              </h2>
+
+            </div>
+
+          </div>
+
+          <button
+            class="amy-panel__close"
+            id="closeAmyPanelButton"
+            type="button"
+            aria-label="Close Ask Amy"
+          >
+            <i
+              data-lucide="x"
+              aria-hidden="true"
+            ></i>
+          </button>
+
+        </header>
+
+
+        <div
+          class="amy-panel__conversation"
+          id="amyConversation"
+        >
+
+          <article class="amy-message amy-message--assistant">
+
+            <p>
+              Based on your current financial picture, this home appears
+              comfortably affordable. Your housing ratio, monthly cash flow,
+              and remaining reserves are all in a healthy range.
+            </p>
+
+          </article>
+
+        </div>
+
+
+        <form
+          class="amy-panel__composer"
+          id="amyComposer"
+        >
+
+          <label
+            class="sr-only"
+            for="amyMessageInput"
+          >
+            Ask Amy a question
+          </label>
+
+          <textarea
+            id="amyMessageInput"
+            name="amyMessage"
+            rows="1"
+            placeholder="Ask Amy about this home analysis..."
+          ></textarea>
+
+          <button
+            class="amy-panel__send"
+            type="submit"
+            aria-label="Send message to Amy"
+          >
+            <i
+              data-lucide="send"
+              aria-hidden="true"
+            ></i>
+          </button>
+
+        </form>
+
+      </aside>
+
+    </div>
+
+
+    <!-- =====================================================
+      FULL ANALYSIS REPORT MODAL
+    ====================================================== -->
+    <div
+      class="analysis-modal-backdrop"
+      id="analysisReportModal"
+      hidden
+    >
+
+      <section
+        class="analysis-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="analysisReportModalTitle"
+      >
+
+        <header class="analysis-modal__header">
+
+          <div>
+
+            <span class="analysis-modal__eyebrow">
+              PCSUnited
+            </span>
+
+            <h2
+              class="analysis-modal__title"
+              id="analysisReportModalTitle"
+            >
+              Full Home Buying Analysis
+            </h2>
+
+          </div>
+
+          <button
+            class="analysis-modal__close"
+            id="closeAnalysisReportButton"
+            type="button"
+            aria-label="Close full analysis report"
+          >
+            <i
+              data-lucide="x"
+              aria-hidden="true"
+            ></i>
+          </button>
+
+        </header>
+
+
+        <div
+          class="analysis-modal__body"
+          id="analysisReportContent"
+        >
+
+          <section class="analysis-report-section">
+
+            <h3>
+              Affordability
+            </h3>
+
+            <p>
+              Your selected home is currently within the healthy housing
+              range based on the information supplied to PCSUnited.
+            </p>
+
+          </section>
+
+          <section class="analysis-report-section">
+
+            <h3>
+              Monthly Cash Flow
+            </h3>
+
+            <p>
+              Your projected monthly cash flow remains positive after the
+              estimated housing payment, expenses, debt, and savings.
+            </p>
+
+          </section>
+
+          <section class="analysis-report-section">
+
+            <h3>
+              Upfront Readiness
+            </h3>
+
+            <p>
+              The analysis compares your available funds against the down
+              payment, estimated closing costs, and prepaid expenses.
+            </p>
+
+          </section>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+    APPLICATION JAVASCRIPT
+  ======================================================== -->
+  <script src="./app.js"></script>
+
+
+  <!-- =======================================================
+    ICON INITIALIZATION FALLBACK
+  ======================================================== -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.lucide) {
+        window.lucide.createIcons({
+          attrs: {
+            "stroke-width": 2
+          }
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
