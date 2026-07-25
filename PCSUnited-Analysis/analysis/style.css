@@ -1,0 +1,2793 @@
+/* ============================================================
+   PCSUnited Analysis
+   Home Buying Financial Analysis Dashboard
+   style.css
+   v1.0.0
+
+   SECTION 1 OF 2
+   - Design tokens
+   - Reset and accessibility
+   - Application shell
+   - Header
+   - Affordability hero
+   - Primary dashboard layout
+   - General cards
+   - Payment breakdown
+   - Cash-flow waterfall
+   ============================================================ */
+
+
+/* ============================================================
+   1. DESIGN TOKENS
+   ============================================================ */
+
+:root {
+  color-scheme: light;
+
+  --pcsu-navy-950: #07122d;
+  --pcsu-navy-900: #0b1737;
+  --pcsu-navy-850: #101d42;
+  --pcsu-navy-800: #15244d;
+  --pcsu-navy-700: #22355f;
+  --pcsu-navy-600: #334976;
+
+  --pcsu-blue-700: #3157af;
+  --pcsu-blue-600: #3e69d0;
+  --pcsu-blue-500: #527be0;
+  --pcsu-blue-400: #7194e8;
+  --pcsu-blue-100: #eaf0ff;
+  --pcsu-blue-050: #f3f6ff;
+
+  --pcsu-gold-600: #b98326;
+  --pcsu-gold-500: #d59b37;
+  --pcsu-gold-400: #e6b35d;
+  --pcsu-gold-100: #fff4d8;
+
+  --pcsu-green-700: #17724a;
+  --pcsu-green-600: #22885c;
+  --pcsu-green-500: #31a86f;
+  --pcsu-green-100: #e2f7ec;
+  --pcsu-green-050: #effbf4;
+
+  --pcsu-yellow-700: #9a6810;
+  --pcsu-yellow-600: #b47a13;
+  --pcsu-yellow-500: #d89b28;
+  --pcsu-yellow-100: #fff2cf;
+  --pcsu-yellow-050: #fff9e8;
+
+  --pcsu-red-700: #a43f49;
+  --pcsu-red-600: #c04b57;
+  --pcsu-red-500: #d65d68;
+  --pcsu-red-100: #ffe4e7;
+  --pcsu-red-050: #fff2f3;
+
+  --pcsu-purple-600: #7655bf;
+  --pcsu-purple-500: #8d6bd3;
+  --pcsu-purple-100: #efe9ff;
+
+  --pcsu-cyan-600: #258ea3;
+  --pcsu-cyan-500: #35a7bd;
+  --pcsu-cyan-100: #e0f7fa;
+
+  --pcsu-text-950: #10162a;
+  --pcsu-text-900: #17203a;
+  --pcsu-text-800: #29334e;
+  --pcsu-text-700: #43506b;
+  --pcsu-text-600: #63708a;
+  --pcsu-text-500: #7c879d;
+  --pcsu-text-400: #9aa3b5;
+
+  --pcsu-surface: #ffffff;
+  --pcsu-surface-soft: #f8f9fc;
+  --pcsu-surface-muted: #f1f3f8;
+  --pcsu-surface-blue: #f4f7ff;
+  --pcsu-page: #eef1f6;
+
+  --pcsu-border: #dce1ea;
+  --pcsu-border-soft: #e8ebf1;
+  --pcsu-border-dark: #cbd2df;
+
+  --pcsu-shadow-xs:
+    0 1px 2px rgba(12, 23, 54, 0.04);
+
+  --pcsu-shadow-sm:
+    0 4px 12px rgba(12, 23, 54, 0.06);
+
+  --pcsu-shadow-md:
+    0 10px 28px rgba(12, 23, 54, 0.09);
+
+  --pcsu-shadow-lg:
+    0 20px 55px rgba(12, 23, 54, 0.15);
+
+  --pcsu-shadow-blue:
+    0 14px 34px rgba(58, 96, 190, 0.23);
+
+  --pcsu-radius-xs: 6px;
+  --pcsu-radius-sm: 9px;
+  --pcsu-radius-md: 13px;
+  --pcsu-radius-lg: 18px;
+  --pcsu-radius-xl: 24px;
+  --pcsu-radius-pill: 999px;
+
+  --pcsu-font-ui:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  --pcsu-font-display:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  --pcsu-transition:
+    160ms ease;
+
+  --pcsu-header-height: 96px;
+  --pcsu-footer-height: 86px;
+}
+
+
+/* ============================================================
+   2. RESET
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+  background: var(--pcsu-page);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  color: var(--pcsu-text-900);
+  background:
+    radial-gradient(
+      circle at 15% -10%,
+      rgba(86, 121, 214, 0.08),
+      transparent 28rem
+    ),
+    var(--pcsu-page);
+  font-family: var(--pcsu-font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  margin: 0;
+  color: inherit;
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+button,
+select {
+  cursor: pointer;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+p,
+h1,
+h2,
+h3,
+ul {
+  margin-top: 0;
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(82, 123, 224, 0.35);
+  outline-offset: 3px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+
+/* ============================================================
+   3. APPLICATION SHELL
+   ============================================================ */
+
+.analysis-app {
+  width: 100%;
+  min-height: 100vh;
+  padding-bottom: calc(
+    var(--pcsu-footer-height) + 30px
+  );
+}
+
+.analysis-main {
+  width: min(100%, 1600px);
+  margin: 0 auto;
+  padding:
+    28px
+    clamp(20px, 3vw, 48px)
+    40px;
+}
+
+
+/* ============================================================
+   4. HEADER
+   ============================================================ */
+
+.analysis-header {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  display: grid;
+  grid-template-columns:
+    auto
+    1px
+    minmax(250px, 1fr)
+    minmax(290px, 390px)
+    auto
+    auto;
+  align-items: center;
+  min-height: var(--pcsu-header-height);
+  padding:
+    14px
+    clamp(20px, 3vw, 48px);
+  gap: clamp(16px, 2vw, 30px);
+  border-bottom: 1px solid rgba(210, 216, 229, 0.9);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 5px 18px rgba(12, 23, 54, 0.05);
+  backdrop-filter: blur(16px);
+}
+
+.analysis-brand {
+  display: flex;
+  align-items: center;
+  min-width: 175px;
+  gap: 11px;
+}
+
+.analysis-brand__mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 34px;
+  color: var(--pcsu-gold-500);
+}
+
+.analysis-brand__star {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--pcsu-gold-500);
+  background: var(--pcsu-navy-900);
+  box-shadow:
+    0 0 0 3px #ffffff,
+    0 0 0 4px rgba(20, 35, 74, 0.15);
+}
+
+.analysis-brand__star svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+.analysis-brand__wing {
+  position: absolute;
+  top: 14px;
+  width: 19px;
+  height: 8px;
+  border-top: 2px solid currentColor;
+}
+
+.analysis-brand__wing::before,
+.analysis-brand__wing::after {
+  position: absolute;
+  width: 15px;
+  height: 2px;
+  content: "";
+  background: currentColor;
+}
+
+.analysis-brand__wing::before {
+  top: 3px;
+}
+
+.analysis-brand__wing::after {
+  top: 7px;
+  width: 11px;
+}
+
+.analysis-brand__wing--left {
+  right: 29px;
+  transform: skewY(-12deg);
+}
+
+.analysis-brand__wing--left::before,
+.analysis-brand__wing--left::after {
+  right: 0;
+}
+
+.analysis-brand__wing--right {
+  left: 29px;
+  transform: skewY(12deg);
+}
+
+.analysis-brand__wing--right::before,
+.analysis-brand__wing--right::after {
+  left: 0;
+}
+
+.analysis-brand__copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.analysis-brand__name {
+  color: var(--pcsu-navy-900);
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.075em;
+}
+
+.analysis-brand__tagline {
+  margin-top: 6px;
+  color: var(--pcsu-gold-600);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.analysis-header__divider {
+  width: 1px;
+  height: 45px;
+  background: var(--pcsu-border);
+}
+
+.analysis-header__title-group {
+  min-width: 0;
+}
+
+.analysis-header__title {
+  margin-bottom: 4px;
+  color: var(--pcsu-navy-900);
+  font-family: var(--pcsu-font-display);
+  font-size: clamp(20px, 1.55vw, 27px);
+  font-weight: 600;
+  line-height: 1.16;
+}
+
+.analysis-header__subtitle {
+  overflow: hidden;
+  margin-bottom: 0;
+  color: var(--pcsu-text-600);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* Selected Home */
+
+.selected-home-card {
+  display: grid;
+  grid-template-columns: 104px 1fr;
+  min-width: 0;
+  padding: 8px;
+  gap: 12px;
+  border: 1px solid var(--pcsu-border);
+  border-radius: var(--pcsu-radius-md);
+  background: var(--pcsu-surface);
+  box-shadow: var(--pcsu-shadow-xs);
+}
+
+.selected-home-card__image-wrap {
+  overflow: hidden;
+  width: 104px;
+  height: 62px;
+  border-radius: 8px;
+  background: var(--pcsu-surface-muted);
+}
+
+.selected-home-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.selected-home-card__content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.selected-home-card__eyebrow {
+  margin-bottom: 1px;
+  color: var(--pcsu-text-500);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.selected-home-card__price {
+  color: var(--pcsu-navy-900);
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.selected-home-card__details,
+.selected-home-card__location {
+  overflow: hidden;
+  color: var(--pcsu-text-600);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected-home-card__details {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.selected-home-card__separator {
+  color: var(--pcsu-border-dark);
+}
+
+
+/* User */
+
+.analysis-user {
+  display: flex;
+  align-items: center;
+  min-width: 195px;
+  gap: 10px;
+}
+
+.analysis-user__avatar-wrap {
+  overflow: hidden;
+  width: 47px;
+  height: 47px;
+  flex: 0 0 47px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: var(--pcsu-surface-muted);
+  box-shadow: 0 0 0 2px var(--pcsu-blue-100);
+}
+
+.analysis-user__avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.analysis-user__content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.analysis-user__greeting {
+  overflow: hidden;
+  margin-bottom: 3px;
+  color: var(--pcsu-navy-900);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analysis-user__detail {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  gap: 5px;
+  color: var(--pcsu-text-600);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analysis-user__detail + .analysis-user__detail {
+  margin-top: 2px;
+}
+
+.analysis-user__detail svg {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 auto;
+  color: var(--pcsu-blue-600);
+}
+
+
+/* Ask Amy Button */
+
+.ask-amy-button {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  gap: 9px;
+  border-radius: var(--pcsu-radius-pill);
+  color: #ffffff;
+  background:
+    linear-gradient(
+      135deg,
+      var(--pcsu-navy-800),
+      var(--pcsu-blue-700)
+    );
+  box-shadow: var(--pcsu-shadow-blue);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  transition:
+    transform var(--pcsu-transition),
+    box-shadow var(--pcsu-transition);
+}
+
+.ask-amy-button:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 18px 38px rgba(58, 96, 190, 0.3);
+}
+
+.ask-amy-button__icon {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ask-amy-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+
+/* ============================================================
+   5. AFFORDABILITY HERO
+   ============================================================ */
+
+.affordability-hero {
+  display: grid;
+  grid-template-columns:
+    minmax(235px, 1.35fr)
+    repeat(4, minmax(145px, 0.85fr))
+    minmax(155px, 0.78fr);
+  overflow: hidden;
+  min-height: 180px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--pcsu-radius-lg);
+  color: #ffffff;
+  background:
+    radial-gradient(
+      circle at 92% 0%,
+      rgba(112, 145, 233, 0.23),
+      transparent 26rem
+    ),
+    linear-gradient(
+      135deg,
+      #0a1432 0%,
+      #142349 58%,
+      #1d3264 100%
+    );
+  box-shadow: var(--pcsu-shadow-md);
+}
+
+.affordability-verdict,
+.hero-metric,
+.affordability-score {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px;
+}
+
+.affordability-verdict::after,
+.hero-metric::after {
+  position: absolute;
+  top: 25px;
+  right: 0;
+  bottom: 25px;
+  width: 1px;
+  content: "";
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.affordability-verdict {
+  align-items: center;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 19px;
+}
+
+.affordability-verdict__title {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.affordability-verdict__ring {
+  display: grid;
+  width: 112px;
+  height: 112px;
+  flex: 0 0 112px;
+  margin-top: 17px;
+  place-items: center;
+  border: 8px solid rgba(47, 171, 111, 0.22);
+  border-top-color: var(--pcsu-green-500);
+  border-right-color: var(--pcsu-green-500);
+  border-radius: 50%;
+  transform: rotate(-30deg);
+  box-shadow:
+    inset 0 0 28px rgba(35, 172, 107, 0.12),
+    0 0 26px rgba(35, 172, 107, 0.14);
+}
+
+.affordability-verdict__ring-inner {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  transform: rotate(30deg);
+  text-align: center;
+}
+
+.affordability-verdict__answer {
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.affordability-verdict__message {
+  margin-top: 7px;
+  color: #a9e9c9;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hero-metric__label,
+.affordability-score__label {
+  min-height: 30px;
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.67);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.hero-metric__value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.hero-metric__value {
+  overflow: hidden;
+  color: #ffffff;
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-metric__suffix {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+}
+
+.hero-metric__description,
+.hero-metric__note {
+  margin-top: 7px;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 9px;
+}
+
+.hero-metric__note {
+  margin-top: 6px;
+  color: #b8c7e8;
+}
+
+.hero-status {
+  align-self: flex-start;
+  margin-top: 13px;
+  padding: 4px 9px;
+  border-radius: var(--pcsu-radius-pill);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.hero-status--healthy,
+.hero-status--strong,
+.hero-status--good {
+  color: #bff3d6;
+  background: rgba(36, 153, 99, 0.2);
+}
+
+.affordability-score {
+  align-items: center;
+  text-align: center;
+}
+
+.affordability-score__label {
+  min-height: unset;
+  margin-bottom: 9px;
+}
+
+.affordability-score__ring {
+  display: grid;
+  width: 102px;
+  height: 102px;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      var(--pcsu-gold-400) 0deg 331deg,
+      rgba(255, 255, 255, 0.12) 331deg 360deg
+    );
+  box-shadow: 0 0 24px rgba(218, 160, 62, 0.14);
+}
+
+.affordability-score__inner {
+  display: grid;
+  width: 78px;
+  height: 78px;
+  place-items: center;
+  align-content: center;
+  border-radius: 50%;
+  background: #18294f;
+}
+
+.affordability-score__value {
+  font-size: 27px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.affordability-score__rating {
+  margin-top: 5px;
+  color: var(--pcsu-gold-400);
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+
+/* ============================================================
+   6. DASHBOARD GRID
+   ============================================================ */
+
+.analysis-content-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(300px, 355px);
+  align-items: start;
+  margin-top: 22px;
+  gap: 22px;
+}
+
+.analysis-content-grid__main,
+.analysis-content-grid__sidebar {
+  display: grid;
+  min-width: 0;
+  gap: 22px;
+}
+
+.analysis-content-grid__sidebar {
+  position: sticky;
+  top: calc(
+    var(--pcsu-header-height) + 20px
+  );
+}
+
+
+/* ============================================================
+   7. GENERAL CARD SYSTEM
+   ============================================================ */
+
+.analysis-card {
+  overflow: hidden;
+  border: 1px solid var(--pcsu-border);
+  border-radius: var(--pcsu-radius-lg);
+  background: var(--pcsu-surface);
+  box-shadow: var(--pcsu-shadow-sm);
+}
+
+.analysis-card__header,
+.summary-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 21px 23px 17px;
+}
+
+.analysis-card__title,
+.summary-card__title {
+  margin: 0;
+  color: var(--pcsu-navy-900);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.analysis-card__title-note {
+  color: var(--pcsu-text-500);
+  font-weight: 600;
+}
+
+.analysis-card__subtitle {
+  margin: 4px 0 0;
+  color: var(--pcsu-text-500);
+  font-size: 10px;
+}
+
+.summary-card__heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.info-button {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--pcsu-text-500);
+  background: transparent;
+  transition:
+    color var(--pcsu-transition),
+    background var(--pcsu-transition);
+}
+
+.info-button:hover {
+  color: var(--pcsu-blue-600);
+  background: var(--pcsu-blue-100);
+}
+
+.info-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+
+/* ============================================================
+   8. PAYMENT BREAKDOWN
+   ============================================================ */
+
+.payment-breakdown-card__body {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(320px, 1.2fr);
+  align-items: center;
+  padding: 7px 28px 25px;
+  gap: clamp(26px, 5vw, 75px);
+}
+
+.payment-donut {
+  position: relative;
+  width: min(100%, 220px);
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+
+.payment-donut__svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.payment-donut__track,
+.payment-donut__segment {
+  fill: none;
+  stroke-width: 21;
+}
+
+.payment-donut__track {
+  stroke: var(--pcsu-surface-muted);
+}
+
+.payment-donut__segment {
+  stroke-linecap: butt;
+  transition:
+    stroke-dasharray 450ms ease,
+    stroke-dashoffset 450ms ease;
+}
+
+.payment-donut__segment--principal {
+  stroke: var(--pcsu-blue-600);
+}
+
+.payment-donut__segment--taxes {
+  stroke: var(--pcsu-purple-500);
+}
+
+.payment-donut__segment--insurance {
+  stroke: var(--pcsu-cyan-500);
+}
+
+.payment-donut__segment--hoa {
+  stroke: var(--pcsu-gold-500);
+}
+
+.payment-donut__segment--pmi {
+  stroke: var(--pcsu-red-500);
+}
+
+.payment-donut__center {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  inset: 0;
+  text-align: center;
+}
+
+.payment-donut__value {
+  color: var(--pcsu-navy-900);
+  font-size: 26px;
+  font-weight: 850;
+  letter-spacing: -0.045em;
+}
+
+.payment-donut__label {
+  margin-top: 3px;
+  color: var(--pcsu-text-500);
+  font-size: 10px;
+}
+
+.payment-breakdown-list {
+  display: grid;
+  gap: 4px;
+}
+
+.payment-breakdown-item {
+  display: grid;
+  grid-template-columns: 12px minmax(150px, 1fr) auto 42px;
+  align-items: center;
+  min-height: 44px;
+  gap: 11px;
+  border-bottom: 1px solid var(--pcsu-border-soft);
+}
+
+.payment-breakdown-item:last-child {
+  border-bottom: 0;
+}
+
+.payment-breakdown-item__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.payment-breakdown-item__dot--principal {
+  background: var(--pcsu-blue-600);
+}
+
+.payment-breakdown-item__dot--taxes {
+  background: var(--pcsu-purple-500);
+}
+
+.payment-breakdown-item__dot--insurance {
+  background: var(--pcsu-cyan-500);
+}
+
+.payment-breakdown-item__dot--hoa {
+  background: var(--pcsu-gold-500);
+}
+
+.payment-breakdown-item__dot--pmi {
+  background: var(--pcsu-red-500);
+}
+
+.payment-breakdown-item__label {
+  color: var(--pcsu-text-700);
+  font-size: 11px;
+}
+
+.payment-breakdown-item__amount {
+  color: var(--pcsu-text-900);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.payment-breakdown-item__percentage {
+  color: var(--pcsu-text-500);
+  font-size: 10px;
+  text-align: right;
+}
+
+.payment-breakdown-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 10px 22px;
+  gap: 35px;
+  border-top: 1px solid var(--pcsu-border-soft);
+  color: var(--pcsu-text-500);
+  background: var(--pcsu-surface-soft);
+  font-size: 9px;
+}
+
+.payment-breakdown-card__footer strong {
+  margin-left: 4px;
+  color: var(--pcsu-text-800);
+}
+
+
+/* ============================================================
+   9. MONTHLY CASH FLOW
+   ============================================================ */
+
+.monthly-flow-card__header {
+  padding-bottom: 8px;
+}
+
+.analysis-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.analysis-select select {
+  min-width: 102px;
+  height: 34px;
+  padding: 0 31px 0 12px;
+  border: 1px solid var(--pcsu-border);
+  border-radius: 8px;
+  outline: 0;
+  color: var(--pcsu-text-700);
+  background: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  appearance: none;
+}
+
+.analysis-select svg {
+  position: absolute;
+  right: 10px;
+  width: 13px;
+  height: 13px;
+  pointer-events: none;
+  color: var(--pcsu-text-500);
+}
+
+.waterfall-chart {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(75px, 1fr));
+  align-items: end;
+  min-height: 305px;
+  padding: 30px 28px 22px;
+  gap: 12px;
+  isolation: isolate;
+}
+
+.waterfall-chart::before {
+  position: absolute;
+  z-index: -2;
+  top: 35px;
+  right: 28px;
+  bottom: 70px;
+  left: 28px;
+  content: "";
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 45px,
+      var(--pcsu-border-soft) 46px
+    );
+}
+
+.waterfall-column {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  height: 230px;
+  align-items: center;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.waterfall-column__bar {
+  width: min(58px, 72%);
+  min-height: 10px;
+  border-radius: 7px 7px 2px 2px;
+  transition: height 450ms ease;
+}
+
+.waterfall-column__value {
+  margin: 0 0 8px;
+  color: var(--pcsu-text-800);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.waterfall-column--housing .waterfall-column__value,
+.waterfall-column--expenses .waterfall-column__value,
+.waterfall-column--debt .waterfall-column__value,
+.waterfall-column--savings .waterfall-column__value {
+  order: 2;
+  margin: 7px 0 0;
+}
+
+.waterfall-column__label {
+  min-height: 34px;
+  margin-top: 10px;
+  color: var(--pcsu-text-500);
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.waterfall-column--income .waterfall-column__bar {
+  height: 165px;
+  background:
+    linear-gradient(
+      180deg,
+      var(--pcsu-blue-500),
+      var(--pcsu-blue-700)
+    );
+}
+
+.waterfall-column--housing .waterfall-column__bar {
+  height: 70px;
+  background:
+    linear-gradient(
+      180deg,
+      #ef7680,
+      var(--pcsu-red-600)
+    );
+}
+
+.waterfall-column--expenses .waterfall-column__bar {
+  height: 54px;
+  background:
+    linear-gradient(
+      180deg,
+      #ecad49,
+      var(--pcsu-gold-600)
+    );
+}
+
+.waterfall-column--debt .waterfall-column__bar {
+  height: 28px;
+  background:
+    linear-gradient(
+      180deg,
+      #9e80df,
+      var(--pcsu-purple-600)
+    );
+}
+
+.waterfall-column--savings .waterfall-column__bar {
+  height: 38px;
+  background:
+    linear-gradient(
+      180deg,
+      #56b8ca,
+      var(--pcsu-cyan-600)
+    );
+}
+
+.waterfall-column--remaining .waterfall-column__bar {
+  height: 82px;
+  background:
+    linear-gradient(
+      180deg,
+      #45bd80,
+      var(--pcsu-green-700)
+    );
+}
+
+.waterfall-chart__connector {
+  position: absolute;
+  z-index: 1;
+  top: 20px;
+  right: 20px;
+  bottom: 48px;
+  left: 20px;
+  width: calc(100% - 40px);
+  height: calc(100% - 68px);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.waterfall-chart__connector path {
+  fill: none;
+  stroke: rgba(52, 70, 111, 0.22);
+  stroke-width: 2;
+  stroke-dasharray: 4 5;
+  vector-effect: non-scaling-stroke;
+}
+
+.monthly-flow-insight {
+  display: flex;
+  align-items: center;
+  min-height: 58px;
+  padding: 13px 22px;
+  gap: 11px;
+  border-top: 1px solid var(--pcsu-border-soft);
+  color: var(--pcsu-green-700);
+  background: var(--pcsu-green-050);
+}
+
+.monthly-flow-insight__icon {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  flex: 0 0 29px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--pcsu-green-700);
+  background: var(--pcsu-green-100);
+}
+
+.monthly-flow-insight__icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.monthly-flow-insight p {
+  margin: 0;
+  font-size: 10px;
+}
+
+.monthly-flow-insight strong {
+  font-weight: 900;
+}
+/* ============================================================
+   PCSUnited Analysis
+   Home Buying Financial Analysis Dashboard
+   style.css
+   v1.0.0
+
+   SECTION 2 OF 2
+   - Summary cards
+   - Affordability result
+   - Price scenarios
+   - Key takeaways
+   - Bottom navigation
+   - Ask Amy panel
+   - Full report modal
+   - Responsive layouts
+   - Animations and accessibility
+   ============================================================ */
+
+
+/* ============================================================
+   10. LOWER SUMMARY CARDS
+   ============================================================ */
+
+.analysis-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.summary-card,
+.reserves-card {
+  min-height: 232px;
+}
+
+.summary-card__header {
+  min-height: 61px;
+  padding-bottom: 12px;
+}
+
+.summary-list {
+  padding: 0 21px;
+}
+
+.summary-list__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 42px;
+  column-gap: 8px;
+  border-bottom: 1px solid var(--pcsu-border-soft);
+}
+
+.summary-list__row:last-child {
+  border-bottom: 0;
+}
+
+.summary-list__row > span:first-child {
+  color: var(--pcsu-text-600);
+  font-size: 9px;
+}
+
+.summary-list__row > strong {
+  color: var(--pcsu-text-900);
+  font-size: 11px;
+  font-weight: 850;
+  text-align: right;
+}
+
+.compact-status {
+  grid-column: 2;
+  justify-self: end;
+  margin-top: -5px;
+  padding: 2px 7px;
+  border-radius: var(--pcsu-radius-pill);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.compact-status--excellent,
+.compact-status--good {
+  color: var(--pcsu-green-700);
+  background: var(--pcsu-green-100);
+}
+
+.compact-status--warning {
+  color: var(--pcsu-yellow-700);
+  background: var(--pcsu-yellow-100);
+}
+
+.compact-status--danger {
+  color: var(--pcsu-red-700);
+  background: var(--pcsu-red-100);
+}
+
+.summary-card__link,
+.key-takeaways-card__link {
+  display: flex;
+  width: 100%;
+  min-height: 43px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  padding: 10px 15px;
+  gap: 7px;
+  border-top: 1px solid var(--pcsu-border-soft);
+  color: var(--pcsu-blue-700);
+  background: var(--pcsu-surface-soft);
+  font-size: 9px;
+  font-weight: 800;
+  transition:
+    color var(--pcsu-transition),
+    background var(--pcsu-transition);
+}
+
+.summary-card__link:hover,
+.key-takeaways-card__link:hover {
+  color: var(--pcsu-blue-700);
+  background: var(--pcsu-blue-100);
+}
+
+.summary-card__link svg,
+.key-takeaways-card__link svg {
+  width: 13px;
+  height: 13px;
+}
+
+.upfront-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 53px;
+  margin-top: 9px;
+  padding: 12px 21px;
+  border-top: 1px solid #d7e2fd;
+  color: var(--pcsu-blue-700);
+  background: var(--pcsu-blue-050);
+}
+
+.upfront-total span {
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.upfront-total strong {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+
+/* Reserves */
+
+.reserves-card__content {
+  display: flex;
+  align-items: center;
+  padding: 5px 22px 14px;
+  gap: 14px;
+}
+
+.reserves-card__icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--pcsu-green-700);
+  background:
+    linear-gradient(
+      135deg,
+      var(--pcsu-green-050),
+      var(--pcsu-green-100)
+    );
+}
+
+.reserves-card__icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.reserves-card__value-group {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  min-width: 0;
+  align-items: center;
+  column-gap: 8px;
+}
+
+.reserves-card__value {
+  color: var(--pcsu-navy-900);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.reserves-card__label {
+  grid-column: 1;
+  color: var(--pcsu-text-500);
+  font-size: 8px;
+}
+
+.reserves-card__value-group .compact-status {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  margin: 0;
+}
+
+.reserves-card__description {
+  margin: 4px 21px 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--pcsu-border-soft);
+  color: var(--pcsu-text-600);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   11. AFFORDABILITY RESULT
+   ============================================================ */
+
+.affordability-result-card {
+  padding-bottom: 19px;
+}
+
+.affordability-result-card__header {
+  display: flex;
+  align-items: flex-start;
+  padding: 21px 21px 10px;
+  gap: 11px;
+}
+
+.affordability-result-card__icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--pcsu-green-700);
+  background: var(--pcsu-green-100);
+}
+
+.affordability-result-card__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.affordability-result-card__title {
+  margin: 0 0 6px;
+  color: var(--pcsu-navy-900);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.affordability-result-card__headline {
+  display: block;
+  color: var(--pcsu-green-700);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.affordability-result-card__copy {
+  margin: 3px 21px 7px;
+  color: var(--pcsu-text-600);
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.affordability-gauge {
+  position: relative;
+  width: min(100%, 290px);
+  height: 154px;
+  margin: 0 auto;
+}
+
+.affordability-gauge__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.affordability-gauge__segment {
+  fill: none;
+  stroke-width: 19;
+  stroke-linecap: round;
+}
+
+.affordability-gauge__segment--danger {
+  stroke: var(--pcsu-red-500);
+}
+
+.affordability-gauge__segment--warning {
+  stroke: var(--pcsu-gold-500);
+}
+
+.affordability-gauge__segment--healthy {
+  stroke: var(--pcsu-green-500);
+}
+
+.affordability-gauge__pivot {
+  fill: var(--pcsu-navy-900);
+  stroke: #ffffff;
+  stroke-width: 4;
+}
+
+.affordability-gauge__needle {
+  stroke: var(--pcsu-navy-900);
+  stroke-width: 5;
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: left center;
+  transition: transform 550ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.affordability-gauge__value {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.affordability-gauge__value strong {
+  color: var(--pcsu-navy-900);
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.affordability-gauge__value span {
+  color: var(--pcsu-text-500);
+  font-size: 8px;
+}
+
+.affordability-result-card__status {
+  display: block;
+  width: calc(100% - 42px);
+  margin: 0 auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--pcsu-green-700);
+  background: var(--pcsu-green-050);
+  font-size: 8px;
+  font-weight: 750;
+  line-height: 1.4;
+  text-align: center;
+}
+
+
+/* ============================================================
+   12. PRICE SCENARIOS
+   ============================================================ */
+
+.price-scenarios-card__header {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+}
+
+.price-scenarios-card__title {
+  margin: 0;
+  color: var(--pcsu-navy-900);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.price-scenarios-card__toggle {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 7px;
+  color: var(--pcsu-text-500);
+  background: var(--pcsu-surface-soft);
+}
+
+.price-scenarios-card__toggle:hover {
+  color: var(--pcsu-blue-600);
+  background: var(--pcsu-blue-100);
+}
+
+.price-scenarios-card__toggle svg {
+  width: 15px;
+  height: 15px;
+}
+
+.price-scenarios-list {
+  padding: 0 16px 12px;
+}
+
+.price-scenario {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  min-height: 63px;
+  padding: 10px 11px;
+  column-gap: 9px;
+  border-top: 1px solid var(--pcsu-border-soft);
+}
+
+.price-scenario--selected {
+  margin: 2px 0;
+  border: 1px solid #ccdafb;
+  border-radius: 10px;
+  background: var(--pcsu-blue-050);
+}
+
+.price-scenario__label {
+  grid-column: 1;
+  color: var(--pcsu-text-500);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.price-scenario__price {
+  grid-row: 2;
+  grid-column: 1;
+  color: var(--pcsu-text-900);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.price-scenario__payment {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  color: var(--pcsu-text-800);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.price-scenario__payment span {
+  color: var(--pcsu-text-500);
+  font-size: 8px;
+  font-weight: 500;
+}
+
+.price-scenario__ratio {
+  grid-row: 1 / span 2;
+  grid-column: 3;
+  min-width: 39px;
+  padding: 4px 6px;
+  border-radius: var(--pcsu-radius-pill);
+  font-size: 8px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.price-scenario__ratio--healthy {
+  color: var(--pcsu-green-700);
+  background: var(--pcsu-green-100);
+}
+
+.price-scenario__ratio--caution {
+  color: var(--pcsu-yellow-700);
+  background: var(--pcsu-yellow-100);
+}
+
+.price-scenario__ratio--danger {
+  color: var(--pcsu-red-700);
+  background: var(--pcsu-red-100);
+}
+
+.price-scenarios-card__footer {
+  padding: 12px 18px;
+  border-top: 1px solid var(--pcsu-border-soft);
+  color: var(--pcsu-text-500);
+  background: var(--pcsu-surface-soft);
+  font-size: 8px;
+  text-align: center;
+}
+
+
+/* ============================================================
+   13. KEY TAKEAWAYS
+   ============================================================ */
+
+.key-takeaways-list {
+  display: grid;
+  margin: 0;
+  padding: 0 20px 13px;
+  gap: 11px;
+  list-style: none;
+}
+
+.key-takeaway {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: var(--pcsu-text-700);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.key-takeaway__icon {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--pcsu-green-700);
+  background: var(--pcsu-green-100);
+}
+
+.key-takeaway__icon svg {
+  width: 11px;
+  height: 11px;
+  stroke-width: 3;
+}
+
+.key-takeaways-card__link {
+  margin-top: 0;
+}
+
+
+/* ============================================================
+   14. BOTTOM APPLICATION NAVIGATION
+   ============================================================ */
+
+.analysis-footer {
+  position: fixed;
+  z-index: 25;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  min-height: var(--pcsu-footer-height);
+  align-items: center;
+  justify-content: space-between;
+  padding:
+    13px
+    clamp(20px, 3vw, 48px);
+  gap: 30px;
+  border-top: 1px solid var(--pcsu-border);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 -9px 28px rgba(12, 23, 54, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.analysis-progress {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.analysis-progress__step {
+  display: grid;
+  min-width: 65px;
+  place-items: center;
+  gap: 3px;
+  color: var(--pcsu-text-500);
+  background: transparent;
+  font-size: 8px;
+}
+
+.analysis-progress__number {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border: 1px solid var(--pcsu-border-dark);
+  border-radius: 50%;
+  color: var(--pcsu-text-500);
+  background: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.analysis-progress__label {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.analysis-progress__check {
+  display: none;
+}
+
+.analysis-progress__step--complete .analysis-progress__number {
+  border-color: var(--pcsu-green-500);
+  color: #ffffff;
+  background: var(--pcsu-green-500);
+}
+
+.analysis-progress__step--active {
+  color: var(--pcsu-blue-700);
+}
+
+.analysis-progress__step--active .analysis-progress__number {
+  border-color: var(--pcsu-blue-600);
+  color: #ffffff;
+  background: var(--pcsu-blue-600);
+  box-shadow:
+    0 0 0 4px var(--pcsu-blue-100);
+}
+
+.analysis-progress__connector {
+  width: clamp(25px, 4vw, 75px);
+  height: 2px;
+  margin: 0 3px 18px;
+  background: var(--pcsu-border);
+}
+
+.analysis-next-button {
+  display: inline-flex;
+  min-width: 195px;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 21px;
+  gap: 10px;
+  border-radius: 10px;
+  color: #ffffff;
+  background:
+    linear-gradient(
+      135deg,
+      var(--pcsu-blue-700),
+      var(--pcsu-blue-500)
+    );
+  box-shadow: var(--pcsu-shadow-blue);
+  font-size: 11px;
+  font-weight: 850;
+  transition:
+    transform var(--pcsu-transition),
+    box-shadow var(--pcsu-transition);
+}
+
+.analysis-next-button:hover {
+  transform: translateY(-2px);
+}
+
+.analysis-next-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.analysis-next-button--complete {
+  background:
+    linear-gradient(
+      135deg,
+      var(--pcsu-green-700),
+      var(--pcsu-green-500)
+    );
+}
+
+
+/* ============================================================
+   15. ASK AMY PANEL
+   ============================================================ */
+
+.amy-panel-backdrop,
+.analysis-modal-backdrop {
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  padding: 0;
+  inset: 0;
+  background: rgba(7, 16, 40, 0.52);
+  backdrop-filter: blur(4px);
+}
+
+.amy-panel {
+  display: grid;
+  width: min(100%, 430px);
+  height: 100%;
+  grid-template-rows: auto 1fr auto;
+  background: #ffffff;
+  box-shadow:
+    -20px 0 55px rgba(7, 16, 40, 0.2);
+  animation:
+    pcsu-panel-enter 240ms ease both;
+}
+
+.amy-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--pcsu-border);
+  background:
+    linear-gradient(
+      135deg,
+      var(--pcsu-navy-900),
+      var(--pcsu-navy-700)
+    );
+  color: #ffffff;
+}
+
+.amy-panel__identity {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.amy-panel__avatar {
+  width: 48px;
+  height: 48px;
+  border: 2px solid rgba(255, 255, 255, 0.78);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.amy-panel__eyebrow {
+  display: block;
+  margin-bottom: 2px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.amy-panel__title {
+  margin: 0;
+  font-family: var(--pcsu-font-display);
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.amy-panel__close,
+.analysis-modal__close {
+  display: grid;
+  width: 35px;
+  height: 35px;
+  place-items: center;
+  border-radius: 50%;
+  color: currentColor;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background var(--pcsu-transition);
+}
+
+.amy-panel__close:hover {
+  background: rgba(255, 255, 255, 0.19);
+}
+
+.amy-panel__close svg,
+.analysis-modal__close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.amy-panel__conversation {
+  overflow-y: auto;
+  padding: 22px 18px;
+  background:
+    linear-gradient(
+      180deg,
+      #f7f9fd,
+      #ffffff
+    );
+}
+
+.amy-message {
+  width: fit-content;
+  max-width: 88%;
+  margin-bottom: 13px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  box-shadow: var(--pcsu-shadow-xs);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.amy-message p {
+  margin: 0;
+}
+
+.amy-message--assistant {
+  margin-right: auto;
+  border: 1px solid var(--pcsu-border-soft);
+  border-bottom-left-radius: 4px;
+  color: var(--pcsu-text-800);
+  background: #ffffff;
+}
+
+.amy-message--user {
+  margin-left: auto;
+  border-bottom-right-radius: 4px;
+  color: #ffffff;
+  background:
+    linear-gradient(
+      135deg,
+      var(--pcsu-blue-700),
+      var(--pcsu-blue-500)
+    );
+}
+
+.amy-panel__composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  padding: 14px;
+  gap: 9px;
+  border-top: 1px solid var(--pcsu-border);
+  background: #ffffff;
+}
+
+.amy-panel__composer textarea {
+  width: 100%;
+  min-height: 46px;
+  max-height: 130px;
+  resize: vertical;
+  padding: 13px 14px;
+  border: 1px solid var(--pcsu-border);
+  border-radius: 12px;
+  outline: 0;
+  color: var(--pcsu-text-800);
+  background: var(--pcsu-surface-soft);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.amy-panel__composer textarea:focus {
+  border-color: var(--pcsu-blue-400);
+  background: #ffffff;
+  box-shadow:
+    0 0 0 3px rgba(82, 123, 224, 0.12);
+}
+
+.amy-panel__send {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 12px;
+  color: #ffffff;
+  background: var(--pcsu-blue-600);
+  box-shadow: var(--pcsu-shadow-sm);
+}
+
+.amy-panel__send:hover {
+  background: var(--pcsu-blue-700);
+}
+
+.amy-panel__send svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+/* ============================================================
+   16. FULL ANALYSIS MODAL
+   ============================================================ */
+
+.analysis-modal-backdrop {
+  align-items: center;
+  justify-content: center;
+  padding: 25px;
+}
+
+.analysis-modal {
+  display: grid;
+  width: min(100%, 790px);
+  max-height: min(88vh, 900px);
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  border-radius: var(--pcsu-radius-xl);
+  background: #ffffff;
+  box-shadow: var(--pcsu-shadow-lg);
+  animation:
+    pcsu-modal-enter 220ms ease both;
+}
+
+.analysis-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 21px 24px;
+  border-bottom: 1px solid var(--pcsu-border);
+  color: #ffffff;
+  background:
+    radial-gradient(
+      circle at 95% 0,
+      rgba(114, 146, 230, 0.22),
+      transparent 18rem
+    ),
+    var(--pcsu-navy-900);
+}
+
+.analysis-modal__eyebrow {
+  color: var(--pcsu-gold-400);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.analysis-modal__title {
+  margin: 3px 0 0;
+  font-family: var(--pcsu-font-display);
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.analysis-modal__close {
+  color: #ffffff;
+}
+
+.analysis-modal__body {
+  overflow-y: auto;
+  padding: 25px;
+}
+
+.analysis-report-section {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--pcsu-border-soft);
+}
+
+.analysis-report-section:first-child {
+  padding-top: 0;
+}
+
+.analysis-report-section:last-child {
+  border-bottom: 0;
+}
+
+.analysis-report-section h3 {
+  margin-bottom: 8px;
+  color: var(--pcsu-navy-900);
+  font-size: 14px;
+}
+
+.analysis-report-section p {
+  margin: 0;
+  color: var(--pcsu-text-700);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.analysis-report-section strong {
+  color: var(--pcsu-text-900);
+}
+
+
+/* ============================================================
+   17. ANIMATIONS
+   ============================================================ */
+
+@keyframes pcsu-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateX(35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pcsu-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.pcsu-analysis-ready .analysis-card,
+.pcsu-analysis-ready .affordability-hero {
+  animation:
+    pcsu-content-enter 360ms ease both;
+}
+
+.pcsu-analysis-ready .analysis-card:nth-child(2) {
+  animation-delay: 40ms;
+}
+
+.pcsu-analysis-ready .analysis-card:nth-child(3) {
+  animation-delay: 75ms;
+}
+
+@keyframes pcsu-content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ============================================================
+   18. RESPONSIVE — LARGE LAPTOP
+   ============================================================ */
+
+@media (max-width: 1400px) {
+  .analysis-header {
+    grid-template-columns:
+      auto
+      1px
+      minmax(200px, 1fr)
+      minmax(255px, 335px)
+      auto;
+  }
+
+  .analysis-user {
+    display: none;
+  }
+
+  .affordability-hero {
+    grid-template-columns:
+      minmax(220px, 1.25fr)
+      repeat(4, minmax(125px, 0.78fr))
+      minmax(140px, 0.7fr);
+  }
+
+  .affordability-verdict,
+  .hero-metric,
+  .affordability-score {
+    padding: 20px;
+  }
+
+  .analysis-summary-grid {
+    gap: 16px;
+  }
+}
+
+
+/* ============================================================
+   19. RESPONSIVE — TABLET LANDSCAPE
+   ============================================================ */
+
+@media (max-width: 1180px) {
+  :root {
+    --pcsu-header-height: 88px;
+  }
+
+  .analysis-header {
+    grid-template-columns:
+      auto
+      1px
+      minmax(190px, 1fr)
+      auto;
+  }
+
+  .selected-home-card {
+    display: none;
+  }
+
+  .affordability-hero {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+  .affordability-verdict,
+  .hero-metric,
+  .affordability-score {
+    min-height: 150px;
+  }
+
+  .affordability-verdict::after,
+  .hero-metric::after {
+    display: none;
+  }
+
+  .affordability-verdict,
+  .hero-metric:nth-child(2),
+  .hero-metric:nth-child(3) {
+    border-bottom:
+      1px solid
+      rgba(255, 255, 255, 0.11);
+  }
+
+  .hero-metric:nth-child(2),
+  .hero-metric:nth-child(5) {
+    border-right:
+      1px solid
+      rgba(255, 255, 255, 0.11);
+    border-left:
+      1px solid
+      rgba(255, 255, 255, 0.11);
+  }
+
+  .analysis-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-content-grid__sidebar {
+    position: static;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .analysis-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+
+/* ============================================================
+   20. RESPONSIVE — TABLET PORTRAIT
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .analysis-main {
+    padding:
+      20px
+      18px
+      145px;
+  }
+
+  .analysis-header {
+    position: relative;
+    grid-template-columns: auto 1fr auto;
+    min-height: 78px;
+    padding: 12px 18px;
+    gap: 15px;
+  }
+
+  .analysis-header__divider,
+  .analysis-header__subtitle {
+    display: none;
+  }
+
+  .analysis-header__title {
+    font-size: 18px;
+  }
+
+  .analysis-brand {
+    min-width: 0;
+  }
+
+  .analysis-brand__copy {
+    display: none;
+  }
+
+  .analysis-brand__mark {
+    width: 46px;
+  }
+
+  .ask-amy-button {
+    width: 45px;
+    min-height: 45px;
+    padding: 0;
+  }
+
+  .ask-amy-button > span:last-child {
+    display: none;
+  }
+
+  .affordability-hero {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .affordability-verdict,
+  .hero-metric,
+  .affordability-score {
+    min-height: 148px;
+    border-right:
+      1px solid
+      rgba(255, 255, 255, 0.1);
+    border-bottom:
+      1px solid
+      rgba(255, 255, 255, 0.1);
+  }
+
+  .payment-breakdown-card__body {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-breakdown-list {
+    width: min(100%, 520px);
+    margin: 0 auto;
+  }
+
+  .analysis-summary-grid,
+  .analysis-content-grid__sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .waterfall-chart {
+    overflow-x: auto;
+    grid-template-columns: repeat(6, minmax(100px, 1fr));
+  }
+
+  .waterfall-column {
+    min-width: 100px;
+  }
+
+  .analysis-footer {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 12px 18px;
+    gap: 10px;
+  }
+
+  .analysis-progress {
+    width: 100%;
+  }
+
+  .analysis-progress__step {
+    min-width: 45px;
+  }
+
+  .analysis-progress__label {
+    display: none;
+  }
+
+  .analysis-progress__connector {
+    flex: 1;
+    width: auto;
+    margin-bottom: 0;
+  }
+
+  .analysis-next-button {
+    width: 100%;
+    min-height: 45px;
+  }
+}
+
+
+/* ============================================================
+   21. RESPONSIVE — MOBILE
+   ============================================================ */
+
+@media (max-width: 600px) {
+  body {
+    font-size: 14px;
+  }
+
+  .analysis-main {
+    padding:
+      14px
+      12px
+      140px;
+  }
+
+  .analysis-header {
+    grid-template-columns: auto 1fr auto;
+    padding: 10px 12px;
+  }
+
+  .analysis-header__title {
+    overflow: hidden;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .analysis-brand__mark {
+    width: 41px;
+    transform: scale(0.9);
+  }
+
+  .affordability-hero {
+    grid-template-columns: 1fr;
+    border-radius: 14px;
+  }
+
+  .affordability-verdict,
+  .hero-metric,
+  .affordability-score {
+    min-height: 128px;
+    padding: 19px 22px;
+    border-right: 0;
+  }
+
+  .affordability-verdict {
+    min-height: 156px;
+  }
+
+  .affordability-verdict__ring {
+    width: 102px;
+    height: 102px;
+    flex-basis: 102px;
+  }
+
+  .hero-metric__label {
+    min-height: unset;
+  }
+
+  .hero-metric__value {
+    font-size: 28px;
+  }
+
+  .affordability-score {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  .affordability-score__label {
+    font-size: 12px;
+  }
+
+  .analysis-card {
+    border-radius: 14px;
+  }
+
+  .analysis-card__header,
+  .summary-card__header {
+    padding: 18px 17px 13px;
+  }
+
+  .payment-breakdown-card__body {
+    padding: 8px 18px 20px;
+    gap: 22px;
+  }
+
+  .payment-donut {
+    width: 195px;
+  }
+
+  .payment-breakdown-item {
+    grid-template-columns:
+      11px
+      minmax(0, 1fr)
+      auto
+      34px;
+    gap: 8px;
+  }
+
+  .payment-breakdown-card__footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .waterfall-chart {
+    min-height: 286px;
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+
+  .analysis-summary-grid {
+    gap: 14px;
+  }
+
+  .analysis-content-grid,
+  .analysis-content-grid__main,
+  .analysis-content-grid__sidebar {
+    gap: 14px;
+  }
+
+  .analysis-content-grid {
+    margin-top: 14px;
+  }
+
+  .analysis-modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .analysis-modal {
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .analysis-modal__header {
+    padding: 18px;
+  }
+
+  .analysis-modal__title {
+    font-size: 20px;
+  }
+
+  .analysis-modal__body {
+    padding: 19px;
+  }
+
+  .amy-panel {
+    width: 100%;
+  }
+}
+
+
+/* ============================================================
+   22. VERY SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 390px) {
+  .analysis-header__title {
+    max-width: 190px;
+  }
+
+  .payment-breakdown-item__label {
+    font-size: 9px;
+  }
+
+  .payment-breakdown-item__amount {
+    font-size: 10px;
+  }
+
+  .analysis-progress__step {
+    min-width: 31px;
+  }
+
+  .analysis-progress__number {
+    width: 23px;
+    height: 23px;
+  }
+
+  .analysis-progress__connector {
+    min-width: 8px;
+  }
+}
+
+
+/* ============================================================
+   23. REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ============================================================
+   24. PRINT
+   ============================================================ */
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  .analysis-header {
+    position: static;
+    box-shadow: none;
+  }
+
+  .ask-amy-button,
+  .analysis-footer,
+  .price-scenarios-card__toggle,
+  .summary-card__link,
+  .key-takeaways-card__link {
+    display: none !important;
+  }
+
+  .analysis-app {
+    padding-bottom: 0;
+  }
+
+  .analysis-main {
+    width: 100%;
+    padding: 20px 0;
+  }
+
+  .analysis-content-grid {
+    display: block;
+  }
+
+  .analysis-content-grid__sidebar {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 20px;
+  }
+
+  .analysis-card,
+  .affordability-hero {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+}
