@@ -200,16 +200,6 @@ const DEFAULT_ITEMS = Object.freeze({
 
   lifestyle: [
     {
-      id: "dining-out",
-      label: "Dining Out",
-      icon: "utensils-crossed",
-      color: "orange",
-      value: 250,
-      min: 0,
-      max: 1000,
-      step: 10
-    },
-    {
       id: "entertainment",
       label: "Entertainment",
       icon: "monitor-play",
