@@ -256,35 +256,7 @@
       font-weight: 900;
     }
 
-    .pcsu-amy-timeline {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: 100%;
-      min-height: 100%;
-    }
-
-    .pcsu-amy-timeline-brief-frame,
-    .pcsu-amy-timeline-brief-frame * {
-      box-sizing: border-box;
-      font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        Arial,
-        sans-serif;
-    }
-
-    .pcsu-amy-timeline-brief-frame {
-      display: block;
-      width: 100%;
-      flex: 0 0 auto;
-    }
-
-    .pcsu-amy-render-stage {
+    .pcsu-amy-brief-container {
       display: none;
       width: 100%;
       flex: 0 0 auto;
@@ -292,31 +264,8 @@
       margin: 0;
     }
 
-    .pcsu-amy-render-stage[data-visible="1"] {
-      display: none;
-    }
-
-    @keyframes pcsu-amy-sidebar-glow {
-      0%,
-      100% {
-        box-shadow:
-          0 0 0 rgba(231, 181, 83, 0),
-          0 0 0 rgba(244, 213, 138, 0);
-        border-color: inherit;
-      }
-
-      50% {
-        box-shadow:
-          0 0 0 1px rgba(231, 181, 83, 0.22),
-          0 0 28px rgba(231, 181, 83, 0.24);
-        border-color: rgba(231, 181, 83, 0.56);
-      }
-    }
-
-    #pcsu-ask-amy-sidebar .pcsu-amy-card[data-pcsu-amy-notification="pending"],
-    [data-pcsu-open-amy="1"][data-pcsu-amy-notification="pending"] {
-      animation: pcsu-amy-sidebar-glow 2.6s ease-in-out infinite;
-      will-change: box-shadow, border-color;
+    .pcsu-amy-brief-container[data-visible="1"] {
+      display: block;
     }
 
     .pcsu-amy-chat {
@@ -589,15 +538,8 @@
         aria-label="Ask Amy conversation"
       >
         <div
-        id="pcsu-amy-timeline"
-        class="pcsu-amy-timeline"
-        aria-label="Ask Amy insight timeline"
-      ></div>
-
-      <div
-        id="pcsu-amy-brief-container"
-        class="pcsu-amy-render-stage"
-        aria-hidden="true"
+          id="pcsu-amy-brief-container"
+          class="pcsu-amy-brief-container"
         ></div>
       </div>
 
@@ -643,7 +585,6 @@
       const hud = root.querySelector("#pcsu-amy-hud");
       const panel = root.querySelector("#pcsu-amy-panel");
       const closeBtn = root.querySelector("#pcsu-amy-close");
-      const timelineEl = root.querySelector("#pcsu-amy-timeline");
       const briefContainer = root.querySelector("#pcsu-amy-brief-container");
       const chatEl = root.querySelector("#pcsu-amy-chat");
       const inputEl = root.querySelector("#pcsu-amy-input");
@@ -653,7 +594,6 @@
         !hud ||
         !panel ||
         !closeBtn ||
-        !timelineEl ||
         !chatEl ||
         !inputEl ||
         !sendBtn
@@ -663,19 +603,13 @@
       }
 
       /* ========================================================
-         2b. MULTI-BRIEF CONTROLLER
+         2b. DUAL BRIEF CONTROLLER
          Compensation: window.PCSUnitedAmyBrief
          Mortgage:     window.PCSUnitedAmyMortgageBrief
-         Financial:    window.PCSUnitedAmyFinancialBrief
 
          Mortgage Brief activates only after a user-initiated
          pcsunited:financial-input-updated event, once the Header
          Strip is confirmed in "financial" mode.
-
-         Financial Brief activates from confirmed PCSUnited
-         Financial / Analysis summary events
-         (pcsunited:financial-ready, pcsunited:analysis-ready,
-         pcsunited:analysis-updated). Once active, it is sticky.
       ======================================================== */
 
       let activeBriefType = null;
@@ -685,110 +619,9 @@
       let compensationBriefInitialized = false;
       let mortgageBriefInitialized = false;
       let warnedMissingMortgageBrief = false;
-      let latestFinancialBriefData = null;
-      let financialBriefActivated = false;
-      let financialBriefInitialized = false;
-      let warnedMissingFinancialBrief = false;
-      let latestCompensationBriefData = null;
-      let hasPendingAmyNotification = false;
-      let briefTimelineEntries = [];
 
       function getMortgageBriefApi() {
         return window.PCSUnitedAmyMortgageBrief || null;
-      }
-
-      function getFinancialBriefApi() {
-        return window.PCSUnitedAmyFinancialBrief || null;
-      }
-
-      function getCompensationBriefApi() {
-        return window.PCSUnitedAmyBrief || null;
-      }
-
-      function getTimelineBriefRootId(type) {
-        switch (safeString(type).toLowerCase()) {
-          case "compensation":
-            return "pcsu-amy-brief-root";
-          case "mortgage":
-            return "pcsu-amy-mortgage-brief-root";
-          case "financial":
-            return "pcsu-amy-financial-brief-root";
-          default:
-            return "";
-        }
-      }
-
-      function getAmyNotificationTriggers() {
-        return Array.from(
-          document.querySelectorAll(
-            "#pcsu-ask-amy-sidebar .pcsu-amy-card, [data-pcsu-open-amy='1']"
-          )
-        );
-      }
-
-      function applyAmyNotificationState() {
-        const state = isOpen()
-          ? "open"
-          : hasPendingAmyNotification
-            ? "pending"
-            : "normal";
-
-        root.setAttribute("data-pcsu-amy-notification", state);
-
-        getAmyNotificationTriggers().forEach((node) => {
-          node.setAttribute("data-pcsu-amy-notification", state);
-        });
-      }
-
-      function clearAmyNotification() {
-        hasPendingAmyNotification = false;
-        applyAmyNotificationState();
-      }
-
-      function notifyAmyOfNewInsight() {
-        if (isOpen()) {
-          clearAmyNotification();
-          return;
-        }
-
-        hasPendingAmyNotification = true;
-        applyAmyNotificationState();
-      }
-
-      function getTimelineEntry(type, key) {
-        return briefTimelineEntries.find((entry) => {
-          return entry.type === type && entry.key === key;
-        }) || null;
-      }
-
-      function ensureTimelineEntry(type, key) {
-        const existing = getTimelineEntry(type, key);
-        if (existing) return existing;
-
-        const node = document.createElement("div");
-        node.className = "pcsu-amy-timeline-brief-frame";
-        node.setAttribute("data-brief-type", type);
-        node.setAttribute("data-brief-key", key);
-        if (type === "compensation" && timelineEl.firstChild) {
-          timelineEl.insertBefore(node, timelineEl.firstChild);
-        } else {
-          timelineEl.appendChild(node);
-        }
-
-        const entry = {
-          type,
-          key,
-          node,
-          data: null
-        };
-
-        briefTimelineEntries.push(entry);
-        return entry;
-      }
-
-      function resetTimelineEntries() {
-        briefTimelineEntries = [];
-        timelineEl.innerHTML = "";
       }
 
       function cancelPendingMortgageActivation() {
@@ -812,107 +645,6 @@
           mortgageBriefInitialized = true;
         }
 
-        const financialApi = getFinancialBriefApi();
-        if (financialApi && !financialBriefInitialized) {
-          financialApi.initialize(briefContainer);
-          financialBriefInitialized = true;
-        }
-
-        return true;
-      }
-
-      function clearRenderStage() {
-        try {
-          const compApi = getCompensationBriefApi();
-          if (compApi && typeof compApi.clear === "function") {
-            compApi.clear();
-          }
-        } catch (_) {}
-
-        try {
-          const mortgageApi = getMortgageBriefApi();
-          if (mortgageApi && typeof mortgageApi.clear === "function") {
-            mortgageApi.clear();
-          }
-        } catch (_) {}
-
-        try {
-          const financialApi = getFinancialBriefApi();
-          if (financialApi && typeof financialApi.clear === "function") {
-            financialApi.clear();
-          }
-        } catch (_) {}
-
-        if (briefContainer) {
-          briefContainer.setAttribute("data-visible", "0");
-        }
-      }
-
-      function captureBriefSnapshot(type, data) {
-        initializeBriefRenderers();
-        clearRenderStage();
-
-        const briefType = safeString(type).toLowerCase();
-        const renderer =
-          briefType === "compensation"
-            ? getCompensationBriefApi()
-            : briefType === "mortgage"
-              ? getMortgageBriefApi()
-              : briefType === "financial"
-                ? getFinancialBriefApi()
-                : null;
-
-        if (!renderer || typeof renderer.render !== "function") {
-          return "";
-        }
-
-        try {
-          renderer.render(data);
-        } catch (err) {
-          console.warn(
-            "PCSUnited Ask Amy HUD: Brief snapshot render failed.",
-            err
-          );
-          return "";
-        }
-
-        const rootId = getTimelineBriefRootId(briefType);
-        if (!rootId) return "";
-
-        const renderedRoot = briefContainer.querySelector("#" + rootId);
-        if (!renderedRoot) return "";
-
-        if (renderedRoot.getAttribute("data-empty") === "1") {
-          return "";
-        }
-
-        return safeString(renderedRoot.innerHTML);
-      }
-
-      function upsertTimelineBrief(type, data, options = {}) {
-        const briefType = safeString(type).toLowerCase();
-        if (!briefType || !isPlainObject(data)) return false;
-
-        const key = safeString(
-          options.briefKey ||
-          data.briefKey ||
-          data.timelineKey ||
-          briefType
-        ).toLowerCase();
-
-        const snapshot = captureBriefSnapshot(briefType, data);
-        if (!snapshot) return false;
-
-        const entry = ensureTimelineEntry(briefType, key);
-        entry.data = data;
-        entry.node.innerHTML = snapshot;
-
-        if (briefType !== "compensation" && options.notify !== false) {
-          notifyAmyOfNewInsight();
-        }
-
-        activeBriefType = briefType;
-        scrollToBottom();
         return true;
       }
 
@@ -1059,409 +791,49 @@
         };
       }
 
-      function readRuntimeFinancialSnapshot() {
-        const out = {};
-
-        try {
-          const financial = window.PCSUnitedFinancial;
-          if (financial && typeof financial.getMetrics === "function") {
-            const metrics = financial.getMetrics();
-            if (isPlainObject(metrics)) {
-              out.metrics = metrics;
-              Object.assign(out, metrics);
-            }
-          }
-
-          if (financial && typeof financial.getState === "function") {
-            const state = financial.getState();
-            if (isPlainObject(state)) {
-              out.state = state;
-            }
-          }
-        } catch (_) {}
-
-        try {
-          const analysis = window.PCSUnitedAnalysis;
-          if (analysis && typeof analysis.getAnalysis === "function") {
-            const packet = analysis.getAnalysis();
-            if (isPlainObject(packet)) {
-              out.analysis = packet;
-            }
-          } else if (
-            analysis &&
-            typeof analysis.getState === "function"
-          ) {
-            const packet = analysis.getState();
-            if (isPlainObject(packet) && isPlainObject(packet.analysis)) {
-              out.analysis = packet.analysis;
-            }
-          }
-        } catch (_) {}
-
-        try {
-          if (isPlainObject(window.PCSU_FINANCIAL_CURRENT)) {
-            out.current = window.PCSU_FINANCIAL_CURRENT;
-            Object.assign(out, window.PCSU_FINANCIAL_CURRENT);
-          }
-        } catch (_) {}
-
-        return out;
-      }
-
-      function hasUsableFinancialBriefSignal(value) {
-        if (!isPlainObject(value)) return false;
-
-        function signalFrom(obj) {
-          if (!isPlainObject(obj)) return false;
-
-          const cashFlow = isPlainObject(obj.cashFlow) ? obj.cashFlow : null;
-          const ratios = isPlainObject(obj.ratios) ? obj.ratios : {};
-          const summary = isPlainObject(obj.summary) ? obj.summary : {};
-
-          const numericHits = [
-            obj.monthlyCashRemaining,
-            obj.cashRemaining,
-            typeof obj.cashFlow === "number" ? obj.cashFlow : null,
-            cashFlow ? cashFlow.remaining : null,
-            obj.totalMonthlyExpenses,
-            obj.totalExpenses,
-            obj.totalMonthlyDebt,
-            obj.totalDebt,
-            obj.debtToIncomeRatio,
-            obj.affordabilityScore,
-            ratios.dti,
-            summary.cashRemaining,
-            summary.cashFlow
-          ];
-
-          for (const hit of numericHits) {
-            if (hit === undefined || hit === null || hit === "") continue;
-            if (typeof hit === "number" && Number.isFinite(hit)) return true;
-            if (typeof hit === "string" && String(hit).trim()) return true;
-          }
-
-          if (
-            safeString(obj.financialHealthGrade) ||
-            safeString(obj.healthGrade) ||
-            safeString(obj.grade)
-          ) {
-            return true;
-          }
-
-          return false;
-        }
-
-        return (
-          signalFrom(value) ||
-          signalFrom(value.financial) ||
-          signalFrom(value.analysis) ||
-          signalFrom(value.summary) ||
-          signalFrom(value.budget) ||
-          signalFrom(value.fad) ||
-          signalFrom(value.result) ||
-          signalFrom(value.data) ||
-          signalFrom(value.metrics) ||
-          signalFrom(value.state)
-        );
-      }
-
-      function flattenFinancialEventFields(detail) {
-        if (!isPlainObject(detail)) return {};
-
-        const metrics = isPlainObject(detail.metrics) ? detail.metrics : {};
-        const state = isPlainObject(detail.state) ? detail.state : {};
-        const analysis = isPlainObject(detail.analysis) ? detail.analysis : {};
-        const cashFlow = isPlainObject(analysis.cashFlow)
-          ? analysis.cashFlow
-          : isPlainObject(detail.cashFlow)
-            ? detail.cashFlow
-            : {};
-        const financial = isPlainObject(detail.financial)
-          ? detail.financial
-          : {};
-        const summary = isPlainObject(detail.summary) ? detail.summary : {};
-        const budget = isPlainObject(detail.budget) ? detail.budget : {};
-
-        const out = {
-          ...(isPlainObject(detail.fad) ? detail.fad : {}),
-          ...financial,
-          ...budget,
-          ...summary,
-          ...analysis,
-          ...state,
-          ...metrics
-        };
-
-        // Copy only scalar / useful top-level detail fields. Avoid spreading
-        // nested packet wrappers that would wipe assembled financial totals.
-        Object.entries(detail).forEach(([key, value]) => {
-          if (value === undefined || value === null || value === "") return;
-          if (
-            key === "financial" ||
-            key === "analysis" ||
-            key === "summary" ||
-            key === "budget" ||
-            key === "fad" ||
-            key === "metrics" ||
-            key === "state" ||
-            key === "compensation" ||
-            key === "mortgage" ||
-            key === "basicbrain" ||
-            key === "profile" ||
-            key === "bridge"
-          ) {
-            return;
-          }
-          out[key] = value;
-        });
-
-        const mapped = {
-          monthlyIncome: firstDefined(
-            detail.monthlyIncome,
-            metrics.monthlyIncome,
-            state.monthlyIncome,
-            cashFlow.income,
-            analysis.monthlyIncome
-          ),
-          totalMonthlyIncome: firstDefined(
-            detail.totalMonthlyIncome,
-            detail.monthlyIncome,
-            metrics.monthlyIncome,
-            state.monthlyIncome,
-            cashFlow.income
-          ),
-          totalMonthlyExpenses: firstDefined(
-            detail.totalMonthlyExpenses,
-            detail.totalExpenses,
-            metrics.totalExpenses,
-            cashFlow.expenses
-          ),
-          totalExpenses: firstDefined(
-            detail.totalExpenses,
-            metrics.totalExpenses,
-            cashFlow.expenses
-          ),
-          totalMonthlyDebt: firstDefined(
-            detail.totalMonthlyDebt,
-            detail.totalDebt,
-            metrics.totalDebt,
-            cashFlow.debt
-          ),
-          totalDebt: firstDefined(
-            detail.totalDebt,
-            metrics.totalDebt,
-            cashFlow.debt
-          ),
-          totalMonthlySavings: firstDefined(
-            detail.totalMonthlySavings,
-            detail.totalSavings,
-            metrics.totalSavings,
-            state.totalSavings,
-            cashFlow.savings
-          ),
-          totalSavings: firstDefined(
-            detail.totalSavings,
-            metrics.totalSavings,
-            state.totalSavings,
-            cashFlow.savings
-          ),
-          monthlyCashRemaining: firstDefined(
-            detail.monthlyCashRemaining,
-            detail.cashRemaining,
-            typeof detail.cashFlow === "number" ? detail.cashFlow : null,
-            metrics.cashFlow,
-            cashFlow.remaining
-          ),
-          cashFlow: firstDefined(
-            typeof detail.cashFlow === "number" ? detail.cashFlow : null,
-            metrics.cashFlow,
-            cashFlow.remaining
-          ),
-          totalMonthlyHousingCost: firstDefined(
-            detail.totalMonthlyHousingCost,
-            detail.monthlyHousingCost,
-            cashFlow.housing
-          ),
-          emergencyFund: firstDefined(
-            detail.emergencyFund,
-            state.emergencyFund
-          ),
-          essentialMonthlyExpenses: firstDefined(
-            detail.essentialMonthlyExpenses,
-            state.essentialMonthlyExpenses
-          ),
-          debtToIncomeRatio: firstDefined(
-            detail.debtToIncomeRatio,
-            metrics.debtIncomeRatio,
-            isPlainObject(analysis.ratios) ? analysis.ratios.dti : undefined
-          ),
-          expenseToIncomeRatio: firstDefined(
-            detail.expenseToIncomeRatio,
-            metrics.expensesIncomeRatio
-          ),
-          affordabilityScore: firstDefined(
-            detail.affordabilityScore,
-            analysis.affordabilityScore
-          )
-        };
-
-        Object.entries(mapped).forEach(([key, value]) => {
-          if (value === undefined || value === null || value === "") return;
-          out[key] = value;
-        });
-
-        return out;
-      }
-
-      function patchPublicSessionFromFinancialBriefDetail(detail) {
-        if (!isPlainObject(detail)) {
-          return loadPublicSession();
-        }
-
-        const patch = {};
-
-        const financialPacket =
-          (isPlainObject(detail.financial) && detail.financial) ||
-          (isPlainObject(detail.summary) && detail.summary) ||
-          (isPlainObject(detail.analysis) && detail.analysis) ||
-          (isPlainObject(detail.metrics) && detail.metrics) ||
-          null;
-
-        const budgetPacket =
-          (isPlainObject(detail.budget) && detail.budget) ||
-          (isPlainObject(detail.financialInputs) && detail.financialInputs) ||
-          (isPlainObject(detail.user_financial_inputs) &&
-            detail.user_financial_inputs) ||
-          null;
-
-        if (financialPacket) {
-          patch.fad = financialPacket;
-        }
-
-        if (budgetPacket) {
-          patch.user_financial_inputs = budgetPacket;
-        }
-
-        if (isPlainObject(detail.mortgage)) {
-          patch.mortgage = detail.mortgage;
-        }
-
-        if (
-          isPlainObject(detail.state) ||
-          isPlainObject(detail.metrics) ||
-          isPlainObject(detail.financial) ||
-          isPlainObject(detail.analysis) ||
-          isPlainObject(detail.budget)
-        ) {
-          patch.financial_intake = detail;
-        } else if (hasUsableFinancialBriefSignal(detail)) {
-          patch.financial_intake = detail;
-        }
-
-        if (!Object.keys(patch).length) {
-          return loadPublicSession();
-        }
-
-        return patchPublicSession(patch);
-      }
-
-      function buildFinancialBriefData(eventDetail) {
-        const detail = isPlainObject(eventDetail) ? eventDetail : {};
-        const session = loadPublicSession();
-        const panelInputs = readFinancialPanelInputs();
-        const runtime = readRuntimeFinancialSnapshot();
-
-        const compensation = isPlainObject(session.compensation)
-          ? session.compensation
-          : {};
-        const mortgage = isPlainObject(session.mortgage)
-          ? session.mortgage
-          : {};
-        const financialInputs = isPlainObject(session.user_financial_inputs)
-          ? session.user_financial_inputs
-          : {};
-        const financialIntake = isPlainObject(session.financial_intake)
-          ? session.financial_intake
-          : {};
-        const fad = isPlainObject(session.fad) ? session.fad : {};
-        const kpiOverrides = isPlainObject(session.kpi_overrides)
-          ? session.kpi_overrides
-          : {};
-
-        const flattenedIntake = flattenFinancialEventFields(financialIntake);
-        const flattenedFad = flattenFinancialEventFields(fad);
-        const flattenedRuntime = flattenFinancialEventFields(runtime);
-        const flattenedDetail = flattenFinancialEventFields(detail);
-
-        return {
-          type: "financial",
-          compensation,
-          mortgage,
-          financial_intake: financialIntake,
-          user_financial_inputs: financialInputs,
-          fad,
-          kpi_overrides: kpiOverrides,
-          basicbrain: isPlainObject(session.basicbrain)
-            ? session.basicbrain
-            : undefined,
-          metrics: firstDefined(
-            detail.metrics,
-            runtime.metrics,
-            isPlainObject(financialIntake.metrics)
-              ? financialIntake.metrics
-              : undefined
-          ),
-          state: firstDefined(
-            detail.state,
-            runtime.state,
-            isPlainObject(financialIntake.state)
-              ? financialIntake.state
-              : undefined
-          ),
-          analysis: firstDefined(
-            detail.analysis,
-            runtime.analysis,
-            isPlainObject(financialIntake.analysis)
-              ? financialIntake.analysis
-              : undefined,
-            isPlainObject(fad.cashFlow) ? fad : undefined
-          ),
-          ...financialInputs,
-          ...flattenedIntake,
-          ...flattenedFad,
-          ...kpiOverrides,
-          ...panelInputs,
-          ...flattenedRuntime,
-          ...flattenedDetail
-        };
-      }
-
       function hideAllBriefs() {
-        clearRenderStage();
-        resetTimelineEntries();
+        if (window.PCSUnitedAmyBrief) {
+          window.PCSUnitedAmyBrief.clear();
+        }
+
+        const mortgageApi = getMortgageBriefApi();
+        if (mortgageApi && typeof mortgageApi.clear === "function") {
+          mortgageApi.clear();
+        }
+
+        if (briefContainer) {
+          briefContainer.setAttribute("data-visible", "0");
+        }
+
         activeBriefType = null;
-        latestCompensationBriefData = null;
-        clearAmyNotification();
       }
 
       function showCompensationBrief(data) {
-        if (!getCompensationBriefApi() || !timelineEl || !data) {
+        initializeBriefRenderers();
+
+        if (!window.PCSUnitedAmyBrief || !briefContainer || !data) {
           return false;
         }
 
-        latestCompensationBriefData = data;
-        return upsertTimelineBrief("compensation", data, {
-          notify: false,
-          briefKey: "compensation"
-        });
+        const mortgageApi = getMortgageBriefApi();
+        if (mortgageApi && typeof mortgageApi.clear === "function") {
+          mortgageApi.clear();
+        }
+
+        briefContainer.setAttribute("data-visible", "1");
+        window.PCSUnitedAmyBrief.render(data);
+        activeBriefType = "compensation";
+        return true;
       }
 
       function showMortgageBrief(data, options = {}) {
+        initializeBriefRenderers();
+
         const mortgageApi = getMortgageBriefApi();
-        if (!mortgageApi || !timelineEl) {
+        if (!mortgageApi || !briefContainer) {
           if (!warnedMissingMortgageBrief) {
             console.warn(
-              "PCSUnited Ask Amy HUD: Mortgage Brief renderer is unavailable. Keeping timeline intact."
+              "PCSUnited Ask Amy HUD: Mortgage Brief renderer is unavailable. Keeping Compensation Brief."
             );
             warnedMissingMortgageBrief = true;
           }
@@ -1472,59 +844,33 @@
           return false;
         }
 
+        if (window.PCSUnitedAmyBrief) {
+          window.PCSUnitedAmyBrief.clear();
+        }
+
+        briefContainer.setAttribute("data-visible", "1");
+
+        const alreadyActive =
+          activeBriefType === "mortgage" && mortgageBriefActivated;
+
+        if (alreadyActive && typeof mortgageApi.update === "function") {
+          mortgageApi.update(data);
+        } else if (typeof mortgageApi.render === "function") {
+          mortgageApi.render(data);
+        } else {
+          return false;
+        }
+
         latestMortgageBriefData = data;
-        const rendered = upsertTimelineBrief("mortgage", data, {
-          notify: options.notify !== false,
-          briefKey: options.briefKey || "mortgage"
-        });
-        if (!rendered) return false;
+        activeBriefType = "mortgage";
 
         const firstTransition = !mortgageBriefActivated;
         if (firstTransition) {
           mortgageBriefActivated = true;
-        }
 
-        return true;
-      }
-
-      function showFinancialBrief(data, options = {}) {
-        const financialApi = getFinancialBriefApi();
-
-        if (!financialApi || !timelineEl) {
-          if (!warnedMissingFinancialBrief) {
-            console.warn(
-              "PCSUnited Ask Amy HUD: Financial Brief renderer is unavailable."
-            );
-            warnedMissingFinancialBrief = true;
+          if (options.openIfFirst !== false && !isOpen()) {
+            openAmy();
           }
-
-          return false;
-        }
-
-        if (!data || typeof data !== "object") {
-          return false;
-        }
-
-        try {
-          const rendered = upsertTimelineBrief("financial", data, {
-            notify: options.notify !== false,
-            briefKey: options.briefKey || "financial"
-          });
-          if (!rendered) return false;
-        } catch (err) {
-          console.warn(
-            "PCSUnited Ask Amy HUD: Financial Brief render failed.",
-            err
-          );
-          return false;
-        }
-
-        latestFinancialBriefData = data;
-
-        const firstTransition = !financialBriefActivated;
-
-        if (firstTransition) {
-          financialBriefActivated = true;
         }
 
         return true;
@@ -1628,37 +974,26 @@
       }
 
       function refreshActiveBrief(options = {}) {
-        const briefData = buildCompensationBriefData();
-        let rendered = false;
-
-        if (briefData) {
-          rendered = showCompensationBrief(briefData) || rendered;
-        }
+        initializeBriefRenderers();
 
         if (
           (activeBriefType === "mortgage" || mortgageBriefActivated) &&
           latestMortgageBriefData
         ) {
-          rendered =
-            showMortgageBrief(latestMortgageBriefData, {
-              notify: false
-            }) || rendered;
+          showMortgageBrief(latestMortgageBriefData, {
+            openIfFirst: false
+          });
+          return true;
         }
 
-        if (
-          (activeBriefType === "financial" || financialBriefActivated) &&
-          latestFinancialBriefData
-        ) {
-          rendered =
-            showFinancialBrief(latestFinancialBriefData, {
-              notify: false
-            }) || rendered;
-        }
+        const briefData = buildCompensationBriefData();
 
-        if (!rendered) {
+        if (!briefData) {
           hideAllBriefs();
           return false;
         }
+
+        showCompensationBrief(briefData);
 
         if (options.open === true) {
           openAmy();
@@ -1672,39 +1007,15 @@
       }
 
       function showAmyBrief(data) {
-        switch (safeString(data && data.type)) {
-          case "financial":
-            return showFinancialBrief(data);
-
-          case "mortgage":
-            return showMortgageBrief(data);
-
-          case "compensation":
-          default:
-            return showCompensationBrief(data);
+        if (isPlainObject(data) && safeString(data.type) === "mortgage") {
+          return showMortgageBrief(data, { openIfFirst: false });
         }
+
+        return showCompensationBrief(data);
       }
 
       function hideAmyBrief() {
         hideAllBriefs();
-      }
-
-      function activateFinancialBriefFromEvent(event) {
-        const detail =
-          event && isPlainObject(event.detail) ? event.detail : null;
-
-        if (!detail) return;
-
-        if (!hasUsableFinancialBriefSignal(detail)) {
-          return;
-        }
-
-        patchPublicSessionFromFinancialBriefDetail(detail);
-
-        const briefData = buildFinancialBriefData(detail);
-        latestFinancialBriefData = briefData;
-
-        showFinancialBrief(briefData);
       }
 
       function activateMortgageBriefFromFinancialEvent(event) {
@@ -1714,16 +1025,6 @@
         if (!detail) return;
 
         patchPublicSessionFromFinancialDetail(detail);
-
-        // Financial Brief is sticky once activated. Keep updating its
-        // assembled payload, but do not regress to Mortgage Brief.
-        if (financialBriefActivated || activeBriefType === "financial") {
-          latestFinancialBriefData = buildFinancialBriefData(detail);
-          showFinancialBrief(latestFinancialBriefData, {
-            notify: !isOpen()
-          });
-          return;
-        }
 
         const briefData = buildMortgageBriefData(detail);
         latestMortgageBriefData = briefData;
@@ -1745,7 +1046,9 @@
           attempts += 1;
 
           if (isHeaderFinancialMode()) {
-            showMortgageBrief(latestMortgageBriefData || briefData);
+            showMortgageBrief(latestMortgageBriefData || briefData, {
+              openIfFirst: true
+            });
             return;
           }
 
@@ -2351,20 +1654,6 @@
             patchPublicSession(patch);
           }
 
-          // Financial Brief is sticky once activated.
-          if (financialBriefActivated || activeBriefType === "financial") {
-            latestFinancialBriefData = buildFinancialBriefData({
-              ...(isPlainObject(latestFinancialBriefData)
-                ? latestFinancialBriefData
-                : {}),
-              mortgage: patch.mortgage
-            });
-            showFinancialBrief(latestFinancialBriefData, {
-              notify: !isOpen()
-            });
-            return;
-          }
-
           // Enrich an already-active Mortgage Brief. Never activate from
           // mortgage-ready / mortgage-health-ready alone.
           if (mortgageBriefActivated || activeBriefType === "mortgage") {
@@ -2376,7 +1665,7 @@
               mortgageApiResult: patch.mortgage
             });
             showMortgageBrief(latestMortgageBriefData, {
-              notify: !isOpen()
+              openIfFirst: false
             });
           }
 
@@ -2389,21 +1678,6 @@
 
         absorbBasicBrainHandoff();
 
-        // After Financial Brief is active, keep it sticky. Compensation /
-        // BasicBrain / Mortgage context may still update the session above.
-        if (financialBriefActivated || activeBriefType === "financial") {
-          latestFinancialBriefData = buildFinancialBriefData({
-            ...(isPlainObject(latestFinancialBriefData)
-              ? latestFinancialBriefData
-              : {}),
-            ...(isPlainObject(detail) ? detail : {})
-          });
-          showFinancialBrief(latestFinancialBriefData, {
-            notify: !isOpen()
-          });
-          return;
-        }
-
         // After Mortgage Brief is active, keep it sticky. Compensation /
         // BasicBrain events may still update the public session above.
         if (mortgageBriefActivated || activeBriefType === "mortgage") {
@@ -2411,8 +1685,15 @@
           return;
         }
 
+        const shouldOpen =
+          !isOpen() &&
+          (
+            type === "pcsunited:compensation-ready" ||
+            type === "pcsunited:basicbrain-updated"
+          );
+
         refreshActiveBrief({
-          open: false
+          open: shouldOpen
         });
       }
 
@@ -2428,10 +1709,6 @@
 
         // Preload may update session state only. Never activate Mortgage Brief.
         patchPublicSessionFromFinancialDetail(detail);
-      }
-
-      function onFinancialBriefActivationEvent(event) {
-        activateFinancialBriefFromEvent(event);
       }
 
       function bindResourcesContextListeners() {
@@ -2463,17 +1740,6 @@
           "pcsunited:mortgage-input-preloaded",
           onFinancialInputPreloaded
         );
-
-        // Confirmed Financial / Analysis summary events only.
-        const financialBriefEvents = [
-          "pcsunited:financial-ready",
-          "pcsunited:analysis-ready",
-          "pcsunited:analysis-updated"
-        ];
-
-        financialBriefEvents.forEach((name) => {
-          window.addEventListener(name, onFinancialBriefActivationEvent);
-        });
       }
 
       function getProfile() {
@@ -2563,8 +1829,6 @@
       function openAmy() {
         hud.setAttribute("data-open", "1");
         hud.setAttribute("aria-modal", "true");
-        clearAmyNotification();
-        applyAmyNotificationState();
 
         setTimeout(() => {
           inputEl.focus();
@@ -2575,7 +1839,6 @@
       function closeAmy() {
         hud.setAttribute("data-open", "0");
         hud.setAttribute("aria-modal", "false");
-        applyAmyNotificationState();
       }
 
       function isOpen() {
@@ -2637,11 +1900,6 @@
 
       function scrollToBottom() {
         chatEl.scrollTop = chatEl.scrollHeight;
-      }
-
-      function appendToTimeline(node) {
-        timelineEl.appendChild(node);
-        scrollToBottom();
       }
 
       function timeStamp(role) {
@@ -2732,8 +1990,10 @@
         const meta = document.createElement("small");
         meta.textContent = timeStamp(cleanRole);
 
-        appendToTimeline(message);
+        chatEl.appendChild(message);
         message.appendChild(meta);
+
+        scrollToBottom();
 
         if (options.save !== false) {
           addToThread(cleanRole, cleanContent);
@@ -2770,7 +2030,8 @@
         typing.textContent =
           "Amy is reviewing your PCSUnited context…";
 
-        appendToTimeline(typing);
+        chatEl.appendChild(typing);
+        scrollToBottom();
       }
 
       function hideTyping() {
@@ -2809,7 +2070,7 @@
 
             message.appendChild(body);
             message.appendChild(meta);
-            timelineEl.appendChild(message);
+            chatEl.appendChild(message);
           });
 
         scrollToBottom();
@@ -3087,8 +2348,12 @@
         window.__PCSU_AMY_MEMORY = {};
         window.__PCSU_AMY_CID = "";
 
-        resetTimelineEntries();
-        clearRenderStage();
+        // Preserve the Amy Brief mount node inside the shared transcript.
+        Array.from(chatEl.children).forEach((child) => {
+          if (child !== briefContainer) {
+            child.remove();
+          }
+        });
         inputEl.value = "";
       }
 
@@ -3111,8 +2376,6 @@
         cancelPendingMortgageActivation();
         latestMortgageBriefData = null;
         mortgageBriefActivated = false;
-        latestFinancialBriefData = null;
-        financialBriefActivated = false;
         hideAllBriefs();
         startFreshPublicSession();
 
@@ -3161,7 +2424,6 @@
       ======================================================== */
 
       bindResourcesContextListeners();
-      applyAmyNotificationState();
 
       // Fresh conversation each page load. Optionally import a current-page
       // BasicBrain handoff, then sync live runtime context into the session.
@@ -3231,5 +2493,4 @@
       window.PCSUnitedAskAmy.hideBrief = hideAmyBrief;
       window.PCSUnitedAskAmy.refreshBrief = refreshActiveBrief;
       window.PCSUnitedAskAmy.getActiveBriefType = () => activeBriefType;
-      window.PCSUnitedAskAmy.showFinancialBrief = showFinancialBrief;
 })();
