@@ -603,13 +603,19 @@
       }
 
       /* ========================================================
-         2b. DUAL BRIEF CONTROLLER
+         2b. MULTI-BRIEF CONTROLLER
          Compensation: window.PCSUnitedAmyBrief
          Mortgage:     window.PCSUnitedAmyMortgageBrief
+         Financial:    window.PCSUnitedAmyFinancialBrief
 
          Mortgage Brief activates only after a user-initiated
          pcsunited:financial-input-updated event, once the Header
          Strip is confirmed in "financial" mode.
+
+         Financial Brief activates from confirmed PCSUnited
+         Financial / Analysis summary events
+         (pcsunited:financial-ready, pcsunited:analysis-ready,
+         pcsunited:analysis-updated). Once active, it is sticky.
       ======================================================== */
 
       let activeBriefType = null;
@@ -619,9 +625,17 @@
       let compensationBriefInitialized = false;
       let mortgageBriefInitialized = false;
       let warnedMissingMortgageBrief = false;
+      let latestFinancialBriefData = null;
+      let financialBriefActivated = false;
+      let financialBriefInitialized = false;
+      let warnedMissingFinancialBrief = false;
 
       function getMortgageBriefApi() {
         return window.PCSUnitedAmyMortgageBrief || null;
+      }
+
+      function getFinancialBriefApi() {
+        return window.PCSUnitedAmyFinancialBrief || null;
       }
 
       function cancelPendingMortgageActivation() {
@@ -643,6 +657,12 @@
         if (mortgageApi && !mortgageBriefInitialized) {
           mortgageApi.initialize(briefContainer);
           mortgageBriefInitialized = true;
+        }
+
+        const financialApi = getFinancialBriefApi();
+        if (financialApi && !financialBriefInitialized) {
+          financialApi.initialize(briefContainer);
+          financialBriefInitialized = true;
         }
 
         return true;
@@ -791,6 +811,383 @@
         };
       }
 
+      function readRuntimeFinancialSnapshot() {
+        const out = {};
+
+        try {
+          const financial = window.PCSUnitedFinancial;
+          if (financial && typeof financial.getMetrics === "function") {
+            const metrics = financial.getMetrics();
+            if (isPlainObject(metrics)) {
+              out.metrics = metrics;
+              Object.assign(out, metrics);
+            }
+          }
+
+          if (financial && typeof financial.getState === "function") {
+            const state = financial.getState();
+            if (isPlainObject(state)) {
+              out.state = state;
+            }
+          }
+        } catch (_) {}
+
+        try {
+          const analysis = window.PCSUnitedAnalysis;
+          if (analysis && typeof analysis.getAnalysis === "function") {
+            const packet = analysis.getAnalysis();
+            if (isPlainObject(packet)) {
+              out.analysis = packet;
+            }
+          } else if (
+            analysis &&
+            typeof analysis.getState === "function"
+          ) {
+            const packet = analysis.getState();
+            if (isPlainObject(packet) && isPlainObject(packet.analysis)) {
+              out.analysis = packet.analysis;
+            }
+          }
+        } catch (_) {}
+
+        try {
+          if (isPlainObject(window.PCSU_FINANCIAL_CURRENT)) {
+            out.current = window.PCSU_FINANCIAL_CURRENT;
+            Object.assign(out, window.PCSU_FINANCIAL_CURRENT);
+          }
+        } catch (_) {}
+
+        return out;
+      }
+
+      function hasUsableFinancialBriefSignal(value) {
+        if (!isPlainObject(value)) return false;
+
+        function signalFrom(obj) {
+          if (!isPlainObject(obj)) return false;
+
+          const cashFlow = isPlainObject(obj.cashFlow) ? obj.cashFlow : null;
+          const ratios = isPlainObject(obj.ratios) ? obj.ratios : {};
+          const summary = isPlainObject(obj.summary) ? obj.summary : {};
+
+          const numericHits = [
+            obj.monthlyCashRemaining,
+            obj.cashRemaining,
+            typeof obj.cashFlow === "number" ? obj.cashFlow : null,
+            cashFlow ? cashFlow.remaining : null,
+            obj.totalMonthlyExpenses,
+            obj.totalExpenses,
+            obj.totalMonthlyDebt,
+            obj.totalDebt,
+            obj.debtToIncomeRatio,
+            obj.affordabilityScore,
+            ratios.dti,
+            summary.cashRemaining,
+            summary.cashFlow
+          ];
+
+          for (const hit of numericHits) {
+            if (hit === undefined || hit === null || hit === "") continue;
+            if (typeof hit === "number" && Number.isFinite(hit)) return true;
+            if (typeof hit === "string" && String(hit).trim()) return true;
+          }
+
+          if (
+            safeString(obj.financialHealthGrade) ||
+            safeString(obj.healthGrade) ||
+            safeString(obj.grade)
+          ) {
+            return true;
+          }
+
+          return false;
+        }
+
+        return (
+          signalFrom(value) ||
+          signalFrom(value.financial) ||
+          signalFrom(value.analysis) ||
+          signalFrom(value.summary) ||
+          signalFrom(value.budget) ||
+          signalFrom(value.fad) ||
+          signalFrom(value.result) ||
+          signalFrom(value.data) ||
+          signalFrom(value.metrics) ||
+          signalFrom(value.state)
+        );
+      }
+
+      function flattenFinancialEventFields(detail) {
+        if (!isPlainObject(detail)) return {};
+
+        const metrics = isPlainObject(detail.metrics) ? detail.metrics : {};
+        const state = isPlainObject(detail.state) ? detail.state : {};
+        const analysis = isPlainObject(detail.analysis) ? detail.analysis : {};
+        const cashFlow = isPlainObject(analysis.cashFlow)
+          ? analysis.cashFlow
+          : isPlainObject(detail.cashFlow)
+            ? detail.cashFlow
+            : {};
+        const financial = isPlainObject(detail.financial)
+          ? detail.financial
+          : {};
+        const summary = isPlainObject(detail.summary) ? detail.summary : {};
+        const budget = isPlainObject(detail.budget) ? detail.budget : {};
+
+        const out = {
+          ...(isPlainObject(detail.fad) ? detail.fad : {}),
+          ...financial,
+          ...budget,
+          ...summary,
+          ...analysis,
+          ...state,
+          ...metrics
+        };
+
+        // Copy only scalar / useful top-level detail fields. Avoid spreading
+        // nested packet wrappers that would wipe assembled financial totals.
+        Object.entries(detail).forEach(([key, value]) => {
+          if (value === undefined || value === null || value === "") return;
+          if (
+            key === "financial" ||
+            key === "analysis" ||
+            key === "summary" ||
+            key === "budget" ||
+            key === "fad" ||
+            key === "metrics" ||
+            key === "state" ||
+            key === "compensation" ||
+            key === "mortgage" ||
+            key === "basicbrain" ||
+            key === "profile" ||
+            key === "bridge"
+          ) {
+            return;
+          }
+          out[key] = value;
+        });
+
+        const mapped = {
+          monthlyIncome: firstDefined(
+            detail.monthlyIncome,
+            metrics.monthlyIncome,
+            state.monthlyIncome,
+            cashFlow.income,
+            analysis.monthlyIncome
+          ),
+          totalMonthlyIncome: firstDefined(
+            detail.totalMonthlyIncome,
+            detail.monthlyIncome,
+            metrics.monthlyIncome,
+            state.monthlyIncome,
+            cashFlow.income
+          ),
+          totalMonthlyExpenses: firstDefined(
+            detail.totalMonthlyExpenses,
+            detail.totalExpenses,
+            metrics.totalExpenses,
+            cashFlow.expenses
+          ),
+          totalExpenses: firstDefined(
+            detail.totalExpenses,
+            metrics.totalExpenses,
+            cashFlow.expenses
+          ),
+          totalMonthlyDebt: firstDefined(
+            detail.totalMonthlyDebt,
+            detail.totalDebt,
+            metrics.totalDebt,
+            cashFlow.debt
+          ),
+          totalDebt: firstDefined(
+            detail.totalDebt,
+            metrics.totalDebt,
+            cashFlow.debt
+          ),
+          totalMonthlySavings: firstDefined(
+            detail.totalMonthlySavings,
+            detail.totalSavings,
+            metrics.totalSavings,
+            state.totalSavings,
+            cashFlow.savings
+          ),
+          totalSavings: firstDefined(
+            detail.totalSavings,
+            metrics.totalSavings,
+            state.totalSavings,
+            cashFlow.savings
+          ),
+          monthlyCashRemaining: firstDefined(
+            detail.monthlyCashRemaining,
+            detail.cashRemaining,
+            typeof detail.cashFlow === "number" ? detail.cashFlow : null,
+            metrics.cashFlow,
+            cashFlow.remaining
+          ),
+          cashFlow: firstDefined(
+            typeof detail.cashFlow === "number" ? detail.cashFlow : null,
+            metrics.cashFlow,
+            cashFlow.remaining
+          ),
+          totalMonthlyHousingCost: firstDefined(
+            detail.totalMonthlyHousingCost,
+            detail.monthlyHousingCost,
+            cashFlow.housing
+          ),
+          emergencyFund: firstDefined(
+            detail.emergencyFund,
+            state.emergencyFund
+          ),
+          essentialMonthlyExpenses: firstDefined(
+            detail.essentialMonthlyExpenses,
+            state.essentialMonthlyExpenses
+          ),
+          debtToIncomeRatio: firstDefined(
+            detail.debtToIncomeRatio,
+            metrics.debtIncomeRatio,
+            isPlainObject(analysis.ratios) ? analysis.ratios.dti : undefined
+          ),
+          expenseToIncomeRatio: firstDefined(
+            detail.expenseToIncomeRatio,
+            metrics.expensesIncomeRatio
+          ),
+          affordabilityScore: firstDefined(
+            detail.affordabilityScore,
+            analysis.affordabilityScore
+          )
+        };
+
+        Object.entries(mapped).forEach(([key, value]) => {
+          if (value === undefined || value === null || value === "") return;
+          out[key] = value;
+        });
+
+        return out;
+      }
+
+      function patchPublicSessionFromFinancialBriefDetail(detail) {
+        if (!isPlainObject(detail)) {
+          return loadPublicSession();
+        }
+
+        const patch = {};
+
+        const financialPacket =
+          (isPlainObject(detail.financial) && detail.financial) ||
+          (isPlainObject(detail.summary) && detail.summary) ||
+          (isPlainObject(detail.analysis) && detail.analysis) ||
+          (isPlainObject(detail.metrics) && detail.metrics) ||
+          null;
+
+        const budgetPacket =
+          (isPlainObject(detail.budget) && detail.budget) ||
+          (isPlainObject(detail.financialInputs) && detail.financialInputs) ||
+          (isPlainObject(detail.user_financial_inputs) &&
+            detail.user_financial_inputs) ||
+          null;
+
+        if (financialPacket) {
+          patch.fad = financialPacket;
+        }
+
+        if (budgetPacket) {
+          patch.user_financial_inputs = budgetPacket;
+        }
+
+        if (isPlainObject(detail.mortgage)) {
+          patch.mortgage = detail.mortgage;
+        }
+
+        if (
+          isPlainObject(detail.state) ||
+          isPlainObject(detail.metrics) ||
+          isPlainObject(detail.financial) ||
+          isPlainObject(detail.analysis) ||
+          isPlainObject(detail.budget)
+        ) {
+          patch.financial_intake = detail;
+        } else if (hasUsableFinancialBriefSignal(detail)) {
+          patch.financial_intake = detail;
+        }
+
+        if (!Object.keys(patch).length) {
+          return loadPublicSession();
+        }
+
+        return patchPublicSession(patch);
+      }
+
+      function buildFinancialBriefData(eventDetail) {
+        const detail = isPlainObject(eventDetail) ? eventDetail : {};
+        const session = loadPublicSession();
+        const panelInputs = readFinancialPanelInputs();
+        const runtime = readRuntimeFinancialSnapshot();
+
+        const compensation = isPlainObject(session.compensation)
+          ? session.compensation
+          : {};
+        const mortgage = isPlainObject(session.mortgage)
+          ? session.mortgage
+          : {};
+        const financialInputs = isPlainObject(session.user_financial_inputs)
+          ? session.user_financial_inputs
+          : {};
+        const financialIntake = isPlainObject(session.financial_intake)
+          ? session.financial_intake
+          : {};
+        const fad = isPlainObject(session.fad) ? session.fad : {};
+        const kpiOverrides = isPlainObject(session.kpi_overrides)
+          ? session.kpi_overrides
+          : {};
+
+        const flattenedIntake = flattenFinancialEventFields(financialIntake);
+        const flattenedFad = flattenFinancialEventFields(fad);
+        const flattenedRuntime = flattenFinancialEventFields(runtime);
+        const flattenedDetail = flattenFinancialEventFields(detail);
+
+        return {
+          type: "financial",
+          compensation,
+          mortgage,
+          financial_intake: financialIntake,
+          user_financial_inputs: financialInputs,
+          fad,
+          kpi_overrides: kpiOverrides,
+          basicbrain: isPlainObject(session.basicbrain)
+            ? session.basicbrain
+            : undefined,
+          metrics: firstDefined(
+            detail.metrics,
+            runtime.metrics,
+            isPlainObject(financialIntake.metrics)
+              ? financialIntake.metrics
+              : undefined
+          ),
+          state: firstDefined(
+            detail.state,
+            runtime.state,
+            isPlainObject(financialIntake.state)
+              ? financialIntake.state
+              : undefined
+          ),
+          analysis: firstDefined(
+            detail.analysis,
+            runtime.analysis,
+            isPlainObject(financialIntake.analysis)
+              ? financialIntake.analysis
+              : undefined,
+            isPlainObject(fad.cashFlow) ? fad : undefined
+          ),
+          ...financialInputs,
+          ...flattenedIntake,
+          ...flattenedFad,
+          ...kpiOverrides,
+          ...panelInputs,
+          ...flattenedRuntime,
+          ...flattenedDetail
+        };
+      }
+
       function hideAllBriefs() {
         if (window.PCSUnitedAmyBrief) {
           window.PCSUnitedAmyBrief.clear();
@@ -799,6 +1196,11 @@
         const mortgageApi = getMortgageBriefApi();
         if (mortgageApi && typeof mortgageApi.clear === "function") {
           mortgageApi.clear();
+        }
+
+        const financialApi = getFinancialBriefApi();
+        if (financialApi && typeof financialApi.clear === "function") {
+          financialApi.clear();
         }
 
         if (briefContainer) {
@@ -818,6 +1220,11 @@
         const mortgageApi = getMortgageBriefApi();
         if (mortgageApi && typeof mortgageApi.clear === "function") {
           mortgageApi.clear();
+        }
+
+        const financialApi = getFinancialBriefApi();
+        if (financialApi && typeof financialApi.clear === "function") {
+          financialApi.clear();
         }
 
         briefContainer.setAttribute("data-visible", "1");
@@ -848,6 +1255,11 @@
           window.PCSUnitedAmyBrief.clear();
         }
 
+        const financialApi = getFinancialBriefApi();
+        if (financialApi && typeof financialApi.clear === "function") {
+          financialApi.clear();
+        }
+
         briefContainer.setAttribute("data-visible", "1");
 
         const alreadyActive =
@@ -867,6 +1279,76 @@
         const firstTransition = !mortgageBriefActivated;
         if (firstTransition) {
           mortgageBriefActivated = true;
+
+          if (options.openIfFirst !== false && !isOpen()) {
+            openAmy();
+          }
+        }
+
+        return true;
+      }
+
+      function showFinancialBrief(data, options = {}) {
+        initializeBriefRenderers();
+
+        const financialApi = getFinancialBriefApi();
+
+        if (!financialApi || !briefContainer) {
+          if (!warnedMissingFinancialBrief) {
+            console.warn(
+              "PCSUnited Ask Amy HUD: Financial Brief renderer is unavailable."
+            );
+            warnedMissingFinancialBrief = true;
+          }
+
+          return false;
+        }
+
+        if (!data || typeof data !== "object") {
+          return false;
+        }
+
+        if (window.PCSUnitedAmyBrief) {
+          window.PCSUnitedAmyBrief.clear();
+        }
+
+        const mortgageApi = getMortgageBriefApi();
+
+        if (mortgageApi && typeof mortgageApi.clear === "function") {
+          mortgageApi.clear();
+        }
+
+        briefContainer.setAttribute("data-visible", "1");
+
+        const alreadyActive =
+          activeBriefType === "financial" && financialBriefActivated;
+
+        try {
+          if (
+            alreadyActive &&
+            typeof financialApi.update === "function"
+          ) {
+            financialApi.update(data);
+          } else if (typeof financialApi.render === "function") {
+            financialApi.render(data);
+          } else {
+            return false;
+          }
+        } catch (err) {
+          console.warn(
+            "PCSUnited Ask Amy HUD: Financial Brief render failed.",
+            err
+          );
+          return false;
+        }
+
+        latestFinancialBriefData = data;
+        activeBriefType = "financial";
+
+        const firstTransition = !financialBriefActivated;
+
+        if (firstTransition) {
+          financialBriefActivated = true;
 
           if (options.openIfFirst !== false && !isOpen()) {
             openAmy();
@@ -977,6 +1459,16 @@
         initializeBriefRenderers();
 
         if (
+          (activeBriefType === "financial" || financialBriefActivated) &&
+          latestFinancialBriefData
+        ) {
+          showFinancialBrief(latestFinancialBriefData, {
+            openIfFirst: false
+          });
+          return true;
+        }
+
+        if (
           (activeBriefType === "mortgage" || mortgageBriefActivated) &&
           latestMortgageBriefData
         ) {
@@ -1007,15 +1499,45 @@
       }
 
       function showAmyBrief(data) {
-        if (isPlainObject(data) && safeString(data.type) === "mortgage") {
-          return showMortgageBrief(data, { openIfFirst: false });
-        }
+        switch (safeString(data && data.type)) {
+          case "financial":
+            return showFinancialBrief(data, {
+              openIfFirst: false
+            });
 
-        return showCompensationBrief(data);
+          case "mortgage":
+            return showMortgageBrief(data, {
+              openIfFirst: false
+            });
+
+          case "compensation":
+          default:
+            return showCompensationBrief(data);
+        }
       }
 
       function hideAmyBrief() {
         hideAllBriefs();
+      }
+
+      function activateFinancialBriefFromEvent(event) {
+        const detail =
+          event && isPlainObject(event.detail) ? event.detail : null;
+
+        if (!detail) return;
+
+        if (!hasUsableFinancialBriefSignal(detail)) {
+          return;
+        }
+
+        patchPublicSessionFromFinancialBriefDetail(detail);
+
+        const briefData = buildFinancialBriefData(detail);
+        latestFinancialBriefData = briefData;
+
+        showFinancialBrief(briefData, {
+          openIfFirst: true
+        });
       }
 
       function activateMortgageBriefFromFinancialEvent(event) {
@@ -1025,6 +1547,16 @@
         if (!detail) return;
 
         patchPublicSessionFromFinancialDetail(detail);
+
+        // Financial Brief is sticky once activated. Keep updating its
+        // assembled payload, but do not regress to Mortgage Brief.
+        if (financialBriefActivated || activeBriefType === "financial") {
+          latestFinancialBriefData = buildFinancialBriefData(detail);
+          showFinancialBrief(latestFinancialBriefData, {
+            openIfFirst: false
+          });
+          return;
+        }
 
         const briefData = buildMortgageBriefData(detail);
         latestMortgageBriefData = briefData;
@@ -1654,6 +2186,20 @@
             patchPublicSession(patch);
           }
 
+          // Financial Brief is sticky once activated.
+          if (financialBriefActivated || activeBriefType === "financial") {
+            latestFinancialBriefData = buildFinancialBriefData({
+              ...(isPlainObject(latestFinancialBriefData)
+                ? latestFinancialBriefData
+                : {}),
+              mortgage: patch.mortgage
+            });
+            showFinancialBrief(latestFinancialBriefData, {
+              openIfFirst: false
+            });
+            return;
+          }
+
           // Enrich an already-active Mortgage Brief. Never activate from
           // mortgage-ready / mortgage-health-ready alone.
           if (mortgageBriefActivated || activeBriefType === "mortgage") {
@@ -1677,6 +2223,21 @@
         }
 
         absorbBasicBrainHandoff();
+
+        // After Financial Brief is active, keep it sticky. Compensation /
+        // BasicBrain / Mortgage context may still update the session above.
+        if (financialBriefActivated || activeBriefType === "financial") {
+          latestFinancialBriefData = buildFinancialBriefData({
+            ...(isPlainObject(latestFinancialBriefData)
+              ? latestFinancialBriefData
+              : {}),
+            ...(isPlainObject(detail) ? detail : {})
+          });
+          showFinancialBrief(latestFinancialBriefData, {
+            openIfFirst: false
+          });
+          return;
+        }
 
         // After Mortgage Brief is active, keep it sticky. Compensation /
         // BasicBrain events may still update the public session above.
@@ -1711,6 +2272,10 @@
         patchPublicSessionFromFinancialDetail(detail);
       }
 
+      function onFinancialBriefActivationEvent(event) {
+        activateFinancialBriefFromEvent(event);
+      }
+
       function bindResourcesContextListeners() {
         const events = [
           "pcsunited:basicbrain-updated",
@@ -1740,6 +2305,17 @@
           "pcsunited:mortgage-input-preloaded",
           onFinancialInputPreloaded
         );
+
+        // Confirmed Financial / Analysis summary events only.
+        const financialBriefEvents = [
+          "pcsunited:financial-ready",
+          "pcsunited:analysis-ready",
+          "pcsunited:analysis-updated"
+        ];
+
+        financialBriefEvents.forEach((name) => {
+          window.addEventListener(name, onFinancialBriefActivationEvent);
+        });
       }
 
       function getProfile() {
@@ -2376,6 +2952,8 @@
         cancelPendingMortgageActivation();
         latestMortgageBriefData = null;
         mortgageBriefActivated = false;
+        latestFinancialBriefData = null;
+        financialBriefActivated = false;
         hideAllBriefs();
         startFreshPublicSession();
 
@@ -2493,4 +3071,5 @@
       window.PCSUnitedAskAmy.hideBrief = hideAmyBrief;
       window.PCSUnitedAskAmy.refreshBrief = refreshActiveBrief;
       window.PCSUnitedAskAmy.getActiveBriefType = () => activeBriefType;
+      window.PCSUnitedAskAmy.showFinancialBrief = showFinancialBrief;
 })();
