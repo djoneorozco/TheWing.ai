@@ -385,7 +385,8 @@ console.log("====================================");
           profile: clientContext?.profile || {},
           bridge: clientContext?.bridge || {},
           compensation: clientContext?.compensation || null,
-          fad: clientContext?.fad || {}
+          fad: clientContext?.fad || {},
+          pt: clientContext?.pt || null
         },
         compensation:
           deterministic?.public?.compensation ||
@@ -394,6 +395,7 @@ console.log("====================================");
         mortgage:
           deterministic?.public?.mortgage || clientContext?.mortgage || null,
         affordability: deterministic?.public?.affordability || null,
+        pt: clientContext?.pt || null,
         scenario: deterministic?.internal?.scenario || null,
         selectedBase: deterministic?.public?.base_info || null,
         metadata: {
@@ -506,8 +508,14 @@ console.log("====================================");
             mortgage: deterministic?.public?.mortgage?.source || null,
             affordability: deterministic?.public?.affordability?.source || null,
             verdict: deterministic?.public?.verdict?.source || null,
-            base: deterministic?.public?.base_info?.source || null
+            base: deterministic?.public?.base_info?.source || null,
+            pt_calculator:
+              amyTruth?.truth?.pt_calculator?.version ||
+              amyTruth?.truth?.pt_calculator?._source ||
+              null
           },
+          pt: clientContext?.pt || null,
+          amy_truth: amyTruth || null,
           latency_ms: Date.now() - startedAt,
           warnings
         }
@@ -835,6 +843,155 @@ function redactSensitive(value, depth = 0) {
   return out;
 }
 
+function sanitizePublicPtContext(raw) {
+  if (!isPlainObject(raw)) return null;
+
+  const redacted = redactSensitive(raw) || {};
+  const num = (value) => {
+    if (value === null || value === undefined || value === "") return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  };
+  const str = (value) => {
+    const s = safeStr(value);
+    return s || null;
+  };
+  const bool = (value) => {
+    if (value === true || value === false) return value;
+    return null;
+  };
+
+  const componentScores = isPlainObject(
+    redacted.component_scores || redacted.componentScores || redacted.scores
+  )
+    ? {
+        body_composition: num(
+          pickFirst(
+            redacted.component_scores?.body_composition,
+            redacted.scores?.bodyScore,
+            redacted.scores?.body,
+            redacted.bodyScore
+          )
+        ),
+        strength: num(
+          pickFirst(
+            redacted.component_scores?.strength,
+            redacted.scores?.strengthScore,
+            redacted.scores?.strength,
+            redacted.strengthScore
+          )
+        ),
+        core: num(
+          pickFirst(
+            redacted.component_scores?.core,
+            redacted.scores?.coreScore,
+            redacted.scores?.core,
+            redacted.coreScore
+          )
+        ),
+        cardio: num(
+          pickFirst(
+            redacted.component_scores?.cardio,
+            redacted.scores?.cardioScore,
+            redacted.scores?.cardio,
+            redacted.cardioScore
+          )
+        )
+      }
+    : undefined;
+
+  return stripEmpty({
+    schema_version: str(redacted.schema_version) || "pt-input-v1",
+    source_version: str(
+      pickFirst(redacted.source_version, redacted.version)
+    ),
+    effective_date: str(redacted.effective_date),
+    sex: str(pickFirst(redacted.sex, redacted.gender)),
+    gender: str(pickFirst(redacted.gender, redacted.sex)),
+    age: num(redacted.age),
+    age_band: str(
+      pickFirst(redacted.age_band, redacted.ageBand, redacted.age_group, redacted.ageGroup)
+    ),
+    height_inches: num(
+      pickFirst(redacted.height_inches, redacted.heightInches, redacted.height)
+    ),
+    waist_inches: num(
+      pickFirst(redacted.waist_inches, redacted.waistInches, redacted.waist)
+    ),
+    strength_option: str(
+      pickFirst(
+        redacted.strength_option,
+        redacted.strengthOption,
+        redacted.strength_event,
+        redacted.strengthEvent
+      )
+    ),
+    strength_reps: num(
+      pickFirst(redacted.strength_reps, redacted.strengthReps, redacted.strength_value)
+    ),
+    core_option: str(
+      pickFirst(
+        redacted.core_option,
+        redacted.coreOption,
+        redacted.endurance_event,
+        redacted.enduranceEvent
+      )
+    ),
+    core_reps: num(pickFirst(redacted.core_reps, redacted.coreReps)),
+    plank_seconds: num(pickFirst(redacted.plank_seconds, redacted.plankSeconds)),
+    cardio_option: str(
+      pickFirst(
+        redacted.cardio_option,
+        redacted.cardioOption,
+        redacted.cardio_event,
+        redacted.cardioEvent
+      )
+    ),
+    run_seconds: num(pickFirst(redacted.run_seconds, redacted.runSeconds)),
+    hamr_shuttles: num(pickFirst(redacted.hamr_shuttles, redacted.hamrShuttles)),
+    walk_seconds: num(pickFirst(redacted.walk_seconds, redacted.walkSeconds)),
+    walk_authorized: bool(
+      pickFirst(redacted.walk_authorized, redacted.walkAuthorized)
+    ),
+    cardio_exempt: bool(pickFirst(redacted.cardio_exempt, redacted.cardioExempt)),
+    altitude_feet: num(pickFirst(redacted.altitude_feet, redacted.altitudeFeet)),
+    altitude_group: str(pickFirst(redacted.altitude_group, redacted.altitudeGroup)),
+    displayed_component_scores: componentScores,
+    displayed_total_score: num(
+      pickFirst(
+        redacted.displayed_total_score,
+        redacted.displayedTotalScore,
+        redacted.total_score,
+        redacted.totalScore,
+        redacted.total,
+        redacted.scores?.total
+      )
+    ),
+    displayed_rating: str(
+      pickFirst(
+        redacted.displayed_rating,
+        redacted.displayedRating,
+        redacted.rating,
+        redacted.category,
+        redacted.scores?.category
+      )
+    ),
+    whtr: num(pickFirst(redacted.whtr, redacted.measurements?.whtr)),
+    whtr_risk: str(pickFirst(redacted.whtr_risk, redacted.measurements?.whtr_risk)),
+    component_scores: componentScores,
+    selections: isPlainObject(redacted.selections)
+      ? stripEmpty({
+          strength: str(redacted.selections.strength),
+          core: str(redacted.selections.core),
+          cardio: str(redacted.selections.cardio)
+        })
+      : undefined,
+    warnings: Array.isArray(redacted.warnings)
+      ? redacted.warnings.map((w) => safeStr(w)).filter(Boolean).slice(0, 12)
+      : undefined
+  });
+}
+
 // ============================================================
 // //#6 PUBLIC CONTEXT INGEST
 // ============================================================
@@ -1006,11 +1163,24 @@ function collectPublicClientContext(body) {
     mergeDeep({}, body?.bridge || {}, context?.bridge || {})
   );
 
+  const ptRaw = pickFirst(
+    body?.pt,
+    body?.ptCalculator,
+    body?.pt_calculator,
+    body?.pfra,
+    context?.pt,
+    context?.ptCalculator,
+    context?.pt_calculator,
+    context?.pfra,
+    null
+  );
+
   return {
     profile: isPlainObject(profile) ? profile : {},
     bridge: isPlainObject(bridge) ? bridge : {},
     compensation: pickFirst(body?.compensation, context?.compensation, null),
     mortgage: pickFirst(body?.mortgage, context?.mortgage, null),
+    pt: sanitizePublicPtContext(ptRaw),
     financial_intake: redactSensitive(
       mergeDeep(
         {},
@@ -1217,6 +1387,15 @@ function detectIntent(message) {
     )
   ) {
     return "va_loan";
+  }
+
+  if (
+    /\b(air force pt|usaf pt|pt calculator|pfra|physical fitness assessment|2[\s-]?mile run|hamr|hand[-\s]?release push[-\s]?ups?|waist[-\s]?to[-\s]?height|\bwhtr\b|did i pass my pt|pt score)\b/.test(
+      t
+    ) &&
+    !/\b(credit score|mortgage score|va disability|financial readiness)\b/.test(t)
+  ) {
+    return "pt_calculator";
   }
 
   if (

@@ -23,6 +23,12 @@ import {
   buildVaLoanTruthPacket
 } from "./va-loans.js";
 
+import {
+  PT_CALCULATOR_VERSION,
+  detectPtCalculatorIntent,
+  buildPtCalculatorTruthPacket
+} from "./pt-calculator.js";
+
 // ============================================================
 // //#1 VERSION
 // ============================================================
@@ -203,6 +209,21 @@ function normalizeAmyBrainInput(rawInput = {}) {
     bridgeCompensation
   );
 
+  const pt = pickFirstObject(
+    input.pt,
+    input.ptCalculator,
+    input.pt_calculator,
+    input.pfra,
+    session.pt,
+    session.ptCalculator,
+    session.pt_calculator,
+    session.pfra,
+    basicbrain.pt,
+    basicbrain.ptCalculator,
+    basicbrain.pt_calculator,
+    basicbrain.pfra
+  );
+
   return {
     message: clean(input.message),
     profile,
@@ -210,11 +231,42 @@ function normalizeAmyBrainInput(rawInput = {}) {
     compensation,
     mortgage: safeObject(input.mortgage),
     affordability: safeObject(input.affordability),
+    pt,
     selectedBase: safeObject(input.selectedBase),
     basicbrain,
     session,
     metadata
   };
+}
+
+const PT_VALUE_KEYS = [
+  "sex",
+  "gender",
+  "age",
+  "age_band",
+  "ageBand",
+  "height_inches",
+  "height",
+  "waist_inches",
+  "waist",
+  "strength_option",
+  "strength_reps",
+  "core_option",
+  "core_reps",
+  "plank_seconds",
+  "cardio_option",
+  "run_seconds",
+  "hamr_shuttles",
+  "walk_seconds",
+  "total_score",
+  "total",
+  "displayed_total_score",
+  "component_scores",
+  "scores"
+];
+
+function hasRecognizedPtFields(obj) {
+  return hasAnyValue(obj, PT_VALUE_KEYS);
 }
 
 function normalizeCompensationPacket(raw = {}) {
@@ -419,6 +471,65 @@ function buildVaLoansTruth(input) {
   });
 }
 
+function detectPtCalculatorNeed(input) {
+  const normalized = normalizeAmyBrainInput(input);
+  const reasons = [];
+  let score = 0;
+  const hasPt = hasRecognizedPtFields(normalized.pt);
+  const pagePath = lower(
+    normalized.metadata?.page?.path ||
+      normalized.metadata?.page ||
+      normalized.metadata?.product ||
+      ""
+  );
+  const ptPageContext = /pt|pfra|fitness/.test(pagePath);
+
+  let intent = null;
+  try {
+    intent = detectPtCalculatorIntent(normalized.message, {
+      hasPtData: hasPt || ptPageContext,
+      ptContext: ptPageContext
+    });
+  } catch (_) {
+    intent = null;
+  }
+
+  if (intent) {
+    score += 70;
+    reasons.push(`PT Calculator intent detected: ${clean(intent)}`);
+  }
+
+  if (hasPt) {
+    score += 40;
+    reasons.push("PT/PFRA calculator context is present");
+  }
+
+  if (ptPageContext && !intent && hasPt) {
+    score += 20;
+    reasons.push("Current page context appears PT-specific");
+  }
+
+  const matched = Boolean(intent) || (hasPt && /\b(how did i do|my score|explain|pass|fail)\b/i.test(lower(normalized.message)));
+
+  return {
+    id: "pt_calculator",
+    matched,
+    score: matched ? Math.max(score, 1) : 0,
+    reasons: matched ? uniqueArray(reasons) : []
+  };
+}
+
+function buildPtCalculatorTruth(input) {
+  const normalized = normalizeAmyBrainInput(input);
+  return buildPtCalculatorTruthPacket({
+    message: normalized.message,
+    profile: normalized.profile,
+    pt: normalized.pt,
+    scenario: normalized.scenario,
+    metadata: normalized.metadata
+  });
+}
+
 // ============================================================
 // //#5 MODULE REGISTRY
 // ============================================================
@@ -451,9 +562,24 @@ const vaLoansModule = Object.freeze({
   }
 });
 
+const ptCalculatorModule = Object.freeze({
+  id: "pt_calculator",
+  version: PT_CALCULATOR_VERSION,
+  description:
+    "Routes USAF PFRA/PT scoring and explanation through pt-calculator.js.",
+  priority: 85,
+  detect(input) {
+    return detectPtCalculatorNeed(input);
+  },
+  build(input) {
+    return buildPtCalculatorTruth(input);
+  }
+});
+
 export const AMY_BRAIN_MODULES = Object.freeze({
   compensation: compensationModule,
-  va_loans: vaLoansModule
+  va_loans: vaLoansModule,
+  pt_calculator: ptCalculatorModule
 });
 
 function listRegistryModules() {
@@ -642,6 +768,74 @@ function combineTruthPackets(packets = {}, routeWarnings = []) {
     }
   }
 
+  const pt = packets.pt_calculator;
+  if (isPlainObject(pt)) {
+    const guidance = isPlainObject(pt.guidance) ? pt.guidance : {};
+    if (clean(guidance.bluf)) bluf.push(clean(guidance.bluf));
+    else if (clean(pt.bluf)) bluf.push(clean(pt.bluf));
+
+    if (Number.isFinite(Number(pt.total_score))) {
+      facts.push(
+        `USAF PFRA total score: ${Number(pt.total_score).toFixed(1)}${
+          clean(pt.rating) ? ` (${clean(pt.rating)})` : ""
+        }.`
+      );
+    }
+
+    const scores = isPlainObject(pt.component_scores) ? pt.component_scores : {};
+    if (Object.keys(scores).length) {
+      facts.push(
+        `PT components — Body composition: ${scores.body_composition ?? "n/a"}, Strength: ${scores.strength ?? "n/a"}, Core: ${scores.core ?? "n/a"}, Cardio: ${scores.cardio ?? "n/a"}.`
+      );
+    }
+
+    if (pt.component_minimums_met === true || pt.component_minimums_met === false) {
+      facts.push(
+        `PT component minimums met: ${pt.component_minimums_met ? "yes" : "no"}.`
+      );
+    }
+
+    if (pt.overall_pass === true || pt.overall_pass === false) {
+      facts.push(`PT overall pass: ${pt.overall_pass ? "yes" : "no"}.`);
+    }
+
+    if (Number.isFinite(Number(pt.measurements?.whtr))) {
+      facts.push(
+        `WHtR: ${Number(pt.measurements.whtr).toFixed(2)}${
+          clean(pt.measurements.whtr_risk)
+            ? ` (${clean(pt.measurements.whtr_risk)})`
+            : ""
+        }.`
+      );
+    }
+
+    if (Array.isArray(guidance.facts)) {
+      for (const fact of guidance.facts) {
+        if (clean(fact)) facts.push(clean(fact));
+      }
+    }
+    if (Array.isArray(guidance.risks)) {
+      for (const risk of guidance.risks) {
+        if (clean(risk)) risks.push(clean(risk));
+      }
+    }
+    if (Array.isArray(guidance.next_steps)) {
+      for (const step of guidance.next_steps) {
+        if (clean(step)) next_steps.push(clean(step));
+      }
+    }
+    if (Array.isArray(guidance.disclaimers)) {
+      for (const disclaimer of guidance.disclaimers) {
+        if (clean(disclaimer)) disclaimers.push(clean(disclaimer));
+      }
+    }
+    if (Array.isArray(pt.warnings)) {
+      for (const warning of pt.warnings) {
+        if (clean(warning)) warnings.push(clean(warning));
+      }
+    }
+  }
+
   if (Array.isArray(routeWarnings)) {
     for (const warning of routeWarnings) {
       if (clean(warning)) warnings.push(clean(warning));
@@ -671,7 +865,8 @@ export async function buildAmyTruthPacket(input = {}) {
       has_profile: Object.keys(normalized.profile).length > 0,
       has_compensation: hasRecognizedCompensationFields(normalized.compensation),
       has_mortgage: Object.keys(normalized.mortgage).length > 0,
-      has_affordability: Object.keys(normalized.affordability).length > 0
+      has_affordability: Object.keys(normalized.affordability).length > 0,
+      has_pt: hasRecognizedPtFields(normalized.pt)
     },
     routing: {
       matched_modules: routed.matched_modules,
