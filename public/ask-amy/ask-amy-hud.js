@@ -620,6 +620,61 @@
       let mortgageBriefInitialized = false;
       let warnedMissingMortgageBrief = false;
 
+      // In-memory PT Calculator context for Ask Amy (no localStorage).
+      let latestPtCalculatorData = null;
+      let ptCalculatorListenersBound = false;
+
+      function readPtCalculatorData() {
+        try {
+          const api = window.PCSUnitedPTCalculator;
+          if (api && typeof api.getData === "function") {
+            const data = api.getData();
+            if (data && typeof data === "object") return data;
+          }
+        } catch (_) {
+          // ignore
+        }
+        return null;
+      }
+
+      function setLatestPtCalculatorData(pt, sourceEvent) {
+        if (!pt || typeof pt !== "object") return;
+        latestPtCalculatorData = {
+          ...pt,
+          _captured_at: new Date().toISOString(),
+          _source_event: sourceEvent || "pcsunited-pt-calculator"
+        };
+      }
+
+      function bindPtCalculatorListeners() {
+        if (ptCalculatorListenersBound) return;
+        ptCalculatorListenersBound = true;
+
+        const onReady = (event) => {
+          const detail = event && event.detail ? event.detail : {};
+          const pt =
+            (detail.pt && typeof detail.pt === "object" && detail.pt) ||
+            readPtCalculatorData();
+          if (pt) setLatestPtCalculatorData(pt, "pcsunited:pt-calculator-ready");
+        };
+
+        const onUpdated = (event) => {
+          const detail = event && event.detail ? event.detail : {};
+          const pt =
+            (detail.pt && typeof detail.pt === "object" && detail.pt) ||
+            readPtCalculatorData();
+          if (pt) setLatestPtCalculatorData(pt, "pcsunited:pt-calculator-updated");
+        };
+
+        window.addEventListener("pcsunited:pt-calculator-ready", onReady);
+        window.addEventListener("pcsunited:pt-calculator-updated", onUpdated);
+
+        const existing = readPtCalculatorData();
+        if (existing) {
+          setLatestPtCalculatorData(existing, "window.PCSUnitedPTCalculator");
+        }
+      }
+
       function getMortgageBriefApi() {
         return window.PCSUnitedAmyMortgageBrief || null;
       }
@@ -1797,10 +1852,22 @@
           : null;
       }
 
+      function getPtCalculatorContext() {
+        const live = readPtCalculatorData();
+        if (live) {
+          setLatestPtCalculatorData(live, "window.PCSUnitedPTCalculator");
+          return live;
+        }
+        return isPlainObject(latestPtCalculatorData)
+          ? latestPtCalculatorData
+          : null;
+      }
+
       function getPCSContext() {
         syncLiveRuntimeContext();
 
         const session = loadPublicSession();
+        const pt = getPtCalculatorContext();
 
         return stripEmptyObject({
           resources_session_id: session.id || undefined,
@@ -1808,6 +1875,7 @@
           bridge: getBridge() || undefined,
           compensation: getCompensation() || undefined,
           mortgage: getMortgage() || undefined,
+          pt: pt || undefined,
           financial_intake: getFinancialIntake() || undefined,
           user_financial_inputs:
             getFinancialInputs() || undefined,
@@ -2188,6 +2256,9 @@
             mortgage:
               pcsContext.mortgage || undefined,
 
+            pt:
+              pcsContext.pt || undefined,
+
             financial_intake:
               pcsContext.financial_intake || undefined,
 
@@ -2424,6 +2495,7 @@
       ======================================================== */
 
       bindResourcesContextListeners();
+      bindPtCalculatorListeners();
 
       // Fresh conversation each page load. Optionally import a current-page
       // BasicBrain handoff, then sync live runtime context into the session.

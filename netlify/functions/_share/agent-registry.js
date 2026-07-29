@@ -22,6 +22,7 @@
 // - affordability_engine
 // - decision_rules
 // - va_loans
+// - pt_calculator
 //
 // IMPORTANT NETLIFY NOTE
 // Make sure netlify.toml includes:
@@ -163,6 +164,24 @@ const TOOL_DEFINITIONS = [
       "formatVaLoanReply"
     ],
     normalize: normalizeVaLoanPacket
+  },
+  {
+    name: "pt_calculator",
+    label: "USAF PT Calculator",
+    path: "./pt-calculator.js",
+    intents: [
+      "pt_calculator",
+      "pfra",
+      "fitness_assessment",
+      "general_guidance"
+    ],
+    contextFunctions: [
+      "buildPtCalculatorTruthPacket",
+      "analyzePtCalculatorQuestion",
+      "calculatePfraScore"
+    ],
+    replyFunctions: [],
+    normalize: normalizePtCalculatorPacket
   }
 ];
 
@@ -251,6 +270,10 @@ export async function getAgentTools() {
 
     vaLoans: loaded.va_loans || null,
     va_loans: loaded.va_loans || null,
+
+    ptCalculator: loaded.pt_calculator || null,
+    pt_calculator: loaded.pt_calculator || null,
+    pfra: loaded.pt_calculator || null,
 
     tools: loaded
   };
@@ -454,7 +477,9 @@ function getToolsForIntent(intent) {
 
   if (cleanIntent === "general_guidance") {
     return TOOL_DEFINITIONS.filter((tool) =>
-      ["compensation_context", "mortgage_engine", "va_loans"].includes(tool.name)
+      ["compensation_context", "mortgage_engine", "va_loans", "pt_calculator"].includes(
+        tool.name
+      )
     );
   }
 
@@ -575,6 +600,18 @@ function normalizeRegistryInput(input = {}) {
     input.verdict || {}
   );
 
+  const pt = mergeDeep(
+    {},
+    context.pt || {},
+    context.ptCalculator || {},
+    context.pt_calculator || {},
+    context.pfra || {},
+    input.pt || {},
+    input.ptCalculator || {},
+    input.pt_calculator || {},
+    input.pfra || {}
+  );
+
   return {
     message: safeStr(input.message || input.question || input.prompt || ""),
     intent: safeStr(
@@ -587,6 +624,7 @@ function normalizeRegistryInput(input = {}) {
     mortgage,
     affordability,
     verdict,
+    pt,
     raw: input
   };
 }
@@ -598,6 +636,7 @@ function buildToolInput(input, def) {
   const mortgage = input.mortgage || {};
   const affordability = input.affordability || {};
   const verdict = input.verdict || {};
+  const pt = input.pt || {};
 
   const rank = pickFirst(
     scenario.rank,
@@ -906,7 +945,12 @@ function buildToolInput(input, def) {
     compensation,
     mortgage,
     affordability,
-    verdict
+    verdict,
+    pt,
+    ptCalculator: pt,
+    pt_calculator: pt,
+    pfra: pt,
+    message: input.message || ""
   });
 
   return {
@@ -919,6 +963,10 @@ function buildToolInput(input, def) {
     mortgage,
     affordability,
     verdict,
+    pt,
+    ptCalculator: pt,
+    pt_calculator: pt,
+    pfra: pt,
 
     tool: {
       name: def.name,
@@ -932,7 +980,8 @@ function buildToolInput(input, def) {
       compensation,
       mortgage,
       affordability,
-      verdict
+      verdict,
+      pt
     }
   };
 }
@@ -1380,10 +1429,50 @@ function normalizeVaLoanPacket(raw) {
 // //#7 FALLBACK INTENT DETECTION
 // ============================================================
 
+function normalizePtCalculatorPacket(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  if (raw.ok === false && !raw.partial) return null;
+
+  const guidance =
+    raw.guidance && typeof raw.guidance === "object" ? raw.guidance : {};
+
+  return stripEmpty({
+    ...raw,
+    ok: raw.ok !== false,
+    source: safeStr(
+      pickFirst(raw.source, raw._source, "TheWing pt-calculator.js")
+    ),
+    topic: safeStr(pickFirst(raw.topic, raw.intent, "pt_calculator")),
+    title: safeStr(pickFirst(raw.title, "USAF PT Calculator")),
+    bluf: safeStr(pickFirst(raw.bluf, guidance.bluf, raw.summary)),
+    total_score: pickFirst(raw.total_score, raw.totalScore, raw.total),
+    rating: safeStr(pickFirst(raw.rating, raw.category)),
+    component_scores: raw.component_scores || raw.componentScores,
+    overall_pass: pickFirst(raw.overall_pass, raw.overallPass),
+    component_minimums_met: pickFirst(
+      raw.component_minimums_met,
+      raw.componentMinimumsMet
+    ),
+    key_points: Array.isArray(guidance.facts) ? guidance.facts : undefined,
+    risks: Array.isArray(guidance.risks) ? guidance.risks : undefined,
+    next_steps: Array.isArray(guidance.next_steps)
+      ? guidance.next_steps
+      : undefined
+  });
+}
+
 function detectIntentFallback(message) {
   const t = safeStr(message).toLowerCase();
 
   if (!t) return "unknown";
+
+  if (
+    /\b(air force pt|usaf pt|pt calculator|pfra|physical fitness assessment|2[\s-]?mile run|hamr|hand[-\s]?release push[-\s]?ups?|waist[-\s]?to[-\s]?height|whtr)\b/.test(
+      t
+    )
+  ) {
+    return "pt_calculator";
+  }
 
   if (
     /\bva loan\b|\bva mortgage\b|\bva-backed\b|\bva backed\b|\bcoe\b|\bcertificate of eligibility\b|\bfunding fee\b|\bva funding fee\b|\bva appraisal\b|\bva inspection\b|\bentitlement\b|\bfull entitlement\b|\bpartial entitlement\b|\bseller concession\b|\bseller credit\b|\bzero down\b|\b0 down\b|\bno down payment\b|\bno pmi\b|\boccupancy\b|\bprimary residence\b|\bva closing costs\b|\bva home loan\b/.test(t)

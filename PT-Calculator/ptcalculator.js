@@ -186,6 +186,14 @@
     return `Missing ${componentName} standard for selected age/gender.`;
   }
 
+  function getCardioEventMode(){
+    const value = String(els.cardioEvent?.value || "").trim();
+    if (/hamr/i.test(value)) return "hamr";
+    if (/2\s*km\s*walk/i.test(value)) return "walk";
+    if (/2\.0\s*mile\s*run/i.test(value) || /mile\s*run/i.test(value)) return "run";
+    return "unknown";
+  }
+
   //#4) OFFICIAL TABLES — PFRA Scoring Charts effective 1 MAR 26 (DAFMAN 36-2905)
   const TABLES = {
     // PFRA Scoring Charts p.2 — Push-Up Scoring Standards (reps)
@@ -402,6 +410,19 @@
       [35, buildMap([42,21,42,20,38,19,36,18,32,17,31,16,30,14,27,13,26,11])],
     ],
 
+    // PFRA Scoring Charts p.11 — 2.0 Kilometer Walk Standards (pass/fail; 35.0 pts if at or under time)
+    // Age bands: Under 30, 30–39, 40–49, 50–59, 60 and Over (mapped from 5-year PFRA age groups)
+    walk: {
+      passPoints: 35.0,
+      passSeconds: buildMap([
+        976, 1042, 976, 1042,
+        978, 1048, 978, 1048,
+        983, 1069, 983, 1069,
+        1000, 1091, 1000, 1091,
+        1018, 1133
+      ])
+    },
+
     // PFRA Scoring Charts p.1 — Waist-to-Height Ratio (WHtR) Scoring Standards
     whtr: [
       { maxRatio: 0.49, points: 20.0 },
@@ -467,6 +488,12 @@
       if (sec <= threshold) return pts;
     }
     return 0.0;
+  }
+
+  function scoreWalk(sec, key){
+    const maxSeconds = TABLES.walk?.passSeconds?.[key];
+    if (!Number.isFinite(maxSeconds)) return null;
+    return sec <= maxSeconds ? TABLES.walk.passPoints : 0.0;
   }
 
   function scoreFromTable(table, key, value, direction){
@@ -540,8 +567,9 @@
 
   function getCurrentCardioBounds(){
     const key = pairKey();
+    const eventMode = getCardioEventMode();
 
-    if (els.cardioEvent?.value.includes("HAMR")){
+    if (eventMode === "hamr"){
       const top = TABLES.hamr[0][1][key];
       const passMin = TABLES.hamr[TABLES.hamr.length - 1][1][key];
       return {
@@ -555,16 +583,42 @@
       };
     }
 
-    const top = TABLES.run[0][1][key];
-    const passMin = TABLES.run[TABLES.run.length - 1][1][key];
+    if (eventMode === "walk"){
+      const passSeconds = TABLES.walk.passSeconds[key];
+      const fastFloor = Number.isFinite(passSeconds) ? Math.max(480, passSeconds - 240) : 480;
+      return {
+        mode: "walk",
+        table: TABLES.walk,
+        type: "walk",
+        min: fastFloor,
+        sliderMax: Number.isFinite(passSeconds) ? passSeconds + 300 : 1500,
+        top: passSeconds,
+        passMin: passSeconds
+      };
+    }
+
+    if (eventMode === "run"){
+      const top = TABLES.run[0][1][key];
+      const passMin = TABLES.run[TABLES.run.length - 1][1][key];
+      return {
+        mode: "run",
+        table: TABLES.run,
+        type: "run",
+        min: top,
+        sliderMax: (passMin || 0) + 300,
+        top,
+        passMin
+      };
+    }
+
     return {
-      mode: "run",
-      table: TABLES.run,
-      type: "run",
-      min: top,
-      sliderMax: (passMin || 0) + 300,
-      top,
-      passMin
+      mode: "unknown",
+      table: null,
+      type: "unknown",
+      min: 0,
+      sliderMax: 100,
+      top: NaN,
+      passMin: NaN
     };
   }
 
@@ -615,8 +669,15 @@
     const cardioBounds = getCurrentCardioBounds();
     if (cardioBounds.type === "hamr") {
       safeText(els.cardioMeta, `Best: ${cardioBounds.top} shuttles • Minimum Passing: ${cardioBounds.passMin} shuttles`);
-    } else {
+    } else if (cardioBounds.type === "walk") {
+      safeText(
+        els.cardioMeta,
+        `Passing: ≤ ${formatTime(cardioBounds.top)} • Score: ${TABLES.walk.passPoints} pts (pass/fail only)`
+      );
+    } else if (cardioBounds.type === "run") {
       safeText(els.cardioMeta, `Best: ${formatTime(cardioBounds.top)} • Minimum Passing: ${formatTime(cardioBounds.passMin)}`);
+    } else {
+      safeText(els.cardioMeta, "Unsupported cardio event selected.");
     }
   }
 
@@ -634,8 +695,10 @@
     const cardioBounds = getCurrentCardioBounds();
     if (cardioBounds.type === "hamr"){
       setTickLabels(els.cardioTicks, buildLinearNumberTicks(cardioBounds.min, cardioBounds.sliderMax));
-    } else {
+    } else if (cardioBounds.type === "walk" || cardioBounds.type === "run"){
       setTickLabels(els.cardioTicks, buildTimeTicks(cardioBounds.min, cardioBounds.sliderMax));
+    } else {
+      setTickLabels(els.cardioTicks, ["—", "—", "—", "—", "—", "—"]);
     }
   }
 
@@ -708,22 +771,29 @@
     const coreScore = coreScoreRaw === null ? 0 : coreScoreRaw;
 
     let cardioScore = 0.0;
-    let cardioMode = "run";
+    let cardioMode = getCardioEventMode();
 
     if (cardioBounds.mode === "hamr"){
-      cardioMode = "hamr";
       const hamrScore = scoreHigherBetter(cardio, TABLES.hamr, key);
       cardioScore = hamrScore === null ? 0 : hamrScore;
-    } else {
-      cardioMode = "run";
+    } else if (cardioBounds.mode === "walk"){
+      const walkScore = scoreWalk(cardio, key);
+      cardioScore = walkScore === null ? 0 : walkScore;
+    } else if (cardioBounds.mode === "run"){
       const runScore = scoreTimeLowerBetter(cardio, TABLES.run, key);
       cardioScore = runScore === null ? 0 : runScore;
+    } else {
+      cardioScore = 0.0;
+      warnings.push("Unsupported cardio event selected. Please choose 2.0 Mile Run, 20m HAMR, or 2 km Walk.");
     }
 
     if (strengthScoreRaw === null) warnings.push(lookupMissingWarning("strength scoring"));
     if (coreScoreRaw === null) warnings.push(lookupMissingWarning("core scoring"));
     if (cardioBounds.mode === "hamr" && scoreHigherBetter(cardio, TABLES.hamr, key) === null){
       warnings.push(lookupMissingWarning("HAMR scoring"));
+    }
+    if (cardioBounds.mode === "walk" && scoreWalk(cardio, key) === null){
+      warnings.push(lookupMissingWarning("walk scoring"));
     }
     if (cardioBounds.mode === "run" && scoreTimeLowerBetter(cardio, TABLES.run, key) === null){
       warnings.push(lookupMissingWarning("run scoring"));
@@ -801,8 +871,12 @@
       lines.push("Body composition is one of the largest scoring opportunities right now.");
     }
 
+    if (scores.cardioMode === "walk"){
+      lines.push("The 2 km Walk awards 35 cardio points when you finish at or under the official standard time.");
+    }
+
     const weakest = Math.min(scores.strengthScore, scores.coreScore, scores.cardioScore);
-    if (weakest === scores.cardioScore){
+    if (weakest === scores.cardioScore && scores.cardioMode !== "walk"){
       lines.push("Cardio is the clearest lever for raising the composite score fastest.");
     } else if (weakest === scores.coreScore){
       lines.push("Improving core performance would be one of the fastest ways to raise the total.");
@@ -817,7 +891,179 @@
     };
   }
 
-  //#9) UI RENDER
+  //#9) ASK AMY DATA BRIDGE (in-memory only; no persistent browser storage)
+  const PT_BRIDGE_VERSION = "pt-calculator-2026.1";
+  let lastBridgePayload = null;
+  let userInitiatedUpdate = false;
+
+  function mapStrengthOption(label){
+    const t = String(label || "");
+    if (/hand-release/i.test(t)) return "hand_release_push_ups";
+    return "push_ups";
+  }
+
+  function mapCoreOption(label){
+    const t = String(label || "");
+    if (/cross-legged|reverse crunch/i.test(t)) return "cross_leg_reverse_crunch";
+    if (/plank/i.test(t)) return "forearm_plank";
+    return "sit_ups";
+  }
+
+  function mapCardioOption(mode){
+    if (mode === "hamr") return "hamr";
+    if (mode === "walk") return "two_kilometer_walk";
+    if (mode === "run") return "two_mile_run";
+    return null;
+  }
+
+  function mapAgeBand(label){
+    const t = String(label || "").trim();
+    if (/under\s*25/i.test(t)) return "under25";
+    if (/60/.test(t)) return "60plus";
+    const m = t.match(/(\d{2})\s*[–-]\s*(\d{2})/);
+    if (m) return `${m[1]}-${m[2]}`;
+    return null;
+  }
+
+  function mapSex(value){
+    const t = String(value || "").toLowerCase();
+    if (t.startsWith("f")) return "female";
+    if (t.startsWith("m")) return "male";
+    return null;
+  }
+
+  function buildBridgePayload(scores){
+    const strengthOption = mapStrengthOption(els.strengthEvent?.value);
+    const coreOption = mapCoreOption(els.enduranceEvent?.value);
+    const cardioOption = mapCardioOption(scores.cardioMode);
+    const sex = mapSex(els.gender?.value);
+    const age_band = mapAgeBand(els.ageGroup?.value);
+    const height_inches = Number(els.heightSlider?.value || 0);
+    const waist_inches = Number(els.waistSlider?.value || 0);
+    const strength_reps = Number(els.strengthSlider?.value || 0);
+    const coreRaw = Number(els.coreSlider?.value || 0);
+    const cardioRaw = Number(els.cardioSlider?.value || 0);
+
+    return {
+      schema_version: "pt-input-v1",
+      source_version: PT_BRIDGE_VERSION,
+      effective_date: "2026-03-01",
+      sex,
+      gender: sex,
+      age_band: age_band,
+      ageGroup: els.ageGroup?.value || null,
+      height_inches,
+      waist_inches,
+      strength_option: strengthOption,
+      strength_reps,
+      core_option: coreOption,
+      core_reps: coreOption === "forearm_plank" ? null : coreRaw,
+      plank_seconds: coreOption === "forearm_plank" ? coreRaw : null,
+      cardio_option: cardioOption,
+      run_seconds: cardioOption === "two_mile_run" ? cardioRaw : null,
+      hamr_shuttles: cardioOption === "hamr" ? cardioRaw : null,
+      walk_seconds: cardioOption === "two_kilometer_walk" ? cardioRaw : null,
+      walk_authorized: cardioOption === "two_kilometer_walk" ? null : null,
+      selections: {
+        strength: strengthOption,
+        core: coreOption,
+        cardio: cardioOption
+      },
+      measurements: {
+        height_inches,
+        waist_inches,
+        whtr: scores.ratio,
+        whtr_risk:
+          scores.ratio >= 0.6
+            ? "high_risk_fail"
+            : scores.ratio >= 0.55
+              ? "elevated"
+              : scores.ratio >= 0.5
+                ? "moderate"
+                : "low"
+      },
+      component_scores: {
+        body_composition: scores.bodyScore,
+        strength: scores.strengthScore,
+        core: scores.coreScore,
+        cardio: scores.cardioScore
+      },
+      displayed_component_scores: {
+        body_composition: scores.bodyScore,
+        strength: scores.strengthScore,
+        core: scores.coreScore,
+        cardio: scores.cardioScore
+      },
+      total_score: scores.total,
+      displayed_total_score: scores.total,
+      rating: scores.category,
+      displayed_rating: scores.category,
+      overall_pass: Boolean(scores.minimumsMet && scores.total >= 75),
+      component_minimums_met: Boolean(scores.minimumsMet),
+      component_pass: {
+        body_composition: scores.bodyPassed,
+        strength: scores.strengthPassed,
+        core: scores.corePassed,
+        cardio: scores.cardioPassed
+      },
+      whtr: scores.ratio,
+      warnings: Array.isArray(scores.warnings) ? scores.warnings.slice() : [],
+      scores: {
+        bodyScore: scores.bodyScore,
+        strengthScore: scores.strengthScore,
+        coreScore: scores.coreScore,
+        cardioScore: scores.cardioScore,
+        total: scores.total,
+        category: scores.category,
+        minimumsMet: scores.minimumsMet,
+        ratio: scores.ratio
+      },
+      source: {
+        manual: "AFMAN 36-2905",
+        scoring_effective_date: "2026-03-01",
+        calculator: "PCSUnited PT Calculator"
+      }
+    };
+  }
+
+  function dispatchPtEvent(name, userInitiated){
+    try {
+      window.dispatchEvent(
+        new CustomEvent(name, {
+          detail: {
+            source: "pcsunited-pt-calculator",
+            version: PT_BRIDGE_VERSION,
+            userInitiated: Boolean(userInitiated),
+            pt: lastBridgePayload
+          }
+        })
+      );
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  function publishBridge(scores, userInitiated){
+    lastBridgePayload = buildBridgePayload(scores);
+    window.PCSUnitedPTCalculator = {
+      version: PT_BRIDGE_VERSION,
+      getData() {
+        return lastBridgePayload ? { ...lastBridgePayload } : null;
+      },
+      calculate() {
+        const next = computeScores();
+        publishBridge(next, true);
+        return lastBridgePayload ? { ...lastBridgePayload } : null;
+      },
+      reset() {
+        lastBridgePayload = null;
+        return null;
+      }
+    };
+    dispatchPtEvent("pcsunited:pt-calculator-updated", userInitiated);
+  }
+
+  //#10) UI RENDER
   function updateUI(){
     setSliderFill(els.heightSlider);
     setSliderFill(els.waistSlider);
@@ -844,8 +1090,10 @@
 
     if (scores.cardioMode === "hamr"){
       safeText(els.cardioValue, `${els.cardioSlider?.value || 0} shuttles`);
-    } else {
+    } else if (scores.cardioMode === "walk" || scores.cardioMode === "run"){
       safeText(els.cardioValue, formatTime(Number(els.cardioSlider?.value || 0)));
+    } else {
+      safeText(els.cardioValue, "—");
     }
 
     safeText(els.ratioValue, scores.ratio.toFixed(2));
@@ -869,9 +1117,12 @@
       <li><span class="dot peach"></span><span>${insights.line2}</span></li>
       <li><span class="dot lav"></span><span>${insights.line3}</span></li>
     `);
+
+    publishBridge(scores, userInitiatedUpdate);
+    userInitiatedUpdate = false;
   }
 
-  //#10) EVENTS
+  //#11) EVENTS
   [
     els.gender,
     els.heightSlider,
@@ -887,6 +1138,7 @@
     if (!el) return;
 
     const refresh = () => {
+      userInitiatedUpdate = true;
       if (
         el === els.gender ||
         el === els.ageGroup ||
@@ -903,7 +1155,8 @@
     el.addEventListener("change", refresh);
   });
 
-  //#11) INIT
+  //#12) INIT
   updateEventRanges();
   updateUI();
+  dispatchPtEvent("pcsunited:pt-calculator-ready", false);
 })();
