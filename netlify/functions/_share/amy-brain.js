@@ -567,7 +567,7 @@ function buildPtCalculatorTruth(input) {
 }
 
 const AF_FITNESS_MESSAGE_RE =
-  /\b(pt test|fitness test|pfra|physical fitness|pt score|fitness score|2[\s-]?mile|hamr|push[-\s]?ups?|hand[-\s]?release|sit[-\s]?ups?|plank|reverse crunch|body composition|whtr|waist[-\s]?to[-\s]?height|diagnostic (?:pfra|test)|af form 469|form 469|myfitness|fitness appeal|fitness assessment|fac\b|ufpm|ufac|fsq|2[\s-]?km walk|2[\s-]?kilometer walk|pfra hold|adaptive fitness|fitness reconditioning|afman\s*36-?2905)\b/i;
+   /\b(pt test|fitness test|fitness system|fitness program|air force fitness|af fitness|usaf fitness|pfra|physical fitness|pt score|fitness score|2[\s-]?mile|hamr|push[-\s]?ups?|hand[-\s]?release|sit[-\s]?ups?|plank|reverse crunch|body composition|whtr|waist[-\s]?to[-\s]?height|diagnostic (?:pfra|test)|af form 469|form 469|myfitness|fitness appeal|fitness assessment|fac\b|ufpm|ufac|fsq|2[\s-]?km walk|2[\s-]?kilometer walk|pfra hold|adaptive fitness|fitness reconditioning|afman\s*36-?2905)\b/i;
 
 function detectAirForceFitnessNeed(input) {
   const normalized = normalizeAmyBrainInput(input);
