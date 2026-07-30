@@ -55,11 +55,6 @@
   //#2) CONFIG
   const DEBUG = false;
 
-  const POLICY = {
-    satisfactoryMonths: 6,
-    unsatMonths: 3
-  };
-
   const SCORE_CAPS = {
     body: 20,
     strength: 15,
@@ -71,8 +66,7 @@
   const MIN_PASS = {
     strength: 2.5,
     core: 2.5,
-    cardio: 35.0,
-    bodyMaxRatio: 0.59
+    cardio: 35.0
   };
 
   const ORDER = [
@@ -86,6 +80,24 @@
     "55-59_male","55-59_female",
     "60plus_male","60plus_female"
   ];
+
+  // DAFMAN Table 3.1 / PFRA chart p.11 — 2 km Walk pass/fail max times (seconds)
+  const WALK_STANDARDS = {
+    male: {
+      under30: 16 * 60 + 16,
+      "30-39": 16 * 60 + 18,
+      "40-49": 16 * 60 + 23,
+      "50-59": 16 * 60 + 40,
+      "60plus": 16 * 60 + 58
+    },
+    female: {
+      under30: 17 * 60 + 22,
+      "30-39": 17 * 60 + 28,
+      "40-49": 17 * 60 + 49,
+      "50-59": 18 * 60 + 11,
+      "60plus": 18 * 60 + 53
+    }
+  };
 
   //#3) HELPERS
   function clamp(value, min, max){
@@ -108,7 +120,14 @@
   }
 
   function formatInches(value){
-    return `${Number(value).toFixed(1)} in`;
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "—";
+    return `${n.toFixed(1)} in`;
+  }
+
+  function safeNumber(value, fallback = 0){
+    const n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
   }
 
   function setSliderFill(slider){
@@ -117,7 +136,7 @@
     const max = Number(slider.max);
     const val = Number(slider.value);
     const pct = ((val - min) / (max - min || 1)) * 100;
-    slider.style.setProperty("--fill", `${pct}%`);
+    slider.style.setProperty("--fill", `${clamp(pct, 0, 100)}%`);
   }
 
   function normalizeAgeKey(label){
@@ -125,6 +144,15 @@
     if (raw.includes("under")) return "under25";
     if (raw.includes("60")) return "60plus";
     return raw;
+  }
+
+  function walkAgeBand(ageKey){
+    if (ageKey === "under25" || ageKey === "25-29") return "under30";
+    if (ageKey === "30-34" || ageKey === "35-39") return "30-39";
+    if (ageKey === "40-44" || ageKey === "45-49") return "40-49";
+    if (ageKey === "50-54" || ageKey === "55-59") return "50-59";
+    if (ageKey === "60plus") return "60plus";
+    return null;
   }
 
   function buildMap(arr){
@@ -137,6 +165,14 @@
 
   function pairKey(){
     return `${normalizeAgeKey(els.ageGroup?.value || "")}_${els.gender?.value || ""}`;
+  }
+
+  function isWalkSelected(){
+    return String(els.cardioEvent?.value || "").includes("Walk");
+  }
+
+  function isHamrSelected(){
+    return String(els.cardioEvent?.value || "").includes("HAMR");
   }
 
   function setTickLabels(container, labels){
@@ -418,35 +454,51 @@
     ]
   };
 
+
   //#5) RULE HELPERS
+  function truncateWHtR(ratio){
+    const value = Number(ratio);
+    if (!Number.isFinite(value) || value < 0) return null;
+    return Math.floor((value + Number.EPSILON) * 100) / 100;
+  }
+
+  function getWHtRRiskLabel(truncatedRatio){
+    if (!Number.isFinite(truncatedRatio)) return "—";
+    if (truncatedRatio <= 0.49) return "Low Risk";
+    if (truncatedRatio <= 0.54) return "Moderate Risk";
+    return "High Risk";
+  }
+
   function scoreCategory(total, minimumsMet){
     if (!minimumsMet) return "Unsatisfactory";
-    if (total >= 90) return "Excellent";
-    if (total >= 75) return "Satisfactory";
+    if (!Number.isFinite(total)) return "Unsatisfactory";
+    if (total > 90) return "Excellent";
+    if (total >= 75 && total <= 89.9) return "Satisfactory";
+    if (Math.abs(total - 90) < 1e-9) return "Unresolved-90";
     return "Unsatisfactory";
   }
 
-  function nextAssessmentText(total, minimumsMet){
-    return (minimumsMet && total >= 75)
-      ? `Next assessment<br>in ${POLICY.satisfactoryMonths} months`
-      : `Next assessment<br>in ${POLICY.unsatMonths} months`;
-  }
-
-  function roundWHtR(ratio){
-    return Math.round(Number(ratio) * 100) / 100;
+  function nextAssessmentText(mode, category){
+    if (mode === "walk"){
+      return "Walk/exemption frequency must be confirmed through the official record and unit guidance.<br>Confirm your official due date in myFitness.";
+    }
+    if (category === "Unresolved-90"){
+      return "Confirm the official rating and due date in myFitness.";
+    }
+    if (category === "Unsatisfactory"){
+      return "Typical reassessment cycle: 3 months.<br>Confirm your official due date in myFitness.";
+    }
+    return "Typical RegAF cycle: 6 months.<br>ARC members normally assess every 12 months.<br>Confirm your official due date in myFitness.";
   }
 
   function getWHtRScore(ratio){
-    const rounded = roundWHtR(ratio);
-    if (rounded >= 0.60) return 0.0;
+    const truncated = truncateWHtR(ratio);
+    if (truncated === null) return 0.0;
+    if (truncated >= 0.60) return 0.0;
     for (const row of TABLES.whtr){
-      if (rounded <= row.maxRatio) return row.points;
+      if (truncated <= row.maxRatio) return row.points;
     }
     return 0.0;
-  }
-
-  function bodyCompositionPassed(ratio){
-    return roundWHtR(ratio) <= MIN_PASS.bodyMaxRatio;
   }
 
   function scoreHigherBetter(value, rows, key){
@@ -478,11 +530,19 @@
 
   function componentMinimumsMet(flags){
     return (
-      flags.bodyPassed &&
       flags.strengthPassed &&
       flags.corePassed &&
       flags.cardioPassed
     );
+  }
+
+  function getWalkStandardSeconds(){
+    const gender = els.gender?.value === "female" ? "female" : "male";
+    const ageKey = normalizeAgeKey(els.ageGroup?.value || "");
+    const band = walkAgeBand(ageKey);
+    if (!band) return null;
+    const value = WALK_STANDARDS[gender]?.[band];
+    return Number.isFinite(value) ? value : null;
   }
 
   function getCurrentStrengthBounds(){
@@ -541,7 +601,22 @@
   function getCurrentCardioBounds(){
     const key = pairKey();
 
-    if (els.cardioEvent?.value.includes("HAMR")){
+    if (isWalkSelected()){
+      const passMax = getWalkStandardSeconds();
+      const top = Number.isFinite(passMax) ? Math.max(14 * 60, passMax - 180) : 14 * 60;
+      const sliderMax = Number.isFinite(passMax) ? passMax + 300 : 22 * 60;
+      return {
+        mode: "walk",
+        table: null,
+        type: "walk",
+        min: top,
+        sliderMax,
+        top,
+        passMin: passMax
+      };
+    }
+
+    if (isHamrSelected()){
       const top = TABLES.hamr[0][1][key];
       const passMin = TABLES.hamr[TABLES.hamr.length - 1][1][key];
       return {
@@ -587,7 +662,11 @@
     }
 
     const cardioBounds = getCurrentCardioBounds();
-    if (!Number.isFinite(cardioBounds.top) || !Number.isFinite(cardioBounds.passMin)){
+    if (cardioBounds.mode === "walk"){
+      if (!Number.isFinite(cardioBounds.passMin)){
+        warnings.push(lookupMissingWarning("2 km Walk"));
+      }
+    } else if (!Number.isFinite(cardioBounds.top) || !Number.isFinite(cardioBounds.passMin)){
       warnings.push(lookupMissingWarning("cardio"));
     }
 
@@ -596,11 +675,13 @@
 
   //#6) UI RANGE / TICKS
   function updateRangeMeta(){
-    const height = Number(els.heightSlider?.value || 0);
-
+    const height = safeNumber(els.heightSlider?.value, 0);
     const waistBest = 0.49 * height;
-    const waistMinPass = MIN_PASS.bodyMaxRatio * height;
-    safeText(els.waistMeta, `Best: ≤ ${formatInches(waistBest)} • Minimum Passing: ≤ ${formatInches(waistMinPass)}`);
+    const highRiskStart = 0.55 * height;
+    safeText(
+      els.waistMeta,
+      `Best scoring band: ≤ ${formatInches(waistBest)} (Low Risk) • High Risk begins: ≥ ${formatInches(highRiskStart)}`
+    );
 
     const strengthBounds = getCurrentStrengthBounds();
     safeText(els.strengthMeta, `Best: ${strengthBounds.top} reps • Minimum Passing: ${strengthBounds.passMin} reps`);
@@ -615,6 +696,9 @@
     const cardioBounds = getCurrentCardioBounds();
     if (cardioBounds.type === "hamr") {
       safeText(els.cardioMeta, `Best: ${cardioBounds.top} shuttles • Minimum Passing: ${cardioBounds.passMin} shuttles`);
+    } else if (cardioBounds.type === "walk") {
+      const passText = Number.isFinite(cardioBounds.passMin) ? formatTime(cardioBounds.passMin) : "—";
+      safeText(els.cardioMeta, `Pass standard: ≤ ${passText} • Medical only (AF Form 469) • No cardio points`);
     } else {
       safeText(els.cardioMeta, `Best: ${formatTime(cardioBounds.top)} • Minimum Passing: ${formatTime(cardioBounds.passMin)}`);
     }
@@ -645,13 +729,13 @@
     const cardioBounds = getCurrentCardioBounds();
 
     if (els.strengthSlider){
-      els.strengthSlider.value = String(clamp(Number(els.strengthSlider.value), strengthBounds.min, strengthBounds.sliderMax));
+      els.strengthSlider.value = String(clamp(safeNumber(els.strengthSlider.value), strengthBounds.min, strengthBounds.sliderMax));
     }
     if (els.coreSlider){
-      els.coreSlider.value = String(clamp(Number(els.coreSlider.value), coreBounds.min, coreBounds.sliderMax));
+      els.coreSlider.value = String(clamp(safeNumber(els.coreSlider.value), coreBounds.min, coreBounds.sliderMax));
     }
     if (els.cardioSlider){
-      els.cardioSlider.value = String(clamp(Number(els.cardioSlider.value), cardioBounds.min, cardioBounds.sliderMax));
+      els.cardioSlider.value = String(clamp(safeNumber(els.cardioSlider.value), cardioBounds.min, cardioBounds.sliderMax));
     }
   }
 
@@ -686,17 +770,18 @@
     const warnings = validateSelectionState();
     const key = pairKey();
 
-    const height = Number(els.heightSlider?.value || 0);
-    const waist = Number(els.waistSlider?.value || 0);
-    const strength = Number(els.strengthSlider?.value || 0);
-    const core = Number(els.coreSlider?.value || 0);
-    const cardio = Number(els.cardioSlider?.value || 0);
+    const height = safeNumber(els.heightSlider?.value, 0);
+    const waist = safeNumber(els.waistSlider?.value, 0);
+    const strength = safeNumber(els.strengthSlider?.value, 0);
+    const core = safeNumber(els.coreSlider?.value, 0);
+    const cardio = safeNumber(els.cardioSlider?.value, 0);
 
     const ratio = height > 0 ? waist / height : 0;
-    const roundedRatio = roundWHtR(ratio);
+    const truncatedRatio = truncateWHtR(ratio);
+    const displayRatio = truncatedRatio === null ? 0 : truncatedRatio;
     const bodyScoreRaw = getWHtRScore(ratio);
-    const bodyScore = bodyScoreRaw === null ? 0 : bodyScoreRaw;
-    const bodyPassed = bodyCompositionPassed(ratio);
+    const bodyScore = Number.isFinite(bodyScoreRaw) ? bodyScoreRaw : 0;
+    const riskLabel = getWHtRRiskLabel(displayRatio);
 
     const strengthBounds = getCurrentStrengthBounds();
     const coreBounds = getCurrentCoreBounds();
@@ -708,61 +793,81 @@
     const coreScore = coreScoreRaw === null ? 0 : coreScoreRaw;
 
     let cardioScore = 0.0;
-    let cardioMode = "run";
+    let cardioMode = cardioBounds.mode;
+    let walkPassed = null;
 
-    if (cardioBounds.mode === "hamr"){
+    if (cardioBounds.mode === "walk"){
+      cardioMode = "walk";
+      cardioScore = 0.0;
+      if (Number.isFinite(cardioBounds.passMin)){
+        walkPassed = cardio <= cardioBounds.passMin;
+      } else {
+        warnings.push(lookupMissingWarning("2 km Walk"));
+        walkPassed = false;
+      }
+    } else if (cardioBounds.mode === "hamr"){
       cardioMode = "hamr";
       const hamrScore = scoreHigherBetter(cardio, TABLES.hamr, key);
       cardioScore = hamrScore === null ? 0 : hamrScore;
+      if (hamrScore === null) warnings.push(lookupMissingWarning("HAMR scoring"));
     } else {
       cardioMode = "run";
       const runScore = scoreTimeLowerBetter(cardio, TABLES.run, key);
       cardioScore = runScore === null ? 0 : runScore;
+      if (runScore === null) warnings.push(lookupMissingWarning("run scoring"));
     }
 
     if (strengthScoreRaw === null) warnings.push(lookupMissingWarning("strength scoring"));
     if (coreScoreRaw === null) warnings.push(lookupMissingWarning("core scoring"));
-    if (cardioBounds.mode === "hamr" && scoreHigherBetter(cardio, TABLES.hamr, key) === null){
-      warnings.push(lookupMissingWarning("HAMR scoring"));
-    }
-    if (cardioBounds.mode === "run" && scoreTimeLowerBetter(cardio, TABLES.run, key) === null){
-      warnings.push(lookupMissingWarning("run scoring"));
-    }
 
     const strengthPassed = strengthScore >= MIN_PASS.strength;
     const corePassed = coreScore >= MIN_PASS.core;
-    const cardioPassed = cardioScore >= MIN_PASS.cardio;
+    const cardioPassed = cardioMode === "walk"
+      ? false
+      : cardioScore >= MIN_PASS.cardio;
 
-    const minimumsMet = componentMinimumsMet({
-      bodyPassed,
-      strengthPassed,
-      corePassed,
-      cardioPassed
-    });
+    const minimumsMet = cardioMode === "walk"
+      ? false
+      : componentMinimumsMet({
+          strengthPassed,
+          corePassed,
+          cardioPassed
+        });
 
-    const total = clamp(bodyScore + strengthScore + coreScore + cardioScore, 0, SCORE_CAPS.total);
-    const category = scoreCategory(total, minimumsMet);
+    const cappedBody = clamp(bodyScore, 0, SCORE_CAPS.body);
+    const cappedStrength = clamp(strengthScore, 0, SCORE_CAPS.strength);
+    const cappedCore = clamp(coreScore, 0, SCORE_CAPS.core);
+    const cappedCardio = clamp(cardioScore, 0, SCORE_CAPS.cardio);
+
+    const total = cardioMode === "walk"
+      ? null
+      : clamp(cappedBody + cappedStrength + cappedCore + cappedCardio, 0, SCORE_CAPS.total);
+
+    const category = cardioMode === "walk"
+      ? (walkPassed ? "Walk-Pass" : "Walk-Fail")
+      : scoreCategory(total, minimumsMet);
 
     const result = {
-      ratio: roundedRatio,
-      bodyScore,
-      strengthScore,
-      coreScore,
-      cardioScore,
+      ratio: displayRatio,
+      riskLabel,
+      bodyScore: cappedBody,
+      strengthScore: cappedStrength,
+      coreScore: cappedCore,
+      cardioScore: cappedCardio,
       total,
       category,
       minimumsMet,
       cardioMode,
-      bodyPassed,
+      walkPassed,
       strengthPassed,
       corePassed,
       cardioPassed,
       warnings: [...new Set(warnings)],
       breakdown: {
-        body: bodyScore,
-        strength: strengthScore,
-        core: coreScore,
-        cardio: cardioScore
+        body: cappedBody,
+        strength: cappedStrength,
+        core: cappedCore,
+        cardio: cappedCardio
       }
     };
 
@@ -776,38 +881,53 @@
       return {
         line1: scores.warnings[0],
         line2: scores.warnings[1] || "Review selected standards and supported event configuration.",
-        line3: "Calculator output may be incomplete until all official values are available."
+        line3: "Calculator output may be incomplete until all published values are available."
+      };
+    }
+
+    if (scores.cardioMode === "walk"){
+      const walkLine = scores.walkPassed
+        ? "2 km Walk estimate: Pass against Table 3.1 maximum time."
+        : "2 km Walk estimate: Fail — time exceeds the Table 3.1 maximum.";
+      return {
+        line1: walkLine,
+        line2: "AF Form 469 authorization is required. Walk awards no cardio points and treats the member as cardio-component exempt.",
+        line3: "The published PDFs do not define the exempt composite formula. Confirm the official exempt composite and due date in myFitness."
       };
     }
 
     const lines = [];
-    if (!scores.minimumsMet){
-      lines.push("One or more components are below the current minimum passing standard.");
-    } else if (scores.total >= 90){
-      lines.push("This combination projects an excellent official result.");
-    } else if (scores.total >= 75){
-      lines.push("This combination projects a satisfactory official result.");
+    if (scores.category === "Unresolved-90"){
+      lines.push("Total is exactly 90.0. The published AFMAN does not explicitly assign this exact score to a rating category.");
+    } else if (!scores.minimumsMet){
+      lines.push("One or more required physical components are below the minimum passing standard.");
+    } else if (scores.category === "Excellent"){
+      lines.push("This combination projects an Excellent estimate (greater than 90).");
+    } else if (scores.category === "Satisfactory"){
+      lines.push("This combination projects a Satisfactory estimate (75 through 89.9).");
     } else {
-      lines.push("The current combination projects an unsatisfactory result.");
+      lines.push("The current combination projects an Unsatisfactory estimate.");
     }
 
-    if (!scores.bodyPassed){
-      lines.push("Body composition is above the passing WHtR threshold and fails as a standalone component.");
-    } else if (scores.bodyScore >= 15){
-      lines.push("Body composition remains within a solid scoring range.");
-    } else if (scores.bodyScore >= 10){
-      lines.push("Body composition is moderate, with additional points still available.");
-    } else {
-      lines.push("Body composition is one of the largest scoring opportunities right now.");
-    }
+    lines.push(`Body composition WHtR risk band: ${scores.riskLabel} (${scores.bodyScore.toFixed(1)} / ${SCORE_CAPS.body} points).`);
 
-    const weakest = Math.min(scores.strengthScore, scores.coreScore, scores.cardioScore);
-    if (weakest === scores.cardioScore){
-      lines.push("Cardio is the clearest lever for raising the composite score fastest.");
-    } else if (weakest === scores.coreScore){
-      lines.push("Improving core performance would be one of the fastest ways to raise the total.");
+    if (!scores.strengthPassed){
+      lines.push("Strength is below the 2.5-point component minimum.");
+    } else if (!scores.corePassed){
+      lines.push("Core is below the 2.5-point component minimum.");
+    } else if (!scores.cardioPassed){
+      lines.push("Cardio is below the 35.0-point component minimum.");
+    } else if (scores.bodyScore === 0){
+      lines.push("Body composition scored 0 points; that alone does not fail a standard assessment when physical minimums and total are met.");
     } else {
-      lines.push("Improving strength output would be one of the fastest ways to raise the total.");
+      const weakest = Math.min(scores.strengthScore, scores.coreScore, scores.cardioScore);
+      if (weakest === scores.cardioScore){
+        lines.push("Cardio is the clearest lever for raising the composite score fastest.");
+      } else if (weakest === scores.coreScore){
+        lines.push("Improving core performance would be one of the fastest ways to raise the total.");
+      } else {
+        lines.push("Improving strength output would be one of the fastest ways to raise the total.");
+      }
     }
 
     return {
@@ -825,8 +945,8 @@
     setSliderFill(els.coreSlider);
     setSliderFill(els.cardioSlider);
 
-    safeText(els.heightValue, `${els.heightSlider?.value || 0} in`);
-    safeText(els.waistValue, `${els.waistSlider?.value || 0} in`);
+    safeText(els.heightValue, formatInches(els.heightSlider?.value));
+    safeText(els.waistValue, formatInches(els.waistSlider?.value));
 
     safeText(els.strengthModeLabel, els.strengthEvent?.value || "");
     safeText(els.coreModeLabel, els.enduranceEvent?.value || "");
@@ -835,7 +955,7 @@
     safeText(els.strengthValue, `${els.strengthSlider?.value || 0} reps`);
 
     if (els.enduranceEvent?.value.includes("Plank")){
-      safeText(els.coreValue, formatTime(Number(els.coreSlider?.value || 0)));
+      safeText(els.coreValue, formatTime(safeNumber(els.coreSlider?.value, 0)));
     } else {
       safeText(els.coreValue, `${els.coreSlider?.value || 0} reps`);
     }
@@ -845,29 +965,61 @@
     if (scores.cardioMode === "hamr"){
       safeText(els.cardioValue, `${els.cardioSlider?.value || 0} shuttles`);
     } else {
-      safeText(els.cardioValue, formatTime(Number(els.cardioSlider?.value || 0)));
+      safeText(els.cardioValue, formatTime(safeNumber(els.cardioSlider?.value, 0)));
     }
 
-    safeText(els.ratioValue, scores.ratio.toFixed(2));
-    safeText(els.bodyCompScoreText, `${scores.bodyScore.toFixed(1)} / ${SCORE_CAPS.body}`);
+    const ratioText = Number.isFinite(scores.ratio) ? scores.ratio.toFixed(2) : "—";
+    safeText(els.ratioValue, ratioText);
+    safeText(els.bodyCompScoreText, `${scores.bodyScore.toFixed(1)} / ${SCORE_CAPS.body} · ${scores.riskLabel}`);
 
-    if (els.scoreRing) els.scoreRing.style.setProperty("--pct", scores.total.toFixed(1));
-    safeText(els.scoreNumber, scores.total.toFixed(1));
-    safeText(els.scoreLabel, scores.category);
-    safeHtml(els.nextAssessment, nextAssessmentText(scores.total, scores.minimumsMet));
+    els.scoreNumber?.classList.remove("is-compact");
+    els.scoreLabel?.classList.remove("is-walk");
+
+    if (scores.cardioMode === "walk"){
+      if (els.scoreRing) els.scoreRing.style.setProperty("--pct", "0");
+      safeText(els.scoreNumber, scores.walkPassed ? "PASS" : "FAIL");
+      els.scoreNumber?.classList.add("is-compact");
+      els.scoreLabel?.classList.add("is-walk");
+      safeText(els.scoreLabel, "2 km Walk · not a scored composite");
+    } else if (scores.category === "Unresolved-90"){
+      if (els.scoreRing) els.scoreRing.style.setProperty("--pct", "90.0");
+      safeText(els.scoreNumber, "90.0");
+      els.scoreNumber?.classList.add("is-compact");
+      safeText(
+        els.scoreLabel,
+        "Not Excellent — AFMAN does not explicitly assign 90.0"
+      );
+    } else {
+      const totalText = Number.isFinite(scores.total) ? scores.total.toFixed(1) : "0.0";
+      if (els.scoreRing) els.scoreRing.style.setProperty("--pct", totalText);
+      safeText(els.scoreNumber, totalText);
+      safeText(els.scoreLabel, scores.category);
+    }
+
+    safeHtml(els.nextAssessment, nextAssessmentText(scores.cardioMode, scores.category));
 
     if (els.barBody) els.barBody.style.height = `${(scores.breakdown.body / SCORE_CAPS.body) * 100}%`;
     if (els.barStrength) els.barStrength.style.height = `${(scores.breakdown.strength / SCORE_CAPS.strength) * 100}%`;
     if (els.barCore) els.barCore.style.height = `${(scores.breakdown.core / SCORE_CAPS.core) * 100}%`;
-    if (els.barCardio) els.barCardio.style.height = `${(scores.breakdown.cardio / SCORE_CAPS.cardio) * 100}%`;
+    if (els.barCardio) {
+      els.barCardio.style.height = scores.cardioMode === "walk"
+        ? "0%"
+        : `${(scores.breakdown.cardio / SCORE_CAPS.cardio) * 100}%`;
+    }
 
     updateRangeMeta();
 
     const insights = buildInsights(scores);
+    let extra = "";
+    if (scores.category === "Unresolved-90"){
+      extra = `<li><span class="dot lav"></span><span>90.0 — The published AFMAN does not explicitly assign this exact score to a rating category. It is not Excellent because Excellent requires greater than 90. Verify the official rating in myFitness.</span></li>`;
+    }
+
     safeHtml(els.insightList, `
       <li><span class="dot mint"></span><span>${insights.line1}</span></li>
       <li><span class="dot peach"></span><span>${insights.line2}</span></li>
       <li><span class="dot lav"></span><span>${insights.line3}</span></li>
+      ${extra}
     `);
   }
 
