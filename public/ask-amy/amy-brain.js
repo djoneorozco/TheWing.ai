@@ -23,6 +23,18 @@ import {
   buildVaLoanTruthPacket
 } from "./va-loans.js";
 
+import {
+  PT_CALCULATOR_VERSION,
+  detectPtCalculatorIntent,
+  buildPtCalculatorTruthPacket
+} from "./pt-calculator.js";
+
+import {
+  AF_FITNESS_VERSION,
+  detectAfFitnessIntent,
+  buildAfFitnessTruthPacket
+} from "./af-fitness.js";
+
 // ============================================================
 // //#1 VERSION
 // ============================================================
@@ -182,6 +194,9 @@ function normalizeAmyBrainInput(rawInput = {}) {
   const basicbrain = safeObject(input.basicbrain);
   const session = safeObject(input.session);
   const metadata = safeObject(input.metadata);
+  const widget = safeObject(
+    pickFirstObject(metadata.widget, input.widget, session.widget)
+  );
 
   const profile = pickFirstObject(
     input.profile,
@@ -203,6 +218,36 @@ function normalizeAmyBrainInput(rawInput = {}) {
     bridgeCompensation
   );
 
+  const pt = pickFirstObject(
+    input.pt,
+    input.ptScore,
+    input.pt_score,
+    input.ptScoreSnapshot,
+    input.pt_score_snapshot,
+    input.ptCalculator,
+    input.pt_calculator,
+    input.pfra,
+    input.fitness,
+    widget.ptScore,
+    widget.pt_score,
+    widget.pt,
+    widget.fitness,
+    session.pt,
+    session.ptScore,
+    session.pt_score,
+    session.ptCalculator,
+    session.pt_calculator,
+    session.pfra,
+    session.fitness,
+    basicbrain.pt,
+    basicbrain.ptScore,
+    basicbrain.pt_score,
+    basicbrain.ptCalculator,
+    basicbrain.pt_calculator,
+    basicbrain.pfra,
+    basicbrain.fitness
+  );
+
   return {
     message: clean(input.message),
     profile,
@@ -210,11 +255,54 @@ function normalizeAmyBrainInput(rawInput = {}) {
     compensation,
     mortgage: safeObject(input.mortgage),
     affordability: safeObject(input.affordability),
+    pt,
     selectedBase: safeObject(input.selectedBase),
     basicbrain,
     session,
-    metadata
+    metadata: {
+      ...metadata,
+      widget,
+      page: metadata.page || input.page || null
+    }
   };
+}
+
+const PT_VALUE_KEYS = [
+  "sex",
+  "gender",
+  "age",
+  "age_band",
+  "ageBand",
+  "height_inches",
+  "height",
+  "waist_inches",
+  "waist",
+  "strength_option",
+  "strength_reps",
+  "core_option",
+  "core_reps",
+  "plank_seconds",
+  "cardio_option",
+  "run_seconds",
+  "hamr_shuttles",
+  "walk_seconds",
+  "total_score",
+  "total",
+  "displayed_total_score",
+  "component_scores",
+  "scores",
+  "bodyScore",
+  "strengthScore",
+  "coreScore",
+  "cardioScore",
+  "category",
+  "minimumsMet",
+  "type",
+  "source"
+];
+
+function hasRecognizedPtFields(obj) {
+  return hasAnyValue(obj, PT_VALUE_KEYS);
 }
 
 function normalizeCompensationPacket(raw = {}) {
@@ -419,6 +507,158 @@ function buildVaLoansTruth(input) {
   });
 }
 
+function detectPtCalculatorNeed(input) {
+  const normalized = normalizeAmyBrainInput(input);
+  const reasons = [];
+  let score = 0;
+  const hasPt = hasRecognizedPtFields(normalized.pt);
+  const pagePath = lower(
+    normalized.metadata?.page?.path ||
+      normalized.metadata?.page ||
+      normalized.metadata?.product ||
+      ""
+  );
+  const ptPageContext = /pt|pfra|fitness/.test(pagePath);
+
+  let intent = null;
+  try {
+    intent = detectPtCalculatorIntent(normalized.message, {
+      hasPtData: hasPt || ptPageContext,
+      ptContext: ptPageContext
+    });
+  } catch (_) {
+    intent = null;
+  }
+
+  if (intent) {
+    score += 70;
+    reasons.push(`PT Calculator intent detected: ${clean(intent)}`);
+  }
+
+  if (hasPt) {
+    score += 40;
+    reasons.push("PT/PFRA calculator context is present");
+  }
+
+  if (ptPageContext && !intent && hasPt) {
+    score += 20;
+    reasons.push("Current page context appears PT-specific");
+  }
+
+  const matched = Boolean(intent) || (hasPt && /\b(how did i do|my score|explain|pass|fail)\b/i.test(lower(normalized.message)));
+
+  return {
+    id: "pt_calculator",
+    matched,
+    score: matched ? Math.max(score, 1) : 0,
+    reasons: matched ? uniqueArray(reasons) : []
+  };
+}
+
+function buildPtCalculatorTruth(input) {
+  const normalized = normalizeAmyBrainInput(input);
+  return buildPtCalculatorTruthPacket({
+    message: normalized.message,
+    profile: normalized.profile,
+    pt: normalized.pt,
+    scenario: normalized.scenario,
+    metadata: normalized.metadata
+  });
+}
+
+const AF_FITNESS_MESSAGE_RE =
+  /\b(pt test|fitness test|pfra|physical fitness|pt score|fitness score|2[\s-]?mile|hamr|push[-\s]?ups?|hand[-\s]?release|sit[-\s]?ups?|plank|reverse crunch|body composition|whtr|waist[-\s]?to[-\s]?height|diagnostic (?:pfra|test)|af form 469|form 469|myfitness|fitness appeal|fitness assessment|fac\b|ufpm|ufac|fsq|2[\s-]?km walk|2[\s-]?kilometer walk|pfra hold|adaptive fitness|fitness reconditioning|afman\s*36-?2905)\b/i;
+
+function detectAirForceFitnessNeed(input) {
+  const normalized = normalizeAmyBrainInput(input);
+  const message = clean(normalized.message);
+  const t = lower(message);
+  const reasons = [];
+  let score = 0;
+
+  if (!t) {
+    return {
+      id: "air_force_fitness",
+      matched: false,
+      score: 0,
+      reasons: []
+    };
+  }
+
+  let intent = null;
+  try {
+    intent = detectAfFitnessIntent(message);
+  } catch (_) {
+    intent = null;
+  }
+
+  const explicit = AF_FITNESS_MESSAGE_RE.test(t);
+  const hasPt = hasRecognizedPtFields(normalized.pt);
+  const pagePath = lower(
+    normalized.metadata?.page?.path ||
+      normalized.metadata?.page ||
+      normalized.metadata?.product ||
+      ""
+  );
+  const fitnessPage = /pt|pfra|fitness/.test(pagePath);
+
+  if (explicit) {
+    score += 65;
+    reasons.push("Message contains Air Force fitness / PFRA language");
+  }
+
+  if (intent && intent !== "overview") {
+    score += explicit ? 20 : 55;
+    reasons.push(`AF fitness intent detected: ${clean(intent)}`);
+  } else if (intent === "overview" && explicit) {
+    score += 15;
+    reasons.push("AF fitness overview intent detected");
+  }
+
+  if (hasPt && explicit) {
+    score += 15;
+    reasons.push("PT score snapshot context is present");
+  }
+
+  if (fitnessPage && explicit) {
+    score += 10;
+    reasons.push("Page context appears fitness-related");
+  }
+
+  const matched =
+    explicit ||
+    (Boolean(intent) && intent !== "overview") ||
+    (hasPt &&
+      /\b(how did i do|my score|explain|pass|fail|excellent|satisfactory|unsatisfactory)\b/i.test(
+        t
+      ));
+
+  return {
+    id: "air_force_fitness",
+    matched,
+    score: matched ? Math.max(score, 1) : 0,
+    reasons: matched ? uniqueArray(reasons) : []
+  };
+}
+
+function buildAirForceFitnessTruth(input) {
+  const normalized = normalizeAmyBrainInput(input);
+  return buildAfFitnessTruthPacket({
+    message: normalized.message,
+    profile: normalized.profile,
+    context: {
+      ptScore: normalized.pt,
+      pt_score: normalized.pt,
+      fitness: normalized.pt,
+      page: normalized.metadata?.page || null,
+      widget: normalized.metadata?.widget || null
+    },
+    ptScore: normalized.pt,
+    page: normalized.metadata?.page || null,
+    widget: normalized.metadata?.widget || null
+  });
+}
+
 // ============================================================
 // //#5 MODULE REGISTRY
 // ============================================================
@@ -451,9 +691,39 @@ const vaLoansModule = Object.freeze({
   }
 });
 
+const ptCalculatorModule = Object.freeze({
+  id: "pt_calculator",
+  version: PT_CALCULATOR_VERSION,
+  description:
+    "Routes USAF PFRA/PT scoring and explanation through pt-calculator.js.",
+  priority: 85,
+  detect(input) {
+    return detectPtCalculatorNeed(input);
+  },
+  build(input) {
+    return buildPtCalculatorTruth(input);
+  }
+});
+
+const airForceFitnessModule = Object.freeze({
+  id: "air_force_fitness",
+  version: AF_FITNESS_VERSION,
+  description:
+    "Routes AFMAN 36-2905 Physical Fitness Readiness Program guidance through af-fitness.js.",
+  priority: 83,
+  detect(input) {
+    return detectAirForceFitnessNeed(input);
+  },
+  build(input) {
+    return buildAirForceFitnessTruth(input);
+  }
+});
+
 export const AMY_BRAIN_MODULES = Object.freeze({
   compensation: compensationModule,
-  va_loans: vaLoansModule
+  va_loans: vaLoansModule,
+  pt_calculator: ptCalculatorModule,
+  air_force_fitness: airForceFitnessModule
 });
 
 function listRegistryModules() {
@@ -642,6 +912,122 @@ function combineTruthPackets(packets = {}, routeWarnings = []) {
     }
   }
 
+  const pt = packets.pt_calculator;
+  if (isPlainObject(pt)) {
+    const guidance = isPlainObject(pt.guidance) ? pt.guidance : {};
+    if (clean(guidance.bluf)) bluf.push(clean(guidance.bluf));
+    else if (clean(pt.bluf)) bluf.push(clean(pt.bluf));
+
+    if (Number.isFinite(Number(pt.total_score))) {
+      facts.push(
+        `USAF PFRA total score: ${Number(pt.total_score).toFixed(1)}${
+          clean(pt.rating) ? ` (${clean(pt.rating)})` : ""
+        }.`
+      );
+    }
+
+    const scores = isPlainObject(pt.component_scores) ? pt.component_scores : {};
+    if (Object.keys(scores).length) {
+      facts.push(
+        `PT components — Body composition: ${scores.body_composition ?? "n/a"}, Strength: ${scores.strength ?? "n/a"}, Core: ${scores.core ?? "n/a"}, Cardio: ${scores.cardio ?? "n/a"}.`
+      );
+    }
+
+    if (pt.component_minimums_met === true || pt.component_minimums_met === false) {
+      facts.push(
+        `PT component minimums met: ${pt.component_minimums_met ? "yes" : "no"}.`
+      );
+    }
+
+    if (pt.overall_pass === true || pt.overall_pass === false) {
+      facts.push(`PT overall pass: ${pt.overall_pass ? "yes" : "no"}.`);
+    }
+
+    if (Number.isFinite(Number(pt.measurements?.whtr))) {
+      facts.push(
+        `WHtR: ${Number(pt.measurements.whtr).toFixed(2)}${
+          clean(pt.measurements.whtr_risk)
+            ? ` (${clean(pt.measurements.whtr_risk)})`
+            : ""
+        }.`
+      );
+    }
+
+    if (Array.isArray(guidance.facts)) {
+      for (const fact of guidance.facts) {
+        if (clean(fact)) facts.push(clean(fact));
+      }
+    }
+    if (Array.isArray(guidance.risks)) {
+      for (const risk of guidance.risks) {
+        if (clean(risk)) risks.push(clean(risk));
+      }
+    }
+    if (Array.isArray(guidance.next_steps)) {
+      for (const step of guidance.next_steps) {
+        if (clean(step)) next_steps.push(clean(step));
+      }
+    }
+    if (Array.isArray(guidance.disclaimers)) {
+      for (const disclaimer of guidance.disclaimers) {
+        if (clean(disclaimer)) disclaimers.push(clean(disclaimer));
+      }
+    }
+    if (Array.isArray(pt.warnings)) {
+      for (const warning of pt.warnings) {
+        if (clean(warning)) warnings.push(clean(warning));
+      }
+    }
+  }
+
+  const fitness = packets.air_force_fitness;
+  if (isPlainObject(fitness)) {
+    if (clean(fitness.bluf)) bluf.push(clean(fitness.bluf));
+
+    const guidance = isPlainObject(fitness.guidance) ? fitness.guidance : {};
+    if (Array.isArray(guidance.key_points)) {
+      for (const point of guidance.key_points) {
+        if (clean(point)) facts.push(clean(point));
+      }
+    }
+    if (Array.isArray(guidance.cautions)) {
+      for (const caution of guidance.cautions) {
+        if (clean(caution)) risks.push(clean(caution));
+      }
+    }
+    if (Array.isArray(guidance.next_steps)) {
+      for (const step of guidance.next_steps) {
+        if (clean(step)) next_steps.push(clean(step));
+      }
+    }
+    if (Array.isArray(guidance.disclaimers)) {
+      for (const disclaimer of guidance.disclaimers) {
+        if (clean(disclaimer)) disclaimers.push(clean(disclaimer));
+      }
+    }
+    if (Array.isArray(fitness.disclaimers)) {
+      for (const disclaimer of fitness.disclaimers) {
+        if (clean(disclaimer)) disclaimers.push(clean(disclaimer));
+      }
+    }
+    if (Array.isArray(fitness.warnings)) {
+      for (const warning of fitness.warnings) {
+        if (clean(warning)) warnings.push(clean(warning));
+      }
+    }
+    if (Array.isArray(fitness.references)) {
+      for (const ref of fitness.references) {
+        if (isPlainObject(ref) && clean(ref.section)) {
+          facts.push(
+            `AFMAN 36-2905 reference: ${clean(ref.section)}${
+              clean(ref.title) ? ` (${clean(ref.title)})` : ""
+            }.`
+          );
+        }
+      }
+    }
+  }
+
   if (Array.isArray(routeWarnings)) {
     for (const warning of routeWarnings) {
       if (clean(warning)) warnings.push(clean(warning));
@@ -671,7 +1057,8 @@ export async function buildAmyTruthPacket(input = {}) {
       has_profile: Object.keys(normalized.profile).length > 0,
       has_compensation: hasRecognizedCompensationFields(normalized.compensation),
       has_mortgage: Object.keys(normalized.mortgage).length > 0,
-      has_affordability: Object.keys(normalized.affordability).length > 0
+      has_affordability: Object.keys(normalized.affordability).length > 0,
+      has_pt: hasRecognizedPtFields(normalized.pt)
     },
     routing: {
       matched_modules: routed.matched_modules,
