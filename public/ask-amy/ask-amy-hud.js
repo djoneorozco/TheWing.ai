@@ -620,16 +620,56 @@
       let mortgageBriefInitialized = false;
       let warnedMissingMortgageBrief = false;
 
-      // In-memory PT Calculator context for Ask Amy (no localStorage).
+      // In-memory PT Calculator context for Ask Amy (no localStorage/sessionStorage).
       let latestPtCalculatorData = null;
       let ptCalculatorListenersBound = false;
 
-      function readPtCalculatorData() {
+      function clonePtSnapshot(value) {
+        if (!value || typeof value !== "object") return null;
+        try {
+          return JSON.parse(JSON.stringify(value));
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function readCurrentPtGlobals() {
+        try {
+          if (
+            window.PCSU_PT_SCORE_CURRENT &&
+            typeof window.PCSU_PT_SCORE_CURRENT === "object"
+          ) {
+            const cloned = clonePtSnapshot(window.PCSU_PT_SCORE_CURRENT);
+            if (cloned) return cloned;
+          }
+        } catch (_) {
+          // ignore
+        }
+
+        try {
+          const api = window.PCSU_PT_CALCULATOR;
+          if (api && typeof api.getScoreSnapshot === "function") {
+            const snapshot = api.getScoreSnapshot();
+            if (snapshot && typeof snapshot === "object") {
+              const cloned = clonePtSnapshot(snapshot);
+              if (cloned) return cloned;
+            }
+          }
+        } catch (_) {
+          // ignore
+        }
+
+        return null;
+      }
+
+      function readLegacyPtCalculatorData() {
         try {
           const api = window.PCSUnitedPTCalculator;
           if (api && typeof api.getData === "function") {
             const data = api.getData();
-            if (data && typeof data === "object") return data;
+            if (data && typeof data === "object") {
+              return clonePtSnapshot(data);
+            }
           }
         } catch (_) {
           // ignore
@@ -637,42 +677,110 @@
         return null;
       }
 
+      function readPtCalculatorData() {
+        const current = readCurrentPtGlobals();
+        if (current) return current;
+
+        if (latestPtCalculatorData && typeof latestPtCalculatorData === "object") {
+          return clonePtSnapshot(latestPtCalculatorData);
+        }
+
+        return readLegacyPtCalculatorData();
+      }
+
       function setLatestPtCalculatorData(pt, sourceEvent) {
-        if (!pt || typeof pt !== "object") return;
+        const cloned = clonePtSnapshot(pt);
+        if (!cloned) return;
         latestPtCalculatorData = {
-          ...pt,
+          ...cloned,
           _captured_at: new Date().toISOString(),
-          _source_event: sourceEvent || "pcsunited-pt-calculator"
+          _source_event: sourceEvent || "pcsunited-pt-score"
         };
+      }
+
+      function hydratePtCalculatorSnapshot(sourceLabel) {
+        const live = readCurrentPtGlobals() || readLegacyPtCalculatorData();
+        if (!live) return false;
+        setLatestPtCalculatorData(live, sourceLabel || "hydrate");
+        return true;
       }
 
       function bindPtCalculatorListeners() {
         if (ptCalculatorListenersBound) return;
         ptCalculatorListenersBound = true;
 
-        const onReady = (event) => {
+        const onScoreUpdated = (event) => {
+          const detail = event && event.detail;
+          if (detail && typeof detail === "object") {
+            setLatestPtCalculatorData(detail, "pcsunited:pt-score-updated");
+            return;
+          }
+          hydratePtCalculatorSnapshot("pcsunited:pt-score-updated");
+        };
+
+        // Legacy fallback events only.
+        const onLegacyReady = (event) => {
           const detail = event && event.detail ? event.detail : {};
           const pt =
             (detail.pt && typeof detail.pt === "object" && detail.pt) ||
-            readPtCalculatorData();
-          if (pt) setLatestPtCalculatorData(pt, "pcsunited:pt-calculator-ready");
+            (detail &&
+            typeof detail === "object" &&
+            (detail.total != null || detail.bodyScore != null)
+              ? detail
+              : null) ||
+            readLegacyPtCalculatorData();
+          if (pt) {
+            setLatestPtCalculatorData(pt, "pcsunited:pt-calculator-ready");
+          }
         };
 
-        const onUpdated = (event) => {
+        const onLegacyUpdated = (event) => {
           const detail = event && event.detail ? event.detail : {};
           const pt =
             (detail.pt && typeof detail.pt === "object" && detail.pt) ||
-            readPtCalculatorData();
-          if (pt) setLatestPtCalculatorData(pt, "pcsunited:pt-calculator-updated");
+            (detail &&
+            typeof detail === "object" &&
+            (detail.total != null || detail.bodyScore != null)
+              ? detail
+              : null) ||
+            readLegacyPtCalculatorData();
+          if (pt) {
+            setLatestPtCalculatorData(pt, "pcsunited:pt-calculator-updated");
+          }
         };
 
-        window.addEventListener("pcsunited:pt-calculator-ready", onReady);
-        window.addEventListener("pcsunited:pt-calculator-updated", onUpdated);
+        const onPostMessage = (event) => {
+          const data = event && event.data;
+          if (!data || typeof data !== "object") return;
+          if (data.type !== "pcsunited-pt-score") return;
+          if (!data.detail || typeof data.detail !== "object") return;
+          setLatestPtCalculatorData(
+            data.detail,
+            "postMessage:pcsunited-pt-score"
+          );
+        };
 
-        const existing = readPtCalculatorData();
-        if (existing) {
-          setLatestPtCalculatorData(existing, "window.PCSUnitedPTCalculator");
-        }
+        window.addEventListener("pcsunited:pt-score-updated", onScoreUpdated);
+        window.addEventListener("pcsunited:pt-calculator-ready", onLegacyReady);
+        window.addEventListener(
+          "pcsunited:pt-calculator-updated",
+          onLegacyUpdated
+        );
+        window.addEventListener("message", onPostMessage);
+
+        hydratePtCalculatorSnapshot("init");
+        window.setTimeout(
+          () => hydratePtCalculatorSnapshot("retry-100ms"),
+          100
+        );
+        window.setTimeout(
+          () => hydratePtCalculatorSnapshot("retry-500ms"),
+          500
+        );
+        window.setTimeout(
+          () => hydratePtCalculatorSnapshot("retry-1200ms"),
+          1200
+        );
       }
 
       function getMortgageBriefApi() {
@@ -1853,14 +1961,23 @@
       }
 
       function getPtCalculatorContext() {
-        const live = readPtCalculatorData();
+        const live = readCurrentPtGlobals();
         if (live) {
-          setLatestPtCalculatorData(live, "window.PCSUnitedPTCalculator");
-          return live;
+          setLatestPtCalculatorData(live, "window.PCSU_PT_*");
+          return clonePtSnapshot(latestPtCalculatorData);
         }
-        return isPlainObject(latestPtCalculatorData)
-          ? latestPtCalculatorData
-          : null;
+
+        if (isPlainObject(latestPtCalculatorData)) {
+          return clonePtSnapshot(latestPtCalculatorData);
+        }
+
+        const legacy = readLegacyPtCalculatorData();
+        if (legacy) {
+          setLatestPtCalculatorData(legacy, "window.PCSUnitedPTCalculator");
+          return clonePtSnapshot(latestPtCalculatorData);
+        }
+
+        return null;
       }
 
       function getPCSContext() {
@@ -2220,9 +2337,12 @@
         const pcsContext = getPCSContext();
         const thread = loadThread();
         const memory = loadMemory();
+        const currentPtSnapshot = getPtCalculatorContext();
 
         return stripEmptyObject({
           message,
+
+          pt: currentPtSnapshot || undefined,
 
           context: {
             source: "web",
@@ -2257,7 +2377,7 @@
               pcsContext.mortgage || undefined,
 
             pt:
-              pcsContext.pt || undefined,
+              currentPtSnapshot || pcsContext.pt || undefined,
 
             financial_intake:
               pcsContext.financial_intake || undefined,
