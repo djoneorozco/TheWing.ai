@@ -29,6 +29,12 @@ import {
   buildPtCalculatorTruthPacket
 } from "./pt-calculator.js";
 
+import {
+  AF_FITNESS_VERSION,
+  detectAfFitnessIntent,
+  buildAfFitnessTruthPacket
+} from "./af-fitness.js";
+
 // ============================================================
 // //#1 VERSION
 // ============================================================
@@ -188,6 +194,9 @@ function normalizeAmyBrainInput(rawInput = {}) {
   const basicbrain = safeObject(input.basicbrain);
   const session = safeObject(input.session);
   const metadata = safeObject(input.metadata);
+  const widget = safeObject(
+    pickFirstObject(metadata.widget, input.widget, session.widget)
+  );
 
   const profile = pickFirstObject(
     input.profile,
@@ -211,17 +220,32 @@ function normalizeAmyBrainInput(rawInput = {}) {
 
   const pt = pickFirstObject(
     input.pt,
+    input.ptScore,
+    input.pt_score,
+    input.ptScoreSnapshot,
+    input.pt_score_snapshot,
     input.ptCalculator,
     input.pt_calculator,
     input.pfra,
+    input.fitness,
+    widget.ptScore,
+    widget.pt_score,
+    widget.pt,
+    widget.fitness,
     session.pt,
+    session.ptScore,
+    session.pt_score,
     session.ptCalculator,
     session.pt_calculator,
     session.pfra,
+    session.fitness,
     basicbrain.pt,
+    basicbrain.ptScore,
+    basicbrain.pt_score,
     basicbrain.ptCalculator,
     basicbrain.pt_calculator,
-    basicbrain.pfra
+    basicbrain.pfra,
+    basicbrain.fitness
   );
 
   return {
@@ -235,7 +259,11 @@ function normalizeAmyBrainInput(rawInput = {}) {
     selectedBase: safeObject(input.selectedBase),
     basicbrain,
     session,
-    metadata
+    metadata: {
+      ...metadata,
+      widget,
+      page: metadata.page || input.page || null
+    }
   };
 }
 
@@ -262,7 +290,15 @@ const PT_VALUE_KEYS = [
   "total",
   "displayed_total_score",
   "component_scores",
-  "scores"
+  "scores",
+  "bodyScore",
+  "strengthScore",
+  "coreScore",
+  "cardioScore",
+  "category",
+  "minimumsMet",
+  "type",
+  "source"
 ];
 
 function hasRecognizedPtFields(obj) {
@@ -530,6 +566,99 @@ function buildPtCalculatorTruth(input) {
   });
 }
 
+const AF_FITNESS_MESSAGE_RE =
+  /\b(pt test|fitness test|pfra|physical fitness|pt score|fitness score|2[\s-]?mile|hamr|push[-\s]?ups?|hand[-\s]?release|sit[-\s]?ups?|plank|reverse crunch|body composition|whtr|waist[-\s]?to[-\s]?height|diagnostic (?:pfra|test)|af form 469|form 469|myfitness|fitness appeal|fitness assessment|fac\b|ufpm|ufac|fsq|2[\s-]?km walk|2[\s-]?kilometer walk|pfra hold|adaptive fitness|fitness reconditioning|afman\s*36-?2905)\b/i;
+
+function detectAirForceFitnessNeed(input) {
+  const normalized = normalizeAmyBrainInput(input);
+  const message = clean(normalized.message);
+  const t = lower(message);
+  const reasons = [];
+  let score = 0;
+
+  if (!t) {
+    return {
+      id: "air_force_fitness",
+      matched: false,
+      score: 0,
+      reasons: []
+    };
+  }
+
+  let intent = null;
+  try {
+    intent = detectAfFitnessIntent(message);
+  } catch (_) {
+    intent = null;
+  }
+
+  const explicit = AF_FITNESS_MESSAGE_RE.test(t);
+  const hasPt = hasRecognizedPtFields(normalized.pt);
+  const pagePath = lower(
+    normalized.metadata?.page?.path ||
+      normalized.metadata?.page ||
+      normalized.metadata?.product ||
+      ""
+  );
+  const fitnessPage = /pt|pfra|fitness/.test(pagePath);
+
+  if (explicit) {
+    score += 65;
+    reasons.push("Message contains Air Force fitness / PFRA language");
+  }
+
+  if (intent && intent !== "overview") {
+    score += explicit ? 20 : 55;
+    reasons.push(`AF fitness intent detected: ${clean(intent)}`);
+  } else if (intent === "overview" && explicit) {
+    score += 15;
+    reasons.push("AF fitness overview intent detected");
+  }
+
+  if (hasPt && explicit) {
+    score += 15;
+    reasons.push("PT score snapshot context is present");
+  }
+
+  if (fitnessPage && explicit) {
+    score += 10;
+    reasons.push("Page context appears fitness-related");
+  }
+
+  const matched =
+    explicit ||
+    (Boolean(intent) && intent !== "overview") ||
+    (hasPt &&
+      /\b(how did i do|my score|explain|pass|fail|excellent|satisfactory|unsatisfactory)\b/i.test(
+        t
+      ));
+
+  return {
+    id: "air_force_fitness",
+    matched,
+    score: matched ? Math.max(score, 1) : 0,
+    reasons: matched ? uniqueArray(reasons) : []
+  };
+}
+
+function buildAirForceFitnessTruth(input) {
+  const normalized = normalizeAmyBrainInput(input);
+  return buildAfFitnessTruthPacket({
+    message: normalized.message,
+    profile: normalized.profile,
+    context: {
+      ptScore: normalized.pt,
+      pt_score: normalized.pt,
+      fitness: normalized.pt,
+      page: normalized.metadata?.page || null,
+      widget: normalized.metadata?.widget || null
+    },
+    ptScore: normalized.pt,
+    page: normalized.metadata?.page || null,
+    widget: normalized.metadata?.widget || null
+  });
+}
+
 // ============================================================
 // //#5 MODULE REGISTRY
 // ============================================================
@@ -576,10 +705,25 @@ const ptCalculatorModule = Object.freeze({
   }
 });
 
+const airForceFitnessModule = Object.freeze({
+  id: "air_force_fitness",
+  version: AF_FITNESS_VERSION,
+  description:
+    "Routes AFMAN 36-2905 Physical Fitness Readiness Program guidance through af-fitness.js.",
+  priority: 83,
+  detect(input) {
+    return detectAirForceFitnessNeed(input);
+  },
+  build(input) {
+    return buildAirForceFitnessTruth(input);
+  }
+});
+
 export const AMY_BRAIN_MODULES = Object.freeze({
   compensation: compensationModule,
   va_loans: vaLoansModule,
-  pt_calculator: ptCalculatorModule
+  pt_calculator: ptCalculatorModule,
+  air_force_fitness: airForceFitnessModule
 });
 
 function listRegistryModules() {
@@ -832,6 +976,54 @@ function combineTruthPackets(packets = {}, routeWarnings = []) {
     if (Array.isArray(pt.warnings)) {
       for (const warning of pt.warnings) {
         if (clean(warning)) warnings.push(clean(warning));
+      }
+    }
+  }
+
+  const fitness = packets.air_force_fitness;
+  if (isPlainObject(fitness)) {
+    if (clean(fitness.bluf)) bluf.push(clean(fitness.bluf));
+
+    const guidance = isPlainObject(fitness.guidance) ? fitness.guidance : {};
+    if (Array.isArray(guidance.key_points)) {
+      for (const point of guidance.key_points) {
+        if (clean(point)) facts.push(clean(point));
+      }
+    }
+    if (Array.isArray(guidance.cautions)) {
+      for (const caution of guidance.cautions) {
+        if (clean(caution)) risks.push(clean(caution));
+      }
+    }
+    if (Array.isArray(guidance.next_steps)) {
+      for (const step of guidance.next_steps) {
+        if (clean(step)) next_steps.push(clean(step));
+      }
+    }
+    if (Array.isArray(guidance.disclaimers)) {
+      for (const disclaimer of guidance.disclaimers) {
+        if (clean(disclaimer)) disclaimers.push(clean(disclaimer));
+      }
+    }
+    if (Array.isArray(fitness.disclaimers)) {
+      for (const disclaimer of fitness.disclaimers) {
+        if (clean(disclaimer)) disclaimers.push(clean(disclaimer));
+      }
+    }
+    if (Array.isArray(fitness.warnings)) {
+      for (const warning of fitness.warnings) {
+        if (clean(warning)) warnings.push(clean(warning));
+      }
+    }
+    if (Array.isArray(fitness.references)) {
+      for (const ref of fitness.references) {
+        if (isPlainObject(ref) && clean(ref.section)) {
+          facts.push(
+            `AFMAN 36-2905 reference: ${clean(ref.section)}${
+              clean(ref.title) ? ` (${clean(ref.title)})` : ""
+            }.`
+          );
+        }
       }
     }
   }
