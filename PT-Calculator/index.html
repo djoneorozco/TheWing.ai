@@ -36,7 +36,7 @@
           </div>
 
           <div class="gender-corner glass">
-            <div class="mini-label"><label for="gender">Gender</label></div>
+            <div class="mini-label"><label for="gender">Sex for PFRA Scoring</label></div>
             <div class="mini-value">
               <div class="select-wrap">
                 <select id="gender">
@@ -65,6 +65,11 @@
 
         <div class="divider"></div>
 
+        <div
+          id="pcsu-pt-header-progression-widget"
+          aria-label="Estimated PT score breakdown"
+        ></div>
+
         <section class="seo-copy glass" aria-label="About this calculator" style="padding:20px 24px; margin-bottom:20px;">
           <h2 class="panel-title" style="margin-bottom:10px;">About the Air Force PT Calculator</h2>
           <div class="panel-rule" style="margin-bottom:14px;"></div>
@@ -72,7 +77,7 @@
             PCSUnited’s Air Force PT Calculator helps users estimate their Physical Fitness Readiness Assessment (PFRA) score using published 2026 Air Force standards. The calculator includes body composition, muscular strength, core endurance, and cardio scoring for the 2.0 mile run and 20m HAMR.
           </p>
           <p style="margin:0 0 12px 0; color:rgba(240,246,255,.86); font-size:16px; line-height:1.6;">
-            Users can adjust age group, gender, height, waist, strength event, core event, and cardio event to estimate a projected score and identify scoring thresholds for each supported component. Official scores and due dates are determined in myFitness.
+            Users can adjust age group, sex, height, waist, strength event, core event, and cardio event to estimate a projected score and identify scoring thresholds for each supported component. Official scores and due dates are determined in myFitness.
           </p>
           <p style="margin:0; color:rgba(240,246,255,.86); font-size:15px; line-height:1.6;">
             Sources:
@@ -297,6 +302,7 @@
                 </div>
               </div>
             </div>
+            <div id="resultLiveRegion" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
           </section>
         </div>
 
@@ -323,6 +329,7 @@
     </div>
   </div>
 
+  <script src="./pt-header-progression.js"></script>
   <script src="./ptcalculator.js"></script>
 </body>
 </html>
