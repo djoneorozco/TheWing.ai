@@ -32,11 +32,11 @@
         <div class="topbar">
           <div class="title-wrap">
             <h1 class="title">Air Force PT Calculator</h1>
-            <div class="subtitle">Score your official fitness components</div>
+            <div class="subtitle">Estimate your PFRA components using 2026 Air Force standards</div>
           </div>
 
           <div class="gender-corner glass">
-            <div class="mini-label">Gender</div>
+            <div class="mini-label"><label for="gender">Gender</label></div>
             <div class="mini-value">
               <div class="select-wrap">
                 <select id="gender">
@@ -48,10 +48,10 @@
 
             <div class="height-inline">
               <div class="height-head">
-                <div class="height-label">Height</div>
-                <div class="height-value" id="heightValue">72 in</div>
+                <div class="height-label"><label for="heightSlider">Height</label></div>
+                <div class="height-value" id="heightValue">72.0 in</div>
               </div>
-              <input id="heightSlider" class="mini-slider" type="range" min="56" max="80" value="72" step="1">
+              <input id="heightSlider" class="mini-slider" type="range" min="56" max="80" value="72" step="0.5" aria-label="Height in inches">
               <div class="mini-ticks">
                 <span>56</span>
                 <span>62</span>
@@ -69,16 +69,22 @@
           <h2 class="panel-title" style="margin-bottom:10px;">About the Air Force PT Calculator</h2>
           <div class="panel-rule" style="margin-bottom:14px;"></div>
           <p style="margin:0 0 12px 0; color:rgba(240,246,255,.86); font-size:16px; line-height:1.6;">
-            PCSUnited’s Air Force PT Calculator helps users estimate their Physical Fitness Assessment score using current Air Force standards. The calculator includes body composition, muscular strength, core endurance, and cardio scoring for the 2.0 mile run and 20m HAMR.
+            PCSUnited’s Air Force PT Calculator helps users estimate their Physical Fitness Readiness Assessment (PFRA) score using published 2026 Air Force standards. The calculator includes body composition, muscular strength, core endurance, and cardio scoring for the 2.0 mile run and 20m HAMR.
           </p>
-          <p style="margin:0; color:rgba(240,246,255,.86); font-size:16px; line-height:1.6;">
-            Users can adjust age group, gender, height, waist, strength event, core event, and cardio event to estimate a projected score and identify the minimum passing standards for each supported component.
+          <p style="margin:0 0 12px 0; color:rgba(240,246,255,.86); font-size:16px; line-height:1.6;">
+            Users can adjust age group, gender, height, waist, strength event, core event, and cardio event to estimate a projected score and identify scoring thresholds for each supported component. Official scores and due dates are determined in myFitness.
+          </p>
+          <p style="margin:0; color:rgba(240,246,255,.86); font-size:15px; line-height:1.6;">
+            Sources:
+            <a class="source-link" href="/doc/dafman36-2905.pdf" target="_blank" rel="noopener noreferrer">DAFMAN 36-2905</a>
+            ·
+            <a class="source-link" href="/doc/PFRA%20Scoring%20Charts.pdf" target="_blank" rel="noopener noreferrer">PFRA Scoring Charts</a>
           </p>
         </section>
 
         <div class="summary-grid">
           <div class="mini-card glass">
-            <div class="mini-label">Age Group</div>
+            <div class="mini-label"><label for="ageGroup">Age Group</label></div>
             <div class="mini-value">
               <div class="select-wrap">
                 <select id="ageGroup">
@@ -97,20 +103,20 @@
           </div>
 
           <div class="mini-card glass">
-            <div class="mini-label">Cardio Event</div>
+            <div class="mini-label"><label for="cardioEvent">Cardio Event</label></div>
             <div class="mini-value">
               <div class="select-wrap">
                 <select id="cardioEvent">
                   <option selected>2.0 Mile Run</option>
                   <option>20m HAMR</option>
-                  <option>2 km Walk</option>
+                  <option>2 km Walk (medical only)</option>
                 </select>
               </div>
             </div>
           </div>
 
           <div class="mini-card glass">
-            <div class="mini-label">Strength Event</div>
+            <div class="mini-label"><label for="strengthEvent">Strength Event</label></div>
             <div class="mini-value">
               <div class="select-wrap">
                 <select id="strengthEvent">
@@ -122,7 +128,7 @@
           </div>
 
           <div class="mini-card glass">
-            <div class="mini-label">Endurance Event</div>
+            <div class="mini-label"><label for="enduranceEvent">Endurance Event</label></div>
             <div class="mini-value">
               <div class="select-wrap">
                 <select id="enduranceEvent">
@@ -142,10 +148,10 @@
 
             <div class="input-group">
               <div class="row-head">
-                <div class="row-label">Waist</div>
-                <div class="row-value" id="waistValue">32 in</div>
+                <div class="row-label"><label for="waistSlider">Waist</label></div>
+                <div class="row-value" id="waistValue">32.0 in</div>
               </div>
-              <input id="waistSlider" class="slider mint-track" type="range" min="24" max="55" value="32" step="1">
+              <input id="waistSlider" class="slider mint-track" type="range" min="24" max="55" value="32" step="0.5" aria-label="Waist circumference in inches">
               <div class="ticks" id="waistTicks">
                 <span>24</span>
                 <span>29</span>
@@ -155,18 +161,18 @@
                 <span>49</span>
                 <span>55</span>
               </div>
-              <div id="waistMeta" class="range-meta">Best: — • Minimum Passing: —</div>
+              <div id="waistMeta" class="range-meta">Best scoring band: — • Risk: —</div>
             </div>
 
             <div class="input-group">
               <div class="row-head">
                 <div>
-                  <div class="row-label">Strength</div>
+                  <div class="row-label"><label for="strengthSlider">Strength</label></div>
                   <div class="sub-value" id="strengthModeLabel">Push-Ups</div>
                 </div>
                 <div class="row-value" id="strengthValue">44 reps</div>
               </div>
-              <input id="strengthSlider" class="slider peach-track" type="range" min="0" max="80" value="44" step="1">
+              <input id="strengthSlider" class="slider peach-track" type="range" min="0" max="80" value="44" step="1" aria-label="Strength repetitions">
               <div class="ticks" id="strengthTicks">
                 <span>0</span>
                 <span>15</span>
@@ -181,12 +187,12 @@
             <div class="input-group">
               <div class="row-head">
                 <div>
-                  <div class="row-label">Core</div>
+                  <div class="row-label"><label for="coreSlider">Core</label></div>
                   <div class="sub-value" id="coreModeLabel">Sit-Ups</div>
                 </div>
                 <div class="row-value" id="coreValue">38 reps</div>
               </div>
-              <input id="coreSlider" class="slider peach-track" type="range" min="0" max="80" value="38" step="1">
+              <input id="coreSlider" class="slider peach-track" type="range" min="0" max="80" value="38" step="1" aria-label="Core performance">
               <div class="ticks" id="coreTicks">
                 <span>0</span>
                 <span>15</span>
@@ -201,12 +207,12 @@
             <div class="input-group">
               <div class="row-head">
                 <div>
-                  <div class="row-label">Cardio</div>
+                  <div class="row-label"><label for="cardioSlider">Cardio</label></div>
                   <div class="sub-value" id="cardioModeLabel">2.0 Mile Run</div>
                 </div>
                 <div class="row-value" id="cardioValue">16:45</div>
               </div>
-              <input id="cardioSlider" class="slider teal-track" type="range" min="750" max="1260" value="1005" step="1">
+              <input id="cardioSlider" class="slider teal-track" type="range" min="750" max="1260" value="1005" step="1" aria-label="Cardio performance">
               <div class="ticks" id="cardioTicks">
                 <span>12:30</span>
                 <span>14:00</span>
@@ -224,9 +230,9 @@
             <div class="panel-rule insight-rule"></div>
 
             <ul class="insight-list" id="insightList">
-              <li><span class="dot mint"></span><span>Loading official scoring logic.</span></li>
+              <li><span class="dot mint"></span><span>Loading published scoring logic.</span></li>
               <li><span class="dot peach"></span><span>Reviewing body composition and event minimums.</span></li>
-              <li><span class="dot lav"></span><span>Calculating total official readiness score.</span></li>
+              <li><span class="dot lav"></span><span>Calculating estimated readiness score.</span></li>
             </ul>
           </section>
 
@@ -285,7 +291,9 @@
                 </div>
 
                 <div id="nextAssessment" class="next-assessment">
-                  Next assessment<br>in 3 months
+                  Typical RegAF cycle: 6 months.<br>
+                  ARC members normally assess every 12 months.<br>
+                  Confirm your official due date in myFitness.
                 </div>
               </div>
             </div>
@@ -298,17 +306,17 @@
 
           <h3 style="margin:0 0 8px 0; color:rgba(244,248,255,.96); font-size:18px; font-weight:700;">How is the Air Force PT score calculated?</h3>
           <p style="margin:0 0 16px 0; color:rgba(240,246,255,.86); font-size:16px; line-height:1.6;">
-            The total score combines body composition, strength, core, and cardio performance based on age- and gender-based standards.
+            The estimated total combines body composition (20), strength (15), core (15), and cardio (50) using age- and sex-based PFRA charts. Strength, core, and cardio each have required component minimums. Official scores are recorded in myFitness.
           </p>
 
           <h3 style="margin:0 0 8px 0; color:rgba(244,248,255,.96); font-size:18px; font-weight:700;">Does this calculator include the 2.0 mile run and 20m HAMR?</h3>
           <p style="margin:0 0 16px 0; color:rgba(240,246,255,.86); font-size:16px; line-height:1.6;">
-            Yes. The calculator supports both the 2.0 mile run and 20m HAMR cardio events.
+            Yes. The calculator supports scored cardio events for the 2.0 mile run and 20m HAMR. The 2 km Walk is medical-only (AF Form 469), pass/fail, awards no cardio points, and does not produce an Excellent rating.
           </p>
 
           <h3 style="margin:0 0 8px 0; color:rgba(244,248,255,.96); font-size:18px; font-weight:700;">Can I use this Air Force PT Calculator to estimate passing standards?</h3>
           <p style="margin:0; color:rgba(240,246,255,.86); font-size:16px; line-height:1.6;">
-            Yes. The calculator shows best values and minimum passing values for each supported component.
+            Yes. The calculator shows best values and minimum passing values for scored strength, core, and cardio components. Confirm your official result and due date in myFitness.
           </p>
         </section>
       </div>
