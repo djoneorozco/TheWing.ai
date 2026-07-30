@@ -386,7 +386,12 @@ console.log("====================================");
           bridge: clientContext?.bridge || {},
           compensation: clientContext?.compensation || null,
           fad: clientContext?.fad || {},
-          pt: clientContext?.pt || null
+          pt:
+            clientContext?.pt ||
+            clientContext?.ptScore ||
+            clientContext?.pt_score ||
+            clientContext?.fitness ||
+            null
         },
         compensation:
           deterministic?.public?.compensation ||
@@ -395,7 +400,19 @@ console.log("====================================");
         mortgage:
           deterministic?.public?.mortgage || clientContext?.mortgage || null,
         affordability: deterministic?.public?.affordability || null,
-        pt: clientContext?.pt || null,
+        pt:
+          clientContext?.pt ||
+          clientContext?.ptScore ||
+          clientContext?.pt_score ||
+          clientContext?.fitness ||
+          clientContext?.widget?.ptScore ||
+          clientContext?.widget?.pt_score ||
+          null,
+        ptScore:
+          clientContext?.ptScore ||
+          clientContext?.pt_score ||
+          clientContext?.widget?.ptScore ||
+          null,
         scenario: deterministic?.internal?.scenario || null,
         selectedBase: deterministic?.public?.base_info || null,
         metadata: {
