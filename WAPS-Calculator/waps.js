@@ -1,39 +1,54 @@
 /* ============================================================
-   THEWING.AI • WAPS CALCULATOR
+   THEWING.AI • AIR FORCE WAPS CALCULATOR
    WAPS.JS
-   Version 1.0.0
+   SIMPLIFIED AURA INTERFACE
+   Version 2.0.0
 
    FILE PAIRING
-   - index.html v1.0.0
-   - waps.css v1.0.0
+   - index.html v2.0.0
+   - waps.css v2.0.0
 
-   PURPOSE
-   - Estimate Regular Air Force WAPS points for SSgt and TSgt
-   - Support SKT + PFE and authorized PFE-only paths
-   - Apply up to three eligible EPB recommendations
-   - Apply eligible decoration points
-   - Validate minimum promotion-test scores
-   - Compare calculated score with an optional verified cutoff
+   PRIMARY EXPERIENCE
+   1. Select promotion grade
+   2. Select testing type
+   3. Enter test scores
+   4. Select up to three eligible EPB recommendations
+   5. Enter eligible decoration points
+   6. View the estimated WAPS score
 
-   GOVERNING BASELINE
-   - AFI 36-2502, 2 July 2026
-   - DAFMAN 36-2664, Change 1, 15 July 2025
+   SCORING BASELINE
+   - PFE maximum: 100
+   - SKT maximum: 100
+   - Testing maximum: 200
+   - EPB PRS maximum: 285
+   - Decoration maximum: 25
+   - Total maximum: 510
+
+   STANDARD TEST MINIMUMS
+   - PFE: 40
+   - SKT: 40
+   - Combined: 90
+
+   PFE-ONLY MINIMUM
+   - PFE: 45
+   - Testing component: PFE × 2
 
    IMPORTANT
-   - Test percentages are truncated to two decimal places
-   - Scores are never presented as promotion probability
-   - Official selection remains dependent on AFPC data,
-     promotion AFSC, quotas and cycle-specific cutoffs
+   - Test scores are truncated to two decimal places.
+   - The calculator does not predict official selection.
+   - Official promotion outcomes depend on AFPC data,
+     promotion AFSC, quotas, cutoffs and eligibility.
 ============================================================ */
 
 (() => {
   "use strict";
 
-  const VERSION = "1.0.0";
-  const BOOT_KEY = "__THEWING_WAPS_V100_BOOTED__";
+  const VERSION = "2.0.0";
+  const MOUNT_KEY = "__THEWING_WAPS_V200_MOUNTED__";
 
-  if (window[BOOT_KEY]) return;
-  window[BOOT_KEY] = true;
+  if (window[MOUNT_KEY]) return;
+  window[MOUNT_KEY] = true;
+
 
   /* ==========================================================
      1. CONFIGURATION
@@ -46,62 +61,59 @@
       PFE: 100,
       SKT: 100,
       TESTING: 200,
+      EPB: 285,
       DECORATIONS: 25,
-      EPB_PRS: 285,
       TOTAL: 510
     }),
 
     MINIMUMS: Object.freeze({
-      BOTH_PFE: 40,
-      BOTH_SKT: 40,
-      BOTH_COMBINED: 90,
+      STANDARD_PFE: 40,
+      STANDARD_SKT: 40,
+      STANDARD_COMBINED: 90,
       PFE_ONLY: 45
     }),
 
     PATHS: Object.freeze({
-      PENDING: "PENDING",
-      BOTH: "SKT_PFE",
-      PFE_ONLY: "PFE_ONLY"
+      BOTH: "both",
+      PFE_ONLY: "pfe-only"
     }),
 
     PATH_SOURCES: Object.freeze({
-      PENDING: "PENDING_CAFSC",
-      DEFAULT: "DEFAULT_SKT_PFE",
+      USER_SELECTION: "USER_SELECTION",
       CAFSC_PFE_ONLY: "CAFSC_PFE_ONLY",
-      CURRENT_CAFSC: "NOTE_11_CURRENT_CAFSC",
-      INDIVIDUAL_EXEMPTION: "INDIVIDUAL_SKT_EXEMPTION",
-      MEMBER_ELECTION: "EXEMPT_MEMBER_ELECTED_SKT"
+      CAFSC_CURRENT_RULE: "CAFSC_CURRENT_RULE",
+      INDIVIDUAL_EXEMPTION: "INDIVIDUAL_EXEMPTION"
     }),
 
-    EPB_POSITION_KEYS: Object.freeze([
+    EPB_POSITIONS: Object.freeze([
       "current",
-      "previous1",
-      "previous2"
+      "second",
+      "third"
     ]),
 
-    EPB_TABLE: Object.freeze({
+    EPB_POINTS: Object.freeze({
       "promote-now": Object.freeze({
         current: 250,
-        previous1: 20,
-        previous2: 15
+        second: 20,
+        third: 15
       }),
 
       "must-promote": Object.freeze({
         current: 220,
-        previous1: 15,
-        previous2: 10
+        second: 15,
+        third: 10
       }),
 
       "promote": Object.freeze({
         current: 200,
-        previous1: 10,
-        previous2: 5
+        second: 10,
+        third: 5
       }),
 
       "not-ready-now": Object.freeze({
         current: 0,
-        previous1: 0,
-        previous2: 0
+        second: 0,
+        third: 0
       })
     }),
 
@@ -115,22 +127,21 @@
     }),
 
     DEFAULTS: Object.freeze({
-      PROMO_GRADE: "ssgt",
+      PROMOTION_GRADE: "ssgt",
+      TESTING_PATH: "both",
       PROMOTION_CYCLE: "26e5",
       CAFSC: "",
-
-      SKT_EXEMPTION: "no",
-      SKT_ELECTION: "pfe-only",
+      INDIVIDUAL_EXEMPTION: false,
 
       PFE: 74,
       SKT: 68,
-      DECORATIONS: 12,
 
       EPB_CURRENT: "must-promote",
-      EPB_PREVIOUS_1: "promote",
-      EPB_PREVIOUS_2: "promote",
+      EPB_SECOND: "promote",
+      EPB_THIRD: "promote",
 
-      DECORATION_CONFIRMED: false,
+      DECORATIONS: 12,
+
       HISTORICAL_CUTOFF: "",
       CUTOFF_SOURCE: ""
     })
@@ -138,35 +149,32 @@
 
 
   /* ==========================================================
-     2. 2026 AFSC / RI / SDI EXCEPTION DATABASE
+     2. 2026 AFSC EXCEPTION DATABASE
 
-     IMPORTANT
-     This is an exception table, not a complete AFSC catalog.
+     This is an exception database, not a complete AFSC list.
 
-     RULE MODEL
-     - Listed in PFE_ONLY:
-       PFE-only path applies for that grade/cycle table.
+     LOGIC
+     - PFE_ONLY:
+       The loaded cycle table identifies the CAFSC as PFE only.
 
-     - Listed as NOTE_11_CURRENT_CAFSC:
-       Member uses SKT + PFE in the current CAFSC.
+     - NOTE_11_CURRENT_CAFSC:
+       The member follows SKT + PFE using the current CAFSC.
 
-     - Not listed:
-       Calculator defaults provisionally to SKT + PFE.
+     - No match:
+       The primary testing-type selection remains in effect.
 
-     The database should be revalidated against the applicable
-     cycle EPRRC before each annual promotion cycle.
+     This data must be reviewed for each promotion cycle.
   ========================================================== */
 
   const INTERNAL_AFSC_DB = {
     META: {
       version: "2026.1",
-      basis: "User-supplied 2026 E5 and E6 official reference-page extraction",
+      sourceType: "CYCLE_EXCEPTION_TABLE",
+      catalogType: "EXCEPTIONS_ONLY",
       supportedCycles: {
         E5: "26E5",
         E6: "26E6"
-      },
-      defaultPath: "SKT + PFE",
-      catalogType: "EXCEPTIONS_ONLY"
+      }
     },
 
     E5: {
@@ -192,7 +200,7 @@
         "1N851": "Targeting Analyst Journeyman",
         "1S051": "Safety Journeyman",
         "1U151": "Remotely Piloted Aircraft Pilot Journeyman",
-        "2A551": "Airlift/Special Mission Aircraft Maintenance Journeyman",
+        "2A551": "Airlift and Special Mission Aircraft Maintenance Journeyman",
         "2A753": "Aircraft Structural Maintenance Journeyman",
         "2M051": "Missile and Space Systems Electronic Maintenance Journeyman",
         "2T151": "Ground Transportation Journeyman",
@@ -204,7 +212,7 @@
         "3F451": "Equal Opportunity Journeyman",
         "3G051": "Talent Acquisition Journeyman",
         "3H051": "Historian Journeyman",
-        "3N1/3N2/3N3": "Regional/Premier Band Journeyman",
+        "3N1/3N2/3N3": "Regional or Premier Band Journeyman",
         "4A051": "Health Services Management Journeyman",
         "4A151": "Medical Materiel Journeyman",
         "4C051": "Mental Health Service Journeyman",
@@ -215,7 +223,9 @@
         "7S051": "Special Investigations Journeyman"
       },
 
-      NOTE_11_CURRENT_CAFSC: {}
+      NOTE_11_CURRENT_CAFSC: {},
+
+      RI_SDI: {}
     },
 
     E6: {
@@ -227,7 +237,7 @@
         "1C371": "All Domain Command and Control Operations Craftsman",
         "1C671": "Space Systems Operations Craftsman",
         "1D771": "Cyber Defense Operations Craftsman",
-        "1D772": "Spectrum Defense Craftsman",
+        "1D772": "Spectrum Defense Operations Craftsman",
         "1D773": "Cable and Antenna Defense Operations Craftsman",
         "1D774": "Data Engineering",
         "1D775": "Cybersecurity",
@@ -240,18 +250,18 @@
         "1N771": "Human Intelligence Specialist Craftsman",
         "1N871": "Targeting Analyst Craftsman",
         "1U171": "Remotely Piloted Aircraft Pilot Craftsman",
-        "2A571": "Airlift/Special Mission Aircraft Maintenance Craftsman",
+        "2A571": "Airlift and Special Mission Aircraft Maintenance Craftsman",
         "2A773": "Aircraft Structural Maintenance Craftsman",
         "2M071": "Missile and Space Systems Electronic Maintenance Craftsman",
         "2T171": "Ground Transportation Craftsman",
         "2T371": "Mission Generation Vehicular Equipment Maintenance Craftsman",
         "2T377": "Fleet Management and Analysis Craftsman",
-        "3F071": "Human Resources and Administration",
+        "3F071": "Human Resources and Administration Craftsman",
         "3F171": "Services Craftsman",
         "3F371": "Manpower Craftsman",
         "3G071": "Talent Acquisition Craftsman",
         "3H071": "Historian Craftsman",
-        "3N1/3N2/3N3": "Regional/Premier Band Craftsman",
+        "3N1/3N2/3N3": "Regional or Premier Band Craftsman",
         "4A071": "Health Services Management Craftsman",
         "4A171": "Medical Materiel Craftsman",
         "4C071": "Mental Health Service Craftsman",
@@ -286,6 +296,11 @@
           rule: "PFE_ONLY"
         },
 
+        "8B100": {
+          title: "Military Training Leader",
+          rule: "PFE_ONLY"
+        },
+
         "8B200": {
           title: "Academy Military Training Instructor",
           rule: "PFE_ONLY"
@@ -293,11 +308,6 @@
 
         "8B300": {
           title: "AFROTC Training Instructor",
-          rule: "PFE_ONLY"
-        },
-
-        "8B100": {
-          title: "Military Training Leader",
           rule: "PFE_ONLY"
         },
 
@@ -427,7 +437,7 @@
         },
 
         "9L000": {
-          title: "Interpreter/Translator",
+          title: "Interpreter or Translator",
           rule: "PFE_ONLY"
         },
 
@@ -461,14 +471,247 @@
 
 
   /* ==========================================================
-     3. INITIALIZATION
+     3. HELP CONTENT
+  ========================================================== */
+
+  const HELP_TOPICS = Object.freeze({
+    general: {
+      title: "How WAPS Scoring Works",
+
+      html: `
+        <section>
+          <h3>Standard Testing Path</h3>
+          <p>
+            The SKT + PFE path provides up to 100 points from each
+            examination, for a maximum testing component of 200.
+          </p>
+          <p>
+            The PFE and SKT must each be at least 40.00, and the
+            combined testing score must be at least 90.00.
+          </p>
+        </section>
+
+        <section>
+          <h3>PFE-Only Path</h3>
+          <p>
+            The PFE-only testing component equals the PFE score
+            multiplied by two. The minimum PFE score is 45.00.
+          </p>
+        </section>
+
+        <section>
+          <h3>EPB Recommendations</h3>
+          <p>
+            Up to three eligible force-distributed EPB recommendations
+            contribute to the promotion recommendation score.
+            Nonrated or successfully removed reports are bypassed.
+          </p>
+        </section>
+
+        <section>
+          <h3>Decoration Points</h3>
+          <p>
+            Eligible decorations may contribute up to 25 points.
+            Only decorations that qualify for the applicable promotion
+            cycle should be entered.
+          </p>
+        </section>
+
+        <section>
+          <h3>Official Selection</h3>
+          <p>
+            A calculated WAPS score does not guarantee promotion.
+            Selection depends on official personnel data, the promotion
+            AFSC, quotas and the applicable cycle cutoff.
+          </p>
+        </section>
+      `
+    },
+
+    "promotion-grade": {
+      title: "Select the Promotion Grade",
+
+      html: `
+        <section>
+          <h3>Staff Sergeant</h3>
+          <p>
+            Select SSgt when competing for promotion from Senior Airman
+            to Staff Sergeant.
+          </p>
+        </section>
+
+        <section>
+          <h3>Technical Sergeant</h3>
+          <p>
+            Select TSgt when competing for promotion from Staff Sergeant
+            to Technical Sergeant.
+          </p>
+        </section>
+
+        <section>
+          <h3>Promotion Cycle</h3>
+          <p>
+            The calculator automatically pairs SSgt with the 26E5 cycle
+            and TSgt with the 26E6 cycle. The cycle can be adjusted under
+            Advanced Options.
+          </p>
+        </section>
+      `
+    },
+
+    "testing-type": {
+      title: "Choose the Testing Type",
+
+      html: `
+        <section>
+          <h3>SKT + PFE</h3>
+          <p>
+            Choose this path when both the Specialty Knowledge Test and
+            Promotion Fitness Examination apply.
+          </p>
+          <p>
+            Each score must be at least 40.00, and the combined score
+            must be at least 90.00.
+          </p>
+        </section>
+
+        <section>
+          <h3>PFE Only</h3>
+          <p>
+            Choose this path only when the member has an authorized
+            PFE-only testing requirement or official SKT exemption.
+          </p>
+          <p>
+            The PFE score is doubled for the testing component and must
+            be at least 45.00.
+          </p>
+        </section>
+
+        <section>
+          <h3>CAFSC Verification</h3>
+          <p>
+            Advanced Options can check the entered CAFSC against the
+            loaded cycle exception table. The table is cycle-specific
+            and should be verified against current official guidance.
+          </p>
+        </section>
+      `
+    },
+
+    "test-scores": {
+      title: "Enter Test Scores",
+
+      html: `
+        <section>
+          <h3>Official or Projected Scores</h3>
+          <p>
+            Enter an official score when it is available, or use a
+            projected score to explore a possible WAPS outcome.
+          </p>
+        </section>
+
+        <section>
+          <h3>Two Decimal Places</h3>
+          <p>
+            PFE and SKT values are preserved to two decimal places.
+            Additional decimal places are discarded rather than rounded.
+          </p>
+        </section>
+
+        <section>
+          <h3>Minimum Requirements</h3>
+          <p>
+            The calculator checks the minimum requirements separately
+            from the total WAPS score. A high total does not override a
+            failed minimum test requirement.
+          </p>
+        </section>
+      `
+    },
+
+    epb: {
+      title: "EPB Promotion Recommendations",
+
+      html: `
+        <section>
+          <h3>Most Recent Eligible EPB</h3>
+          <p>
+            The most recent eligible force-distributed recommendation
+            carries the largest point value.
+          </p>
+        </section>
+
+        <section>
+          <h3>Prior Eligible EPBs</h3>
+          <p>
+            The second and third eligible recommendations receive the
+            lower point values assigned to those positions.
+          </p>
+        </section>
+
+        <section>
+          <h3>Bypassed Reports</h3>
+          <p>
+            Select Nonrated or Removed when a report should be bypassed.
+            Remaining eligible reports shift forward into the applicable
+            weighted positions.
+          </p>
+        </section>
+
+        <section>
+          <h3>No Eligible EPB</h3>
+          <p>
+            Select No Eligible EPB when an eligible report does not
+            exist for that position.
+          </p>
+        </section>
+      `
+    },
+
+    decorations: {
+      title: "Eligible Decoration Points",
+
+      html: `
+        <section>
+          <h3>Maximum Points</h3>
+          <p>
+            Eligible decorations can contribute no more than 25 total
+            points to the WAPS calculation.
+          </p>
+        </section>
+
+        <section>
+          <h3>Cycle Eligibility</h3>
+          <p>
+            Enter only decorations that meet the closeout-date and
+            official approval-date requirements for the applicable
+            promotion cycle.
+          </p>
+        </section>
+
+        <section>
+          <h3>Not Projected Awards</h3>
+          <p>
+            Do not include an expected or projected decoration that has
+            not become eligible for the cycle.
+          </p>
+        </section>
+      `
+    }
+  });
+
+
+  /* ==========================================================
+     4. INITIALIZATION
   ========================================================== */
 
   function initialize() {
     const root = document.getElementById("thewing-waps");
 
     if (!root) {
-      console.warn("[THEWING_WAPS] Root #thewing-waps was not found.");
+      console.warn(
+        "[THEWING_WAPS] Root element #thewing-waps was not found."
+      );
       return;
     }
 
@@ -477,43 +720,28 @@
     const el = {
       root,
 
-      promoGrade: byId("promoGrade"),
-      promotionCycle: byId("promotionCycle"),
+      form: byId("wapsCalculatorForm"),
 
-      cafscInput: byId("cafscInput"),
-      cafscCatalog: byId("cafscCatalog"),
-      cafscClearButton: byId("cafscClearButton"),
-      cafscHelp: byId("cafscHelp"),
-      cafscStatus: byId("cafscStatus"),
+      promoGradeSSgt: byId("promoGradeSSgt"),
+      promoGradeTSgt: byId("promoGradeTSgt"),
 
-      testingPathDisplay: byId("testingPathDisplay"),
-      testingPathText: byId("testingPathText"),
-      testingPathHelp: byId("testingPathHelp"),
+      testingPathBoth: byId("testingPathBoth"),
+      testingPathPFEOnly: byId("testingPathPFEOnly"),
+      testingPathControl:
+        root.querySelector('[data-control="testing-type"]'),
 
-      inputCompletionBadge: byId("inputCompletionBadge"),
-      testingMinimumBadge: byId("testingMinimumBadge"),
-
-      sktExemptionBlock: byId("sktExemptionBlock"),
-      sktExemptionNo: byId("sktExemptionNo"),
-      sktExemptionYes: byId("sktExemptionYes"),
-      sktExemptionHelp: byId("sktExemptionHelp"),
-
-      sktElectionBlock: byId("sktElectionBlock"),
-      sktElection: byId("sktElection"),
-
-      pfeRange: byId("pfeRange"),
       pfeScore: byId("pfeScore"),
-      pfeScoreHelp: byId("pfeScoreHelp"),
+      pfeRange: byId("pfeRange"),
+      pfeScoreFeedback: byId("pfeScoreFeedback"),
 
-      sktScoreGroup: byId("sktScoreGroup"),
-      sktRange: byId("sktRange"),
+      sktScoreCard: byId("sktScoreCard"),
       sktScore: byId("sktScore"),
-      sktScoreDescription: byId("sktScoreDescription"),
-      sktScoreHelp: byId("sktScoreHelp"),
+      sktRange: byId("sktRange"),
+      sktScoreFeedback: byId("sktScoreFeedback"),
 
-      testingValidationCard: byId("testingValidationCard"),
-      testingValidationTitle: byId("testingValidationTitle"),
-      testingValidationText: byId("testingValidationText"),
+      testingMinimumNotice: byId("testingMinimumNotice"),
+      testingMinimumTitle: byId("testingMinimumTitle"),
+      testingMinimumText: byId("testingMinimumText"),
 
       epbCurrent: byId("epbCurrent"),
       epbPrevious1: byId("epbPrevious1"),
@@ -522,13 +750,18 @@
       epbCurrentPoints: byId("epbCurrentPoints"),
       epbPrevious1Points: byId("epbPrevious1Points"),
       epbPrevious2Points: byId("epbPrevious2Points"),
-      epbPoints: byId("epbPoints"),
 
-      decorationRange: byId("decorationRange"),
       decorationPoints: byId("decorationPoints"),
-      decorationPointsDisplay: byId("decorationPointsDisplay"),
-      decorationPointsHelp: byId("decorationPointsHelp"),
-      decorationEligibilityConfirmed: byId("decorationEligibilityConfirmed"),
+
+      advancedOptions: byId("advancedOptions"),
+      promotionCycle: byId("promotionCycle"),
+
+      cafscInput: byId("cafscInput"),
+      cafscCatalog: byId("cafscCatalog"),
+      cafscClearButton: byId("cafscClearButton"),
+      cafscStatus: byId("cafscStatus"),
+
+      individualSktExemption: byId("individualSktExemption"),
 
       historicalCutoff: byId("historicalCutoff"),
       cutoffSource: byId("cutoffSource"),
@@ -538,123 +771,120 @@
 
       wapsScoreRing: byId("wapsScoreRing"),
       wapsTotalScore: byId("wapsTotalScore"),
-      scoreUtilization: byId("scoreUtilization"),
 
       overallScoreStatus: byId("overallScoreStatus"),
+      overallScoreStatusTitle: byId("overallScoreStatusTitle"),
       overallScoreStatusText: byId("overallScoreStatusText"),
 
+      testingComponentValue: byId("testingComponentValue"),
+      epbComponentValue: byId("epbComponentValue"),
+      decorationComponentValue: byId("decorationComponentValue"),
+      totalComponentValue: byId("totalComponentValue"),
+
+      wapsMeaningText: byId("wapsMeaningText"),
+
+      pfeBreakdownLabel: byId("pfeBreakdownLabel"),
       pfeBreakdownValue: byId("pfeBreakdownValue"),
       pfeBreakdownMaximum: byId("pfeBreakdownMaximum"),
       pfeProgressBar: byId("pfeProgressBar"),
 
       sktBreakdownItem: byId("sktBreakdownItem"),
-      sktBreakdownSubtitle: byId("sktBreakdownSubtitle"),
       sktBreakdownValue: byId("sktBreakdownValue"),
       sktBreakdownMaximum: byId("sktBreakdownMaximum"),
       sktProgressBar: byId("sktProgressBar"),
 
-      decorationsBreakdownValue: byId("decorationsBreakdownValue"),
-      decorationsProgressBar: byId("decorationsProgressBar"),
-
       epbBreakdownValue: byId("epbBreakdownValue"),
       epbProgressBar: byId("epbProgressBar"),
 
-      testPassBadge: byId("testPassBadge"),
-
-      pfeMinimumRow: byId("pfeMinimumRow"),
-      pfeMinimumResult: byId("pfeMinimumResult"),
-
-      sktMinimumRow: byId("sktMinimumRow"),
-      sktMinimumResult: byId("sktMinimumResult"),
-
-      combinedMinimumRow: byId("combinedMinimumRow"),
-      combinedMinimumLabel: byId("combinedMinimumLabel"),
-      combinedMinimumResult: byId("combinedMinimumResult"),
-
-      wapsInsightList: byId("wapsInsightList"),
+      decorationsBreakdownValue:
+        byId("decorationsBreakdownValue"),
+      decorationsProgressBar:
+        byId("decorationsProgressBar"),
 
       copyResultsButton: byId("copyResultsButton"),
       copyResultsButtonText: byId("copyResultsButtonText"),
-      printResultsButton: byId("printResultsButton"),
 
-      wapsLiveRegion: byId("wapsLiveRegion")
+      openHelpButton: byId("openHelpButton"),
+      testingPathHelpButton: byId("testingPathHelpButton"),
+
+      helpDialog: byId("wapsHelpDialog"),
+      helpDialogSurface:
+        root.querySelector(".waps-dialog-surface"),
+      helpDialogTitle: byId("wapsHelpDialogTitle"),
+      helpContent: byId("wapsHelpContent"),
+      closeHelpButton: byId("closeHelpButton"),
+      helpDialogDoneButton: byId("helpDialogDoneButton"),
+
+      liveRegion: byId("wapsLiveRegion")
     };
 
     const requiredKeys = [
-      "promoGrade",
-      "promotionCycle",
-      "cafscInput",
-      "cafscCatalog",
-      "cafscClearButton",
-      "cafscStatus",
-      "testingPathDisplay",
-      "testingPathText",
-      "testingPathHelp",
-      "inputCompletionBadge",
-      "testingMinimumBadge",
-      "sktExemptionBlock",
-      "sktExemptionNo",
-      "sktExemptionYes",
-      "sktExemptionHelp",
-      "sktElectionBlock",
-      "sktElection",
-      "pfeRange",
+      "form",
+      "promoGradeSSgt",
+      "promoGradeTSgt",
+      "testingPathBoth",
+      "testingPathPFEOnly",
+      "testingPathControl",
       "pfeScore",
-      "pfeScoreHelp",
-      "sktScoreGroup",
-      "sktRange",
+      "pfeRange",
+      "pfeScoreFeedback",
+      "sktScoreCard",
       "sktScore",
-      "sktScoreDescription",
-      "sktScoreHelp",
-      "testingValidationCard",
-      "testingValidationTitle",
-      "testingValidationText",
+      "sktRange",
+      "sktScoreFeedback",
+      "testingMinimumNotice",
+      "testingMinimumTitle",
+      "testingMinimumText",
       "epbCurrent",
       "epbPrevious1",
       "epbPrevious2",
       "epbCurrentPoints",
       "epbPrevious1Points",
       "epbPrevious2Points",
-      "epbPoints",
-      "decorationRange",
       "decorationPoints",
-      "decorationPointsDisplay",
-      "decorationPointsHelp",
-      "decorationEligibilityConfirmed",
+      "promotionCycle",
+      "cafscInput",
+      "cafscCatalog",
+      "cafscClearButton",
+      "cafscStatus",
+      "individualSktExemption",
       "historicalCutoff",
       "cutoffSource",
       "cutoffComparisonResult",
       "resetCalculatorButton",
       "wapsScoreRing",
       "wapsTotalScore",
-      "scoreUtilization",
       "overallScoreStatus",
+      "overallScoreStatusTitle",
       "overallScoreStatusText",
+      "testingComponentValue",
+      "epbComponentValue",
+      "decorationComponentValue",
+      "totalComponentValue",
+      "wapsMeaningText",
+      "pfeBreakdownLabel",
       "pfeBreakdownValue",
       "pfeBreakdownMaximum",
       "pfeProgressBar",
       "sktBreakdownItem",
-      "sktBreakdownSubtitle",
       "sktBreakdownValue",
       "sktBreakdownMaximum",
       "sktProgressBar",
-      "decorationsBreakdownValue",
-      "decorationsProgressBar",
       "epbBreakdownValue",
       "epbProgressBar",
-      "testPassBadge",
-      "pfeMinimumRow",
-      "pfeMinimumResult",
-      "sktMinimumRow",
-      "sktMinimumResult",
-      "combinedMinimumRow",
-      "combinedMinimumLabel",
-      "combinedMinimumResult",
-      "wapsInsightList",
+      "decorationsBreakdownValue",
+      "decorationsProgressBar",
       "copyResultsButton",
       "copyResultsButtonText",
-      "printResultsButton",
-      "wapsLiveRegion"
+      "openHelpButton",
+      "testingPathHelpButton",
+      "helpDialog",
+      "helpDialogSurface",
+      "helpDialogTitle",
+      "helpContent",
+      "closeHelpButton",
+      "helpDialogDoneButton",
+      "liveRegion"
     ];
 
     const missing = requiredKeys.filter((key) => !el[key]);
@@ -669,26 +899,28 @@
 
 
     /* ========================================================
-       4. LOCAL STATE
+       5. LOCAL STATE
     ======================================================== */
 
     const state = {
-      rule: null,
-      path: null,
       snapshot: null,
+      pathLocked: false,
       gradeCycleSyncing: false,
-      copyResetTimer: null
+      copyResetTimer: null,
+      activeHelpTopic: "general"
     };
 
 
     /* ========================================================
-       5. BASIC HELPERS
+       6. BASIC HELPERS
     ======================================================== */
 
     function clamp(value, minimum, maximum) {
       const number = Number(value);
 
-      if (!Number.isFinite(number)) return minimum;
+      if (!Number.isFinite(number)) {
+        return minimum;
+      }
 
       return Math.min(
         maximum,
@@ -699,7 +931,9 @@
     function truncate2(value) {
       const number = Number(value);
 
-      if (!Number.isFinite(number)) return 0;
+      if (!Number.isFinite(number)) {
+        return 0;
+      }
 
       if (number >= 0) {
         return Math.floor(number * 100) / 100;
@@ -715,7 +949,10 @@
     function formatSigned2(value) {
       const number = truncate2(value);
 
-      if (number > 0) return `+${number.toFixed(2)}`;
+      if (number > 0) {
+        return `+${number.toFixed(2)}`;
+      }
+
       return number.toFixed(2);
     }
 
@@ -737,35 +974,44 @@
       );
     }
 
-    function deepClone(value) {
-      return JSON.parse(JSON.stringify(value));
-    }
-
-    function normalizeCAFSC(rawValue) {
-      return String(rawValue || "")
+    function normalizeCAFSC(value) {
+      return String(value || "")
         .toUpperCase()
         .replace(/[^A-Z0-9/]/g, "")
         .slice(0, 15);
     }
 
+    function deepClone(value) {
+      if (typeof structuredClone === "function") {
+        return structuredClone(value);
+      }
+
+      return JSON.parse(JSON.stringify(value));
+    }
+
     function selectedRadioValue(name) {
-      const selected = document.querySelector(
-        `input[name="${name}"]:checked`
-      );
+      const selected =
+        root.querySelector(
+          `input[name="${name}"]:checked`
+        );
 
       return selected ? selected.value : "";
     }
 
-    function getGradeBucket() {
-      return el.promoGrade.value === "tsgt"
-        ? "E6"
-        : "E5";
+    function getPromotionGrade() {
+      return selectedRadioValue("promoGrade") || "ssgt";
     }
 
     function getPromotionGradeLabel() {
-      return el.promoGrade.value === "tsgt"
+      return getPromotionGrade() === "tsgt"
         ? "Technical Sergeant"
         : "Staff Sergeant";
+    }
+
+    function getGradeBucket() {
+      return getPromotionGrade() === "tsgt"
+        ? "E6"
+        : "E5";
     }
 
     function getCycleLabel() {
@@ -779,7 +1025,7 @@
         : "";
     }
 
-    function isCycleSupported(gradeBucket, cycleValue) {
+    function isSupportedCycle(gradeBucket, cycleValue) {
       if (gradeBucket === "E5") {
         return cycleValue === "26e5";
       }
@@ -791,18 +1037,56 @@
       return false;
     }
 
-    function setDataStatus(element, status) {
-      if (!element) return;
-      element.dataset.status = status;
+    function readScore(input, maximum) {
+      if (!input || input.value === "") {
+        return 0;
+      }
+
+      return truncate2(
+        clamp(input.value, 0, maximum)
+      );
     }
 
-    function setRangeFill(rangeElement) {
-      if (!rangeElement) return;
+    function readDecorations() {
+      if (el.decorationPoints.value === "") {
+        return 0;
+      }
 
-      const minimum = Number(rangeElement.min || 0);
-      const maximum = Number(rangeElement.max || 100);
+      return integerValue(
+        el.decorationPoints.value,
+        0,
+        CONFIG.MAXIMUMS.DECORATIONS
+      );
+    }
+
+    function readHistoricalCutoff() {
+      const raw = el.historicalCutoff.value.trim();
+
+      if (!raw) return null;
+
+      const number = Number(raw);
+
+      if (!Number.isFinite(number)) {
+        return null;
+      }
+
+      return truncate2(
+        clamp(
+          number,
+          0,
+          CONFIG.MAXIMUMS.TOTAL
+        )
+      );
+    }
+
+    function setRangeFill(range) {
+      if (!range) return;
+
+      const minimum = Number(range.min || 0);
+      const maximum = Number(range.max || 100);
+
       const value = clamp(
-        rangeElement.value,
+        range.value,
         minimum,
         maximum
       );
@@ -810,9 +1094,12 @@
       const fill =
         maximum === minimum
           ? 0
-          : ((value - minimum) / (maximum - minimum)) * 100;
+          : (
+              (value - minimum) /
+              (maximum - minimum)
+            ) * 100;
 
-      rangeElement.style.setProperty(
+      range.style.setProperty(
         "--range-fill",
         `${fill}%`
       );
@@ -825,41 +1112,52 @@
         `${percentage(value, maximum)}%`;
     }
 
-    function setRequirement(row, result, passed, text) {
-      row.dataset.status = passed
-        ? "pass"
-        : "fail";
+    function setRadioValue(name, value) {
+      const target =
+        root.querySelector(
+          `input[name="${name}"][value="${value}"]`
+        );
 
-      result.textContent = text;
-    }
-
-    function setRadioGroupDisabled(disabled) {
-      el.sktExemptionNo.disabled = disabled;
-      el.sktExemptionYes.disabled = disabled;
-
-      el.sktExemptionBlock.setAttribute(
-        "aria-disabled",
-        String(disabled)
-      );
-
-      el.sktExemptionBlock.classList.toggle(
-        "is-dimmed",
-        disabled
-      );
+      if (target) {
+        target.checked = true;
+      }
     }
 
     function announce(message) {
-      el.wapsLiveRegion.textContent = "";
+      el.liveRegion.textContent = "";
 
       window.setTimeout(() => {
-        el.wapsLiveRegion.textContent = message;
+        el.liveRegion.textContent = message;
       }, 20);
     }
 
 
     /* ========================================================
-       6. AFSC DATABASE HELPERS
+       7. AFSC DATABASE HELPERS
     ======================================================== */
+
+    function normalizeDatabaseRule(rule) {
+      const normalized = String(rule || "")
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g, "_");
+
+      if (
+        normalized === "PFE_ONLY" ||
+        normalized.includes("PFE_ONLY")
+      ) {
+        return "PFE_ONLY";
+      }
+
+      if (
+        normalized.includes("NOTE_11") ||
+        normalized.includes("CURRENT_CAFSC")
+      ) {
+        return "NOTE_11_CURRENT_CAFSC";
+      }
+
+      return "DEFAULT";
+    }
 
     function findDatabaseMatch(collection, cafsc) {
       if (
@@ -877,26 +1175,26 @@
         )
       ) {
         return {
-          key: cafsc,
+          matchedCode: cafsc,
           value: collection[cafsc]
         };
       }
 
-      for (const [key, value] of Object.entries(collection)) {
-        if (!key.includes("/")) continue;
+      for (const [code, value] of Object.entries(collection)) {
+        if (!code.includes("/")) continue;
 
-        const prefixes = key
+        const prefixes = code
           .split("/")
           .map((item) => item.trim())
           .filter(Boolean);
 
-        const matchesComposite = prefixes.some(
+        const matched = prefixes.some(
           (prefix) => cafsc.startsWith(prefix)
         );
 
-        if (matchesComposite) {
+        if (matched) {
           return {
-            key,
+            matchedCode: code,
             value
           };
         }
@@ -909,76 +1207,84 @@
       gradeBucket = getGradeBucket(),
       cafsc = normalizeCAFSC(el.cafscInput.value)
     } = {}) {
-      const bucket = AFSC_DB[gradeBucket];
-
       if (!cafsc) {
         return {
           found: false,
-          gradeBucket,
           cafsc: "",
           matchedCode: "",
+          gradeBucket,
           title: "",
-          rule: "PENDING",
+          rule: "DEFAULT",
           source: "NO_CAFSC"
         };
       }
 
+      const bucket = AFSC_DB[gradeBucket];
+
       if (!bucket) {
         return {
           found: false,
-          gradeBucket,
           cafsc,
           matchedCode: "",
+          gradeBucket,
           title: cafsc,
-          rule: "DEFAULT_BOTH",
-          source: "NO_GRADE_BUCKET"
+          rule: "DEFAULT",
+          source: "NO_BUCKET"
         };
       }
 
-      const pfeMatch = findDatabaseMatch(
-        bucket.PFE_ONLY,
-        cafsc
-      );
+      const pfeOnlyMatch =
+        findDatabaseMatch(
+          bucket.PFE_ONLY,
+          cafsc
+        );
 
-      if (pfeMatch) {
+      if (pfeOnlyMatch) {
+        const title =
+          typeof pfeOnlyMatch.value === "string"
+            ? pfeOnlyMatch.value
+            : pfeOnlyMatch.value?.title || cafsc;
+
         return {
           found: true,
-          gradeBucket,
           cafsc,
-          matchedCode: pfeMatch.key,
-          title:
-            typeof pfeMatch.value === "string"
-              ? pfeMatch.value
-              : pfeMatch.value?.title || cafsc,
+          matchedCode: pfeOnlyMatch.matchedCode,
+          gradeBucket,
+          title,
           rule: "PFE_ONLY",
           source: `${gradeBucket}.PFE_ONLY`
         };
       }
 
-      const note11Match = findDatabaseMatch(
-        bucket.NOTE_11_CURRENT_CAFSC,
-        cafsc
-      );
+      const currentCAFSCMatch =
+        findDatabaseMatch(
+          bucket.NOTE_11_CURRENT_CAFSC,
+          cafsc
+        );
 
-      if (note11Match) {
+      if (currentCAFSCMatch) {
+        const title =
+          typeof currentCAFSCMatch.value === "string"
+            ? currentCAFSCMatch.value
+            : currentCAFSCMatch.value?.title || cafsc;
+
         return {
           found: true,
-          gradeBucket,
           cafsc,
-          matchedCode: note11Match.key,
-          title:
-            typeof note11Match.value === "string"
-              ? note11Match.value
-              : note11Match.value?.title || cafsc,
+          matchedCode: currentCAFSCMatch.matchedCode,
+          gradeBucket,
+          title,
           rule: "NOTE_11_CURRENT_CAFSC",
-          source: `${gradeBucket}.NOTE_11_CURRENT_CAFSC`
+          source:
+            `${gradeBucket}.NOTE_11_CURRENT_CAFSC`
         };
       }
 
-      const riSdiMatch = findDatabaseMatch(
-        bucket.RI_SDI,
-        cafsc
-      );
+      const riSdiMatch =
+        findDatabaseMatch(
+          bucket.RI_SDI,
+          cafsc
+        );
 
       if (riSdiMatch) {
         const item =
@@ -991,26 +1297,23 @@
 
         return {
           found: true,
-          gradeBucket,
           cafsc,
-          matchedCode: riSdiMatch.key,
+          matchedCode: riSdiMatch.matchedCode,
+          gradeBucket,
           title: item?.title || cafsc,
-          rule:
-            item?.rule === "NOTE_11_CURRENT_CAFSC"
-              ? "NOTE_11_CURRENT_CAFSC"
-              : "PFE_ONLY",
+          rule: normalizeDatabaseRule(item?.rule),
           source: `${gradeBucket}.RI_SDI`
         };
       }
 
       return {
         found: false,
-        gradeBucket,
         cafsc,
         matchedCode: "",
+        gradeBucket,
         title: cafsc,
-        rule: "DEFAULT_BOTH",
-        source: "DEFAULT"
+        rule: "DEFAULT",
+        source: "NO_EXCEPTION_MATCH"
       };
     }
 
@@ -1056,7 +1359,8 @@
           );
         });
 
-      const fragment = document.createDocumentFragment();
+      const fragment =
+        document.createDocumentFragment();
 
       sorted.forEach(([code, title]) => {
         const option = document.createElement("option");
@@ -1072,160 +1376,117 @@
 
 
     /* ========================================================
-       7. PATH RESOLUTION
+       8. EFFECTIVE TESTING PATH
     ======================================================== */
 
-    function normalizeExemptionControls(rule) {
-      const databaseControlsPath =
-        rule.rule === "PFE_ONLY" ||
-        rule.rule === "NOTE_11_CURRENT_CAFSC";
+    function setTestingPathLock(locked) {
+      state.pathLocked = locked;
 
-      if (databaseControlsPath) {
-        el.sktExemptionNo.checked = true;
-        el.sktExemptionYes.checked = false;
+      el.testingPathBoth.disabled = locked;
+      el.testingPathPFEOnly.disabled = locked;
 
-        setRadioGroupDisabled(true);
-        el.sktElectionBlock.hidden = true;
+      el.testingPathControl.classList.toggle(
+        "is-disabled",
+        locked
+      );
 
-        if (rule.rule === "PFE_ONLY") {
-          el.sktExemptionHelp.textContent =
-            "This CAFSC is listed as PFE only in the loaded cycle exception table.";
-        } else {
-          el.sktExemptionHelp.textContent =
-            "The loaded current-CAFSC rule requires SKT + PFE for this entry.";
-        }
-
-        return;
-      }
-
-      setRadioGroupDisabled(false);
-
-      el.sktExemptionHelp.textContent =
-        "Select yes only when an official member-specific SKT exemption applies for this cycle.";
-
-      const exemptionSelected =
-        selectedRadioValue("sktExemption") === "yes";
-
-      el.sktElectionBlock.hidden = !exemptionSelected;
+      el.testingPathControl.setAttribute(
+        "aria-disabled",
+        String(locked)
+      );
     }
 
-    function resolveTestingPath(rule) {
-      const cafscPending = !rule.cafsc;
+    function resolveEffectiveTestingPath({
+      rule,
+      supportedCycle
+    }) {
+      if (
+        supportedCycle &&
+        rule.rule === "PFE_ONLY"
+      ) {
+        setRadioValue(
+          "testingPath",
+          CONFIG.PATHS.PFE_ONLY
+        );
 
-      if (rule.rule === "PFE_ONLY") {
+        setTestingPathLock(true);
+
         return {
           mode: CONFIG.PATHS.PFE_ONLY,
           source: CONFIG.PATH_SOURCES.CAFSC_PFE_ONLY,
-          pendingCAFSC: false,
-          label: "PFE Only — CAFSC Rule",
-          description:
+          locked: true,
+          label: "PFE Only",
+          explanation:
             "The loaded cycle exception table identifies this CAFSC as PFE only."
         };
       }
 
-      if (rule.rule === "NOTE_11_CURRENT_CAFSC") {
+      if (
+        supportedCycle &&
+        rule.rule === "NOTE_11_CURRENT_CAFSC"
+      ) {
+        setRadioValue(
+          "testingPath",
+          CONFIG.PATHS.BOTH
+        );
+
+        setTestingPathLock(true);
+
         return {
           mode: CONFIG.PATHS.BOTH,
-          source: CONFIG.PATH_SOURCES.CURRENT_CAFSC,
-          pendingCAFSC: false,
-          label: "SKT + PFE — Current CAFSC",
-          description:
-            "The loaded rule directs testing in the member’s current CAFSC."
+          source:
+            CONFIG.PATH_SOURCES.CAFSC_CURRENT_RULE,
+          locked: true,
+          label: "SKT + PFE",
+          explanation:
+            "The loaded current-CAFSC rule requires the SKT + PFE path."
         };
       }
 
-      const hasIndividualExemption =
-        selectedRadioValue("sktExemption") === "yes";
+      if (el.individualSktExemption.checked) {
+        setRadioValue(
+          "testingPath",
+          CONFIG.PATHS.PFE_ONLY
+        );
 
-      if (hasIndividualExemption) {
-        const electedToTakeSKT =
-          el.sktElection.value === "take-skt";
-
-        if (electedToTakeSKT) {
-          return {
-            mode: CONFIG.PATHS.BOTH,
-            source: CONFIG.PATH_SOURCES.MEMBER_ELECTION,
-            pendingCAFSC: cafscPending,
-            label: cafscPending
-              ? "SKT + PFE — CAFSC Pending"
-              : "SKT + PFE — Member Election",
-            description:
-              "The member is treated as exempt but has elected to take the SKT."
-          };
-        }
+        setTestingPathLock(true);
 
         return {
           mode: CONFIG.PATHS.PFE_ONLY,
-          source: CONFIG.PATH_SOURCES.INDIVIDUAL_EXEMPTION,
-          pendingCAFSC: cafscPending,
-          label: cafscPending
-            ? "PFE Only — CAFSC Pending"
-            : "PFE Only — Official Exemption",
-          description:
-            "The member-specific SKT exemption is being applied to this estimate."
+          source:
+            CONFIG.PATH_SOURCES.INDIVIDUAL_EXEMPTION,
+          locked: true,
+          label: "PFE Only",
+          explanation:
+            "The official member-specific SKT exemption is being applied."
         };
       }
 
-      if (cafscPending) {
-        return {
-          mode: CONFIG.PATHS.BOTH,
-          source: CONFIG.PATH_SOURCES.PENDING,
-          pendingCAFSC: true,
-          label: "Awaiting CAFSC",
-          description:
-            "SKT + PFE is used provisionally until a CAFSC is entered."
-        };
-      }
+      setTestingPathLock(false);
+
+      const userPath =
+        selectedRadioValue("testingPath") ||
+        CONFIG.PATHS.BOTH;
 
       return {
-        mode: CONFIG.PATHS.BOTH,
-        source: CONFIG.PATH_SOURCES.DEFAULT,
-        pendingCAFSC: false,
-        label: "SKT + PFE",
-        description:
-          "No PFE-only or current-CAFSC exception matched the loaded table."
+        mode:
+          userPath === CONFIG.PATHS.PFE_ONLY
+            ? CONFIG.PATHS.PFE_ONLY
+            : CONFIG.PATHS.BOTH,
+
+        source: CONFIG.PATH_SOURCES.USER_SELECTION,
+        locked: false,
+
+        label:
+          userPath === CONFIG.PATHS.PFE_ONLY
+            ? "PFE Only"
+            : "SKT + PFE",
+
+        explanation:
+          userPath === CONFIG.PATHS.PFE_ONLY
+            ? "The PFE-only testing path was selected."
+            : "The standard SKT + PFE testing path was selected."
       };
-    }
-
-
-    /* ========================================================
-       8. INPUT READING
-    ======================================================== */
-
-    function readScore(input, maximum) {
-      if (input.value === "") return 0;
-
-      return truncate2(
-        clamp(input.value, 0, maximum)
-      );
-    }
-
-    function readDecorationPoints() {
-      if (el.decorationPoints.value === "") return 0;
-
-      return integerValue(
-        el.decorationPoints.value,
-        0,
-        CONFIG.MAXIMUMS.DECORATIONS
-      );
-    }
-
-    function readHistoricalCutoff() {
-      const raw = el.historicalCutoff.value.trim();
-
-      if (!raw) return null;
-
-      const number = Number(raw);
-
-      if (!Number.isFinite(number)) return null;
-
-      return truncate2(
-        clamp(
-          number,
-          0,
-          CONFIG.MAXIMUMS.TOTAL
-        )
-      );
     }
 
 
@@ -1233,7 +1494,7 @@
        9. EPB CALCULATION
 
        "none" and "bypass" do not consume an eligible weighted
-       position. Remaining eligible EPBs shift forward.
+       position. Remaining eligible reports shift forward.
     ======================================================== */
 
     function calculateEPB() {
@@ -1243,15 +1504,15 @@
         el.epbPrevious2.value
       ];
 
-      let eligiblePosition = 0;
+      let eligiblePositionIndex = 0;
 
-      const scoredEntries = selections.map(
+      const entries = selections.map(
         (rating, originalIndex) => {
-          const omitted =
+          const isBypassed =
             rating === "none" ||
             rating === "bypass";
 
-          if (omitted) {
+          if (isBypassed) {
             return {
               originalIndex,
               rating,
@@ -1265,15 +1526,15 @@
           }
 
           const weightedPosition =
-            CONFIG.EPB_POSITION_KEYS[
-              eligiblePosition
+            CONFIG.EPB_POSITIONS[
+              eligiblePositionIndex
             ];
 
-          eligiblePosition += 1;
+          eligiblePositionIndex += 1;
 
           const table =
-            CONFIG.EPB_TABLE[rating] ||
-            CONFIG.EPB_TABLE["promote"];
+            CONFIG.EPB_POINTS[rating] ||
+            CONFIG.EPB_POINTS.promote;
 
           const points =
             table[weightedPosition] || 0;
@@ -1292,8 +1553,8 @@
       );
 
       const total = Math.min(
-        CONFIG.MAXIMUMS.EPB_PRS,
-        scoredEntries.reduce(
+        CONFIG.MAXIMUMS.EPB,
+        entries.reduce(
           (sum, entry) => sum + entry.points,
           0
         )
@@ -1301,17 +1562,18 @@
 
       return {
         selections,
-        entries: scoredEntries,
-        eligibleCount: scoredEntries.filter(
-          (entry) => entry.eligible
-        ).length,
+        entries,
+        eligibleCount:
+          entries.filter(
+            (entry) => entry.eligible
+          ).length,
         total
       };
     }
 
 
     /* ========================================================
-       10. TEST MINIMUM CALCULATION
+       10. MINIMUM TEST REQUIREMENTS
     ======================================================== */
 
     function calculateMinimums({
@@ -1324,29 +1586,29 @@
           pfe >= CONFIG.MINIMUMS.PFE_ONLY;
 
         return {
-          mode: CONFIG.PATHS.PFE_ONLY,
+          path: CONFIG.PATHS.PFE_ONLY,
           pfePass,
           sktPass: true,
           combinedPass: pfePass,
           allPassed: pfePass,
-          combinedRaw: truncate2(pfe * 2)
+          combinedScore: truncate2(pfe * 2)
         };
       }
 
-      const combinedRaw = truncate2(pfe + skt);
+      const combinedScore = truncate2(pfe + skt);
 
       const pfePass =
-        pfe >= CONFIG.MINIMUMS.BOTH_PFE;
+        pfe >= CONFIG.MINIMUMS.STANDARD_PFE;
 
       const sktPass =
-        skt >= CONFIG.MINIMUMS.BOTH_SKT;
+        skt >= CONFIG.MINIMUMS.STANDARD_SKT;
 
       const combinedPass =
-        combinedRaw >=
-        CONFIG.MINIMUMS.BOTH_COMBINED;
+        combinedScore >=
+        CONFIG.MINIMUMS.STANDARD_COMBINED;
 
       return {
-        mode: CONFIG.PATHS.BOTH,
+        path: CONFIG.PATHS.BOTH,
         pfePass,
         sktPass,
         combinedPass,
@@ -1354,7 +1616,7 @@
           pfePass &&
           sktPass &&
           combinedPass,
-        combinedRaw
+        combinedScore
       };
     }
 
@@ -1364,57 +1626,79 @@
     ======================================================== */
 
     function calculateSnapshot() {
+      const promotionGrade = getPromotionGrade();
       const gradeBucket = getGradeBucket();
-      const promotionCycle = el.promotionCycle.value;
+
+      const promotionCycle =
+        el.promotionCycle.value;
+
       const cycleLabel = getCycleLabel();
-      const cafsc = normalizeCAFSC(el.cafscInput.value);
 
-      const rule = resolveAFSCRule({
-        gradeBucket,
-        cafsc
-      });
+      const supportedCycle =
+        isSupportedCycle(
+          gradeBucket,
+          promotionCycle
+        );
 
-      normalizeExemptionControls(rule);
+      const cafsc =
+        normalizeCAFSC(
+          el.cafscInput.value
+        );
 
-      const path = resolveTestingPath(rule);
+      const afscRule =
+        resolveAFSCRule({
+          gradeBucket,
+          cafsc
+        });
 
-      const pfe = readScore(
-        el.pfeScore,
-        CONFIG.MAXIMUMS.PFE
-      );
+      const path =
+        resolveEffectiveTestingPath({
+          rule: afscRule,
+          supportedCycle
+        });
 
-      const skt = readScore(
-        el.sktScore,
-        CONFIG.MAXIMUMS.SKT
-      );
+      const pfe =
+        readScore(
+          el.pfeScore,
+          CONFIG.MAXIMUMS.PFE
+        );
 
-      const decorations = readDecorationPoints();
+      const skt =
+        readScore(
+          el.sktScore,
+          CONFIG.MAXIMUMS.SKT
+        );
+
       const epb = calculateEPB();
+      const decorations = readDecorations();
 
       const testingComponent =
         path.mode === CONFIG.PATHS.PFE_ONLY
           ? truncate2(pfe * 2)
           : truncate2(pfe + skt);
 
-      const totalScore = truncate2(
-        Math.min(
-          CONFIG.MAXIMUMS.TOTAL,
-          testingComponent +
-            decorations +
-            epb.total
-        )
-      );
+      const totalScore =
+        truncate2(
+          Math.min(
+            CONFIG.MAXIMUMS.TOTAL,
+            testingComponent +
+              epb.total +
+              decorations
+          )
+        );
 
-      const scoreUtilization = percentage(
-        totalScore,
-        CONFIG.MAXIMUMS.TOTAL
-      );
+      const scorePercentage =
+        percentage(
+          totalScore,
+          CONFIG.MAXIMUMS.TOTAL
+        );
 
-      const minimums = calculateMinimums({
-        path,
-        pfe,
-        skt
-      });
+      const minimums =
+        calculateMinimums({
+          path,
+          pfe,
+          skt
+        });
 
       const historicalCutoff =
         readHistoricalCutoff();
@@ -1423,43 +1707,23 @@
         historicalCutoff === null
           ? null
           : truncate2(
-              totalScore - historicalCutoff
+              totalScore -
+              historicalCutoff
             );
-
-      const supportedCycle =
-        isCycleSupported(
-          gradeBucket,
-          promotionCycle
-        );
-
-      const decorationConfirmed =
-        decorations === 0 ||
-        el.decorationEligibilityConfirmed.checked;
-
-      const hasRequiredCAFSC = cafsc.length >= 3;
-
-      const inputComplete =
-        hasRequiredCAFSC &&
-        decorationConfirmed &&
-        Number.isFinite(pfe) &&
-        (
-          path.mode === CONFIG.PATHS.PFE_ONLY ||
-          Number.isFinite(skt)
-        );
 
       return {
         version: VERSION,
 
         promotion: {
-          targetGrade: el.promoGrade.value,
-          targetGradeLabel:
+          grade: promotionGrade,
+          gradeLabel:
             getPromotionGradeLabel(),
           gradeBucket,
           cycle: promotionCycle,
           cycleLabel,
           supportedCycle,
           cafsc,
-          rule
+          afscRule
         },
 
         path,
@@ -1472,47 +1736,35 @@
               : skt,
           rawSKT: skt,
           testingComponent,
+          epb: epb.total,
           decorations,
-          epbPoints: epb.total,
           totalScore,
-          scoreUtilization
+          scorePercentage
         },
 
         epb,
 
         minimums,
 
-        decorations: {
-          points: decorations,
-          confirmed: decorationConfirmed,
-          checkboxChecked:
-            el.decorationEligibilityConfirmed.checked
-        },
-
         cutoff: {
           value: historicalCutoff,
-          source: el.cutoffSource.value.trim(),
+          source:
+            el.cutoffSource.value.trim(),
           difference: cutoffDifference
-        },
-
-        completion: {
-          hasRequiredCAFSC,
-          decorationConfirmed,
-          inputComplete
         }
       };
     }
 
 
     /* ========================================================
-       12. CAFSC AND PATH RENDERING
+       12. AFSC STATUS RENDERING
     ======================================================== */
 
-    function renderCAFSC(snapshot) {
+    function renderCAFSCStatus(snapshot) {
       const {
-        rule,
+        cafsc,
         supportedCycle,
-        cafsc
+        afscRule
       } = snapshot.promotion;
 
       el.cafscInput.value = cafsc;
@@ -1520,8 +1772,10 @@
 
       if (!cafsc) {
         el.cafscStatus.dataset.status = "neutral";
+
         el.cafscStatus.textContent =
-          "Enter a CAFSC to determine the testing path.";
+          "Optional CAFSC verification.";
+
         return;
       }
 
@@ -1529,479 +1783,355 @@
         el.cafscStatus.dataset.status = "warning";
 
         el.cafscStatus.textContent =
-          rule.found
-            ? `${rule.title}. The loaded exception match is outside its supported 26E5/26E6 cycle.`
-            : "Custom cycle selected. Verify the testing path against the applicable EPRRC.";
+          "Custom cycle selected. Verify the testing path against the applicable official promotion references.";
 
         return;
       }
 
-      if (rule.rule === "PFE_ONLY") {
+      if (afscRule.rule === "PFE_ONLY") {
         el.cafscStatus.dataset.status = "valid";
+
         el.cafscStatus.textContent =
-          `${rule.title} — PFE-only exception matched.`;
+          `${afscRule.title} — PFE-only exception matched.`;
+
         return;
       }
 
-      if (rule.rule === "NOTE_11_CURRENT_CAFSC") {
+      if (
+        afscRule.rule ===
+        "NOTE_11_CURRENT_CAFSC"
+      ) {
         el.cafscStatus.dataset.status = "valid";
+
         el.cafscStatus.textContent =
-          `${rule.title} — current-CAFSC SKT + PFE rule matched.`;
+          `${afscRule.title} — current-CAFSC SKT + PFE rule matched.`;
+
         return;
       }
 
-      el.cafscStatus.dataset.status = "warning";
+      el.cafscStatus.dataset.status = "neutral";
+
       el.cafscStatus.textContent =
-        "No exception matched. SKT + PFE is being used provisionally; verify the current cycle EPRRC.";
-    }
-
-    function renderPath(snapshot) {
-      const { path } = snapshot;
-      const usesPFEOnly =
-        path.mode === CONFIG.PATHS.PFE_ONLY;
-
-      el.testingPathText.textContent =
-        path.label;
-
-      el.testingPathHelp.textContent =
-        path.description;
-
-      if (path.pendingCAFSC) {
-        el.testingPathDisplay.dataset.path =
-          "pending";
-      } else if (usesPFEOnly) {
-        el.testingPathDisplay.dataset.path =
-          "pfe-only";
-      } else {
-        el.testingPathDisplay.dataset.path =
-          "both";
-      }
-
-      el.sktScore.disabled = usesPFEOnly;
-      el.sktRange.disabled = usesPFEOnly;
-
-      el.sktScoreGroup.classList.toggle(
-        "is-disabled",
-        usesPFEOnly
-      );
-
-      el.sktScoreGroup.setAttribute(
-        "aria-disabled",
-        String(usesPFEOnly)
-      );
-
-      el.sktBreakdownItem.classList.toggle(
-        "is-disabled",
-        usesPFEOnly
-      );
-
-      if (usesPFEOnly) {
-        el.sktScoreDescription.textContent =
-          "Excluded from the PFE-only calculation";
-
-        el.sktScoreHelp.dataset.status = "neutral";
-        el.sktScoreHelp.textContent =
-          "SKT is excluded from this estimated testing path.";
-
-        el.sktBreakdownSubtitle.textContent =
-          "Excluded from PFE-only calculation";
-
-        el.sktBreakdownValue.textContent =
-          "N/A";
-
-        el.sktBreakdownMaximum.textContent =
-          " Exempt";
-
-        el.sktProgressBar.style.width = "0%";
-      } else {
-        el.sktScoreDescription.textContent =
-          "Specialty Knowledge Test";
-
-        el.sktBreakdownSubtitle.textContent =
-          "Specialty Knowledge Test";
-
-        el.sktBreakdownMaximum.textContent =
-          "/ 100";
-      }
+        "No exception matched. Your selected testing type remains in use.";
     }
 
 
     /* ========================================================
-       13. SCORE-INPUT RENDERING
+       13. TESTING-PATH RENDERING
     ======================================================== */
 
-    function renderInputFeedback(snapshot) {
-      const {
-        pfe,
-        rawSKT,
-        decorations
-      } = {
-        pfe: snapshot.scores.pfe,
-        rawSKT: snapshot.scores.rawSKT,
-        decorations: snapshot.scores.decorations
-      };
-
+    function renderTestingPath(snapshot) {
       const usesPFEOnly =
         snapshot.path.mode ===
         CONFIG.PATHS.PFE_ONLY;
+
+      el.root.dataset.testingPath =
+        usesPFEOnly
+          ? "pfe-only"
+          : "both";
+
+      if (usesPFEOnly) {
+        el.sktScore.disabled = true;
+        el.sktRange.disabled = true;
+      } else {
+        el.sktScore.disabled = false;
+        el.sktRange.disabled = false;
+      }
 
       setRangeFill(el.pfeRange);
       setRangeFill(el.sktRange);
-      setRangeFill(el.decorationRange);
-
-      if (usesPFEOnly) {
-        el.pfeScoreHelp.dataset.status =
-          snapshot.minimums.pfePass
-            ? "pass"
-            : "fail";
-
-        el.pfeScoreHelp.textContent =
-          snapshot.minimums.pfePass
-            ? `PFE-only minimum met: ${format2(pfe)} of at least 45.00.`
-            : `PFE-only minimum not met: ${format2(pfe)} of at least 45.00.`;
-      } else {
-        el.pfeScoreHelp.dataset.status =
-          snapshot.minimums.pfePass
-            ? "pass"
-            : "fail";
-
-        el.pfeScoreHelp.textContent =
-          snapshot.minimums.pfePass
-            ? `PFE minimum met: ${format2(pfe)} of at least 40.00.`
-            : `PFE minimum not met: ${format2(pfe)} of at least 40.00.`;
-
-        el.sktScoreHelp.dataset.status =
-          snapshot.minimums.sktPass
-            ? "pass"
-            : "fail";
-
-        el.sktScoreHelp.textContent =
-          snapshot.minimums.sktPass
-            ? `SKT minimum met: ${format2(rawSKT)} of at least 40.00.`
-            : `SKT minimum not met: ${format2(rawSKT)} of at least 40.00.`;
-      }
-
-      el.decorationPointsDisplay.textContent =
-        String(decorations);
-
-      if (
-        decorations > 0 &&
-        !snapshot.decorations.confirmed
-      ) {
-        el.decorationPointsHelp.dataset.status =
-          "warning";
-
-        el.decorationPointsHelp.textContent =
-          "Confirm that the entered decorations satisfy the applicable date requirements.";
-      } else {
-        el.decorationPointsHelp.dataset.status =
-          "neutral";
-
-        el.decorationPointsHelp.textContent =
-          decorations === CONFIG.MAXIMUMS.DECORATIONS
-            ? "Decoration points are capped at 25."
-            : "Include only eligible decoration points, up to a maximum of 25.";
-      }
     }
 
 
     /* ========================================================
-       14. EPB RENDERING
+       14. TESTING-MINIMUM RENDERING
+    ======================================================== */
+
+    function renderMinimums(snapshot) {
+      const {
+        path,
+        minimums,
+        scores
+      } = snapshot;
+
+      const usesPFEOnly =
+        path.mode === CONFIG.PATHS.PFE_ONLY;
+
+      if (usesPFEOnly) {
+        el.pfeScoreFeedback.dataset.status =
+          minimums.pfePass
+            ? "pass"
+            : "fail";
+
+        el.pfeScoreFeedback.textContent =
+          minimums.pfePass
+            ? `PFE-only minimum met: ${format2(scores.pfe)} of at least 45.00.`
+            : `PFE-only minimum not met: ${format2(scores.pfe)} of at least 45.00.`;
+
+        el.testingMinimumNotice.dataset.status =
+          minimums.allPassed
+            ? "pass"
+            : "fail";
+
+        el.testingMinimumTitle.textContent =
+          minimums.allPassed
+            ? "Minimum test requirement met"
+            : "Minimum test requirement not met";
+
+        el.testingMinimumText.textContent =
+          minimums.allPassed
+            ? `The PFE score is at least 45.00. The testing component is ${format2(scores.testingComponent)} out of 200.`
+            : "The PFE score must be at least 45.00 for the PFE-only path.";
+
+        return;
+      }
+
+      el.pfeScoreFeedback.dataset.status =
+        minimums.pfePass
+          ? "pass"
+          : "fail";
+
+      el.pfeScoreFeedback.textContent =
+        minimums.pfePass
+          ? `PFE minimum met: ${format2(scores.pfe)} of at least 40.00.`
+          : `PFE minimum not met: ${format2(scores.pfe)} of at least 40.00.`;
+
+      el.sktScoreFeedback.dataset.status =
+        minimums.sktPass
+          ? "pass"
+          : "fail";
+
+      el.sktScoreFeedback.textContent =
+        minimums.sktPass
+          ? `SKT minimum met: ${format2(scores.rawSKT)} of at least 40.00.`
+          : `SKT minimum not met: ${format2(scores.rawSKT)} of at least 40.00.`;
+
+      el.testingMinimumNotice.dataset.status =
+        minimums.allPassed
+          ? "pass"
+          : "fail";
+
+      el.testingMinimumTitle.textContent =
+        minimums.allPassed
+          ? "Minimum test requirements met"
+          : "Minimum test requirements not met";
+
+      if (minimums.allPassed) {
+        el.testingMinimumText.textContent =
+          `PFE and SKT are each at least 40.00, and the combined score is ${format2(minimums.combinedScore)}.`;
+
+        return;
+      }
+
+      const issues = [];
+
+      if (!minimums.pfePass) {
+        issues.push("PFE must be at least 40.00");
+      }
+
+      if (!minimums.sktPass) {
+        issues.push("SKT must be at least 40.00");
+      }
+
+      if (!minimums.combinedPass) {
+        issues.push(
+          "combined testing score must be at least 90.00"
+        );
+      }
+
+      el.testingMinimumText.textContent =
+        `${issues.join("; ")}.`;
+    }
+
+
+    /* ========================================================
+       15. EPB RENDERING
     ======================================================== */
 
     function renderEPB(snapshot) {
-      const points = snapshot.epb.entries.map(
-        (entry) => entry.points
-      );
+      const entries = snapshot.epb.entries;
 
       el.epbCurrentPoints.textContent =
-        String(points[0] || 0);
+        String(entries[0]?.points || 0);
 
       el.epbPrevious1Points.textContent =
-        String(points[1] || 0);
+        String(entries[1]?.points || 0);
 
       el.epbPrevious2Points.textContent =
-        String(points[2] || 0);
+        String(entries[2]?.points || 0);
 
-      el.epbPoints.textContent =
-        String(snapshot.epb.total);
+      el.epbComponentValue.textContent =
+        String(snapshot.scores.epb);
 
       el.epbBreakdownValue.textContent =
-        String(snapshot.epb.total);
+        String(snapshot.scores.epb);
 
       setProgress(
         el.epbProgressBar,
-        snapshot.epb.total,
-        CONFIG.MAXIMUMS.EPB_PRS
+        snapshot.scores.epb,
+        CONFIG.MAXIMUMS.EPB
       );
     }
 
 
     /* ========================================================
-       15. TOTAL SCORE RENDERING
+       16. SCORE AND BREAKDOWN RENDERING
     ======================================================== */
 
-    function renderTotalScore(snapshot) {
+    function renderScore(snapshot) {
       const {
-        pfe,
-        rawSKT,
-        testingComponent,
-        decorations,
-        epbPoints,
-        totalScore,
-        scoreUtilization
-      } = snapshot.scores;
+        path,
+        scores,
+        minimums
+      } = snapshot;
 
       const usesPFEOnly =
-        snapshot.path.mode ===
-        CONFIG.PATHS.PFE_ONLY;
+        path.mode === CONFIG.PATHS.PFE_ONLY;
 
       el.wapsTotalScore.textContent =
-        format2(totalScore);
+        format2(scores.totalScore);
 
-      el.scoreUtilization.textContent =
-        `${format2(scoreUtilization)}%`;
+      el.testingComponentValue.textContent =
+        format2(scores.testingComponent);
+
+      el.decorationComponentValue.textContent =
+        String(scores.decorations);
+
+      el.totalComponentValue.textContent =
+        format2(scores.totalScore);
 
       el.wapsScoreRing.style.setProperty(
         "--score-percent",
-        String(scoreUtilization)
+        String(scores.scorePercentage)
       );
 
       if (usesPFEOnly) {
+        el.pfeBreakdownLabel.textContent =
+          "PFE Score (×2)";
+
         el.pfeBreakdownValue.textContent =
-          `${format2(pfe)} × 2`;
+          `${format2(scores.pfe)} × 2`;
 
         el.pfeBreakdownMaximum.textContent =
-          `= ${format2(testingComponent)}`;
+          `= ${format2(scores.testingComponent)}`;
       } else {
+        el.pfeBreakdownLabel.textContent =
+          "PFE Score";
+
         el.pfeBreakdownValue.textContent =
-          format2(pfe);
+          format2(scores.pfe);
 
         el.pfeBreakdownMaximum.textContent =
           "/ 100";
 
         el.sktBreakdownValue.textContent =
-          format2(rawSKT);
+          format2(scores.rawSKT);
 
         el.sktBreakdownMaximum.textContent =
           "/ 100";
 
         setProgress(
           el.sktProgressBar,
-          rawSKT,
+          scores.rawSKT,
           CONFIG.MAXIMUMS.SKT
         );
       }
 
       setProgress(
         el.pfeProgressBar,
-        pfe,
+        scores.pfe,
         CONFIG.MAXIMUMS.PFE
       );
 
       el.decorationsBreakdownValue.textContent =
-        String(decorations);
+        String(scores.decorations);
 
       setProgress(
         el.decorationsProgressBar,
-        decorations,
+        scores.decorations,
         CONFIG.MAXIMUMS.DECORATIONS
       );
 
-      el.epbBreakdownValue.textContent =
-        String(epbPoints);
+      if (minimums.allPassed) {
+        el.overallScoreStatus.dataset.status =
+          "pass";
 
-      setProgress(
-        el.epbProgressBar,
-        epbPoints,
-        CONFIG.MAXIMUMS.EPB_PRS
-      );
+        el.overallScoreStatusTitle.textContent =
+          "Minimum test requirements met";
+
+        el.overallScoreStatusText.textContent =
+          usesPFEOnly
+            ? "Your PFE score meets the displayed minimum for the PFE-only testing path."
+            : "Your PFE, SKT and combined testing scores meet the displayed minimum requirements.";
+      } else {
+        el.overallScoreStatus.dataset.status =
+          "fail";
+
+        el.overallScoreStatusTitle.textContent =
+          "Minimum test requirements not met";
+
+        el.overallScoreStatusText.textContent =
+          usesPFEOnly
+            ? "The PFE score must be at least 45.00 for the PFE-only testing path."
+            : "PFE and SKT must each be at least 40.00, with a combined score of at least 90.00.";
+      }
     }
 
 
     /* ========================================================
-       16. MINIMUM REQUIREMENT RENDERING
+       17. MEANING TEXT
     ======================================================== */
 
-    function renderMinimums(snapshot) {
-      const usesPFEOnly =
-        snapshot.path.mode ===
-        CONFIG.PATHS.PFE_ONLY;
+    function renderMeaning(snapshot) {
+      const {
+        path,
+        scores,
+        minimums,
+        cutoff
+      } = snapshot;
 
-      const pfeLabel =
-        el.pfeMinimumRow.querySelector(
-          ".waps-requirement-label"
-        );
+      const scoreText =
+        `Your estimated WAPS score is ${format2(scores.totalScore)} out of ${CONFIG.MAXIMUMS.TOTAL}.`;
 
-      const sktLabel =
-        el.sktMinimumRow.querySelector(
-          ".waps-requirement-label"
-        );
+      const pathText =
+        path.mode === CONFIG.PATHS.PFE_ONLY
+          ? ` The PFE-only testing component is ${format2(scores.pfe)} multiplied by two.`
+          : ` The SKT + PFE testing component is ${format2(scores.testingComponent)} out of 200.`;
 
-      if (usesPFEOnly) {
-        if (pfeLabel) {
-          pfeLabel.textContent =
-            "PFE-only minimum";
+      const minimumText =
+        minimums.allPassed
+          ? " The displayed minimum testing requirements are met."
+          : " One or more displayed minimum testing requirements are not met.";
+
+      const officialText =
+        " Official selection depends on the promotion AFSC, quota, cycle cutoff and official Air Force personnel data.";
+
+      let cutoffText = "";
+
+      if (cutoff.value !== null) {
+        if (cutoff.difference > 0) {
+          cutoffText =
+            ` The score is ${format2(cutoff.difference)} points above the entered comparison cutoff.`;
+        } else if (cutoff.difference < 0) {
+          cutoffText =
+            ` The score is ${format2(Math.abs(cutoff.difference))} points below the entered comparison cutoff.`;
+        } else {
+          cutoffText =
+            " The score matches the entered comparison cutoff.";
         }
-
-        if (sktLabel) {
-          sktLabel.textContent =
-            "SKT requirement";
-        }
-
-        setRequirement(
-          el.pfeMinimumRow,
-          el.pfeMinimumResult,
-          snapshot.minimums.pfePass,
-          `${format2(snapshot.scores.pfe)} / 45.00`
-        );
-
-        el.sktMinimumRow.dataset.status = "pass";
-        el.sktMinimumResult.textContent = "Exempt";
-
-        el.combinedMinimumLabel.textContent =
-          "PFE testing component";
-
-        el.combinedMinimumRow.dataset.status =
-          snapshot.minimums.allPassed
-            ? "pass"
-            : "fail";
-
-        el.combinedMinimumResult.textContent =
-          `${format2(snapshot.scores.testingComponent)} / 200.00`;
-      } else {
-        if (pfeLabel) {
-          pfeLabel.textContent =
-            "PFE minimum";
-        }
-
-        if (sktLabel) {
-          sktLabel.textContent =
-            "SKT minimum";
-        }
-
-        setRequirement(
-          el.pfeMinimumRow,
-          el.pfeMinimumResult,
-          snapshot.minimums.pfePass,
-          `${format2(snapshot.scores.pfe)} / 40.00`
-        );
-
-        setRequirement(
-          el.sktMinimumRow,
-          el.sktMinimumResult,
-          snapshot.minimums.sktPass,
-          `${format2(snapshot.scores.rawSKT)} / 40.00`
-        );
-
-        el.combinedMinimumLabel.textContent =
-          "Combined test minimum";
-
-        setRequirement(
-          el.combinedMinimumRow,
-          el.combinedMinimumResult,
-          snapshot.minimums.combinedPass,
-          `${format2(snapshot.minimums.combinedRaw)} / 90.00`
-        );
       }
 
-      if (snapshot.path.pendingCAFSC) {
-        el.testingMinimumBadge.dataset.status =
-          "warning";
-
-        el.testingMinimumBadge.textContent =
-          "Path Pending";
-
-        el.testPassBadge.dataset.status =
-          "warning";
-
-        el.testPassBadge.textContent =
-          "Provisional";
-
-        el.testingValidationCard.dataset.status =
-          "warning";
-
-        el.testingValidationTitle.textContent =
-          "CAFSC Required to Confirm Path";
-
-        el.testingValidationText.textContent =
-          snapshot.minimums.allPassed
-            ? "The provisional SKT + PFE inputs meet the displayed minimums, but the testing path is not confirmed."
-            : "The provisional testing inputs do not meet all displayed minimums, and the testing path is not confirmed.";
-
-        el.overallScoreStatus.dataset.status =
-          "warning";
-
-        el.overallScoreStatusText.textContent =
-          "Enter CAFSC to verify the testing path";
-
-        return;
-      }
-
-      if (snapshot.minimums.allPassed) {
-        el.testingMinimumBadge.dataset.status =
-          "pass";
-
-        el.testingMinimumBadge.textContent =
-          "Minimums Met";
-
-        el.testPassBadge.dataset.status =
-          "pass";
-
-        el.testPassBadge.textContent =
-          "Passed";
-
-        el.testingValidationCard.dataset.status =
-          "pass";
-
-        el.testingValidationTitle.textContent =
-          "Minimum Test Requirements Met";
-
-        el.testingValidationText.textContent =
-          usesPFEOnly
-            ? "The entered PFE score meets the displayed PFE-only minimum."
-            : "The PFE, SKT and combined testing scores meet the displayed minimums.";
-
-        el.overallScoreStatus.dataset.status =
-          "pass";
-
-        el.overallScoreStatusText.textContent =
-          "Minimum testing requirements met";
-      } else {
-        el.testingMinimumBadge.dataset.status =
-          "fail";
-
-        el.testingMinimumBadge.textContent =
-          "Below Minimum";
-
-        el.testPassBadge.dataset.status =
-          "fail";
-
-        el.testPassBadge.textContent =
-          "Not Met";
-
-        el.testingValidationCard.dataset.status =
-          "fail";
-
-        el.testingValidationTitle.textContent =
-          "Minimum Test Requirement Not Met";
-
-        el.testingValidationText.textContent =
-          usesPFEOnly
-            ? "The PFE score must be at least 45.00 for the displayed PFE-only path."
-            : "PFE and SKT must each be at least 40.00, with a combined score of at least 90.00.";
-
-        el.overallScoreStatus.dataset.status =
-          "fail";
-
-        el.overallScoreStatusText.textContent =
-          "Minimum testing requirements not met";
-      }
+      el.wapsMeaningText.textContent =
+        scoreText +
+        pathText +
+        minimumText +
+        cutoffText +
+        officialText;
     }
 
 
     /* ========================================================
-       17. CUTOFF COMPARISON
+       18. CUTOFF COMPARISON
     ======================================================== */
 
     function renderCutoff(snapshot) {
@@ -2016,7 +2146,7 @@
           "empty";
 
         el.cutoffComparisonResult.textContent =
-          "Enter a verified cutoff score to compare it with your calculated total.";
+          "Enter a verified cutoff to compare it with the estimate.";
 
         return;
       }
@@ -2030,7 +2160,7 @@
           "above";
 
         el.cutoffComparisonResult.textContent =
-          `The calculated score is ${formatSigned2(difference)} points above the entered comparison cutoff of ${format2(value)}.${sourceText}`;
+          `The estimated score is ${formatSigned2(difference)} points above the entered cutoff of ${format2(value)}.${sourceText}`;
 
         return;
       }
@@ -2040,7 +2170,7 @@
           "below";
 
         el.cutoffComparisonResult.textContent =
-          `The calculated score is ${formatSigned2(difference)} points below the entered comparison cutoff of ${format2(value)}.${sourceText}`;
+          `The estimated score is ${formatSigned2(difference)} points below the entered cutoff of ${format2(value)}.${sourceText}`;
 
         return;
       }
@@ -2049,165 +2179,32 @@
         "match";
 
       el.cutoffComparisonResult.textContent =
-        `The calculated score matches the entered comparison cutoff of ${format2(value)}.${sourceText}`;
+        `The estimated score matches the entered cutoff of ${format2(value)}.${sourceText}`;
     }
 
 
     /* ========================================================
-       18. INSIGHTS
-    ======================================================== */
-
-    function createInsight(markerClass, text) {
-      const item = document.createElement("li");
-      item.className = "waps-insight-item";
-
-      const marker = document.createElement("span");
-      marker.className =
-        `waps-insight-marker ${markerClass}`;
-      marker.setAttribute("aria-hidden", "true");
-
-      const copy = document.createElement("span");
-      copy.textContent = text;
-
-      item.append(marker, copy);
-
-      return item;
-    }
-
-    function renderInsights(snapshot) {
-      const fragment = document.createDocumentFragment();
-
-      fragment.appendChild(
-        createInsight(
-          "waps-marker-mint",
-          `The calculated WAPS score is ${format2(snapshot.scores.totalScore)} out of ${CONFIG.MAXIMUMS.TOTAL}.`
-        )
-      );
-
-      if (snapshot.path.pendingCAFSC) {
-        fragment.appendChild(
-          createInsight(
-            "waps-marker-peach",
-            "The testing path is provisional because a CAFSC has not been entered."
-          )
-        );
-      } else if (
-        snapshot.path.mode ===
-        CONFIG.PATHS.PFE_ONLY
-      ) {
-        fragment.appendChild(
-          createInsight(
-            "waps-marker-peach",
-            `The PFE-only testing component is ${format2(snapshot.scores.pfe)} × 2, producing ${format2(snapshot.scores.testingComponent)} testing points.`
-          )
-        );
-      } else {
-        fragment.appendChild(
-          createInsight(
-            "waps-marker-peach",
-            `The SKT + PFE testing component is ${format2(snapshot.scores.testingComponent)} out of 200.00.`
-          )
-        );
-      }
-
-      fragment.appendChild(
-        createInsight(
-          "waps-marker-teal",
-          snapshot.minimums.allPassed
-            ? "The entered test scores meet the displayed minimum testing requirements."
-            : "The entered test scores do not meet all displayed minimum testing requirements."
-        )
-      );
-
-      if (
-        snapshot.scores.decorations > 0 &&
-        !snapshot.decorations.confirmed
-      ) {
-        fragment.appendChild(
-          createInsight(
-            "waps-marker-peach",
-            "Decoration points are included in the estimate, but their date eligibility has not been confirmed."
-          )
-        );
-      } else {
-        fragment.appendChild(
-          createInsight(
-            "waps-marker-mint",
-            `The fixed record factors currently include ${snapshot.scores.epbPoints} EPB points and ${snapshot.scores.decorations} decoration points.`
-          )
-        );
-      }
-
-      fragment.appendChild(
-        createInsight(
-          "waps-marker-teal",
-          "Official promotion selection depends on the applicable promotion AFSC, quota, cycle cutoff and official Air Force personnel data."
-        )
-      );
-
-      el.wapsInsightList.replaceChildren(fragment);
-    }
-
-
-    /* ========================================================
-       19. COMPLETION STATUS
-    ======================================================== */
-
-    function renderCompletion(snapshot) {
-      if (snapshot.completion.inputComplete) {
-        el.inputCompletionBadge.dataset.state =
-          "complete";
-
-        el.inputCompletionBadge.textContent =
-          "Inputs Complete";
-      } else {
-        el.inputCompletionBadge.dataset.state =
-          "incomplete";
-
-        if (!snapshot.completion.hasRequiredCAFSC) {
-          el.inputCompletionBadge.textContent =
-            "CAFSC Needed";
-        } else if (
-          !snapshot.completion.decorationConfirmed
-        ) {
-          el.inputCompletionBadge.textContent =
-            "Confirm Awards";
-        } else {
-          el.inputCompletionBadge.textContent =
-            "Incomplete";
-        }
-      }
-    }
-
-
-    /* ========================================================
-       20. MASTER RENDER
+       19. MASTER RENDER
     ======================================================== */
 
     function render(snapshot) {
-      state.rule = snapshot.promotion.rule;
-      state.path = snapshot.path;
       state.snapshot = snapshot;
 
-      renderCAFSC(snapshot);
-      renderPath(snapshot);
-      renderInputFeedback(snapshot);
-      renderEPB(snapshot);
-      renderTotalScore(snapshot);
+      renderCAFSCStatus(snapshot);
+      renderTestingPath(snapshot);
       renderMinimums(snapshot);
+      renderEPB(snapshot);
+      renderScore(snapshot);
+      renderMeaning(snapshot);
       renderCutoff(snapshot);
-      renderInsights(snapshot);
-      renderCompletion(snapshot);
 
       el.root.dataset.ready = "true";
-
-      const eventDetail = deepClone(snapshot);
 
       window.dispatchEvent(
         new CustomEvent(
           "thewing:waps-updated",
           {
-            detail: eventDetail
+            detail: deepClone(snapshot)
           }
         )
       );
@@ -2216,19 +2213,24 @@
     function recompute() {
       try {
         const snapshot = calculateSnapshot();
+
         render(snapshot);
+
         return snapshot;
       } catch (error) {
         console.error(
-          "[THEWING_WAPS] Recompute failed:",
+          "[THEWING_WAPS] Calculation failed:",
           error
         );
 
         el.overallScoreStatus.dataset.status =
           "fail";
 
+        el.overallScoreStatusTitle.textContent =
+          "Calculation unavailable";
+
         el.overallScoreStatusText.textContent =
-          "Calculation error";
+          "The calculator could not process the current inputs.";
 
         return null;
       }
@@ -2236,124 +2238,80 @@
 
 
     /* ========================================================
-       21. SCORE CONTROL SYNCHRONIZATION
+       20. SCORE INPUT SYNCHRONIZATION
     ======================================================== */
 
-    function bindDecimalScorePair({
-      range,
-      input,
+    function bindScorePair({
+      numberInput,
+      rangeInput,
       maximum
     }) {
-      range.addEventListener("input", () => {
-        const value = truncate2(
-          clamp(
-            range.value,
-            0,
-            maximum
-          )
-        );
-
-        input.value = format2(value);
-        setRangeFill(range);
-        recompute();
-      });
-
-      input.addEventListener("input", () => {
-        if (input.value === "") {
-          range.value = "0";
-          setRangeFill(range);
-          recompute();
-          return;
-        }
-
-        const value = truncate2(
-          clamp(
-            input.value,
-            0,
-            maximum
-          )
-        );
-
-        range.value = String(value);
-        setRangeFill(range);
-        recompute();
-      });
-
-      input.addEventListener("blur", () => {
-        const value = truncate2(
-          clamp(
-            input.value,
-            0,
-            maximum
-          )
-        );
-
-        input.value = format2(value);
-        range.value = String(value);
-
-        setRangeFill(range);
-        recompute();
-      });
-    }
-
-    function bindDecorationPair() {
-      el.decorationRange.addEventListener(
+      rangeInput.addEventListener(
         "input",
         () => {
-          const value = integerValue(
-            el.decorationRange.value,
-            0,
-            CONFIG.MAXIMUMS.DECORATIONS
-          );
+          const value =
+            truncate2(
+              clamp(
+                rangeInput.value,
+                0,
+                maximum
+              )
+            );
 
-          el.decorationPoints.value =
-            String(value);
+          numberInput.value =
+            format2(value);
 
-          setRangeFill(el.decorationRange);
+          setRangeFill(rangeInput);
           recompute();
         }
       );
 
-      el.decorationPoints.addEventListener(
+      numberInput.addEventListener(
         "input",
         () => {
-          if (el.decorationPoints.value === "") {
-            el.decorationRange.value = "0";
-            setRangeFill(el.decorationRange);
+          if (numberInput.value === "") {
+            rangeInput.value = "0";
+            setRangeFill(rangeInput);
             recompute();
             return;
           }
 
-          const value = integerValue(
-            el.decorationPoints.value,
-            0,
-            CONFIG.MAXIMUMS.DECORATIONS
-          );
+          const value =
+            truncate2(
+              clamp(
+                numberInput.value,
+                0,
+                maximum
+              )
+            );
 
-          el.decorationRange.value =
+          rangeInput.value =
             String(value);
 
-          setRangeFill(el.decorationRange);
+          setRangeFill(rangeInput);
           recompute();
         }
       );
 
-      el.decorationPoints.addEventListener(
+      numberInput.addEventListener(
         "blur",
         () => {
-          const value = integerValue(
-            el.decorationPoints.value,
-            0,
-            CONFIG.MAXIMUMS.DECORATIONS
-          );
+          const value =
+            truncate2(
+              clamp(
+                numberInput.value,
+                0,
+                maximum
+              )
+            );
 
-          el.decorationPoints.value =
+          numberInput.value =
+            format2(value);
+
+          rangeInput.value =
             String(value);
 
-          el.decorationRange.value =
-            String(value);
-
-          setRangeFill(el.decorationRange);
+          setRangeFill(rangeInput);
           recompute();
         }
       );
@@ -2361,7 +2319,7 @@
 
 
     /* ========================================================
-       22. GRADE AND CYCLE SYNCHRONIZATION
+       21. GRADE AND CYCLE SYNCHRONIZATION
     ======================================================== */
 
     function synchronizeCycleFromGrade() {
@@ -2369,11 +2327,10 @@
 
       state.gradeCycleSyncing = true;
 
-      if (el.promoGrade.value === "tsgt") {
-        el.promotionCycle.value = "26e6";
-      } else {
-        el.promotionCycle.value = "26e5";
-      }
+      el.promotionCycle.value =
+        getPromotionGrade() === "tsgt"
+          ? "26e6"
+          : "26e5";
 
       populateCAFSCDataList();
 
@@ -2387,11 +2344,11 @@
       state.gradeCycleSyncing = true;
 
       if (el.promotionCycle.value === "26e5") {
-        el.promoGrade.value = "ssgt";
+        el.promoGradeSSgt.checked = true;
       }
 
       if (el.promotionCycle.value === "26e6") {
-        el.promoGrade.value = "tsgt";
+        el.promoGradeTSgt.checked = true;
       }
 
       populateCAFSCDataList();
@@ -2402,7 +2359,7 @@
 
 
     /* ========================================================
-       23. RESET
+       22. RESET
     ======================================================== */
 
     function resetCalculator({
@@ -2410,8 +2367,15 @@
     } = {}) {
       const defaults = CONFIG.DEFAULTS;
 
-      el.promoGrade.value =
-        defaults.PROMO_GRADE;
+      setRadioValue(
+        "promoGrade",
+        defaults.PROMOTION_GRADE
+      );
+
+      setRadioValue(
+        "testingPath",
+        defaults.TESTING_PATH
+      );
 
       el.promotionCycle.value =
         defaults.PROMOTION_CYCLE;
@@ -2419,14 +2383,8 @@
       el.cafscInput.value =
         defaults.CAFSC;
 
-      el.sktExemptionNo.checked =
-        defaults.SKT_EXEMPTION === "no";
-
-      el.sktExemptionYes.checked =
-        defaults.SKT_EXEMPTION === "yes";
-
-      el.sktElection.value =
-        defaults.SKT_ELECTION;
+      el.individualSktExemption.checked =
+        defaults.INDIVIDUAL_EXEMPTION;
 
       el.pfeScore.value =
         format2(defaults.PFE);
@@ -2440,23 +2398,17 @@
       el.sktRange.value =
         String(defaults.SKT);
 
-      el.decorationPoints.value =
-        String(defaults.DECORATIONS);
-
-      el.decorationRange.value =
-        String(defaults.DECORATIONS);
-
       el.epbCurrent.value =
         defaults.EPB_CURRENT;
 
       el.epbPrevious1.value =
-        defaults.EPB_PREVIOUS_1;
+        defaults.EPB_SECOND;
 
       el.epbPrevious2.value =
-        defaults.EPB_PREVIOUS_2;
+        defaults.EPB_THIRD;
 
-      el.decorationEligibilityConfirmed.checked =
-        defaults.DECORATION_CONFIRMED;
+      el.decorationPoints.value =
+        String(defaults.DECORATIONS);
 
       el.historicalCutoff.value =
         defaults.HISTORICAL_CUTOFF;
@@ -2464,13 +2416,15 @@
       el.cutoffSource.value =
         defaults.CUTOFF_SOURCE;
 
+      if (el.advancedOptions) {
+        el.advancedOptions.open = false;
+      }
+
+      setTestingPathLock(false);
       populateCAFSCDataList();
 
-      [
-        el.pfeRange,
-        el.sktRange,
-        el.decorationRange
-      ].forEach(setRangeFill);
+      setRangeFill(el.pfeRange);
+      setRangeFill(el.sktRange);
 
       recompute();
 
@@ -2483,31 +2437,30 @@
 
 
     /* ========================================================
-       24. COPY SUMMARY
+       23. COPY SCORE SUMMARY
     ======================================================== */
 
-    function buildCopySummary(snapshot) {
+    function buildScoreSummary(snapshot) {
       const lines = [
         "TheWing.ai WAPS Calculator",
-        "-----------------------------",
-        `Target grade: ${snapshot.promotion.targetGradeLabel}`,
+        "--------------------------------",
+        `Promotion to: ${snapshot.promotion.gradeLabel}`,
         `Promotion cycle: ${snapshot.promotion.cycleLabel}`,
+        `Testing type: ${snapshot.path.label}`,
         `CAFSC on PECD: ${snapshot.promotion.cafsc || "Not entered"}`,
-        `Testing path: ${snapshot.path.label}`,
         "",
-        `PFE: ${format2(snapshot.scores.pfe)}`,
-        `SKT: ${
+        `PFE score: ${format2(snapshot.scores.pfe)}`,
+        `SKT score: ${
           snapshot.path.mode === CONFIG.PATHS.PFE_ONLY
-            ? "Exempt"
+            ? "Not included"
             : format2(snapshot.scores.rawSKT)
         }`,
-        `Testing component: ${format2(snapshot.scores.testingComponent)} / 200.00`,
-        `EPB promotion recommendation score: ${snapshot.scores.epbPoints} / 285`,
-        `Eligible decoration points: ${snapshot.scores.decorations} / 25`,
+        `Testing component: ${format2(snapshot.scores.testingComponent)} / 200`,
+        `EPB promotion recommendation score: ${snapshot.scores.epb} / 285`,
+        `Decoration points: ${snapshot.scores.decorations} / 25`,
         "",
-        `Calculated WAPS score: ${format2(snapshot.scores.totalScore)} / 510`,
-        `Score utilization: ${format2(snapshot.scores.scoreUtilization)}%`,
-        `Minimum testing requirements: ${
+        `Estimated WAPS score: ${format2(snapshot.scores.totalScore)} / 510`,
+        `Minimum test requirements: ${
           snapshot.minimums.allPassed
             ? "Met"
             : "Not met"
@@ -2530,7 +2483,7 @@
 
       lines.push(
         "",
-        "Estimate only. Official eligibility, scores, promotion AFSC, quotas, cutoffs and selection status are determined by Air Force personnel systems and AFPC."
+        "Unofficial estimate only. Official eligibility, scores, promotion AFSC, quotas, cutoffs and selection status are determined by the Air Force and AFPC."
       );
 
       return lines.join("\n");
@@ -2539,14 +2492,16 @@
     async function writeClipboard(text) {
       if (
         navigator.clipboard &&
-        typeof navigator.clipboard.writeText === "function" &&
+        typeof navigator.clipboard.writeText ===
+          "function" &&
         window.isSecureContext
       ) {
         await navigator.clipboard.writeText(text);
         return;
       }
 
-      const fallback = document.createElement("textarea");
+      const fallback =
+        document.createElement("textarea");
 
       fallback.value = text;
       fallback.setAttribute("readonly", "");
@@ -2562,13 +2517,14 @@
         fallback.value.length
       );
 
-      const copied = document.execCommand("copy");
+      const copied =
+        document.execCommand("copy");
 
       fallback.remove();
 
       if (!copied) {
         throw new Error(
-          "Clipboard copy was not supported."
+          "Clipboard access is unavailable."
         );
       }
     }
@@ -2579,12 +2535,12 @@
 
       if (!snapshot) return;
 
-      const originalText =
+      const normalLabel =
         "Copy Score Summary";
 
       try {
         await writeClipboard(
-          buildCopySummary(snapshot)
+          buildScoreSummary(snapshot)
         );
 
         el.copyResultsButtonText.textContent =
@@ -2603,7 +2559,7 @@
         state.copyResetTimer =
           window.setTimeout(() => {
             el.copyResultsButtonText.textContent =
-              originalText;
+              normalLabel;
           }, 1800);
       } catch (error) {
         console.error(
@@ -2620,8 +2576,54 @@
 
         window.setTimeout(() => {
           el.copyResultsButtonText.textContent =
-            originalText;
+            normalLabel;
         }, 1800);
+      }
+    }
+
+
+    /* ========================================================
+       24. HELP DIALOG
+    ======================================================== */
+
+    function openHelp(topicName = "general") {
+      const topic =
+        HELP_TOPICS[topicName] ||
+        HELP_TOPICS.general;
+
+      state.activeHelpTopic =
+        HELP_TOPICS[topicName]
+          ? topicName
+          : "general";
+
+      el.helpDialogTitle.textContent =
+        topic.title;
+
+      el.helpContent.innerHTML =
+        topic.html;
+
+      if (
+        typeof el.helpDialog.showModal ===
+        "function"
+      ) {
+        if (!el.helpDialog.open) {
+          el.helpDialog.showModal();
+        }
+      } else {
+        el.helpDialog.setAttribute("open", "");
+      }
+    }
+
+    function closeHelp() {
+      if (
+        typeof el.helpDialog.close ===
+        "function"
+      ) {
+        if (el.helpDialog.open) {
+          el.helpDialog.close();
+        }
+      } else {
+        el.helpDialog.removeAttribute("open");
       }
     }
 
@@ -2631,23 +2633,71 @@
     ======================================================== */
 
     function bindEvents() {
-      bindDecimalScorePair({
-        range: el.pfeRange,
-        input: el.pfeScore,
+      el.form.addEventListener(
+        "submit",
+        (event) => {
+          event.preventDefault();
+        }
+      );
+
+      bindScorePair({
+        numberInput: el.pfeScore,
+        rangeInput: el.pfeRange,
         maximum: CONFIG.MAXIMUMS.PFE
       });
 
-      bindDecimalScorePair({
-        range: el.sktRange,
-        input: el.sktScore,
+      bindScorePair({
+        numberInput: el.sktScore,
+        rangeInput: el.sktRange,
         maximum: CONFIG.MAXIMUMS.SKT
       });
 
-      bindDecorationPair();
+      [
+        el.promoGradeSSgt,
+        el.promoGradeTSgt
+      ].forEach((radio) => {
+        radio.addEventListener(
+          "change",
+          synchronizeCycleFromGrade
+        );
+      });
 
-      el.promoGrade.addEventListener(
-        "change",
-        synchronizeCycleFromGrade
+      [
+        el.testingPathBoth,
+        el.testingPathPFEOnly
+      ].forEach((radio) => {
+        radio.addEventListener(
+          "change",
+          recompute
+        );
+      });
+
+      [
+        el.epbCurrent,
+        el.epbPrevious1,
+        el.epbPrevious2
+      ].forEach((select) => {
+        select.addEventListener(
+          "change",
+          recompute
+        );
+      });
+
+      el.decorationPoints.addEventListener(
+        "input",
+        recompute
+      );
+
+      el.decorationPoints.addEventListener(
+        "blur",
+        () => {
+          const points = readDecorations();
+
+          el.decorationPoints.value =
+            String(points);
+
+          recompute();
+        }
       );
 
       el.promotionCycle.addEventListener(
@@ -2658,12 +2708,17 @@
       el.cafscInput.addEventListener(
         "input",
         () => {
-          const normalized = normalizeCAFSC(
-            el.cafscInput.value
-          );
+          const normalized =
+            normalizeCAFSC(
+              el.cafscInput.value
+            );
 
-          if (el.cafscInput.value !== normalized) {
-            el.cafscInput.value = normalized;
+          if (
+            el.cafscInput.value !==
+            normalized
+          ) {
+            el.cafscInput.value =
+              normalized;
           }
 
           el.cafscClearButton.hidden =
@@ -2689,38 +2744,14 @@
         "click",
         () => {
           el.cafscInput.value = "";
+          el.cafscClearButton.hidden = true;
+
           el.cafscInput.focus();
           recompute();
         }
       );
 
-      [
-        el.sktExemptionNo,
-        el.sktExemptionYes
-      ].forEach((radio) => {
-        radio.addEventListener(
-          "change",
-          recompute
-        );
-      });
-
-      el.sktElection.addEventListener(
-        "change",
-        recompute
-      );
-
-      [
-        el.epbCurrent,
-        el.epbPrevious1,
-        el.epbPrevious2
-      ].forEach((select) => {
-        select.addEventListener(
-          "change",
-          recompute
-        );
-      });
-
-      el.decorationEligibilityConfirmed.addEventListener(
+      el.individualSktExemption.addEventListener(
         "change",
         recompute
       );
@@ -2764,10 +2795,56 @@
         copyResults
       );
 
-      el.printResultsButton.addEventListener(
+      el.openHelpButton.addEventListener(
         "click",
         () => {
-          window.print();
+          openHelp("general");
+        }
+      );
+
+      el.testingPathHelpButton.addEventListener(
+        "click",
+        () => {
+          openHelp("testing-type");
+        }
+      );
+
+      root
+        .querySelectorAll("[data-help-topic]")
+        .forEach((button) => {
+          if (button === el.testingPathHelpButton) {
+            return;
+          }
+
+          button.addEventListener(
+            "click",
+            () => {
+              openHelp(
+                button.dataset.helpTopic ||
+                "general"
+              );
+            }
+          );
+        });
+
+      el.closeHelpButton.addEventListener(
+        "click",
+        closeHelp
+      );
+
+      el.helpDialogDoneButton.addEventListener(
+        "click",
+        closeHelp
+      );
+
+      el.helpDialog.addEventListener(
+        "click",
+        (event) => {
+          if (
+            event.target === el.helpDialog
+          ) {
+            closeHelp();
+          }
         }
       );
     }
@@ -2778,7 +2855,7 @@
     ======================================================== */
 
     const api = {
-      __mounted_v100: true,
+      __mounted_v200: true,
 
       version: VERSION,
       CONFIG,
@@ -2800,10 +2877,90 @@
           : null;
       },
 
-      getCAFSC() {
-        return normalizeCAFSC(
-          el.cafscInput.value
+      setPromotionGrade(grade) {
+        const normalized =
+          String(grade || "")
+            .trim()
+            .toLowerCase();
+
+        setRadioValue(
+          "promoGrade",
+          normalized === "tsgt" ||
+          normalized === "e6"
+            ? "tsgt"
+            : "ssgt"
         );
+
+        synchronizeCycleFromGrade();
+
+        return this.getState();
+      },
+
+      setTestingPath(path) {
+        const normalized =
+          String(path || "")
+            .trim()
+            .toLowerCase();
+
+        setRadioValue(
+          "testingPath",
+          normalized === "pfe-only" ||
+          normalized === "pfe_only" ||
+          normalized === "pfe"
+            ? "pfe-only"
+            : "both"
+        );
+
+        recompute();
+
+        return this.getState();
+      },
+
+      setScores({
+        pfe,
+        skt
+      } = {}) {
+        if (pfe !== undefined) {
+          const pfeValue =
+            truncate2(
+              clamp(
+                pfe,
+                0,
+                CONFIG.MAXIMUMS.PFE
+              )
+            );
+
+          el.pfeScore.value =
+            format2(pfeValue);
+
+          el.pfeRange.value =
+            String(pfeValue);
+
+          setRangeFill(el.pfeRange);
+        }
+
+        if (skt !== undefined) {
+          const sktValue =
+            truncate2(
+              clamp(
+                skt,
+                0,
+                CONFIG.MAXIMUMS.SKT
+              )
+            );
+
+          el.sktScore.value =
+            format2(sktValue);
+
+          el.sktRange.value =
+            String(sktValue);
+
+          setRangeFill(el.sktRange);
+        }
+
+        recompute();
+
+        return this.getState();
       },
 
       setCAFSC(cafsc) {
@@ -2811,26 +2968,6 @@
           normalizeCAFSC(cafsc);
 
         recompute();
-
-        return this.getState();
-      },
-
-      setPromotionGrade(grade) {
-        const normalized =
-          String(grade || "")
-            .trim()
-            .toLowerCase();
-
-        if (
-          normalized === "tsgt" ||
-          normalized === "e6"
-        ) {
-          el.promoGrade.value = "tsgt";
-        } else {
-          el.promoGrade.value = "ssgt";
-        }
-
-        synchronizeCycleFromGrade();
 
         return this.getState();
       },
@@ -2847,26 +2984,34 @@
             .toUpperCase();
 
         if (
-          normalizedGrade === "E6" ||
-          normalizedGrade === "TSGT"
-        ) {
-          gradeBucket = "E6";
-        }
-
-        if (
           normalizedGrade === "E5" ||
           normalizedGrade === "SSGT"
         ) {
           gradeBucket = "E5";
         }
 
+        if (
+          normalizedGrade === "E6" ||
+          normalizedGrade === "TSGT"
+        ) {
+          gradeBucket = "E6";
+        }
+
         return resolveAFSCRule({
           gradeBucket,
-          cafsc: normalizeCAFSC(
-            cafsc ?? el.cafscInput.value
-          )
+          cafsc:
+            normalizeCAFSC(
+              cafsc ??
+              el.cafscInput.value
+            )
         });
       },
+
+      openHelp(topic = "general") {
+        openHelp(topic);
+      },
+
+      closeHelp,
 
       copySummary() {
         return copyResults();
@@ -2883,11 +3028,8 @@
     bindEvents();
     populateCAFSCDataList();
 
-    [
-      el.pfeRange,
-      el.sktRange,
-      el.decorationRange
-    ].forEach(setRangeFill);
+    setRangeFill(el.pfeRange);
+    setRangeFill(el.sktRange);
 
     recompute();
 
