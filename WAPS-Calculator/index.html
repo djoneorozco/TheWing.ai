@@ -10,32 +10,35 @@
 
   <meta
     name="description"
-    content="Estimate Regular Air Force Weighted Airman Promotion System points for promotion to Staff Sergeant or Technical Sergeant."
+    content="Estimate your Regular Air Force Weighted Airman Promotion System score for promotion to Staff Sergeant or Technical Sergeant."
   >
 
   <meta
     name="theme-color"
-    content="#071726"
+    content="#071827"
   >
 
-  <title>WAPS Calculator | TheWing.ai</title>
+  <title>Air Force WAPS Calculator | TheWing.ai</title>
 
   <!-- =========================================================
-    THEWING.AI • WAPS CALCULATOR
+    THEWING.AI • AIR FORCE WAPS CALCULATOR
     INDEX.HTML
-    Aura Interface
-    Version 1.0.0
+    SIMPLIFIED AURA INTERFACE
+    Version 2.0.0
 
-    PURPOSE
-    - Regular Air Force SSgt and TSgt WAPS score estimation
-    - Supports SKT + PFE and authorized PFE-only paths
-    - Supports up to three eligible EPB promotion recommendations
-    - Supports eligible decoration points
-    - Separates calculated score from official promotion selection
+    PRIMARY EXPERIENCE
+    1. Select promotion grade
+    2. Select testing type
+    3. Enter test scores
+    4. Select up to three eligible EPB recommendations
+    5. Enter decoration points
+    6. View estimated WAPS score
 
-    GOVERNING REFERENCES
-    - AFI 36-2502, Enlisted Airman Promotion and Demotion Programs
-    - DAFMAN 36-2664, Personnel Assessment Program
+    ADVANCED OPTIONS
+    - Promotion-cycle override
+    - CAFSC lookup
+    - Individual SKT exemption
+    - Historical cutoff comparison
 
     REQUIRED FILES
     - waps.css
@@ -51,10 +54,10 @@
     rel="stylesheet"
   >
 
-  <!-- WAPS Calculator Styles -->
+  <!-- Calculator Styles -->
   <link rel="stylesheet" href="waps.css">
 
-  <!-- WAPS Calculator Logic -->
+  <!-- Calculator Logic -->
   <script src="waps.js" defer></script>
 </head>
 
@@ -63,20 +66,19 @@
   <main
     id="thewing-waps"
     class="waps-app"
-    data-theme="aura"
     data-ready="false"
+    data-testing-path="both"
   >
 
     <!-- =======================================================
-      DECORATIVE AURA BACKGROUND
+      AURA BACKGROUND
     ======================================================== -->
 
-    <div class="waps-aura-background" aria-hidden="true">
-      <span class="waps-aura waps-aura-one"></span>
-      <span class="waps-aura waps-aura-two"></span>
-      <span class="waps-aura waps-aura-three"></span>
-      <span class="waps-grid-overlay"></span>
-      <span class="waps-grain-overlay"></span>
+    <div class="waps-background" aria-hidden="true">
+      <span class="waps-aura waps-aura-top"></span>
+      <span class="waps-aura waps-aura-bottom"></span>
+      <span class="waps-grid"></span>
+      <span class="waps-grain"></span>
     </div>
 
 
@@ -87,553 +89,480 @@
     <div class="waps-container">
 
       <!-- =====================================================
-        HEADER
+        TOP NAVIGATION
+      ====================================================== -->
+
+      <nav
+        class="waps-topbar"
+        aria-label="WAPS Calculator navigation"
+      >
+
+        <div class="waps-topbar-left">
+
+          <a
+            class="waps-brand"
+            href="/"
+            aria-label="Return to TheWing.ai home"
+          >
+
+            <span
+              class="waps-brand-mark"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 44 44">
+                <path
+                  d="M22 4.5 37 19.2 22 14.6 7 19.2 22 4.5Z"
+                  fill="currentColor"
+                />
+
+                <path
+                  d="M9.5 23.3 22 18.1l12.5 5.2L22 39.5 9.5 23.3Z"
+                  fill="currentColor"
+                  opacity=".55"
+                />
+
+                <path
+                  d="M15.2 24.2 22 21.5l6.8 2.7L22 32.7l-6.8-8.5Z"
+                  fill="currentColor"
+                  opacity=".9"
+                />
+              </svg>
+            </span>
+
+            <span class="waps-brand-word">
+              TheWing<span>.ai</span>
+            </span>
+
+          </a>
+
+
+          <span
+            class="waps-topbar-divider"
+            aria-hidden="true"
+          ></span>
+
+
+          <span class="waps-product-label">
+            WAPS Calculator
+          </span>
+
+        </div>
+
+
+        <button
+          id="openHelpButton"
+          class="waps-help-button"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="wapsHelpDialog"
+        >
+
+          <span
+            class="waps-help-icon"
+            aria-hidden="true"
+          >
+            <svg viewBox="0 0 24 24">
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+              />
+
+              <path
+                d="M9.8 9.1a2.4 2.4 0 0 1 4.7.7c0 1.7-2.5 2-2.5 3.7"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+
+              <path
+                d="M12 17.2v.1"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </span>
+
+          <span>How WAPS Works</span>
+
+        </button>
+
+      </nav>
+
+
+      <!-- =====================================================
+        PAGE HEADER
       ====================================================== -->
 
       <header class="waps-header">
 
-        <div class="waps-header-main">
-
-          <div class="waps-brand-line">
-            <a
-              class="waps-brand"
-              href="/"
-              aria-label="Return to TheWing.ai"
-            >
-              <span class="waps-brand-mark" aria-hidden="true">
-                <svg
-                  viewBox="0 0 48 48"
-                  role="img"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M8 28.4 24 9l16 19.4-16-7.8L8 28.4Z"
-                    fill="currentColor"
-                    opacity=".95"
-                  />
-                  <path
-                    d="M13.2 31.2 24 25.9l10.8 5.3L24 39 13.2 31.2Z"
-                    fill="currentColor"
-                    opacity=".55"
-                  />
-                </svg>
-              </span>
-
-              <span class="waps-brand-name">
-                TheWing<span class="waps-brand-domain">.ai</span>
-              </span>
-            </a>
-
-            <span class="waps-product-divider" aria-hidden="true"></span>
-
-            <span class="waps-product-name">
-              WAPS Calculator
-            </span>
-          </div>
-
-
-          <div class="waps-heading-group">
-
-            <div class="waps-eyebrow">
-              Enlisted Promotion Intelligence
-            </div>
-
-            <h1 class="waps-title">
-              Air Force WAPS Calculator
-            </h1>
-
-            <p class="waps-subtitle">
-              Estimate your Weighted Airman Promotion System score
-              for promotion to Staff Sergeant or Technical Sergeant.
-            </p>
-
-          </div>
-
+        <div class="waps-eyebrow">
+          Enlisted Promotion Intelligence
         </div>
 
+        <h1 class="waps-title">
+          Air Force WAPS Calculator
+        </h1>
 
-        <div class="waps-reference-badges">
-
-          <span class="waps-reference-badge">
-            AFI 36-2502
-          </span>
-
-          <span class="waps-reference-badge">
-            DAFMAN 36-2664
-          </span>
-
-          <span class="waps-reference-badge waps-reference-badge-muted">
-            Regular Air Force
-          </span>
-
-        </div>
+        <p class="waps-subtitle">
+          Estimate your Weighted Airman Promotion System score
+          for promotion to Staff Sergeant or Technical Sergeant.
+        </p>
 
       </header>
 
 
       <!-- =====================================================
-        PRIMARY CONFIGURATION
+        MAIN CALCULATOR
       ====================================================== -->
 
-      <section
-        class="waps-configuration-grid"
-        aria-labelledby="waps-configuration-title"
+      <form
+        id="wapsCalculatorForm"
+        class="waps-calculator-grid"
+        autocomplete="off"
+        novalidate
       >
 
-        <h2
-          id="waps-configuration-title"
-          class="waps-visually-hidden"
-        >
-          Promotion cycle configuration
-        </h2>
-
-
-        <!-- TARGET GRADE -->
-
-        <article class="waps-glass-card waps-config-card">
-
-          <label
-            class="waps-field-label"
-            for="promoGrade"
-          >
-            Promotion Grade
-          </label>
-
-          <div class="waps-select-shell">
-            <select
-              id="promoGrade"
-              name="promoGrade"
-              class="waps-select"
-              autocomplete="off"
-            >
-              <option value="ssgt" selected>
-                Staff Sergeant
-              </option>
-
-              <option value="tsgt">
-                Technical Sergeant
-              </option>
-            </select>
-
-            <span
-              class="waps-select-arrow"
-              aria-hidden="true"
-            ></span>
-          </div>
-
-          <p
-            id="promoGradeHelp"
-            class="waps-field-help"
-          >
-            Select the grade for which you are competing.
-          </p>
-
-        </article>
-
-
-        <!-- PROMOTION CYCLE -->
-
-        <article class="waps-glass-card waps-config-card">
-
-          <label
-            class="waps-field-label"
-            for="promotionCycle"
-          >
-            Promotion Cycle
-          </label>
-
-          <div class="waps-select-shell">
-            <select
-              id="promotionCycle"
-              name="promotionCycle"
-              class="waps-select"
-              autocomplete="off"
-            >
-              <option value="26e5" selected>
-                26E5
-              </option>
-
-              <option value="26e6">
-                26E6
-              </option>
-
-              <option value="custom">
-                Other Cycle
-              </option>
-            </select>
-
-            <span
-              class="waps-select-arrow"
-              aria-hidden="true"
-            ></span>
-          </div>
-
-          <p class="waps-field-help">
-            Cycle-specific rules may be updated through official guidance.
-          </p>
-
-        </article>
-
-
-        <!-- CAFSC -->
-
-        <article class="waps-glass-card waps-config-card">
-
-          <label
-            class="waps-field-label"
-            for="cafscInput"
-          >
-            CAFSC on the PECD
-          </label>
-
-          <div class="waps-input-shell">
-
-            <input
-              id="cafscInput"
-              name="cafscInput"
-              class="waps-text-input"
-              type="text"
-              inputmode="text"
-              maxlength="15"
-              placeholder="Example: 2A571"
-              list="cafscCatalog"
-              autocomplete="off"
-              spellcheck="false"
-              aria-describedby="cafscHelp cafscStatus"
-            >
-
-            <button
-              id="cafscClearButton"
-              class="waps-input-action"
-              type="button"
-              aria-label="Clear CAFSC"
-              hidden
-            >
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  d="m7 7 10 10M17 7 7 17"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </button>
-
-          </div>
-
-          <datalist id="cafscCatalog"></datalist>
-
-          <p
-            id="cafscHelp"
-            class="waps-field-help"
-          >
-            Enter the CAFSC held on the promotion eligibility cutoff date.
-          </p>
-
-          <div
-            id="cafscStatus"
-            class="waps-field-status"
-            data-status="neutral"
-            aria-live="polite"
-          >
-            Enter a CAFSC to determine the testing path.
-          </div>
-
-        </article>
-
-
-        <!-- TESTING PATH -->
-
-        <article class="waps-glass-card waps-config-card">
-
-          <div class="waps-field-label">
-            Testing Path
-          </div>
-
-          <div
-            id="testingPathDisplay"
-            class="waps-readonly-value"
-            data-path="pending"
-            aria-live="polite"
-          >
-            <span
-              class="waps-readonly-icon"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 24 24">
-                <path
-                  d="M12 3v18M3 12h18"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </span>
-
-            <span id="testingPathText">
-              Awaiting CAFSC
-            </span>
-          </div>
-
-          <p
-            id="testingPathHelp"
-            class="waps-field-help"
-          >
-            The testing path is determined from CAFSC and exemption rules.
-          </p>
-
-        </article>
-
-      </section>
-
-
-      <!-- =====================================================
-        MAIN WORKSPACE
-      ====================================================== -->
-
-      <div class="waps-workspace">
-
         <!-- ===================================================
-          LEFT COLUMN — INPUTS
+          LEFT PANEL — USER INPUTS
         ==================================================== -->
 
         <section
-          class="waps-glass-panel waps-input-panel"
-          aria-labelledby="promotion-inputs-title"
+          class="waps-panel waps-input-panel"
+          aria-labelledby="waps-input-title"
         >
 
           <div class="waps-panel-heading">
 
             <div>
               <div class="waps-panel-eyebrow">
-                Your Promotion Record
+                Your Inputs
               </div>
 
               <h2
-                id="promotion-inputs-title"
+                id="waps-input-title"
                 class="waps-panel-title"
               >
-                Promotion Inputs
+                Build Your Estimate
               </h2>
-            </div>
-
-            <div
-              id="inputCompletionBadge"
-              class="waps-completion-badge"
-              data-state="incomplete"
-            >
-              Incomplete
             </div>
 
           </div>
 
-          <div class="waps-panel-rule"></div>
+
+          <!-- =================================================
+            1. PROMOTION GRADE
+          ================================================== -->
+
+          <fieldset class="waps-input-section">
+
+            <legend class="waps-section-heading">
+
+              <span class="waps-section-number">
+                1
+              </span>
+
+              <span class="waps-section-label">
+                Promotion To
+              </span>
+
+              <button
+                class="waps-info-button"
+                type="button"
+                data-help-topic="promotion-grade"
+                aria-label="Learn about promotion grade selection"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                  />
+
+                  <path
+                    d="M12 10.7v5.1M12 7.4v.1"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </button>
+
+            </legend>
+
+
+            <div
+              class="waps-segmented-control"
+              data-control="promotion-grade"
+            >
+
+              <label class="waps-segment-option">
+
+                <input
+                  id="promoGradeSSgt"
+                  name="promoGrade"
+                  type="radio"
+                  value="ssgt"
+                  checked
+                >
+
+                <span class="waps-segment-content">
+                  <span class="waps-segment-primary">
+                    SSgt
+                  </span>
+
+                  <span class="waps-segment-secondary">
+                    E-5
+                  </span>
+                </span>
+
+              </label>
+
+
+              <label class="waps-segment-option">
+
+                <input
+                  id="promoGradeTSgt"
+                  name="promoGrade"
+                  type="radio"
+                  value="tsgt"
+                >
+
+                <span class="waps-segment-content">
+                  <span class="waps-segment-primary">
+                    TSgt
+                  </span>
+
+                  <span class="waps-segment-secondary">
+                    E-6
+                  </span>
+                </span>
+
+              </label>
+
+            </div>
+
+          </fieldset>
 
 
           <!-- =================================================
-            TESTING PATH DETAILS
+            2. TESTING TYPE
+          ================================================== -->
+
+          <fieldset class="waps-input-section">
+
+            <legend class="waps-section-heading">
+
+              <span class="waps-section-number">
+                2
+              </span>
+
+              <span class="waps-section-label">
+                Testing Type
+              </span>
+
+              <button
+                class="waps-info-button"
+                type="button"
+                data-help-topic="testing-type"
+                aria-label="Learn about WAPS testing types"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                  />
+
+                  <path
+                    d="M12 10.7v5.1M12 7.4v.1"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </button>
+
+            </legend>
+
+
+            <div
+              class="waps-segmented-control"
+              data-control="testing-type"
+            >
+
+              <label class="waps-segment-option">
+
+                <input
+                  id="testingPathBoth"
+                  name="testingPath"
+                  type="radio"
+                  value="both"
+                  checked
+                >
+
+                <span class="waps-segment-content">
+                  <span class="waps-segment-primary">
+                    SKT + PFE
+                  </span>
+
+                  <span class="waps-segment-secondary">
+                    Two-test path
+                  </span>
+                </span>
+
+              </label>
+
+
+              <label class="waps-segment-option">
+
+                <input
+                  id="testingPathPFEOnly"
+                  name="testingPath"
+                  type="radio"
+                  value="pfe-only"
+                >
+
+                <span class="waps-segment-content">
+                  <span class="waps-segment-primary">
+                    PFE Only
+                  </span>
+
+                  <span class="waps-segment-secondary">
+                    Authorized path
+                  </span>
+                </span>
+
+              </label>
+
+            </div>
+
+
+            <button
+              id="testingPathHelpButton"
+              class="waps-inline-help"
+              type="button"
+              data-help-topic="testing-type"
+            >
+              Not sure which testing type applies?
+            </button>
+
+          </fieldset>
+
+
+          <!-- =================================================
+            3. TEST SCORES
           ================================================== -->
 
           <section
             class="waps-input-section"
-            aria-labelledby="testing-section-title"
+            aria-labelledby="test-scores-heading"
           >
 
             <div class="waps-section-heading">
 
-              <div>
-                <h3
-                  id="testing-section-title"
-                  class="waps-section-title"
-                >
-                  Promotion Testing
-                </h3>
+              <span class="waps-section-number">
+                3
+              </span>
 
-                <p class="waps-section-copy">
-                  Enter official scores or projected testing scenarios.
-                </p>
-              </div>
-
-              <div
-                id="testingMinimumBadge"
-                class="waps-status-badge"
-                data-status="pending"
+              <h3
+                id="test-scores-heading"
+                class="waps-section-label"
               >
-                Awaiting Scores
-              </div>
+                Test Scores
+              </h3>
+
+              <button
+                class="waps-info-button"
+                type="button"
+                data-help-topic="test-scores"
+                aria-label="Learn about WAPS test scores"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                  />
+
+                  <path
+                    d="M12 10.7v5.1M12 7.4v.1"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </button>
 
             </div>
 
-
-            <!-- SKT EXEMPTION QUESTION -->
 
             <div
-              id="sktExemptionBlock"
-              class="waps-subpanel"
+              id="testScoreGrid"
+              class="waps-test-score-grid"
             >
 
-              <div class="waps-subpanel-heading">
+              <!-- PFE SCORE -->
 
-                <div>
-                  <div class="waps-subpanel-title">
-                    Individual SKT Exemption
+              <article class="waps-score-card">
+
+                <div class="waps-score-card-heading">
+
+                  <div>
+                    <label
+                      class="waps-score-card-label"
+                      for="pfeScore"
+                    >
+                      PFE Score
+                    </label>
+
+                    <div class="waps-score-card-description">
+                      Promotion Fitness Examination
+                    </div>
                   </div>
 
-                  <div class="waps-subpanel-copy">
-                    Select yes only when an official exemption applies
-                    to the member for this promotion cycle.
+                  <div class="waps-score-maximum">
+                    / 100
                   </div>
+
                 </div>
 
-              </div>
 
-
-              <fieldset
-                class="waps-choice-group"
-                aria-describedby="sktExemptionHelp"
-              >
-
-                <legend class="waps-visually-hidden">
-                  Official SKT exemption status
-                </legend>
-
-                <label class="waps-choice-card">
+                <div class="waps-score-value-row">
 
                   <input
-                    id="sktExemptionNo"
-                    name="sktExemption"
-                    type="radio"
-                    value="no"
-                    checked
+                    id="pfeScore"
+                    name="pfeScore"
+                    class="waps-score-number"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value="74.00"
+                    aria-describedby="pfeScoreFeedback"
                   >
 
-                  <span class="waps-choice-indicator"></span>
-
-                  <span class="waps-choice-content">
-                    <span class="waps-choice-title">
-                      No
-                    </span>
-
-                    <span class="waps-choice-copy">
-                      Standard CAFSC testing requirements apply.
-                    </span>
-                  </span>
-
-                </label>
-
-
-                <label class="waps-choice-card">
-
-                  <input
-                    id="sktExemptionYes"
-                    name="sktExemption"
-                    type="radio"
-                    value="yes"
-                  >
-
-                  <span class="waps-choice-indicator"></span>
-
-                  <span class="waps-choice-content">
-                    <span class="waps-choice-title">
-                      Yes
-                    </span>
-
-                    <span class="waps-choice-copy">
-                      An official SKT exemption applies.
-                    </span>
-                  </span>
-
-                </label>
-
-              </fieldset>
-
-              <p
-                id="sktExemptionHelp"
-                class="waps-field-help"
-              >
-                A user-selected exemption does not replace official
-                personnel or testing documentation.
-              </p>
-
-            </div>
-
-
-            <!-- EXEMPTION ELECTION -->
-
-            <div
-              id="sktElectionBlock"
-              class="waps-subpanel"
-              hidden
-            >
-
-              <label
-                class="waps-field-label"
-                for="sktElection"
-              >
-                Testing Election
-              </label>
-
-              <div class="waps-select-shell">
-                <select
-                  id="sktElection"
-                  name="sktElection"
-                  class="waps-select"
-                >
-                  <option value="pfe-only" selected>
-                    Use authorized PFE-only path
-                  </option>
-
-                  <option value="take-skt">
-                    Elect to take SKT + PFE
-                  </option>
-                </select>
-
-                <span
-                  class="waps-select-arrow"
-                  aria-hidden="true"
-                ></span>
-              </div>
-
-              <p class="waps-field-help">
-                This option appears only when an individual exemption
-                allows a testing election.
-              </p>
-
-            </div>
-
-
-            <!-- PFE SCORE -->
-
-            <div class="waps-score-input-group">
-
-              <div class="waps-score-input-heading">
-
-                <div>
-                  <label
-                    class="waps-score-label"
-                    for="pfeScore"
-                  >
-                    PFE Score
-                  </label>
-
-                  <div class="waps-score-description">
-                    Promotion Fitness Examination
-                  </div>
                 </div>
 
-                <div class="waps-score-limit">
-                  Maximum 100.00
-                </div>
-
-              </div>
-
-
-              <div class="waps-score-control-row">
 
                 <input
                   id="pfeRange"
@@ -641,407 +570,110 @@
                   type="range"
                   min="0"
                   max="100"
+                  step="0.01"
                   value="74"
-                  step="0.01"
-                  aria-label="PFE score slider"
+                  aria-label="PFE score"
                 >
 
-                <div class="waps-number-shell">
 
-                  <input
-                    id="pfeScore"
-                    name="pfeScore"
-                    class="waps-number-input"
-                    type="number"
-                    inputmode="decimal"
-                    min="0"
-                    max="100"
-                    value="74.00"
-                    step="0.01"
-                    aria-describedby="pfeScoreHelp"
-                  >
-
-                  <span class="waps-number-suffix">
-                    pts
-                  </span>
-
+                <div class="waps-range-ticks" aria-hidden="true">
+                  <span>0</span>
+                  <span>20</span>
+                  <span>40</span>
+                  <span>60</span>
+                  <span>80</span>
+                  <span>100</span>
                 </div>
 
-              </div>
 
-              <div
-                id="pfeScoreHelp"
-                class="waps-score-feedback"
-                data-status="neutral"
-                aria-live="polite"
+                <div
+                  id="pfeScoreFeedback"
+                  class="waps-score-feedback"
+                  data-status="pass"
+                  aria-live="polite"
+                >
+                  PFE minimum met.
+                </div>
+
+              </article>
+
+
+              <!-- SKT SCORE -->
+
+              <article
+                id="sktScoreCard"
+                class="waps-score-card"
               >
-                Standard two-test minimum: 40.00.
-              </div>
 
-            </div>
+                <div class="waps-score-card-heading">
 
+                  <div>
+                    <label
+                      class="waps-score-card-label"
+                      for="sktScore"
+                    >
+                      SKT Score
+                    </label>
 
-            <!-- SKT SCORE -->
-
-            <div
-              id="sktScoreGroup"
-              class="waps-score-input-group"
-            >
-
-              <div class="waps-score-input-heading">
-
-                <div>
-                  <label
-                    class="waps-score-label"
-                    for="sktScore"
-                  >
-                    SKT Score
-                  </label>
-
-                  <div
-                    id="sktScoreDescription"
-                    class="waps-score-description"
-                  >
-                    Specialty Knowledge Test
+                    <div class="waps-score-card-description">
+                      Specialty Knowledge Test
+                    </div>
                   </div>
+
+                  <div class="waps-score-maximum">
+                    / 100
+                  </div>
+
                 </div>
 
-                <div class="waps-score-limit">
-                  Maximum 100.00
-                </div>
 
-              </div>
-
-
-              <div class="waps-score-control-row">
-
-                <input
-                  id="sktRange"
-                  class="waps-range waps-range-peach"
-                  type="range"
-                  min="0"
-                  max="100"
-                  value="68"
-                  step="0.01"
-                  aria-label="SKT score slider"
-                >
-
-                <div class="waps-number-shell">
+                <div class="waps-score-value-row">
 
                   <input
                     id="sktScore"
                     name="sktScore"
-                    class="waps-number-input"
+                    class="waps-score-number"
                     type="number"
                     inputmode="decimal"
                     min="0"
                     max="100"
-                    value="68.00"
                     step="0.01"
-                    aria-describedby="sktScoreHelp"
+                    value="68.00"
+                    aria-describedby="sktScoreFeedback"
                   >
-
-                  <span class="waps-number-suffix">
-                    pts
-                  </span>
 
                 </div>
 
-              </div>
 
-              <div
-                id="sktScoreHelp"
-                class="waps-score-feedback"
-                data-status="neutral"
-                aria-live="polite"
-              >
-                Standard two-test minimum: 40.00.
-              </div>
+                <input
+                  id="sktRange"
+                  class="waps-range waps-range-teal"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value="68"
+                  aria-label="SKT score"
+                >
 
-            </div>
 
+                <div class="waps-range-ticks" aria-hidden="true">
+                  <span>0</span>
+                  <span>20</span>
+                  <span>40</span>
+                  <span>60</span>
+                  <span>80</span>
+                  <span>100</span>
+                </div>
 
-            <!-- COMBINED TEST VALIDATION -->
-
-            <div
-              id="testingValidationCard"
-              class="waps-validation-card"
-              data-status="pending"
-            >
-
-              <div
-                class="waps-validation-icon"
-                aria-hidden="true"
-              >
-                <svg viewBox="0 0 24 24">
-                  <path
-                    d="M12 3.5 21 20H3L12 3.5Z"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.7"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M12 9v5M12 17.2v.2"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.7"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </div>
-
-              <div class="waps-validation-content">
 
                 <div
-                  id="testingValidationTitle"
-                  class="waps-validation-title"
+                  id="sktScoreFeedback"
+                  class="waps-score-feedback"
+                  data-status="pass"
+                  aria-live="polite"
                 >
-                  Testing Requirements Pending
-                </div>
-
-                <div
-                  id="testingValidationText"
-                  class="waps-validation-copy"
-                >
-                  Enter the applicable PFE and SKT scores.
-                </div>
-
-              </div>
-
-            </div>
-
-          </section>
-
-
-          <div class="waps-section-divider"></div>
-
-
-          <!-- =================================================
-            EPB PROMOTION RECOMMENDATION SCORE
-          ================================================== -->
-
-          <section
-            class="waps-input-section"
-            aria-labelledby="epb-section-title"
-          >
-
-            <div class="waps-section-heading">
-
-              <div>
-                <h3
-                  id="epb-section-title"
-                  class="waps-section-title"
-                >
-                  EPB Promotion Recommendation Score
-                </h3>
-
-                <p class="waps-section-copy">
-                  Based on up to three eligible force-distributed
-                  EPBs during the current grade’s period of
-                  promotion eligibility.
-                </p>
-              </div>
-
-              <div class="waps-section-total">
-                <span
-                  id="epbPoints"
-                  class="waps-section-total-value"
-                >
-                  235
-                </span>
-
-                <span class="waps-section-total-label">
-                  of 285
-                </span>
-              </div>
-
-            </div>
-
-
-            <div class="waps-epb-grid">
-
-              <!-- MOST RECENT EPB -->
-
-              <article class="waps-epb-card">
-
-                <div class="waps-epb-position">
-                  Most Recent
-                </div>
-
-                <label
-                  class="waps-field-label"
-                  for="epbCurrent"
-                >
-                  Eligible EPB 1
-                </label>
-
-                <div class="waps-select-shell">
-                  <select
-                    id="epbCurrent"
-                    name="epbCurrent"
-                    class="waps-select"
-                  >
-                    <option value="promote">
-                      Promote
-                    </option>
-
-                    <option value="must-promote" selected>
-                      Must Promote
-                    </option>
-
-                    <option value="promote-now">
-                      Promote Now
-                    </option>
-
-                    <option value="not-ready-now">
-                      Not Ready Now
-                    </option>
-
-                    <option value="none">
-                      No Eligible EPB
-                    </option>
-
-                    <option value="bypass">
-                      Nonrated or Removed
-                    </option>
-                  </select>
-
-                  <span
-                    class="waps-select-arrow"
-                    aria-hidden="true"
-                  ></span>
-                </div>
-
-                <div class="waps-epb-points">
-                  <span id="epbCurrentPoints">
-                    220
-                  </span>
-                  points
-                </div>
-
-              </article>
-
-
-              <!-- SECOND ELIGIBLE EPB -->
-
-              <article class="waps-epb-card">
-
-                <div class="waps-epb-position">
-                  Second Eligible
-                </div>
-
-                <label
-                  class="waps-field-label"
-                  for="epbPrevious1"
-                >
-                  Eligible EPB 2
-                </label>
-
-                <div class="waps-select-shell">
-                  <select
-                    id="epbPrevious1"
-                    name="epbPrevious1"
-                    class="waps-select"
-                  >
-                    <option value="promote" selected>
-                      Promote
-                    </option>
-
-                    <option value="must-promote">
-                      Must Promote
-                    </option>
-
-                    <option value="promote-now">
-                      Promote Now
-                    </option>
-
-                    <option value="not-ready-now">
-                      Not Ready Now
-                    </option>
-
-                    <option value="none">
-                      No Eligible EPB
-                    </option>
-
-                    <option value="bypass">
-                      Nonrated or Removed
-                    </option>
-                  </select>
-
-                  <span
-                    class="waps-select-arrow"
-                    aria-hidden="true"
-                  ></span>
-                </div>
-
-                <div class="waps-epb-points">
-                  <span id="epbPrevious1Points">
-                    10
-                  </span>
-                  points
-                </div>
-
-              </article>
-
-
-              <!-- THIRD ELIGIBLE EPB -->
-
-              <article class="waps-epb-card">
-
-                <div class="waps-epb-position">
-                  Third Eligible
-                </div>
-
-                <label
-                  class="waps-field-label"
-                  for="epbPrevious2"
-                >
-                  Eligible EPB 3
-                </label>
-
-                <div class="waps-select-shell">
-                  <select
-                    id="epbPrevious2"
-                    name="epbPrevious2"
-                    class="waps-select"
-                  >
-                    <option value="promote" selected>
-                      Promote
-                    </option>
-
-                    <option value="must-promote">
-                      Must Promote
-                    </option>
-
-                    <option value="promote-now">
-                      Promote Now
-                    </option>
-
-                    <option value="not-ready-now">
-                      Not Ready Now
-                    </option>
-
-                    <option value="none">
-                      No Eligible EPB
-                    </option>
-
-                    <option value="bypass">
-                      Nonrated or Removed
-                    </option>
-                  </select>
-
-                  <span
-                    class="waps-select-arrow"
-                    aria-hidden="true"
-                  ></span>
-                </div>
-
-                <div class="waps-epb-points">
-                  <span id="epbPrevious2Points">
-                    5
-                  </span>
-                  points
+                  SKT minimum met.
                 </div>
 
               </article>
@@ -1050,12 +682,14 @@
 
 
             <div
-              id="epbGuidance"
-              class="waps-information-note"
+              id="testingMinimumNotice"
+              class="waps-minimum-notice"
+              data-status="pass"
+              aria-live="polite"
             >
 
               <span
-                class="waps-information-icon"
+                class="waps-minimum-icon"
                 aria-hidden="true"
               >
                 <svg viewBox="0 0 24 24">
@@ -1065,10 +699,661 @@
                     r="9"
                     fill="none"
                     stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+
+                  <path
+                    d="m8.2 12.2 2.5 2.5 5.3-5.4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+
+
+              <span class="waps-minimum-copy">
+
+                <strong id="testingMinimumTitle">
+                  Minimum test requirements met
+                </strong>
+
+                <span id="testingMinimumText">
+                  PFE and SKT are each at least 40.00 and total at least 90.00.
+                </span>
+
+              </span>
+
+            </div>
+
+          </section>
+
+
+          <!-- =================================================
+            4. EPB RECOMMENDATIONS
+          ================================================== -->
+
+          <section
+            class="waps-input-section"
+            aria-labelledby="epb-heading"
+          >
+
+            <div class="waps-section-heading">
+
+              <span class="waps-section-number">
+                4
+              </span>
+
+              <h3
+                id="epb-heading"
+                class="waps-section-label"
+              >
+                EPB Promotion Recommendations
+              </h3>
+
+              <span class="waps-section-qualifier">
+                Last 3 Eligible
+              </span>
+
+              <button
+                class="waps-info-button"
+                type="button"
+                data-help-topic="epb"
+                aria-label="Learn about EPB promotion recommendation scoring"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                    fill="none"
+                    stroke="currentColor"
                     stroke-width="1.7"
                   />
+
                   <path
-                    d="M12 10.7v5.2M12 7.5v.2"
+                    d="M12 10.7v5.1M12 7.4v.1"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </button>
+
+            </div>
+
+
+            <div class="waps-epb-grid">
+
+              <!-- MOST RECENT -->
+
+              <div class="waps-select-card">
+
+                <label
+                  class="waps-select-card-label"
+                  for="epbCurrent"
+                >
+                  Most Recent
+                </label>
+
+                <div class="waps-select-shell">
+
+                  <select
+                    id="epbCurrent"
+                    name="epbCurrent"
+                    class="waps-select"
+                  >
+                    <option value="promote-now">
+                      Promote Now
+                    </option>
+
+                    <option value="must-promote" selected>
+                      Must Promote
+                    </option>
+
+                    <option value="promote">
+                      Promote
+                    </option>
+
+                    <option value="not-ready-now">
+                      Not Ready Now
+                    </option>
+
+                    <option value="none">
+                      No Eligible EPB
+                    </option>
+
+                    <option value="bypass">
+                      Nonrated or Removed
+                    </option>
+                  </select>
+
+                  <span
+                    class="waps-select-arrow"
+                    aria-hidden="true"
+                  ></span>
+
+                </div>
+
+
+                <div class="waps-select-card-points">
+                  <span id="epbCurrentPoints">220</span>
+                  points
+                </div>
+
+              </div>
+
+
+              <!-- SECOND -->
+
+              <div class="waps-select-card">
+
+                <label
+                  class="waps-select-card-label"
+                  for="epbPrevious1"
+                >
+                  Second Most Recent
+                </label>
+
+                <div class="waps-select-shell">
+
+                  <select
+                    id="epbPrevious1"
+                    name="epbPrevious1"
+                    class="waps-select"
+                  >
+                    <option value="promote-now">
+                      Promote Now
+                    </option>
+
+                    <option value="must-promote">
+                      Must Promote
+                    </option>
+
+                    <option value="promote" selected>
+                      Promote
+                    </option>
+
+                    <option value="not-ready-now">
+                      Not Ready Now
+                    </option>
+
+                    <option value="none">
+                      No Eligible EPB
+                    </option>
+
+                    <option value="bypass">
+                      Nonrated or Removed
+                    </option>
+                  </select>
+
+                  <span
+                    class="waps-select-arrow"
+                    aria-hidden="true"
+                  ></span>
+
+                </div>
+
+
+                <div class="waps-select-card-points">
+                  <span id="epbPrevious1Points">10</span>
+                  points
+                </div>
+
+              </div>
+
+
+              <!-- THIRD -->
+
+              <div class="waps-select-card">
+
+                <label
+                  class="waps-select-card-label"
+                  for="epbPrevious2"
+                >
+                  Third Most Recent
+                </label>
+
+                <div class="waps-select-shell">
+
+                  <select
+                    id="epbPrevious2"
+                    name="epbPrevious2"
+                    class="waps-select"
+                  >
+                    <option value="promote-now">
+                      Promote Now
+                    </option>
+
+                    <option value="must-promote">
+                      Must Promote
+                    </option>
+
+                    <option value="promote" selected>
+                      Promote
+                    </option>
+
+                    <option value="not-ready-now">
+                      Not Ready Now
+                    </option>
+
+                    <option value="none">
+                      No Eligible EPB
+                    </option>
+
+                    <option value="bypass">
+                      Nonrated or Removed
+                    </option>
+                  </select>
+
+                  <span
+                    class="waps-select-arrow"
+                    aria-hidden="true"
+                  ></span>
+
+                </div>
+
+
+                <div class="waps-select-card-points">
+                  <span id="epbPrevious2Points">5</span>
+                  points
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- =================================================
+            5. DECORATIONS
+          ================================================== -->
+
+          <section
+            class="waps-input-section"
+            aria-labelledby="decorations-heading"
+          >
+
+            <div class="waps-section-heading">
+
+              <span class="waps-section-number">
+                5
+              </span>
+
+              <h3
+                id="decorations-heading"
+                class="waps-section-label"
+              >
+                Decoration Points
+              </h3>
+
+              <button
+                class="waps-info-button"
+                type="button"
+                data-help-topic="decorations"
+                aria-label="Learn about decoration points"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                  />
+
+                  <path
+                    d="M12 10.7v5.1M12 7.4v.1"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </button>
+
+            </div>
+
+
+            <div class="waps-decoration-row">
+
+              <div class="waps-decoration-input-shell">
+
+                <input
+                  id="decorationPoints"
+                  name="decorationPoints"
+                  class="waps-decoration-input"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  max="25"
+                  step="1"
+                  value="12"
+                  aria-describedby="decorationHelp"
+                >
+
+                <span class="waps-decoration-maximum">
+                  / 25
+                </span>
+
+              </div>
+
+
+              <div
+                id="decorationHelp"
+                class="waps-decoration-help"
+              >
+                Enter eligible decoration points already earned.
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- =================================================
+            ADVANCED OPTIONS
+          ================================================== -->
+
+          <details
+            id="advancedOptions"
+            class="waps-advanced"
+          >
+
+            <summary class="waps-advanced-summary">
+
+              <span>Advanced Options</span>
+
+              <span
+                class="waps-advanced-arrow"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="m7 10 5 5 5-5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+
+            </summary>
+
+
+            <div class="waps-advanced-content">
+
+              <p class="waps-advanced-intro">
+                These fields are optional. Use them to verify a testing
+                path or compare the estimate with a known cutoff.
+              </p>
+
+
+              <div class="waps-advanced-grid">
+
+                <!-- PROMOTION CYCLE -->
+
+                <div class="waps-field-group">
+
+                  <label
+                    class="waps-field-label"
+                    for="promotionCycle"
+                  >
+                    Promotion Cycle
+                  </label>
+
+                  <div class="waps-select-shell">
+
+                    <select
+                      id="promotionCycle"
+                      name="promotionCycle"
+                      class="waps-select"
+                    >
+                      <option value="26e5" selected>
+                        26E5
+                      </option>
+
+                      <option value="26e6">
+                        26E6
+                      </option>
+
+                      <option value="custom">
+                        Other Cycle
+                      </option>
+                    </select>
+
+                    <span
+                      class="waps-select-arrow"
+                      aria-hidden="true"
+                    ></span>
+
+                  </div>
+
+                </div>
+
+
+                <!-- CAFSC -->
+
+                <div class="waps-field-group">
+
+                  <label
+                    class="waps-field-label"
+                    for="cafscInput"
+                  >
+                    CAFSC on the PECD
+                  </label>
+
+                  <div class="waps-text-shell">
+
+                    <input
+                      id="cafscInput"
+                      name="cafscInput"
+                      class="waps-text-input"
+                      type="text"
+                      inputmode="text"
+                      maxlength="15"
+                      placeholder="Example: 2A571"
+                      list="cafscCatalog"
+                      spellcheck="false"
+                    >
+
+                    <button
+                      id="cafscClearButton"
+                      class="waps-clear-button"
+                      type="button"
+                      aria-label="Clear CAFSC"
+                      hidden
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="m7 7 10 10M17 7 7 17"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                    </button>
+
+                  </div>
+
+                  <datalist id="cafscCatalog"></datalist>
+
+                  <div
+                    id="cafscStatus"
+                    class="waps-field-status"
+                    data-status="neutral"
+                    aria-live="polite"
+                  >
+                    Optional CAFSC verification.
+                  </div>
+
+                </div>
+
+
+                <!-- INDIVIDUAL EXEMPTION -->
+
+                <div class="waps-field-group">
+
+                  <span class="waps-field-label">
+                    Individual SKT Exemption
+                  </span>
+
+                  <label class="waps-toggle-row">
+
+                    <input
+                      id="individualSktExemption"
+                      name="individualSktExemption"
+                      type="checkbox"
+                    >
+
+                    <span
+                      class="waps-toggle-control"
+                      aria-hidden="true"
+                    ></span>
+
+                    <span class="waps-toggle-copy">
+                      An official member-specific exemption applies.
+                    </span>
+
+                  </label>
+
+                </div>
+
+
+                <!-- HISTORICAL CUTOFF -->
+
+                <div class="waps-field-group">
+
+                  <label
+                    class="waps-field-label"
+                    for="historicalCutoff"
+                  >
+                    Historical Cutoff
+                  </label>
+
+                  <div class="waps-number-shell">
+
+                    <input
+                      id="historicalCutoff"
+                      name="historicalCutoff"
+                      class="waps-number-input"
+                      type="number"
+                      inputmode="decimal"
+                      min="0"
+                      max="510"
+                      step="0.01"
+                      placeholder="Optional"
+                    >
+
+                    <span class="waps-number-suffix">
+                      pts
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                <!-- CUTOFF SOURCE -->
+
+                <div class="waps-field-group waps-field-wide">
+
+                  <label
+                    class="waps-field-label"
+                    for="cutoffSource"
+                  >
+                    Cutoff Source
+                  </label>
+
+                  <div class="waps-text-shell">
+
+                    <input
+                      id="cutoffSource"
+                      name="cutoffSource"
+                      class="waps-text-input waps-text-input-normal"
+                      type="text"
+                      maxlength="100"
+                      placeholder="Example: Official 25E5 cutoff"
+                    >
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div
+                id="cutoffComparisonResult"
+                class="waps-cutoff-result"
+                data-status="empty"
+                aria-live="polite"
+              >
+                Enter a verified cutoff to compare it with the estimate.
+              </div>
+
+            </div>
+
+          </details>
+
+        </section>
+
+
+        <!-- ===================================================
+          RIGHT PANEL — ESTIMATED RESULT
+        ==================================================== -->
+
+        <aside
+          class="waps-panel waps-result-panel"
+          aria-labelledby="waps-result-title"
+        >
+
+          <div class="waps-result-heading">
+
+            <div>
+              <div class="waps-panel-eyebrow">
+                Your Estimated WAPS Score
+              </div>
+
+              <h2
+                id="waps-result-title"
+                class="waps-panel-title"
+              >
+                Score Overview
+              </h2>
+            </div>
+
+
+            <button
+              id="resetCalculatorButton"
+              class="waps-reset-button"
+              type="button"
+            >
+
+              <span
+                class="waps-reset-icon"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M4.5 8V3.8M4.5 3.8h4.2"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+
+                  <path
+                    d="M5.4 7.2a8 8 0 1 1-1.1 7.3"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="1.7"
@@ -1077,9 +1362,199 @@
                 </svg>
               </span>
 
-              <p>
-                Nonrated or successfully removed reports are bypassed.
-                The remaining eligible EPBs are applied in eligible-date order.
+              <span>Reset Calculator</span>
+
+            </button>
+
+          </div>
+
+
+          <!-- =================================================
+            SCORE HERO
+          ================================================== -->
+
+          <div class="waps-result-hero">
+
+            <div
+              id="wapsScoreRing"
+              class="waps-score-ring"
+              style="--score-percent:76.27;"
+            >
+
+              <div class="waps-score-ring-inner">
+
+                <div
+                  id="wapsTotalScore"
+                  class="waps-total-score"
+                  aria-live="polite"
+                >
+                  389.00
+                </div>
+
+                <div class="waps-total-maximum">
+                  out of <strong>510</strong>
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="waps-result-summary">
+
+              <div
+                id="overallScoreStatus"
+                class="waps-result-status"
+                data-status="pass"
+              >
+
+                <span
+                  class="waps-result-status-icon"
+                  aria-hidden="true"
+                >
+                  <svg viewBox="0 0 24 24">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    />
+
+                    <path
+                      d="m8.2 12.2 2.5 2.5 5.3-5.4"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+
+                <span>
+
+                  <strong id="overallScoreStatusTitle">
+                    Minimum test requirements met
+                  </strong>
+
+                  <span id="overallScoreStatusText">
+                    Your entered scores meet the minimum requirements
+                    for the selected testing path.
+                  </span>
+
+                </span>
+
+              </div>
+
+
+              <dl class="waps-component-summary">
+
+                <div class="waps-component-summary-row">
+
+                  <dt>Testing Component</dt>
+
+                  <dd>
+                    <strong id="testingComponentValue">
+                      142.00
+                    </strong>
+
+                    <span>/ 200</span>
+                  </dd>
+
+                </div>
+
+
+                <div class="waps-component-summary-row">
+
+                  <dt>EPB Component</dt>
+
+                  <dd>
+                    <strong id="epbComponentValue">
+                      235
+                    </strong>
+
+                    <span>/ 285</span>
+                  </dd>
+
+                </div>
+
+
+                <div class="waps-component-summary-row">
+
+                  <dt>Decoration Points</dt>
+
+                  <dd>
+                    <strong id="decorationComponentValue">
+                      12
+                    </strong>
+
+                    <span>/ 25</span>
+                  </dd>
+
+                </div>
+
+
+                <div class="waps-component-summary-row waps-total-row">
+
+                  <dt>Total Score</dt>
+
+                  <dd>
+                    <strong id="totalComponentValue">
+                      389.00
+                    </strong>
+
+                    <span>/ 510</span>
+                  </dd>
+
+                </div>
+
+              </dl>
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+            WHAT THIS MEANS
+          ================================================== -->
+
+          <section
+            class="waps-meaning-card"
+            aria-labelledby="meaning-heading"
+          >
+
+            <span
+              class="waps-meaning-icon"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="m12 3 2.3 4.7L19.5 9l-3.8 3.7.9 5.3-4.6-2.5L7.4 18l.9-5.3L4.5 9l5.2-1.3L12 3Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+
+
+            <div>
+
+              <h3
+                id="meaning-heading"
+                class="waps-meaning-title"
+              >
+                What This Means
+              </h3>
+
+              <p id="wapsMeaningText">
+                Your estimated WAPS score is calculated from the test,
+                EPB and decoration values entered. Official selection
+                depends on the promotion AFSC, quota and cycle cutoff.
               </p>
 
             </div>
@@ -1087,585 +1562,156 @@
           </section>
 
 
-          <div class="waps-section-divider"></div>
-
-
           <!-- =================================================
-            DECORATION POINTS
+            COMPONENT BREAKDOWN
           ================================================== -->
 
           <section
-            class="waps-input-section"
-            aria-labelledby="decorations-section-title"
+            class="waps-breakdown-card"
+            aria-labelledby="breakdown-heading"
           >
 
-            <div class="waps-section-heading">
-
-              <div>
-                <h3
-                  id="decorations-section-title"
-                  class="waps-section-title"
-                >
-                  Eligible Decoration Points
-                </h3>
-
-                <p class="waps-section-copy">
-                  Include only decorations that satisfy the applicable
-                  PECD and public-release requirements.
-                </p>
-              </div>
-
-              <div class="waps-section-total">
-                <span
-                  id="decorationPointsDisplay"
-                  class="waps-section-total-value"
-                >
-                  12
-                </span>
-
-                <span class="waps-section-total-label">
-                  of 25
-                </span>
-              </div>
-
-            </div>
-
-
-            <div class="waps-score-input-group">
-
-              <div class="waps-score-control-row">
-
-                <input
-                  id="decorationRange"
-                  class="waps-range waps-range-mint"
-                  type="range"
-                  min="0"
-                  max="25"
-                  value="12"
-                  step="1"
-                  aria-label="Eligible decoration points slider"
-                >
-
-                <div class="waps-number-shell">
-
-                  <input
-                    id="decorationPoints"
-                    name="decorationPoints"
-                    class="waps-number-input"
-                    type="number"
-                    inputmode="numeric"
-                    min="0"
-                    max="25"
-                    value="12"
-                    step="1"
-                    aria-describedby="decorationPointsHelp"
-                  >
-
-                  <span class="waps-number-suffix">
-                    pts
-                  </span>
-
-                </div>
-
-              </div>
-
-              <div
-                id="decorationPointsHelp"
-                class="waps-score-feedback"
-                data-status="neutral"
-              >
-                Decoration points are capped at 25.
-              </div>
-
-            </div>
-
-
-            <label class="waps-confirmation-row">
-
-              <input
-                id="decorationEligibilityConfirmed"
-                name="decorationEligibilityConfirmed"
-                type="checkbox"
-              >
-
-              <span class="waps-checkbox-indicator"></span>
-
-              <span class="waps-confirmation-copy">
-                I entered only decorations with an eligible closeout date
-                and qualifying “Given Under My Hand” date.
-              </span>
-
-            </label>
-
-          </section>
-
-
-          <div class="waps-section-divider"></div>
-
-
-          <!-- =================================================
-            OPTIONAL CUTOFF COMPARISON
-          ================================================== -->
-
-          <section
-            class="waps-input-section"
-            aria-labelledby="cutoff-section-title"
-          >
-
-            <div class="waps-section-heading">
-
-              <div>
-                <h3
-                  id="cutoff-section-title"
-                  class="waps-section-title"
-                >
-                  Historical Cutoff Comparison
-                </h3>
-
-                <p class="waps-section-copy">
-                  Optional comparison using an official or historical
-                  cutoff for the same promotion AFSC and cycle.
-                </p>
-              </div>
-
-            </div>
-
-
-            <div class="waps-inline-fields">
-
-              <div class="waps-field-group">
-
-                <label
-                  class="waps-field-label"
-                  for="historicalCutoff"
-                >
-                  Cutoff Score
-                </label>
-
-                <div class="waps-number-shell waps-number-shell-wide">
-
-                  <input
-                    id="historicalCutoff"
-                    name="historicalCutoff"
-                    class="waps-number-input"
-                    type="number"
-                    inputmode="decimal"
-                    min="0"
-                    max="510"
-                    step="0.01"
-                    placeholder="Optional"
-                  >
-
-                  <span class="waps-number-suffix">
-                    pts
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              <div class="waps-field-group">
-
-                <label
-                  class="waps-field-label"
-                  for="cutoffSource"
-                >
-                  Source Label
-                </label>
-
-                <div class="waps-input-shell">
-
-                  <input
-                    id="cutoffSource"
-                    name="cutoffSource"
-                    class="waps-text-input"
-                    type="text"
-                    maxlength="80"
-                    placeholder="Example: 25E5 official cutoff"
-                    autocomplete="off"
-                  >
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <div
-              id="cutoffComparisonResult"
-              class="waps-comparison-result"
-              data-status="empty"
-              aria-live="polite"
+            <h3
+              id="breakdown-heading"
+              class="waps-breakdown-heading"
             >
-              Enter a verified cutoff score to compare it with your
-              calculated total.
-            </div>
-
-          </section>
-
-        </section>
+              Component Breakdown
+            </h3>
 
 
-        <!-- ===================================================
-          RIGHT COLUMN — RESULTS
-        ==================================================== -->
-
-        <aside
-          class="waps-results-column"
-          aria-labelledby="score-overview-title"
-        >
-
-          <!-- TOTAL SCORE -->
-
-          <section class="waps-glass-panel waps-score-panel">
-
-            <div class="waps-panel-heading">
-
-              <div>
-                <div class="waps-panel-eyebrow">
-                  Calculated Result
-                </div>
-
-                <h2
-                  id="score-overview-title"
-                  class="waps-panel-title"
-                >
-                  WAPS Score Overview
-                </h2>
-              </div>
-
-              <button
-                id="resetCalculatorButton"
-                class="waps-text-button"
-                type="button"
-              >
-                Reset
-              </button>
-
-            </div>
-
-            <div class="waps-panel-rule"></div>
-
-
-            <div class="waps-total-score-layout">
-
-              <div
-                id="wapsScoreRing"
-                class="waps-score-ring"
-                style="--score-percent: 76.27;"
-              >
-
-                <div class="waps-score-ring-inner">
-
-                  <div
-                    id="wapsTotalScore"
-                    class="waps-total-score"
-                    aria-live="polite"
-                  >
-                    389.00
-                  </div>
-
-                  <div class="waps-total-score-maximum">
-                    out of 510
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              <div class="waps-score-summary">
-
-                <div class="waps-summary-label">
-                  Score Utilization
-                </div>
-
-                <div
-                  id="scoreUtilization"
-                  class="waps-summary-value"
-                >
-                  76.27%
-                </div>
-
-                <p class="waps-summary-copy">
-                  Percentage of available WAPS points represented
-                  by the current inputs.
-                </p>
-
-                <div
-                  id="overallScoreStatus"
-                  class="waps-overall-status"
-                  data-status="pending"
-                  aria-live="polite"
-                >
-                  <span
-                    class="waps-overall-status-dot"
-                    aria-hidden="true"
-                  ></span>
-
-                  <span id="overallScoreStatusText">
-                    Reviewing testing minimums
-                  </span>
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <div class="waps-score-breakdown">
+            <div class="waps-breakdown-list">
 
               <!-- PFE -->
 
-              <article class="waps-breakdown-item">
+              <div class="waps-breakdown-item">
 
-                <div class="waps-breakdown-header">
+                <div class="waps-breakdown-top">
 
-                  <div>
-                    <div class="waps-breakdown-title">
-                      PFE
-                    </div>
+                  <span id="pfeBreakdownLabel">
+                    PFE Score
+                  </span>
 
-                    <div class="waps-breakdown-subtitle">
-                      Promotion Fitness Examination
-                    </div>
-                  </div>
+                  <span>
+                    <strong id="pfeBreakdownValue">
+                      74.00
+                    </strong>
 
-                  <div class="waps-breakdown-value">
-                    <span id="pfeBreakdownValue">74.00</span>
-                    <span id="pfeBreakdownMaximum">/ 100</span>
-                  </div>
+                    <span id="pfeBreakdownMaximum">
+                      / 100
+                    </span>
+                  </span>
 
                 </div>
 
                 <div class="waps-progress-track">
+
                   <span
                     id="pfeProgressBar"
-                    class="waps-progress-fill waps-progress-teal"
-                    style="width: 74%;"
+                    class="waps-progress-fill waps-progress-blue"
+                    style="width:74%;"
                   ></span>
+
                 </div>
 
-              </article>
+              </div>
 
 
               <!-- SKT -->
 
-              <article
+              <div
                 id="sktBreakdownItem"
                 class="waps-breakdown-item"
               >
 
-                <div class="waps-breakdown-header">
+                <div class="waps-breakdown-top">
 
-                  <div>
-                    <div class="waps-breakdown-title">
-                      SKT
-                    </div>
+                  <span>SKT Score</span>
 
-                    <div
-                      id="sktBreakdownSubtitle"
-                      class="waps-breakdown-subtitle"
-                    >
-                      Specialty Knowledge Test
-                    </div>
-                  </div>
+                  <span>
+                    <strong id="sktBreakdownValue">
+                      68.00
+                    </strong>
 
-                  <div class="waps-breakdown-value">
-                    <span id="sktBreakdownValue">68.00</span>
-                    <span id="sktBreakdownMaximum">/ 100</span>
-                  </div>
+                    <span id="sktBreakdownMaximum">
+                      / 100
+                    </span>
+                  </span>
 
                 </div>
 
                 <div class="waps-progress-track">
+
                   <span
                     id="sktProgressBar"
-                    class="waps-progress-fill waps-progress-peach"
-                    style="width: 68%;"
+                    class="waps-progress-fill waps-progress-orange"
+                    style="width:68%;"
                   ></span>
+
                 </div>
 
-              </article>
+              </div>
+
+
+              <!-- EPB -->
+
+              <div class="waps-breakdown-item">
+
+                <div class="waps-breakdown-top">
+
+                  <span>
+                    EPB Promotion Recommendation Score
+                  </span>
+
+                  <span>
+                    <strong id="epbBreakdownValue">
+                      235
+                    </strong>
+
+                    <span>/ 285</span>
+                  </span>
+
+                </div>
+
+                <div class="waps-progress-track">
+
+                  <span
+                    id="epbProgressBar"
+                    class="waps-progress-fill waps-progress-green"
+                    style="width:82.46%;"
+                  ></span>
+
+                </div>
+
+              </div>
 
 
               <!-- DECORATIONS -->
 
-              <article class="waps-breakdown-item">
+              <div class="waps-breakdown-item">
 
-                <div class="waps-breakdown-header">
+                <div class="waps-breakdown-top">
 
-                  <div>
-                    <div class="waps-breakdown-title">
-                      Decorations
-                    </div>
+                  <span>Decoration Points</span>
 
-                    <div class="waps-breakdown-subtitle">
-                      Eligible decoration points
-                    </div>
-                  </div>
+                  <span>
+                    <strong id="decorationsBreakdownValue">
+                      12
+                    </strong>
 
-                  <div class="waps-breakdown-value">
-                    <span id="decorationsBreakdownValue">12</span>
                     <span>/ 25</span>
-                  </div>
+                  </span>
 
                 </div>
 
                 <div class="waps-progress-track">
+
                   <span
                     id="decorationsProgressBar"
-                    class="waps-progress-fill waps-progress-lavender"
-                    style="width: 48%;"
+                    class="waps-progress-fill waps-progress-purple"
+                    style="width:48%;"
                   ></span>
-                </div>
-
-              </article>
-
-
-              <!-- EPB PRS -->
-
-              <article class="waps-breakdown-item">
-
-                <div class="waps-breakdown-header">
-
-                  <div>
-                    <div class="waps-breakdown-title">
-                      EPB PRS
-                    </div>
-
-                    <div class="waps-breakdown-subtitle">
-                      Promotion recommendation score
-                    </div>
-                  </div>
-
-                  <div class="waps-breakdown-value">
-                    <span id="epbBreakdownValue">235</span>
-                    <span>/ 285</span>
-                  </div>
 
                 </div>
-
-                <div class="waps-progress-track">
-                  <span
-                    id="epbProgressBar"
-                    class="waps-progress-fill waps-progress-mint"
-                    style="width: 82.46%;"
-                  ></span>
-                </div>
-
-              </article>
-
-            </div>
-
-          </section>
-
-
-          <!-- TESTING SUMMARY -->
-
-          <section class="waps-glass-panel waps-summary-panel">
-
-            <div class="waps-card-header">
-
-              <div>
-                <div class="waps-panel-eyebrow">
-                  Test Validation
-                </div>
-
-                <h2 class="waps-card-title">
-                  Testing Requirements
-                </h2>
-              </div>
-
-              <div
-                id="testPassBadge"
-                class="waps-status-badge"
-                data-status="pending"
-              >
-                Pending
-              </div>
-
-            </div>
-
-
-            <div class="waps-requirement-list">
-
-              <div
-                id="pfeMinimumRow"
-                class="waps-requirement-row"
-                data-status="pending"
-              >
-
-                <span
-                  class="waps-requirement-icon"
-                  aria-hidden="true"
-                ></span>
-
-                <span class="waps-requirement-label">
-                  PFE minimum
-                </span>
-
-                <span
-                  id="pfeMinimumResult"
-                  class="waps-requirement-value"
-                >
-                  Pending
-                </span>
-
-              </div>
-
-
-              <div
-                id="sktMinimumRow"
-                class="waps-requirement-row"
-                data-status="pending"
-              >
-
-                <span
-                  class="waps-requirement-icon"
-                  aria-hidden="true"
-                ></span>
-
-                <span class="waps-requirement-label">
-                  SKT minimum
-                </span>
-
-                <span
-                  id="sktMinimumResult"
-                  class="waps-requirement-value"
-                >
-                  Pending
-                </span>
-
-              </div>
-
-
-              <div
-                id="combinedMinimumRow"
-                class="waps-requirement-row"
-                data-status="pending"
-              >
-
-                <span
-                  class="waps-requirement-icon"
-                  aria-hidden="true"
-                ></span>
-
-                <span
-                  id="combinedMinimumLabel"
-                  class="waps-requirement-label"
-                >
-                  Combined test minimum
-                </span>
-
-                <span
-                  id="combinedMinimumResult"
-                  class="waps-requirement-value"
-                >
-                  Pending
-                </span>
 
               </div>
 
@@ -1674,90 +1720,20 @@
           </section>
 
 
-          <!-- SCORE GUIDANCE -->
+          <!-- =================================================
+            RESULT ACTIONS
+          ================================================== -->
 
-          <section class="waps-glass-panel waps-guidance-panel">
-
-            <div class="waps-card-header">
-
-              <div>
-                <div class="waps-panel-eyebrow">
-                  TheWing Guidance
-                </div>
-
-                <h2 class="waps-card-title">
-                  Score Interpretation
-                </h2>
-              </div>
-
-            </div>
-
-
-            <ul
-              id="wapsInsightList"
-              class="waps-insight-list"
-            >
-
-              <li class="waps-insight-item">
-
-                <span
-                  class="waps-insight-marker waps-marker-mint"
-                  aria-hidden="true"
-                ></span>
-
-                <span>
-                  Your calculated score is based on the values
-                  currently entered.
-                </span>
-
-              </li>
-
-
-              <li class="waps-insight-item">
-
-                <span
-                  class="waps-insight-marker waps-marker-teal"
-                  aria-hidden="true"
-                ></span>
-
-                <span>
-                  Official selection depends on the promotion AFSC,
-                  quota and cutoff established for the cycle.
-                </span>
-
-              </li>
-
-
-              <li class="waps-insight-item">
-
-                <span
-                  class="waps-insight-marker waps-marker-peach"
-                  aria-hidden="true"
-                ></span>
-
-                <span>
-                  Use projected test scores to explore possible
-                  outcomes without changing fixed record factors.
-                </span>
-
-              </li>
-
-            </ul>
-
-          </section>
-
-
-          <!-- ACTIONS -->
-
-          <section class="waps-action-panel">
+          <div class="waps-result-actions">
 
             <button
               id="copyResultsButton"
-              class="waps-primary-button"
+              class="waps-copy-button"
               type="button"
             >
+
               <span
-                class="waps-button-icon"
+                class="waps-copy-icon"
                 aria-hidden="true"
               >
                 <svg viewBox="0 0 24 24">
@@ -1771,6 +1747,7 @@
                     stroke="currentColor"
                     stroke-width="1.7"
                   />
+
                   <path
                     d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
                     fill="none"
@@ -1784,112 +1761,66 @@
               <span id="copyResultsButtonText">
                 Copy Score Summary
               </span>
+
             </button>
 
-
-            <button
-              id="printResultsButton"
-              class="waps-secondary-button"
-              type="button"
-            >
-              <span
-                class="waps-button-icon"
-                aria-hidden="true"
-              >
-                <svg viewBox="0 0 24 24">
-                  <path
-                    d="M7 8V4h10v4M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.7"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M7 14h10v6H7z"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.7"
-                  />
-                </svg>
-              </span>
-
-              Print Results
-            </button>
-
-          </section>
+          </div>
 
         </aside>
 
-      </div>
+      </form>
 
 
       <!-- =====================================================
-        OFFICIAL BOUNDARY AND REFERENCES
+        OFFICIAL NOTICE
       ====================================================== -->
 
       <footer class="waps-footer">
 
-        <section
-          class="waps-disclaimer"
-          aria-labelledby="waps-disclaimer-title"
-        >
+        <div class="waps-footer-notice">
 
-          <div
-            class="waps-disclaimer-icon"
+          <span
+            class="waps-footer-icon"
             aria-hidden="true"
           >
             <svg viewBox="0 0 24 24">
-              <path
-                d="M12 3.5 21 20H3L12 3.5Z"
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.7"
-                stroke-linejoin="round"
               />
+
               <path
-                d="M12 9v5M12 17.2v.2"
+                d="M12 10.7v5.1M12 7.4v.1"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="1.7"
+                stroke-width="1.8"
                 stroke-linecap="round"
               />
             </svg>
-          </div>
+          </span>
 
+          <span>
+            This calculator is an unofficial estimator. Official
+            eligibility, scores, promotion AFSC, quotas, cutoffs and
+            selection status are determined by the Air Force and AFPC.
+          </span>
 
-          <div class="waps-disclaimer-content">
-
-            <h2
-              id="waps-disclaimer-title"
-              class="waps-disclaimer-title"
-            >
-              Official Determination Notice
-            </h2>
-
-            <p>
-              This calculator estimates WAPS points from user-provided
-              information. Official eligibility, test scores, promotion
-              AFSC, quotas, cutoff scores and selection status are
-              determined by Air Force personnel systems and AFPC.
-            </p>
-
-          </div>
-
-        </section>
+        </div>
 
 
         <div class="waps-footer-bottom">
 
-          <div class="waps-footer-brand">
+          <span>
             TheWing calculates. Amy explains.
-          </div>
+          </span>
 
-          <div class="waps-footer-references">
-            <span>AFI 36-2502</span>
-            <span aria-hidden="true">•</span>
-            <span>DAFMAN 36-2664</span>
-          </div>
+          <span>
+            AFI 36-2502 · DAFMAN 36-2664
+          </span>
 
         </div>
 
@@ -1899,7 +1830,150 @@
 
 
     <!-- =======================================================
-      ACCESSIBILITY ANNOUNCEMENTS
+      HELP DIALOG
+    ======================================================== -->
+
+    <dialog
+      id="wapsHelpDialog"
+      class="waps-dialog"
+      aria-labelledby="wapsHelpDialogTitle"
+    >
+
+      <div class="waps-dialog-surface">
+
+        <div class="waps-dialog-heading">
+
+          <div>
+
+            <div class="waps-panel-eyebrow">
+              WAPS Calculator Help
+            </div>
+
+            <h2
+              id="wapsHelpDialogTitle"
+              class="waps-dialog-title"
+            >
+              How WAPS Scoring Works
+            </h2>
+
+          </div>
+
+
+          <button
+            id="closeHelpButton"
+            class="waps-dialog-close"
+            type="button"
+            aria-label="Close help"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="m7 7 10 10M17 7 7 17"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+
+        </div>
+
+
+        <div
+          id="wapsHelpContent"
+          class="waps-dialog-content"
+        >
+
+          <section>
+
+            <h3>Standard Testing Path</h3>
+
+            <p>
+              Airmen using the SKT + PFE path receive up to 100 points
+              from each test, for a maximum testing component of 200.
+            </p>
+
+            <p>
+              Each test must be at least 40.00, and the combined test
+              score must be at least 90.00.
+            </p>
+
+          </section>
+
+
+          <section>
+
+            <h3>PFE-Only Path</h3>
+
+            <p>
+              Airmen with an authorized PFE-only path receive a testing
+              component equal to the PFE score multiplied by two.
+            </p>
+
+            <p>
+              The PFE-only minimum is 45.00.
+            </p>
+
+          </section>
+
+
+          <section>
+
+            <h3>EPB Recommendations</h3>
+
+            <p>
+              The calculator uses up to three eligible
+              force-distributed EPB recommendations. Nonrated or
+              successfully removed reports are bypassed.
+            </p>
+
+          </section>
+
+
+          <section>
+
+            <h3>Decoration Points</h3>
+
+            <p>
+              Eligible decoration points may contribute up to 25
+              points. Enter only points that qualify for the applicable
+              promotion cycle.
+            </p>
+
+          </section>
+
+
+          <section>
+
+            <h3>Official Selection</h3>
+
+            <p>
+              The calculated score does not guarantee promotion.
+              Selection depends on official personnel data, the
+              applicable promotion AFSC, promotion quotas and the
+              cycle cutoff.
+            </p>
+
+          </section>
+
+        </div>
+
+
+        <button
+          id="helpDialogDoneButton"
+          class="waps-dialog-done"
+          type="button"
+        >
+          Got It
+        </button>
+
+      </div>
+
+    </dialog>
+
+
+    <!-- =======================================================
+      LIVE REGION
     ======================================================== -->
 
     <div
@@ -1912,7 +1986,7 @@
 
 
     <!-- =======================================================
-      NOSCRIPT FALLBACK
+      NOSCRIPT
     ======================================================== -->
 
     <noscript>
