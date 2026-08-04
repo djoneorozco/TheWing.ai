@@ -1,20 +1,18 @@
 /* ============================================================
    THEWING.AI • AIR FORCE WAPS CALCULATOR
    WAPS.CSS
-   SIMPLIFIED AURA INTERFACE
-   Version 2.0.0
+   AFSC-FIRST AURA INTERFACE
+   Version 2.1.0
 
    FILE PAIRING
-   - index.html v2.0.0
-   - waps.js v2.0.0
+   - index.html v2.1.0
+   - waps.js v2.1.0
 
-   DESIGN DIRECTION
-   - Compact two-column calculator
-   - One primary input panel
-   - One immediate result panel
-   - Midnight aerospace background
-   - Transparent Aura glass
-   - Teal, mint, amber and lavender accents
+   PRIMARY FLOW
+   1. Select CAFSC on the PECD
+   2. Automatically determine promotion cycle and testing path
+   3. Display required test-score fields
+   4. Calculate EPB, decoration and total WAPS points
 ============================================================ */
 
 
@@ -30,7 +28,7 @@ html {
   min-width: 320px;
   min-height: 100%;
   margin: 0;
-  background: #06131f;
+  background: #05131f;
   scroll-behavior: smooth;
 }
 
@@ -38,7 +36,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background: #06131f;
+  background: #05131f;
 }
 
 body,
@@ -85,8 +83,8 @@ svg {
   --waps-bg-mid: #081d2d;
   --waps-bg-blue: #0d2a40;
 
-  --waps-panel: rgba(17, 42, 62, 0.82);
-  --waps-panel-strong: rgba(12, 34, 52, 0.92);
+  --waps-panel: rgba(17, 42, 62, 0.84);
+  --waps-panel-strong: rgba(10, 31, 48, 0.94);
   --waps-panel-soft: rgba(255, 255, 255, 0.035);
   --waps-panel-hover: rgba(255, 255, 255, 0.06);
 
@@ -163,14 +161,6 @@ svg {
       #0a2235 76%,
       #122b3d 100%
     );
-
-  font-family:
-    "Barlow",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
 
   line-height: 1.45;
   isolation: isolate;
@@ -332,7 +322,6 @@ svg {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-
   min-height: 44px;
 }
 
@@ -355,10 +344,8 @@ svg {
 .waps-brand-mark {
   display: grid;
   place-items: center;
-
   width: 27px;
   height: 27px;
-
   color: var(--waps-teal);
 }
 
@@ -403,6 +390,7 @@ svg {
   border-radius: 11px;
 
   color: var(--waps-ink-soft);
+
   background:
     linear-gradient(
       180deg,
@@ -435,12 +423,14 @@ svg {
 .waps-dialog-done:hover {
   color: var(--waps-white);
   border-color: var(--waps-stroke-strong);
+
   background:
     linear-gradient(
       180deg,
       rgba(255, 255, 255, 0.085),
       rgba(255, 255, 255, 0.04)
     );
+
   transform: translateY(-1px);
 }
 
@@ -498,7 +488,7 @@ svg {
 }
 
 .waps-subtitle {
-  max-width: 770px;
+  max-width: 820px;
   margin: 15px 0 0;
 
   color: var(--waps-ink-soft);
@@ -513,6 +503,7 @@ svg {
 
 .waps-calculator-grid {
   display: grid;
+
   grid-template-columns:
     minmax(0, 0.98fr)
     minmax(480px, 1.02fr);
@@ -578,7 +569,9 @@ svg {
   gap: 18px;
 
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--waps-stroke-soft);
+
+  border-bottom:
+    1px solid var(--waps-stroke-soft);
 }
 
 .waps-panel-title {
@@ -625,7 +618,7 @@ svg {
 
   width: 100%;
   padding: 0;
-  margin: 0 0 12px;
+  margin: 0 0 10px;
 
   color: var(--waps-ink);
 }
@@ -663,6 +656,15 @@ svg {
   font-weight: 500;
 }
 
+.waps-section-description {
+  max-width: 640px;
+  margin: 0 0 13px;
+
+  color: var(--waps-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 .waps-info-button {
   display: grid;
   flex: 0 0 auto;
@@ -695,133 +697,425 @@ svg {
   height: 18px;
 }
 
-.waps-inline-help {
-  padding: 0;
-  margin: 9px 0 0;
-
-  border: 0;
-
-  color: var(--waps-teal);
-  background: transparent;
-
-  font-size: 12px;
-  font-weight: 700;
-  text-decoration: underline;
-  text-decoration-color: rgba(120, 222, 211, 0.4);
-  text-underline-offset: 3px;
-
-  cursor: pointer;
-}
-
-.waps-inline-help:hover {
-  color: var(--waps-teal-bright);
-}
-
 
 /* ============================================================
-   10. SEGMENTED CONTROLS
+   10. CAFSC SEARCH
 ============================================================ */
 
-.waps-segmented-control {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.waps-segment-option {
+.waps-cafsc-search-shell {
   position: relative;
-  display: block;
-  min-width: 0;
-  cursor: pointer;
-}
-
-.waps-segment-option input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.waps-segment-content {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
-
-  min-height: 52px;
-  padding: 10px 14px;
+  width: 100%;
+  min-height: 58px;
 
   border: 1px solid var(--waps-stroke-strong);
-  border-radius: 11px;
+  border-radius: 13px;
 
-  color: var(--waps-ink-soft);
   background:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.035),
-      rgba(255, 255, 255, 0.018)
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.022)
     );
 
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
 
   transition:
     border-color 160ms ease,
     background 160ms ease,
-    color 160ms ease,
-    transform 160ms ease,
     box-shadow 160ms ease;
 }
 
-.waps-segment-option:hover .waps-segment-content {
-  color: var(--waps-white);
-  border-color: rgba(120, 222, 211, 0.34);
-  background: rgba(120, 222, 211, 0.055);
+.waps-cafsc-search-shell:hover {
+  border-color: rgba(120, 222, 211, 0.36);
 }
 
-.waps-segment-option input:checked + .waps-segment-content {
-  color: #f5fffe;
-  border-color: rgba(117, 238, 222, 0.88);
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(67, 181, 173, 0.53),
-      rgba(67, 181, 173, 0.29)
-    );
+.waps-cafsc-search-shell:focus-within {
+  border-color: rgba(120, 222, 211, 0.78);
 
   box-shadow:
-    0 0 0 1px rgba(117, 238, 222, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.13);
+    0 0 0 4px rgba(120, 222, 211, 0.085),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.waps-segment-option input:focus-visible + .waps-segment-content {
-  outline: 2px solid var(--waps-teal-bright);
-  outline-offset: 3px;
+.waps-cafsc-search-icon {
+  position: absolute;
+  left: 16px;
+
+  display: grid;
+  place-items: center;
+
+  width: 22px;
+  height: 22px;
+
+  color: var(--waps-teal);
+  pointer-events: none;
 }
 
-.waps-segment-primary {
-  font-size: 15px;
-  font-weight: 800;
+.waps-cafsc-search-icon svg {
+  width: 20px;
+  height: 20px;
 }
 
-.waps-segment-secondary {
-  color: currentColor;
-  font-size: 12px;
+.waps-cafsc-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 56px;
+
+  padding: 0 52px 0 48px;
+
+  border: 0;
+  outline: 0;
+
+  color: var(--waps-white);
+  background: transparent;
+
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.waps-cafsc-input::placeholder {
+  color: rgba(216, 231, 247, 0.40);
   font-weight: 600;
-  opacity: 0.72;
+}
+
+.waps-cafsc-clear {
+  position: absolute;
+  right: 10px;
+
+  display: grid;
+  place-items: center;
+
+  width: 34px;
+  height: 34px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 9px;
+
+  color: var(--waps-muted);
+  background: transparent;
+
+  cursor: pointer;
+
+  transition:
+    color 150ms ease,
+    background 150ms ease;
+}
+
+.waps-cafsc-clear:hover {
+  color: var(--waps-white);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.waps-cafsc-clear svg {
+  width: 18px;
+  height: 18px;
+}
+
+.waps-field-status {
+  min-height: 18px;
+  margin-top: 9px;
+
+  color: var(--waps-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.waps-field-status[data-status="valid"],
+.waps-field-status[data-status="pass"] {
+  color: var(--waps-success);
+}
+
+.waps-field-status[data-status="warning"] {
+  color: var(--waps-amber);
+}
+
+.waps-field-status[data-status="invalid"],
+.waps-field-status[data-status="fail"] {
+  color: var(--waps-danger);
+}
+
+.waps-field-help {
+  margin: 5px 0 0;
+
+  color: var(--waps-faint);
+  font-size: 10px;
+  line-height: 1.45;
 }
 
 
 /* ============================================================
-   11. TEST SCORE CARDS
+   11. SELECTED AFSC SUMMARY
+============================================================ */
+
+.waps-afsc-summary {
+  display: grid;
+  gap: 15px;
+
+  margin-top: 15px;
+  padding: 16px;
+
+  border: 1px solid rgba(120, 222, 211, 0.26);
+  border-radius: var(--waps-radius-md);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(120, 222, 211, 0.095),
+      rgba(120, 222, 211, 0.025)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.waps-afsc-summary-main {
+  min-width: 0;
+}
+
+.waps-afsc-code-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.waps-afsc-code {
+  color: var(--waps-white);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.waps-path-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 26px;
+  padding: 5px 9px;
+
+  border: 1px solid var(--waps-stroke);
+  border-radius: 999px;
+
+  color: var(--waps-muted);
+  background: rgba(255, 255, 255, 0.035);
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.waps-path-badge[data-path="both"],
+.waps-path-badge[data-path="skt-pfe"] {
+  color: var(--waps-teal-bright);
+  border-color: rgba(120, 222, 211, 0.34);
+  background: var(--waps-teal-soft);
+}
+
+.waps-path-badge[data-path="pfe-only"] {
+  color: var(--waps-orange);
+  border-color: rgba(243, 171, 80, 0.34);
+  background: var(--waps-orange-soft);
+}
+
+.waps-afsc-title {
+  margin-top: 5px;
+
+  color: var(--waps-ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.waps-afsc-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+
+  padding: 0;
+  margin: 0;
+}
+
+.waps-afsc-meta-item {
+  min-width: 0;
+  padding: 10px 11px;
+
+  border: 1px solid var(--waps-stroke-soft);
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.waps-afsc-meta-item dt,
+.waps-afsc-meta-item dd {
+  margin: 0;
+}
+
+.waps-afsc-meta-item dt {
+  color: var(--waps-faint);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.waps-afsc-meta-item dd {
+  margin-top: 4px;
+
+  color: var(--waps-white);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+/* ============================================================
+   12. INPUT FLOW AND EMPTY STATE
+============================================================ */
+
+.waps-input-flow {
+  position: relative;
+  z-index: 2;
+}
+
+.waps-input-empty-state {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 310px;
+  padding: 28px 20px;
+
+  color: var(--waps-muted);
+  text-align: center;
+}
+
+.waps-empty-state-icon {
+  display: grid;
+  place-items: center;
+
+  width: 68px;
+  height: 68px;
+  margin-bottom: 17px;
+
+  border: 1px solid rgba(120, 222, 211, 0.18);
+  border-radius: 50%;
+
+  color: var(--waps-teal);
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(120, 222, 211, 0.11),
+      rgba(120, 222, 211, 0.025)
+    );
+}
+
+.waps-empty-state-icon svg {
+  width: 42px;
+  height: 42px;
+}
+
+.waps-input-empty-state strong {
+  color: var(--waps-white);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.waps-input-empty-state > span:last-child {
+  max-width: 360px;
+  margin-top: 6px;
+
+  color: var(--waps-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   13. TESTING PATH NOTICE
+============================================================ */
+
+.waps-testing-path-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+
+  margin-bottom: 14px;
+  padding: 13px 14px;
+
+  border: 1px solid var(--waps-stroke);
+  border-radius: 12px;
+
+  color: var(--waps-muted);
+  background: rgba(255, 255, 255, 0.028);
+}
+
+.waps-testing-path-notice[data-path="both"],
+.waps-testing-path-notice[data-path="skt-pfe"] {
+  color: var(--waps-teal);
+  border-color: rgba(120, 222, 211, 0.30);
+  background: var(--waps-teal-soft);
+}
+
+.waps-testing-path-notice[data-path="pfe-only"] {
+  color: var(--waps-orange);
+  border-color: rgba(243, 171, 80, 0.30);
+  background: var(--waps-orange-soft);
+}
+
+.waps-testing-path-icon {
+  display: grid;
+  flex: 0 0 22px;
+  place-items: center;
+
+  width: 22px;
+  height: 22px;
+}
+
+.waps-testing-path-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.waps-testing-path-notice strong {
+  display: block;
+  color: currentColor;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.waps-testing-path-notice span span {
+  display: block;
+  margin-top: 2px;
+
+  color: var(--waps-ink-soft);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+
+/* ============================================================
+   14. TEST SCORE CARDS
 ============================================================ */
 
 .waps-test-score-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+
+#thewing-waps[data-testing-path="pfe-only"] .waps-test-score-grid {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .waps-score-card {
@@ -1038,21 +1332,7 @@ svg {
 
 
 /* ============================================================
-   12. PFE-ONLY INTERFACE STATES
-============================================================ */
-
-#thewing-waps[data-testing-path="pfe-only"] .waps-test-score-grid {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-#thewing-waps[data-testing-path="pfe-only"] #sktScoreCard,
-#thewing-waps[data-testing-path="pfe-only"] #sktBreakdownItem {
-  display: none;
-}
-
-
-/* ============================================================
-   13. MINIMUM REQUIREMENTS NOTICE
+   15. MINIMUM REQUIREMENTS NOTICE
 ============================================================ */
 
 .waps-minimum-notice {
@@ -1125,7 +1405,7 @@ svg {
 
 
 /* ============================================================
-   14. EPB SELECT CARDS
+   16. EPB SELECT CARDS
 ============================================================ */
 
 .waps-epb-grid {
@@ -1240,8 +1520,11 @@ svg {
   height: 8px;
   margin-top: -6px;
 
-  border-right: 2px solid rgba(230, 242, 255, 0.55);
-  border-bottom: 2px solid rgba(230, 242, 255, 0.55);
+  border-right:
+    2px solid rgba(230, 242, 255, 0.55);
+
+  border-bottom:
+    2px solid rgba(230, 242, 255, 0.55);
 
   transform: rotate(45deg);
   pointer-events: none;
@@ -1263,12 +1546,15 @@ svg {
 
 
 /* ============================================================
-   15. DECORATION INPUT
+   17. DECORATION INPUT
 ============================================================ */
 
 .waps-decoration-row {
   display: grid;
-  grid-template-columns: minmax(180px, 0.55fr) minmax(0, 1fr);
+  grid-template-columns:
+    minmax(180px, 0.55fr)
+    minmax(0, 1fr);
+
   gap: 14px;
   align-items: center;
 }
@@ -1338,7 +1624,7 @@ svg {
 
 
 /* ============================================================
-   16. ADVANCED OPTIONS
+   18. ADVANCED OPTIONS
 ============================================================ */
 
 .waps-advanced {
@@ -1401,7 +1687,9 @@ svg {
 
 .waps-advanced-content {
   padding: 18px;
-  border-top: 1px solid var(--waps-stroke-soft);
+
+  border-top:
+    1px solid var(--waps-stroke-soft);
 }
 
 .waps-advanced-intro {
@@ -1439,11 +1727,10 @@ svg {
 
 .waps-text-input {
   min-height: 42px;
-  padding: 0 42px 0 12px;
+  padding: 0 12px;
 
   font-size: 13px;
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 .waps-text-input-normal {
@@ -1454,35 +1741,6 @@ svg {
 .waps-number-input::placeholder {
   color: rgba(216, 231, 247, 0.35);
   font-weight: 600;
-}
-
-.waps-clear-button {
-  position: absolute;
-  right: 7px;
-
-  display: grid;
-  place-items: center;
-
-  width: 29px;
-  height: 29px;
-  padding: 0;
-
-  border: 0;
-  border-radius: 8px;
-
-  color: var(--waps-muted);
-  background: transparent;
-  cursor: pointer;
-}
-
-.waps-clear-button:hover {
-  color: var(--waps-white);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.waps-clear-button svg {
-  width: 16px;
-  height: 16px;
 }
 
 .waps-number-shell {
@@ -1518,37 +1776,14 @@ svg {
   pointer-events: none;
 }
 
-.waps-field-status {
-  min-height: 16px;
-  margin-top: 7px;
-
-  color: var(--waps-muted);
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.waps-field-status[data-status="valid"],
-.waps-field-status[data-status="pass"] {
-  color: var(--waps-success);
-}
-
-.waps-field-status[data-status="warning"] {
-  color: var(--waps-amber);
-}
-
-.waps-field-status[data-status="fail"],
-.waps-field-status[data-status="invalid"] {
-  color: var(--waps-danger);
-}
-
 .waps-toggle-row {
   position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
 
-  min-height: 42px;
-  padding: 9px 11px;
+  min-height: 48px;
+  padding: 10px 12px;
 
   border: 1px solid var(--waps-stroke);
   border-radius: 10px;
@@ -1613,7 +1848,7 @@ svg {
   color: var(--waps-muted);
   font-size: 10px;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .waps-cutoff-result {
@@ -1651,7 +1886,7 @@ svg {
 
 
 /* ============================================================
-   17. RESULT PANEL HEADER
+   19. RESULT PANEL HEADER
 ============================================================ */
 
 .waps-reset-button {
@@ -1665,13 +1900,80 @@ svg {
 
 
 /* ============================================================
-   18. RESULT HERO
+   20. RESULT EMPTY STATE
 ============================================================ */
 
-.waps-result-hero {
+.waps-result-empty-state {
   position: relative;
   z-index: 2;
 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 560px;
+  padding: 40px 24px;
+
+  color: var(--waps-muted);
+  text-align: center;
+}
+
+.waps-result-empty-icon {
+  display: grid;
+  place-items: center;
+
+  width: 110px;
+  height: 110px;
+  margin-bottom: 22px;
+
+  border: 1px solid rgba(133, 212, 244, 0.18);
+  border-radius: 50%;
+
+  color: var(--waps-blue);
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(133, 212, 244, 0.10),
+      rgba(133, 212, 244, 0.018)
+    );
+
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.18);
+}
+
+.waps-result-empty-icon svg {
+  width: 66px;
+  height: 66px;
+}
+
+.waps-result-empty-state strong {
+  color: var(--waps-white);
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.waps-result-empty-state > span:last-child {
+  max-width: 400px;
+  margin-top: 7px;
+
+  color: var(--waps-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+
+/* ============================================================
+   21. RESULT CONTENT AND SCORE HERO
+============================================================ */
+
+.waps-result-content {
+  position: relative;
+  z-index: 2;
+}
+
+.waps-result-hero {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   gap: 30px;
@@ -1767,7 +2069,8 @@ svg {
   padding-bottom: 19px;
   margin-bottom: 18px;
 
-  border-bottom: 1px solid var(--waps-stroke-soft);
+  border-bottom:
+    1px solid var(--waps-stroke-soft);
 
   color: var(--waps-muted);
 }
@@ -1865,7 +2168,9 @@ svg {
 .waps-total-row {
   padding-top: 13px;
   margin-top: 3px;
-  border-top: 1px solid var(--waps-stroke-strong);
+
+  border-top:
+    1px solid var(--waps-stroke-strong);
 }
 
 .waps-total-row dt {
@@ -1881,13 +2186,10 @@ svg {
 
 
 /* ============================================================
-   19. WHAT THIS MEANS CARD
+   22. WHAT THIS MEANS
 ============================================================ */
 
 .waps-meaning-card {
-  position: relative;
-  z-index: 2;
-
   display: flex;
   align-items: flex-start;
   gap: 13px;
@@ -1943,13 +2245,10 @@ svg {
 
 
 /* ============================================================
-   20. COMPONENT BREAKDOWN
+   23. COMPONENT BREAKDOWN
 ============================================================ */
 
 .waps-breakdown-card {
-  position: relative;
-  z-index: 2;
-
   margin-top: 16px;
 
   border: 1px solid var(--waps-stroke);
@@ -1963,7 +2262,8 @@ svg {
   padding: 14px 15px;
   margin: 0;
 
-  border-bottom: 1px solid var(--waps-stroke-soft);
+  border-bottom:
+    1px solid var(--waps-stroke-soft);
 
   color: var(--waps-muted);
   font-size: 11px;
@@ -2070,13 +2370,10 @@ svg {
 
 
 /* ============================================================
-   21. RESULT ACTIONS
+   24. RESULT ACTIONS
 ============================================================ */
 
 .waps-result-actions {
-  position: relative;
-  z-index: 2;
-
   display: flex;
   justify-content: flex-end;
 
@@ -2093,7 +2390,7 @@ svg {
 
 
 /* ============================================================
-   22. FOOTER
+   25. FOOTER
 ============================================================ */
 
 .waps-footer {
@@ -2161,7 +2458,7 @@ svg {
 
 
 /* ============================================================
-   23. HELP DIALOG
+   26. HELP DIALOG
 ============================================================ */
 
 .waps-dialog {
@@ -2213,7 +2510,9 @@ svg {
   gap: 18px;
 
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--waps-stroke-soft);
+
+  border-bottom:
+    1px solid var(--waps-stroke-soft);
 }
 
 .waps-dialog-title {
@@ -2310,6 +2609,7 @@ svg {
 
 .waps-dialog-done:hover {
   color: #041914;
+
   background:
     linear-gradient(
       135deg,
@@ -2320,7 +2620,7 @@ svg {
 
 
 /* ============================================================
-   24. NOSCRIPT
+   27. NOSCRIPT
 ============================================================ */
 
 .waps-noscript {
@@ -2344,7 +2644,7 @@ svg {
 
 
 /* ============================================================
-   25. READY AND TRANSITION STATES
+   28. STATE AND TRANSITION CLASSES
 ============================================================ */
 
 #thewing-waps[data-ready="false"] .waps-total-score,
@@ -2353,7 +2653,12 @@ svg {
 }
 
 #thewing-waps.is-calculating .waps-score-ring {
-  animation: waps-score-pulse 760ms ease-in-out infinite alternate;
+  animation:
+    waps-score-pulse
+    760ms
+    ease-in-out
+    infinite
+    alternate;
 }
 
 #thewing-waps .is-hidden {
@@ -2377,7 +2682,7 @@ svg {
 
 
 /* ============================================================
-   26. LARGE DESKTOP
+   29. LARGE DESKTOP
 ============================================================ */
 
 @media (min-width: 1500px) {
@@ -2394,7 +2699,7 @@ svg {
 
 
 /* ============================================================
-   27. STANDARD DESKTOP
+   30. STANDARD DESKTOP
 ============================================================ */
 
 @media (max-width: 1240px) {
@@ -2409,7 +2714,10 @@ svg {
   }
 
   .waps-result-hero {
-    grid-template-columns: 230px minmax(0, 1fr);
+    grid-template-columns:
+      230px
+      minmax(0, 1fr);
+
     gap: 24px;
   }
 
@@ -2429,7 +2737,7 @@ svg {
 
 
 /* ============================================================
-   28. TABLET
+   31. TABLET
 ============================================================ */
 
 @media (max-width: 980px) {
@@ -2441,16 +2749,18 @@ svg {
     grid-template-columns: 1fr;
   }
 
-  .waps-result-panel {
+  .waps-input-panel {
     grid-row: 1;
   }
 
-  .waps-input-panel {
+  .waps-result-panel {
     grid-row: 2;
   }
 
   .waps-result-hero {
-    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-columns:
+      260px
+      minmax(0, 1fr);
   }
 
   .waps-score-ring {
@@ -2463,13 +2773,18 @@ svg {
   }
 
   .waps-epb-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+  .waps-result-empty-state {
+    min-height: 370px;
   }
 }
 
 
 /* ============================================================
-   29. SMALL TABLET
+   32. SMALL TABLET
 ============================================================ */
 
 @media (max-width: 760px) {
@@ -2505,6 +2820,10 @@ svg {
   .waps-input-panel,
   .waps-result-panel {
     padding: 19px;
+  }
+
+  .waps-afsc-meta {
+    grid-template-columns: 1fr;
   }
 
   .waps-result-hero {
@@ -2555,7 +2874,7 @@ svg {
 
 
 /* ============================================================
-   30. MOBILE
+   33. MOBILE
 ============================================================ */
 
 @media (max-width: 560px) {
@@ -2643,7 +2962,7 @@ svg {
   }
 
   .waps-section-heading {
-    margin-bottom: 10px;
+    margin-bottom: 9px;
   }
 
   .waps-section-label {
@@ -2654,21 +2973,22 @@ svg {
     font-size: 10px;
   }
 
-  .waps-segmented-control {
-    gap: 8px;
+  .waps-cafsc-search-shell {
+    min-height: 54px;
   }
 
-  .waps-segment-content {
-    min-height: 48px;
-    padding: 9px 8px;
+  .waps-cafsc-input {
+    min-height: 52px;
+    padding-left: 44px;
+    font-size: 14px;
   }
 
-  .waps-segment-primary {
-    font-size: 13px;
+  .waps-cafsc-search-icon {
+    left: 14px;
   }
 
-  .waps-segment-secondary {
-    font-size: 10px;
+  .waps-afsc-code {
+    font-size: 19px;
   }
 
   .waps-score-card {
@@ -2677,6 +2997,20 @@ svg {
 
   .waps-score-number {
     font-size: 28px;
+  }
+
+  .waps-result-empty-state {
+    min-height: 320px;
+  }
+
+  .waps-result-empty-icon {
+    width: 90px;
+    height: 90px;
+  }
+
+  .waps-result-empty-icon svg {
+    width: 56px;
+    height: 56px;
   }
 
   .waps-result-hero {
@@ -2742,25 +3076,17 @@ svg {
 
 
 /* ============================================================
-   31. VERY SMALL MOBILE
+   34. VERY SMALL MOBILE
 ============================================================ */
 
 @media (max-width: 390px) {
-  .waps-product-label {
-    display: none;
-  }
-
+  .waps-product-label,
   .waps-topbar-divider {
     display: none;
   }
 
   .waps-title {
     font-size: 35px;
-  }
-
-  .waps-segment-content {
-    flex-direction: column;
-    gap: 1px;
   }
 
   .waps-score-ring {
@@ -2775,26 +3101,30 @@ svg {
   .waps-component-summary-row {
     gap: 8px;
   }
+
+  .waps-afsc-code-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 
 /* ============================================================
-   32. NON-HOVER DEVICES
+   35. NON-HOVER DEVICES
 ============================================================ */
 
 @media (hover: none) {
   .waps-help-button:hover,
   .waps-reset-button:hover,
   .waps-copy-button:hover,
-  .waps-dialog-done:hover,
-  .waps-segment-option:hover .waps-segment-content {
+  .waps-dialog-done:hover {
     transform: none;
   }
 }
 
 
 /* ============================================================
-   33. REDUCED MOTION
+   36. REDUCED MOTION
 ============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
@@ -2814,7 +3144,7 @@ svg {
 
 
 /* ============================================================
-   34. PRINT
+   37. PRINT
 ============================================================ */
 
 @media print {
@@ -2831,7 +3161,6 @@ svg {
   #thewing-waps {
     min-height: auto;
     overflow: visible;
-
     color: #111827;
     background: #ffffff !important;
   }
@@ -2841,7 +3170,6 @@ svg {
   .waps-reset-button,
   .waps-copy-button,
   .waps-info-button,
-  .waps-inline-help,
   .waps-range,
   .waps-advanced,
   .waps-dialog,
@@ -2872,6 +3200,7 @@ svg {
   .waps-section-label,
   .waps-section-number,
   .waps-section-qualifier,
+  .waps-section-description,
   .waps-score-card-label,
   .waps-score-card-description,
   .waps-score-number,
@@ -2879,6 +3208,10 @@ svg {
   .waps-select-card-label,
   .waps-select-card-points,
   .waps-decoration-help,
+  .waps-afsc-code,
+  .waps-afsc-title,
+  .waps-afsc-meta-item dt,
+  .waps-afsc-meta-item dd,
   .waps-total-score,
   .waps-total-maximum,
   .waps-component-summary-row dt,
@@ -2917,6 +3250,17 @@ svg {
     break-inside: avoid;
   }
 
+  .waps-afsc-summary,
+  .waps-score-card,
+  .waps-select-card,
+  .waps-minimum-notice,
+  .waps-testing-path-notice,
+  .waps-meaning-card,
+  .waps-breakdown-card {
+    border-color: #d1d5db !important;
+    background: #ffffff !important;
+  }
+
   .waps-score-ring {
     border: 13px solid #9ca3af;
     background: #ffffff !important;
@@ -2927,15 +3271,6 @@ svg {
     border-color: #d1d5db;
     background: #ffffff !important;
     box-shadow: none !important;
-  }
-
-  .waps-score-card,
-  .waps-select-card,
-  .waps-minimum-notice,
-  .waps-meaning-card,
-  .waps-breakdown-card {
-    border-color: #d1d5db !important;
-    background: #ffffff !important;
   }
 
   .waps-progress-track {
