@@ -1348,11 +1348,41 @@
         .replace(/\s+/g, " ");
     }
 
-    function normalizeCode(value) {
-      return String(value || "")
-        .toUpperCase()
-        .replace(/[^A-Z0-9/]/g, "");
-    }
+function normalizeCode(value) {
+
+  const raw = String(value || "")
+
+    .trim()
+
+    .toUpperCase();
+
+  /*
+
+    Extract only the AFSC appearing at the beginning.
+
+    Examples:
+
+    "2A772"                                      → "2A772"
+
+    "2A772 -"                                    → "2A772"
+
+    "2A772 — Nondestructive Inspection"          → "2A772"
+
+    "2A772 — Nondestructive Inspection — 26E6"   → "2A772"
+
+    "3N1/3N2/3N3 — Regional Band — 26E6"         → "3N1/3N2/3N3"
+
+  */
+
+  const match = raw.match(
+
+    /^([0-9][A-Z0-9]*(?:\/[A-Z0-9]+)*)(?=\s|[-–—]|$)/
+
+  );
+
+  return match ? match[1] : "";
+
+}
 
     function readScore(input, maximum) {
       if (!input || input.value === "") {
