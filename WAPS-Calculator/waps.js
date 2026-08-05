@@ -2,11 +2,11 @@
    THEWING.AI • AIR FORCE WAPS CALCULATOR
    WAPS.JS
    AFSC-FIRST AURA INTERFACE
-   Version 2.1.0
+   Version 2.2.0
 
    FILE PAIRING
-   - index.html v2.1.0
-   - waps.css v2.1.0
+   - index.html v2.2.0
+   - waps.css v2.2.0
 
    PRIMARY FLOW
    1. User selects CAFSC on the PECD
@@ -47,8 +47,8 @@
 (() => {
   "use strict";
 
-  const VERSION = "2.1.0";
-  const MOUNT_KEY = "__THEWING_WAPS_V210_MOUNTED__";
+  const VERSION = "2.2.0";
+  const MOUNT_KEY = "__THEWING_WAPS_V220_MOUNTED__";
 
   if (window[MOUNT_KEY]) return;
   window[MOUNT_KEY] = true;
@@ -138,13 +138,226 @@
       EPB_SECOND: "promote",
       EPB_THIRD: "promote",
 
-      DECORATIONS: 12,
+      DECORATIONS: 0,
       INDIVIDUAL_EXEMPTION: false,
 
       HISTORICAL_CUTOFF: "",
       CUTOFF_SOURCE: ""
     })
   });
+
+
+
+  /* ==========================================================
+     1B. DECORATION POINT VALUES
+     Source: AFI 36-2502, Table 2.4 (Decorations factor)
+     Maximum WAPS decoration credit: 25
+  ========================================================== */
+
+  const DECORATION_QUANTITY_MAX = 99;
+
+  const DECORATION_DEFINITIONS = Object.freeze([
+    Object.freeze({
+      key: "msm",
+      id: "decorationMsm",
+      label: "Meritorious Service Medal",
+      pointsEach: 5,
+      group: "common"
+    }),
+    Object.freeze({
+      key: "commendation",
+      id: "decorationCommendation",
+      label: "Air Force Commendation Medal",
+      pointsEach: 3,
+      group: "common"
+    }),
+    Object.freeze({
+      key: "achievement",
+      id: "decorationAchievement",
+      label: "Air Force Achievement Medal",
+      pointsEach: 1,
+      group: "common"
+    }),
+    Object.freeze({
+      key: "airMedal",
+      id: "decorationAirMedal",
+      label: "Air Medal",
+      pointsEach: 3,
+      group: "common"
+    }),
+    Object.freeze({
+      key: "bronzeStar",
+      id: "decorationBronzeStar",
+      label: "Bronze Star Medal",
+      pointsEach: 5,
+      group: "common"
+    }),
+    Object.freeze({
+      key: "purpleHeart",
+      id: "decorationPurpleHeart",
+      label: "Purple Heart",
+      pointsEach: 5,
+      group: "common"
+    }),
+    Object.freeze({
+      key: "medalOfHonor",
+      id: "decorationMedalOfHonor",
+      label: "Medal of Honor",
+      pointsEach: 15,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "airForceCross",
+      id: "decorationAirForceCross",
+      label: "Air Force Cross",
+      pointsEach: 11,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "navyCross",
+      id: "decorationNavyCross",
+      label: "Navy Cross",
+      pointsEach: 11,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "distinguishedServiceCross",
+      id: "decorationDistinguishedServiceCross",
+      label: "Distinguished Service Cross",
+      pointsEach: 11,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "defenseDsm",
+      id: "decorationDefenseDsm",
+      label: "Defense Distinguished Service Medal",
+      pointsEach: 9,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "dsm",
+      id: "decorationDsm",
+      label: "Distinguished Service Medal",
+      pointsEach: 9,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "silverStar",
+      id: "decorationSilverStar",
+      label: "Silver Star",
+      pointsEach: 9,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "legionOfMerit",
+      id: "decorationLegionOfMerit",
+      label: "Legion of Merit",
+      pointsEach: 7,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "dssm",
+      id: "decorationDssm",
+      label: "Defense Superior Service Medal",
+      pointsEach: 7,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "dfc",
+      id: "decorationDfc",
+      label: "Distinguished Flying Cross",
+      pointsEach: 7,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "defenseMsm",
+      id: "decorationDefenseMsm",
+      label: "Defense Meritorious Service Medal",
+      pointsEach: 5,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "aerialAchievement",
+      id: "decorationAerialAchievement",
+      label: "Aerial Achievement Medal",
+      pointsEach: 3,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "armyCommendation",
+      id: "decorationArmyCommendation",
+      label: "Army Commendation Medal",
+      pointsEach: 3,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "navyCommendation",
+      id: "decorationNavyCommendation",
+      label: "Navy-Marine Corps Commendation Medal",
+      pointsEach: 3,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "jointCommendation",
+      id: "decorationJointCommendation",
+      label: "Joint Service Commendation Medal",
+      pointsEach: 3,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "coastGuardCommendation",
+      id: "decorationCoastGuardCommendation",
+      label: "Coast Guard Commendation Medal",
+      pointsEach: 3,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "navyAchievement",
+      id: "decorationNavyAchievement",
+      label: "Navy-Marine Corps Achievement Medal",
+      pointsEach: 1,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "coastGuardAchievement",
+      id: "decorationCoastGuardAchievement",
+      label: "Coast Guard Achievement Medal",
+      pointsEach: 1,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "armyAchievement",
+      id: "decorationArmyAchievement",
+      label: "Army Achievement Medal",
+      pointsEach: 1,
+      group: "additional"
+    }),
+    Object.freeze({
+      key: "jointAchievement",
+      id: "decorationJointAchievement",
+      label: "Joint Service Achievement Medal",
+      pointsEach: 1,
+      group: "additional"
+    })
+  ]);
+
+  const DECORATION_POINT_VALUES = Object.freeze(
+    Object.fromEntries(
+      DECORATION_DEFINITIONS.map((item) => [
+        item.key,
+        item.pointsEach
+      ])
+    )
+  );
+
+  const DECORATION_BY_KEY = Object.freeze(
+    Object.fromEntries(
+      DECORATION_DEFINITIONS.map((item) => [
+        item.key,
+        item
+      ])
+    )
+  );
 
 
   /* ==========================================================
@@ -853,21 +1066,32 @@
     },
 
     decorations: {
-      title: "Eligible Decoration Points",
+      title: "Eligible Decorations",
 
       html: `
         <section>
-          <h3>Maximum Points</h3>
+          <h3>Quantity Inputs</h3>
           <p>
-            Eligible decorations can contribute up to 25 points.
+            Enter how many of each qualifying decoration you hold.
+            TheWing multiplies each quantity by the AFI 36-2502
+            Table 2.4 point value.
+          </p>
+        </section>
+
+        <section>
+          <h3>Maximum Credit</h3>
+          <p>
+            Raw decoration points may exceed 25, but WAPS decoration
+            credit is capped at 25.
           </p>
         </section>
 
         <section>
           <h3>Cycle Eligibility</h3>
           <p>
-            Include only decorations meeting the applicable
-            closeout-date and official approval-date requirements.
+            Include only decorations with a closeout date on or
+            before the PECD and a Given Under My Hand date before
+            the cycle public release date.
           </p>
         </section>
       `
@@ -1012,6 +1236,102 @@
 
       decorationPoints:
         byId("decorationPoints"),
+
+      decorationMsm:
+        byId("decorationMsm"),
+
+      decorationCommendation:
+        byId("decorationCommendation"),
+
+      decorationAchievement:
+        byId("decorationAchievement"),
+
+      decorationAirMedal:
+        byId("decorationAirMedal"),
+
+      decorationBronzeStar:
+        byId("decorationBronzeStar"),
+
+      decorationPurpleHeart:
+        byId("decorationPurpleHeart"),
+
+      decorationMedalOfHonor:
+        byId("decorationMedalOfHonor"),
+
+      decorationAirForceCross:
+        byId("decorationAirForceCross"),
+
+      decorationNavyCross:
+        byId("decorationNavyCross"),
+
+      decorationDistinguishedServiceCross:
+        byId("decorationDistinguishedServiceCross"),
+
+      decorationDefenseDsm:
+        byId("decorationDefenseDsm"),
+
+      decorationDsm:
+        byId("decorationDsm"),
+
+      decorationSilverStar:
+        byId("decorationSilverStar"),
+
+      decorationLegionOfMerit:
+        byId("decorationLegionOfMerit"),
+
+      decorationDssm:
+        byId("decorationDssm"),
+
+      decorationDfc:
+        byId("decorationDfc"),
+
+      decorationDefenseMsm:
+        byId("decorationDefenseMsm"),
+
+      decorationAerialAchievement:
+        byId("decorationAerialAchievement"),
+
+      decorationArmyCommendation:
+        byId("decorationArmyCommendation"),
+
+      decorationNavyCommendation:
+        byId("decorationNavyCommendation"),
+
+      decorationJointCommendation:
+        byId("decorationJointCommendation"),
+
+      decorationCoastGuardCommendation:
+        byId("decorationCoastGuardCommendation"),
+
+      decorationNavyAchievement:
+        byId("decorationNavyAchievement"),
+
+      decorationCoastGuardAchievement:
+        byId("decorationCoastGuardAchievement"),
+
+      decorationArmyAchievement:
+        byId("decorationArmyAchievement"),
+
+      decorationJointAchievement:
+        byId("decorationJointAchievement"),
+
+      decorationSummary:
+        byId("decorationSummary"),
+
+      decorationRawTotal:
+        byId("decorationRawTotal"),
+
+      decorationCappedTotal:
+        byId("decorationCappedTotal"),
+
+      decorationRawRow:
+        byId("decorationRawRow"),
+
+      decorationCapNotice:
+        byId("decorationCapNotice"),
+
+      additionalDecorations:
+        byId("additionalDecorations"),
 
       advancedOptions:
         byId("advancedOptions"),
@@ -1170,6 +1490,37 @@
       "epbPrevious1Points",
       "epbPrevious2Points",
       "decorationPoints",
+      "decorationMsm",
+      "decorationCommendation",
+      "decorationAchievement",
+      "decorationAirMedal",
+      "decorationBronzeStar",
+      "decorationPurpleHeart",
+      "decorationMedalOfHonor",
+      "decorationAirForceCross",
+      "decorationNavyCross",
+      "decorationDistinguishedServiceCross",
+      "decorationDefenseDsm",
+      "decorationDsm",
+      "decorationSilverStar",
+      "decorationLegionOfMerit",
+      "decorationDssm",
+      "decorationDfc",
+      "decorationDefenseMsm",
+      "decorationAerialAchievement",
+      "decorationArmyCommendation",
+      "decorationNavyCommendation",
+      "decorationJointCommendation",
+      "decorationCoastGuardCommendation",
+      "decorationNavyAchievement",
+      "decorationCoastGuardAchievement",
+      "decorationArmyAchievement",
+      "decorationJointAchievement",
+      "decorationSummary",
+      "decorationRawTotal",
+      "decorationCappedTotal",
+      "decorationRawRow",
+      "decorationCapNotice",
       "individualSktExemption",
       "historicalCutoff",
       "cutoffSource",
@@ -1231,7 +1582,8 @@
       selectedRecord: null,
       effectivePath: null,
       snapshot: null,
-      copyResetTimer: null
+      copyResetTimer: null,
+      decorationOverride: null
     };
 
 
@@ -1394,15 +1746,193 @@ function normalizeCode(value) {
       );
     }
 
-    function readDecorations() {
-      if (el.decorationPoints.value === "") {
+    function getDecorationInputs() {
+      return DECORATION_DEFINITIONS.map((definition) => {
+        const input = el[definition.id];
+
+        return {
+          definition,
+          input
+        };
+      });
+    }
+
+    function normalizeDecorationQuantity(value) {
+      if (
+        value === "" ||
+        value === null ||
+        value === undefined
+      ) {
+        return 0;
+      }
+
+      const number = Number(value);
+
+      if (!Number.isFinite(number)) {
         return 0;
       }
 
       return integerValue(
-        el.decorationPoints.value,
+        number,
         0,
+        DECORATION_QUANTITY_MAX
+      );
+    }
+
+    function readDecorationQuantity(input) {
+      if (!input) return 0;
+
+      return normalizeDecorationQuantity(input.value);
+    }
+
+    function syncDecorationQuantityInput(input) {
+      if (!input) return 0;
+
+      const quantity =
+        readDecorationQuantity(input);
+
+      input.value = String(quantity);
+
+      return quantity;
+    }
+
+    function emptyDecorationCalculation(overridePoints = null) {
+      const quantities = {};
+
+      DECORATION_DEFINITIONS.forEach((definition) => {
+        quantities[definition.key] = 0;
+      });
+
+      if (overridePoints === null) {
+        return {
+          quantities,
+          lineItems: [],
+          rawTotal: 0,
+          cappedTotal: 0,
+          capApplied: false,
+          override: false
+        };
+      }
+
+      const rawTotal = integerValue(
+        overridePoints,
+        0,
+        Number.MAX_SAFE_INTEGER
+      );
+
+      const cappedTotal = Math.min(
+        rawTotal,
         CONFIG.MAXIMUMS.DECORATIONS
+      );
+
+      return {
+        quantities,
+        lineItems: [],
+        rawTotal,
+        cappedTotal,
+        capApplied: rawTotal > CONFIG.MAXIMUMS.DECORATIONS,
+        override: true
+      };
+    }
+
+    function calculateDecorations() {
+      if (state.decorationOverride !== null) {
+        const overrideResult =
+          emptyDecorationCalculation(
+            state.decorationOverride
+          );
+
+        el.decorationPoints.value =
+          String(overrideResult.cappedTotal);
+
+        return overrideResult;
+      }
+
+      const quantities = {};
+      const lineItems = [];
+      let rawTotal = 0;
+
+      getDecorationInputs().forEach(({ definition, input }) => {
+        const quantity =
+          readDecorationQuantity(input);
+
+        quantities[definition.key] = quantity;
+
+        const subtotal =
+          quantity * definition.pointsEach;
+
+        rawTotal += subtotal;
+
+        if (quantity > 0) {
+          lineItems.push({
+            key: definition.key,
+            label: definition.label,
+            quantity,
+            pointsEach: definition.pointsEach,
+            subtotal
+          });
+        }
+      });
+
+      const cappedTotal = Math.min(
+        rawTotal,
+        CONFIG.MAXIMUMS.DECORATIONS
+      );
+
+      const result = {
+        quantities,
+        lineItems,
+        rawTotal,
+        cappedTotal,
+        capApplied:
+          rawTotal > CONFIG.MAXIMUMS.DECORATIONS,
+        override: false
+      };
+
+      el.decorationPoints.value =
+        String(result.cappedTotal);
+
+      return result;
+    }
+
+    function readDecorations() {
+      return calculateDecorations().cappedTotal;
+    }
+
+    function renderDecorationSummary(decorations) {
+      el.decorationCappedTotal.textContent =
+        String(decorations.cappedTotal);
+
+      el.decorationRawTotal.textContent =
+        String(decorations.rawTotal);
+
+      el.decorationSummary.dataset.capApplied =
+        decorations.capApplied ? "true" : "false";
+
+      el.decorationRawRow.hidden =
+        !decorations.capApplied;
+
+      el.decorationCapNotice.hidden =
+        !decorations.capApplied;
+    }
+
+    function resetDecorationQuantities() {
+      state.decorationOverride = null;
+
+      getDecorationInputs().forEach(({ input }) => {
+        if (input) {
+          input.value = "0";
+        }
+      });
+
+      el.decorationPoints.value = "0";
+
+      if (el.additionalDecorations) {
+        el.additionalDecorations.open = false;
+      }
+
+      renderDecorationSummary(
+        emptyDecorationCalculation()
       );
     }
 
@@ -2017,8 +2547,11 @@ function normalizeCode(value) {
       const epb =
         calculateEPB();
 
+      const decorationsDetail =
+        calculateDecorations();
+
       const decorations =
-        readDecorations();
+        decorationsDetail.cappedTotal;
 
       const testingComponent =
         path.mode ===
@@ -2101,6 +2634,7 @@ function normalizeCode(value) {
         },
 
         epb,
+        decorations: decorationsDetail,
         minimums,
 
         cutoff: {
@@ -2392,6 +2926,10 @@ function normalizeCode(value) {
 
       el.decorationComponentValue.textContent =
         String(scores.decorations);
+
+      renderDecorationSummary(
+        snapshot.decorations
+      );
 
       el.totalComponentValue.textContent =
         format2(scores.totalScore);
@@ -2755,8 +3293,7 @@ function normalizeCode(value) {
       el.epbPrevious2.value =
         defaults.EPB_THIRD;
 
-      el.decorationPoints.value =
-        String(defaults.DECORATIONS);
+      resetDecorationQuantities();
 
       el.individualSktExemption.checked =
         defaults.INDIVIDUAL_EXEMPTION;
@@ -2810,7 +3347,18 @@ function normalizeCode(value) {
         }`,
         `Testing component: ${format2(snapshot.scores.testingComponent)} / 200`,
         `EPB promotion recommendation score: ${snapshot.scores.epb} / 285`,
-        `Decoration points: ${snapshot.scores.decorations} / 25`,
+        "",
+        "Decorations:",
+        ...(
+          snapshot.decorations.lineItems.length
+            ? snapshot.decorations.lineItems.map(
+                (item) =>
+                  `- ${item.label}: ${item.quantity} × ${item.pointsEach} = ${item.subtotal}`
+              )
+            : ["- None entered"]
+        ),
+        `Raw decoration points: ${snapshot.decorations.rawTotal}`,
+        `WAPS decoration credit: ${snapshot.decorations.cappedTotal} / 25`,
         "",
         `Estimated WAPS score: ${format2(snapshot.scores.totalScore)} / 510`,
         `Minimum test requirements: ${
@@ -3174,23 +3722,26 @@ el.cafscInput.addEventListener(
         );
       });
 
-      el.decorationPoints.addEventListener(
-        "input",
-        recompute
-      );
+      getDecorationInputs().forEach(({ input }) => {
+        if (!input) return;
 
-      el.decorationPoints.addEventListener(
-        "blur",
-        () => {
-          const value =
-            readDecorations();
+        input.addEventListener(
+          "input",
+          () => {
+            state.decorationOverride = null;
+            recompute();
+          }
+        );
 
-          el.decorationPoints.value =
-            String(value);
-
-          recompute();
-        }
-      );
+        input.addEventListener(
+          "blur",
+          () => {
+            state.decorationOverride = null;
+            syncDecorationQuantityInput(input);
+            recompute();
+          }
+        );
+      });
 
       el.individualSktExemption.addEventListener(
         "change",
@@ -3286,7 +3837,7 @@ el.cafscInput.addEventListener(
     ======================================================== */
 
     const api = {
-      __mounted_v210: true,
+      __mounted_v220: true,
 
       version: VERSION,
       CONFIG,
@@ -3436,19 +3987,53 @@ el.cafscInput.addEventListener(
         return this.getState();
       },
 
-      setDecorations(points) {
-        el.decorationPoints.value =
-          String(
-            integerValue(
-              points,
-              0,
-              CONFIG.MAXIMUMS.DECORATIONS
-            )
+      setDecorations(pointsOrQuantities) {
+        if (
+          pointsOrQuantities &&
+          typeof pointsOrQuantities === "object" &&
+          !Array.isArray(pointsOrQuantities)
+        ) {
+          state.decorationOverride = null;
+
+          DECORATION_DEFINITIONS.forEach((definition) => {
+            const input = el[definition.id];
+
+            if (!input) return;
+
+            const raw =
+              pointsOrQuantities[definition.key];
+
+            input.value = String(
+              normalizeDecorationQuantity(
+                raw === undefined ? 0 : raw
+              )
+            );
+          });
+        } else {
+          getDecorationInputs().forEach(({ input }) => {
+            if (input) {
+              input.value = "0";
+            }
+          });
+
+          state.decorationOverride = integerValue(
+            pointsOrQuantities,
+            0,
+            Number.MAX_SAFE_INTEGER
           );
+        }
 
         recompute();
 
         return this.getState();
+      },
+
+      getDecorationPointValues() {
+        return deepClone(DECORATION_POINT_VALUES);
+      },
+
+      getDecorationDefinitions() {
+        return deepClone(DECORATION_DEFINITIONS);
       },
 
       setIndividualSKTExemption(enabled) {
