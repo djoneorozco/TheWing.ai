@@ -2,11 +2,11 @@
    THEWING.AI • AIR FORCE WAPS CALCULATOR
    WAPS.CSS
    AFSC-FIRST AURA INTERFACE
-   Version 2.1.0
+   Version 2.2.0
 
    FILE PAIRING
-   - index.html v2.1.0
-   - waps.js v2.1.0
+   - index.html v2.2.0
+   - waps.js v2.2.0
 
    PRIMARY FLOW
    1. Select CAFSC on the PECD
@@ -1546,43 +1546,91 @@ svg {
 
 
 /* ============================================================
-   17. DECORATION INPUT
+   17. DECORATION QUANTITY INTERFACE
 ============================================================ */
 
-.waps-decoration-row {
+.waps-decoration-grid {
   display: grid;
-  grid-template-columns:
-    minmax(180px, 0.55fr)
-    minmax(0, 1fr);
-
-  gap: 14px;
-  align-items: center;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
-.waps-decoration-input-shell {
-  position: relative;
+.waps-decoration-item {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 6px;
 
-  min-height: 50px;
+  min-width: 0;
+  padding: 12px;
 
-  border: 1px solid var(--waps-stroke);
-  border-radius: 11px;
+  border: 1px solid var(--waps-stroke-soft);
+  border-radius: var(--waps-radius-md);
 
   background:
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.043),
-      rgba(255, 255, 255, 0.019)
+      rgba(255, 255, 255, 0.04),
+      rgba(255, 255, 255, 0.017)
     );
 }
 
-.waps-decoration-input {
+.waps-decoration-item-label {
+  display: block;
+
+  color: var(--waps-ink);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.waps-decoration-item-meta {
+  color: var(--waps-muted);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.waps-decoration-qty-shell {
+  display: flex;
+  align-items: center;
+
+  min-height: 40px;
+  margin-top: 2px;
+
+  border: 1px solid var(--waps-stroke);
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.021)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.waps-decoration-qty-shell:hover {
+  border-color: var(--waps-stroke-strong);
+}
+
+.waps-decoration-qty-shell:focus-within {
+  border-color: rgba(120, 222, 211, 0.58);
+
+  box-shadow:
+    0 0 0 3px rgba(120, 222, 211, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.waps-decoration-qty {
   width: 100%;
   min-width: 0;
-  min-height: 48px;
-
-  padding: 0 60px 0 15px;
+  min-height: 38px;
+  padding: 0 12px;
 
   border: 0;
   outline: 0;
@@ -1590,36 +1638,163 @@ svg {
   color: var(--waps-white);
   background: transparent;
 
-  font-size: 25px;
+  font-size: 18px;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 
   appearance: textfield;
   -moz-appearance: textfield;
 }
 
-.waps-decoration-input::-webkit-inner-spin-button,
-.waps-decoration-input::-webkit-outer-spin-button {
+.waps-decoration-qty::-webkit-inner-spin-button,
+.waps-decoration-qty::-webkit-outer-spin-button {
   margin: 0;
   appearance: none;
   -webkit-appearance: none;
 }
 
-.waps-decoration-maximum {
-  position: absolute;
-  right: 15px;
+.waps-additional-decorations {
+  margin-top: 14px;
 
+  border: 1px solid var(--waps-stroke);
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+
+.waps-additional-decorations-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 44px;
+  padding: 10px 15px;
+
+  color: var(--waps-ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.waps-additional-decorations-summary::-webkit-details-marker {
+  display: none;
+}
+
+.waps-additional-decorations-summary:hover {
+  color: var(--waps-white);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.waps-additional-decorations[open] .waps-advanced-arrow {
+  transform: rotate(180deg);
+}
+
+.waps-decoration-grid-additional {
+  padding: 0 14px 14px;
+
+  border-top:
+    1px solid var(--waps-stroke-soft);
+}
+
+.waps-additional-decorations[open] .waps-decoration-grid-additional {
+  padding-top: 14px;
+}
+
+.waps-decoration-summary {
+  margin-top: 14px;
+  padding: 13px 14px;
+
+  border: 1px solid var(--waps-stroke);
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.028);
+}
+
+.waps-decoration-summary[data-cap-applied="true"] {
+  border-color: rgba(241, 217, 137, 0.34);
+  background: var(--waps-amber-soft);
+}
+
+.waps-decoration-summary-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.waps-decoration-summary-label {
+  color: var(--waps-ink-soft);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.waps-decoration-summary-value {
   color: var(--waps-muted);
   font-size: 13px;
   font-weight: 700;
+  text-align: right;
+}
 
-  pointer-events: none;
+.waps-decoration-summary-value strong {
+  color: var(--waps-purple);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.waps-decoration-summary[data-cap-applied="true"]
+.waps-decoration-summary-value strong {
+  color: var(--waps-amber);
+}
+
+.waps-decoration-raw-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-top: 10px;
+  padding-top: 10px;
+
+  border-top: 1px solid rgba(241, 217, 137, 0.22);
+
+  color: var(--waps-ink-soft);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.waps-decoration-raw-row strong {
+  color: var(--waps-amber);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.waps-decoration-cap-notice {
+  margin-top: 9px;
+
+  color: var(--waps-amber);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .waps-decoration-help {
+  margin: 10px 0 0;
+
   color: var(--waps-muted);
   font-size: 11px;
   line-height: 1.45;
+}
+
+.waps-decoration-summary[data-cap-applied="true"]
+.waps-decoration-help {
+  color: var(--waps-ink-soft);
 }
 
 
@@ -2733,6 +2908,10 @@ svg {
   .waps-epb-grid {
     grid-template-columns: 1fr;
   }
+
+  .waps-decoration-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 
@@ -2775,6 +2954,10 @@ svg {
   .waps-epb-grid {
     grid-template-columns:
       repeat(3, minmax(0, 1fr));
+  }
+
+  .waps-decoration-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .waps-result-empty-state {
@@ -2859,8 +3042,8 @@ svg {
     grid-template-columns: 1fr;
   }
 
-  .waps-decoration-row {
-    grid-template-columns: 1fr;
+  .waps-decoration-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .waps-advanced-grid {
@@ -2997,6 +3180,10 @@ svg {
 
   .waps-score-number {
     font-size: 28px;
+  }
+
+  .waps-decoration-grid {
+    grid-template-columns: 1fr;
   }
 
   .waps-result-empty-state {
@@ -3208,6 +3395,12 @@ svg {
   .waps-select-card-label,
   .waps-select-card-points,
   .waps-decoration-help,
+  .waps-decoration-item-label,
+  .waps-decoration-item-meta,
+  .waps-decoration-summary-label,
+  .waps-decoration-summary-value,
+  .waps-decoration-raw-row,
+  .waps-decoration-cap-notice,
   .waps-afsc-code,
   .waps-afsc-title,
   .waps-afsc-meta-item dt,
@@ -3253,6 +3446,9 @@ svg {
   .waps-afsc-summary,
   .waps-score-card,
   .waps-select-card,
+  .waps-decoration-item,
+  .waps-decoration-summary,
+  .waps-additional-decorations,
   .waps-minimum-notice,
   .waps-testing-path-notice,
   .waps-meaning-card,
