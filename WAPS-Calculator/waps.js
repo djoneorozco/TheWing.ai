@@ -3015,14 +3015,119 @@ function normalizeCode(value) {
         maximum: CONFIG.MAXIMUMS.SKT
       });
 
-      el.cafscInput.addEventListener(
-        "input",
-        () => {
-          processCAFSCInput({
-            allowSinglePartial: false
-          });
-        }
-      );
+el.cafscInput.addEventListener(
+
+  "input",
+
+  () => {
+
+    const rawValue = el.cafscInput.value.trim();
+
+    el.cafscClearButton.hidden = !rawValue;
+
+    /* The field was completely cleared. */
+
+    if (!rawValue) {
+
+      clearSelection({
+
+        preserveInput: false,
+
+        resetMessage: true
+
+      });
+
+      return;
+
+    }
+
+    const result = findRecordFromRawInput(rawValue);
+
+    /*
+
+      Immediately accept:
+
+      - A complete datalist selection
+
+      - An exact unique AFSC code
+
+      - An exact career-field title
+
+    */
+
+    if (result.record) {
+
+      selectRecord(result.record, {
+
+        updateInput: true,
+
+        announceSelection: false
+
+      });
+
+      return;
+
+    }
+
+    /*
+
+      Do not clear or hide the calculator while the user
+
+      is still typing a search.
+
+    */
+
+    if (
+
+      result.status === "partial" ||
+
+      result.status === "single-partial"
+
+    ) {
+
+      el.cafscStatus.dataset.status = "neutral";
+
+      el.cafscStatus.textContent =
+
+        `${result.matches.length} matching catalog option${
+
+          result.matches.length === 1 ? "" : "s"
+
+        }. Select one from the list.`;
+
+      return;
+
+    }
+
+    if (result.status === "ambiguous") {
+
+      el.cafscStatus.dataset.status = "warning";
+
+      el.cafscStatus.textContent =
+
+        "This code applies to more than one promotion cycle. Select the 26E5 or 26E6 option from the list.";
+
+      return;
+
+    }
+
+    /*
+
+      While typing an unfinished value, do not display
+
+      the red invalid-record error.
+
+    */
+
+    el.cafscStatus.dataset.status = "neutral";
+
+    el.cafscStatus.textContent =
+
+      "Continue typing or select a matching CAFSC from the list.";
+
+  }
+
+);
 
       el.cafscInput.addEventListener(
         "change",
