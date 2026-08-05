@@ -24,7 +24,7 @@
     THEWING.AI • AIR FORCE WAPS CALCULATOR
     INDEX.HTML
     AFSC-FIRST AURA INTERFACE
-    Version 2.1.0
+    Version 2.2.0
 
     PRIMARY FLOW
     1. Select CAFSC held on the PECD
@@ -34,7 +34,7 @@
        - SKT + PFE or PFE-only testing path
     3. Enter required test score(s)
     4. Select eligible EPB recommendations
-    5. Enter eligible decoration points
+    5. Enter qualifying decoration quantities
     6. View estimated WAPS score
 
     REMOVED FROM PRIMARY FLOW
@@ -1078,11 +1078,11 @@
 
 
             <!-- ===============================================
-              4. DECORATION POINTS
+              4. DECORATIONS
             ================================================ -->
 
             <section
-              class="waps-input-section"
+              class="waps-input-section waps-decorations-section"
               aria-labelledby="decorations-heading"
             >
 
@@ -1096,8 +1096,12 @@
                   id="decorations-heading"
                   class="waps-section-label"
                 >
-                  Decoration Points
+                  Decorations
                 </h3>
+
+                <span class="waps-section-qualifier">
+                  MAX 25
+                </span>
 
                 <button
                   class="waps-info-button"
@@ -1128,36 +1132,732 @@
               </div>
 
 
-              <div class="waps-decoration-row">
+              <p class="waps-section-description">
+                Enter the number of each qualifying decoration.
+                TheWing converts quantities to WAPS decoration
+                points and caps credit at 25.
+              </p>
 
-                <div class="waps-decoration-input-shell">
 
-                  <input
-                    id="decorationPoints"
-                    name="decorationPoints"
-                    class="waps-decoration-input"
-                    type="number"
-                    inputmode="numeric"
-                    min="0"
-                    max="25"
-                    step="1"
-                    value="12"
-                    aria-describedby="decorationHelp"
+              <input
+                id="decorationPoints"
+                name="decorationPoints"
+                type="hidden"
+                value="0"
+              >
+
+
+              <div
+                class="waps-decoration-grid"
+                role="group"
+                aria-label="Common eligible decorations"
+              >
+
+                <div class="waps-decoration-item">
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationMsm"
                   >
-
-                  <span class="waps-decoration-maximum">
-                    / 25
+                    Meritorious Service Medal
+                  </label>
+                  <div class="waps-decoration-item-meta">
+                    5 points each
+                  </div>
+                  <div class="waps-decoration-qty-shell">
+                    <input
+                      id="decorationMsm"
+                      name="decorationMsm"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="msm"
+                      aria-describedby="decorationMsmMeta"
+                    >
+                  </div>
+                  <span
+                    id="decorationMsmMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Meritorious Service Medal, 5 points each
                   </span>
-
                 </div>
+
+
+                <div class="waps-decoration-item">
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationCommendation"
+                  >
+                    Air Force Commendation Medal
+                  </label>
+                  <div class="waps-decoration-item-meta">
+                    3 points each
+                  </div>
+                  <div class="waps-decoration-qty-shell">
+                    <input
+                      id="decorationCommendation"
+                      name="decorationCommendation"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="commendation"
+                      aria-describedby="decorationCommendationMeta"
+                    >
+                  </div>
+                  <span
+                    id="decorationCommendationMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Air Force Commendation Medal, 3 points each
+                  </span>
+                </div>
+
+
+                <div class="waps-decoration-item">
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationAchievement"
+                  >
+                    Air Force Achievement Medal
+                  </label>
+                  <div class="waps-decoration-item-meta">
+                    1 point each
+                  </div>
+                  <div class="waps-decoration-qty-shell">
+                    <input
+                      id="decorationAchievement"
+                      name="decorationAchievement"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="achievement"
+                      aria-describedby="decorationAchievementMeta"
+                    >
+                  </div>
+                  <span
+                    id="decorationAchievementMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Air Force Achievement Medal, 1 point each
+                  </span>
+                </div>
+
+
+                <div class="waps-decoration-item">
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationAirMedal"
+                  >
+                    Air Medal
+                  </label>
+                  <div class="waps-decoration-item-meta">
+                    3 points each
+                  </div>
+                  <div class="waps-decoration-qty-shell">
+                    <input
+                      id="decorationAirMedal"
+                      name="decorationAirMedal"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="airMedal"
+                      aria-describedby="decorationAirMedalMeta"
+                    >
+                  </div>
+                  <span
+                    id="decorationAirMedalMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Air Medal, 3 points each
+                  </span>
+                </div>
+
+
+                <div class="waps-decoration-item">
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationBronzeStar"
+                  >
+                    Bronze Star Medal
+                  </label>
+                  <div class="waps-decoration-item-meta">
+                    5 points each
+                  </div>
+                  <div class="waps-decoration-qty-shell">
+                    <input
+                      id="decorationBronzeStar"
+                      name="decorationBronzeStar"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="bronzeStar"
+                      aria-describedby="decorationBronzeStarMeta"
+                    >
+                  </div>
+                  <span
+                    id="decorationBronzeStarMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Bronze Star Medal, 5 points each
+                  </span>
+                </div>
+
+
+                <div class="waps-decoration-item">
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationPurpleHeart"
+                  >
+                    Purple Heart
+                  </label>
+                  <div class="waps-decoration-item-meta">
+                    5 points each
+                  </div>
+                  <div class="waps-decoration-qty-shell">
+                    <input
+                      id="decorationPurpleHeart"
+                      name="decorationPurpleHeart"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="purpleHeart"
+                      aria-describedby="decorationPurpleHeartMeta"
+                    >
+                  </div>
+                  <span
+                    id="decorationPurpleHeartMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Purple Heart, 5 points each
+                  </span>
+                </div>
+
+              </div>
+
+
+              <details
+                id="additionalDecorations"
+                class="waps-additional-decorations"
+              >
+
+                <summary class="waps-additional-decorations-summary">
+                  <span>Additional Eligible Decorations</span>
+                  <span
+                    class="waps-advanced-arrow"
+                    aria-hidden="true"
+                  >
+                    <svg viewBox="0 0 24 24">
+                      <path
+                        d="m7 10 5 5 5-5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </span>
+                </summary>
 
 
                 <div
+                  class="waps-decoration-grid waps-decoration-grid-additional"
+                  role="group"
+                  aria-label="Additional eligible decorations"
+                >
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationMedalOfHonor">
+                      Medal of Honor
+                    </label>
+                    <div class="waps-decoration-item-meta">15 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationMedalOfHonor"
+                        name="decorationMedalOfHonor"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="medalOfHonor"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationAirForceCross">
+                      Air Force Cross
+                    </label>
+                    <div class="waps-decoration-item-meta">11 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationAirForceCross"
+                        name="decorationAirForceCross"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="airForceCross"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationNavyCross">
+                      Navy Cross
+                    </label>
+                    <div class="waps-decoration-item-meta">11 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationNavyCross"
+                        name="decorationNavyCross"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="navyCross"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationDistinguishedServiceCross">
+                      Distinguished Service Cross
+                    </label>
+                    <div class="waps-decoration-item-meta">11 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationDistinguishedServiceCross"
+                        name="decorationDistinguishedServiceCross"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="distinguishedServiceCross"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationDefenseDsm">
+                      Defense Distinguished Service Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">9 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationDefenseDsm"
+                        name="decorationDefenseDsm"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="defenseDsm"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationDsm">
+                      Distinguished Service Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">9 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationDsm"
+                        name="decorationDsm"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="dsm"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationSilverStar">
+                      Silver Star
+                    </label>
+                    <div class="waps-decoration-item-meta">9 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationSilverStar"
+                        name="decorationSilverStar"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="silverStar"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationLegionOfMerit">
+                      Legion of Merit
+                    </label>
+                    <div class="waps-decoration-item-meta">7 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationLegionOfMerit"
+                        name="decorationLegionOfMerit"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="legionOfMerit"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationDssm">
+                      Defense Superior Service Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">7 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationDssm"
+                        name="decorationDssm"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="dssm"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationDfc">
+                      Distinguished Flying Cross
+                    </label>
+                    <div class="waps-decoration-item-meta">7 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationDfc"
+                        name="decorationDfc"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="dfc"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationDefenseMsm">
+                      Defense Meritorious Service Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">5 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationDefenseMsm"
+                        name="decorationDefenseMsm"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="defenseMsm"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationAerialAchievement">
+                      Aerial Achievement Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">3 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationAerialAchievement"
+                        name="decorationAerialAchievement"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="aerialAchievement"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationArmyCommendation">
+                      Army Commendation Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">3 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationArmyCommendation"
+                        name="decorationArmyCommendation"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="armyCommendation"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationNavyCommendation">
+                      Navy-Marine Corps Commendation Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">3 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationNavyCommendation"
+                        name="decorationNavyCommendation"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="navyCommendation"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationJointCommendation">
+                      Joint Service Commendation Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">3 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationJointCommendation"
+                        name="decorationJointCommendation"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="jointCommendation"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationCoastGuardCommendation">
+                      Coast Guard Commendation Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">3 points each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationCoastGuardCommendation"
+                        name="decorationCoastGuardCommendation"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="coastGuardCommendation"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationNavyAchievement">
+                      Navy-Marine Corps Achievement Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">1 point each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationNavyAchievement"
+                        name="decorationNavyAchievement"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="navyAchievement"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationCoastGuardAchievement">
+                      Coast Guard Achievement Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">1 point each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationCoastGuardAchievement"
+                        name="decorationCoastGuardAchievement"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="coastGuardAchievement"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationArmyAchievement">
+                      Army Achievement Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">1 point each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationArmyAchievement"
+                        name="decorationArmyAchievement"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="armyAchievement"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="waps-decoration-item">
+                    <label class="waps-decoration-item-label" for="decorationJointAchievement">
+                      Joint Service Achievement Medal
+                    </label>
+                    <div class="waps-decoration-item-meta">1 point each</div>
+                    <div class="waps-decoration-qty-shell">
+                      <input
+                        id="decorationJointAchievement"
+                        name="decorationJointAchievement"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="jointAchievement"
+                      >
+                    </div>
+                  </div>
+
+                </div>
+
+              </details>
+
+
+              <div
+                id="decorationSummary"
+                class="waps-decoration-summary"
+                data-cap-applied="false"
+                aria-live="polite"
+              >
+
+                <div class="waps-decoration-summary-main">
+                  <span class="waps-decoration-summary-label">
+                    Decorations Total
+                  </span>
+                  <span class="waps-decoration-summary-value">
+                    <strong id="decorationCappedTotal">0</strong>
+                    <span>/ 25</span>
+                  </span>
+                </div>
+
+                <div
+                  id="decorationRawRow"
+                  class="waps-decoration-raw-row"
+                  hidden
+                >
+                  <span>Earned Decoration Points</span>
+                  <strong id="decorationRawTotal">0</strong>
+                </div>
+
+                <div
+                  id="decorationCapNotice"
+                  class="waps-decoration-cap-notice"
+                  hidden
+                >
+                  Raw decoration points exceed the WAPS maximum.
+                  Credit is capped at 25.
+                </div>
+
+                <p
                   id="decorationHelp"
                   class="waps-decoration-help"
                 >
-                  Enter eligible decoration points already earned.
-                </div>
+                  Include only decorations with a closeout date on
+                  or before the PECD and a Given Under My Hand date
+                  before the cycle public release date.
+                </p>
 
               </div>
 
@@ -1598,7 +2298,7 @@
 
                     <dd>
                       <strong id="decorationComponentValue">
-                        12
+                        0
                       </strong>
 
                       <span>/ 25</span>
@@ -1802,7 +2502,7 @@
 
                     <span>
                       <strong id="decorationsBreakdownValue">
-                        12
+                        0
                       </strong>
 
                       <span>/ 25</span>
@@ -1815,7 +2515,7 @@
                     <span
                       id="decorationsProgressBar"
                       class="waps-progress-fill waps-progress-purple"
-                      style="width:48%;"
+                      style="width:0%;"
                     ></span>
 
                   </div>
@@ -2046,12 +2746,12 @@
 
           <section>
 
-            <h3>Decoration Points</h3>
+            <h3>Decorations</h3>
 
             <p>
-              Eligible decorations may contribute up to 25 points.
-              Enter only points that qualify for the applicable
-              promotion cycle.
+              Enter the quantity of each qualifying decoration.
+              Point values follow AFI 36-2502 Table 2.4, and WAPS
+              credit is capped at 25 points.
             </p>
 
           </section>
