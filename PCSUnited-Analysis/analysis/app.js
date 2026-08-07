@@ -5077,27 +5077,29 @@
   function updateSources(
     updates = {}
   ) {
+    // Merge aliases instead of OR-picking the first truthy object.
+    // profile + income both feed basicBrain and must coexist.
     const sources =
       buildNormalizedSources({
-        basicBrain:
-          updates.basicBrain ||
-          updates.profile ||
-          updates.income ||
-          {},
+        basicBrain: mergeObjects(
+          updates.basicBrain || {},
+          updates.profile || {},
+          updates.income || {}
+        ),
 
         mortgage:
           updates.mortgage ||
           {},
 
-        financial:
-          updates.financial ||
-          updates.budget ||
-          {},
+        financial: mergeObjects(
+          updates.budget || {},
+          updates.financial || {}
+        ),
 
-        selectedHome:
-          updates.selectedHome ||
-          updates.home ||
-          {}
+        selectedHome: mergeObjects(
+          updates.home || {},
+          updates.selectedHome || {}
+        )
       });
 
     analysisState.sources =
