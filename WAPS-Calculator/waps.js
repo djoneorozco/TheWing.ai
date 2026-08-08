@@ -1147,27 +1147,6 @@
       cafscStatus:
         byId("cafscStatus"),
 
-      afscSelectionSummary:
-        byId("afscSelectionSummary"),
-
-      selectedAfscCode:
-        byId("selectedAfscCode"),
-
-      selectedAfscTitle:
-        byId("selectedAfscTitle"),
-
-      selectedTestingPathBadge:
-        byId("selectedTestingPathBadge"),
-
-      selectedCycleValue:
-        byId("selectedCycleValue"),
-
-      selectedGradeValue:
-        byId("selectedGradeValue"),
-
-      selectedTestingPathValue:
-        byId("selectedTestingPathValue"),
-
       wapsInputFlow:
         byId("wapsInputFlow"),
 
@@ -1429,9 +1408,6 @@
       copyResultsButtonText:
         byId("copyResultsButtonText"),
 
-      openHelpButton:
-        byId("openHelpButton"),
-
       helpDialog:
         byId("wapsHelpDialog"),
 
@@ -1461,13 +1437,6 @@
       "cafscCatalog",
       "cafscClearButton",
       "cafscStatus",
-      "afscSelectionSummary",
-      "selectedAfscCode",
-      "selectedAfscTitle",
-      "selectedTestingPathBadge",
-      "selectedCycleValue",
-      "selectedGradeValue",
-      "selectedTestingPathValue",
       "wapsInputFlow",
       "inputEmptyState",
       "testingPathNotice",
@@ -1552,7 +1521,6 @@
       "decorationsProgressBar",
       "copyResultsButton",
       "copyResultsButtonText",
-      "openHelpButton",
       "helpDialog",
       "helpDialogTitle",
       "helpContent",
@@ -2207,8 +2175,6 @@ function normalizeCode(value) {
 
       setCalculatorReady(false);
 
-      el.afscSelectionSummary.hidden = true;
-
       if (resetMessage) {
         el.cafscStatus.dataset.status =
           "neutral";
@@ -2651,59 +2617,40 @@ function normalizeCode(value) {
        19. SELECTED AFSC RENDERING
     ======================================================== */
 
-    function renderAFSCSummary(snapshot) {
+    function renderAFSCContext(snapshot) {
+
       const record =
+
         state.selectedRecord;
 
       const path =
+
         snapshot.path;
 
-      el.afscSelectionSummary.hidden =
-        false;
-
-      el.selectedAfscCode.textContent =
-        record.code;
-
-      el.selectedAfscTitle.textContent =
-        record.title;
-
-      el.selectedCycleValue.textContent =
-        record.cycle;
-
-      el.selectedGradeValue.textContent =
-        record.grade === "tsgt"
-          ? "TSgt"
-          : "SSgt";
-
-      el.selectedTestingPathValue.textContent =
-        path.label;
-
-      el.selectedTestingPathBadge.textContent =
-        path.rule ===
-        CONFIG.RULES.NOTE_11_CURRENT_CAFSC
-          ? "SKT + PFE · Note 11"
-          : path.rule ===
-            CONFIG.RULES.INDIVIDUAL_EXEMPTION
-            ? "PFE Only · Exemption"
-            : path.label;
-
-      el.selectedTestingPathBadge.dataset.path =
-        path.mode;
-
       el.cafscStatus.dataset.status =
+
         "valid";
 
       el.cafscStatus.textContent =
-        `${record.code} selected — ${record.cycle}, promotion to ${record.grade === "tsgt" ? "TSgt" : "SSgt"}.`;
+
+        `${record.code} selected — ${record.cycle}, promotion to ${
+
+          record.grade === "tsgt" ? "TSgt" : "SSgt"
+
+        }.`;
 
       el.promotionGrade.value =
+
         record.grade;
 
       el.promotionCycle.value =
+
         record.cycleValue;
 
       el.testingPath.value =
+
         path.mode;
+
     }
 
 
@@ -3128,7 +3075,7 @@ function normalizeCode(value) {
     function render(snapshot) {
       state.snapshot = snapshot;
 
-      renderAFSCSummary(snapshot);
+      renderAFSCContext(snapshot);
       renderTestingPath(snapshot);
       renderMinimums(snapshot);
       renderEPB(snapshot);
@@ -3785,13 +3732,6 @@ el.cafscInput.addEventListener(
       el.copyResultsButton.addEventListener(
         "click",
         copyResults
-      );
-
-      el.openHelpButton.addEventListener(
-        "click",
-        () => {
-          openHelp("general");
-        }
       );
 
       root
