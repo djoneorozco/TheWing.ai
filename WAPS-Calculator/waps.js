@@ -26,7 +26,7 @@
    - SKT maximum: 100
    - Testing maximum: 200
    - EPB/PRS maximum: 285
-   - Decorations maximum: 25
+   - Decoration maximum: 25
    - Total maximum: 510
 
    MINIMUM TESTING REQUIREMENTS
@@ -1147,6 +1147,27 @@
       cafscStatus:
         byId("cafscStatus"),
 
+      afscSelectionSummary:
+        byId("afscSelectionSummary"),
+
+      selectedAfscCode:
+        byId("selectedAfscCode"),
+
+      selectedAfscTitle:
+        byId("selectedAfscTitle"),
+
+      selectedTestingPathBadge:
+        byId("selectedTestingPathBadge"),
+
+      selectedCycleValue:
+        byId("selectedCycleValue"),
+
+      selectedGradeValue:
+        byId("selectedGradeValue"),
+
+      selectedTestingPathValue:
+        byId("selectedTestingPathValue"),
+
       wapsInputFlow:
         byId("wapsInputFlow"),
 
@@ -1408,6 +1429,9 @@
       copyResultsButtonText:
         byId("copyResultsButtonText"),
 
+      openHelpButton:
+        byId("openHelpButton"),
+
       helpDialog:
         byId("wapsHelpDialog"),
 
@@ -1437,6 +1461,13 @@
       "cafscCatalog",
       "cafscClearButton",
       "cafscStatus",
+      "afscSelectionSummary",
+      "selectedAfscCode",
+      "selectedAfscTitle",
+      "selectedTestingPathBadge",
+      "selectedCycleValue",
+      "selectedGradeValue",
+      "selectedTestingPathValue",
       "wapsInputFlow",
       "inputEmptyState",
       "testingPathNotice",
@@ -1521,6 +1552,7 @@
       "decorationsProgressBar",
       "copyResultsButton",
       "copyResultsButtonText",
+      "openHelpButton",
       "helpDialog",
       "helpDialogTitle",
       "helpContent",
@@ -2175,6 +2207,8 @@ function normalizeCode(value) {
 
       setCalculatorReady(false);
 
+      el.afscSelectionSummary.hidden = true;
+
       if (resetMessage) {
         el.cafscStatus.dataset.status =
           "neutral";
@@ -2617,20 +2651,59 @@ function normalizeCode(value) {
        19. SELECTED AFSC RENDERING
     ======================================================== */
 
-    function renderAFSCContext(snapshot) {
-      const record = state.selectedRecord;
-      const path = snapshot.path;
+    function renderAFSCSummary(snapshot) {
+      const record =
+        state.selectedRecord;
 
-      el.cafscStatus.dataset.status = "valid";
+      const path =
+        snapshot.path;
+
+      el.afscSelectionSummary.hidden =
+        false;
+
+      el.selectedAfscCode.textContent =
+        record.code;
+
+      el.selectedAfscTitle.textContent =
+        record.title;
+
+      el.selectedCycleValue.textContent =
+        record.cycle;
+
+      el.selectedGradeValue.textContent =
+        record.grade === "tsgt"
+          ? "TSgt"
+          : "SSgt";
+
+      el.selectedTestingPathValue.textContent =
+        path.label;
+
+      el.selectedTestingPathBadge.textContent =
+        path.rule ===
+        CONFIG.RULES.NOTE_11_CURRENT_CAFSC
+          ? "SKT + PFE · Note 11"
+          : path.rule ===
+            CONFIG.RULES.INDIVIDUAL_EXEMPTION
+            ? "PFE Only · Exemption"
+            : path.label;
+
+      el.selectedTestingPathBadge.dataset.path =
+        path.mode;
+
+      el.cafscStatus.dataset.status =
+        "valid";
 
       el.cafscStatus.textContent =
-        `${record.code} selected — ${record.cycle}, promotion to ${
-          record.grade === "tsgt" ? "TSgt" : "SSgt"
-        }.`;
+        `${record.code} selected — ${record.cycle}, promotion to ${record.grade === "tsgt" ? "TSgt" : "SSgt"}.`;
 
-      el.promotionGrade.value = record.grade;
-      el.promotionCycle.value = record.cycleValue;
-      el.testingPath.value = path.mode;
+      el.promotionGrade.value =
+        record.grade;
+
+      el.promotionCycle.value =
+        record.cycleValue;
+
+      el.testingPath.value =
+        path.mode;
     }
 
 
@@ -2744,4 +2817,1286 @@ function normalizeCode(value) {
 
       el.pfeScoreFeedback.textContent =
         minimums.pfePass
-          ? `PFE minimum met: ${format2(scores.pfe
+          ? `PFE minimum met: ${format2(scores.pfe)} of at least 40.00.`
+          : `PFE minimum not met: ${format2(scores.pfe)} of at least 40.00.`;
+
+      el.sktScoreFeedback.dataset.status =
+        minimums.sktPass
+          ? "pass"
+          : "fail";
+
+      el.sktScoreFeedback.textContent =
+        minimums.sktPass
+          ? `SKT minimum met: ${format2(scores.rawSKT)} of at least 40.00.`
+          : `SKT minimum not met: ${format2(scores.rawSKT)} of at least 40.00.`;
+
+      el.testingMinimumNotice.dataset.status =
+        minimums.allPassed
+          ? "pass"
+          : "fail";
+
+      el.testingMinimumTitle.textContent =
+        minimums.allPassed
+          ? "Minimum test requirements met"
+          : "Minimum test requirements not met";
+
+      if (minimums.allPassed) {
+        el.testingMinimumText.textContent =
+          `PFE and SKT are each at least 40.00. The combined score is ${format2(minimums.combinedScore)}.`;
+
+        return;
+      }
+
+      const issues = [];
+
+      if (!minimums.pfePass) {
+        issues.push(
+          "PFE must be at least 40.00"
+        );
+      }
+
+      if (!minimums.sktPass) {
+        issues.push(
+          "SKT must be at least 40.00"
+        );
+      }
+
+      if (!minimums.combinedPass) {
+        issues.push(
+          "the combined score must be at least 90.00"
+        );
+      }
+
+      el.testingMinimumText.textContent =
+        `${issues.join("; ")}.`;
+    }
+
+
+    /* ========================================================
+       22. EPB RENDERING
+    ======================================================== */
+
+    function renderEPB(snapshot) {
+      const entries =
+        snapshot.epb.entries;
+
+      el.epbCurrentPoints.textContent =
+        String(entries[0]?.points || 0);
+
+      el.epbPrevious1Points.textContent =
+        String(entries[1]?.points || 0);
+
+      el.epbPrevious2Points.textContent =
+        String(entries[2]?.points || 0);
+
+      el.epbComponentValue.textContent =
+        String(snapshot.scores.epb);
+
+      el.epbBreakdownValue.textContent =
+        String(snapshot.scores.epb);
+
+      setProgress(
+        el.epbProgressBar,
+        snapshot.scores.epb,
+        CONFIG.MAXIMUMS.EPB
+      );
+    }
+
+
+    /* ========================================================
+       23. SCORE RENDERING
+    ======================================================== */
+
+    function renderScore(snapshot) {
+      const {
+        path,
+        scores,
+        minimums
+      } = snapshot;
+
+      const usesPFEOnly =
+        path.mode ===
+        CONFIG.PATHS.PFE_ONLY;
+
+      el.wapsTotalScore.textContent =
+        format2(scores.totalScore);
+
+      el.testingComponentValue.textContent =
+        format2(scores.testingComponent);
+
+      el.decorationComponentValue.textContent =
+        String(scores.decorations);
+
+      renderDecorationSummary(
+        snapshot.decorations
+      );
+
+      el.totalComponentValue.textContent =
+        format2(scores.totalScore);
+
+      el.wapsScoreRing.style.setProperty(
+        "--score-percent",
+        String(scores.scorePercentage)
+      );
+
+      if (usesPFEOnly) {
+        el.pfeBreakdownLabel.textContent =
+          "PFE Score (×2)";
+
+        el.pfeBreakdownValue.textContent =
+          `${format2(scores.pfe)} × 2`;
+
+        el.pfeBreakdownMaximum.textContent =
+          `= ${format2(scores.testingComponent)}`;
+      } else {
+        el.pfeBreakdownLabel.textContent =
+          "PFE Score";
+
+        el.pfeBreakdownValue.textContent =
+          format2(scores.pfe);
+
+        el.pfeBreakdownMaximum.textContent =
+          "/ 100";
+
+        el.sktBreakdownValue.textContent =
+          format2(scores.rawSKT);
+
+        el.sktBreakdownMaximum.textContent =
+          "/ 100";
+
+        setProgress(
+          el.sktProgressBar,
+          scores.rawSKT,
+          CONFIG.MAXIMUMS.SKT
+        );
+      }
+
+      setProgress(
+        el.pfeProgressBar,
+        scores.pfe,
+        CONFIG.MAXIMUMS.PFE
+      );
+
+      el.decorationsBreakdownValue.textContent =
+        String(scores.decorations);
+
+      setProgress(
+        el.decorationsProgressBar,
+        scores.decorations,
+        CONFIG.MAXIMUMS.DECORATIONS
+      );
+
+      if (minimums.allPassed) {
+        el.overallScoreStatus.dataset.status =
+          "pass";
+
+        el.overallScoreStatusTitle.textContent =
+          "Minimum test requirements met";
+
+        el.overallScoreStatusText.textContent =
+          usesPFEOnly
+            ? "The PFE score meets the displayed minimum for the PFE-only path."
+            : "The PFE, SKT and combined testing scores meet the displayed minimums.";
+      } else {
+        el.overallScoreStatus.dataset.status =
+          "fail";
+
+        el.overallScoreStatusTitle.textContent =
+          "Minimum test requirements not met";
+
+        el.overallScoreStatusText.textContent =
+          usesPFEOnly
+            ? "The PFE must be at least 45.00 for the PFE-only path."
+            : "PFE and SKT must each be at least 40.00, with a combined score of at least 90.00.";
+      }
+    }
+
+
+    /* ========================================================
+       24. MEANING TEXT
+    ======================================================== */
+
+    function renderMeaning(snapshot) {
+      const {
+        catalog,
+        promotion,
+        path,
+        scores,
+        minimums,
+        cutoff
+      } = snapshot;
+
+      const opening =
+        `For ${catalog.code} in the ${promotion.cycle} cycle, your estimated WAPS score is ${format2(scores.totalScore)} out of 510.`;
+
+      const testing =
+        path.mode ===
+        CONFIG.PATHS.PFE_ONLY
+          ? ` The testing component is ${format2(scores.pfe)} multiplied by two, for ${format2(scores.testingComponent)} points.`
+          : ` The PFE and SKT produce ${format2(scores.testingComponent)} testing points.`;
+
+      const minimum =
+        minimums.allPassed
+          ? " The displayed minimum testing requirements are met."
+          : " One or more displayed minimum testing requirements are not met.";
+
+      let comparison = "";
+
+      if (cutoff.value !== null) {
+        if (cutoff.difference > 0) {
+          comparison =
+            ` The score is ${format2(cutoff.difference)} points above the entered comparison cutoff.`;
+        } else if (cutoff.difference < 0) {
+          comparison =
+            ` The score is ${format2(Math.abs(cutoff.difference))} points below the entered comparison cutoff.`;
+        } else {
+          comparison =
+            " The score matches the entered comparison cutoff.";
+        }
+      }
+
+      const official =
+        " Official selection depends on the promotion AFSC, quota, cycle cutoff and official Air Force personnel data.";
+
+      el.wapsMeaningText.textContent =
+        opening +
+        testing +
+        minimum +
+        comparison +
+        official;
+    }
+
+
+    /* ========================================================
+       25. CUTOFF COMPARISON
+    ======================================================== */
+
+    function renderCutoff(snapshot) {
+      const {
+        value,
+        source,
+        difference
+      } = snapshot.cutoff;
+
+      if (value === null) {
+        el.cutoffComparisonResult.dataset.status =
+          "empty";
+
+        el.cutoffComparisonResult.textContent =
+          "Enter a verified cutoff to compare it with the estimate.";
+
+        return;
+      }
+
+      const sourceText =
+        source
+          ? ` Source: ${source}.`
+          : "";
+
+      if (difference > 0) {
+        el.cutoffComparisonResult.dataset.status =
+          "above";
+
+        el.cutoffComparisonResult.textContent =
+          `The estimated score is ${formatSigned2(difference)} points above the entered cutoff of ${format2(value)}.${sourceText}`;
+
+        return;
+      }
+
+      if (difference < 0) {
+        el.cutoffComparisonResult.dataset.status =
+          "below";
+
+        el.cutoffComparisonResult.textContent =
+          `The estimated score is ${formatSigned2(difference)} points below the entered cutoff of ${format2(value)}.${sourceText}`;
+
+        return;
+      }
+
+      el.cutoffComparisonResult.dataset.status =
+        "match";
+
+      el.cutoffComparisonResult.textContent =
+        `The estimated score matches the entered cutoff of ${format2(value)}.${sourceText}`;
+    }
+
+
+    /* ========================================================
+       26. MASTER RENDER AND RECOMPUTE
+    ======================================================== */
+
+    function render(snapshot) {
+      state.snapshot = snapshot;
+
+      renderAFSCSummary(snapshot);
+      renderTestingPath(snapshot);
+      renderMinimums(snapshot);
+      renderEPB(snapshot);
+      renderScore(snapshot);
+      renderMeaning(snapshot);
+      renderCutoff(snapshot);
+
+      el.root.dataset.ready = "true";
+
+      window.dispatchEvent(
+        new CustomEvent(
+          "thewing:waps-updated",
+          {
+            detail: deepClone(snapshot)
+          }
+        )
+      );
+    }
+
+    function recompute() {
+      if (!state.selectedRecord) {
+        return null;
+      }
+
+      try {
+        const snapshot =
+          calculateSnapshot();
+
+        if (!snapshot) return null;
+
+        render(snapshot);
+        return snapshot;
+      } catch (error) {
+        console.error(
+          "[THEWING_WAPS] Calculation failed:",
+          error
+        );
+
+        el.overallScoreStatus.dataset.status =
+          "fail";
+
+        el.overallScoreStatusTitle.textContent =
+          "Calculation unavailable";
+
+        el.overallScoreStatusText.textContent =
+          "The calculator could not process the current inputs.";
+
+        return null;
+      }
+    }
+
+
+    /* ========================================================
+       27. TEST SCORE INPUT PAIRS
+    ======================================================== */
+
+    function bindScorePair({
+      numberInput,
+      rangeInput,
+      maximum
+    }) {
+      rangeInput.addEventListener(
+        "input",
+        () => {
+          const value =
+            truncate2(
+              clamp(
+                rangeInput.value,
+                0,
+                maximum
+              )
+            );
+
+          numberInput.value =
+            format2(value);
+
+          setRangeFill(rangeInput);
+          recompute();
+        }
+      );
+
+      numberInput.addEventListener(
+        "input",
+        () => {
+          if (numberInput.value === "") {
+            rangeInput.value = "0";
+            setRangeFill(rangeInput);
+            recompute();
+            return;
+          }
+
+          const value =
+            truncate2(
+              clamp(
+                numberInput.value,
+                0,
+                maximum
+              )
+            );
+
+          rangeInput.value =
+            String(value);
+
+          setRangeFill(rangeInput);
+          recompute();
+        }
+      );
+
+      numberInput.addEventListener(
+        "blur",
+        () => {
+          const value =
+            truncate2(
+              clamp(
+                numberInput.value,
+                0,
+                maximum
+              )
+            );
+
+          numberInput.value =
+            format2(value);
+
+          rangeInput.value =
+            String(value);
+
+          setRangeFill(rangeInput);
+          recompute();
+        }
+      );
+    }
+
+
+    /* ========================================================
+       28. RESET
+    ======================================================== */
+
+    function resetCalculator({
+      announceReset = true
+    } = {}) {
+      const defaults =
+        CONFIG.DEFAULTS;
+
+      el.pfeScore.value =
+        format2(defaults.PFE);
+
+      el.pfeRange.value =
+        String(defaults.PFE);
+
+      el.sktScore.value =
+        format2(defaults.SKT);
+
+      el.sktRange.value =
+        String(defaults.SKT);
+
+      el.epbCurrent.value =
+        defaults.EPB_CURRENT;
+
+      el.epbPrevious1.value =
+        defaults.EPB_SECOND;
+
+      el.epbPrevious2.value =
+        defaults.EPB_THIRD;
+
+      resetDecorationQuantities();
+
+      el.individualSktExemption.checked =
+        defaults.INDIVIDUAL_EXEMPTION;
+
+      el.historicalCutoff.value =
+        defaults.HISTORICAL_CUTOFF;
+
+      el.cutoffSource.value =
+        defaults.CUTOFF_SOURCE;
+
+      if (el.advancedOptions) {
+        el.advancedOptions.open = false;
+      }
+
+      setRangeFill(el.pfeRange);
+      setRangeFill(el.sktRange);
+
+      clearSelection({
+        preserveInput: false,
+        resetMessage: true
+      });
+
+      if (announceReset) {
+        announce(
+          "WAPS calculator reset. Select a CAFSC to begin."
+        );
+      }
+    }
+
+
+    /* ========================================================
+       29. COPY SUMMARY
+    ======================================================== */
+
+    function buildScoreSummary(snapshot) {
+      const lines = [
+        "TheWing.ai WAPS Calculator",
+        "--------------------------------",
+        `CAFSC: ${snapshot.catalog.code}`,
+        `Career field: ${snapshot.catalog.title}`,
+        `Promotion cycle: ${snapshot.promotion.cycle}`,
+        `Promotion to: ${snapshot.promotion.gradeLabel}`,
+        `Testing path: ${snapshot.path.label}`,
+        "",
+        `PFE score: ${format2(snapshot.scores.pfe)}`,
+        `SKT score: ${
+          snapshot.path.mode ===
+          CONFIG.PATHS.PFE_ONLY
+            ? "Not included"
+            : format2(snapshot.scores.rawSKT)
+        }`,
+        `Testing component: ${format2(snapshot.scores.testingComponent)} / 200`,
+        `EPB promotion recommendation score: ${snapshot.scores.epb} / 285`,
+        "",
+        "Decorations:",
+        ...(
+          snapshot.decorations.lineItems.length
+            ? snapshot.decorations.lineItems.map(
+                (item) =>
+                  `- ${item.label}: ${item.quantity} × ${item.pointsEach} = ${item.subtotal}`
+              )
+            : ["- None entered"]
+        ),
+        `Raw decoration points: ${snapshot.decorations.rawTotal}`,
+        `WAPS decoration credit: ${snapshot.decorations.cappedTotal} / 25`,
+        "",
+        `Estimated WAPS score: ${format2(snapshot.scores.totalScore)} / 510`,
+        `Minimum test requirements: ${
+          snapshot.minimums.allPassed
+            ? "Met"
+            : "Not met"
+        }`
+      ];
+
+      if (snapshot.cutoff.value !== null) {
+        lines.push(
+          "",
+          `Entered comparison cutoff: ${format2(snapshot.cutoff.value)}`,
+          `Difference: ${formatSigned2(snapshot.cutoff.difference)}`
+        );
+
+        if (snapshot.cutoff.source) {
+          lines.push(
+            `Cutoff source: ${snapshot.cutoff.source}`
+          );
+        }
+      }
+
+      lines.push(
+        "",
+        "Unofficial estimate only. Official eligibility, scores, promotion AFSC, quotas, cutoffs and selection status are determined by the Air Force and AFPC."
+      );
+
+      return lines.join("\n");
+    }
+
+    async function writeClipboard(text) {
+      if (
+        navigator.clipboard &&
+        typeof navigator.clipboard.writeText ===
+          "function" &&
+        window.isSecureContext
+      ) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const fallback =
+        document.createElement("textarea");
+
+      fallback.value = text;
+      fallback.setAttribute("readonly", "");
+      fallback.style.position = "fixed";
+      fallback.style.opacity = "0";
+      fallback.style.pointerEvents = "none";
+
+      document.body.appendChild(fallback);
+
+      fallback.select();
+
+      fallback.setSelectionRange(
+        0,
+        fallback.value.length
+      );
+
+      const copied =
+        document.execCommand("copy");
+
+      fallback.remove();
+
+      if (!copied) {
+        throw new Error(
+          "Clipboard access is unavailable."
+        );
+      }
+    }
+
+    async function copyResults() {
+      const snapshot =
+        state.snapshot || recompute();
+
+      if (!snapshot) {
+        announce(
+          "Select a CAFSC before copying a score summary."
+        );
+        return;
+      }
+
+      const normalLabel =
+        "Copy Score Summary";
+
+      try {
+        await writeClipboard(
+          buildScoreSummary(snapshot)
+        );
+
+        el.copyResultsButtonText.textContent =
+          "Summary Copied";
+
+        announce(
+          "WAPS score summary copied."
+        );
+
+        if (state.copyResetTimer) {
+          window.clearTimeout(
+            state.copyResetTimer
+          );
+        }
+
+        state.copyResetTimer =
+          window.setTimeout(() => {
+            el.copyResultsButtonText.textContent =
+              normalLabel;
+          }, 1800);
+      } catch (error) {
+        console.error(
+          "[THEWING_WAPS] Copy failed:",
+          error
+        );
+
+        el.copyResultsButtonText.textContent =
+          "Copy Failed";
+
+        announce(
+          "The score summary could not be copied."
+        );
+
+        window.setTimeout(() => {
+          el.copyResultsButtonText.textContent =
+            normalLabel;
+        }, 1800);
+      }
+    }
+
+
+    /* ========================================================
+       30. HELP DIALOG
+    ======================================================== */
+
+    function openHelp(topicName = "general") {
+      const topic =
+        HELP_TOPICS[topicName] ||
+        HELP_TOPICS.general;
+
+      el.helpDialogTitle.textContent =
+        topic.title;
+
+      el.helpContent.innerHTML =
+        topic.html;
+
+      if (
+        typeof el.helpDialog.showModal ===
+        "function"
+      ) {
+        if (!el.helpDialog.open) {
+          el.helpDialog.showModal();
+        }
+      } else {
+        el.helpDialog.setAttribute(
+          "open",
+          ""
+        );
+      }
+    }
+
+    function closeHelp() {
+      if (
+        typeof el.helpDialog.close ===
+        "function"
+      ) {
+        if (el.helpDialog.open) {
+          el.helpDialog.close();
+        }
+      } else {
+        el.helpDialog.removeAttribute(
+          "open"
+        );
+      }
+    }
+
+
+    /* ========================================================
+       31. EVENT BINDINGS
+    ======================================================== */
+
+    function bindEvents() {
+      el.form.addEventListener(
+        "submit",
+        (event) => {
+          event.preventDefault();
+
+          processCAFSCInput({
+            allowSinglePartial: true
+          });
+        }
+      );
+
+      bindScorePair({
+        numberInput: el.pfeScore,
+        rangeInput: el.pfeRange,
+        maximum: CONFIG.MAXIMUMS.PFE
+      });
+
+      bindScorePair({
+        numberInput: el.sktScore,
+        rangeInput: el.sktRange,
+        maximum: CONFIG.MAXIMUMS.SKT
+      });
+
+el.cafscInput.addEventListener(
+
+  "input",
+
+  () => {
+
+    const rawValue = el.cafscInput.value.trim();
+
+    el.cafscClearButton.hidden = !rawValue;
+
+    /* The field was completely cleared. */
+
+    if (!rawValue) {
+
+      clearSelection({
+
+        preserveInput: false,
+
+        resetMessage: true
+
+      });
+
+      return;
+
+    }
+
+    const result = findRecordFromRawInput(rawValue);
+
+    /*
+
+      Immediately accept:
+
+      - A complete datalist selection
+
+      - An exact unique AFSC code
+
+      - An exact career-field title
+
+    */
+
+    if (result.record) {
+
+      selectRecord(result.record, {
+
+        updateInput: true,
+
+        announceSelection: false
+
+      });
+
+      return;
+
+    }
+
+    /*
+
+      Do not clear or hide the calculator while the user
+
+      is still typing a search.
+
+    */
+
+    if (
+
+      result.status === "partial" ||
+
+      result.status === "single-partial"
+
+    ) {
+
+      el.cafscStatus.dataset.status = "neutral";
+
+      el.cafscStatus.textContent =
+
+        `${result.matches.length} matching catalog option${
+
+          result.matches.length === 1 ? "" : "s"
+
+        }. Select one from the list.`;
+
+      return;
+
+    }
+
+    if (result.status === "ambiguous") {
+
+      el.cafscStatus.dataset.status = "warning";
+
+      el.cafscStatus.textContent =
+
+        "This code applies to more than one promotion cycle. Select the 26E5 or 26E6 option from the list.";
+
+      return;
+
+    }
+
+    /*
+
+      While typing an unfinished value, do not display
+
+      the red invalid-record error.
+
+    */
+
+    el.cafscStatus.dataset.status = "neutral";
+
+    el.cafscStatus.textContent =
+
+      "Continue typing or select a matching CAFSC from the list.";
+
+  }
+
+);
+
+      el.cafscInput.addEventListener(
+        "change",
+        () => {
+          processCAFSCInput({
+            allowSinglePartial: true
+          });
+        }
+      );
+
+      el.cafscInput.addEventListener(
+        "keydown",
+        (event) => {
+          if (event.key !== "Enter") return;
+
+          event.preventDefault();
+
+          processCAFSCInput({
+            allowSinglePartial: true
+          });
+        }
+      );
+
+      el.cafscClearButton.addEventListener(
+        "click",
+        () => {
+          clearSelection({
+            preserveInput: false,
+            resetMessage: true
+          });
+
+          el.cafscInput.focus();
+        }
+      );
+
+      [
+        el.epbCurrent,
+        el.epbPrevious1,
+        el.epbPrevious2
+      ].forEach((select) => {
+        select.addEventListener(
+          "change",
+          recompute
+        );
+      });
+
+      getDecorationInputs().forEach(({ input }) => {
+        if (!input) return;
+
+        input.addEventListener(
+          "input",
+          () => {
+            state.decorationOverride = null;
+            recompute();
+          }
+        );
+
+        input.addEventListener(
+          "blur",
+          () => {
+            state.decorationOverride = null;
+            syncDecorationQuantityInput(input);
+            recompute();
+          }
+        );
+      });
+
+      el.individualSktExemption.addEventListener(
+        "change",
+        recompute
+      );
+
+      el.historicalCutoff.addEventListener(
+        "input",
+        recompute
+      );
+
+      el.historicalCutoff.addEventListener(
+        "blur",
+        () => {
+          const cutoff =
+            readHistoricalCutoff();
+
+          if (cutoff !== null) {
+            el.historicalCutoff.value =
+              format2(cutoff);
+          }
+
+          recompute();
+        }
+      );
+
+      el.cutoffSource.addEventListener(
+        "input",
+        recompute
+      );
+
+      el.resetCalculatorButton.addEventListener(
+        "click",
+        () => {
+          resetCalculator({
+            announceReset: true
+          });
+        }
+      );
+
+      el.copyResultsButton.addEventListener(
+        "click",
+        copyResults
+      );
+
+      el.openHelpButton.addEventListener(
+        "click",
+        () => {
+          openHelp("general");
+        }
+      );
+
+      root
+        .querySelectorAll("[data-help-topic]")
+        .forEach((button) => {
+          button.addEventListener(
+            "click",
+            () => {
+              openHelp(
+                button.dataset.helpTopic ||
+                "general"
+              );
+            }
+          );
+        });
+
+      el.closeHelpButton.addEventListener(
+        "click",
+        closeHelp
+      );
+
+      el.helpDialogDoneButton.addEventListener(
+        "click",
+        closeHelp
+      );
+
+      el.helpDialog.addEventListener(
+        "click",
+        (event) => {
+          if (
+            event.target ===
+            el.helpDialog
+          ) {
+            closeHelp();
+          }
+        }
+      );
+    }
+
+
+    /* ========================================================
+       32. PUBLIC API
+    ======================================================== */
+
+    const api = {
+      __mounted_v220: true,
+
+      version: VERSION,
+      CONFIG,
+
+      getCatalog() {
+        return deepClone(CATALOG);
+      },
+
+      searchCatalog(query) {
+        const normalized =
+          normalizeSearchText(query);
+
+        if (!normalized) return [];
+
+        return deepClone(
+          CATALOG.filter((record) => {
+            const searchable =
+              normalizeSearchText(
+                `${record.code} ${record.title} ${record.cycle}`
+              );
+
+            return searchable.includes(
+              normalized
+            );
+          })
+        );
+      },
+
+      selectAFSC(code, cycle = "") {
+        const normalizedCode =
+          normalizeCode(code);
+
+        const matches =
+          recordsByCode.get(
+            normalizedCode
+          ) || [];
+
+        if (!matches.length) {
+          return {
+            ok: false,
+            reason: "NOT_FOUND",
+            matches: []
+          };
+        }
+
+        let record = null;
+
+        if (matches.length === 1) {
+          record = matches[0];
+        } else if (cycle) {
+          const normalizedCycle =
+            String(cycle)
+              .trim()
+              .toUpperCase();
+
+          record =
+            matches.find(
+              (item) =>
+                item.cycle ===
+                normalizedCycle
+            ) || null;
+        }
+
+        if (!record) {
+          return {
+            ok: false,
+            reason: "AMBIGUOUS",
+            matches: deepClone(matches)
+          };
+        }
+
+        selectRecord(record);
+
+        return {
+          ok: true,
+          state: this.getState()
+        };
+      },
+
+      clearAFSC() {
+        clearSelection({
+          preserveInput: false,
+          resetMessage: true
+        });
+      },
+
+      recompute,
+
+      reset() {
+        resetCalculator({
+          announceReset: false
+        });
+
+        return this.getState();
+      },
+
+      getState() {
+        return state.snapshot
+          ? deepClone(state.snapshot)
+          : null;
+      },
+
+      setScores({
+        pfe,
+        skt
+      } = {}) {
+        if (pfe !== undefined) {
+          const value =
+            truncate2(
+              clamp(
+                pfe,
+                0,
+                CONFIG.MAXIMUMS.PFE
+              )
+            );
+
+          el.pfeScore.value =
+            format2(value);
+
+          el.pfeRange.value =
+            String(value);
+
+          setRangeFill(el.pfeRange);
+        }
+
+        if (skt !== undefined) {
+          const value =
+            truncate2(
+              clamp(
+                skt,
+                0,
+                CONFIG.MAXIMUMS.SKT
+              )
+            );
+
+          el.sktScore.value =
+            format2(value);
+
+          el.sktRange.value =
+            String(value);
+
+          setRangeFill(el.sktRange);
+        }
+
+        recompute();
+
+        return this.getState();
+      },
+
+      setDecorations(pointsOrQuantities) {
+        if (
+          pointsOrQuantities &&
+          typeof pointsOrQuantities === "object" &&
+          !Array.isArray(pointsOrQuantities)
+        ) {
+          state.decorationOverride = null;
+
+          DECORATION_DEFINITIONS.forEach((definition) => {
+            const input = el[definition.id];
+
+            if (!input) return;
+
+            const raw =
+              pointsOrQuantities[definition.key];
+
+            input.value = String(
+              normalizeDecorationQuantity(
+                raw === undefined ? 0 : raw
+              )
+            );
+          });
+        } else {
+          getDecorationInputs().forEach(({ input }) => {
+            if (input) {
+              input.value = "0";
+            }
+          });
+
+          state.decorationOverride = integerValue(
+            pointsOrQuantities,
+            0,
+            Number.MAX_SAFE_INTEGER
+          );
+        }
+
+        recompute();
+
+        return this.getState();
+      },
+
+      getDecorationPointValues() {
+        return deepClone(DECORATION_POINT_VALUES);
+      },
+
+      getDecorationDefinitions() {
+        return deepClone(DECORATION_DEFINITIONS);
+      },
+
+      setIndividualSKTExemption(enabled) {
+        if (
+          state.selectedRecord?.path ===
+          CONFIG.PATHS.PFE_ONLY
+        ) {
+          el.individualSktExemption.checked =
+            false;
+        } else {
+          el.individualSktExemption.checked =
+            Boolean(enabled);
+        }
+
+        recompute();
+
+        return this.getState();
+      },
+
+      openHelp,
+      closeHelp,
+
+      copySummary() {
+        return copyResults();
+      }
+    };
+
+    window.THEWING_WAPS = api;
+
+
+    /* ========================================================
+       33. STARTUP
+    ======================================================== */
+
+    bindEvents();
+    populateCAFSCDataList();
+
+    setRangeFill(el.pfeRange);
+    setRangeFill(el.sktRange);
+
+    setCalculatorReady(false);
+
+    el.root.dataset.ready = "true";
+
+    console.info(
+      `[THEWING_WAPS] Mounted v${VERSION} with ${CATALOG.length} catalog records.`
+    );
+  }
+
+
+  /* ==========================================================
+     34. DOM READY
+  ========================================================== */
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initialize,
+      {
+        once: true
+      }
+    );
+  } else {
+    initialize();
+  }
+})();
