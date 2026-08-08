@@ -314,70 +314,9 @@ svg {
 
 
 /* ============================================================
-   6. TOP NAVIGATION
+   6. SHARED ACTION BUTTONS
 ============================================================ */
 
-.waps-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  min-height: 44px;
-}
-
-.waps-topbar-left {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  gap: 15px;
-}
-
-.waps-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-
-  color: var(--waps-white);
-  text-decoration: none;
-}
-
-.waps-brand-mark {
-  display: grid;
-  place-items: center;
-  width: 27px;
-  height: 27px;
-  color: var(--waps-teal);
-}
-
-.waps-brand-mark svg {
-  width: 100%;
-  height: 100%;
-}
-
-.waps-brand-word {
-  color: var(--waps-white);
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.waps-brand-word span {
-  color: var(--waps-teal);
-}
-
-.waps-topbar-divider {
-  width: 1px;
-  height: 30px;
-  background: var(--waps-stroke-strong);
-}
-
-.waps-product-label {
-  color: var(--waps-muted);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.waps-help-button,
 .waps-reset-button,
 .waps-copy-button,
 .waps-dialog-done {
@@ -410,14 +349,6 @@ svg {
     background 150ms ease;
 }
 
-.waps-help-button {
-  min-height: 41px;
-  padding: 9px 15px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.waps-help-button:hover,
 .waps-reset-button:hover,
 .waps-copy-button:hover,
 .waps-dialog-done:hover {
@@ -434,7 +365,6 @@ svg {
   transform: translateY(-1px);
 }
 
-.waps-help-icon,
 .waps-reset-icon,
 .waps-copy-icon {
   display: grid;
@@ -443,7 +373,6 @@ svg {
   height: 18px;
 }
 
-.waps-help-icon svg,
 .waps-reset-icon svg,
 .waps-copy-icon svg {
   width: 100%;
@@ -452,48 +381,15 @@ svg {
 
 
 /* ============================================================
-   7. PAGE HEADER
+   7. PANEL EYEBROW
 ============================================================ */
 
-.waps-header {
-  padding: 34px 4px 25px;
-}
-
-.waps-eyebrow,
 .waps-panel-eyebrow {
   color: var(--waps-teal-bright);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-}
-
-.waps-title {
-  margin: 8px 0 0;
-
-  color: rgba(251, 252, 255, 0.99);
-
-  font-family:
-    "Gilda Display",
-    Georgia,
-    serif;
-
-  font-size: clamp(42px, 4.6vw, 66px);
-  font-weight: 400;
-  line-height: 0.98;
-  letter-spacing: -0.043em;
-
-  text-shadow:
-    0 3px 22px rgba(255, 255, 255, 0.035);
-}
-
-.waps-subtitle {
-  max-width: 820px;
-  margin: 15px 0 0;
-
-  color: var(--waps-ink-soft);
-  font-size: 16px;
-  line-height: 1.55;
 }
 
 
@@ -845,132 +741,6 @@ svg {
   color: var(--waps-faint);
   font-size: 10px;
   line-height: 1.45;
-}
-
-
-/* ============================================================
-   11. SELECTED AFSC SUMMARY
-============================================================ */
-
-.waps-afsc-summary {
-  display: grid;
-  gap: 15px;
-
-  margin-top: 15px;
-  padding: 16px;
-
-  border: 1px solid rgba(120, 222, 211, 0.26);
-  border-radius: var(--waps-radius-md);
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(120, 222, 211, 0.095),
-      rgba(120, 222, 211, 0.025)
-    );
-
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.waps-afsc-summary-main {
-  min-width: 0;
-}
-
-.waps-afsc-code-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 9px;
-}
-
-.waps-afsc-code {
-  color: var(--waps-white);
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-}
-
-.waps-path-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  min-height: 26px;
-  padding: 5px 9px;
-
-  border: 1px solid var(--waps-stroke);
-  border-radius: 999px;
-
-  color: var(--waps-muted);
-  background: rgba(255, 255, 255, 0.035);
-
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.055em;
-  text-transform: uppercase;
-}
-
-.waps-path-badge[data-path="both"],
-.waps-path-badge[data-path="skt-pfe"] {
-  color: var(--waps-teal-bright);
-  border-color: rgba(120, 222, 211, 0.34);
-  background: var(--waps-teal-soft);
-}
-
-.waps-path-badge[data-path="pfe-only"] {
-  color: var(--waps-orange);
-  border-color: rgba(243, 171, 80, 0.34);
-  background: var(--waps-orange-soft);
-}
-
-.waps-afsc-title {
-  margin-top: 5px;
-
-  color: var(--waps-ink-soft);
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.waps-afsc-meta {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-
-  padding: 0;
-  margin: 0;
-}
-
-.waps-afsc-meta-item {
-  min-width: 0;
-  padding: 10px 11px;
-
-  border: 1px solid var(--waps-stroke-soft);
-  border-radius: 10px;
-
-  background: rgba(255, 255, 255, 0.025);
-}
-
-.waps-afsc-meta-item dt,
-.waps-afsc-meta-item dd {
-  margin: 0;
-}
-
-.waps-afsc-meta-item dt {
-  color: var(--waps-faint);
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.waps-afsc-meta-item dd {
-  margin-top: 4px;
-
-  color: var(--waps-white);
-  font-size: 12px;
-  font-weight: 800;
 }
 
 
@@ -2976,37 +2746,9 @@ svg {
     padding-top: 14px;
   }
 
-  .waps-topbar {
-    align-items: flex-start;
-  }
-
-  .waps-help-button {
-    padding: 8px 10px;
-  }
-
-  .waps-help-button > span:last-child {
-    display: none;
-  }
-
-  .waps-header {
-    padding: 27px 3px 21px;
-  }
-
-  .waps-title {
-    font-size: clamp(39px, 10vw, 55px);
-  }
-
-  .waps-subtitle {
-    font-size: 15px;
-  }
-
   .waps-input-panel,
   .waps-result-panel {
     padding: 19px;
-  }
-
-  .waps-afsc-meta {
-    grid-template-columns: 1fr;
   }
 
   .waps-result-hero {
@@ -3064,48 +2806,6 @@ svg {
   .waps-container {
     width: min(100% - 12px, 1480px);
     padding-bottom: 20px;
-  }
-
-  .waps-topbar {
-    min-height: 40px;
-  }
-
-  .waps-topbar-left {
-    gap: 9px;
-  }
-
-  .waps-brand-mark {
-    width: 24px;
-    height: 24px;
-  }
-
-  .waps-brand-word {
-    font-size: 15px;
-  }
-
-  .waps-topbar-divider {
-    height: 23px;
-  }
-
-  .waps-product-label {
-    font-size: 11px;
-  }
-
-  .waps-header {
-    padding: 22px 3px 18px;
-  }
-
-  .waps-eyebrow {
-    font-size: 9px;
-  }
-
-  .waps-title {
-    font-size: clamp(36px, 12vw, 48px);
-  }
-
-  .waps-subtitle {
-    margin-top: 12px;
-    font-size: 14px;
   }
 
   .waps-calculator-grid {
@@ -3168,10 +2868,6 @@ svg {
 
   .waps-cafsc-search-icon {
     left: 14px;
-  }
-
-  .waps-afsc-code {
-    font-size: 19px;
   }
 
   .waps-score-card {
@@ -3267,15 +2963,6 @@ svg {
 ============================================================ */
 
 @media (max-width: 390px) {
-  .waps-product-label,
-  .waps-topbar-divider {
-    display: none;
-  }
-
-  .waps-title {
-    font-size: 35px;
-  }
-
   .waps-score-ring {
     width: 205px;
     height: 205px;
@@ -3289,10 +2976,6 @@ svg {
     gap: 8px;
   }
 
-  .waps-afsc-code-row {
-    align-items: flex-start;
-    flex-direction: column;
-  }
 }
 
 
@@ -3301,7 +2984,6 @@ svg {
 ============================================================ */
 
 @media (hover: none) {
-  .waps-help-button:hover,
   .waps-reset-button:hover,
   .waps-copy-button:hover,
   .waps-dialog-done:hover {
@@ -3353,7 +3035,6 @@ svg {
   }
 
   .waps-background,
-  .waps-help-button,
   .waps-reset-button,
   .waps-copy-button,
   .waps-info-button,
@@ -3369,19 +3050,6 @@ svg {
     padding: 0;
   }
 
-  .waps-topbar {
-    margin-bottom: 20px;
-  }
-
-  .waps-header {
-    padding: 0 0 20px;
-  }
-
-  .waps-brand-word,
-  .waps-product-label,
-  .waps-title,
-  .waps-subtitle,
-  .waps-eyebrow,
   .waps-panel-eyebrow,
   .waps-panel-title,
   .waps-section-label,
@@ -3401,10 +3069,6 @@ svg {
   .waps-decoration-summary-value,
   .waps-decoration-raw-row,
   .waps-decoration-cap-notice,
-  .waps-afsc-code,
-  .waps-afsc-title,
-  .waps-afsc-meta-item dt,
-  .waps-afsc-meta-item dd,
   .waps-total-score,
   .waps-total-maximum,
   .waps-component-summary-row dt,
@@ -3443,7 +3107,6 @@ svg {
     break-inside: avoid;
   }
 
-  .waps-afsc-summary,
   .waps-score-card,
   .waps-select-card,
   .waps-decoration-item,
