@@ -37,6 +37,10 @@ import * as mortgageEngine from "./_share/mortgage-engine.js";
 import * as vaLoans from "./_share/va-loans.js";
 import * as officialBah from "./_share/official-bah.js";
 import { buildAmyTruthPacket } from "./_share/amy-brain.js";
+import {
+  buildAmyConciergeReply,
+  buildAmyConciergeStyleGuide
+} from "./_share/amy-concierge.js";
 
 // ============================================================
 // //#1 CONFIG
@@ -350,6 +354,21 @@ export async function handler(event) {
     const clientContext = collectPublicClientContext(body);
     const normalizedProfile = normalizePublicScenario(clientContext, registryTools);
     const intent = detectIntent(message);
+
+    let conciergeResult = null;
+    try {
+      conciergeResult = buildAmyConciergeReply({
+        message,
+        intent,
+        normalizedProfile
+      });
+    } catch (error) {
+      console.warn(
+        "[agent-amy-public] Amy Concierge unavailable:",
+        error?.message || error
+      );
+    }
+
     const requestedMode =
       conversationContext.requested_mode || DEFAULT_RESPONSE_MODE;
 
@@ -458,18 +477,24 @@ console.log("====================================");
         conversationContext.response_limits.max_follow_up_questions
     };
 
-    const directReplyRaw = buildDirectDeterministicReply({
-      intent,
-      normalizedProfile,
-      deterministic
-    });
+    const conciergeReply = conciergeResult?.reply || "";
+
+    const directReplyRaw =
+      conciergeReply ||
+      buildDirectDeterministicReply({
+        intent,
+        normalizedProfile,
+        deterministic
+      });
 
     let openaiUsed = false;
     let openaiUnavailable = !OPENAI_API_KEY;
     let replyRaw = "";
     const preferPtFitnessTruth = amyTruthHasPtFitness(amyTruth);
 
-    if (
+    if (conciergeReply) {
+      replyRaw = conciergeReply;
+    } else if (
       directReplyRaw &&
       !preferPtFitnessTruth &&
       !shouldUseOpenAI(message, intent, deterministic)
@@ -4016,6 +4041,16 @@ function buildSystemPrompt({
     ? buildPtAuthorityInstructions(browserPt)
     : null;
 
+  let conciergeStyleGuide = "";
+  try {
+    conciergeStyleGuide = buildAmyConciergeStyleGuide();
+  } catch (error) {
+    console.warn(
+      "[agent-amy-public] Amy Concierge style guide unavailable:",
+      error?.message || error
+    );
+  }
+
   return [
     "You are Amy, the PCSUnited Public Resources Concierge, powered by TheWing.ai.",
     "This is Public Resources Amy.",
@@ -4051,6 +4086,11 @@ function buildSystemPrompt({
           JSON.stringify(browserPt, null, 2)
         ].join("\n")
       : "",
+    "",
+    "==============================",
+    "AMY CONCIERGE VOICE",
+    "==============================",
+    conciergeStyleGuide,
     "",
     "Style:",
     "- Calm, practical, military-aware, concise.",
