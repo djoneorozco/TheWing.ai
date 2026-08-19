@@ -48,7 +48,7 @@ import {
 
 const VERSION = "1.0.0-public-resources";
 const RESPONSE_CONTRACT_VERSION = "ask-amy-response-v1";
-const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
 const DEFAULT_RESPONSE_MODE = "member_guidance";
 const MAX_MESSAGE_LENGTH = 5000;
 
