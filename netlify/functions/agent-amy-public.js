@@ -52,7 +52,7 @@ const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const DEFAULT_RESPONSE_MODE = "member_guidance";
 const MAX_MESSAGE_LENGTH = 5000;
 
-const DEFAULT_MAX_REPLY_CHARS = 820;
+const DEFAULT_MAX_REPLY_CHARS = 1200;
 const DEFAULT_GREETING_MAX_CHARS = 620;
 const DEFAULT_MAX_FOLLOW_UP_QUESTIONS = 1;
 const MAX_THREAD_MESSAGES = 12;
@@ -585,8 +585,8 @@ console.log("====================================");
       {
         ok: true,
         agent: "Amy",
-        display_name: "PCSUnited Public Resources Concierge",
-        brand: "PCSUnited",
+        display_name: "Amy — TheWing.ai A.I. Concierge",
+        brand: "TheWing",
         powered_by: "TheWing.ai",
         endpoint: "agent-amy-public",
         version: VERSION,
@@ -1822,7 +1822,7 @@ function parseClientConversationContext(body) {
     max_chars:
       clamp(num(limitsRaw.max_chars), 240, 1600) || DEFAULT_MAX_REPLY_CHARS,
     greeting_max_chars:
-      clamp(num(limitsRaw.greeting_max_chars), 100, 500) ||
+      clamp(num(limitsRaw.greeting_max_chars), 100, 1000) ||
       DEFAULT_GREETING_MAX_CHARS,
     max_follow_up_questions:
       clamp(num(limitsRaw.max_follow_up_questions), 0, 2) ??
@@ -3817,20 +3817,22 @@ function buildDirectDeterministicReply({
   const baseInfo = packet.base_info;
   const missing = packet.missing_inputs || [];
 
-  if (intent === "greeting") {
-    return [
-      "Hi — I’m Amy, the PCSUnited Public Resources Concierge.",
-      "I can use the information entered or calculated on this Resources page to explain military compensation, BAH, housing, mortgages, VA loans, affordability, and PCS next steps."
-    ].join(" ");
-  }
+if (intent === "greeting") {
+  return [
+    "Hey — I’m Amy, TheWing.ai’s A.I. Concierge.",
+    "I can help you work through military pay, PCS, housing, readiness, career, benefits, and the decision tools across TheWing.ai.",
+    "Tell me what you’re trying to figure out and I’ll help you find the right place to start."
+  ].join(" ");
+}
 
-  if (intent === "capabilities") {
-    return [
-      "I only know what is entered or calculated in this Resources-page session.",
-      "I do not access member accounts or saved profiles.",
-      "I can help explain Basic Brain results, compensation, mortgage estimates, affordability, VA loan planning concepts, and public base/installation information available through PCSUnited tools."
-    ].join(" ");
-  }
+if (intent === "capabilities") {
+  return [
+    "Think of me as your guide through TheWing.ai.",
+    "I can help you understand military pay and BAH, explore duty stations, work through housing and mortgage scenarios, look at PT readiness or promotion, and point you toward tools like PCS Snapshot, Base Demographics, WAPS, Performance Intelligence, and the advanced calculators.",
+    "You don’t need to know which tool you need first—just tell me what you’re trying to accomplish."
+  ].join(" ");
+
+}
 
   if (intent === "public_context_question") {
     const pieces = [];
@@ -4052,11 +4054,12 @@ function buildSystemPrompt({
   }
 
   return [
-    "You are Amy, the PCSUnited Public Resources Concierge, powered by TheWing.ai.",
-    "This is Public Resources Amy.",
-    "Public Amy does not access member accounts or Supabase.",
-    "Public Amy only knows the current Resources-page scenario.",
-    "TheWing calculates and evaluates. Amy explains and guides.",
+  "You are Amy, TheWing.ai's A.I. Concierge.",
+  "TheWing.ai is your primary brand and is a Military Decision Intelligence Platform.",
+  "PCSUnited is a specialized legacy PCS and housing resource within the broader TheWing.ai ecosystem. Mention PCSUnited only when it is directly relevant or the user asks about it.",
+  "This public version of Amy does not access member accounts or Supabase.",
+  "You know the current TheWing.ai session scenario, deterministic Truth Packet, Amy Brain knowledge, and the user's current conversation.",
+  "TheWing calculates. Amy Brain knows. Amy Concierge talks.",
     "",
     "Authority rules:",
     "- The deterministic truth packet is authoritative.",
@@ -4093,9 +4096,12 @@ function buildSystemPrompt({
     conciergeStyleGuide,
     "",
     "Style:",
-    "- Calm, practical, military-aware, concise.",
-    "- Prefer BLUF, then why, then next move.",
-    "- Refer to “current Resources-page scenario,” not “saved member profile.”",
+   "- Very Warm, conversational, engaging, flirty, confident, and military-aware.",
+   "- Usually respond in 3 to 5 natural sentences unless the user asks for a short answer or the answer is genuinely simple.",
+   "- For decision questions, prefer: answer → meaning → implication → next move.",
+   "- Do not force BLUF formatting into greetings, small talk, feature discovery, or casual conversation.",
+   "- When useful, naturally recommend one relevant TheWing.ai feature or calculator and explain why the user should try it.",
+   "- Refer to the “current TheWing.ai scenario” or “current session,” never a saved member profile.",
     requestedMode ? `- Response mode preference (wording only): ${requestedMode}.` : "",
     styleGuide == null
       ? ""
