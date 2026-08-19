@@ -1,0 +1,84 @@
+<!-- ============================================================
+  PCSUNITED • BASICBRAIN SHELL ADDITIONS for v6.1.0 JS
+  Insert these blocks into the existing Webflow BasicBrain shell.
+=============================================================== -->
+
+<!-- 1) Wrap existing dependents row -->
+<!-- Change: <div class="bb-row"> dependents ... -->
+<!-- To: -->
+<div class="bb-row" id="bb-dependents-row">
+  <!-- existing dependents content, keep id="bb-dependents" -->
+</div>
+
+<!-- 2) Add after #bb-va-row (Veteran-only rows; JS toggles is-hidden) -->
+
+<div class="bb-row is-hidden" id="bb-married-row">
+  <div class="bb-row-head">
+    <div class="bb-icon">💍</div>
+    <label class="bb-label">Married?</label>
+  </div>
+  <div class="bb-select-wrap">
+    <select id="bb-married" class="bb-select" autocomplete="off"></select>
+  </div>
+</div>
+
+<div class="bb-row is-hidden" id="bb-children-under-row">
+  <div class="bb-row-head">
+    <div class="bb-icon">👶</div>
+    <label class="bb-label">Children Under 18</label>
+  </div>
+  <div class="bb-select-wrap">
+    <select id="bb-children-under" class="bb-select" autocomplete="off"></select>
+  </div>
+</div>
+
+<div class="bb-row is-hidden" id="bb-children-school-row">
+  <div class="bb-row-head">
+    <div class="bb-icon">🎓</div>
+    <label class="bb-label">Children In School (18+)</label>
+  </div>
+  <div class="bb-select-wrap">
+    <select id="bb-children-school" class="bb-select" autocomplete="off"></select>
+  </div>
+</div>
+
+<div class="bb-row is-hidden" id="bb-parents-row">
+  <div class="bb-row-head">
+    <div class="bb-icon">🧓</div>
+    <label class="bb-label">Dependent Parents</label>
+  </div>
+  <div class="bb-select-wrap">
+    <select id="bb-parents" class="bb-select" autocomplete="off"></select>
+  </div>
+</div>
+
+<div class="bb-row is-hidden" id="bb-retirement-row">
+  <div class="bb-row-head">
+    <div class="bb-icon">🛡️</div>
+    <label class="bb-label">Retirement System</label>
+  </div>
+  <div class="bb-select-wrap">
+    <select id="bb-retirement" class="bb-select" autocomplete="off"></select>
+  </div>
+</div>
+
+<!-- 3) Add inside .ag-section after .ag-pay-grid -->
+
+<div id="ag-accuracy-note" class="ag-accuracy-note" style="display:none;"></div>
+
+<!-- 4) Add to shell <style> block -->
+
+<style>
+#pcsu-brain-amy-shell .ag-accuracy-note{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  background:rgba(216,184,122,.08);
+  border:1px solid rgba(216,184,122,.16);
+  color:var(--gold2);
+  font-size:.8rem;
+  line-height:1.5;
+  font-weight:700;
+  text-align:center;
+}
+</style>
