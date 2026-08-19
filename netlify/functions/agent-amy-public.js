@@ -82,6 +82,8 @@ const ALLOW_ORIGINS = [
   "https://www.thewing.ai",
   "https://thewing.netlify.app",
   "https://www.thewing.netlify.app",
+  "https://the-wing.webflow.io",
+  "https://www.the-wing.webflow.io",
   "http://localhost:8888",
   "http://localhost:3000",
   "http://127.0.0.1:8888",
