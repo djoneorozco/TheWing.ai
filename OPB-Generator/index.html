@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <!-- =========================================================
+       UNIVERSAL OPB GENERATOR
+       TheWing.ai
+       index.html
+       v1.0.0
+  ========================================================== -->
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="Universal Air Force OPB Performance Statement Generator. Turn rough accomplishments into clear, impact-focused Air Force Performance Statements."
+  >
+
+  <meta
+    name="theme-color"
+    content="#0c1b2a"
+  >
+
+  <title>Universal OPB Generator | TheWing.ai</title>
+
+
+  <!-- =========================================================
+       FONTS
+  ========================================================== -->
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@700&display=swap"
+    rel="stylesheet"
+  >
+
+
+  <!-- =========================================================
+       APP STYLES
+  ========================================================== -->
+
+  <link
+    rel="stylesheet"
+    href="./styles.css"
+  >
+
+</head>
+
+
+<body>
+
+  <!-- =========================================================
+       APP ROOT
+  ========================================================== -->
+
+  <div
+    id="opb-app"
+    class="opb-app"
+  >
+
+
+    <!-- =======================================================
+         TOP NAV
+    ======================================================== -->
+
+    <header class="opb-topbar">
+
+      <div class="opb-topbar-inner">
+
+
+        <a
+          class="opb-brand"
+          href="#"
+          aria-label="OPB Generator home"
+        >
+
+          <div
+            class="opb-brand-mark"
+            aria-hidden="true"
+          >
+            TW
+          </div>
+
+          <div class="opb-brand-copy">
+
+            <span class="opb-brand-name">
+              OPB Generator
+            </span>
+
+            <span class="opb-brand-sub">
+              Powered by TheWing.ai
+            </span>
+
+          </div>
+
+        </a>
+
+
+        <div class="opb-topbar-badge">
+
+          <span
+            class="opb-status-dot"
+            aria-hidden="true"
+          ></span>
+
+          Universal Generator
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- =======================================================
+         MAIN
+    ======================================================== -->
+
+    <main class="opb-main">
+
+
+      <!-- =====================================================
+           HERO
+      ====================================================== -->
+
+      <section
+        class="opb-hero"
+        aria-labelledby="opb-page-title"
+      >
+
+        <div class="opb-eyebrow">
+          AIR FORCE PERFORMANCE INTELLIGENCE
+        </div>
+
+
+        <h1 id="opb-page-title">
+          Universal OPB Generator
+        </h1>
+
+
+        <p class="opb-hero-copy">
+
+          Turn a rough accomplishment into a clear,
+          impact-focused Air Force Performance Statement.
+
+        </p>
+
+
+        <div
+          class="opb-hero-tags"
+          aria-label="Generator features"
+        >
+
+          <span>
+            Plain Language
+          </span>
+
+          <span>
+            Action + Impact
+          </span>
+
+          <span>
+            No AFSC Required
+          </span>
+
+          <span>
+            No Account Required
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           GENERATOR
+      ====================================================== -->
+
+      <section
+        class="opb-generator-card"
+        aria-labelledby="opb-generator-title"
+      >
+
+
+        <!-- ===================================================
+             CARD HEADER
+        ==================================================== -->
+
+        <div class="opb-card-header">
+
+          <div>
+
+            <div class="opb-section-kicker">
+              STEP 1
+            </div>
+
+            <h2 id="opb-generator-title">
+              What did you accomplish?
+            </h2>
+
+            <p>
+              Write it naturally. Do not worry about formatting,
+              abbreviations, or making it sound impressive.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             FORM
+        ==================================================== -->
+
+        <form
+          id="opb-form"
+          class="opb-form"
+          novalidate
+        >
+
+
+          <!-- =================================================
+               ACCOMPLISHMENT INPUT
+          ================================================== -->
+
+          <div class="opb-field">
+
+            <div class="opb-field-header">
+
+              <label
+                for="accomplishment-input"
+                class="opb-label"
+              >
+                Accomplishment
+              </label>
+
+
+              <div
+                id="opb-character-count"
+                class="opb-character-count"
+                aria-live="polite"
+              >
+                0 characters
+              </div>
+
+            </div>
+
+
+            <textarea
+              id="accomplishment-input"
+              name="accomplishment"
+              class="opb-textarea"
+              rows="8"
+              maxlength="2000"
+              required
+              aria-describedby="accomplishment-help"
+              placeholder="Example: Led 12 technicians through an aircraft inspection backlog and completed 34 inspections ahead of schedule, helping restore aircraft availability."
+            ></textarea>
+
+
+            <div
+              id="accomplishment-help"
+              class="opb-field-help"
+            >
+
+              Include whatever you know: what you did, who or what
+              was involved, measurable results, and why it mattered.
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+               MPA
+          ================================================== -->
+
+          <fieldset class="opb-field opb-mpa-field">
+
+            <legend class="opb-label">
+              Major Performance Area
+            </legend>
+
+
+            <p class="opb-field-help">
+
+              Optional. Choose the area that best matches the
+              accomplishment, or let the generator recommend one.
+
+            </p>
+
+
+            <div
+              id="opb-mpa-options"
+              class="opb-mpa-grid"
+              role="radiogroup"
+              aria-label="Major Performance Area"
+            >
+
+
+              <!-- AUTO -->
+
+              <label class="opb-mpa-option">
+
+                <input
+                  type="radio"
+                  name="mpa"
+                  value="auto"
+                  checked
+                >
+
+                <span class="opb-mpa-option-inner">
+
+                  <span class="opb-mpa-title">
+                    Auto Detect
+                  </span>
+
+                  <span class="opb-mpa-description">
+                    Let the generator recommend the best fit.
+                  </span>
+
+                </span>
+
+              </label>
+
+
+              <!-- EXECUTING THE MISSION -->
+
+              <label class="opb-mpa-option">
+
+                <input
+                  type="radio"
+                  name="mpa"
+                  value="executing-the-mission"
+                >
+
+                <span class="opb-mpa-option-inner">
+
+                  <span class="opb-mpa-title">
+                    Executing the Mission
+                  </span>
+
+                  <span class="opb-mpa-description">
+                    Mission accomplishment, expertise, initiative,
+                    and operational results.
+                  </span>
+
+                </span>
+
+              </label>
+
+
+              <!-- LEADING PEOPLE -->
+
+              <label class="opb-mpa-option">
+
+                <input
+                  type="radio"
+                  name="mpa"
+                  value="leading-people"
+                >
+
+                <span class="opb-mpa-option-inner">
+
+                  <span class="opb-mpa-title">
+                    Leading People
+                  </span>
+
+                  <span class="opb-mpa-description">
+                    Leadership, teamwork, development, and
+                    strengthening people.
+                  </span>
+
+                </span>
+
+              </label>
+
+
+              <!-- MANAGING RESOURCES -->
+
+              <label class="opb-mpa-option">
+
+                <input
+                  type="radio"
+                  name="mpa"
+                  value="managing-resources"
+                >
+
+                <span class="opb-mpa-option-inner">
+
+                  <span class="opb-mpa-title">
+                    Managing Resources
+                  </span>
+
+                  <span class="opb-mpa-description">
+                    Time, equipment, money, manpower, and
+                    organizational resources.
+                  </span>
+
+                </span>
+
+              </label>
+
+
+              <!-- IMPROVING THE UNIT -->
+
+              <label class="opb-mpa-option">
+
+                <input
+                  type="radio"
+                  name="mpa"
+                  value="improving-the-unit"
+                >
+
+                <span class="opb-mpa-option-inner">
+
+                  <span class="opb-mpa-title">
+                    Improving the Unit
+                  </span>
+
+                  <span class="opb-mpa-description">
+                    Innovation, process improvement, problem solving,
+                    and organizational advancement.
+                  </span>
+
+                </span>
+
+              </label>
+
+
+            </div>
+
+          </fieldset>
+
+
+          <!-- =================================================
+               ERROR / FORM STATUS
+          ================================================== -->
+
+          <div
+            id="opb-form-message"
+            class="opb-form-message"
+            role="alert"
+            aria-live="polite"
+            hidden
+          ></div>
+
+
+          <!-- =================================================
+               GENERATE
+          ================================================== -->
+
+          <div class="opb-form-actions">
+
+            <button
+              id="generate-btn"
+              class="opb-primary-btn"
+              type="submit"
+            >
+
+              <span>
+                Generate Performance Statement
+              </span>
+
+              <span
+                class="opb-btn-arrow"
+                aria-hidden="true"
+              >
+                →
+              </span>
+
+            </button>
+
+          </div>
+
+
+        </form>
+
+      </section>
+
+
+      <!-- =====================================================
+           WRITING FRAMEWORK
+      ====================================================== -->
+
+      <section
+        class="opb-framework"
+        aria-labelledby="opb-framework-title"
+      >
+
+        <div class="opb-section-kicker">
+          UNIVERSAL WRITING MODEL
+        </div>
+
+
+        <h2 id="opb-framework-title">
+          What the generator looks for
+        </h2>
+
+
+        <div class="opb-framework-grid">
+
+
+          <article class="opb-framework-item">
+
+            <div class="opb-framework-number">
+              01
+            </div>
+
+            <h3>
+              Action
+            </h3>
+
+            <p>
+              What did you actually do?
+            </p>
+
+          </article>
+
+
+          <article class="opb-framework-item">
+
+            <div class="opb-framework-number">
+              02
+            </div>
+
+            <h3>
+              Scope
+            </h3>
+
+            <p>
+              How large, difficult, or important was the effort?
+            </p>
+
+          </article>
+
+
+          <article class="opb-framework-item">
+
+            <div class="opb-framework-number">
+              03
+            </div>
+
+            <h3>
+              Result
+            </h3>
+
+            <p>
+              What changed because of your action?
+            </p>
+
+          </article>
+
+
+          <article class="opb-framework-item">
+
+            <div class="opb-framework-number">
+              04
+            </div>
+
+            <h3>
+              Impact
+            </h3>
+
+            <p>
+              Why did the result matter to the mission, people,
+              resources, or unit?
+            </p>
+
+          </article>
+
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           RESULTS
+      ====================================================== -->
+
+      <section
+        id="opb-results"
+        class="opb-results"
+        aria-labelledby="opb-results-title"
+        aria-live="polite"
+        hidden
+      >
+
+
+        <!-- ===================================================
+             RESULT HEADER
+        ==================================================== -->
+
+        <div class="opb-results-header">
+
+          <div>
+
+            <div class="opb-section-kicker">
+              YOUR RESULT
+            </div>
+
+            <h2 id="opb-results-title">
+              Performance Statement
+            </h2>
+
+          </div>
+
+
+          <div
+            id="result-status"
+            class="opb-result-status"
+          >
+            Ready
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             MAIN RESULT CARD
+        ==================================================== -->
+
+        <article class="opb-result-card">
+
+
+          <div class="opb-result-meta">
+
+            <div class="opb-result-meta-item">
+
+              <span class="opb-meta-label">
+                Major Performance Area
+              </span>
+
+              <span
+                id="result-mpa"
+                class="opb-meta-value"
+              >
+                —
+              </span>
+
+            </div>
+
+
+            <div class="opb-result-meta-item">
+
+              <span class="opb-meta-label">
+                Character Count
+              </span>
+
+              <span
+                id="result-character-count"
+                class="opb-meta-value"
+              >
+                0
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="opb-statement-wrap">
+
+            <p
+              id="result-statement"
+              class="opb-result-statement"
+            ></p>
+
+          </div>
+
+
+          <!-- =================================================
+               RESULT ACTIONS
+          ================================================== -->
+
+          <div class="opb-result-actions">
+
+            <button
+              id="copy-btn"
+              class="opb-primary-btn"
+              type="button"
+            >
+
+              Copy Statement
+
+            </button>
+
+
+            <button
+              id="regenerate-btn"
+              class="opb-secondary-btn"
+              type="button"
+            >
+
+              Generate Another Version
+
+            </button>
+
+
+            <button
+              id="reset-btn"
+              class="opb-text-btn"
+              type="button"
+            >
+
+              Start Over
+
+            </button>
+
+          </div>
+
+
+          <div
+            id="copy-status"
+            class="opb-copy-status"
+            aria-live="polite"
+          ></div>
+
+
+        </article>
+
+
+        <!-- ===================================================
+             STATEMENT ANALYSIS
+        ==================================================== -->
+
+        <article
+          id="opb-analysis"
+          class="opb-analysis-card"
+        >
+
+          <div class="opb-analysis-header">
+
+            <div>
+
+              <div class="opb-section-kicker">
+                STATEMENT ANALYSIS
+              </div>
+
+              <h3>
+                Why this statement works
+              </h3>
+
+            </div>
+
+          </div>
+
+
+          <div class="opb-analysis-grid">
+
+
+            <div class="opb-analysis-item">
+
+              <span class="opb-analysis-label">
+                Action
+              </span>
+
+              <p id="analysis-action">
+                —
+              </p>
+
+            </div>
+
+
+            <div class="opb-analysis-item">
+
+              <span class="opb-analysis-label">
+                Scope
+              </span>
+
+              <p id="analysis-scope">
+                —
+              </p>
+
+            </div>
+
+
+            <div class="opb-analysis-item">
+
+              <span class="opb-analysis-label">
+                Result
+              </span>
+
+              <p id="analysis-result">
+                —
+              </p>
+
+            </div>
+
+
+            <div class="opb-analysis-item">
+
+              <span class="opb-analysis-label">
+                Impact
+              </span>
+
+              <p id="analysis-impact">
+                —
+              </p>
+
+            </div>
+
+
+          </div>
+
+        </article>
+
+
+        <!-- ===================================================
+             VALIDATION
+        ==================================================== -->
+
+        <article
+          id="opb-validation"
+          class="opb-validation-card"
+        >
+
+          <div class="opb-analysis-header">
+
+            <div>
+
+              <div class="opb-section-kicker">
+                QUALITY CHECK
+              </div>
+
+              <h3>
+                Statement Review
+              </h3>
+
+            </div>
+
+          </div>
+
+
+          <ul
+            id="validation-list"
+            class="opb-validation-list"
+          >
+
+            <!-- Populated by opb-validator.js -->
+
+          </ul>
+
+        </article>
+
+
+      </section>
+
+
+      <!-- =====================================================
+           EXAMPLE
+      ====================================================== -->
+
+      <section
+        class="opb-example"
+        aria-labelledby="opb-example-title"
+      >
+
+        <div class="opb-section-kicker">
+          EXAMPLE
+        </div>
+
+
+        <h2 id="opb-example-title">
+          You write naturally. The generator does the cleanup.
+        </h2>
+
+
+        <div class="opb-example-grid">
+
+
+          <article class="opb-example-card">
+
+            <span class="opb-example-label">
+              ROUGH INPUT
+            </span>
+
+            <p>
+
+              Managed 12 technicians during an inspection backlog
+              and got 34 aircraft inspections completed early.
+
+            </p>
+
+          </article>
+
+
+          <div
+            class="opb-example-arrow"
+            aria-hidden="true"
+          >
+            →
+          </div>
+
+
+          <article class="opb-example-card opb-example-output">
+
+            <span class="opb-example-label">
+              PERFORMANCE STATEMENT
+            </span>
+
+            <p>
+
+              Led 12 technicians through a critical inspection
+              backlog, completing 34 aircraft inspections ahead of
+              schedule and restoring mission capacity.
+
+            </p>
+
+          </article>
+
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           GUIDANCE / DISCLAIMER
+      ====================================================== -->
+
+      <section class="opb-guidance-note">
+
+        <div
+          class="opb-guidance-icon"
+          aria-hidden="true"
+        >
+          i
+        </div>
+
+
+        <div>
+
+          <h2>
+            Built to improve your writing — not invent your record.
+          </h2>
+
+          <p>
+
+            The Universal OPB Generator should only use information
+            you provide. Review every generated statement for
+            accuracy before using it in an official evaluation.
+
+          </p>
+
+        </div>
+
+      </section>
+
+
+    </main>
+
+
+    <!-- =======================================================
+         FOOTER
+    ======================================================== -->
+
+    <footer class="opb-footer">
+
+      <div class="opb-footer-inner">
+
+        <div>
+
+          <strong>
+            Universal OPB Generator
+          </strong>
+
+          <span>
+            An open-source TheWing.ai project.
+          </span>
+
+        </div>
+
+
+        <div class="opb-footer-links">
+
+          <a
+            href="https://thewing.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            TheWing.ai
+          </a>
+
+          <a
+            href="https://github.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub
+          </a>
+
+        </div>
+
+      </div>
+
+    </footer>
+
+
+  </div>
+
+
+  <!-- =========================================================
+       APP SCRIPT
+
+       app.js will import:
+       - ./js/opb-universal.js
+       - ./js/opb-validator.js
+       - ./data/opb-guidance.js
+  ========================================================== -->
+
+  <script
+    type="module"
+    src="./app.js"
+  ></script>
+
+
+</body>
+
+</html>
