@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
 
@@ -18,49 +19,60 @@
     content="#071827"
   >
 
-  <title>Air Force WAPS Calculator | TheWing.ai</title>
+  <title>
+    Air Force WAPS Calculator | TheWing.ai
+  </title>
 
   <!-- =========================================================
     THEWING.AI • AIR FORCE WAPS CALCULATOR
-    INDEX.HTML
-    AFSC-FIRST AURA INTERFACE
-    Version 2.2.0
+    MOBILE-FIRST AURORA INTERFACE
 
-    PRIMARY FLOW
-    1. Select CAFSC held on the PECD
-    2. TheWing determines:
-       - promotion cycle
-       - target grade
-       - SKT + PFE or PFE-only testing path
-    3. Enter required test score(s)
-    4. Select eligible EPB recommendations
-    5. Enter qualifying decoration quantities
-    6. View estimated WAPS score
-
-    REMOVED FROM PRIMARY FLOW
-    - Promotion-to selection
-    - Manual testing-type selection
-
-    REQUIRED FILES
-    - waps.css
-    - waps.js
+    IMPORTANT
+    -------------------------------------------------------------
+    - Existing WAPS calculation logic remains in waps.js
+    - Existing scoring formulas are NOT recreated here
+    - Existing JS-critical IDs are preserved
+    - Score Overview is intentionally first in the mobile flow
+    - No Ask Amy control on this calculator surface
+    - No bottom calculator navigation
+    - No manual Calculate / Recalculate button
+    - Score continues to update through existing deterministic JS
   ========================================================== -->
 
+
   <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
 
   <link
     href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Gilda+Display&display=swap"
     rel="stylesheet"
   >
 
+
   <!-- Calculator Styles -->
-  <link rel="stylesheet" href="waps.css">
+  <link
+    rel="stylesheet"
+    href="waps.css"
+  >
+
 
   <!-- Calculator Logic -->
-  <script src="waps.js" defer></script>
+  <script
+    src="waps.js"
+    defer
+  ></script>
+
 </head>
+
 
 <body>
 
@@ -71,6 +83,7 @@
     data-afsc-ready="false"
     data-testing-path="pending"
   >
+
 
     <!-- =======================================================
       INTERNAL CALCULATOR VALUES
@@ -99,16 +112,32 @@
     >
 
 
+
     <!-- =======================================================
-      AURA BACKGROUND
+      AURORA BACKGROUND
     ======================================================== -->
 
-    <div class="waps-background" aria-hidden="true">
-      <span class="waps-aura waps-aura-top"></span>
-      <span class="waps-aura waps-aura-bottom"></span>
-      <span class="waps-grid"></span>
-      <span class="waps-grain"></span>
+    <div
+      class="waps-background"
+      aria-hidden="true"
+    >
+      <span
+        class="waps-aura waps-aura-top"
+      ></span>
+
+      <span
+        class="waps-aura waps-aura-bottom"
+      ></span>
+
+      <span
+        class="waps-grid"
+      ></span>
+
+      <span
+        class="waps-grain"
+      ></span>
     </div>
+
 
 
     <!-- =======================================================
@@ -116,6 +145,30 @@
     ======================================================== -->
 
     <div class="waps-container">
+
+
+      <!-- =====================================================
+        PAGE HEADING
+      ====================================================== -->
+
+      <header
+        class="waps-page-heading"
+        aria-labelledby="waps-page-title"
+      >
+
+        <h1
+          id="waps-page-title"
+          class="waps-page-title"
+        >
+          WAPS Calculator
+        </h1>
+
+        <p class="waps-page-subtitle">
+          AFSC-first. Accurate. Mission-focused.
+        </p>
+
+      </header>
+
 
 
       <!-- =====================================================
@@ -129,1742 +182,30 @@
         novalidate
       >
 
-        <!-- ===================================================
-          LEFT PANEL — USER INPUTS
-        ==================================================== -->
-
-        <section
-          class="waps-panel waps-input-panel"
-          aria-labelledby="waps-input-title"
-        >
-
-          <div class="waps-panel-heading">
-
-            <div>
-              <div class="waps-panel-eyebrow">
-                Your Inputs
-              </div>
-
-              <h2
-                id="waps-input-title"
-                class="waps-panel-title"
-              >
-                Build Your Estimate
-              </h2>
-            </div>
-
-          </div>
-
-
-          <!-- =================================================
-            1. CAFSC SELECTION
-          ================================================== -->
-
-          <section
-            class="waps-input-section waps-afsc-section"
-            aria-labelledby="cafsc-heading"
-          >
-
-            <div class="waps-section-heading">
-
-              <span class="waps-section-number">
-                1
-              </span>
-
-              <h3
-                id="cafsc-heading"
-                class="waps-section-label"
-              >
-                CAFSC on the PECD
-              </h3>
-
-              <button
-                class="waps-info-button"
-                type="button"
-                data-help-topic="cafsc"
-                aria-label="Learn about selecting your CAFSC"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="9"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.7"
-                  />
-
-                  <path
-                    d="M12 10.7v5.1M12 7.4v.1"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </button>
-
-            </div>
-
-
-            <p class="waps-section-description">
-              Search by AFSC code or career-field name. Use the CAFSC
-              held on the promotion eligibility cutoff date.
-            </p>
-
-
-            <div
-              id="cafscSearchShell"
-              class="waps-cafsc-search-shell"
-            >
-
-              <span
-                class="waps-cafsc-search-icon"
-                aria-hidden="true"
-              >
-                <svg viewBox="0 0 24 24">
-                  <circle
-                    cx="10.8"
-                    cy="10.8"
-                    r="6.5"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                  />
-
-                  <path
-                    d="m16 16 4.2 4.2"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </span>
-
-
-              <input
-                id="cafscInput"
-                name="cafscInput"
-                class="waps-cafsc-input"
-                type="text"
-                inputmode="text"
-                placeholder="Search AFSC code or career-field name"
-                list="cafscCatalog"
-                autocomplete="off"
-                spellcheck="false"
-                role="combobox"
-                aria-autocomplete="list"
-                aria-controls="cafscCatalog"
-                aria-describedby="cafscHelp cafscStatus"
-              >
-
-
-              <button
-                id="cafscClearButton"
-                class="waps-cafsc-clear"
-                type="button"
-                aria-label="Clear selected CAFSC"
-                hidden
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="m7 7 10 10M17 7 7 17"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </button>
-
-            </div>
-
-
-            <datalist id="cafscCatalog"></datalist>
-
-
-            <div
-              id="cafscStatus"
-              class="waps-field-status"
-              data-status="neutral"
-              aria-live="polite"
-            >
-              Select a CAFSC to begin.
-            </div>
-
-
-            <p
-              id="cafscHelp"
-              class="waps-field-help"
-            >
-              TheWing will determine the target grade, cycle and
-              required test score inputs.
-            </p>
-
-          </section>
-
-
-          <!-- =================================================
-            INPUT FLOW
-            Hidden until a valid CAFSC is selected
-          ================================================== -->
-
-          <div
-            id="wapsInputFlow"
-            class="waps-input-flow"
-            hidden
-          >
-
-            <!-- ===============================================
-              2. TEST SCORES
-            ================================================ -->
-
-            <section
-              class="waps-input-section"
-              aria-labelledby="test-scores-heading"
-            >
-
-              <div class="waps-section-heading">
-
-                <span class="waps-section-number">
-                  2
-                </span>
-
-                <h3
-                  id="test-scores-heading"
-                  class="waps-section-label"
-                >
-                  Test Scores
-                </h3>
-
-                <button
-                  class="waps-info-button"
-                  type="button"
-                  data-help-topic="test-scores"
-                  aria-label="Learn about WAPS test scores"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="9"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.7"
-                    />
-
-                    <path
-                      d="M12 10.7v5.1M12 7.4v.1"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                </button>
-
-              </div>
-
-
-              <div
-                id="testingPathNotice"
-                class="waps-testing-path-notice"
-                data-path="pending"
-              >
-
-                <span
-                  class="waps-testing-path-icon"
-                  aria-hidden="true"
-                >
-                  <svg viewBox="0 0 24 24">
-                    <path
-                      d="M5 12h14M14 7l5 5-5 5"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </span>
-
-
-                <span>
-
-                  <strong id="testingPathNoticeTitle">
-                    Testing path pending
-                  </strong>
-
-                  <span id="testingPathNoticeText">
-                    Select a CAFSC to determine the required test scores.
-                  </span>
-
-                </span>
-
-              </div>
-
-
-              <div
-                id="testScoreGrid"
-                class="waps-test-score-grid"
-              >
-
-                <!-- PFE SCORE -->
-
-                <article
-                  id="pfeScoreCard"
-                  class="waps-score-card"
-                >
-
-                  <div class="waps-score-card-heading">
-
-                    <div>
-                      <label
-                        class="waps-score-card-label"
-                        for="pfeScore"
-                      >
-                        PFE Score
-                      </label>
-
-                      <div class="waps-score-card-description">
-                        Promotion Fitness Examination
-                      </div>
-                    </div>
-
-                    <div class="waps-score-maximum">
-                      / 100
-                    </div>
-
-                  </div>
-
-
-                  <div class="waps-score-value-row">
-
-                    <input
-                      id="pfeScore"
-                      name="pfeScore"
-                      class="waps-score-number"
-                      type="number"
-                      inputmode="decimal"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      value="74.00"
-                      aria-describedby="pfeScoreFeedback"
-                    >
-
-                  </div>
-
-
-                  <input
-                    id="pfeRange"
-                    class="waps-range waps-range-teal"
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    value="74"
-                    aria-label="PFE score"
-                  >
-
-
-                  <div
-                    class="waps-range-ticks"
-                    aria-hidden="true"
-                  >
-                    <span>0</span>
-                    <span>20</span>
-                    <span>40</span>
-                    <span>60</span>
-                    <span>80</span>
-                    <span>100</span>
-                  </div>
-
-
-                  <div
-                    id="pfeScoreFeedback"
-                    class="waps-score-feedback"
-                    data-status="neutral"
-                    aria-live="polite"
-                  >
-                    Enter your PFE score.
-                  </div>
-
-                </article>
-
-
-                <!-- SKT SCORE -->
-
-                <article
-                  id="sktScoreCard"
-                  class="waps-score-card"
-                  hidden
-                >
-
-                  <div class="waps-score-card-heading">
-
-                    <div>
-                      <label
-                        class="waps-score-card-label"
-                        for="sktScore"
-                      >
-                        SKT Score
-                      </label>
-
-                      <div class="waps-score-card-description">
-                        Specialty Knowledge Test
-                      </div>
-                    </div>
-
-                    <div class="waps-score-maximum">
-                      / 100
-                    </div>
-
-                  </div>
-
-
-                  <div class="waps-score-value-row">
-
-                    <input
-                      id="sktScore"
-                      name="sktScore"
-                      class="waps-score-number"
-                      type="number"
-                      inputmode="decimal"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      value="68.00"
-                      aria-describedby="sktScoreFeedback"
-                    >
-
-                  </div>
-
-
-                  <input
-                    id="sktRange"
-                    class="waps-range waps-range-teal"
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    value="68"
-                    aria-label="SKT score"
-                  >
-
-
-                  <div
-                    class="waps-range-ticks"
-                    aria-hidden="true"
-                  >
-                    <span>0</span>
-                    <span>20</span>
-                    <span>40</span>
-                    <span>60</span>
-                    <span>80</span>
-                    <span>100</span>
-                  </div>
-
-
-                  <div
-                    id="sktScoreFeedback"
-                    class="waps-score-feedback"
-                    data-status="neutral"
-                    aria-live="polite"
-                  >
-                    Enter your SKT score.
-                  </div>
-
-                </article>
-
-              </div>
-
-
-              <div
-                id="testingMinimumNotice"
-                class="waps-minimum-notice"
-                data-status="neutral"
-                aria-live="polite"
-              >
-
-                <span
-                  class="waps-minimum-icon"
-                  aria-hidden="true"
-                >
-                  <svg viewBox="0 0 24 24">
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="9"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                    />
-
-                    <path
-                      d="M12 8v5M12 16.7v.1"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                </span>
-
-
-                <span class="waps-minimum-copy">
-
-                  <strong id="testingMinimumTitle">
-                    Testing requirements pending
-                  </strong>
-
-                  <span id="testingMinimumText">
-                    Select a CAFSC to configure the test minimums.
-                  </span>
-
-                </span>
-
-              </div>
-
-            </section>
-
-
-            <!-- ===============================================
-              3. EPB RECOMMENDATIONS
-            ================================================ -->
-
-            <section
-              class="waps-input-section"
-              aria-labelledby="epb-heading"
-            >
-
-              <div class="waps-section-heading">
-
-                <span class="waps-section-number">
-                  3
-                </span>
-
-                <h3
-                  id="epb-heading"
-                  class="waps-section-label"
-                >
-                  EPB Promotion Recommendations
-                </h3>
-
-                <span class="waps-section-qualifier">
-                  Last 3 Eligible
-                </span>
-
-                <button
-                  class="waps-info-button"
-                  type="button"
-                  data-help-topic="epb"
-                  aria-label="Learn about EPB promotion recommendation scoring"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="9"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.7"
-                    />
-
-                    <path
-                      d="M12 10.7v5.1M12 7.4v.1"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                </button>
-
-              </div>
-
-
-              <div class="waps-epb-grid">
-
-                <!-- MOST RECENT -->
-
-                <div class="waps-select-card">
-
-                  <label
-                    class="waps-select-card-label"
-                    for="epbCurrent"
-                  >
-                    Most Recent
-                  </label>
-
-                  <div class="waps-select-shell">
-
-                    <select
-                      id="epbCurrent"
-                      name="epbCurrent"
-                      class="waps-select"
-                    >
-                      <option value="promote-now">
-                        Promote Now
-                      </option>
-
-                      <option value="must-promote" selected>
-                        Must Promote
-                      </option>
-
-                      <option value="promote">
-                        Promote
-                      </option>
-
-                      <option value="not-ready-now">
-                        Not Ready Now
-                      </option>
-
-                      <option value="none">
-                        No Eligible EPB
-                      </option>
-
-                      <option value="bypass">
-                        Nonrated or Removed
-                      </option>
-                    </select>
-
-                    <span
-                      class="waps-select-arrow"
-                      aria-hidden="true"
-                    ></span>
-
-                  </div>
-
-
-                  <div class="waps-select-card-points">
-                    <span id="epbCurrentPoints">220</span>
-                    points
-                  </div>
-
-                </div>
-
-
-                <!-- SECOND -->
-
-                <div class="waps-select-card">
-
-                  <label
-                    class="waps-select-card-label"
-                    for="epbPrevious1"
-                  >
-                    Second Most Recent
-                  </label>
-
-                  <div class="waps-select-shell">
-
-                    <select
-                      id="epbPrevious1"
-                      name="epbPrevious1"
-                      class="waps-select"
-                    >
-                      <option value="promote-now">
-                        Promote Now
-                      </option>
-
-                      <option value="must-promote">
-                        Must Promote
-                      </option>
-
-                      <option value="promote" selected>
-                        Promote
-                      </option>
-
-                      <option value="not-ready-now">
-                        Not Ready Now
-                      </option>
-
-                      <option value="none">
-                        No Eligible EPB
-                      </option>
-
-                      <option value="bypass">
-                        Nonrated or Removed
-                      </option>
-                    </select>
-
-                    <span
-                      class="waps-select-arrow"
-                      aria-hidden="true"
-                    ></span>
-
-                  </div>
-
-
-                  <div class="waps-select-card-points">
-                    <span id="epbPrevious1Points">10</span>
-                    points
-                  </div>
-
-                </div>
-
-
-                <!-- THIRD -->
-
-                <div class="waps-select-card">
-
-                  <label
-                    class="waps-select-card-label"
-                    for="epbPrevious2"
-                  >
-                    Third Most Recent
-                  </label>
-
-                  <div class="waps-select-shell">
-
-                    <select
-                      id="epbPrevious2"
-                      name="epbPrevious2"
-                      class="waps-select"
-                    >
-                      <option value="promote-now">
-                        Promote Now
-                      </option>
-
-                      <option value="must-promote">
-                        Must Promote
-                      </option>
-
-                      <option value="promote" selected>
-                        Promote
-                      </option>
-
-                      <option value="not-ready-now">
-                        Not Ready Now
-                      </option>
-
-                      <option value="none">
-                        No Eligible EPB
-                      </option>
-
-                      <option value="bypass">
-                        Nonrated or Removed
-                      </option>
-                    </select>
-
-                    <span
-                      class="waps-select-arrow"
-                      aria-hidden="true"
-                    ></span>
-
-                  </div>
-
-
-                  <div class="waps-select-card-points">
-                    <span id="epbPrevious2Points">5</span>
-                    points
-                  </div>
-
-                </div>
-
-              </div>
-
-            </section>
-
-
-            <!-- ===============================================
-              4. DECORATIONS
-            ================================================ -->
-
-            <section
-              class="waps-input-section waps-decorations-section"
-              aria-labelledby="decorations-heading"
-            >
-
-              <div class="waps-section-heading">
-
-                <span class="waps-section-number">
-                  4
-                </span>
-
-                <h3
-                  id="decorations-heading"
-                  class="waps-section-label"
-                >
-                  Decorations
-                </h3>
-
-                <span class="waps-section-qualifier">
-                  MAX 25
-                </span>
-
-                <button
-                  class="waps-info-button"
-                  type="button"
-                  data-help-topic="decorations"
-                  aria-label="Learn about decoration points"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="9"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.7"
-                    />
-
-                    <path
-                      d="M12 10.7v5.1M12 7.4v.1"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                </button>
-
-              </div>
-
-
-              <p class="waps-section-description">
-                Enter the number of each qualifying decoration.
-                TheWing converts quantities to WAPS decoration
-                points and caps credit at 25.
-              </p>
-
-
-              <input
-                id="decorationPoints"
-                name="decorationPoints"
-                type="hidden"
-                value="0"
-              >
-
-
-              <div
-                class="waps-decoration-grid"
-                role="group"
-                aria-label="Common eligible decorations"
-              >
-
-                <div class="waps-decoration-item">
-                  <label
-                    class="waps-decoration-item-label"
-                    for="decorationMsm"
-                  >
-                    Meritorious Service Medal
-                  </label>
-                  <div class="waps-decoration-item-meta">
-                    5 points each
-                  </div>
-                  <div class="waps-decoration-qty-shell">
-                    <input
-                      id="decorationMsm"
-                      name="decorationMsm"
-                      class="waps-decoration-qty"
-                      type="number"
-                      inputmode="numeric"
-                      min="0"
-                      max="99"
-                      step="1"
-                      value="0"
-                      data-decoration-key="msm"
-                      aria-describedby="decorationMsmMeta"
-                    >
-                  </div>
-                  <span
-                    id="decorationMsmMeta"
-                    class="waps-visually-hidden"
-                  >
-                    Meritorious Service Medal, 5 points each
-                  </span>
-                </div>
-
-
-                <div class="waps-decoration-item">
-                  <label
-                    class="waps-decoration-item-label"
-                    for="decorationCommendation"
-                  >
-                    Air Force Commendation Medal
-                  </label>
-                  <div class="waps-decoration-item-meta">
-                    3 points each
-                  </div>
-                  <div class="waps-decoration-qty-shell">
-                    <input
-                      id="decorationCommendation"
-                      name="decorationCommendation"
-                      class="waps-decoration-qty"
-                      type="number"
-                      inputmode="numeric"
-                      min="0"
-                      max="99"
-                      step="1"
-                      value="0"
-                      data-decoration-key="commendation"
-                      aria-describedby="decorationCommendationMeta"
-                    >
-                  </div>
-                  <span
-                    id="decorationCommendationMeta"
-                    class="waps-visually-hidden"
-                  >
-                    Air Force Commendation Medal, 3 points each
-                  </span>
-                </div>
-
-
-                <div class="waps-decoration-item">
-                  <label
-                    class="waps-decoration-item-label"
-                    for="decorationAchievement"
-                  >
-                    Air Force Achievement Medal
-                  </label>
-                  <div class="waps-decoration-item-meta">
-                    1 point each
-                  </div>
-                  <div class="waps-decoration-qty-shell">
-                    <input
-                      id="decorationAchievement"
-                      name="decorationAchievement"
-                      class="waps-decoration-qty"
-                      type="number"
-                      inputmode="numeric"
-                      min="0"
-                      max="99"
-                      step="1"
-                      value="0"
-                      data-decoration-key="achievement"
-                      aria-describedby="decorationAchievementMeta"
-                    >
-                  </div>
-                  <span
-                    id="decorationAchievementMeta"
-                    class="waps-visually-hidden"
-                  >
-                    Air Force Achievement Medal, 1 point each
-                  </span>
-                </div>
-
-
-                <div class="waps-decoration-item">
-                  <label
-                    class="waps-decoration-item-label"
-                    for="decorationAirMedal"
-                  >
-                    Air Medal
-                  </label>
-                  <div class="waps-decoration-item-meta">
-                    3 points each
-                  </div>
-                  <div class="waps-decoration-qty-shell">
-                    <input
-                      id="decorationAirMedal"
-                      name="decorationAirMedal"
-                      class="waps-decoration-qty"
-                      type="number"
-                      inputmode="numeric"
-                      min="0"
-                      max="99"
-                      step="1"
-                      value="0"
-                      data-decoration-key="airMedal"
-                      aria-describedby="decorationAirMedalMeta"
-                    >
-                  </div>
-                  <span
-                    id="decorationAirMedalMeta"
-                    class="waps-visually-hidden"
-                  >
-                    Air Medal, 3 points each
-                  </span>
-                </div>
-
-
-                <div class="waps-decoration-item">
-                  <label
-                    class="waps-decoration-item-label"
-                    for="decorationBronzeStar"
-                  >
-                    Bronze Star Medal
-                  </label>
-                  <div class="waps-decoration-item-meta">
-                    5 points each
-                  </div>
-                  <div class="waps-decoration-qty-shell">
-                    <input
-                      id="decorationBronzeStar"
-                      name="decorationBronzeStar"
-                      class="waps-decoration-qty"
-                      type="number"
-                      inputmode="numeric"
-                      min="0"
-                      max="99"
-                      step="1"
-                      value="0"
-                      data-decoration-key="bronzeStar"
-                      aria-describedby="decorationBronzeStarMeta"
-                    >
-                  </div>
-                  <span
-                    id="decorationBronzeStarMeta"
-                    class="waps-visually-hidden"
-                  >
-                    Bronze Star Medal, 5 points each
-                  </span>
-                </div>
-
-
-                <div class="waps-decoration-item">
-                  <label
-                    class="waps-decoration-item-label"
-                    for="decorationPurpleHeart"
-                  >
-                    Purple Heart
-                  </label>
-                  <div class="waps-decoration-item-meta">
-                    5 points each
-                  </div>
-                  <div class="waps-decoration-qty-shell">
-                    <input
-                      id="decorationPurpleHeart"
-                      name="decorationPurpleHeart"
-                      class="waps-decoration-qty"
-                      type="number"
-                      inputmode="numeric"
-                      min="0"
-                      max="99"
-                      step="1"
-                      value="0"
-                      data-decoration-key="purpleHeart"
-                      aria-describedby="decorationPurpleHeartMeta"
-                    >
-                  </div>
-                  <span
-                    id="decorationPurpleHeartMeta"
-                    class="waps-visually-hidden"
-                  >
-                    Purple Heart, 5 points each
-                  </span>
-                </div>
-
-              </div>
-
-
-              <details
-                id="additionalDecorations"
-                class="waps-additional-decorations"
-              >
-
-                <summary class="waps-additional-decorations-summary">
-                  <span>Additional Eligible Decorations</span>
-                  <span
-                    class="waps-advanced-arrow"
-                    aria-hidden="true"
-                  >
-                    <svg viewBox="0 0 24 24">
-                      <path
-                        d="m7 10 5 5 5-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </span>
-                </summary>
-
-
-                <div
-                  class="waps-decoration-grid waps-decoration-grid-additional"
-                  role="group"
-                  aria-label="Additional eligible decorations"
-                >
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationMedalOfHonor">
-                      Medal of Honor
-                    </label>
-                    <div class="waps-decoration-item-meta">15 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationMedalOfHonor"
-                        name="decorationMedalOfHonor"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="medalOfHonor"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationAirForceCross">
-                      Air Force Cross
-                    </label>
-                    <div class="waps-decoration-item-meta">11 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationAirForceCross"
-                        name="decorationAirForceCross"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="airForceCross"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationNavyCross">
-                      Navy Cross
-                    </label>
-                    <div class="waps-decoration-item-meta">11 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationNavyCross"
-                        name="decorationNavyCross"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="navyCross"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationDistinguishedServiceCross">
-                      Distinguished Service Cross
-                    </label>
-                    <div class="waps-decoration-item-meta">11 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationDistinguishedServiceCross"
-                        name="decorationDistinguishedServiceCross"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="distinguishedServiceCross"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationDefenseDsm">
-                      Defense Distinguished Service Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">9 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationDefenseDsm"
-                        name="decorationDefenseDsm"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="defenseDsm"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationDsm">
-                      Distinguished Service Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">9 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationDsm"
-                        name="decorationDsm"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="dsm"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationSilverStar">
-                      Silver Star
-                    </label>
-                    <div class="waps-decoration-item-meta">9 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationSilverStar"
-                        name="decorationSilverStar"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="silverStar"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationLegionOfMerit">
-                      Legion of Merit
-                    </label>
-                    <div class="waps-decoration-item-meta">7 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationLegionOfMerit"
-                        name="decorationLegionOfMerit"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="legionOfMerit"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationDssm">
-                      Defense Superior Service Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">7 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationDssm"
-                        name="decorationDssm"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="dssm"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationDfc">
-                      Distinguished Flying Cross
-                    </label>
-                    <div class="waps-decoration-item-meta">7 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationDfc"
-                        name="decorationDfc"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="dfc"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationDefenseMsm">
-                      Defense Meritorious Service Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">5 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationDefenseMsm"
-                        name="decorationDefenseMsm"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="defenseMsm"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationAerialAchievement">
-                      Aerial Achievement Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">3 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationAerialAchievement"
-                        name="decorationAerialAchievement"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="aerialAchievement"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationArmyCommendation">
-                      Army Commendation Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">3 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationArmyCommendation"
-                        name="decorationArmyCommendation"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="armyCommendation"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationNavyCommendation">
-                      Navy-Marine Corps Commendation Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">3 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationNavyCommendation"
-                        name="decorationNavyCommendation"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="navyCommendation"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationJointCommendation">
-                      Joint Service Commendation Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">3 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationJointCommendation"
-                        name="decorationJointCommendation"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="jointCommendation"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationCoastGuardCommendation">
-                      Coast Guard Commendation Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">3 points each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationCoastGuardCommendation"
-                        name="decorationCoastGuardCommendation"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="coastGuardCommendation"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationNavyAchievement">
-                      Navy-Marine Corps Achievement Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">1 point each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationNavyAchievement"
-                        name="decorationNavyAchievement"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="navyAchievement"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationCoastGuardAchievement">
-                      Coast Guard Achievement Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">1 point each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationCoastGuardAchievement"
-                        name="decorationCoastGuardAchievement"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="coastGuardAchievement"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationArmyAchievement">
-                      Army Achievement Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">1 point each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationArmyAchievement"
-                        name="decorationArmyAchievement"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="armyAchievement"
-                      >
-                    </div>
-                  </div>
-
-                  <div class="waps-decoration-item">
-                    <label class="waps-decoration-item-label" for="decorationJointAchievement">
-                      Joint Service Achievement Medal
-                    </label>
-                    <div class="waps-decoration-item-meta">1 point each</div>
-                    <div class="waps-decoration-qty-shell">
-                      <input
-                        id="decorationJointAchievement"
-                        name="decorationJointAchievement"
-                        class="waps-decoration-qty"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="99"
-                        step="1"
-                        value="0"
-                        data-decoration-key="jointAchievement"
-                      >
-                    </div>
-                  </div>
-
-                </div>
-
-              </details>
-
-
-              <div
-                id="decorationSummary"
-                class="waps-decoration-summary"
-                data-cap-applied="false"
-                aria-live="polite"
-              >
-
-                <div class="waps-decoration-summary-main">
-                  <span class="waps-decoration-summary-label">
-                    Decorations Total
-                  </span>
-                  <span class="waps-decoration-summary-value">
-                    <strong id="decorationCappedTotal">0</strong>
-                    <span>/ 25</span>
-                  </span>
-                </div>
-
-                <div
-                  id="decorationRawRow"
-                  class="waps-decoration-raw-row"
-                  hidden
-                >
-                  <span>Earned Decoration Points</span>
-                  <strong id="decorationRawTotal">0</strong>
-                </div>
-
-                <div
-                  id="decorationCapNotice"
-                  class="waps-decoration-cap-notice"
-                  hidden
-                >
-                  Raw decoration points exceed the WAPS maximum.
-                  Credit is capped at 25.
-                </div>
-
-                <p
-                  id="decorationHelp"
-                  class="waps-decoration-help"
-                >
-                  Include only decorations with a closeout date on
-                  or before the PECD and a Given Under My Hand date
-                  before the cycle public release date.
-                </p>
-
-              </div>
-
-            </section>
-
-
-            <!-- ===============================================
-              ADVANCED OPTIONS
-            ================================================ -->
-
-            <details
-              id="advancedOptions"
-              class="waps-advanced"
-            >
-
-              <summary class="waps-advanced-summary">
-
-                <span>Advanced Options</span>
-
-                <span
-                  class="waps-advanced-arrow"
-                  aria-hidden="true"
-                >
-                  <svg viewBox="0 0 24 24">
-                    <path
-                      d="m7 10 5 5 5-5"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </span>
-
-              </summary>
-
-
-              <div class="waps-advanced-content">
-
-                <p class="waps-advanced-intro">
-                  These options are not required for the normal
-                  calculation.
-                </p>
-
-
-                <div class="waps-advanced-grid">
-
-                  <!-- INDIVIDUAL SKT EXEMPTION -->
-
-                  <div class="waps-field-group waps-field-wide">
-
-                    <span class="waps-field-label">
-                      Official Individual SKT Exemption
-                    </span>
-
-                    <label class="waps-toggle-row">
-
-                      <input
-                        id="individualSktExemption"
-                        name="individualSktExemption"
-                        type="checkbox"
-                      >
-
-                      <span
-                        class="waps-toggle-control"
-                        aria-hidden="true"
-                      ></span>
-
-                      <span class="waps-toggle-copy">
-                        An official member-specific exemption applies
-                        even though the selected CAFSC normally uses
-                        SKT + PFE.
-                      </span>
-
-                    </label>
-
-                  </div>
-
-
-                  <!-- HISTORICAL CUTOFF -->
-
-                  <div class="waps-field-group">
-
-                    <label
-                      class="waps-field-label"
-                      for="historicalCutoff"
-                    >
-                      Historical Cutoff
-                    </label>
-
-                    <div class="waps-number-shell">
-
-                      <input
-                        id="historicalCutoff"
-                        name="historicalCutoff"
-                        class="waps-number-input"
-                        type="number"
-                        inputmode="decimal"
-                        min="0"
-                        max="510"
-                        step="0.01"
-                        placeholder="Optional"
-                      >
-
-                      <span class="waps-number-suffix">
-                        pts
-                      </span>
-
-                    </div>
-
-                  </div>
-
-
-                  <!-- CUTOFF SOURCE -->
-
-                  <div class="waps-field-group">
-
-                    <label
-                      class="waps-field-label"
-                      for="cutoffSource"
-                    >
-                      Cutoff Source
-                    </label>
-
-                    <div class="waps-text-shell">
-
-                      <input
-                        id="cutoffSource"
-                        name="cutoffSource"
-                        class="waps-text-input waps-text-input-normal"
-                        type="text"
-                        maxlength="100"
-                        placeholder="Example: Official 25E6 cutoff"
-                      >
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-
-                <div
-                  id="cutoffComparisonResult"
-                  class="waps-cutoff-result"
-                  data-status="empty"
-                  aria-live="polite"
-                >
-                  Enter a verified cutoff to compare it with the estimate.
-                </div>
-
-              </div>
-
-            </details>
-
-          </div>
-
-
-          <!-- =================================================
-            LEFT-PANEL EMPTY STATE
-          ================================================== -->
-
-          <div
-            id="inputEmptyState"
-            class="waps-input-empty-state"
-          >
-
-            <span
-              class="waps-empty-state-icon"
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 48 48">
-                <path
-                  d="M24 5 41 22 24 17 7 22 24 5Z"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linejoin="round"
-                />
-
-                <path
-                  d="M10 28h28M15 34h18M20 40h8"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </span>
-
-            <strong>
-              Select your CAFSC to continue
-            </strong>
-
-            <span>
-              The correct test-score fields will appear automatically.
-            </span>
-
-          </div>
-
-        </section>
-
 
         <!-- ===================================================
-          RIGHT PANEL — ESTIMATED RESULT
+          SCORE OVERVIEW
+
+          Mobile-first:
+          Result intentionally comes before input stack.
         ==================================================== -->
 
         <aside
-          class="waps-panel waps-result-panel"
+          class="
+            waps-panel
+            waps-result-panel
+            waps-score-first
+          "
           aria-labelledby="waps-result-title"
         >
+
+
+          <!-- RESULT HEADING -->
 
           <div class="waps-result-heading">
 
             <div>
+
               <div class="waps-panel-eyebrow">
                 Your Estimated WAPS Score
               </div>
@@ -1875,6 +216,7 @@
               >
                 Score Overview
               </h2>
+
             </div>
 
 
@@ -1882,13 +224,16 @@
               id="resetCalculatorButton"
               class="waps-reset-button"
               type="button"
+              aria-label="Reset WAPS calculator"
             >
 
               <span
                 class="waps-reset-icon"
                 aria-hidden="true"
               >
-                <svg viewBox="0 0 24 24">
+                <svg
+                  viewBox="0 0 24 24"
+                >
                   <path
                     d="M4.5 8V3.8M4.5 3.8h4.2"
                     fill="none"
@@ -1908,11 +253,14 @@
                 </svg>
               </span>
 
-              <span>Reset Calculator</span>
+              <span>
+                Reset Calculator
+              </span>
 
             </button>
 
           </div>
+
 
 
           <!-- =================================================
@@ -1928,7 +276,9 @@
               class="waps-result-empty-icon"
               aria-hidden="true"
             >
-              <svg viewBox="0 0 64 64">
+              <svg
+                viewBox="0 0 64 64"
+              >
                 <circle
                   cx="32"
                   cy="32"
@@ -1951,21 +301,24 @@
               </svg>
             </span>
 
+
             <strong>
               Select your CAFSC to begin
             </strong>
 
+
             <span>
-              Your promotion cycle, testing path and score estimate
-              will appear here.
+              Your promotion cycle, testing path and
+              score estimate will appear here.
             </span>
 
           </div>
 
 
+
           <!-- =================================================
             RESULT CONTENT
-            Hidden until CAFSC selection
+            Hidden until valid CAFSC selection
           ================================================== -->
 
           <div
@@ -1974,9 +327,15 @@
             hidden
           >
 
-            <!-- SCORE HERO -->
+
+            <!-- ===============================================
+              SCORE HERO
+            ================================================ -->
 
             <div class="waps-result-hero">
+
+
+              <!-- SCORE RING -->
 
               <div
                 id="wapsScoreRing"
@@ -1994,8 +353,12 @@
                     0.00
                   </div>
 
+
                   <div class="waps-total-maximum">
-                    out of <strong>510</strong>
+                    out of
+                    <strong>
+                      510
+                    </strong>
                   </div>
 
                 </div>
@@ -2003,7 +366,13 @@
               </div>
 
 
+
+              <!-- RESULT SUMMARY -->
+
               <div class="waps-result-summary">
+
+
+                <!-- TEST STATUS -->
 
                 <div
                   id="overallScoreStatus"
@@ -2015,7 +384,9 @@
                     class="waps-result-status-icon"
                     aria-hidden="true"
                   >
-                    <svg viewBox="0 0 24 24">
+                    <svg
+                      viewBox="0 0 24 24"
+                    >
                       <circle
                         cx="12"
                         cy="12"
@@ -2035,15 +406,20 @@
                     </svg>
                   </span>
 
+
                   <span>
 
-                    <strong id="overallScoreStatusTitle">
+                    <strong
+                      id="overallScoreStatusTitle"
+                    >
                       Enter your test score
                     </strong>
 
-                    <span id="overallScoreStatusText">
-                      The minimum testing requirements will be
-                      evaluated automatically.
+                    <span
+                      id="overallScoreStatusText"
+                    >
+                      The minimum testing requirements
+                      will be evaluated automatically.
                     </span>
 
                   </span>
@@ -2051,63 +427,99 @@
                 </div>
 
 
+
+                <!-- COMPONENT SUMMARY -->
+
                 <dl class="waps-component-summary">
+
 
                   <div class="waps-component-summary-row">
 
-                    <dt>Testing Component</dt>
+                    <dt>
+                      Testing Component
+                    </dt>
 
                     <dd>
-                      <strong id="testingComponentValue">
+                      <strong
+                        id="testingComponentValue"
+                      >
                         0.00
                       </strong>
 
-                      <span>/ 200</span>
+                      <span>
+                        / 200
+                      </span>
                     </dd>
 
                   </div>
 
 
+
                   <div class="waps-component-summary-row">
 
-                    <dt>EPB Component</dt>
+                    <dt>
+                      EPB Component
+                    </dt>
 
                     <dd>
-                      <strong id="epbComponentValue">
+                      <strong
+                        id="epbComponentValue"
+                      >
                         235
                       </strong>
 
-                      <span>/ 285</span>
+                      <span>
+                        / 285
+                      </span>
                     </dd>
 
                   </div>
+
 
 
                   <div class="waps-component-summary-row">
 
-                    <dt>Decoration Points</dt>
+                    <dt>
+                      Decoration Points
+                    </dt>
 
                     <dd>
-                      <strong id="decorationComponentValue">
+                      <strong
+                        id="decorationComponentValue"
+                      >
                         0
                       </strong>
 
-                      <span>/ 25</span>
+                      <span>
+                        / 25
+                      </span>
                     </dd>
 
                   </div>
 
 
-                  <div class="waps-component-summary-row waps-total-row">
 
-                    <dt>Total Score</dt>
+                  <div
+                    class="
+                      waps-component-summary-row
+                      waps-total-row
+                    "
+                  >
+
+                    <dt>
+                      Total Score
+                    </dt>
 
                     <dd>
-                      <strong id="totalComponentValue">
+                      <strong
+                        id="totalComponentValue"
+                      >
                         0.00
                       </strong>
 
-                      <span>/ 510</span>
+                      <span>
+                        / 510
+                      </span>
                     </dd>
 
                   </div>
@@ -2119,7 +531,10 @@
             </div>
 
 
-            <!-- WHAT THIS MEANS -->
+
+            <!-- ===============================================
+              WHAT THIS MEANS
+            ================================================ -->
 
             <section
               class="waps-meaning-card"
@@ -2130,9 +545,23 @@
                 class="waps-meaning-icon"
                 aria-hidden="true"
               >
-                <svg viewBox="0 0 24 24">
+                <svg
+                  viewBox="0 0 24 24"
+                >
                   <path
-                    d="m12 3 2.3 4.7L19.5 9l-3.8 3.7.9 5.3-4.6-2.5L7.4 18l.9-5.3L4.5 9l5.2-1.3L12 3Z"
+                    d="
+                      m12 3
+                      2.3 4.7
+                      L19.5 9
+                      l-3.8 3.7
+                      .9 5.3
+                      -4.6-2.5
+                      L7.4 18
+                      l.9-5.3
+                      L4.5 9
+                      l5.2-1.3
+                      L12 3Z
+                    "
                     fill="none"
                     stroke="currentColor"
                     stroke-width="1.6"
@@ -2151,9 +580,13 @@
                   What This Means
                 </h3>
 
-                <p id="wapsMeaningText">
-                  Your score estimate will update as you enter
-                  your test, EPB and decoration information.
+
+                <p
+                  id="wapsMeaningText"
+                >
+                  Your score estimate will update
+                  as you enter your test, EPB and
+                  decoration information.
                 </p>
 
               </div>
@@ -2161,7 +594,10 @@
             </section>
 
 
-            <!-- COMPONENT BREAKDOWN -->
+
+            <!-- ===============================================
+              COMPONENT BREAKDOWN
+            ================================================ -->
 
             <section
               class="waps-breakdown-card"
@@ -2178,39 +614,53 @@
 
               <div class="waps-breakdown-list">
 
+
                 <!-- PFE -->
 
                 <div class="waps-breakdown-item">
 
                   <div class="waps-breakdown-top">
 
-                    <span id="pfeBreakdownLabel">
+                    <span
+                      id="pfeBreakdownLabel"
+                    >
                       PFE Score
                     </span>
 
                     <span>
-                      <strong id="pfeBreakdownValue">
+
+                      <strong
+                        id="pfeBreakdownValue"
+                      >
                         0.00
                       </strong>
 
-                      <span id="pfeBreakdownMaximum">
+                      <span
+                        id="pfeBreakdownMaximum"
+                      >
                         / 100
                       </span>
+
                     </span>
 
                   </div>
+
 
                   <div class="waps-progress-track">
 
                     <span
                       id="pfeProgressBar"
-                      class="waps-progress-fill waps-progress-blue"
+                      class="
+                        waps-progress-fill
+                        waps-progress-blue
+                      "
                       style="width:0%;"
                     ></span>
 
                   </div>
 
                 </div>
+
 
 
                 <!-- SKT -->
@@ -2223,31 +673,44 @@
 
                   <div class="waps-breakdown-top">
 
-                    <span>SKT Score</span>
+                    <span>
+                      SKT Score
+                    </span>
 
                     <span>
-                      <strong id="sktBreakdownValue">
+
+                      <strong
+                        id="sktBreakdownValue"
+                      >
                         0.00
                       </strong>
 
-                      <span id="sktBreakdownMaximum">
+                      <span
+                        id="sktBreakdownMaximum"
+                      >
                         / 100
                       </span>
+
                     </span>
 
                   </div>
+
 
                   <div class="waps-progress-track">
 
                     <span
                       id="sktProgressBar"
-                      class="waps-progress-fill waps-progress-orange"
+                      class="
+                        waps-progress-fill
+                        waps-progress-orange
+                      "
                       style="width:0%;"
                     ></span>
 
                   </div>
 
                 </div>
+
 
 
                 <!-- EPB -->
@@ -2261,20 +724,30 @@
                     </span>
 
                     <span>
-                      <strong id="epbBreakdownValue">
+
+                      <strong
+                        id="epbBreakdownValue"
+                      >
                         235
                       </strong>
 
-                      <span>/ 285</span>
+                      <span>
+                        / 285
+                      </span>
+
                     </span>
 
                   </div>
+
 
                   <div class="waps-progress-track">
 
                     <span
                       id="epbProgressBar"
-                      class="waps-progress-fill waps-progress-green"
+                      class="
+                        waps-progress-fill
+                        waps-progress-green
+                      "
                       style="width:82.46%;"
                     ></span>
 
@@ -2283,29 +756,42 @@
                 </div>
 
 
+
                 <!-- DECORATIONS -->
 
                 <div class="waps-breakdown-item">
 
                   <div class="waps-breakdown-top">
 
-                    <span>Decoration Points</span>
+                    <span>
+                      Decoration Points
+                    </span>
 
                     <span>
-                      <strong id="decorationsBreakdownValue">
+
+                      <strong
+                        id="decorationsBreakdownValue"
+                      >
                         0
                       </strong>
 
-                      <span>/ 25</span>
+                      <span>
+                        / 25
+                      </span>
+
                     </span>
 
                   </div>
+
 
                   <div class="waps-progress-track">
 
                     <span
                       id="decorationsProgressBar"
-                      class="waps-progress-fill waps-progress-purple"
+                      class="
+                        waps-progress-fill
+                        waps-progress-purple
+                      "
                       style="width:0%;"
                     ></span>
 
@@ -2318,9 +804,20 @@
             </section>
 
 
-            <!-- RESULT ACTIONS -->
 
-            <div class="waps-result-actions">
+            <!-- ===============================================
+              SECONDARY RESULT ACTION
+
+              Retained for current JS compatibility.
+              Mobile CSS can visually de-emphasize this.
+            ================================================ -->
+
+            <div
+              class="
+                waps-result-actions
+                waps-secondary-actions
+              "
+            >
 
               <button
                 id="copyResultsButton"
@@ -2332,7 +829,9 @@
                   class="waps-copy-icon"
                   aria-hidden="true"
                 >
-                  <svg viewBox="0 0 24 24">
+                  <svg
+                    viewBox="0 0 24 24"
+                  >
                     <rect
                       x="8"
                       y="8"
@@ -2345,7 +844,15 @@
                     />
 
                     <path
-                      d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
+                      d="
+                        M16 8V6
+                        a2 2 0 0 0-2-2
+                        H6
+                        a2 2 0 0 0-2 2
+                        v8
+                        a2 2 0 0 0 2 2
+                        h2
+                      "
                       fill="none"
                       stroke="currentColor"
                       stroke-width="1.7"
@@ -2354,7 +861,10 @@
                   </svg>
                 </span>
 
-                <span id="copyResultsButtonText">
+
+                <span
+                  id="copyResultsButtonText"
+                >
                   Copy Score Summary
                 </span>
 
@@ -2366,7 +876,2376 @@
 
         </aside>
 
+
+
+        <!-- ===================================================
+          YOUR INPUTS
+        ==================================================== -->
+
+        <section
+          class="
+            waps-panel
+            waps-input-panel
+            waps-input-stack
+          "
+          aria-labelledby="waps-input-title"
+        >
+
+
+          <!-- INPUT PANEL HEADING -->
+
+          <div
+            class="
+              waps-panel-heading
+              waps-input-panel-heading
+            "
+          >
+
+            <div>
+
+              <div class="waps-panel-eyebrow">
+                Your Inputs
+              </div>
+
+              <h2
+                id="waps-input-title"
+                class="waps-panel-title"
+              >
+                Build Your Estimate
+              </h2>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- =================================================
+            1. CAFSC SELECTION
+          ================================================== -->
+
+          <section
+            class="
+              waps-input-section
+              waps-afsc-section
+            "
+            aria-labelledby="cafsc-heading"
+          >
+
+
+            <div class="waps-section-heading">
+
+              <span class="waps-section-number">
+                1
+              </span>
+
+
+              <h3
+                id="cafsc-heading"
+                class="waps-section-label"
+              >
+                CAFSC on the PECD
+              </h3>
+
+
+              <button
+                class="waps-info-button"
+                type="button"
+                data-help-topic="cafsc"
+                aria-label="Learn about selecting your CAFSC"
+              >
+
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                  />
+
+                  <path
+                    d="M12 10.7v5.1M12 7.4v.1"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+
+              </button>
+
+            </div>
+
+
+
+            <p class="waps-section-description">
+              Search by AFSC code or career-field name.
+              Use the CAFSC held on the promotion
+              eligibility cutoff date.
+            </p>
+
+
+
+            <div
+              id="cafscSearchShell"
+              class="waps-cafsc-search-shell"
+            >
+
+
+              <span
+                class="waps-cafsc-search-icon"
+                aria-hidden="true"
+              >
+
+                <svg
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    cx="10.8"
+                    cy="10.8"
+                    r="6.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+
+                  <path
+                    d="m16 16 4.2 4.2"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+
+              </span>
+
+
+
+              <input
+                id="cafscInput"
+                name="cafscInput"
+                class="waps-cafsc-input"
+                type="text"
+                inputmode="text"
+                placeholder="Search AFSC code or career-field name"
+                list="cafscCatalog"
+                autocomplete="off"
+                spellcheck="false"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-controls="cafscCatalog"
+                aria-describedby="cafscHelp cafscStatus"
+              >
+
+
+
+              <button
+                id="cafscClearButton"
+                class="waps-cafsc-clear"
+                type="button"
+                aria-label="Clear selected CAFSC"
+                hidden
+              >
+
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="m7 7 10 10M17 7 7 17"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+
+              </button>
+
+            </div>
+
+
+
+            <datalist
+              id="cafscCatalog"
+            ></datalist>
+
+
+
+            <div
+              id="cafscStatus"
+              class="waps-field-status"
+              data-status="neutral"
+              aria-live="polite"
+            >
+              Select a CAFSC to begin.
+            </div>
+
+
+
+            <p
+              id="cafscHelp"
+              class="waps-field-help"
+            >
+              TheWing will determine the target grade,
+              cycle and required test score inputs.
+            </p>
+
+          </section>
+
+
+
+          <!-- =================================================
+            INPUT FLOW
+            Hidden until valid CAFSC is selected
+          ================================================== -->
+
+          <div
+            id="wapsInputFlow"
+            class="waps-input-flow"
+            hidden
+          >
+
+
+
+            <!-- ===============================================
+              2. TEST SCORES
+            ================================================ -->
+
+            <section
+              class="
+                waps-input-section
+                waps-testing-section
+              "
+              aria-labelledby="test-scores-heading"
+            >
+
+
+              <div class="waps-section-heading">
+
+                <span class="waps-section-number">
+                  2
+                </span>
+
+
+                <h3
+                  id="test-scores-heading"
+                  class="waps-section-label"
+                >
+                  Test Scores
+                </h3>
+
+
+                <button
+                  class="waps-info-button"
+                  type="button"
+                  data-help-topic="test-scores"
+                  aria-label="Learn about WAPS test scores"
+                >
+
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                    />
+
+                    <path
+                      d="M12 10.7v5.1M12 7.4v.1"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+
+                </button>
+
+              </div>
+
+
+
+              <!-- TESTING PATH -->
+
+              <div
+                id="testingPathNotice"
+                class="waps-testing-path-notice"
+                data-path="pending"
+              >
+
+                <span
+                  class="waps-testing-path-icon"
+                  aria-hidden="true"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M5 12h14M14 7l5 5-5 5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+
+
+                <span>
+
+                  <strong
+                    id="testingPathNoticeTitle"
+                  >
+                    Testing path pending
+                  </strong>
+
+
+                  <span
+                    id="testingPathNoticeText"
+                  >
+                    Select a CAFSC to determine the
+                    required test scores.
+                  </span>
+
+                </span>
+
+              </div>
+
+
+
+              <!-- TEST SCORE CARDS -->
+
+              <div
+                id="testScoreGrid"
+                class="waps-test-score-grid"
+              >
+
+
+                <!-- PFE -->
+
+                <article
+                  id="pfeScoreCard"
+                  class="waps-score-card"
+                >
+
+
+                  <div class="waps-score-card-heading">
+
+                    <div>
+
+                      <label
+                        class="waps-score-card-label"
+                        for="pfeScore"
+                      >
+                        PFE Score
+                      </label>
+
+
+                      <div class="waps-score-card-description">
+                        Promotion Fitness Examination
+                      </div>
+
+                    </div>
+
+
+                    <div class="waps-score-maximum">
+                      / 100
+                    </div>
+
+                  </div>
+
+
+
+                  <div class="waps-score-value-row">
+
+                    <input
+                      id="pfeScore"
+                      name="pfeScore"
+                      class="waps-score-number"
+                      type="number"
+                      inputmode="decimal"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      value="74.00"
+                      aria-describedby="pfeScoreFeedback"
+                    >
+
+                  </div>
+
+
+
+                  <input
+                    id="pfeRange"
+                    class="waps-range waps-range-teal"
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value="74"
+                    aria-label="PFE score"
+                  >
+
+
+
+                  <div
+                    class="waps-range-ticks"
+                    aria-hidden="true"
+                  >
+                    <span>0</span>
+                    <span>20</span>
+                    <span>40</span>
+                    <span>60</span>
+                    <span>80</span>
+                    <span>100</span>
+                  </div>
+
+
+
+                  <div
+                    id="pfeScoreFeedback"
+                    class="waps-score-feedback"
+                    data-status="neutral"
+                    aria-live="polite"
+                  >
+                    Enter your PFE score.
+                  </div>
+
+                </article>
+
+
+
+                <!-- SKT -->
+
+                <article
+                  id="sktScoreCard"
+                  class="waps-score-card"
+                  hidden
+                >
+
+
+                  <div class="waps-score-card-heading">
+
+                    <div>
+
+                      <label
+                        class="waps-score-card-label"
+                        for="sktScore"
+                      >
+                        SKT Score
+                      </label>
+
+
+                      <div class="waps-score-card-description">
+                        Specialty Knowledge Test
+                      </div>
+
+                    </div>
+
+
+                    <div class="waps-score-maximum">
+                      / 100
+                    </div>
+
+                  </div>
+
+
+
+                  <div class="waps-score-value-row">
+
+                    <input
+                      id="sktScore"
+                      name="sktScore"
+                      class="waps-score-number"
+                      type="number"
+                      inputmode="decimal"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      value="68.00"
+                      aria-describedby="sktScoreFeedback"
+                    >
+
+                  </div>
+
+
+
+                  <input
+                    id="sktRange"
+                    class="waps-range waps-range-teal"
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value="68"
+                    aria-label="SKT score"
+                  >
+
+
+
+                  <div
+                    class="waps-range-ticks"
+                    aria-hidden="true"
+                  >
+                    <span>0</span>
+                    <span>20</span>
+                    <span>40</span>
+                    <span>60</span>
+                    <span>80</span>
+                    <span>100</span>
+                  </div>
+
+
+
+                  <div
+                    id="sktScoreFeedback"
+                    class="waps-score-feedback"
+                    data-status="neutral"
+                    aria-live="polite"
+                  >
+                    Enter your SKT score.
+                  </div>
+
+                </article>
+
+              </div>
+
+
+
+              <!-- MINIMUM REQUIREMENTS -->
+
+              <div
+                id="testingMinimumNotice"
+                class="waps-minimum-notice"
+                data-status="neutral"
+                aria-live="polite"
+              >
+
+                <span
+                  class="waps-minimum-icon"
+                  aria-hidden="true"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                    />
+
+                    <path
+                      d="M12 8v5M12 16.7v.1"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </span>
+
+
+                <span class="waps-minimum-copy">
+
+                  <strong
+                    id="testingMinimumTitle"
+                  >
+                    Testing requirements pending
+                  </strong>
+
+
+                  <span
+                    id="testingMinimumText"
+                  >
+                    Select a CAFSC to configure
+                    the test minimums.
+                  </span>
+
+                </span>
+
+              </div>
+
+            </section>
+
+
+
+            <!-- ===============================================
+              3. EPB PROMOTION RECOMMENDATIONS
+            ================================================ -->
+
+            <section
+              class="
+                waps-input-section
+                waps-epb-section
+              "
+              aria-labelledby="epb-heading"
+            >
+
+
+              <div class="waps-section-heading">
+
+                <span class="waps-section-number">
+                  3
+                </span>
+
+
+                <h3
+                  id="epb-heading"
+                  class="waps-section-label"
+                >
+                  EPB Promotion Recommendations
+                </h3>
+
+
+                <span class="waps-section-qualifier">
+                  Last 3 Eligible
+                </span>
+
+
+                <button
+                  class="waps-info-button"
+                  type="button"
+                  data-help-topic="epb"
+                  aria-label="Learn about EPB promotion recommendation scoring"
+                >
+
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                    />
+
+                    <path
+                      d="M12 10.7v5.1M12 7.4v.1"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+
+                </button>
+
+              </div>
+
+
+
+              <div class="waps-epb-grid">
+
+
+                <!-- MOST RECENT -->
+
+                <div class="waps-select-card">
+
+                  <label
+                    class="waps-select-card-label"
+                    for="epbCurrent"
+                  >
+                    Most Recent
+                  </label>
+
+
+                  <div class="waps-select-shell">
+
+                    <select
+                      id="epbCurrent"
+                      name="epbCurrent"
+                      class="waps-select"
+                    >
+                      <option
+                        value="promote-now"
+                      >
+                        Promote Now
+                      </option>
+
+                      <option
+                        value="must-promote"
+                        selected
+                      >
+                        Must Promote
+                      </option>
+
+                      <option
+                        value="promote"
+                      >
+                        Promote
+                      </option>
+
+                      <option
+                        value="not-ready-now"
+                      >
+                        Not Ready Now
+                      </option>
+
+                      <option
+                        value="none"
+                      >
+                        No Eligible EPB
+                      </option>
+
+                      <option
+                        value="bypass"
+                      >
+                        Nonrated or Removed
+                      </option>
+                    </select>
+
+
+                    <span
+                      class="waps-select-arrow"
+                      aria-hidden="true"
+                    ></span>
+
+                  </div>
+
+
+                  <div class="waps-select-card-points">
+                    <span
+                      id="epbCurrentPoints"
+                    >
+                      220
+                    </span>
+                    points
+                  </div>
+
+                </div>
+
+
+
+                <!-- SECOND MOST RECENT -->
+
+                <div class="waps-select-card">
+
+                  <label
+                    class="waps-select-card-label"
+                    for="epbPrevious1"
+                  >
+                    Second Most Recent
+                  </label>
+
+
+                  <div class="waps-select-shell">
+
+                    <select
+                      id="epbPrevious1"
+                      name="epbPrevious1"
+                      class="waps-select"
+                    >
+                      <option value="promote-now">
+                        Promote Now
+                      </option>
+
+                      <option value="must-promote">
+                        Must Promote
+                      </option>
+
+                      <option
+                        value="promote"
+                        selected
+                      >
+                        Promote
+                      </option>
+
+                      <option value="not-ready-now">
+                        Not Ready Now
+                      </option>
+
+                      <option value="none">
+                        No Eligible EPB
+                      </option>
+
+                      <option value="bypass">
+                        Nonrated or Removed
+                      </option>
+                    </select>
+
+
+                    <span
+                      class="waps-select-arrow"
+                      aria-hidden="true"
+                    ></span>
+
+                  </div>
+
+
+                  <div class="waps-select-card-points">
+                    <span
+                      id="epbPrevious1Points"
+                    >
+                      10
+                    </span>
+                    points
+                  </div>
+
+                </div>
+
+
+
+                <!-- THIRD MOST RECENT -->
+
+                <div class="waps-select-card">
+
+                  <label
+                    class="waps-select-card-label"
+                    for="epbPrevious2"
+                  >
+                    Third Most Recent
+                  </label>
+
+
+                  <div class="waps-select-shell">
+
+                    <select
+                      id="epbPrevious2"
+                      name="epbPrevious2"
+                      class="waps-select"
+                    >
+                      <option value="promote-now">
+                        Promote Now
+                      </option>
+
+                      <option value="must-promote">
+                        Must Promote
+                      </option>
+
+                      <option
+                        value="promote"
+                        selected
+                      >
+                        Promote
+                      </option>
+
+                      <option value="not-ready-now">
+                        Not Ready Now
+                      </option>
+
+                      <option value="none">
+                        No Eligible EPB
+                      </option>
+
+                      <option value="bypass">
+                        Nonrated or Removed
+                      </option>
+                    </select>
+
+
+                    <span
+                      class="waps-select-arrow"
+                      aria-hidden="true"
+                    ></span>
+
+                  </div>
+
+
+                  <div class="waps-select-card-points">
+                    <span
+                      id="epbPrevious2Points"
+                    >
+                      5
+                    </span>
+                    points
+                  </div>
+
+                </div>
+
+              </div>
+
+            </section>
+
+
+
+            <!-- ===============================================
+              4. DECORATIONS
+            ================================================ -->
+
+            <section
+              class="
+                waps-input-section
+                waps-decorations-section
+              "
+              aria-labelledby="decorations-heading"
+            >
+
+
+              <div class="waps-section-heading">
+
+                <span class="waps-section-number">
+                  4
+                </span>
+
+
+                <h3
+                  id="decorations-heading"
+                  class="waps-section-label"
+                >
+                  Decorations
+                </h3>
+
+
+                <span class="waps-section-qualifier">
+                  MAX 25
+                </span>
+
+
+                <button
+                  class="waps-info-button"
+                  type="button"
+                  data-help-topic="decorations"
+                  aria-label="Learn about decoration points"
+                >
+
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                    />
+
+                    <path
+                      d="M12 10.7v5.1M12 7.4v.1"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+
+                </button>
+
+              </div>
+
+
+
+              <p class="waps-section-description">
+                Enter the number of each qualifying decoration.
+                TheWing converts quantities to WAPS decoration
+                points and caps credit at 25.
+              </p>
+
+
+
+              <input
+                id="decorationPoints"
+                name="decorationPoints"
+                type="hidden"
+                value="0"
+              >
+
+
+
+              <!-- COMMON DECORATIONS -->
+
+              <div
+                class="waps-decoration-grid"
+                role="group"
+                aria-label="Common eligible decorations"
+              >
+
+
+                <!-- MSM -->
+
+                <div class="waps-decoration-item">
+
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationMsm"
+                  >
+                    Meritorious Service Medal
+                  </label>
+
+
+                  <div class="waps-decoration-item-meta">
+                    5 points each
+                  </div>
+
+
+                  <div class="waps-decoration-qty-shell">
+
+                    <input
+                      id="decorationMsm"
+                      name="decorationMsm"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="msm"
+                      aria-describedby="decorationMsmMeta"
+                    >
+
+                  </div>
+
+
+                  <span
+                    id="decorationMsmMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Meritorious Service Medal,
+                    5 points each
+                  </span>
+
+                </div>
+
+
+
+                <!-- AIR FORCE COMMENDATION MEDAL -->
+
+                <div class="waps-decoration-item">
+
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationCommendation"
+                  >
+                    Air Force Commendation Medal
+                  </label>
+
+
+                  <div class="waps-decoration-item-meta">
+                    3 points each
+                  </div>
+
+
+                  <div class="waps-decoration-qty-shell">
+
+                    <input
+                      id="decorationCommendation"
+                      name="decorationCommendation"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="commendation"
+                      aria-describedby="decorationCommendationMeta"
+                    >
+
+                  </div>
+
+
+                  <span
+                    id="decorationCommendationMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Air Force Commendation Medal,
+                    3 points each
+                  </span>
+
+                </div>
+
+
+
+                <!-- AIR FORCE ACHIEVEMENT MEDAL -->
+
+                <div class="waps-decoration-item">
+
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationAchievement"
+                  >
+                    Air Force Achievement Medal
+                  </label>
+
+
+                  <div class="waps-decoration-item-meta">
+                    1 point each
+                  </div>
+
+
+                  <div class="waps-decoration-qty-shell">
+
+                    <input
+                      id="decorationAchievement"
+                      name="decorationAchievement"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="achievement"
+                      aria-describedby="decorationAchievementMeta"
+                    >
+
+                  </div>
+
+
+                  <span
+                    id="decorationAchievementMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Air Force Achievement Medal,
+                    1 point each
+                  </span>
+
+                </div>
+
+
+
+                <!-- AIR MEDAL -->
+
+                <div class="waps-decoration-item">
+
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationAirMedal"
+                  >
+                    Air Medal
+                  </label>
+
+
+                  <div class="waps-decoration-item-meta">
+                    3 points each
+                  </div>
+
+
+                  <div class="waps-decoration-qty-shell">
+
+                    <input
+                      id="decorationAirMedal"
+                      name="decorationAirMedal"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="airMedal"
+                      aria-describedby="decorationAirMedalMeta"
+                    >
+
+                  </div>
+
+
+                  <span
+                    id="decorationAirMedalMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Air Medal,
+                    3 points each
+                  </span>
+
+                </div>
+
+
+
+                <!-- BRONZE STAR -->
+
+                <div class="waps-decoration-item">
+
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationBronzeStar"
+                  >
+                    Bronze Star Medal
+                  </label>
+
+
+                  <div class="waps-decoration-item-meta">
+                    5 points each
+                  </div>
+
+
+                  <div class="waps-decoration-qty-shell">
+
+                    <input
+                      id="decorationBronzeStar"
+                      name="decorationBronzeStar"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="bronzeStar"
+                      aria-describedby="decorationBronzeStarMeta"
+                    >
+
+                  </div>
+
+
+                  <span
+                    id="decorationBronzeStarMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Bronze Star Medal,
+                    5 points each
+                  </span>
+
+                </div>
+
+
+
+                <!-- PURPLE HEART -->
+
+                <div class="waps-decoration-item">
+
+                  <label
+                    class="waps-decoration-item-label"
+                    for="decorationPurpleHeart"
+                  >
+                    Purple Heart
+                  </label>
+
+
+                  <div class="waps-decoration-item-meta">
+                    5 points each
+                  </div>
+
+
+                  <div class="waps-decoration-qty-shell">
+
+                    <input
+                      id="decorationPurpleHeart"
+                      name="decorationPurpleHeart"
+                      class="waps-decoration-qty"
+                      type="number"
+                      inputmode="numeric"
+                      min="0"
+                      max="99"
+                      step="1"
+                      value="0"
+                      data-decoration-key="purpleHeart"
+                      aria-describedby="decorationPurpleHeartMeta"
+                    >
+
+                  </div>
+
+
+                  <span
+                    id="decorationPurpleHeartMeta"
+                    class="waps-visually-hidden"
+                  >
+                    Purple Heart,
+                    5 points each
+                  </span>
+
+                </div>
+
+              </div>
+
+
+
+              <!-- ADDITIONAL DECORATIONS -->
+
+              <details
+                id="additionalDecorations"
+                class="waps-additional-decorations"
+              >
+
+                <summary
+                  class="waps-additional-decorations-summary"
+                >
+
+                  <span>
+                    Additional Eligible Decorations
+                  </span>
+
+
+                  <span
+                    class="waps-advanced-arrow"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="m7 10 5 5 5-5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </span>
+
+                </summary>
+
+
+
+                <div
+                  class="
+                    waps-decoration-grid
+                    waps-decoration-grid-additional
+                  "
+                  role="group"
+                  aria-label="Additional eligible decorations"
+                >
+
+
+                  <!-- MEDAL OF HONOR -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationMedalOfHonor"
+                    >
+                      Medal of Honor
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      15 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationMedalOfHonor"
+                        name="decorationMedalOfHonor"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="medalOfHonor"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- AIR FORCE CROSS -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationAirForceCross"
+                    >
+                      Air Force Cross
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      11 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationAirForceCross"
+                        name="decorationAirForceCross"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="airForceCross"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- NAVY CROSS -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationNavyCross"
+                    >
+                      Navy Cross
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      11 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationNavyCross"
+                        name="decorationNavyCross"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="navyCross"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- DISTINGUISHED SERVICE CROSS -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationDistinguishedServiceCross"
+                    >
+                      Distinguished Service Cross
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      11 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationDistinguishedServiceCross"
+                        name="decorationDistinguishedServiceCross"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="distinguishedServiceCross"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- DEFENSE DISTINGUISHED SERVICE MEDAL -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationDefenseDsm"
+                    >
+                      Defense Distinguished Service Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      9 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationDefenseDsm"
+                        name="decorationDefenseDsm"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="defenseDsm"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- DISTINGUISHED SERVICE MEDAL -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationDsm"
+                    >
+                      Distinguished Service Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      9 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationDsm"
+                        name="decorationDsm"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="dsm"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- SILVER STAR -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationSilverStar"
+                    >
+                      Silver Star
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      9 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationSilverStar"
+                        name="decorationSilverStar"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="silverStar"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- LEGION OF MERIT -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationLegionOfMerit"
+                    >
+                      Legion of Merit
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      7 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationLegionOfMerit"
+                        name="decorationLegionOfMerit"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="legionOfMerit"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- DEFENSE SUPERIOR SERVICE MEDAL -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationDssm"
+                    >
+                      Defense Superior Service Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      7 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationDssm"
+                        name="decorationDssm"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="dssm"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- DISTINGUISHED FLYING CROSS -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationDfc"
+                    >
+                      Distinguished Flying Cross
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      7 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationDfc"
+                        name="decorationDfc"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="dfc"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- DEFENSE MERITORIOUS SERVICE MEDAL -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationDefenseMsm"
+                    >
+                      Defense Meritorious Service Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      5 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationDefenseMsm"
+                        name="decorationDefenseMsm"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="defenseMsm"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- AERIAL ACHIEVEMENT MEDAL -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationAerialAchievement"
+                    >
+                      Aerial Achievement Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      3 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationAerialAchievement"
+                        name="decorationAerialAchievement"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="aerialAchievement"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- ARMY COMMENDATION -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationArmyCommendation"
+                    >
+                      Army Commendation Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      3 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationArmyCommendation"
+                        name="decorationArmyCommendation"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="armyCommendation"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- NAVY COMMENDATION -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationNavyCommendation"
+                    >
+                      Navy-Marine Corps Commendation Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      3 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationNavyCommendation"
+                        name="decorationNavyCommendation"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="navyCommendation"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- JOINT COMMENDATION -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationJointCommendation"
+                    >
+                      Joint Service Commendation Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      3 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationJointCommendation"
+                        name="decorationJointCommendation"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="jointCommendation"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- COAST GUARD COMMENDATION -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationCoastGuardCommendation"
+                    >
+                      Coast Guard Commendation Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      3 points each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationCoastGuardCommendation"
+                        name="decorationCoastGuardCommendation"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="coastGuardCommendation"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- NAVY ACHIEVEMENT -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationNavyAchievement"
+                    >
+                      Navy-Marine Corps Achievement Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      1 point each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationNavyAchievement"
+                        name="decorationNavyAchievement"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="navyAchievement"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- COAST GUARD ACHIEVEMENT -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationCoastGuardAchievement"
+                    >
+                      Coast Guard Achievement Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      1 point each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationCoastGuardAchievement"
+                        name="decorationCoastGuardAchievement"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="coastGuardAchievement"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- ARMY ACHIEVEMENT -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationArmyAchievement"
+                    >
+                      Army Achievement Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      1 point each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationArmyAchievement"
+                        name="decorationArmyAchievement"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="armyAchievement"
+                      >
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- JOINT ACHIEVEMENT -->
+
+                  <div class="waps-decoration-item">
+
+                    <label
+                      class="waps-decoration-item-label"
+                      for="decorationJointAchievement"
+                    >
+                      Joint Service Achievement Medal
+                    </label>
+
+                    <div class="waps-decoration-item-meta">
+                      1 point each
+                    </div>
+
+                    <div class="waps-decoration-qty-shell">
+
+                      <input
+                        id="decorationJointAchievement"
+                        name="decorationJointAchievement"
+                        class="waps-decoration-qty"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="99"
+                        step="1"
+                        value="0"
+                        data-decoration-key="jointAchievement"
+                      >
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </details>
+
+
+
+              <!-- DECORATION SUMMARY -->
+
+              <div
+                id="decorationSummary"
+                class="waps-decoration-summary"
+                data-cap-applied="false"
+                aria-live="polite"
+              >
+
+
+                <div class="waps-decoration-summary-main">
+
+                  <span class="waps-decoration-summary-label">
+                    Decorations Total
+                  </span>
+
+
+                  <span class="waps-decoration-summary-value">
+
+                    <strong
+                      id="decorationCappedTotal"
+                    >
+                      0
+                    </strong>
+
+                    <span>
+                      / 25
+                    </span>
+
+                  </span>
+
+                </div>
+
+
+
+                <div
+                  id="decorationRawRow"
+                  class="waps-decoration-raw-row"
+                  hidden
+                >
+
+                  <span>
+                    Earned Decoration Points
+                  </span>
+
+                  <strong
+                    id="decorationRawTotal"
+                  >
+                    0
+                  </strong>
+
+                </div>
+
+
+
+                <div
+                  id="decorationCapNotice"
+                  class="waps-decoration-cap-notice"
+                  hidden
+                >
+                  Raw decoration points exceed the WAPS
+                  maximum. Credit is capped at 25.
+                </div>
+
+
+
+                <p
+                  id="decorationHelp"
+                  class="waps-decoration-help"
+                >
+                  Include only decorations with a closeout
+                  date on or before the PECD and a Given
+                  Under My Hand date before the cycle public
+                  release date.
+                </p>
+
+              </div>
+
+            </section>
+
+
+
+            <!-- ===============================================
+              ADVANCED OPTIONS
+            ================================================ -->
+
+            <details
+              id="advancedOptions"
+              class="waps-advanced"
+            >
+
+              <summary class="waps-advanced-summary">
+
+                <span>
+                  Advanced Options
+                </span>
+
+
+                <span
+                  class="waps-advanced-arrow"
+                  aria-hidden="true"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="m7 10 5 5 5-5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+
+              </summary>
+
+
+
+              <div class="waps-advanced-content">
+
+                <p class="waps-advanced-intro">
+                  These options are not required for
+                  the normal calculation.
+                </p>
+
+
+
+                <div class="waps-advanced-grid">
+
+
+                  <!-- INDIVIDUAL SKT EXEMPTION -->
+
+                  <div
+                    class="
+                      waps-field-group
+                      waps-field-wide
+                    "
+                  >
+
+                    <span class="waps-field-label">
+                      Official Individual SKT Exemption
+                    </span>
+
+
+                    <label class="waps-toggle-row">
+
+                      <input
+                        id="individualSktExemption"
+                        name="individualSktExemption"
+                        type="checkbox"
+                      >
+
+
+                      <span
+                        class="waps-toggle-control"
+                        aria-hidden="true"
+                      ></span>
+
+
+                      <span class="waps-toggle-copy">
+                        An official member-specific exemption
+                        applies even though the selected CAFSC
+                        normally uses SKT + PFE.
+                      </span>
+
+                    </label>
+
+                  </div>
+
+
+
+                  <!-- HISTORICAL CUTOFF -->
+
+                  <div class="waps-field-group">
+
+                    <label
+                      class="waps-field-label"
+                      for="historicalCutoff"
+                    >
+                      Historical Cutoff
+                    </label>
+
+
+                    <div class="waps-number-shell">
+
+                      <input
+                        id="historicalCutoff"
+                        name="historicalCutoff"
+                        class="waps-number-input"
+                        type="number"
+                        inputmode="decimal"
+                        min="0"
+                        max="510"
+                        step="0.01"
+                        placeholder="Optional"
+                      >
+
+
+                      <span class="waps-number-suffix">
+                        pts
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+
+                  <!-- CUTOFF SOURCE -->
+
+                  <div class="waps-field-group">
+
+                    <label
+                      class="waps-field-label"
+                      for="cutoffSource"
+                    >
+                      Cutoff Source
+                    </label>
+
+
+                    <div class="waps-text-shell">
+
+                      <input
+                        id="cutoffSource"
+                        name="cutoffSource"
+                        class="
+                          waps-text-input
+                          waps-text-input-normal
+                        "
+                        type="text"
+                        maxlength="100"
+                        placeholder="Example: Official 25E6 cutoff"
+                      >
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+
+                <div
+                  id="cutoffComparisonResult"
+                  class="waps-cutoff-result"
+                  data-status="empty"
+                  aria-live="polite"
+                >
+                  Enter a verified cutoff to compare
+                  it with the estimate.
+                </div>
+
+              </div>
+
+            </details>
+
+          </div>
+
+
+
+          <!-- =================================================
+            INPUT EMPTY STATE
+          ================================================== -->
+
+          <div
+            id="inputEmptyState"
+            class="waps-input-empty-state"
+          >
+
+            <span
+              class="waps-empty-state-icon"
+              aria-hidden="true"
+            >
+              <svg
+                viewBox="0 0 48 48"
+              >
+                <path
+                  d="M24 5 41 22 24 17 7 22 24 5Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linejoin="round"
+                />
+
+                <path
+                  d="M10 28h28M15 34h18M20 40h8"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </span>
+
+
+            <strong>
+              Select your CAFSC to continue
+            </strong>
+
+
+            <span>
+              The correct test-score fields
+              will appear automatically.
+            </span>
+
+          </div>
+
+        </section>
+
       </form>
+
 
 
       <!-- =====================================================
@@ -2375,13 +3254,16 @@
 
       <footer class="waps-footer">
 
+
         <div class="waps-footer-notice">
 
           <span
             class="waps-footer-icon"
             aria-hidden="true"
           >
-            <svg viewBox="0 0 24 24">
+            <svg
+              viewBox="0 0 24 24"
+            >
               <circle
                 cx="12"
                 cy="12"
@@ -2401,13 +3283,16 @@
             </svg>
           </span>
 
+
           <span>
-            This calculator is an unofficial estimator. Official
-            eligibility, scores, promotion AFSC, quotas, cutoffs and
-            selection status are determined by the Air Force and AFPC.
+            This calculator is an unofficial estimator.
+            Official eligibility, scores, promotion AFSC,
+            quotas, cutoffs and selection status are
+            determined by the Air Force and AFPC.
           </span>
 
         </div>
+
 
 
         <div class="waps-footer-bottom">
@@ -2427,6 +3312,7 @@
     </div>
 
 
+
     <!-- =======================================================
       HELP DIALOG
     ======================================================== -->
@@ -2439,6 +3325,7 @@
 
       <div class="waps-dialog-surface">
 
+
         <div class="waps-dialog-heading">
 
           <div>
@@ -2446,6 +3333,7 @@
             <div class="waps-panel-eyebrow">
               WAPS Calculator Help
             </div>
+
 
             <h2
               id="wapsHelpDialogTitle"
@@ -2457,13 +3345,18 @@
           </div>
 
 
+
           <button
             id="closeHelpButton"
             class="waps-dialog-close"
             type="button"
             aria-label="Close help"
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
+
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path
                 d="m7 7 10 10M17 7 7 17"
                 fill="none"
@@ -2472,9 +3365,11 @@
                 stroke-linecap="round"
               />
             </svg>
+
           </button>
 
         </div>
+
 
 
         <div
@@ -2482,86 +3377,109 @@
           class="waps-dialog-content"
         >
 
+
           <section>
 
-            <h3>Start With Your CAFSC</h3>
+            <h3>
+              Start With Your CAFSC
+            </h3>
 
             <p>
-              Select the CAFSC held on the promotion eligibility
-              cutoff date. TheWing uses the selected record to
-              determine the applicable promotion cycle and testing
+              Select the CAFSC held on the promotion
+              eligibility cutoff date. TheWing uses
+              the selected record to determine the
+              applicable promotion cycle and testing
               path.
             </p>
 
           </section>
 
 
+
           <section>
 
-            <h3>SKT + PFE</h3>
+            <h3>
+              SKT + PFE
+            </h3>
 
             <p>
-              When both tests apply, each examination contributes
-              up to 100 points. PFE and SKT must each be at least
-              40.00, with a combined score of at least 90.00.
+              When both tests apply, each examination
+              contributes up to 100 points. PFE and
+              SKT must each be at least 40.00, with
+              a combined score of at least 90.00.
             </p>
 
           </section>
 
 
+
           <section>
 
-            <h3>PFE Only</h3>
+            <h3>
+              PFE Only
+            </h3>
 
             <p>
-              When the selected CAFSC uses a PFE-only path, the PFE
-              score is multiplied by two. The minimum PFE score is
-              45.00.
+              When the selected CAFSC uses a PFE-only
+              path, the PFE score is multiplied by two.
+              The minimum PFE score is 45.00.
             </p>
 
           </section>
 
 
+
           <section>
 
-            <h3>EPB Recommendations</h3>
+            <h3>
+              EPB Recommendations
+            </h3>
 
             <p>
               The calculator uses up to three eligible
-              force-distributed EPB recommendations. Nonrated or
-              successfully removed reports are bypassed.
+              force-distributed EPB recommendations.
+              Nonrated or successfully removed reports
+              are bypassed.
             </p>
 
           </section>
 
 
+
           <section>
 
-            <h3>Decorations</h3>
+            <h3>
+              Decorations
+            </h3>
 
             <p>
-              Enter the quantity of each qualifying decoration.
-              Point values follow AFI 36-2502 Table 2.4, and WAPS
-              credit is capped at 25 points.
+              Enter the quantity of each qualifying
+              decoration. Point values follow
+              AFI 36-2502 Table 2.4, and WAPS credit
+              is capped at 25 points.
             </p>
 
           </section>
 
 
+
           <section>
 
-            <h3>Official Selection</h3>
+            <h3>
+              Official Selection
+            </h3>
 
             <p>
-              The calculated score does not guarantee promotion.
-              Selection depends on official personnel data, the
-              applicable promotion AFSC, promotion quotas and the
-              cycle cutoff.
+              The calculated score does not guarantee
+              promotion. Selection depends on official
+              personnel data, the applicable promotion
+              AFSC, promotion quotas and the cycle cutoff.
             </p>
 
           </section>
 
         </div>
+
 
 
         <button
@@ -2577,6 +3495,7 @@
     </dialog>
 
 
+
     <!-- =======================================================
       LIVE REGION
     ======================================================== -->
@@ -2590,17 +3509,22 @@
     ></div>
 
 
+
     <!-- =======================================================
       NOSCRIPT
     ======================================================== -->
 
     <noscript>
+
       <div class="waps-noscript">
-        JavaScript must be enabled to calculate a WAPS score.
+        JavaScript must be enabled to
+        calculate a WAPS score.
       </div>
+
     </noscript>
 
   </main>
 
 </body>
+
 </html>
