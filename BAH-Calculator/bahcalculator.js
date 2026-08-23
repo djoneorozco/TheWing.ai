@@ -82,6 +82,251 @@
       "/api/opensource-brain";
 
 
+    //#3A) BAH HEADER / CROSS-FRAME BRIDGE
+    //
+    // The public BAH Calculator may run inside a Netlify iframe
+    // while the compact compensation header runs on the Webflow
+    // parent page.
+    //
+    // This bridge does NOT calculate or modify compensation.
+    // It only publishes the already-determined calculator result.
+
+    const BAH_HEADER_MESSAGE_TYPE =
+      "pcsunited-bah-compensation";
+
+    const BAH_HEADER_REQUEST_TYPE =
+      "pcsunited-bah-header-request";
+
+    const BAH_CALCULATOR_SOURCE =
+      "pcsunited.bah.calculator";
+
+
+    function cloneSnapshot(value) {
+      if (
+        !value ||
+        typeof value !== "object" ||
+        Array.isArray(value)
+      ) {
+        return null;
+      }
+
+      try {
+        return JSON.parse(
+          JSON.stringify(value)
+        );
+      } catch (_) {
+        return null;
+      }
+    }
+
+
+    function hideLegacyCompensationPanel() {
+      const oldPanel =
+        ROOT.querySelector(
+          ".bah-compensation-panel"
+        );
+
+      if (!oldPanel) {
+        return false;
+      }
+
+      oldPanel.style.display =
+        "none";
+
+      oldPanel.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      return true;
+    }
+
+
+    function buildBAHHeaderMessage(snapshot) {
+      const safeSnapshot =
+        cloneSnapshot(snapshot);
+
+      if (!safeSnapshot) {
+        return null;
+      }
+
+      return {
+        type:
+          BAH_HEADER_MESSAGE_TYPE,
+
+        source:
+          BAH_CALCULATOR_SOURCE,
+
+        version:
+          "1.0.0",
+
+        detail:
+          safeSnapshot
+      };
+    }
+
+
+    function publishBAHCompensationToParent(snapshot) {
+      const safeSnapshot =
+        cloneSnapshot(snapshot);
+
+      if (!safeSnapshot) {
+        return false;
+      }
+
+      const detail = {
+        ...safeSnapshot,
+
+        updated_at:
+          new Date()
+            .toISOString()
+      };
+
+
+      /*
+        Save latest successful calculator snapshot.
+
+        This lets the Webflow header ask for the current
+        result even if it loaded after the calculator.
+      */
+
+      window.PCSU_BAH_COMPENSATION_CURRENT =
+        detail;
+
+
+      const message =
+        buildBAHHeaderMessage(
+          detail
+        );
+
+      if (!message) {
+        return false;
+      }
+
+
+      /*
+        Send to Webflow parent page.
+      */
+
+      try {
+        if (
+          window.parent &&
+          window.parent !== window
+        ) {
+          window.parent.postMessage(
+            message,
+            "*"
+          );
+        }
+      } catch (_) {}
+
+
+      /*
+        Also expose the same result locally for any
+        future same-document TheWing integrations.
+      */
+
+      try {
+        window.dispatchEvent(
+          new CustomEvent(
+            "pcsunited:bah-calculator-updated",
+            {
+              detail
+            }
+          )
+        );
+      } catch (_) {}
+
+
+      return true;
+    }
+
+
+    function bindBAHHeaderBridge() {
+      if (
+        window.__PCSU_BAH_HEADER_BRIDGE_BOUND
+      ) {
+        return;
+      }
+
+      window.__PCSU_BAH_HEADER_BRIDGE_BOUND =
+        true;
+
+
+      window.addEventListener(
+        "message",
+        (event) => {
+          const data =
+            event &&
+            event.data;
+
+
+          if (
+            !data ||
+            typeof data !== "object" ||
+            data.type !==
+              BAH_HEADER_REQUEST_TYPE
+          ) {
+            return;
+          }
+
+
+          /*
+            The external Webflow compensation header is alive.
+
+            Hide the old visible compensation panel INSIDE the
+            calculator iframe.
+
+            Important:
+            We only hide the panel. We do NOT remove its DOM nodes,
+            because bahcalculator.js still owns and updates those
+            existing result elements.
+          */
+
+          hideLegacyCompensationPanel();
+
+
+          /*
+            Replay latest successful calculation.
+          */
+
+          const current =
+            cloneSnapshot(
+              window.PCSU_BAH_COMPENSATION_CURRENT
+            );
+
+          if (!current) {
+            return;
+          }
+
+
+          const message =
+            buildBAHHeaderMessage(
+              current
+            );
+
+          if (!message) {
+            return;
+          }
+
+
+          try {
+            if (
+              event.source &&
+              typeof event.source.postMessage ===
+                "function"
+            ) {
+              event.source.postMessage(
+                message,
+                event.origin || "*"
+              );
+            }
+          } catch (_) {}
+        }
+      );
+    }
+
+
     //#4) FORMATTERS
 
     function money0(value) {
@@ -1563,6 +1808,62 @@
 
 
       /*
+        EXTERNAL BAH COMPENSATION HEADER
+
+        Publish only values already produced by the
+        deterministic calculator.
+      */
+
+      publishBAHCompensationToParent({
+
+        basePay:
+          money2(basePay),
+
+        bah:
+          money0(bah),
+
+        bas:
+          money2(bas),
+
+        total:
+          money2(total),
+
+        rank:
+          payload.rank,
+
+        yos:
+          String(
+            payload.yos
+          ) +
+          " Years",
+
+        location:
+          displayMha
+            ? (
+                displayBase +
+                " • " +
+                displayMha
+              )
+            : displayBase,
+
+        base:
+          displayBase,
+
+        mhaName:
+          displayMha,
+
+        dutyZip:
+          displayZip,
+
+        dependents:
+          payload.dependents ===
+            "with"
+            ? "With Dependents"
+            : "Without Dependents"
+      });
+
+
+      /*
         LEGACY RUNTIME TARGETS
 
         These remain because the current
@@ -1860,6 +2161,8 @@
 
 
     //#14) INIT
+
+    bindBAHHeaderBridge();
 
     bind();
 
