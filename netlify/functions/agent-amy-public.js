@@ -908,6 +908,7 @@ function sanitizePublicPtContext(raw) {
   const redacted = redactSensitive(raw) || {};
   const asNum = (value) => {
     if (value === null || value === undefined || value === "") return null;
+    if (isPlainObject(value) || Array.isArray(value)) return null;
     const n = Number(value);
     return Number.isFinite(n) ? n : null;
   };
@@ -919,6 +920,18 @@ function sanitizePublicPtContext(raw) {
     if (value === true || value === false) return value;
     return null;
   };
+  const eventIncludes = (label, fragments) => {
+    const t = String(label || "").toLowerCase();
+    if (!t) return false;
+    return fragments.some((fragment) => t.includes(String(fragment).toLowerCase()));
+  };
+
+  const nestedProfile = isPlainObject(redacted.profile) ? redacted.profile : {};
+  const nestedStrength = isPlainObject(redacted.strength)
+    ? redacted.strength
+    : {};
+  const nestedCore = isPlainObject(redacted.core) ? redacted.core : {};
+  const nestedCardio = isPlainObject(redacted.cardio) ? redacted.cardio : {};
 
   const nestedScores = isPlainObject(
     redacted.component_scores || redacted.componentScores || redacted.scores
@@ -956,7 +969,8 @@ function sanitizePublicPtContext(raw) {
       breakdown.strength,
       redacted.strengthScore,
       redacted.strength_score,
-      redacted.strength
+      nestedStrength.score,
+      isPlainObject(redacted.strength) ? null : redacted.strength
     )
   );
   const core = asNum(
@@ -967,7 +981,8 @@ function sanitizePublicPtContext(raw) {
       breakdown.core,
       redacted.coreScore,
       redacted.core_score,
-      redacted.core
+      nestedCore.score,
+      isPlainObject(redacted.core) ? null : redacted.core
     )
   );
   const cardio = asNum(
@@ -978,7 +993,8 @@ function sanitizePublicPtContext(raw) {
       breakdown.cardio,
       redacted.cardioScore,
       redacted.cardio_score,
-      redacted.cardio
+      nestedCardio.score,
+      isPlainObject(redacted.cardio) ? null : redacted.cardio
     )
   );
 
@@ -1020,18 +1036,39 @@ function sanitizePublicPtContext(raw) {
     )
   );
   const strengthPassed = bool(
-    pickFirst(redacted.strength_passed, redacted.strengthPassed)
+    pickFirst(
+      redacted.strength_passed,
+      redacted.strengthPassed,
+      nestedStrength.minimumMet
+    )
   );
-  const corePassed = bool(pickFirst(redacted.core_passed, redacted.corePassed));
+  const corePassed = bool(
+    pickFirst(redacted.core_passed, redacted.corePassed, nestedCore.minimumMet)
+  );
   const cardioPassed = bool(
-    pickFirst(redacted.cardio_passed, redacted.cardioPassed)
+    pickFirst(
+      redacted.cardio_passed,
+      redacted.cardioPassed,
+      nestedCardio.minimumMet
+    )
   );
   const cardioMode = str(
     pickFirst(redacted.cardio_mode, redacted.cardioMode)
   );
-  const walkPassed = bool(pickFirst(redacted.walk_passed, redacted.walkPassed));
+  const walkPassed = bool(
+    pickFirst(
+      redacted.walk_passed,
+      redacted.walkPassed,
+      nestedCardio.walkPassed
+    )
+  );
   const whtr = asNum(
-    pickFirst(redacted.whtr, redacted.ratio, redacted.measurements?.whtr)
+    pickFirst(
+      redacted.whtr,
+      redacted.ratio,
+      redacted.measurements?.whtr,
+      nestedProfile.whtr
+    )
   );
   const whtrRisk = str(
     pickFirst(
@@ -1039,7 +1076,57 @@ function sanitizePublicPtContext(raw) {
       redacted.whtrRisk,
       redacted.riskLabel,
       redacted.risk_label,
-      redacted.measurements?.whtr_risk
+      redacted.measurements?.whtr_risk,
+      nestedProfile.whtrRisk
+    )
+  );
+
+  const sex = str(
+    pickFirst(
+      redacted.sex,
+      redacted.gender,
+      nestedProfile.sex,
+      nestedProfile.gender
+    )
+  );
+  const gender = str(
+    pickFirst(
+      redacted.gender,
+      redacted.sex,
+      nestedProfile.gender,
+      nestedProfile.sex
+    )
+  );
+  const ageBand = str(
+    pickFirst(
+      redacted.age_band,
+      redacted.ageBand,
+      redacted.age_group,
+      redacted.ageGroup,
+      nestedProfile.ageGroup,
+      nestedProfile.age_group,
+      nestedProfile.ageBand,
+      nestedProfile.age_band
+    )
+  );
+  const heightInches = asNum(
+    pickFirst(
+      redacted.height_inches,
+      redacted.heightInches,
+      redacted.height,
+      nestedProfile.heightInches,
+      nestedProfile.height_inches,
+      nestedProfile.height
+    )
+  );
+  const waistInches = asNum(
+    pickFirst(
+      redacted.waist_inches,
+      redacted.waistInches,
+      redacted.waist,
+      nestedProfile.waistInches,
+      nestedProfile.waist_inches,
+      nestedProfile.waist
     )
   );
 
@@ -1048,6 +1135,7 @@ function sanitizePublicPtContext(raw) {
       pickFirst(
         selectionsIn.strength,
         events.strength,
+        nestedStrength.event,
         redacted.strength_option,
         redacted.strengthOption,
         redacted.strength_event,
@@ -1058,6 +1146,7 @@ function sanitizePublicPtContext(raw) {
       pickFirst(
         selectionsIn.core,
         events.core,
+        nestedCore.event,
         redacted.core_option,
         redacted.coreOption,
         redacted.endurance_event,
@@ -1068,6 +1157,7 @@ function sanitizePublicPtContext(raw) {
       pickFirst(
         selectionsIn.cardio,
         events.cardio,
+        nestedCardio.event,
         redacted.cardio_option,
         redacted.cardioOption,
         redacted.cardio_event,
@@ -1076,10 +1166,201 @@ function sanitizePublicPtContext(raw) {
     )
   });
 
+  const safeProfile = stripEmpty({
+    sex: str(pickFirst(nestedProfile.sex, nestedProfile.gender, sex, gender)),
+    ageGroup: str(
+      pickFirst(
+        nestedProfile.ageGroup,
+        nestedProfile.age_group,
+        nestedProfile.ageBand,
+        nestedProfile.age_band,
+        redacted.ageGroup,
+        redacted.age_group,
+        ageBand
+      )
+    ),
+    heightInches: asNum(
+      pickFirst(
+        nestedProfile.heightInches,
+        nestedProfile.height_inches,
+        redacted.heightInches,
+        heightInches
+      )
+    ),
+    waistInches: asNum(
+      pickFirst(
+        nestedProfile.waistInches,
+        nestedProfile.waist_inches,
+        redacted.waistInches,
+        waistInches
+      )
+    ),
+    whtr: asNum(pickFirst(nestedProfile.whtr, nestedProfile.ratio, whtr)),
+    whtrRisk: str(
+      pickFirst(
+        nestedProfile.whtrRisk,
+        nestedProfile.whtr_risk,
+        nestedProfile.riskLabel,
+        whtrRisk
+      )
+    )
+  });
+
+  const safeStrength = stripEmpty({
+    event: str(
+      pickFirst(
+        nestedStrength.event,
+        nestedStrength.option,
+        selections.strength,
+        events.strength
+      )
+    ),
+    performance: asNum(
+      pickFirst(
+        nestedStrength.performance,
+        nestedStrength.reps,
+        nestedStrength.value
+      )
+    ),
+    unit: str(nestedStrength.unit),
+    score: asNum(pickFirst(nestedStrength.score, strength)),
+    maxScore: asNum(
+      pickFirst(nestedStrength.maxScore, nestedStrength.max_score)
+    ),
+    minimumMet: bool(
+      pickFirst(
+        nestedStrength.minimumMet,
+        nestedStrength.minimum_met,
+        strengthPassed
+      )
+    )
+  });
+
+  const safeCore = stripEmpty({
+    event: str(
+      pickFirst(
+        nestedCore.event,
+        nestedCore.option,
+        selections.core,
+        events.core
+      )
+    ),
+    performance: asNum(
+      pickFirst(
+        nestedCore.performance,
+        nestedCore.reps,
+        nestedCore.seconds,
+        nestedCore.value
+      )
+    ),
+    formattedPerformance: str(
+      pickFirst(
+        nestedCore.formattedPerformance,
+        nestedCore.formatted_performance
+      )
+    ),
+    unit: str(nestedCore.unit),
+    score: asNum(pickFirst(nestedCore.score, core)),
+    maxScore: asNum(pickFirst(nestedCore.maxScore, nestedCore.max_score)),
+    minimumMet: bool(
+      pickFirst(nestedCore.minimumMet, nestedCore.minimum_met, corePassed)
+    )
+  });
+
+  const safeCardio = stripEmpty({
+    event: str(
+      pickFirst(
+        nestedCardio.event,
+        nestedCardio.option,
+        selections.cardio,
+        events.cardio
+      )
+    ),
+    performance: asNum(
+      pickFirst(
+        nestedCardio.performance,
+        nestedCardio.seconds,
+        nestedCardio.shuttles,
+        nestedCardio.value
+      )
+    ),
+    formattedPerformance: str(
+      pickFirst(
+        nestedCardio.formattedPerformance,
+        nestedCardio.formatted_performance
+      )
+    ),
+    unit: str(nestedCardio.unit),
+    score: asNum(pickFirst(nestedCardio.score, cardio)),
+    maxScore: asNum(
+      pickFirst(nestedCardio.maxScore, nestedCardio.max_score)
+    ),
+    minimumMet: bool(
+      pickFirst(
+        nestedCardio.minimumMet,
+        nestedCardio.minimum_met,
+        cardioPassed
+      )
+    ),
+    walkPassed: bool(
+      pickFirst(nestedCardio.walkPassed, nestedCardio.walk_passed, walkPassed)
+    )
+  });
+
+  const strengthEventLabel = str(
+    pickFirst(safeStrength.event, selections.strength, events.strength)
+  );
+  const coreEventLabel = str(
+    pickFirst(safeCore.event, selections.core, events.core)
+  );
+  const cardioEventLabel = str(
+    pickFirst(safeCardio.event, selections.cardio, events.cardio)
+  );
+
+  const strengthPerformance = asNum(safeStrength.performance);
+  const corePerformance = asNum(safeCore.performance);
+  const cardioPerformance = asNum(safeCardio.performance);
+
+  const mapStrengthReps =
+    strengthPerformance != null &&
+    (!strengthEventLabel ||
+      eventIncludes(strengthEventLabel, [
+        "push-up",
+        "push up",
+        "push_up",
+        "hand-release",
+        "hand release",
+        "hrpu"
+      ]) ||
+      str(safeStrength.unit) === "reps");
+
+  const isPlank =
+    eventIncludes(coreEventLabel, ["plank"]) ||
+    str(safeCore.unit) === "seconds";
+  const isCoreRepsEvent =
+    eventIncludes(coreEventLabel, [
+      "sit-up",
+      "sit up",
+      "situp",
+      "crunch",
+      "cross-legged",
+      "cross-leg"
+    ]) || str(safeCore.unit) === "reps";
+
+  const isWalk =
+    cardioMode === "walk" || eventIncludes(cardioEventLabel, ["walk"]);
+  const isHamr =
+    cardioMode === "hamr" || eventIncludes(cardioEventLabel, ["hamr"]);
+  const isRun =
+    cardioMode === "run" ||
+    eventIncludes(cardioEventLabel, ["run", "mile"]);
+
   const safeEvents = stripEmpty({
-    strength: str(events.strength),
-    core: str(events.core),
-    cardio: str(events.cardio)
+    strength: str(
+      pickFirst(events.strength, safeStrength.event, selections.strength)
+    ),
+    core: str(pickFirst(events.core, safeCore.event, selections.core)),
+    cardio: str(pickFirst(events.cardio, safeCardio.event, selections.cardio))
   });
   const safeBreakdown = stripEmpty({
     body: asNum(pickFirst(breakdown.body, body)),
@@ -1097,7 +1378,14 @@ function sanitizePublicPtContext(raw) {
       })
     : undefined;
 
-  return stripEmpty({
+  const hadExplicitNullTotal =
+    redacted.total === null ||
+    redacted.displayed_total_score === null ||
+    redacted.displayedTotalScore === null ||
+    redacted.total_score === null ||
+    redacted.totalScore === null;
+
+  const cleaned = stripEmpty({
     schema_version: str(redacted.schema_version) || "pt-input-v1",
     source_version: str(pickFirst(redacted.source_version, redacted.version)),
     source: str(redacted.source),
@@ -1105,37 +1393,31 @@ function sanitizePublicPtContext(raw) {
     type: str(redacted.type),
     updated_at: str(pickFirst(redacted.updated_at, redacted.updatedAt)),
     effective_date: str(redacted.effective_date),
-    sex: str(pickFirst(redacted.sex, redacted.gender)),
-    gender: str(pickFirst(redacted.gender, redacted.sex)),
+    sex,
+    gender,
     age: asNum(redacted.age),
-    age_band: str(
-      pickFirst(
-        redacted.age_band,
-        redacted.ageBand,
-        redacted.age_group,
-        redacted.ageGroup
-      )
-    ),
-    height_inches: asNum(
-      pickFirst(redacted.height_inches, redacted.heightInches, redacted.height)
-    ),
-    waist_inches: asNum(
-      pickFirst(redacted.waist_inches, redacted.waistInches, redacted.waist)
-    ),
+    age_band: ageBand,
+    ageGroup: str(pickFirst(redacted.ageGroup, redacted.age_group, ageBand)),
+    height_inches: heightInches,
+    heightInches,
+    waist_inches: waistInches,
+    waistInches,
     strength_option: str(
       pickFirst(
         redacted.strength_option,
         redacted.strengthOption,
         redacted.strength_event,
         redacted.strengthEvent,
-        selections.strength
+        selections.strength,
+        safeStrength.event
       )
     ),
     strength_reps: asNum(
       pickFirst(
         redacted.strength_reps,
         redacted.strengthReps,
-        redacted.strength_value
+        redacted.strength_value,
+        mapStrengthReps ? strengthPerformance : null
       )
     ),
     core_option: str(
@@ -1144,12 +1426,23 @@ function sanitizePublicPtContext(raw) {
         redacted.coreOption,
         redacted.endurance_event,
         redacted.enduranceEvent,
-        selections.core
+        selections.core,
+        safeCore.event
       )
     ),
-    core_reps: asNum(pickFirst(redacted.core_reps, redacted.coreReps)),
+    core_reps: asNum(
+      pickFirst(
+        redacted.core_reps,
+        redacted.coreReps,
+        isCoreRepsEvent && !isPlank ? corePerformance : null
+      )
+    ),
     plank_seconds: asNum(
-      pickFirst(redacted.plank_seconds, redacted.plankSeconds)
+      pickFirst(
+        redacted.plank_seconds,
+        redacted.plankSeconds,
+        isPlank ? corePerformance : null
+      )
     ),
     cardio_option: str(
       pickFirst(
@@ -1157,14 +1450,31 @@ function sanitizePublicPtContext(raw) {
         redacted.cardioOption,
         redacted.cardio_event,
         redacted.cardioEvent,
-        selections.cardio
+        selections.cardio,
+        safeCardio.event
       )
     ),
-    run_seconds: asNum(pickFirst(redacted.run_seconds, redacted.runSeconds)),
-    hamr_shuttles: asNum(
-      pickFirst(redacted.hamr_shuttles, redacted.hamrShuttles)
+    run_seconds: asNum(
+      pickFirst(
+        redacted.run_seconds,
+        redacted.runSeconds,
+        isRun && !isWalk && !isHamr ? cardioPerformance : null
+      )
     ),
-    walk_seconds: asNum(pickFirst(redacted.walk_seconds, redacted.walkSeconds)),
+    hamr_shuttles: asNum(
+      pickFirst(
+        redacted.hamr_shuttles,
+        redacted.hamrShuttles,
+        isHamr ? cardioPerformance : null
+      )
+    ),
+    walk_seconds: asNum(
+      pickFirst(
+        redacted.walk_seconds,
+        redacted.walkSeconds,
+        isWalk ? cardioPerformance : null
+      )
+    ),
     walk_authorized: bool(
       pickFirst(redacted.walk_authorized, redacted.walkAuthorized)
     ),
@@ -1208,10 +1518,23 @@ function sanitizePublicPtContext(raw) {
     events: Object.keys(safeEvents).length ? safeEvents : undefined,
     breakdown: Object.keys(safeBreakdown).length ? safeBreakdown : undefined,
     caps: safeCaps && Object.keys(safeCaps).length ? safeCaps : undefined,
+    profile: Object.keys(safeProfile).length ? safeProfile : undefined,
+    strength: Object.keys(safeStrength).length ? safeStrength : undefined,
+    core: Object.keys(safeCore).length ? safeCore : undefined,
+    cardio: Object.keys(safeCardio).length ? safeCardio : undefined,
     warnings: Array.isArray(redacted.warnings)
       ? redacted.warnings.map((w) => safeStr(w)).filter(Boolean).slice(0, 12)
       : undefined
   });
+
+  if (hadExplicitNullTotal) {
+    cleaned.total = null;
+    if (cleaned.displayed_total_score === undefined) {
+      cleaned.displayed_total_score = null;
+    }
+  }
+
+  return cleaned;
 }
 
 function hasAuthoritativeBrowserPtSnapshot(pt) {
