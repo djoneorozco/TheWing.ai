@@ -303,6 +303,7 @@
         [2.5, buildMap([30,15,28,14,26,12,23,11,21,10,19,8,17,7,14,5,12,3])],
       ]
     },
+
     // PFRA Scoring Charts p.3 — Hand Release Push-Up Scoring Standards (reps)
     hrpu: {
       max: buildMap([52,42,50,40,48,38,46,36,44,34,42,32,40,30,38,28,36,26]),
@@ -336,6 +337,7 @@
         [2.5, buildMap([27,17,25,15,23,13,21,11,19,9,17,7,15,5,13,3,11,1])],
       ]
     },
+
     // PFRA Scoring Charts p.4 — Sit-Up Scoring Standards (reps)
     situp: {
       max: buildMap([58,54,56,50,54,45,52,43,50,41,48,35,46,34,44,32,42,31]),
@@ -369,6 +371,7 @@
         [2.5, buildMap([33,29,31,25,29,20,27,18,25,16,23,10,21,9,19,7,17,6])],
       ]
     },
+
     // PFRA Scoring Charts p.5 — Cross-Leg Reverse Crunch Scoring Standards (reps)
     crunch: {
       max: buildMap([60,58,58,56,56,54,54,52,52,50,50,48,48,46,46,44,44,42]),
@@ -402,6 +405,7 @@
         [2.5, buildMap([35,33,33,31,31,29,29,27,27,25,25,23,23,21,21,19,19,17])],
       ]
     },
+
     // PFRA Scoring Charts p.6 — Forearm Plank Scoring Standards (seconds)
     plank: {
       max: buildMap([220,215,215,210,210,205,205,200,200,195,195,190,190,185,185,180,180,175]),
@@ -435,6 +439,7 @@
         [2.5, buildMap([95,90,90,85,85,80,80,75,75,70,70,65,65,60,60,55,55,50])],
       ]
     },
+
     // PFRA Scoring Charts p.7 — 2 Mile Run Scoring Standards (seconds)
     run: [
       [50, buildMap([805,930,815,955,822,970,836,972,845,1005,870,1015,909,1030,928,1063,1018,1100])],
@@ -459,6 +464,7 @@
       [35.5, buildMap([1176,1493,1176,1511,1223,1545,1254,1559,1300,1582,1323,1604,1347,1652,1392,1687,1419,1746])],
       [35, buildMap([1185,1523,1195,1540,1244,1575,1276,1590,1324,1612,1347,1635,1370,1685,1416,1720,1440,1780])],
     ],
+
     // PFRA Scoring Charts p.8 — 20-Meter HAMR Scoring Standards (shuttles)
     hamr: [
       [50, buildMap([87,68,85,65,84,63,82,63,81,59,77,58,71,57,69,53,65,50])],
@@ -751,6 +757,7 @@
     slider.min = bounds.min;
     slider.max = bounds.sliderMax;
     slider.step = bounds.type === "time" ? 5 : 1;
+
     // Clamp only for display against current age/sex bounds — do not overwrite stored value
     slider.value = String(clamp(stored, bounds.min, bounds.sliderMax));
   }
@@ -759,48 +766,105 @@
     const height = safeNumber(els.heightSlider?.value, 0);
     const waistBest = 0.49 * height;
     const highRiskStart = 0.55 * height;
+
     safeText(
       els.waistMeta,
       `Best scoring band: ≤ ${formatInches(waistBest)} (Low Risk) • High Risk begins: ≥ ${formatInches(highRiskStart)}`
     );
 
     const strengthBounds = getCurrentStrengthBounds();
-    safeText(els.strengthMeta, `Best: ${strengthBounds.top} reps • Minimum Passing: ${strengthBounds.passMin} reps`);
+    safeText(
+      els.strengthMeta,
+      `Best: ${strengthBounds.top} reps • Minimum Passing: ${strengthBounds.passMin} reps`
+    );
 
     const coreBounds = getCurrentCoreBounds();
-    if (coreBounds.type === "time") {
-      safeText(els.coreMeta, `Best: ${formatTime(coreBounds.top)} • Minimum Passing: ${formatTime(coreBounds.passMin)}`);
+
+    if (coreBounds.type === "time"){
+      safeText(
+        els.coreMeta,
+        `Best: ${formatTime(coreBounds.top)} • Minimum Passing: ${formatTime(coreBounds.passMin)}`
+      );
     } else {
-      safeText(els.coreMeta, `Best: ${coreBounds.top} reps • Minimum Passing: ${coreBounds.passMin} reps`);
+      safeText(
+        els.coreMeta,
+        `Best: ${coreBounds.top} reps • Minimum Passing: ${coreBounds.passMin} reps`
+      );
     }
 
     const cardioBounds = getCurrentCardioBounds();
-    if (cardioBounds.type === "hamr") {
-      safeText(els.cardioMeta, `Best: ${cardioBounds.top} shuttles • Minimum Passing: ${cardioBounds.passMin} shuttles`);
-    } else if (cardioBounds.type === "walk") {
-      const passText = Number.isFinite(cardioBounds.passMin) ? formatTime(cardioBounds.passMin) : "—";
-      safeText(els.cardioMeta, `Pass standard: ≤ ${passText} • Medical only (AF Form 469) • No cardio points`);
+
+    if (cardioBounds.type === "hamr"){
+      safeText(
+        els.cardioMeta,
+        `Best: ${cardioBounds.top} shuttles • Minimum Passing: ${cardioBounds.passMin} shuttles`
+      );
+    } else if (cardioBounds.type === "walk"){
+      const passText = Number.isFinite(cardioBounds.passMin)
+        ? formatTime(cardioBounds.passMin)
+        : "—";
+
+      safeText(
+        els.cardioMeta,
+        `Pass standard: ≤ ${passText} • Medical only (AF Form 469) • No cardio points`
+      );
     } else {
-      safeText(els.cardioMeta, `Best: ${formatTime(cardioBounds.top)} • Minimum Passing: ${formatTime(cardioBounds.passMin)}`);
+      safeText(
+        els.cardioMeta,
+        `Best: ${formatTime(cardioBounds.top)} • Minimum Passing: ${formatTime(cardioBounds.passMin)}`
+      );
     }
   }
 
   function updateTickRows(){
     const strengthBounds = getCurrentStrengthBounds();
-    setTickLabels(els.strengthTicks, buildLinearNumberTicks(strengthBounds.min, strengthBounds.sliderMax));
+
+    setTickLabels(
+      els.strengthTicks,
+      buildLinearNumberTicks(
+        strengthBounds.min,
+        strengthBounds.sliderMax
+      )
+    );
 
     const coreBounds = getCurrentCoreBounds();
+
     if (coreBounds.type === "time"){
-      setTickLabels(els.coreTicks, buildTimeTicks(coreBounds.min, coreBounds.sliderMax));
+      setTickLabels(
+        els.coreTicks,
+        buildTimeTicks(
+          coreBounds.min,
+          coreBounds.sliderMax
+        )
+      );
     } else {
-      setTickLabels(els.coreTicks, buildLinearNumberTicks(coreBounds.min, coreBounds.sliderMax));
+      setTickLabels(
+        els.coreTicks,
+        buildLinearNumberTicks(
+          coreBounds.min,
+          coreBounds.sliderMax
+        )
+      );
     }
 
     const cardioBounds = getCurrentCardioBounds();
+
     if (cardioBounds.type === "hamr"){
-      setTickLabels(els.cardioTicks, buildLinearNumberTicks(cardioBounds.min, cardioBounds.sliderMax));
+      setTickLabels(
+        els.cardioTicks,
+        buildLinearNumberTicks(
+          cardioBounds.min,
+          cardioBounds.sliderMax
+        )
+      );
     } else {
-      setTickLabels(els.cardioTicks, buildTimeTicks(cardioBounds.min, cardioBounds.sliderMax));
+      setTickLabels(
+        els.cardioTicks,
+        buildTimeTicks(
+          cardioBounds.min,
+          cardioBounds.sliderMax
+        )
+      );
     }
   }
 
@@ -813,9 +877,23 @@
     const coreBounds = getCurrentCoreBounds();
     const cardioBounds = getCurrentCardioBounds();
 
-    configureSlider(els.strengthSlider, strengthBounds, activeStrengthMode);
-    configureSlider(els.coreSlider, coreBounds, activeCoreMode);
-    configureSlider(els.cardioSlider, cardioBounds, activeCardioMode);
+    configureSlider(
+      els.strengthSlider,
+      strengthBounds,
+      activeStrengthMode
+    );
+
+    configureSlider(
+      els.coreSlider,
+      coreBounds,
+      activeCoreMode
+    );
+
+    configureSlider(
+      els.cardioSlider,
+      cardioBounds,
+      activeCardioMode
+    );
 
     updateTickRows();
   }
@@ -845,18 +923,39 @@
     const ratio = height > 0 ? waist / height : 0;
     const truncatedRatio = truncateWHtR(ratio);
     const displayRatio = truncatedRatio === null ? 0 : truncatedRatio;
+
     const bodyScoreRaw = getWHtRScore(ratio);
-    const bodyScore = Number.isFinite(bodyScoreRaw) ? bodyScoreRaw : 0;
+    const bodyScore = Number.isFinite(bodyScoreRaw)
+      ? bodyScoreRaw
+      : 0;
+
     const riskLabel = getWHtRRiskLabel(displayRatio);
 
     const strengthBounds = getCurrentStrengthBounds();
     const coreBounds = getCurrentCoreBounds();
     const cardioBounds = getCurrentCardioBounds();
 
-    const strengthScoreRaw = scoreFromTable(strengthBounds.table, key, strength, "higher");
-    const coreScoreRaw = scoreFromTable(coreBounds.table, key, core, "higher");
-    const strengthScore = strengthScoreRaw === null ? 0 : strengthScoreRaw;
-    const coreScore = coreScoreRaw === null ? 0 : coreScoreRaw;
+    const strengthScoreRaw = scoreFromTable(
+      strengthBounds.table,
+      key,
+      strength,
+      "higher"
+    );
+
+    const coreScoreRaw = scoreFromTable(
+      coreBounds.table,
+      key,
+      core,
+      "higher"
+    );
+
+    const strengthScore = strengthScoreRaw === null
+      ? 0
+      : strengthScoreRaw;
+
+    const coreScore = coreScoreRaw === null
+      ? 0
+      : coreScoreRaw;
 
     let cardioScore = 0.0;
     let cardioMode = cardioBounds.mode;
@@ -865,70 +964,157 @@
     if (cardioBounds.mode === "walk"){
       cardioMode = "walk";
       cardioScore = 0.0;
+
       if (Number.isFinite(cardioBounds.passMin)){
         walkPassed = cardio <= cardioBounds.passMin;
       } else {
-        warnings.push(lookupMissingWarning("2 km Walk"));
+        warnings.push(
+          lookupMissingWarning("2 km Walk")
+        );
+
         walkPassed = false;
       }
     } else if (cardioBounds.mode === "hamr"){
       cardioMode = "hamr";
-      const hamrScore = scoreHigherBetter(cardio, TABLES.hamr, key);
-      cardioScore = hamrScore === null ? 0 : hamrScore;
-      if (hamrScore === null) warnings.push(lookupMissingWarning("HAMR scoring"));
+
+      const hamrScore = scoreHigherBetter(
+        cardio,
+        TABLES.hamr,
+        key
+      );
+
+      cardioScore = hamrScore === null
+        ? 0
+        : hamrScore;
+
+      if (hamrScore === null){
+        warnings.push(
+          lookupMissingWarning("HAMR scoring")
+        );
+      }
     } else {
       cardioMode = "run";
-      const runScore = scoreTimeLowerBetter(cardio, TABLES.run, key);
-      cardioScore = runScore === null ? 0 : runScore;
-      if (runScore === null) warnings.push(lookupMissingWarning("run scoring"));
+
+      const runScore = scoreTimeLowerBetter(
+        cardio,
+        TABLES.run,
+        key
+      );
+
+      cardioScore = runScore === null
+        ? 0
+        : runScore;
+
+      if (runScore === null){
+        warnings.push(
+          lookupMissingWarning("run scoring")
+        );
+      }
     }
 
-    if (strengthScoreRaw === null) warnings.push(lookupMissingWarning("strength scoring"));
-    if (coreScoreRaw === null) warnings.push(lookupMissingWarning("core scoring"));
+    if (strengthScoreRaw === null){
+      warnings.push(
+        lookupMissingWarning("strength scoring")
+      );
+    }
 
-    const strengthPassed = strengthScore >= MIN_PASS.strength;
-    const corePassed = coreScore >= MIN_PASS.core;
-    const cardioPassed = cardioMode === "walk"
-      ? false
-      : cardioScore >= MIN_PASS.cardio;
+    if (coreScoreRaw === null){
+      warnings.push(
+        lookupMissingWarning("core scoring")
+      );
+    }
 
-    const minimumsMet = cardioMode === "walk"
-      ? false
-      : componentMinimumsMet({
-          strengthPassed,
-          corePassed,
-          cardioPassed
-        });
+    const strengthPassed =
+      strengthScore >= MIN_PASS.strength;
 
-    const cappedBody = clamp(bodyScore, 0, SCORE_CAPS.body);
-    const cappedStrength = clamp(strengthScore, 0, SCORE_CAPS.strength);
-    const cappedCore = clamp(coreScore, 0, SCORE_CAPS.core);
-    const cappedCardio = clamp(cardioScore, 0, SCORE_CAPS.cardio);
+    const corePassed =
+      coreScore >= MIN_PASS.core;
 
-    const total = cardioMode === "walk"
-      ? null
-      : clamp(cappedBody + cappedStrength + cappedCore + cappedCardio, 0, SCORE_CAPS.total);
+    const cardioPassed =
+      cardioMode === "walk"
+        ? false
+        : cardioScore >= MIN_PASS.cardio;
 
-    const category = cardioMode === "walk"
-      ? (walkPassed ? "Walk-Pass" : "Walk-Fail")
-      : scoreCategory(total, minimumsMet);
+    const minimumsMet =
+      cardioMode === "walk"
+        ? false
+        : componentMinimumsMet({
+            strengthPassed,
+            corePassed,
+            cardioPassed
+          });
+
+    const cappedBody = clamp(
+      bodyScore,
+      0,
+      SCORE_CAPS.body
+    );
+
+    const cappedStrength = clamp(
+      strengthScore,
+      0,
+      SCORE_CAPS.strength
+    );
+
+    const cappedCore = clamp(
+      coreScore,
+      0,
+      SCORE_CAPS.core
+    );
+
+    const cappedCardio = clamp(
+      cardioScore,
+      0,
+      SCORE_CAPS.cardio
+    );
+
+    const total =
+      cardioMode === "walk"
+        ? null
+        : clamp(
+            cappedBody +
+            cappedStrength +
+            cappedCore +
+            cappedCardio,
+            0,
+            SCORE_CAPS.total
+          );
+
+    const category =
+      cardioMode === "walk"
+        ? (
+            walkPassed
+              ? "Walk-Pass"
+              : "Walk-Fail"
+          )
+        : scoreCategory(
+            total,
+            minimumsMet
+          );
 
     const result = {
       ratio: displayRatio,
       riskLabel,
+
       bodyScore: cappedBody,
       strengthScore: cappedStrength,
       coreScore: cappedCore,
       cardioScore: cappedCardio,
+
       total,
       category,
       minimumsMet,
       cardioMode,
       walkPassed,
+
       strengthPassed,
       corePassed,
       cardioPassed,
-      warnings: [...new Set(warnings)],
+
+      warnings: [
+        ...new Set(warnings)
+      ],
+
       breakdown: {
         body: cappedBody,
         strength: cappedStrength,
@@ -937,7 +1123,11 @@
       }
     };
 
-    debugLog("computeScores", result);
+    debugLog(
+      "computeScores",
+      result
+    );
+
     return result;
   }
 
@@ -946,53 +1136,92 @@
     if (scores.warnings.length){
       return {
         line1: scores.warnings[0],
-        line2: scores.warnings[1] || "Review selected standards and supported event configuration.",
-        line3: "Calculator output may be incomplete until all published values are available."
+        line2:
+          scores.warnings[1] ||
+          "Review selected standards and supported event configuration.",
+        line3:
+          "Calculator output may be incomplete until all published values are available."
       };
     }
 
     if (scores.cardioMode === "walk"){
-      const walkLine = scores.walkPassed
-        ? "Walk Result: PASS against the Table 3.1 maximum time for the selected sex and age band."
-        : "Walk Result: FAIL — time exceeds the Table 3.1 maximum for the selected sex and age band.";
+      const walkLine =
+        scores.walkPassed
+          ? "Walk Result: PASS against the Table 3.1 maximum time for the selected sex and age band."
+          : "Walk Result: FAIL — time exceeds the Table 3.1 maximum for the selected sex and age band.";
+
       return {
         line1: walkLine,
-        line2: "AF Form 469 authorization is required. Body composition, strength, and core points are still shown, but no cardio points are awarded.",
-        line3: walkExplanationHtml()
+        line2:
+          "AF Form 469 authorization is required. Body composition, strength, and core points are still shown, but no cardio points are awarded.",
+        line3:
+          walkExplanationHtml()
       };
     }
 
     const lines = [];
+
     if (scores.category === "Unresolved-90"){
-      lines.push("Total is exactly 90.0. The published AFMAN does not explicitly assign this exact score to a rating category.");
+      lines.push(
+        "Total is exactly 90.0. The published AFMAN does not explicitly assign this exact score to a rating category."
+      );
     } else if (!scores.minimumsMet){
-      lines.push("One or more required physical components are below the minimum passing standard.");
+      lines.push(
+        "One or more required physical components are below the minimum passing standard."
+      );
     } else if (scores.category === "Excellent"){
-      lines.push("This combination projects an Excellent estimate (greater than 90).");
+      lines.push(
+        "This combination projects an Excellent estimate (greater than 90)."
+      );
     } else if (scores.category === "Satisfactory"){
-      lines.push("This combination projects a Satisfactory estimate (75 through 89.9).");
+      lines.push(
+        "This combination projects a Satisfactory estimate (75 through 89.9)."
+      );
     } else {
-      lines.push("The current combination projects an Unsatisfactory estimate.");
+      lines.push(
+        "The current combination projects an Unsatisfactory estimate."
+      );
     }
 
-    lines.push(`Body composition WHtR risk band: ${scores.riskLabel} (${scores.bodyScore.toFixed(1)} / ${SCORE_CAPS.body} points).`);
+    lines.push(
+      `Body composition WHtR risk band: ${scores.riskLabel} (${scores.bodyScore.toFixed(1)} / ${SCORE_CAPS.body} points).`
+    );
 
     if (!scores.strengthPassed){
-      lines.push("Strength is below the 2.5-point component minimum.");
+      lines.push(
+        "Strength is below the 2.5-point component minimum."
+      );
     } else if (!scores.corePassed){
-      lines.push("Core is below the 2.5-point component minimum.");
+      lines.push(
+        "Core is below the 2.5-point component minimum."
+      );
     } else if (!scores.cardioPassed){
-      lines.push("Cardio is below the 35.0-point component minimum.");
+      lines.push(
+        "Cardio is below the 35.0-point component minimum."
+      );
     } else if (scores.bodyScore === 0){
-      lines.push("Body composition scored 0 points; that alone does not fail a standard assessment when physical minimums and total are met.");
+      lines.push(
+        "Body composition scored 0 points; that alone does not fail a standard assessment when physical minimums and total are met."
+      );
     } else {
-      const weakest = Math.min(scores.strengthScore, scores.coreScore, scores.cardioScore);
+      const weakest = Math.min(
+        scores.strengthScore,
+        scores.coreScore,
+        scores.cardioScore
+      );
+
       if (weakest === scores.cardioScore){
-        lines.push("Cardio is the clearest lever for raising the composite score fastest.");
+        lines.push(
+          "Cardio is the clearest lever for raising the composite score fastest."
+        );
       } else if (weakest === scores.coreScore){
-        lines.push("Improving core performance would be one of the fastest ways to raise the total.");
+        lines.push(
+          "Improving core performance would be one of the fastest ways to raise the total."
+        );
       } else {
-        lines.push("Improving strength output would be one of the fastest ways to raise the total.");
+        lines.push(
+          "Improving strength output would be one of the fastest ways to raise the total."
+        );
       }
     }
 
@@ -1006,106 +1235,284 @@
   function announceResult(summary){
     if (!els.resultLiveRegion) return;
     if (summary === lastAnnouncedResult) return;
+
     lastAnnouncedResult = summary;
-    safeText(els.resultLiveRegion, summary);
+
+    safeText(
+      els.resultLiveRegion,
+      summary
+    );
   }
 
   //#9) UI RENDER
   function updateUI(options = {}){
-    const announce = options.announce === true;
+    const announce =
+      options.announce === true;
 
-    setSliderFill(els.heightSlider);
-    setSliderFill(els.waistSlider);
-    setSliderFill(els.strengthSlider);
-    setSliderFill(els.coreSlider);
-    setSliderFill(els.cardioSlider);
+    setSliderFill(
+      els.heightSlider
+    );
 
-    safeText(els.heightValue, formatInches(els.heightSlider?.value));
-    safeText(els.waistValue, formatInches(els.waistSlider?.value));
+    setSliderFill(
+      els.waistSlider
+    );
 
-    safeText(els.strengthModeLabel, els.strengthEvent?.value || "");
-    safeText(els.coreModeLabel, els.enduranceEvent?.value || "");
-    safeText(els.cardioModeLabel, els.cardioEvent?.value || "");
+    setSliderFill(
+      els.strengthSlider
+    );
 
-    safeText(els.strengthValue, `${els.strengthSlider?.value || 0} reps`);
+    setSliderFill(
+      els.coreSlider
+    );
+
+    setSliderFill(
+      els.cardioSlider
+    );
+
+    safeText(
+      els.heightValue,
+      formatInches(
+        els.heightSlider?.value
+      )
+    );
+
+    safeText(
+      els.waistValue,
+      formatInches(
+        els.waistSlider?.value
+      )
+    );
+
+    safeText(
+      els.strengthModeLabel,
+      els.strengthEvent?.value || ""
+    );
+
+    safeText(
+      els.coreModeLabel,
+      els.enduranceEvent?.value || ""
+    );
+
+    safeText(
+      els.cardioModeLabel,
+      els.cardioEvent?.value || ""
+    );
+
+    safeText(
+      els.strengthValue,
+      `${els.strengthSlider?.value || 0} reps`
+    );
 
     if (getCoreModeKey() === "plank"){
-      safeText(els.coreValue, formatTime(safeNumber(els.coreSlider?.value, 0)));
+      safeText(
+        els.coreValue,
+        formatTime(
+          safeNumber(
+            els.coreSlider?.value,
+            0
+          )
+        )
+      );
     } else {
-      safeText(els.coreValue, `${els.coreSlider?.value || 0} reps`);
+      safeText(
+        els.coreValue,
+        `${els.coreSlider?.value || 0} reps`
+      );
     }
 
     const scores = computeScores();
 
     if (scores.cardioMode === "hamr"){
-      safeText(els.cardioValue, `${els.cardioSlider?.value || 0} shuttles`);
+      safeText(
+        els.cardioValue,
+        `${els.cardioSlider?.value || 0} shuttles`
+      );
     } else {
-      safeText(els.cardioValue, formatTime(safeNumber(els.cardioSlider?.value, 0)));
+      safeText(
+        els.cardioValue,
+        formatTime(
+          safeNumber(
+            els.cardioSlider?.value,
+            0
+          )
+        )
+      );
     }
 
-    const ratioText = Number.isFinite(scores.ratio) ? scores.ratio.toFixed(2) : "—";
-    safeText(els.ratioValue, ratioText);
-    safeText(els.bodyCompScoreText, `${scores.bodyScore.toFixed(1)} / ${SCORE_CAPS.body} · ${scores.riskLabel}`);
+    const ratioText =
+      Number.isFinite(scores.ratio)
+        ? scores.ratio.toFixed(2)
+        : "—";
 
-    els.scoreNumber?.classList.remove("is-compact");
-    els.scoreLabel?.classList.remove("is-walk");
+    safeText(
+      els.ratioValue,
+      ratioText
+    );
+
+    safeText(
+      els.bodyCompScoreText,
+      `${scores.bodyScore.toFixed(1)} / ${SCORE_CAPS.body} · ${scores.riskLabel}`
+    );
+
+    els.scoreNumber?.classList.remove(
+      "is-compact"
+    );
+
+    els.scoreLabel?.classList.remove(
+      "is-walk"
+    );
 
     let announcement = "";
 
     if (scores.cardioMode === "walk"){
-      if (els.scoreRing) els.scoreRing.style.setProperty("--pct", "0");
-      const walkResult = scores.walkPassed ? "PASS" : "FAIL";
-      safeText(els.scoreNumber, walkResult);
-      els.scoreNumber?.classList.add("is-compact");
-      els.scoreLabel?.classList.add("is-walk");
-      safeText(els.scoreLabel, `Walk Result: ${walkResult}`);
-      announcement = `Walk Result: ${walkResult}. ${walkExplanationHtml()}`;
-    } else if (scores.category === "Unresolved-90"){
-      if (els.scoreRing) els.scoreRing.style.setProperty("--pct", "90.0");
-      safeText(els.scoreNumber, "90.0");
-      els.scoreNumber?.classList.add("is-compact");
+      if (els.scoreRing){
+        els.scoreRing.style.setProperty(
+          "--pct",
+          "0"
+        );
+      }
+
+      const walkResult =
+        scores.walkPassed
+          ? "PASS"
+          : "FAIL";
+
+      safeText(
+        els.scoreNumber,
+        walkResult
+      );
+
+      els.scoreNumber?.classList.add(
+        "is-compact"
+      );
+
+      els.scoreLabel?.classList.add(
+        "is-walk"
+      );
+
+      safeText(
+        els.scoreLabel,
+        `Walk Result: ${walkResult}`
+      );
+
+      announcement =
+        `Walk Result: ${walkResult}. ${walkExplanationHtml()}`;
+    } else if (
+      scores.category === "Unresolved-90"
+    ){
+      if (els.scoreRing){
+        els.scoreRing.style.setProperty(
+          "--pct",
+          "90.0"
+        );
+      }
+
+      safeText(
+        els.scoreNumber,
+        "90.0"
+      );
+
+      els.scoreNumber?.classList.add(
+        "is-compact"
+      );
+
       safeText(
         els.scoreLabel,
         "Not Excellent — AFMAN does not explicitly assign 90.0"
       );
-      announcement = "Estimated total 90.0. The published AFMAN does not explicitly assign this exact score to a rating category. It is not Excellent because Excellent requires greater than 90.";
+
+      announcement =
+        "Estimated total 90.0. The published AFMAN does not explicitly assign this exact score to a rating category. It is not Excellent because Excellent requires greater than 90.";
     } else {
-      const totalText = Number.isFinite(scores.total) ? scores.total.toFixed(1) : "0.0";
-      if (els.scoreRing) els.scoreRing.style.setProperty("--pct", totalText);
-      safeText(els.scoreNumber, totalText);
-      safeText(els.scoreLabel, scores.category);
-      announcement = `Estimated total ${totalText}. Rating ${scores.category}. Body composition ${scores.bodyScore.toFixed(1)} of ${SCORE_CAPS.body}, ${scores.riskLabel}.`;
+      const totalText =
+        Number.isFinite(scores.total)
+          ? scores.total.toFixed(1)
+          : "0.0";
+
+      if (els.scoreRing){
+        els.scoreRing.style.setProperty(
+          "--pct",
+          totalText
+        );
+      }
+
+      safeText(
+        els.scoreNumber,
+        totalText
+      );
+
+      safeText(
+        els.scoreLabel,
+        scores.category
+      );
+
+      announcement =
+        `Estimated total ${totalText}. Rating ${scores.category}. Body composition ${scores.bodyScore.toFixed(1)} of ${SCORE_CAPS.body}, ${scores.riskLabel}.`;
     }
 
-    safeHtml(els.nextAssessment, nextAssessmentText(scores.cardioMode, scores.category));
+    safeHtml(
+      els.nextAssessment,
+      nextAssessmentText(
+        scores.cardioMode,
+        scores.category
+      )
+    );
 
-    if (els.barBody) els.barBody.style.height = `${(scores.breakdown.body / SCORE_CAPS.body) * 100}%`;
-    if (els.barStrength) els.barStrength.style.height = `${(scores.breakdown.strength / SCORE_CAPS.strength) * 100}%`;
-    if (els.barCore) els.barCore.style.height = `${(scores.breakdown.core / SCORE_CAPS.core) * 100}%`;
-    if (els.barCardio) {
-      els.barCardio.style.height = scores.cardioMode === "walk"
-        ? "0%"
-        : `${(scores.breakdown.cardio / SCORE_CAPS.cardio) * 100}%`;
+    if (els.barBody){
+      els.barBody.style.height =
+        `${(scores.breakdown.body / SCORE_CAPS.body) * 100}%`;
+    }
+
+    if (els.barStrength){
+      els.barStrength.style.height =
+        `${(scores.breakdown.strength / SCORE_CAPS.strength) * 100}%`;
+    }
+
+    if (els.barCore){
+      els.barCore.style.height =
+        `${(scores.breakdown.core / SCORE_CAPS.core) * 100}%`;
+    }
+
+    if (els.barCardio){
+      els.barCardio.style.height =
+        scores.cardioMode === "walk"
+          ? "0%"
+          : `${(scores.breakdown.cardio / SCORE_CAPS.cardio) * 100}%`;
     }
 
     updateRangeMeta();
 
-    const insights = buildInsights(scores);
+    const insights =
+      buildInsights(scores);
+
     let extra = "";
-    if (scores.category === "Unresolved-90"){
-      extra = `<li><span class="dot lav"></span><span>90.0 — The published AFMAN does not explicitly assign this exact score to a rating category. It is not Excellent because Excellent requires greater than 90. Verify the official rating in myFitness.</span></li>`;
+
+    if (
+      scores.category === "Unresolved-90"
+    ){
+      extra =
+        `<li><span class="dot lav"></span><span>90.0 — The published AFMAN does not explicitly assign this exact score to a rating category. It is not Excellent because Excellent requires greater than 90. Verify the official rating in myFitness.</span></li>`;
     }
 
-    safeHtml(els.insightList, `
+    safeHtml(
+      els.insightList,
+      `
       <li><span class="dot mint"></span><span>${insights.line1}</span></li>
       <li><span class="dot peach"></span><span>${insights.line2}</span></li>
       <li><span class="dot lav"></span><span>${insights.line3}</span></li>
       ${extra}
-    `);
+    `
+    );
 
-    if (announce) announceResult(announcement);
+    if (announce){
+      announceResult(
+        announcement
+      );
+    }
 
-    emitPTScoreSnapshot(scores);
+    emitPTScoreSnapshot(
+      scores
+    );
   }
 
   //#9b) PUBLIC SCORE SNAPSHOT (display consumers only — no rescoring)
@@ -1154,27 +1561,153 @@
         total: SCORE_CAPS.total
       },
 
-      updated_at: new Date().toISOString()
+      profile: {
+        sex: els.gender?.value || "",
+        ageGroup: els.ageGroup?.value || "",
+        heightInches: safeNumber(
+          els.heightSlider?.value,
+          0
+        ),
+        waistInches: safeNumber(
+          els.waistSlider?.value,
+          0
+        ),
+        whtr: scores.ratio,
+        whtrRisk: scores.riskLabel
+      },
+
+      strength: {
+        event:
+          els.strengthEvent?.value || "",
+
+        performance:
+          safeNumber(
+            els.strengthSlider?.value,
+            0
+          ),
+
+        unit:
+          "reps",
+
+        score:
+          scores.strengthScore,
+
+        maxScore:
+          SCORE_CAPS.strength,
+
+        minimumMet:
+          scores.strengthPassed
+      },
+
+      core: {
+        event:
+          els.enduranceEvent?.value || "",
+
+        performance:
+          safeNumber(
+            els.coreSlider?.value,
+            0
+          ),
+
+        formattedPerformance:
+          getCoreModeKey() === "plank"
+            ? formatTime(
+                safeNumber(
+                  els.coreSlider?.value,
+                  0
+                )
+              )
+            : null,
+
+        unit:
+          getCoreModeKey() === "plank"
+            ? "seconds"
+            : "reps",
+
+        score:
+          scores.coreScore,
+
+        maxScore:
+          SCORE_CAPS.core,
+
+        minimumMet:
+          scores.corePassed
+      },
+
+      cardio: {
+        event:
+          els.cardioEvent?.value || "",
+
+        performance:
+          safeNumber(
+            els.cardioSlider?.value,
+            0
+          ),
+
+        formattedPerformance:
+          scores.cardioMode === "hamr"
+            ? null
+            : formatTime(
+                safeNumber(
+                  els.cardioSlider?.value,
+                  0
+                )
+              ),
+
+        unit:
+          scores.cardioMode === "hamr"
+            ? "shuttles"
+            : "seconds",
+
+        score:
+          scores.cardioScore,
+
+        maxScore:
+          SCORE_CAPS.cardio,
+
+        minimumMet:
+          scores.cardioPassed,
+
+        walkPassed:
+          scores.walkPassed
+      },
+
+      updated_at:
+        new Date().toISOString()
     };
   }
 
   function emitPTScoreSnapshot(scores){
-    const snapshot = buildPTScoreSnapshot(scores);
-    window.PCSU_PT_SCORE_CURRENT = snapshot;
+    const snapshot =
+      buildPTScoreSnapshot(scores);
+
+    window.PCSU_PT_SCORE_CURRENT =
+      snapshot;
 
     window.dispatchEvent(
-      new CustomEvent("pcsunited:pt-score-updated", {
-        detail: snapshot
-      })
+      new CustomEvent(
+        "pcsunited:pt-score-updated",
+        {
+          detail: snapshot
+        }
+      )
     );
 
-    if (window.parent && window.parent !== window){
+    if (
+      window.parent &&
+      window.parent !== window
+    ){
       try {
         window.parent.postMessage(
           {
-            type: "pcsunited-pt-score",
-            source: snapshot.source,
-            detail: snapshot
+            type:
+              "pcsunited-pt-score",
+
+            source:
+              snapshot.source,
+
+            detail:
+              snapshot
           },
           "*"
         );
@@ -1192,93 +1725,236 @@
       ? window.PCSU_PT_CALCULATOR
       : {};
 
-  window.PCSU_PT_CALCULATOR = Object.assign({}, existingPtCalculatorApi, {
-    version: "1.0.0",
+  window.PCSU_PT_CALCULATOR =
+    Object.assign(
+      {},
+      existingPtCalculatorApi,
+      {
+        version: "1.0.0",
 
-    getScoreSnapshot(){
-      return window.PCSU_PT_SCORE_CURRENT || null;
-    },
+        getScoreSnapshot(){
+          return (
+            window.PCSU_PT_SCORE_CURRENT ||
+            null
+          );
+        },
 
-    emitScoreSnapshot(){
-      if (!window.PCSU_PT_SCORE_CURRENT){
-        return false;
+        emitScoreSnapshot(){
+          if (
+            !window.PCSU_PT_SCORE_CURRENT
+          ){
+            return false;
+          }
+
+          window.dispatchEvent(
+            new CustomEvent(
+              "pcsunited:pt-score-updated",
+              {
+                detail:
+                  window.PCSU_PT_SCORE_CURRENT
+              }
+            )
+          );
+
+          return true;
+        }
       }
-
-      window.dispatchEvent(
-        new CustomEvent("pcsunited:pt-score-updated", {
-          detail: window.PCSU_PT_SCORE_CURRENT
-        })
-      );
-
-      return true;
-    }
-  });
+    );
 
   //#10) EVENTS
-  function bindSlider(slider, getModeKey){
+  function bindSlider(
+    slider,
+    getModeKey
+  ){
     if (!slider) return;
-    slider.addEventListener("input", () => {
-      saveSliderToActiveMode(slider, getModeKey());
-      updateUI({ announce: false });
-    });
-    slider.addEventListener("change", () => {
-      saveSliderToActiveMode(slider, getModeKey());
-      updateUI({ announce: true });
-    });
+
+    slider.addEventListener(
+      "input",
+      () => {
+        saveSliderToActiveMode(
+          slider,
+          getModeKey()
+        );
+
+        updateUI({
+          announce:false
+        });
+      }
+    );
+
+    slider.addEventListener(
+      "change",
+      () => {
+        saveSliderToActiveMode(
+          slider,
+          getModeKey()
+        );
+
+        updateUI({
+          announce:true
+        });
+      }
+    );
   }
 
   if (els.heightSlider){
-    els.heightSlider.addEventListener("input", () => updateUI({ announce: false }));
-    els.heightSlider.addEventListener("change", () => updateUI({ announce: true }));
-  }
-  if (els.waistSlider){
-    els.waistSlider.addEventListener("input", () => updateUI({ announce: false }));
-    els.waistSlider.addEventListener("change", () => updateUI({ announce: true }));
+    els.heightSlider.addEventListener(
+      "input",
+      () => {
+        updateUI({
+          announce:false
+        });
+      }
+    );
+
+    els.heightSlider.addEventListener(
+      "change",
+      () => {
+        updateUI({
+          announce:true
+        });
+      }
+    );
   }
 
-  bindSlider(els.strengthSlider, () => activeStrengthMode);
-  bindSlider(els.coreSlider, () => activeCoreMode);
-  bindSlider(els.cardioSlider, () => activeCardioMode);
+  if (els.waistSlider){
+    els.waistSlider.addEventListener(
+      "input",
+      () => {
+        updateUI({
+          announce:false
+        });
+      }
+    );
+
+    els.waistSlider.addEventListener(
+      "change",
+      () => {
+        updateUI({
+          announce:true
+        });
+      }
+    );
+  }
+
+  bindSlider(
+    els.strengthSlider,
+    () => activeStrengthMode
+  );
+
+  bindSlider(
+    els.coreSlider,
+    () => activeCoreMode
+  );
+
+  bindSlider(
+    els.cardioSlider,
+    () => activeCardioMode
+  );
 
   if (els.gender){
-    els.gender.addEventListener("change", () => {
-      handleDemographicChange();
-      updateUI({ announce: true });
-    });
+    els.gender.addEventListener(
+      "change",
+      () => {
+        handleDemographicChange();
+
+        updateUI({
+          announce:true
+        });
+      }
+    );
   }
+
   if (els.ageGroup){
-    els.ageGroup.addEventListener("change", () => {
-      handleDemographicChange();
-      updateUI({ announce: true });
-    });
+    els.ageGroup.addEventListener(
+      "change",
+      () => {
+        handleDemographicChange();
+
+        updateUI({
+          announce:true
+        });
+      }
+    );
   }
+
   if (els.strengthEvent){
-    els.strengthEvent.addEventListener("change", () => {
-      handleModalityChange();
-      updateUI({ announce: true });
-    });
+    els.strengthEvent.addEventListener(
+      "change",
+      () => {
+        handleModalityChange();
+
+        updateUI({
+          announce:true
+        });
+      }
+    );
   }
+
   if (els.enduranceEvent){
-    els.enduranceEvent.addEventListener("change", () => {
-      handleModalityChange();
-      updateUI({ announce: true });
-    });
+    els.enduranceEvent.addEventListener(
+      "change",
+      () => {
+        handleModalityChange();
+
+        updateUI({
+          announce:true
+        });
+      }
+    );
   }
+
   if (els.cardioEvent){
-    els.cardioEvent.addEventListener("change", () => {
-      handleModalityChange();
-      updateUI({ announce: true });
-    });
+    els.cardioEvent.addEventListener(
+      "change",
+      () => {
+        handleModalityChange();
+
+        updateUI({
+          announce:true
+        });
+      }
+    );
   }
 
   //#11) INIT
-  activeStrengthMode = getStrengthModeKey();
-  activeCoreMode = getCoreModeKey();
-  activeCardioMode = getCardioModeKey();
+  activeStrengthMode =
+    getStrengthModeKey();
+
+  activeCoreMode =
+    getCoreModeKey();
+
+  activeCardioMode =
+    getCardioModeKey();
+
   // Seed stored values from initial HTML slider values for active events
-  eventValues[activeStrengthMode] = safeNumber(els.strengthSlider?.value, EVENT_DEFAULTS[activeStrengthMode]);
-  eventValues[activeCoreMode] = safeNumber(els.coreSlider?.value, EVENT_DEFAULTS[activeCoreMode]);
-  eventValues[activeCardioMode] = safeNumber(els.cardioSlider?.value, EVENT_DEFAULTS[activeCardioMode]);
+  eventValues[activeStrengthMode] =
+    safeNumber(
+      els.strengthSlider?.value,
+      EVENT_DEFAULTS[
+        activeStrengthMode
+      ]
+    );
+
+  eventValues[activeCoreMode] =
+    safeNumber(
+      els.coreSlider?.value,
+      EVENT_DEFAULTS[
+        activeCoreMode
+      ]
+    );
+
+  eventValues[activeCardioMode] =
+    safeNumber(
+      els.cardioSlider?.value,
+      EVENT_DEFAULTS[
+        activeCardioMode
+      ]
+    );
+
   applyActiveEventSliders();
-  updateUI({ announce: true });
+
+  updateUI({
+    announce:true
+  });
 })();
