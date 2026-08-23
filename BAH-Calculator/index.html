@@ -1,361 +1,1278 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- ============================================================
+    THEWING.AI / PCSUNited
+    AIR FORCE BAH CALCULATOR
+    MOBILE-FIRST AURORA UI
+
+    HTML v2.0
+    UI REDESIGN ONLY
+
+    IMPORTANT:
+    - Preserves existing BAH Calculator JavaScript IDs
+    - Preserves existing API/runtime contract
+    - Does NOT change BAH calculation logic
+    - Does NOT change location normalization
+    - Does NOT change pay logic
+    - Does NOT change /api/opensource-brain
+  =============================================================== -->
+
   <!-- //#1) META -->
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
 
   <!-- //#2) SEO -->
-  <title>BAH & Base Pay Calculator | PCSUnited</title>
+  <title>BAH &amp; Base Pay Calculator | PCSUnited</title>
+
   <meta
     name="description"
     content="Estimate Air Force monthly BAH, Base Pay, BAS, and total military compensation using PCSUnited's Aurora-style calculator."
   />
-  <link rel="canonical" href="https://www.pcsunited.com/bah-calculator" />
 
+  <link
+    rel="canonical"
+    href="https://www.pcsunited.com/bah-calculator"
+  />
+
+  <!-- //#3) SOCIAL -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="BAH & Base Pay Calculator | PCSUnited" />
+
+  <meta
+    property="og:title"
+    content="BAH & Base Pay Calculator | PCSUnited"
+  />
+
   <meta
     property="og:description"
     content="Estimate monthly BAH, Base Pay, BAS, and total military compensation using PCSUnited's premium Aurora calculator."
   />
-  <meta property="og:url" content="https://www.pcsunited.com/bah-calculator" />
 
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="BAH & Base Pay Calculator | PCSUnited" />
+  <meta
+    property="og:url"
+    content="https://www.pcsunited.com/bah-calculator"
+  />
+
+  <meta
+    name="twitter:card"
+    content="summary_large_image"
+  />
+
+  <meta
+    name="twitter:title"
+    content="BAH & Base Pay Calculator | PCSUnited"
+  />
+
   <meta
     name="twitter:description"
     content="Estimate monthly BAH, Base Pay, BAS, and total military compensation using PCSUnited's premium Aurora calculator."
   />
 
-  <!-- //#3) FONTS -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- //#4) FONTS -->
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@700&display=swap"
     rel="stylesheet"
   />
 
-  <!-- //#4) STYLESHEET -->
-  <link rel="stylesheet" href="./bahcalculator.css" />
+  <!-- //#5) STYLES -->
+  <link
+    rel="stylesheet"
+    href="./bahcalculator.css"
+  />
 </head>
+
 <body>
-  <!-- //#5) ROOT -->
-  <div id="pcsu-bah-shell">
+
+  <!-- ============================================================
+    ROOT
+  =============================================================== -->
+
+  <main id="pcsu-bah-shell">
+
     <div class="bah-stage">
-      <div class="app">
 
-        <!-- //#6) TOPBAR -->
-        <div class="topbar">
-          <div class="title-wrap">
-            <h1 class="title">BAH &amp; Base Pay Calculator</h1>
-            <div class="subtitle">
-              Estimate your monthly BAH, Base Pay, BAS, and total military compensation.
+      <div class="app bah-mobile-app">
+
+        <!-- ======================================================
+          HEADER
+        ======================================================= -->
+
+        <header class="bah-app-header">
+
+          <div class="bah-brand-row">
+
+            <!-- Brand -->
+            <div
+              class="bah-brand"
+              aria-label="PCSUnited"
+            >
+
+              <div
+                class="bah-brand-mark"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 48 48"
+                  role="img"
+                  focusable="false"
+                >
+                  <path
+                    d="M24 9v30"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                  />
+
+                  <path
+                    d="M21 14 9 9l5 10 7 5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+
+                  <path
+                    d="m27 14 12-5-5 10-7 5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+
+                  <path
+                    d="m21 25-9-2 5 8 4 3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+
+                  <path
+                    d="m27 25 9-2-5 8-4 3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+
+              <div class="bah-brand-name">
+                PCSUnited
+              </div>
+
             </div>
+
+
+            <!-- Rate Year -->
+            <div
+              class="bah-rate-year"
+              aria-label="2026 BAH rates"
+            >
+
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 3 19 6v5c0 4.6-2.8 8.2-7 10-4.2-1.8-7-5.4-7-10V6l7-3Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linejoin="round"
+                />
+
+                <path
+                  d="m9 12 2 2 4-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+
+              <span>2026 RATES</span>
+
+            </div>
+
           </div>
 
-          <div class="hero-card glass">
-            <div class="mini-label" id="bah-total-hero-label">Total Monthly Military Pay</div>
-            <div class="hero-value" id="bah-total-hero-value">$6,437.95</div>
-            <div class="hero-sub" id="bah-total-hero-sub">Base Pay + BAH + BAS</div>
+
+          <!-- Title -->
+          <div class="bah-title-wrap">
+
+            <h1 class="title bah-title">
+              <span class="bah-title-primary">
+                Air Force
+              </span>
+
+              <span class="bah-title-accent">
+                BAH Calculator
+              </span>
+            </h1>
+
+            <p class="subtitle bah-subtitle">
+              Official BAH
+              <span aria-hidden="true">•</span>
+              Base Pay
+              <span aria-hidden="true">•</span>
+              BAS
+              <span aria-hidden="true">•</span>
+              Total Compensation
+            </p>
+
           </div>
-        </div>
 
-        <!-- //#7) DIVIDER -->
-        <div class="divider"></div>
+        </header>
 
-        <!-- //#8) ABOUT / SEO COPY -->
-        <section class="seo-copy glass" aria-label="About this calculator">
-          <h2 class="panel-title">About the BAH Calculator</h2>
-          <div class="panel-rule"></div>
-          <p>
-            PCSUnited’s BAH &amp; Base Pay Calculator gives military users a quick estimate
-            of monthly compensation by combining projected BAH, estimated Base Pay,
-            and BAS into one clean readiness-style view.
-          </p>
-          <p>
-            Users can adjust pay grade, years in service, duty location, and dependency
-            status to preview housing-related compensation before moving into deeper
-            affordability and home-buying analysis.
-          </p>
+
+        <!-- ======================================================
+          SECTION 1
+          YOUR INFORMATION
+        ======================================================= -->
+
+        <section
+          class="bah-input-panel glass"
+          aria-labelledby="bah-input-heading"
+        >
+
+          <h2
+            class="bah-section-title"
+            id="bah-input-heading"
+          >
+            <span class="bah-section-number">1.</span>
+            Your Information
+          </h2>
+
+
+          <div class="bah-input-list">
+
+            <!-- ==================================================
+              PAY GRADE
+            =================================================== -->
+
+            <div class="bah-input-row">
+
+              <div
+                class="bah-input-icon bah-input-icon-rank"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="m5 8 7-5 7 5-7 5-7-5Z"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="m5 13 7 5 7-5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="m7 18 5 3 5-3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+
+
+              <div class="bah-input-control">
+
+                <label
+                  class="bah-input-label"
+                  for="bah-paygrade"
+                >
+                  Pay Grade
+                </label>
+
+                <div class="select-wrap">
+
+                  <select
+                    id="bah-paygrade"
+                    aria-label="Pay Grade"
+                  >
+                    <option>E-4</option>
+                    <option selected>E-5</option>
+                    <option>E-6</option>
+                    <option>E-7</option>
+                    <option>E-8</option>
+                    <option>E-9</option>
+
+                    <option>O-1</option>
+                    <option>O-2</option>
+                    <option>O-3</option>
+                    <option>O-4</option>
+                    <option>O-5</option>
+                    <option>O-6</option>
+                  </select>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- ==================================================
+              LOCATION
+            =================================================== -->
+
+            <div class="bah-input-row">
+
+              <div
+                class="bah-input-icon bah-input-icon-location"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linejoin="round"
+                  />
+
+                  <circle
+                    cx="12"
+                    cy="10"
+                    r="2.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+                </svg>
+              </div>
+
+
+              <div class="bah-input-control">
+
+                <label
+                  class="bah-input-label"
+                  for="bah-location"
+                >
+                  Duty Station / Location
+                </label>
+
+                <div class="select-wrap">
+
+                  <select
+                    id="bah-location"
+                    aria-label="Duty Station or Location"
+                  >
+                    <option>Andrews AFB</option>
+                    <option>Barksdale AFB</option>
+                    <option>Beale AFB</option>
+                    <option>Cannon AFB</option>
+                    <option>Charleston AFB</option>
+                    <option>Creech AFB</option>
+                    <option>Davis-Monthan AFB</option>
+                    <option>Dover AFB</option>
+                    <option>Dyess AFB</option>
+                    <option>Edwards AFB</option>
+                    <option>Eglin AFB</option>
+                    <option>Elmendorf AFB</option>
+                    <option>Fairchild AFB</option>
+                    <option>F.E. Warren AFB</option>
+                    <option>Goodfellow AFB</option>
+                    <option>Grand Forks AFB</option>
+                    <option>Hanscom AFB</option>
+                    <option>Hill AFB</option>
+                    <option>Holloman AFB</option>
+                    <option>Hurlburt Field</option>
+
+                    <option selected>
+                      Lackland AFB
+                    </option>
+
+                    <option>JBSA-Randolph</option>
+                    <option>JBSA-Fort Sam Houston</option>
+                    <option>Keesler AFB</option>
+                    <option>Kirtland AFB</option>
+                    <option>Langley AFB</option>
+                    <option>Laughlin AFB</option>
+                    <option>Little Rock AFB</option>
+                    <option>Los Angeles AFB</option>
+                    <option>Luke AFB</option>
+                    <option>MacDill AFB</option>
+                    <option>Maxwell AFB</option>
+                    <option>McChord Field</option>
+                    <option>McConnell AFB</option>
+                    <option>McGuire AFB</option>
+                    <option>Minot AFB</option>
+                    <option>Moody AFB</option>
+                    <option>Mountain Home AFB</option>
+                    <option>Nellis AFB</option>
+                    <option>Robins AFB</option>
+                    <option>Scott AFB</option>
+                    <option>Seymour Johnson AFB</option>
+                    <option>Shaw AFB</option>
+                    <option>Tinker AFB</option>
+                    <option>Travis AFB</option>
+                    <option>Tyndall AFB</option>
+                    <option>Whiteman AFB</option>
+                    <option>Wright-Patterson AFB</option>
+                  </select>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- ==================================================
+              DEPENDENTS
+            =================================================== -->
+
+            <div class="bah-input-row">
+
+              <div
+                class="bah-input-icon bah-input-icon-dependents"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24">
+
+                  <circle
+                    cx="9"
+                    cy="8"
+                    r="3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+
+                  <circle
+                    cx="17"
+                    cy="9"
+                    r="2.4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+
+                  <path
+                    d="M3.5 20v-2.2c0-3 2.5-5.3 5.5-5.3s5.5 2.3 5.5 5.3V20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+
+                  <path
+                    d="M15 14.5c3.4-.5 5.5 1.3 5.5 4.3V20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+
+                </svg>
+              </div>
+
+
+              <div class="bah-input-control">
+
+                <label
+                  class="bah-input-label"
+                  for="bah-dependents"
+                >
+                  Dependents
+                </label>
+
+                <div class="select-wrap">
+
+                  <select
+                    id="bah-dependents"
+                    aria-label="Dependent Status"
+                  >
+                    <option selected>
+                      With Dependents
+                    </option>
+
+                    <option>
+                      Without Dependents
+                    </option>
+                  </select>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- ==================================================
+              YEARS IN SERVICE
+            =================================================== -->
+
+            <div class="bah-input-row">
+
+              <div
+                class="bah-input-icon bah-input-icon-yos"
+                aria-hidden="true"
+              >
+
+                <svg viewBox="0 0 24 24">
+
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="8"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+
+                  <path
+                    d="M12 7v5l3 2"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+
+                </svg>
+
+              </div>
+
+
+              <div class="bah-input-control">
+
+                <label
+                  class="bah-input-label"
+                  for="bah-yos"
+                >
+                  Years in Service
+                </label>
+
+                <div class="select-wrap">
+
+                  <select
+                    id="bah-yos"
+                    aria-label="Years in Service"
+                  >
+                    <option>0 Years</option>
+                    <option>2 Years</option>
+                    <option>4 Years</option>
+
+                    <option selected>
+                      6 Years
+                    </option>
+
+                    <option>8 Years</option>
+                    <option>10 Years</option>
+                    <option>12 Years</option>
+                    <option>14 Years</option>
+                    <option>16 Years</option>
+                    <option>18 Years</option>
+                    <option>20 Years</option>
+                  </select>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
         </section>
 
-        <!-- //#9) SUMMARY SELECTORS -->
-        <div class="summary-grid">
-          <div class="mini-card glass">
-            <div class="mini-label">Pay Grade</div>
-            <div class="mini-value">
-              <div class="select-wrap">
-                <select id="bah-paygrade">
-                  <option>E-4</option>
-                  <option selected>E-5</option>
-                  <option>E-6</option>
-                  <option>E-7</option>
-                  <option>E-8</option>
-                  <option>E-9</option>
-                  <option>O-1</option>
-                  <option>O-2</option>
-                  <option>O-3</option>
-                  <option>O-4</option>
-                  <option>O-5</option>
-                  <option>O-6</option>
-                </select>
-              </div>
+
+        <!-- ======================================================
+          SECTION 2
+          PRIMARY BAH RESULT
+        ======================================================= -->
+
+        <section
+          class="bah-result-panel glass"
+          aria-labelledby="bah-result-heading"
+          aria-live="polite"
+        >
+
+          <div class="bah-result-header">
+
+            <h2
+              class="bah-section-title"
+              id="bah-result-heading"
+            >
+              <span class="bah-section-number">2.</span>
+              Your BAH (Monthly)
+            </h2>
+
+
+            <div class="bah-official-badge">
+
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="9"
+                  fill="currentColor"
+                />
+
+                <path
+                  d="m8.5 12 2.2 2.2 4.8-5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+
+              <span>
+                Official BAH Rate
+              </span>
+
             </div>
+
           </div>
 
-          <div class="mini-card glass">
-            <div class="mini-label">Years in Service</div>
-            <div class="mini-value">
-              <div class="select-wrap">
-                <select id="bah-yos">
-                  <option>0 Years</option>
-                  <option>2 Years</option>
-                  <option>4 Years</option>
-                  <option selected>6 Years</option>
-                  <option>8 Years</option>
-                  <option>10 Years</option>
-                  <option>12 Years</option>
-                  <option>14 Years</option>
-                  <option>16 Years</option>
-                  <option>18 Years</option>
-                  <option>20 Years</option>
-                </select>
-              </div>
+
+          <!-- Primary number -->
+          <div class="bah-primary-result">
+
+            <div
+              class="bah-primary-value"
+              id="bah-pay-amount"
+            >
+              —
             </div>
+
+            <div class="bah-primary-period">
+              PER MONTH
+            </div>
+
           </div>
 
-          <div class="mini-card glass">
-            <div class="mini-label">Location</div>
-            <div class="mini-value">
-              <div class="select-wrap">
-                <select id="bah-location">
-                  <option>Andrews AFB</option>
-                  <option>Barksdale AFB</option>
-                  <option>Beale AFB</option>
-                  <option>Cannon AFB</option>
-                  <option>Charleston AFB</option>
-                  <option>Creech AFB</option>
-                  <option>Davis-Monthan AFB</option>
-                  <option>Dover AFB</option>
-                  <option>Dyess AFB</option>
-                  <option>Edwards AFB</option>
-                  <option>Eglin AFB</option>
-                  <option>Elmendorf AFB</option>
-                  <option>Fairchild AFB</option>
-                  <option>F.E. Warren AFB</option>
-                  <option>Goodfellow AFB</option>
-                  <option>Grand Forks AFB</option>
-                  <option>Hanscom AFB</option>
-                  <option>Hill AFB</option>
-                  <option>Holloman AFB</option>
-                  <option>Hurlburt Field</option>
-                  <option selected>Lackland AFB</option>
-                  <option>JBSA-Randolph</option>
-                  <option>JBSA-Fort Sam Houston</option>
-                  <option>Keesler AFB</option>
-                  <option>Kirtland AFB</option>
-                  <option>Langley AFB</option>
-                  <option>Laughlin AFB</option>
-                  <option>Little Rock AFB</option>
-                  <option>Los Angeles AFB</option>
-                  <option>Luke AFB</option>
-                  <option>MacDill AFB</option>
-                  <option>Maxwell AFB</option>
-                  <option>McChord Field</option>
-                  <option>McConnell AFB</option>
-                  <option>McGuire AFB</option>
-                  <option>Minot AFB</option>
-                  <option>Moody AFB</option>
-                  <option>Mountain Home AFB</option>
-                  <option>Nellis AFB</option>
-                  <option>Robins AFB</option>
-                  <option>Scott AFB</option>
-                  <option>Seymour Johnson AFB</option>
-                  <option>Shaw AFB</option>
-                  <option>Tinker AFB</option>
-                  <option>Travis AFB</option>
-                  <option>Tyndall AFB</option>
-                  <option>Whiteman AFB</option>
-                  <option>Wright-Patterson AFB</option>
-                </select>
+
+          <div class="bah-result-divider"></div>
+
+
+          <!-- Result details -->
+          <div class="bah-result-details">
+
+            <!-- Annual -->
+            <div class="bah-result-detail">
+
+              <div
+                class="bah-detail-icon"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24">
+
+                  <rect
+                    x="4"
+                    y="6"
+                    width="16"
+                    height="14"
+                    rx="2"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+
+                  <path
+                    d="M8 3v6M16 3v6M4 11h16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+
+                </svg>
               </div>
+
+              <div>
+                <div class="bah-detail-label">
+                  Annual BAH
+                </div>
+
+                <!--
+                  JS enhancement will populate this later.
+                  Intentionally not hard-coded to avoid stale values.
+                -->
+                <div
+                  class="bah-detail-value"
+                  id="bah-annual-amount"
+                >
+                  —
+                </div>
+              </div>
+
             </div>
+
+
+            <!-- Location -->
+            <div class="bah-result-detail">
+
+              <div
+                class="bah-detail-icon"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24">
+
+                  <path
+                    d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linejoin="round"
+                  />
+
+                  <circle
+                    cx="12"
+                    cy="10"
+                    r="2.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+
+                </svg>
+              </div>
+
+              <div>
+                <div class="bah-detail-label">
+                  Location
+                </div>
+
+                <div
+                  class="bah-detail-value"
+                  id="bah-info-location"
+                >
+                  Lackland AFB
+                </div>
+              </div>
+
+            </div>
+
+
+            <!-- Dependents -->
+            <div class="bah-result-detail">
+
+              <div
+                class="bah-detail-icon bah-detail-icon-dependents"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24">
+
+                  <circle
+                    cx="9"
+                    cy="8"
+                    r="3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+
+                  <circle
+                    cx="17"
+                    cy="9"
+                    r="2.4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+
+                  <path
+                    d="M3.5 20v-2.2c0-3 2.5-5.3 5.5-5.3s5.5 2.3 5.5 5.3V20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+
+                  <path
+                    d="M15 14.5c3.4-.5 5.5 1.3 5.5 4.3V20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+
+                </svg>
+              </div>
+
+              <div>
+                <div class="bah-detail-label">
+                  Dependents
+                </div>
+
+                <div
+                  class="bah-detail-value"
+                  id="bah-info-dependency"
+                >
+                  With Dependents
+                </div>
+              </div>
+
+            </div>
+
           </div>
 
-          <div class="mini-card glass">
-            <div class="mini-label">Dependents</div>
-            <div class="mini-value">
-              <div class="select-wrap">
-                <select id="bah-dependents">
-                  <option selected>With Dependents</option>
-                  <option>Without Dependents</option>
-                </select>
+        </section>
+
+
+        <!-- ======================================================
+          FULL MONTHLY MILITARY COMPENSATION
+        ======================================================= -->
+
+        <section
+          class="bah-compensation-panel glass"
+          aria-labelledby="bah-compensation-heading"
+        >
+
+          <div class="bah-compensation-header">
+
+            <div class="bah-compensation-title-wrap">
+
+              <div
+                class="bah-compensation-icon"
+                aria-hidden="true"
+              >
+                <svg viewBox="0 0 24 24">
+
+                  <rect
+                    x="5"
+                    y="3"
+                    width="14"
+                    height="18"
+                    rx="2"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  />
+
+                  <path
+                    d="M8 7h8M8 11h2M14 11h2M8 15h2M14 15h2"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+
+                </svg>
               </div>
+
+
+              <h2
+                id="bah-compensation-heading"
+                class="bah-compensation-title"
+              >
+                Full Monthly Military Compensation
+              </h2>
+
             </div>
+
+
+            <div
+              class="bah-compensation-chevron"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="m6 15 6-6 6 6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+
           </div>
+
+
+          <!-- Compensation formula -->
+          <div class="bah-compensation-grid">
+
+            <!-- BASE PAY -->
+            <div class="bah-compensation-item">
+
+              <div class="bah-compensation-label bah-basepay-color">
+                Base Pay
+              </div>
+
+              <div
+                class="bah-compensation-value"
+                id="bah-basepay-amount"
+              >
+                —
+              </div>
+
+            </div>
+
+
+            <div
+              class="bah-compensation-plus"
+              aria-hidden="true"
+            >
+              +
+            </div>
+
+
+            <!-- BAH -->
+            <div class="bah-compensation-item">
+
+              <div class="bah-compensation-label bah-bah-color">
+                BAH
+              </div>
+
+              <div
+                class="bah-compensation-value"
+                id="bah-bar-bah-value"
+              >
+                —
+              </div>
+
+            </div>
+
+
+            <div
+              class="bah-compensation-plus"
+              aria-hidden="true"
+            >
+              +
+            </div>
+
+
+            <!-- BAS -->
+            <div class="bah-compensation-item">
+
+              <div class="bah-compensation-label bah-bas-color">
+                BAS
+              </div>
+
+              <div
+                class="bah-compensation-value"
+                id="bah-bas-amount"
+              >
+                —
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="bah-compensation-divider"></div>
+
+
+          <!-- Total -->
+          <div class="bah-compensation-total">
+
+            <div class="bah-compensation-total-label">
+              TOTAL MONTHLY COMPENSATION
+            </div>
+
+            <div
+              class="bah-compensation-total-value"
+              id="bah-total-amount"
+            >
+              —
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ======================================================
+          TRUST / SOURCE LINE
+        ======================================================= -->
+
+        <div class="bah-source-line">
+
+          <div
+            class="bah-source-icon"
+            aria-hidden="true"
+          >
+            <svg viewBox="0 0 24 24">
+
+              <path
+                d="M12 3 19 6v5c0 4.6-2.8 8.2-7 10-4.2-1.8-7-5.4-7-10V6l7-3Z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+              />
+
+              <path
+                d="m9 12 2 2 4-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+
+            </svg>
+          </div>
+
+          <p>
+            BAH rates use TheWing.ai's official BAH data layer.
+          </p>
+
         </div>
 
-        <!-- //#10) MAIN GRID -->
-        <div class="main-grid">
-          <!-- //#10A) LEFT PANEL : PAY ESTIMATE + INSIGHT -->
-          <section class="panel glass">
-            <h2 class="panel-title">Pay Estimate</h2>
-            <div class="panel-rule"></div>
 
-            <!-- keep hidden info values for JS/runtime continuity -->
-            <div id="bah-info-panel" style="display:none;">
-              <div id="bah-info-status">Active Duty</div>
-              <div id="bah-info-dependency">With Dependents</div>
-              <div id="bah-info-location">JBSA-Lackland</div>
-              <div id="bah-info-rank">E-5</div>
-              <div id="bah-info-yos">6 Years</div>
-            </div>
+        <!-- ======================================================
+          SEO SUPPORTING COPY
+          IMPORTANT:
+          Moved BELOW primary calculator.
+          Search traffic sees calculator FIRST.
+        ======================================================= -->
 
-            <div class="calc-card pay-estimate-card">
-              <div class="calc-left">
-                <div class="calc-title" id="bah-pay-label">Projected Monthly BAH</div>
-                <div class="calc-sub">Location-based housing allowance</div>
-              </div>
-              <div class="calc-right">
-                <div class="calc-main gold" id="bah-pay-amount">$2,850</div>
-                <div class="calc-mini" id="bah-breakdown-bah">BAH Component</div>
-              </div>
-            </div>
+        <section
+          class="seo-copy bah-supporting-copy glass"
+          aria-label="About this calculator"
+        >
 
-            <div class="calc-card pay-estimate-card">
-              <div class="calc-left">
-                <div class="calc-title" id="bah-basepay-label">Estimated Monthly Base Pay</div>
-                <div class="calc-sub">Rank and years-of-service driven</div>
-              </div>
-              <div class="calc-right">
-                <div class="calc-main" id="bah-basepay-amount">$3,111</div>
-                <div class="calc-mini" id="bah-breakdown-basepay">Base Pay Component</div>
-              </div>
-            </div>
+          <h2 class="panel-title">
+            About the BAH Calculator
+          </h2>
 
-            <div class="calc-card pay-estimate-card">
-              <div class="calc-left">
-                <div class="calc-title" id="bah-bas-label">Estimated Monthly BAS</div>
-                <div class="calc-sub">Standard food allowance estimate</div>
-              </div>
-              <div class="calc-right">
-                <div class="calc-main" id="bah-bas-amount">$476.95</div>
-                <div class="calc-mini" id="bah-breakdown-bas">BAS Component</div>
-              </div>
-            </div>
-
-            <div class="input-divider"></div>
-
-            <h2 class="panel-title insight-title">Estimation Insight</h2>
-            <div class="panel-rule insight-rule"></div>
-
-            <ul class="insight-list" id="bah-insight-list">
-              <li>
-                <span class="dot mint"></span>
-                <span>
-                  This estimate combines projected monthly BAH, estimated Base Pay,
-                  and BAS into one fast-read compensation view.
-                </span>
-              </li>
-              <li>
-                <span class="dot peach"></span>
-                <span>
-                  BAH changes based on duty location and dependency status, while
-                  Base Pay changes with grade and time in service.
-                </span>
-              </li>
-              <li>
-                <span class="dot lav"></span>
-                <span>
-                  This shell is designed for PCSUnited’s front-end housing workflow
-                  before deeper affordability analysis begins.
-                </span>
-              </li>
-            </ul>
-          </section>
-
-          <!-- //#10B) RIGHT PANEL : GRAPH / RING MOVED UP -->
-          <section class="panel glass">
-            <div class="chart-zone">
-              <div class="bars breakdown-bars" id="bah-breakdown-rows">
-                <div class="bar-col">
-                  <div class="bar-stack">
-                    <div id="bah-bar-bah" class="bar-fill bar-aqua" style="height:78%;"></div>
-                  </div>
-                  <div class="bar-label">BAH</div>
-                  <div class="bar-value" id="bah-bar-bah-value">$2,850</div>
-                </div>
-
-                <div class="bar-col">
-                  <div class="bar-stack">
-                    <div id="bah-bar-basepay" class="bar-fill bar-peach" style="height:84%;"></div>
-                  </div>
-                  <div class="bar-label">Base Pay</div>
-                  <div class="bar-value" id="bah-bar-basepay-value">$3,111</div>
-                </div>
-
-                <div class="bar-col">
-                  <div class="bar-stack">
-                    <div id="bah-bar-bas" class="bar-fill bar-lav" style="height:14%;"></div>
-                  </div>
-                  <div class="bar-label">BAS</div>
-                  <div class="bar-value" id="bah-bar-bas-value">$477</div>
-                </div>
-              </div>
-
-              <div class="score-ring-wrap">
-                <div id="scoreRing" class="score-ring" style="--pct:64.38;">
-                  <div class="score-center">
-                    <div id="bah-total-amount" class="score-number small-money">$6,437.95</div>
-                    <div id="scoreLabel" class="score-label">Total Monthly Pay</div>
-                  </div>
-                </div>
-
-                <div id="bah-total-wrap" class="next-assessment visible-pay-total">
-                  <div class="total-pay-label">Total Monthly Military Pay</div>
-                  <div class="total-pay-note" id="bah-total-note">Base Pay + BAH + BAS</div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <!-- //#11) FAQ -->
-        <section class="seo-faq glass" aria-label="Frequently asked questions">
-          <h2 class="panel-title">BAH Calculator FAQ</h2>
           <div class="panel-rule"></div>
 
-          <h3>What does this BAH calculator estimate?</h3>
           <p>
-            It estimates projected monthly BAH, Base Pay, BAS, and total monthly
-            military compensation using the selected duty location, grade,
+            PCSUnited’s BAH &amp; Base Pay Calculator gives military
+            users a quick estimate of monthly compensation by combining
+            projected BAH, estimated Base Pay, and BAS.
+          </p>
+
+          <p>
+            Adjust pay grade, years in service, duty location, and
+            dependency status to preview housing-related compensation
+            before deeper affordability and housing analysis.
+          </p>
+
+        </section>
+
+
+        <!-- ======================================================
+          FAQ / SEARCH SUPPORT
+        ======================================================= -->
+
+        <section
+          class="seo-faq bah-supporting-faq glass"
+          aria-label="Frequently asked questions"
+        >
+
+          <h2 class="panel-title">
+            BAH Calculator FAQ
+          </h2>
+
+          <div class="panel-rule"></div>
+
+
+          <h3>
+            What does this BAH calculator estimate?
+          </h3>
+
+          <p>
+            It estimates projected monthly BAH, Base Pay, BAS,
+            and total monthly military compensation using the
+            selected duty location, grade, dependency status,
             and years in service.
           </p>
 
-          <h3>Does BAH change by location and dependents?</h3>
+
+          <h3>
+            Does BAH change by location and dependents?
+          </h3>
+
           <p>
-            Yes. BAH can vary significantly by housing market and whether
-            the member has dependents.
+            Yes. BAH can vary significantly by housing market
+            and whether the member has dependents.
           </p>
 
-          <h3>Can this feed into a housing affordability tool?</h3>
+
+          <h3>
+            Why does the calculator also show Base Pay and BAS?
+          </h3>
+
           <p>
-            Yes. This calculator is designed to act as a clean first step before
-            moving into a deeper mortgage and affordability workflow inside PCSUnited.
+            BAH is shown first as the primary housing allowance.
+            Base Pay and BAS are displayed separately to provide
+            additional military compensation context.
           </p>
+
         </section>
 
-        <!-- //#12) FOOTER NOTE -->
-        <div class="footer-note" id="bah-footer-note">
-          Demo logic included. You can now swap the mock data in
-          <code>bahcalculator.js</code> for official PCSUnited pay tables or live endpoints.
+
+        <!-- ======================================================
+          RUNTIME COMPATIBILITY
+          Preserve existing IDs used by bahcalculator.js.
+
+          These are intentionally hidden from the redesigned UI.
+          We will clean/update the JS architecture separately.
+        ======================================================= -->
+
+        <div
+          class="bah-runtime-compat"
+          hidden
+          aria-hidden="true"
+        >
+
+          <!-- Existing hero IDs -->
+          <div id="bah-total-hero-label">
+            Total Monthly Military Pay
+          </div>
+
+          <div id="bah-total-hero-value">
+            —
+          </div>
+
+          <div id="bah-total-hero-sub">
+            Base Pay + BAH + BAS
+          </div>
+
+
+          <!-- Existing info IDs not used visibly -->
+          <div id="bah-info-panel">
+
+            <div id="bah-info-status">
+              Active Duty
+            </div>
+
+            <div id="bah-info-rank">
+              E-5
+            </div>
+
+            <div id="bah-info-yos">
+              6 Years
+            </div>
+
+          </div>
+
+
+          <!-- Existing result label IDs -->
+          <div id="bah-pay-label">
+            Projected Monthly BAH
+          </div>
+
+          <div id="bah-basepay-label">
+            Estimated Monthly Base Pay
+          </div>
+
+          <div id="bah-bas-label">
+            Estimated Monthly BAS
+          </div>
+
+
+          <!-- Existing breakdown IDs -->
+          <div id="bah-breakdown-bah">
+            BAH Component
+          </div>
+
+          <div id="bah-breakdown-basepay">
+            Base Pay Component
+          </div>
+
+          <div id="bah-breakdown-bas">
+            BAS Component
+          </div>
+
+
+          <!-- Existing secondary result IDs -->
+          <div id="bah-bar-basepay-value">
+            —
+          </div>
+
+          <div id="bah-bar-bas-value">
+            —
+          </div>
+
+
+          <!-- Existing bar/ring runtime targets -->
+          <div id="bah-breakdown-rows">
+
+            <div id="bah-bar-bah"></div>
+
+            <div id="bah-bar-basepay"></div>
+
+            <div id="bah-bar-bas"></div>
+
+          </div>
+
+
+          <div id="scoreRing">
+
+            <div id="scoreLabel">
+              Total Monthly Pay
+            </div>
+
+          </div>
+
+
+          <div id="bah-total-wrap">
+
+            <div id="bah-total-note">
+              Base Pay + BAH + BAS
+            </div>
+
+          </div>
+
+
+          <!-- Existing insight runtime target -->
+          <ul id="bah-insight-list"></ul>
+
+
+          <!-- Existing footer runtime target -->
+          <div id="bah-footer-note"></div>
+
         </div>
+
+
       </div>
     </div>
-  </div>
 
-  <!-- //#13) SCRIPT -->
+  </main>
+
+
+  <!-- ============================================================
+    SCRIPT
+    EXISTING JS FILE — UNCHANGED FOR THIS PHASE
+  =============================================================== -->
+
   <script src="./bahcalculator.js"></script>
+
 </body>
 </html>
