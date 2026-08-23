@@ -1,7 +1,7 @@
 /* ============================================================
   PCSUnited • BAH Compensation Header Strip
   Standalone Public JavaScript
-  v1.1.0 • MIDNIGHT AF BLUE / AURORA
+  v1.2.0 • AURORA GLASS
 
   FILE
   BAH-Calculator/bah-header.js
@@ -11,50 +11,31 @@
 
   ARCHITECTURE
   - Runs on the Webflow parent page.
-  - Does NOT require #pcsu-bah-shell in the parent document.
-  - Receives compensation snapshots from the BAH Calculator iframe
+  - Receives BAH compensation snapshots from the calculator iframe
     through window.postMessage().
-  - Sends a passive snapshot request to embedded frames on mount.
   - Does NOT calculate BAH, Base Pay, BAS, or Total Compensation.
   - Does NOT make API requests or use storage.
+  - Visual update only: simplified to match the BAH Calculator Aurora UI.
 =============================================================== */
 
 (() => {
   "use strict";
 
-  const VERSION = "1.1.0";
-  const SOURCE = "pcsunited.bah.header.v1.1.0";
+  const VERSION = "1.2.0";
+  const SOURCE = "pcsunited.bah.header.v1.2.0";
 
-  const MOUNT_ID =
-    "pcsu-bah-header-progression-widget";
+  const MOUNT_ID = "pcsu-bah-header-progression-widget";
+  const ROOT_ID = "pcsu-bah-header-compensation-strip";
+  const STYLE_ID = "pcsu-bah-header-styles-v120";
+  const FONT_ID = "pcsu-bah-header-font";
 
-  const ROOT_ID =
-    "pcsu-bah-header-compensation-strip";
+  const MESSAGE_TYPE = "pcsunited-bah-compensation";
+  const REQUEST_TYPE = "pcsunited-bah-header-request";
+  const CALCULATOR_SOURCE = "pcsunited.bah.calculator";
 
-  const STYLE_ID =
-    "pcsu-bah-header-styles-v110";
-
-  const FONT_ID =
-    "pcsu-bah-header-font";
-
-  const MESSAGE_TYPE =
-    "pcsunited-bah-compensation";
-
-  const REQUEST_TYPE =
-    "pcsunited-bah-header-request";
-
-  const CALCULATOR_SOURCE =
-    "pcsunited.bah.calculator";
-
-
-  /* ============================================================
-    ALLOWED CALCULATOR ORIGINS
-  ============================================================ */
-
-  const ALLOWED_ORIGINS =
-    new Set([
-      "https://thewing.netlify.app"
-    ]);
+  const ALLOWED_ORIGINS = new Set([
+    "https://thewing.netlify.app"
+  ]);
 
 
   /* ============================================================
@@ -62,7 +43,6 @@
   ============================================================ */
 
   function clean(value) {
-
     return String(
       value == null
         ? ""
@@ -72,7 +52,6 @@
 
 
   function isObject(value) {
-
     return (
       Boolean(value) &&
       typeof value === "object" &&
@@ -82,10 +61,7 @@
 
 
   function isAllowedOrigin(origin) {
-
-    return ALLOWED_ORIGINS.has(
-      origin
-    );
+    return ALLOWED_ORIGINS.has(origin);
   }
 
 
@@ -93,12 +69,10 @@
     value,
     digits = 2
   ) {
-
     if (
       typeof value === "number" &&
       Number.isFinite(value)
     ) {
-
       return (
         "$" +
         value.toLocaleString(
@@ -114,15 +88,7 @@
       );
     }
 
-
-    const text =
-      clean(value);
-
-
-    return (
-      text ||
-      "—"
-    );
+    return clean(value) || "—";
   }
 
 
@@ -131,14 +97,11 @@
   ============================================================ */
 
   function normalizeSnapshot(raw) {
-
     if (!isObject(raw)) {
       return null;
     }
 
-
     const detail =
-
       isObject(raw.detail)
 
         ? raw.detail
@@ -151,42 +114,28 @@
 
 
     const basePay =
-
       detail.basePay ??
-
       detail.basicPay ??
-
       detail.monthly?.basePay ??
-
       detail.monthly?.basicPay;
 
 
     const bah =
-
       detail.bah ??
-
       detail.monthlyBAH ??
-
       detail.monthly?.bah;
 
 
     const bas =
-
       detail.bas ??
-
       detail.monthly?.bas;
 
 
     const total =
-
       detail.total ??
-
       detail.totalMonthly ??
-
       detail.grossMonthlyComp ??
-
       detail.monthly?.totalMonthly ??
-
       detail.monthly?.grossMonthlyComp;
 
 
@@ -196,13 +145,11 @@
       bas == null &&
       total == null
     ) {
-
       return null;
     }
 
 
     return {
-
       basePay:
         normalizeMoney(
           basePay,
@@ -264,7 +211,6 @@
   ============================================================ */
 
   function ensureFont() {
-
     if (
       document.getElementById(
         FONT_ID
@@ -313,18 +259,16 @@
       "stylesheet";
 
     fontLink.href =
-      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap";
+      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap";
 
 
     document.head.appendChild(
       preconnectGoogle
     );
 
-
     document.head.appendChild(
       preconnectStatic
     );
-
 
     document.head.appendChild(
       fontLink
@@ -333,11 +277,10 @@
 
 
   /* ============================================================
-    STYLES
+    AURORA STYLES
   ============================================================ */
 
   function ensureStyles() {
-
     if (
       document.getElementById(
         STYLE_ID
@@ -351,7 +294,6 @@
       document.createElement(
         "style"
       );
-
 
     style.id =
       STYLE_ID;
@@ -381,40 +323,20 @@
           100%;
 
         margin:
-          10px 0 14px;
+          0;
       }
 
 
       #${ROOT_ID} {
 
+        width:
+          100%;
+
         display:
           block;
 
-        width:
-          100%;
-
         color:
-          #f3f8fc;
-
-        background:
-          transparent !important;
-      }
-
-
-      #${ROOT_ID}
-      .pcsu-bah-header-wrap {
-
-        width:
-          100%;
-
-        display:
-          flex;
-
-        align-items:
-          center;
-
-        justify-content:
-          center;
+          #eef5ff;
 
         background:
           transparent !important;
@@ -422,7 +344,63 @@
 
 
       /* ========================================================
-        MAIN FORMULA GRID
+        SINGLE AURORA GLASS CARD
+      ======================================================== */
+
+      #${ROOT_ID}
+      .pcsu-bah-header-card {
+
+        width:
+          min(860px,100%);
+
+        margin:
+          0 auto;
+
+        padding:
+          9px 14px;
+
+        border:
+          1px solid
+          rgba(255,255,255,.18);
+
+        border-radius:
+          18px;
+
+        background:
+
+          radial-gradient(
+            360px 100px
+            at 18% 0%,
+            rgba(114,215,228,.07),
+            transparent 72%
+          ),
+
+          linear-gradient(
+            180deg,
+            rgba(255,255,255,.10),
+            rgba(255,255,255,.065)
+          );
+
+        box-shadow:
+
+          0 10px 24px
+          rgba(3,15,30,.12),
+
+          inset 0 1px 0
+          rgba(255,255,255,.08);
+
+        backdrop-filter:
+          blur(18px)
+          saturate(140%);
+
+        -webkit-backdrop-filter:
+          blur(18px)
+          saturate(140%);
+      }
+
+
+      /* ========================================================
+        FORMULA GRID
       ======================================================== */
 
       #${ROOT_ID}
@@ -433,271 +411,43 @@
 
         grid-template-columns:
 
-          minmax(82px,1fr)
+          minmax(90px,1fr)
           18px
 
-          minmax(82px,1fr)
+          minmax(90px,1fr)
           18px
 
-          minmax(82px,1fr)
+          minmax(90px,1fr)
           18px
 
-          minmax(118px,1.25fr);
-
-        gap:
-          8px;
+          minmax(122px,1.18fr);
 
         align-items:
           center;
 
-        width:
-          min(820px,100%);
+        gap:
+          6px;
 
-        margin:
-          0 auto;
+        min-width:
+          0;
       }
 
 
       /* ========================================================
-        TILE
+        METRIC
       ======================================================== */
 
       #${ROOT_ID}
-      .pcsu-bah-header-tile {
-
-        position:
-          relative;
-
-        overflow:
-          hidden;
+      .pcsu-bah-header-metric {
 
         min-width:
           0;
 
-        min-height:
-          52px;
-
-        display:
-          flex;
-
-        flex-direction:
-          column;
-
-        justify-content:
-          center;
-
-        align-items:
-          center;
-
         padding:
-          8px
-          12px
-          10px;
-
-        border:
-          1px solid
-          rgba(183,211,232,.18);
-
-        border-radius:
-          999px;
-
-        background:
-
-          radial-gradient(
-            120px 58px
-            at 24% 0%,
-            rgba(116,177,216,.15),
-            transparent 70%
-          ),
-
-          linear-gradient(
-            180deg,
-            rgba(25,52,78,.94),
-            rgba(10,30,48,.92)
-          );
-
-        color:
-          #f3f8fc;
+          3px 10px;
 
         text-align:
           center;
-
-        box-shadow:
-
-          inset
-          0 1px 0
-          rgba(221,237,247,.10),
-
-          0 10px 24px
-          rgba(2,12,24,.30);
-
-        backdrop-filter:
-          blur(12px)
-          saturate(145%);
-
-        -webkit-backdrop-filter:
-          blur(12px)
-          saturate(145%);
-
-        transition:
-
-          opacity .18s ease,
-          transform .18s ease,
-          filter .18s ease,
-          border-color .18s ease;
-      }
-
-
-      #${ROOT_ID}
-      .pcsu-bah-header-tile::before {
-
-        content:
-          "";
-
-        position:
-          absolute;
-
-        inset:
-          0 0 auto;
-
-        height:
-          1px;
-
-        background:
-
-          linear-gradient(
-            90deg,
-            transparent,
-            rgba(228,192,113,.32),
-            rgba(124,203,217,.18),
-            transparent
-          );
-
-        pointer-events:
-          none;
-      }
-
-
-      #${ROOT_ID}
-      .pcsu-bah-header-tile::after {
-
-        content:
-          "";
-
-        position:
-          absolute;
-
-        inset:
-          0;
-
-        border-radius:
-          inherit;
-
-        background:
-
-          linear-gradient(
-            180deg,
-            rgba(218,235,246,.035),
-            rgba(218,235,246,0)
-            46%
-          );
-
-        pointer-events:
-          none;
-      }
-
-
-      /* ========================================================
-        ACCENT
-      ======================================================== */
-
-      #${ROOT_ID}
-      .pcsu-bah-header-accent {
-
-        position:
-          absolute;
-
-        left:
-          10px;
-
-        right:
-          10px;
-
-        bottom:
-          6px;
-
-        height:
-          2px;
-
-        border-radius:
-          999px;
-
-        opacity:
-          .82;
-
-        pointer-events:
-          none;
-      }
-
-
-      #${ROOT_ID}
-      [data-accent="basepay"]
-      .pcsu-bah-header-accent {
-
-        background:
-
-          linear-gradient(
-            90deg,
-            transparent,
-            #84b9ff,
-            transparent
-          );
-      }
-
-
-      #${ROOT_ID}
-      [data-accent="bah"]
-      .pcsu-bah-header-accent {
-
-        background:
-
-          linear-gradient(
-            90deg,
-            transparent,
-            #76d6d0,
-            transparent
-          );
-      }
-
-
-      #${ROOT_ID}
-      [data-accent="bas"]
-      .pcsu-bah-header-accent {
-
-        background:
-
-          linear-gradient(
-            90deg,
-            transparent,
-            #c997ff,
-            transparent
-          );
-      }
-
-
-      #${ROOT_ID}
-      [data-accent="total"]
-      .pcsu-bah-header-accent {
-
-        background:
-
-          linear-gradient(
-            90deg,
-            transparent,
-            #9fe3d4,
-            #e4c071,
-            transparent
-          );
       }
 
 
@@ -708,47 +458,38 @@
       #${ROOT_ID}
       .pcsu-bah-header-label {
 
-        position:
-          relative;
-
-        z-index:
-          2;
-
         display:
           block;
-
-        max-width:
-          100%;
 
         margin-bottom:
           3px;
 
-        overflow:
-          hidden;
-
         color:
-          rgba(205,223,236,.66);
+          rgba(233,241,255,.62);
 
         font-size:
-          7.5px;
+          8px;
 
         line-height:
           1;
 
         font-weight:
-          900;
+          700;
 
         letter-spacing:
-          .10em;
+          .08em;
 
         text-transform:
           uppercase;
 
-        text-overflow:
-          ellipsis;
-
         white-space:
           nowrap;
+
+        overflow:
+          hidden;
+
+        text-overflow:
+          ellipsis;
       }
 
 
@@ -759,92 +500,74 @@
       #${ROOT_ID}
       .pcsu-bah-header-value {
 
-        position:
-          relative;
-
-        z-index:
-          2;
-
         display:
           block;
 
-        max-width:
-          100%;
-
-        overflow:
-          hidden;
-
         color:
-          #f4f8fb;
+          #f5f9ff;
 
         font-size:
-          13px;
+          14px;
 
         line-height:
-          1.05;
+          1.08;
 
         font-weight:
-          900;
+          800;
 
         letter-spacing:
-          -.03em;
+          -.025em;
 
-        text-overflow:
-          ellipsis;
+        font-variant-numeric:
+          tabular-nums;
 
         white-space:
           nowrap;
 
-        font-variant-numeric:
-          tabular-nums;
+        overflow:
+          hidden;
+
+        text-overflow:
+          ellipsis;
       }
 
 
       /* ========================================================
-        SUPPORT
+        SUPPORT TEXT
       ======================================================== */
 
       #${ROOT_ID}
       .pcsu-bah-header-support {
 
-        position:
-          relative;
-
-        z-index:
-          2;
-
         display:
           block;
-
-        max-width:
-          100%;
 
         min-height:
           9px;
 
         margin-top:
-          2px;
-
-        overflow:
-          hidden;
+          3px;
 
         color:
-          rgba(190,210,225,.62);
+          rgba(233,241,255,.50);
 
         font-size:
-          7.5px;
+          7px;
 
         line-height:
           1.1;
 
         font-weight:
-          600;
-
-        text-overflow:
-          ellipsis;
+          500;
 
         white-space:
           nowrap;
+
+        overflow:
+          hidden;
+
+        text-overflow:
+          ellipsis;
       }
 
 
@@ -865,16 +588,16 @@
           center;
 
         color:
-          rgba(214,228,239,.68);
+          rgba(233,241,255,.58);
 
         font-size:
-          18px;
+          16px;
 
         line-height:
           1;
 
         font-weight:
-          800;
+          600;
 
         user-select:
           none;
@@ -882,19 +605,19 @@
 
 
       /* ========================================================
-        COLORS
+        AURORA VALUE COLORS
       ======================================================== */
 
       #${ROOT_ID}
-      .is-basepay {
+      .pcsu-bah-header-value.is-basepay {
 
         color:
-          #9bc4ff;
+          #a9c9f5;
       }
 
 
       #${ROOT_ID}
-      .is-bah {
+      .pcsu-bah-header-value.is-bah {
 
         color:
           #8fe4d7;
@@ -902,18 +625,10 @@
 
 
       #${ROOT_ID}
-      .is-bas {
+      .pcsu-bah-header-value.is-bas {
 
         color:
-          #d29bff;
-      }
-
-
-      #${ROOT_ID}
-      .is-total {
-
-        color:
-          #82e6d9;
+          #d6b3f4;
       }
 
 
@@ -922,54 +637,37 @@
       ======================================================== */
 
       #${ROOT_ID}
-      .pcsu-bah-header-tile.is-total-tile {
+      .pcsu-bah-header-metric.is-total {
 
-        border-color:
-          rgba(159,227,212,.30);
+        padding-left:
+          14px;
 
-        background:
-
-          radial-gradient(
-            150px 70px
-            at 30% 0%,
-            rgba(159,227,212,.14),
-            transparent 72%
-          ),
-
-          radial-gradient(
-            130px 66px
-            at 88% 0%,
-            rgba(228,192,113,.08),
-            transparent 74%
-          ),
-
-          linear-gradient(
-            180deg,
-            rgba(31,57,75,.96),
-            rgba(13,31,47,.94)
-          );
+        border-left:
+          1px solid
+          rgba(255,255,255,.13);
       }
 
 
       #${ROOT_ID}
-      .pcsu-bah-header-tile.is-missing {
+      .pcsu-bah-header-value.is-total {
+
+        color:
+          #82e6d9;
+
+        font-size:
+          16px;
+      }
+
+
+      /* ========================================================
+        MISSING
+      ======================================================== */
+
+      #${ROOT_ID}
+      .pcsu-bah-header-metric.is-missing {
 
         opacity:
           .58;
-      }
-
-
-      #${ROOT_ID}
-      .pcsu-bah-header-tile:hover {
-
-        transform:
-          translateY(-1px);
-
-        border-color:
-          rgba(183,211,232,.28);
-
-        filter:
-          brightness(1.04);
       }
 
 
@@ -979,49 +677,58 @@
 
       @media (max-width:760px) {
 
-        #${MOUNT_ID} {
+        #${ROOT_ID}
+        .pcsu-bah-header-card {
 
-          margin:
-            8px 0 10px;
+          width:
+            100%;
+
+          padding:
+            10px 12px;
+
+          border-radius:
+            16px;
         }
 
+
+        /*
+          MOBILE LAYOUT
+
+          Base Pay + BAH + BAS
+
+          = Total Monthly Compensation
+        */
 
         #${ROOT_ID}
         .pcsu-bah-header-grid {
 
           grid-template-columns:
 
-            minmax(58px,1fr)
+            minmax(70px,1fr)
             12px
 
-            minmax(58px,1fr)
+            minmax(70px,1fr)
             12px
 
-            minmax(58px,1fr)
-            12px
-
-            minmax(82px,1.18fr);
+            minmax(70px,1fr);
 
           gap:
             4px;
-
-          width:
-            100%;
         }
 
 
         #${ROOT_ID}
-        .pcsu-bah-header-tile {
-
-          min-height:
-            54px;
+        .pcsu-bah-header-metric {
 
           padding:
-            8px
-            6px
-            10px;
+            2px 5px;
+        }
 
-          border-radius:
+
+        #${ROOT_ID}
+        .pcsu-bah-header-operator {
+
+          font-size:
             14px;
         }
 
@@ -1046,15 +753,98 @@
         .pcsu-bah-header-support {
 
           font-size:
+            6.5px;
+        }
+
+
+        /*
+          Hide desktop equals operator.
+
+          Mobile total moves to its own line.
+        */
+
+        #${ROOT_ID}
+        .pcsu-bah-header-equals {
+
+          display:
+            none;
+        }
+
+
+        #${ROOT_ID}
+        .pcsu-bah-header-metric.is-total {
+
+          grid-column:
+            1 / -1;
+
+          margin-top:
+            7px;
+
+          padding:
+            8px 6px 1px;
+
+          border-left:
+            0;
+
+          border-top:
+            1px solid
+            rgba(255,255,255,.12);
+        }
+
+
+        #${ROOT_ID}
+        .pcsu-bah-header-metric.is-total::before {
+
+          content:
+            "= ";
+
+          color:
+            rgba(233,241,255,.58);
+
+          font-size:
+            13px;
+
+          font-weight:
+            600;
+        }
+
+
+        #${ROOT_ID}
+        .pcsu-bah-header-metric.is-total
+        .pcsu-bah-header-label,
+
+        #${ROOT_ID}
+        .pcsu-bah-header-metric.is-total
+        .pcsu-bah-header-value {
+
+          display:
+            inline;
+        }
+
+
+        #${ROOT_ID}
+        .pcsu-bah-header-metric.is-total
+        .pcsu-bah-header-label {
+
+          margin-right:
             7px;
         }
 
 
         #${ROOT_ID}
-        .pcsu-bah-header-operator {
+        .pcsu-bah-header-value.is-total {
 
           font-size:
             15px;
+        }
+
+
+        #${ROOT_ID}
+        .pcsu-bah-header-metric.is-total
+        .pcsu-bah-header-support {
+
+          margin-top:
+            3px;
         }
       }
 
@@ -1066,36 +856,28 @@
       @media (max-width:359px) {
 
         #${ROOT_ID}
-        .pcsu-bah-header-grid {
+        .pcsu-bah-header-card {
 
-          grid-template-columns:
-
-            minmax(52px,1fr)
-            9px
-
-            minmax(52px,1fr)
-            9px
-
-            minmax(52px,1fr)
-            9px
-
-            minmax(70px,1.16fr);
-
-          gap:
-            2px;
+          padding:
+            9px 8px;
         }
 
 
         #${ROOT_ID}
-        .pcsu-bah-header-tile {
+        .pcsu-bah-header-grid {
 
-          min-height:
-            50px;
+          grid-template-columns:
 
-          padding:
-            7px
-            4px
-            9px;
+            minmax(60px,1fr)
+            9px
+
+            minmax(60px,1fr)
+            9px
+
+            minmax(60px,1fr);
+
+          gap:
+            2px;
         }
 
 
@@ -1111,7 +893,7 @@
         .pcsu-bah-header-value {
 
           font-size:
-            10.5px;
+            10.8px;
         }
 
 
@@ -1119,15 +901,15 @@
         .pcsu-bah-header-support {
 
           font-size:
-            6.2px;
+            6px;
         }
 
 
         #${ROOT_ID}
-        .pcsu-bah-header-operator {
+        .pcsu-bah-header-value.is-total {
 
           font-size:
-            13px;
+            14px;
         }
       }
 
@@ -1178,14 +960,6 @@
       );
 
 
-    /*
-      IMPORTANT:
-      We intentionally DO NOT search for
-      #pcsu-bah-shell here anymore.
-
-      That calculator lives in the iframe.
-    */
-
     if (!mount) {
 
       console.warn(
@@ -1235,7 +1009,7 @@
       >
 
         <div
-          class="pcsu-bah-header-wrap"
+          class="pcsu-bah-header-card"
         >
 
           <div
@@ -1247,18 +1021,11 @@
 
             <div
               class="
-                pcsu-bah-header-tile
+                pcsu-bah-header-metric
                 is-missing
               "
-              data-accent="basepay"
               id="pcsu-bah-header-tile-basepay"
             >
-
-              <span
-                class="pcsu-bah-header-accent"
-                aria-hidden="true"
-              ></span>
-
 
               <span
                 class="pcsu-bah-header-label"
@@ -1298,18 +1065,11 @@
 
             <div
               class="
-                pcsu-bah-header-tile
+                pcsu-bah-header-metric
                 is-missing
               "
-              data-accent="bah"
               id="pcsu-bah-header-tile-bah"
             >
-
-              <span
-                class="pcsu-bah-header-accent"
-                aria-hidden="true"
-              ></span>
-
 
               <span
                 class="pcsu-bah-header-label"
@@ -1349,18 +1109,11 @@
 
             <div
               class="
-                pcsu-bah-header-tile
+                pcsu-bah-header-metric
                 is-missing
               "
-              data-accent="bas"
               id="pcsu-bah-header-tile-bas"
             >
-
-              <span
-                class="pcsu-bah-header-accent"
-                aria-hidden="true"
-              ></span>
-
 
               <span
                 class="pcsu-bah-header-label"
@@ -1391,7 +1144,10 @@
 
 
             <div
-              class="pcsu-bah-header-operator"
+              class="
+                pcsu-bah-header-operator
+                pcsu-bah-header-equals
+              "
               aria-hidden="true"
             >
               =
@@ -1402,19 +1158,12 @@
 
             <div
               class="
-                pcsu-bah-header-tile
-                is-total-tile
+                pcsu-bah-header-metric
+                is-total
                 is-missing
               "
-              data-accent="total"
               id="pcsu-bah-header-tile-total"
             >
-
-              <span
-                class="pcsu-bah-header-accent"
-                aria-hidden="true"
-              ></span>
-
 
               <span
                 class="pcsu-bah-header-label"
@@ -1541,7 +1290,7 @@
 
 
     /* ============================================================
-      TEXT HELPER
+      TEXT
     ============================================================ */
 
     function safeText(
@@ -1566,7 +1315,7 @@
 
 
     /* ============================================================
-      TILE STATE
+      MISSING STATE
     ============================================================ */
 
     function setMissing(
@@ -1834,7 +1583,7 @@
 
 
     /* ============================================================
-      ASK EMBEDDED CALCULATOR FOR CURRENT SNAPSHOT
+      ASK IFRAME FOR CURRENT SNAPSHOT
     ============================================================ */
 
     function requestSnapshotFromFrames() {
@@ -1876,22 +1625,11 @@
                 );
             }
 
-          } catch (_) {
-
-            /*
-              Ignore unrelated iframe access errors.
-            */
-          }
+          } catch (_) {}
         }
       );
     }
 
-
-    /*
-      Send several passive requests because
-      Webflow and the calculator iframe can
-      finish booting at slightly different times.
-    */
 
     [
       0,
