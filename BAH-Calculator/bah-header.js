@@ -2655,28 +2655,80 @@
 
 
   /* ============================================================
-    17. SAFE DOM START
-  ============================================================ */
+  17. SAFE WEBFLOW DOM START
+=============================================================== */
 
-  if (
-    document.readyState ===
-      "loading"
-  ) {
+let bahHeaderStartAttempts = 0;
 
-    document.addEventListener(
+const BAH_HEADER_MAX_ATTEMPTS = 120;
 
-      "DOMContentLoaded",
+function safelyStartBAHHeader() {
 
-      startBAHHeader,
+  bahHeaderStartAttempts += 1;
 
-      {
-        once:true
-      }
+  const shell =
+    document.getElementById(
+      "pcsu-bah-shell"
     );
 
-  } else {
+  const mount =
+    document.getElementById(
+      "pcsu-bah-header-progression-widget"
+    );
+
+  if (
+    shell &&
+    mount
+  ) {
 
     startBAHHeader();
+
+    return;
   }
+
+
+  if (
+    bahHeaderStartAttempts <
+    BAH_HEADER_MAX_ATTEMPTS
+  ) {
+
+    setTimeout(
+      safelyStartBAHHeader,
+      100
+    );
+
+    return;
+  }
+
+
+  console.error(
+    "BAH Header could not start.",
+    {
+      shellFound:Boolean(shell),
+      mountFound:Boolean(mount)
+    }
+  );
+}
+
+
+/* Start after DOM is available */
+
+if (
+  document.readyState ===
+    "loading"
+) {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    safelyStartBAHHeader,
+    {
+      once:true
+    }
+  );
+
+} else {
+
+  safelyStartBAHHeader();
+}
 
 })();
