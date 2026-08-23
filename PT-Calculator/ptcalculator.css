@@ -1,7 +1,15 @@
 /* ============================================================
   TheWing.ai • AIR FORCE PT CALCULATOR
-  MOBILE-FIRST APPLICATION UI
-  v2.0.0
+  MOBILE-FIRST AURORA APPLICATION UI
+  v2.1.0
+
+  DESIGN
+  - Preserves approved mobile PT Calculator UX
+  - Restores TheWing Aurora visual identity
+  - Based on original PT Calculator Aurora palette
+  - Mobile-first
+  - Transparent slider tracks
+  - No business-logic changes
 
   PRIMARY TARGET
   - iPhone 390–393px
@@ -13,116 +21,146 @@
   - 393
   - 402
   - 430
-
-  DESIGN PRINCIPLES
-  - Mobile first
-  - No horizontal scrolling
-  - Thumb-friendly controls
-  - Live score first
-  - Profile → Performance → Insight
-  - Preserve existing calculator JS hooks
 =============================================================== */
 
 
 /* ============================================================
-  1. TOKENS
+  1. TOKENS — THEWING AURORA
 =============================================================== */
 
 :root {
 
-  /* Core backgrounds */
+  /* =========================================================
+    ORIGINAL AURORA FOUNDATION
+  ========================================================= */
+
+  --bg1:
+    #163b57;
+
+  --bg2:
+    #2c4864;
+
+  --bg3:
+    #5b5562;
+
+
+  /* =========================================================
+    AURORA APPLICATION BACKGROUNDS
+  ========================================================= */
+
   --afpt-bg:
-    #061a2e;
+    #203f59;
 
   --afpt-bg-deep:
-    #03111f;
+    #17354d;
 
   --afpt-bg-mid:
-    #0a2742;
+    #344f69;
 
-  --afpt-bg-soft:
-    #0c3150;
+  --afpt-bg-warm:
+    #625965;
 
 
-  /* Panels */
+  /* =========================================================
+    GLASS PANELS
+  ========================================================= */
+
   --afpt-panel:
-    rgba(12, 43, 70, .82);
+    rgba(255,255,255,.10);
 
   --afpt-panel-strong:
-    rgba(8, 34, 58, .94);
+    rgba(255,255,255,.125);
 
   --afpt-panel-soft:
-    rgba(255,255,255,.045);
-
-  --afpt-panel-hover:
     rgba(255,255,255,.065);
 
+  --afpt-panel-hover:
+    rgba(255,255,255,.11);
 
-  /* Borders */
+
+  /* =========================================================
+    BORDERS
+  ========================================================= */
+
   --afpt-border:
-    rgba(141, 187, 224, .17);
+    rgba(255,255,255,.16);
 
   --afpt-border-soft:
-    rgba(163, 199, 228, .10);
+    rgba(255,255,255,.095);
 
   --afpt-border-strong:
-    rgba(122, 184, 232, .27);
+    rgba(255,255,255,.23);
 
 
-  /* Text */
+  /* =========================================================
+    TEXT
+  ========================================================= */
+
   --afpt-text:
-    #f5f8fc;
+    #eef5ff;
 
   --afpt-text-soft:
-    rgba(231, 241, 250, .82);
+    rgba(233,241,255,.80);
 
   --afpt-muted:
-    rgba(197, 217, 233, .68);
+    rgba(233,241,255,.64);
 
   --afpt-muted-soft:
-    rgba(183, 206, 226, .52);
+    rgba(233,241,255,.48);
 
 
-  /* TheWing blue */
+  /* =========================================================
+    THEWING BLUE
+  ========================================================= */
+
   --afpt-blue:
-    #2d8cff;
+    #62a9ff;
 
   --afpt-blue-bright:
-    #54a4ff;
+    #88bcff;
 
   --afpt-blue-soft:
-    rgba(45, 140, 255, .16);
+    rgba(98,169,255,.16);
 
 
-  /* Score / event colors */
+  /* =========================================================
+    ORIGINAL AURORA ACCENTS
+  ========================================================= */
+
   --afpt-green:
-    #5ee0ae;
+    #a8e7d6;
+
+  --afpt-green-strong:
+    #74dbc2;
 
   --afpt-green-soft:
-    rgba(94, 224, 174, .14);
+    rgba(168,231,214,.14);
 
   --afpt-teal:
-    #38ccd0;
+    #8ad6df;
 
   --afpt-peach:
-    #e7a98d;
+    #efb18f;
 
   --afpt-purple:
-    #aa9cf3;
+    #cfd6ff;
 
   --afpt-gold:
-    #e9c777;
+    #ecd79e;
 
   --afpt-danger:
-    #ff8598;
+    #ff9fb0;
 
   --afpt-amber:
-    #e7c76f;
+    #ecd79e;
 
 
-  /* Sizing */
+  /* =========================================================
+    RADIUS
+  ========================================================= */
+
   --afpt-radius-xl:
-    22px;
+    24px;
 
   --afpt-radius-lg:
     18px;
@@ -134,31 +172,52 @@
     11px;
 
 
-  /* Shadows */
+  /* =========================================================
+    SHADOW
+  ========================================================= */
+
   --afpt-shadow:
-    0 16px 40px rgba(0, 8, 18, .23);
+    0 18px 40px rgba(3,15,30,.22);
 
   --afpt-shadow-soft:
-    0 10px 24px rgba(0, 8, 18, .16);
+    0 10px 26px rgba(3,15,30,.16);
 
 
-  /* Glass */
+  /* =========================================================
+    GLASS
+  ========================================================= */
+
   --afpt-blur:
-    14px;
+    22px;
 
 
-  /* Existing calculator aliases */
+  /* =========================================================
+    EXISTING CALCULATOR ALIASES
+  ========================================================= */
+
+  --panel:
+    rgba(255,255,255,.10);
+
+  --panel-2:
+    rgba(255,255,255,.07);
+
+  --stroke:
+    rgba(255,255,255,.16);
+
+  --stroke-soft:
+    rgba(255,255,255,.08);
+
   --ink:
-    var(--afpt-text);
+    #eef5ff;
 
   --muted:
-    var(--afpt-text-soft);
+    rgba(233,241,255,.78);
 
   --soft:
-    var(--afpt-muted);
+    rgba(233,241,255,.56);
 
   --mint:
-    #9fe3d4;
+    #a8e7d6;
 
   --teal:
     #8ad6df;
@@ -174,6 +233,7 @@
 
   --track:
     rgba(255,255,255,.12);
+
 }
 
 
@@ -184,12 +244,15 @@
 *,
 *::before,
 *::after {
+
   box-sizing:
     border-box;
+
 }
 
 
 html {
+
   margin:
     0;
 
@@ -200,7 +263,7 @@ html {
     100%;
 
   background:
-    var(--afpt-bg-deep);
+    #203e58;
 
   -webkit-text-size-adjust:
     100%;
@@ -210,10 +273,12 @@ html {
 
   scroll-behavior:
     smooth;
+
 }
 
 
 body {
+
   margin:
     0;
 
@@ -238,30 +303,39 @@ body {
     var(--afpt-text);
 
   background:
+
     radial-gradient(
-      700px 500px
-      at 100% 0%,
-      rgba(27, 105, 170, .18),
-      transparent 63%
+      1200px 700px
+      at 85% 10%,
+      rgba(255,174,122,.27) 0%,
+      rgba(255,174,122,.12) 28%,
+      rgba(255,174,122,0) 58%
     ),
 
     radial-gradient(
-      620px 520px
-      at 0% 45%,
-      rgba(0, 105, 190, .10),
-      transparent 70%
+      900px 600px
+      at 8% 100%,
+      rgba(94,205,235,.16) 0%,
+      rgba(94,205,235,.06) 35%,
+      rgba(94,205,235,0) 60%
     ),
 
     linear-gradient(
-      180deg,
-      #041629 0%,
-      #061b30 38%,
-      #041524 100%
+      135deg,
+      #113a56 0%,
+      #304e6d 42%,
+      #615965 100%
     );
+
 }
 
 
+/* ============================================================
+  3. AURORA ATMOSPHERE
+=============================================================== */
+
 body::before {
+
   content:
     "";
 
@@ -278,45 +352,91 @@ body::before {
     none;
 
   background:
+
+    linear-gradient(
+      to bottom,
+      rgba(255,255,255,.04),
+      rgba(255,255,255,0) 18%
+    ),
+
+    radial-gradient(
+      900px 240px
+      at 85% 18%,
+      rgba(255,192,144,.12),
+      transparent 60%
+    );
+
+  mix-blend-mode:
+    screen;
+
+}
+
+
+body::after {
+
+  content:
+    "";
+
+  position:
+    fixed;
+
+  inset:
+    0;
+
+  z-index:
+    0;
+
+  pointer-events:
+    none;
+
+  background:
+
     linear-gradient(
       180deg,
-      rgba(255,255,255,.018),
-      transparent 24%
+      rgba(255,255,255,.03),
+      rgba(255,255,255,0) 26%
     ),
 
     repeating-linear-gradient(
       180deg,
-      rgba(255,255,255,.009) 0px,
-      rgba(255,255,255,.009) 1px,
+      rgba(255,255,255,.012) 0px,
+      rgba(255,255,255,.012) 1px,
       transparent 1px,
-      transparent 30px
+      transparent 24px
     );
 
   opacity:
-    .60;
+    .18;
+
 }
 
 
 /* ============================================================
-  3. APP SHELL
+  4. APP SHELL
 =============================================================== */
 
 #af-pt-shell {
+
   position:
     relative;
 
   z-index:
     1;
 
+  display:
+    block;
+
   width:
     100%;
 
   min-width:
     0;
+
 }
 
 
 #af-pt-shell .afpt-stage {
+
   position:
     relative;
 
@@ -339,10 +459,12 @@ body::before {
       34px +
       env(safe-area-inset-bottom, 0px)
     );
+
 }
 
 
 #af-pt-shell .app {
+
   position:
     relative;
 
@@ -360,14 +482,16 @@ body::before {
 
   margin:
     0 auto;
+
 }
 
 
 /* ============================================================
-  4. GLASS SURFACE
+  5. AURORA GLASS SURFACE
 =============================================================== */
 
 #af-pt-shell .glass {
+
   position:
     relative;
 
@@ -375,10 +499,11 @@ body::before {
     hidden;
 
   background:
+
     linear-gradient(
       180deg,
-      rgba(15, 48, 77, .86),
-      rgba(7, 33, 57, .86)
+      rgba(255,255,255,.115),
+      rgba(255,255,255,.075)
     );
 
   border:
@@ -389,19 +514,25 @@ body::before {
     var(--afpt-radius-xl);
 
   box-shadow:
-    var(--afpt-shadow);
+
+    var(--afpt-shadow),
+
+    inset 0 1px 0
+      rgba(255,255,255,.11);
 
   backdrop-filter:
     blur(var(--afpt-blur))
-    saturate(135%);
+    saturate(150%);
 
   -webkit-backdrop-filter:
     blur(var(--afpt-blur))
-    saturate(135%);
+    saturate(150%);
+
 }
 
 
 #af-pt-shell .glass::before {
+
   content:
     "";
 
@@ -418,45 +549,52 @@ body::before {
     inherit;
 
   background:
+
     linear-gradient(
       180deg,
-      rgba(255,255,255,.045),
-      transparent 38%
+      rgba(255,255,255,.055),
+      rgba(255,255,255,0) 42%
     );
 
   opacity:
-    .75;
+    .85;
+
 }
 
 
 #af-pt-shell .glass > * {
+
   position:
     relative;
 
   z-index:
     1;
+
 }
 
 
 /* ============================================================
-  5. HERO
+  6. HERO
 =============================================================== */
 
 #af-pt-shell .pt-hero {
+
   margin:
     2px 2px 22px;
 
   padding:
     4px 2px 0;
+
 }
 
 
 #af-pt-shell .pt-hero-eyebrow {
+
   margin:
     0 0 7px;
 
   color:
-    var(--afpt-blue-bright);
+    #8fc1ff;
 
   font-size:
     14px;
@@ -472,15 +610,17 @@ body::before {
 
   letter-spacing:
     .10em;
+
 }
 
 
 #af-pt-shell .title {
+
   margin:
     0;
 
   color:
-    #ffffff;
+    rgba(250,252,255,.98);
 
   font-family:
     "Inter",
@@ -505,10 +645,16 @@ body::before {
 
   letter-spacing:
     -.045em;
+
+  text-shadow:
+    0 2px 18px
+    rgba(255,255,255,.05);
+
 }
 
 
 #af-pt-shell .pt-standard-line {
+
   display:
     flex;
 
@@ -522,7 +668,7 @@ body::before {
     13px;
 
   color:
-    #86baff;
+    #9cc6ff;
 
   font-size:
     14px;
@@ -532,10 +678,12 @@ body::before {
 
   font-weight:
     700;
+
 }
 
 
 #af-pt-shell .pt-standard-icon {
+
   display:
     inline-flex;
 
@@ -556,26 +704,28 @@ body::before {
 
   border:
     1px solid
-    rgba(91, 165, 255, .50);
+    rgba(155,199,255,.48);
 
   border-radius:
     7px;
 
   color:
-    var(--afpt-blue-bright);
+    #9ccaff;
 
   background:
-    rgba(45, 140, 255, .08);
+    rgba(110,174,255,.08);
 
   font-size:
     12px;
 
   font-weight:
     900;
+
 }
 
 
 #af-pt-shell .subtitle {
+
   margin:
     12px 0 0;
 
@@ -596,14 +746,16 @@ body::before {
 
   letter-spacing:
     -.01em;
+
 }
 
 
 /* ============================================================
-  6. COMMON PANEL
+  7. COMMON PANEL
 =============================================================== */
 
 #af-pt-shell .panel {
+
   width:
     100%;
 
@@ -615,11 +767,13 @@ body::before {
 
   padding:
     18px 16px;
+
 }
 
 
 #af-pt-shell .section-heading,
 #af-pt-shell .step-heading {
+
   display:
     flex;
 
@@ -637,28 +791,34 @@ body::before {
 
   margin-bottom:
     16px;
+
 }
 
 
 #af-pt-shell .step-heading {
+
   justify-content:
     flex-start;
+
 }
 
 
 #af-pt-shell .section-heading > div,
 #af-pt-shell .step-heading > div {
+
   min-width:
     0;
+
 }
 
 
 #af-pt-shell .section-kicker {
+
   margin:
     0 0 4px;
 
   color:
-    #82b9ff;
+    #9bc6ff;
 
   font-size:
     12px;
@@ -674,15 +834,17 @@ body::before {
 
   letter-spacing:
     .08em;
+
 }
 
 
 #af-pt-shell .panel-title {
+
   margin:
     0;
 
   color:
-    #f4f8fc;
+    rgba(247,250,255,.97);
 
   font-family:
     "Inter",
@@ -703,10 +865,12 @@ body::before {
 
   letter-spacing:
     -.025em;
+
 }
 
 
 #af-pt-shell .panel-rule {
+
   height:
     1px;
 
@@ -714,15 +878,18 @@ body::before {
     14px 0 18px;
 
   background:
+
     linear-gradient(
       90deg,
-      rgba(161, 199, 230, .15),
-      rgba(161, 199, 230, .04)
+      rgba(255,255,255,.14),
+      rgba(255,255,255,.04)
     );
+
 }
 
 
 #af-pt-shell .step-number {
+
   display:
     inline-flex;
 
@@ -748,28 +915,35 @@ body::before {
     50%;
 
   color:
-    white;
+    #ffffff;
 
   background:
+
     linear-gradient(
       180deg,
-      #3c9cff,
-      #1776ef
+      #55a9ff,
+      #267bd9
     );
 
   box-shadow:
+
     0 7px 18px
-    rgba(19, 116, 238, .27);
+    rgba(22,84,143,.28),
+
+    inset 0 1px 0
+    rgba(255,255,255,.20);
 
   font-size:
     14px;
 
   font-weight:
     800;
+
 }
 
 
 #af-pt-shell .live-indicator {
+
   display:
     inline-flex;
 
@@ -787,16 +961,20 @@ body::before {
 
   border:
     1px solid
-    rgba(94, 224, 174, .18);
+    rgba(168,231,214,.26);
 
   border-radius:
     999px;
 
   color:
-    var(--afpt-green);
+    #a8e7d6;
 
   background:
-    var(--afpt-green-soft);
+    rgba(168,231,214,.11);
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(255,255,255,.06);
 
   font-size:
     10px;
@@ -812,37 +990,42 @@ body::before {
 
   letter-spacing:
     .07em;
+
 }
 
 
 /* ============================================================
-  7. SCORE RESULT — PRIMARY PAYOFF
+  8. SCORE RESULT — PRIMARY PAYOFF
 =============================================================== */
 
 #af-pt-shell .result-panel {
+
   padding:
     18px 16px 16px;
 
   border-color:
-    rgba(88, 157, 215, .24);
+    rgba(255,255,255,.20);
 
   background:
+
     radial-gradient(
       500px 260px
-      at 15% 0%,
-      rgba(38, 126, 197, .13),
-      transparent 70%
+      at 10% 0%,
+      rgba(113,210,226,.08),
+      transparent 72%
     ),
 
     linear-gradient(
       180deg,
-      rgba(12, 48, 79, .92),
-      rgba(7, 34, 58, .90)
+      rgba(255,255,255,.125),
+      rgba(255,255,255,.075)
     );
+
 }
 
 
 #af-pt-shell .score-primary {
+
   display:
     grid;
 
@@ -857,10 +1040,12 @@ body::before {
 
   min-width:
     0;
+
 }
 
 
 #af-pt-shell .score-ring-wrap {
+
   display:
     flex;
 
@@ -875,10 +1060,12 @@ body::before {
 
   padding:
     0;
+
 }
 
 
 #af-pt-shell .score-ring {
+
   --pct:
     0;
 
@@ -898,31 +1085,42 @@ body::before {
     50%;
 
   background:
+
     conic-gradient(
 
-      var(--afpt-green)
+      #a8e7d6
       0deg,
 
-      var(--afpt-green)
+      #79d7cf
+      calc(var(--pct) * 3.6deg * .52),
+
+      #ecd79e
+      calc(var(--pct) * 3.6deg * .52),
+
+      #ecd79e
       calc(var(--pct) * 3.6deg),
 
-      rgba(167, 197, 220, .18)
+      rgba(255,255,255,.12)
       calc(var(--pct) * 3.6deg),
 
-      rgba(167, 197, 220, .18)
+      rgba(255,255,255,.12)
       360deg
+
     );
 
   box-shadow:
-    inset 0 1px 0
-      rgba(255,255,255,.11),
 
-    0 10px 24px
-      rgba(0, 12, 24, .20);
+    inset 0 2px 8px
+    rgba(255,255,255,.13),
+
+    0 12px 28px
+    rgba(5,16,31,.20);
+
 }
 
 
 #af-pt-shell .score-ring::before {
+
   content:
     "";
 
@@ -937,24 +1135,36 @@ body::before {
 
   border:
     1px solid
-    rgba(155, 202, 234, .10);
+    rgba(255,255,255,.12);
 
   background:
+
     radial-gradient(
       circle at 35% 25%,
-      rgba(255,255,255,.05),
-      transparent 38%
+      rgba(255,255,255,.15),
+      rgba(255,255,255,.035) 32%,
+      rgba(255,255,255,.018) 54%,
+      rgba(22,40,56,.12) 100%
     ),
 
-    #08243d;
+    rgba(42,56,71,.50);
 
   box-shadow:
-    inset 0 8px 28px
-    rgba(0, 5, 12, .22);
+
+    inset 0 1px 1px
+    rgba(255,255,255,.10);
+
+  backdrop-filter:
+    blur(10px);
+
+  -webkit-backdrop-filter:
+    blur(10px);
+
 }
 
 
 #af-pt-shell .score-center {
+
   position:
     absolute;
 
@@ -978,15 +1188,17 @@ body::before {
 
   text-align:
     center;
+
 }
 
 
 #af-pt-shell .score-number {
+
   max-width:
     105px;
 
   color:
-    #ffffff;
+    rgba(255,250,240,.98);
 
   font-size:
     38px;
@@ -1002,10 +1214,12 @@ body::before {
 
   overflow-wrap:
     anywhere;
+
 }
 
 
 #af-pt-shell .score-label {
+
   max-width:
     100px;
 
@@ -1013,7 +1227,7 @@ body::before {
     7px;
 
   color:
-    var(--afpt-green);
+    #bce9d7;
 
   font-size:
     11px;
@@ -1029,10 +1243,12 @@ body::before {
 
   letter-spacing:
     .035em;
+
 }
 
 
 #af-pt-shell .score-number.is-compact {
+
   max-width:
     98px;
 
@@ -1047,10 +1263,12 @@ body::before {
 
   letter-spacing:
     -.03em;
+
 }
 
 
 #af-pt-shell .score-label.is-walk {
+
   max-width:
     94px;
 
@@ -1059,24 +1277,28 @@ body::before {
 
   line-height:
     1.2;
+
 }
 
 
 #af-pt-shell .score-summary {
+
   min-width:
     0;
 
   padding:
     3px 0;
+
 }
 
 
 #af-pt-shell .score-summary-label {
+
   margin-bottom:
     8px;
 
   color:
-    var(--afpt-green);
+    #c7ead7;
 
   font-size:
     17px;
@@ -1092,10 +1314,12 @@ body::before {
 
   text-transform:
     uppercase;
+
 }
 
 
 #af-pt-shell .next-assessment {
+
   color:
     var(--afpt-text-soft);
 
@@ -1110,14 +1334,16 @@ body::before {
 
   text-align:
     left;
+
 }
 
 
 /* ============================================================
-  8. PASSIVE HEADER SCORE STRIP
+  9. PASSIVE HEADER SCORE STRIP
 =============================================================== */
 
 #af-pt-shell .pt-score-strip-mount {
+
   width:
     100%;
 
@@ -1132,21 +1358,22 @@ body::before {
 
   border-top:
     1px solid
-    rgba(159, 196, 227, .11);
+    rgba(255,255,255,.11);
+
 }
 
 
 /*
   pt-header-progression.js injects its own CSS after this file.
-
-  !important is intentional here because this is a PRESENTATION
-  override only. We are not changing any score data or behavior.
+  These are presentation-only overrides.
 */
 
 
 #pcsu-pt-header-score-strip {
+
   margin:
     0 !important;
+
 }
 
 
@@ -1170,6 +1397,7 @@ body::before {
 
   margin:
     0 !important;
+
 }
 
 
@@ -1190,7 +1418,7 @@ body::before {
 
   border-right:
     1px solid
-    rgba(164, 199, 226, .11) !important;
+    rgba(255,255,255,.10) !important;
 
   border-radius:
     0 !important;
@@ -1206,6 +1434,7 @@ body::before {
 
   -webkit-backdrop-filter:
     none !important;
+
 }
 
 
@@ -1214,6 +1443,7 @@ body::before {
 
   border-right:
     none !important;
+
 }
 
 
@@ -1228,6 +1458,7 @@ body::before {
 
   display:
     none !important;
+
 }
 
 
@@ -1238,7 +1469,7 @@ body::before {
     4px !important;
 
   color:
-    rgba(209, 225, 237, .72) !important;
+    rgba(233,241,255,.68) !important;
 
   font-size:
     8px !important;
@@ -1254,6 +1485,7 @@ body::before {
 
   letter-spacing:
     0 !important;
+
 }
 
 
@@ -1261,7 +1493,7 @@ body::before {
 .pcsu-pt-header-value {
 
   color:
-    var(--afpt-green) !important;
+    #b9ead9 !important;
 
   font-size:
     13px !important;
@@ -1271,6 +1503,7 @@ body::before {
 
   font-weight:
     800 !important;
+
 }
 
 
@@ -1279,6 +1512,7 @@ body::before {
 
   display:
     none !important;
+
 }
 
 
@@ -1287,30 +1521,36 @@ body::before {
 
   display:
     none !important;
+
 }
 
 
 /* ============================================================
-  9. HIDE DESKTOP DETAIL CHART ON MOBILE
+  10. HIDE DESKTOP DETAIL CHART ON MOBILE
 =============================================================== */
 
 #af-pt-shell .pt-detail-chart {
+
   display:
     none;
+
 }
 
 
 /* ============================================================
-  10. PROFILE
+  11. PROFILE
 =============================================================== */
 
 #af-pt-shell .profile-panel {
+
   padding-bottom:
     17px;
+
 }
 
 
 #af-pt-shell .profile-grid {
+
   display:
     grid;
 
@@ -1325,10 +1565,12 @@ body::before {
 
   min-width:
     0;
+
 }
 
 
 #af-pt-shell .profile-field {
+
   min-width:
     0;
 
@@ -1337,22 +1579,33 @@ body::before {
 
   border:
     1px solid
-    var(--afpt-border-soft);
+    rgba(255,255,255,.10);
 
   border-radius:
     var(--afpt-radius-md);
 
   background:
-    rgba(4, 29, 50, .38);
+
+    linear-gradient(
+      180deg,
+      rgba(37,67,92,.28),
+      rgba(27,52,73,.20)
+    );
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(255,255,255,.025);
+
 }
 
 
 #af-pt-shell .profile-field-label {
+
   margin-bottom:
     6px;
 
   color:
-    rgba(213, 228, 241, .82);
+    rgba(238,245,255,.75);
 
   font-size:
     11px;
@@ -1362,15 +1615,17 @@ body::before {
 
   font-weight:
     600;
+
 }
 
 
 #af-pt-shell .profile-field-control {
+
   min-width:
     0;
 
   color:
-    white;
+    rgba(250,252,255,.97);
 
   font-size:
     16px;
@@ -1380,16 +1635,20 @@ body::before {
 
   font-weight:
     600;
+
 }
 
 
 #af-pt-shell .profile-slider-field {
+
   padding-bottom:
     8px;
+
 }
 
 
 #af-pt-shell .profile-slider-head {
+
   display:
     flex;
 
@@ -1407,6 +1666,7 @@ body::before {
 
   margin-bottom:
     1px;
+
 }
 
 
@@ -1415,15 +1675,17 @@ body::before {
 
   margin-bottom:
     0;
+
 }
 
 
 #af-pt-shell .profile-live-value {
+
   min-width:
     0;
 
   color:
-    #ffffff;
+    rgba(250,252,255,.98);
 
   font-size:
     15px;
@@ -1436,10 +1698,12 @@ body::before {
 
   white-space:
     nowrap;
+
 }
 
 
 #af-pt-shell .profile-ratio {
+
   display:
     flex;
 
@@ -1463,28 +1727,36 @@ body::before {
 
   border:
     1px solid
-    var(--afpt-border-soft);
+    rgba(255,255,255,.10);
 
   border-radius:
     var(--afpt-radius-md);
 
   background:
+    rgba(255,255,255,.045);
+
+  box-shadow:
+    inset 0 1px 0
     rgba(255,255,255,.035);
+
 }
 
 
 #af-pt-shell .profile-ratio-copy {
+
   min-width:
     0;
+
 }
 
 
 #af-pt-shell .profile-ratio-label {
+
   margin-bottom:
     3px;
 
   color:
-    var(--afpt-text-soft);
+    rgba(240,246,255,.84);
 
   font-size:
     11px;
@@ -1494,23 +1766,27 @@ body::before {
 
   font-weight:
     700;
+
 }
 
 
 #af-pt-shell .profile-ratio-score {
+
   flex:
     0 0 auto;
 
   text-align:
     right;
+
 }
 
 
 /* ============================================================
-  11. SELECTS
+  12. SELECTS
 =============================================================== */
 
 #af-pt-shell .select-wrap {
+
   position:
     relative;
 
@@ -1519,10 +1795,12 @@ body::before {
 
   min-width:
     0;
+
 }
 
 
 #af-pt-shell select {
+
   display:
     block;
 
@@ -1557,7 +1835,7 @@ body::before {
     none;
 
   color:
-    #ffffff;
+    rgba(250,252,255,.98);
 
   background:
     transparent;
@@ -1573,19 +1851,23 @@ body::before {
 
   cursor:
     pointer;
+
 }
 
 
 #af-pt-shell select option {
+
   color:
-    #101820;
+    #162432;
 
   background:
-    #ffffff;
+    #f5f8fc;
+
 }
 
 
 #af-pt-shell .select-wrap::after {
+
   content:
     "";
 
@@ -1609,23 +1891,24 @@ body::before {
 
   border-right:
     2px solid
-    rgba(189, 216, 237, .72);
+    rgba(238,245,255,.63);
 
   border-bottom:
     2px solid
-    rgba(189, 216, 237, .72);
+    rgba(238,245,255,.63);
 
   transform:
     rotate(45deg);
 
   pointer-events:
     none;
+
 }
 
 
 /* ============================================================
-  12. RANGE SLIDERS — MOBILE TOUCH
-  Transparent Track Background Fix
+  13. RANGE SLIDERS — MOBILE TOUCH
+  TRANSPARENT TRACK BACKGROUND
 =============================================================== */
 
 #af-pt-shell .slider,
@@ -1681,102 +1964,111 @@ body::before {
 
   box-shadow:
     none;
+
 }
 
 
 /* ============================================================
-  HEIGHT
+  HEIGHT — AURORA AQUA
 =============================================================== */
 
 #af-pt-shell .mini-slider {
 
   background-image:
+
     linear-gradient(
       90deg,
 
-      #49a4ff 0%,
+      #8ad6df 0%,
 
-      #49a4ff
+      #8ad6df
       var(--fill, 50%),
 
-      rgba(170, 201, 225, .18)
+      rgba(255,255,255,.12)
       var(--fill, 50%),
 
-      rgba(170, 201, 225, .18)
+      rgba(255,255,255,.12)
       100%
     );
+
 }
 
 
 /* ============================================================
-  WAIST
+  WAIST — AURORA MINT
 =============================================================== */
 
 #af-pt-shell .slider.mint-track {
 
   background-image:
+
     linear-gradient(
       90deg,
 
-      #52d3be 0%,
+      #a8e7d6 0%,
 
-      #52d3be
+      #a8e7d6
       var(--fill, 50%),
 
-      rgba(170, 201, 225, .18)
+      rgba(255,255,255,.12)
       var(--fill, 50%),
 
-      rgba(170, 201, 225, .18)
+      rgba(255,255,255,.12)
       100%
     );
+
 }
 
 
 /* ============================================================
-  STRENGTH + CORE
+  STRENGTH + CORE — AURORA PEACH
 =============================================================== */
 
 #af-pt-shell .slider.peach-track {
 
   background-image:
+
     linear-gradient(
       90deg,
 
-      #8c89ea 0%,
+      #efb18f 0%,
 
-      #8c89ea
+      #efb18f
       var(--fill, 50%),
 
-      rgba(170, 201, 225, .18)
+      rgba(255,255,255,.12)
       var(--fill, 50%),
 
-      rgba(170, 201, 225, .18)
+      rgba(255,255,255,.12)
       100%
     );
+
 }
 
 
 /* ============================================================
-  CARDIO
+  CARDIO — AURORA TEAL
 =============================================================== */
 
 #af-pt-shell .slider.teal-track {
 
   background-image:
+
     linear-gradient(
       90deg,
 
-      #28c6c9 0%,
+      #8ad6df 0%,
 
-      #28c6c9
+      #8ad6df
       var(--fill, 50%),
 
-      rgba(170, 201, 225, .18)
+      rgba(255,255,255,.12)
       var(--fill, 50%),
 
-      rgba(170, 201, 225, .18)
+      rgba(255,255,255,.12)
       100%
     );
+
 }
 
 
@@ -1801,6 +2093,7 @@ body::before {
 
   box-shadow:
     none;
+
 }
 
 
@@ -1827,24 +2120,34 @@ body::before {
     -10px;
 
   border:
-    2px solid
-    rgba(255,255,255,.94);
+    1px solid
+    rgba(255,255,255,.44);
 
   border-radius:
     50%;
 
   background:
-    #f8fbfd;
+
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.96),
+      rgba(231,240,247,.88)
+    );
 
   box-shadow:
-    0 4px 12px
-      rgba(0, 10, 22, .38),
+
+    0 5px 14px
+      rgba(5,16,31,.26),
+
+    inset 0 1px 1px
+      rgba(255,255,255,.85),
 
     0 0 0 4px
-      rgba(255,255,255,.055);
+      rgba(255,255,255,.045);
 
   cursor:
     grab;
+
 }
 
 
@@ -1853,6 +2156,7 @@ body::before {
 
   cursor:
     grabbing;
+
 }
 
 
@@ -1877,6 +2181,7 @@ body::before {
 
   box-shadow:
     none;
+
 }
 
 
@@ -1898,6 +2203,7 @@ body::before {
 
   background:
     transparent;
+
 }
 
 
@@ -1915,41 +2221,48 @@ body::before {
     28px;
 
   border:
-    2px solid
-    rgba(255,255,255,.94);
+    1px solid
+    rgba(255,255,255,.44);
 
   border-radius:
     50%;
 
   background:
-    #f8fbfd;
+
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.96),
+      rgba(231,240,247,.88)
+    );
 
   box-shadow:
-    0 4px 12px
-      rgba(0, 10, 22, .38),
+
+    0 5px 14px
+      rgba(5,16,31,.26),
+
+    inset 0 1px 1px
+      rgba(255,255,255,.85),
 
     0 0 0 4px
-      rgba(255,255,255,.055);
+      rgba(255,255,255,.045);
 
   cursor:
     grab;
+
 }
 
-
-/* ============================================================
-  ACTIVE STATE
-=============================================================== */
 
 #af-pt-shell .slider:active::-moz-range-thumb,
 #af-pt-shell .mini-slider:active::-moz-range-thumb {
 
   cursor:
     grabbing;
+
 }
 
 
 /* ============================================================
-  13. SLIDER TICKS / META
+  14. SLIDER TICKS / META
 =============================================================== */
 
 #af-pt-shell .ticks,
@@ -1977,7 +2290,7 @@ body::before {
     0;
 
   color:
-    rgba(191, 215, 233, .48);
+    rgba(235,242,255,.46);
 
   font-size:
     9px;
@@ -1990,6 +2303,7 @@ body::before {
 
   user-select:
     none;
+
 }
 
 
@@ -2001,15 +2315,17 @@ body::before {
 
   white-space:
     nowrap;
+
 }
 
 
 #af-pt-shell .range-meta {
+
   margin-top:
     7px;
 
   color:
-    rgba(199, 218, 233, .58);
+    rgba(233,241,255,.60);
 
   font-size:
     10px;
@@ -2022,20 +2338,24 @@ body::before {
 
   letter-spacing:
     -.005em;
+
 }
 
 
 /* ============================================================
-  14. EVENTS + PERFORMANCE
+  15. EVENTS + PERFORMANCE
 =============================================================== */
 
 #af-pt-shell .performance-panel {
+
   padding-bottom:
     16px;
+
 }
 
 
 #af-pt-shell .event-card {
+
   width:
     100%;
 
@@ -2050,21 +2370,29 @@ body::before {
 
   border:
     1px solid
-    var(--afpt-border-soft);
+    rgba(255,255,255,.10);
 
   border-radius:
     var(--afpt-radius-lg);
 
   background:
+
     linear-gradient(
       180deg,
-      rgba(5, 34, 58, .62),
-      rgba(4, 28, 48, .46)
+      rgba(34,61,82,.30),
+      rgba(31,52,71,.22)
     );
+
+  box-shadow:
+
+    inset 0 1px 0
+    rgba(255,255,255,.025);
+
 }
 
 
 #af-pt-shell .event-card-head {
+
   display:
     flex;
 
@@ -2079,10 +2407,12 @@ body::before {
 
   min-width:
     0;
+
 }
 
 
 #af-pt-shell .event-name-block {
+
   display:
     flex;
 
@@ -2094,16 +2424,20 @@ body::before {
 
   min-width:
     0;
+
 }
 
 
 #af-pt-shell .event-name-block > div:last-child {
+
   min-width:
     0;
+
 }
 
 
 #af-pt-shell .event-icon {
+
   display:
     inline-flex;
 
@@ -2122,6 +2456,10 @@ body::before {
   flex:
     0 0 38px;
 
+  border:
+    1px solid
+    rgba(255,255,255,.10);
+
   border-radius:
     50%;
 
@@ -2138,44 +2476,65 @@ body::before {
     800;
 
   box-shadow:
+
     0 8px 18px
-    rgba(0, 8, 20, .24);
+    rgba(5,16,31,.19),
+
+    inset 0 1px 0
+    rgba(255,255,255,.18);
+
 }
 
+
+/* Strength — warmer Aurora peach */
 
 #af-pt-shell .strength-icon {
+
   background:
+
     linear-gradient(
       180deg,
-      #338dff,
-      #186be1
+      #f0b89a,
+      #cc8970
     );
+
 }
 
+
+/* Core — Aurora lavender */
 
 #af-pt-shell .core-icon {
+
   background:
+
     linear-gradient(
       180deg,
-      #9189e9,
-      #665ec6
+      #cfd6ff,
+      #929bd6
     );
+
 }
 
 
+/* Cardio — Aurora teal */
+
 #af-pt-shell .cardio-icon {
+
   background:
+
     linear-gradient(
       180deg,
-      #28bdc2,
-      #18898e
+      #91e0e5,
+      #58b7c5
     );
+
 }
 
 
 #af-pt-shell .event-category {
+
   color:
-    #f6f9fc;
+    rgba(249,251,255,.97);
 
   font-size:
     14px;
@@ -2185,10 +2544,12 @@ body::before {
 
   font-weight:
     750;
+
 }
 
 
 #af-pt-shell .event-selected {
+
   max-width:
     150px;
 
@@ -2199,7 +2560,7 @@ body::before {
     hidden;
 
   color:
-    rgba(210, 227, 240, .78);
+    rgba(233,241,255,.74);
 
   font-size:
     12px;
@@ -2215,15 +2576,17 @@ body::before {
 
   white-space:
     nowrap;
+
 }
 
 
 #af-pt-shell .event-current-value {
+
   flex:
     0 0 auto;
 
   color:
-    #ffffff;
+    rgba(250,252,255,.98);
 
   font-size:
     17px;
@@ -2239,10 +2602,12 @@ body::before {
 
   white-space:
     nowrap;
+
 }
 
 
 #af-pt-shell .event-selector {
+
   display:
     grid;
 
@@ -2263,12 +2628,14 @@ body::before {
 
   padding:
     0 2px 0 48px;
+
 }
 
 
 #af-pt-shell .event-selector-label {
+
   color:
-    rgba(192, 215, 232, .60);
+    rgba(233,241,255,.52);
 
   font-size:
     9px;
@@ -2287,6 +2654,7 @@ body::before {
 
   white-space:
     nowrap;
+
 }
 
 
@@ -2302,7 +2670,7 @@ body::before {
     4px;
 
   color:
-    rgba(224, 236, 245, .82);
+    rgba(242,247,252,.85);
 
   font-size:
     13px;
@@ -2312,10 +2680,12 @@ body::before {
 
   text-align:
     right;
+
 }
 
 
 #af-pt-shell .event-slider-wrap {
+
   min-width:
     0;
 
@@ -2324,10 +2694,12 @@ body::before {
 
   padding-left:
     48px;
+
 }
 
 
 #af-pt-shell .live-calculation-note {
+
   display:
     flex;
 
@@ -2347,7 +2719,7 @@ body::before {
     10px 8px 1px;
 
   color:
-    rgba(201, 220, 235, .67);
+    rgba(233,241,255,.66);
 
   font-size:
     10px;
@@ -2360,10 +2732,12 @@ body::before {
 
   text-align:
     center;
+
 }
 
 
 #af-pt-shell .live-calculation-dot {
+
   width:
     7px;
 
@@ -2377,21 +2751,23 @@ body::before {
     50%;
 
   background:
-    var(--afpt-green);
+    #a8e7d6;
 
   box-shadow:
     0 0 0 4px
-    rgba(94, 224, 174, .08);
+    rgba(168,231,214,.08);
+
 }
 
 
 /* ============================================================
-  15. BODY COMPOSITION VALUES
+  16. BODY COMPOSITION VALUES
 =============================================================== */
 
 #af-pt-shell .calc-main {
+
   color:
-    #ffffff;
+    rgba(250,252,255,.98);
 
   font-size:
     20px;
@@ -2404,15 +2780,17 @@ body::before {
 
   letter-spacing:
     -.035em;
+
 }
 
 
 #af-pt-shell .calc-mini {
+
   margin-top:
     4px;
 
   color:
-    var(--afpt-green);
+    #b6ead8;
 
   font-size:
     10px;
@@ -2422,26 +2800,32 @@ body::before {
 
   font-weight:
     700;
+
 }
 
 
 /* ============================================================
-  16. ASSESSMENT INSIGHT
+  17. ASSESSMENT INSIGHT
 =============================================================== */
 
 #af-pt-shell .insight-title {
+
   margin:
     0;
+
 }
 
 
 #af-pt-shell .insight-panel {
+
   padding-bottom:
     18px;
+
 }
 
 
 #af-pt-shell .insight-list {
+
   display:
     grid;
 
@@ -2456,10 +2840,12 @@ body::before {
 
   list-style:
     none;
+
 }
 
 
 #af-pt-shell .insight-list li {
+
   display:
     flex;
 
@@ -2473,7 +2859,7 @@ body::before {
     0;
 
   color:
-    rgba(224, 236, 245, .84);
+    rgba(240,246,255,.84);
 
   font-size:
     13px;
@@ -2483,16 +2869,20 @@ body::before {
 
   font-weight:
     450;
+
 }
 
 
 #af-pt-shell .insight-list li > span:last-child {
+
   min-width:
     0;
+
 }
 
 
 #af-pt-shell .dot {
+
   width:
     9px;
 
@@ -2511,29 +2901,36 @@ body::before {
   box-shadow:
     0 0 0 4px
     rgba(255,255,255,.025);
+
 }
 
 
 #af-pt-shell .dot.mint {
+
   background:
-    var(--afpt-green);
+    #a8e7d6;
+
 }
 
 
 #af-pt-shell .dot.peach {
+
   background:
-    var(--afpt-peach);
+    #efb18f;
+
 }
 
 
 #af-pt-shell .dot.lav {
+
   background:
-    var(--afpt-purple);
+    #cfd6ff;
+
 }
 
 
 /* ============================================================
-  17. SEO / ABOUT
+  18. SEO / ABOUT
 =============================================================== */
 
 #af-pt-shell .seo-copy,
@@ -2550,6 +2947,7 @@ body::before {
 
   padding:
     18px 16px;
+
 }
 
 
@@ -2560,7 +2958,7 @@ body::before {
     0 0 13px;
 
   color:
-    rgba(215, 230, 241, .76);
+    rgba(240,246,255,.82);
 
   font-size:
     13px;
@@ -2570,6 +2968,7 @@ body::before {
 
   font-weight:
     400;
+
 }
 
 
@@ -2578,10 +2977,12 @@ body::before {
 
   margin-bottom:
     0;
+
 }
 
 
 #af-pt-shell .official-sources {
+
   margin-top:
     18px;
 
@@ -2590,16 +2991,18 @@ body::before {
 
   border-top:
     1px solid
-    rgba(159, 196, 227, .10);
+    rgba(255,255,255,.10);
+
 }
 
 
 #af-pt-shell .official-sources-label {
+
   margin-bottom:
     9px;
 
   color:
-    rgba(220, 234, 244, .86);
+    rgba(244,248,255,.86);
 
   font-size:
     11px;
@@ -2615,10 +3018,12 @@ body::before {
 
   letter-spacing:
     .07em;
+
 }
 
 
 #af-pt-shell .official-source-links {
+
   display:
     flex;
 
@@ -2627,10 +3032,12 @@ body::before {
 
   gap:
     8px;
+
 }
 
 
 #af-pt-shell .source-link {
+
   display:
     inline-flex;
 
@@ -2645,16 +3052,16 @@ body::before {
 
   border:
     1px solid
-    rgba(89, 167, 230, .17);
+    rgba(255,255,255,.12);
 
   border-radius:
     10px;
 
   color:
-    #82bdff;
+    #c8ecdf;
 
   background:
-    rgba(43, 133, 213, .07);
+    rgba(255,255,255,.055);
 
   font-size:
     11px;
@@ -2667,59 +3074,71 @@ body::before {
 
   text-decoration:
     none;
+
 }
 
 
 #af-pt-shell .source-link:active {
+
   background:
-    rgba(43, 133, 213, .14);
+    rgba(255,255,255,.10);
+
 }
 
 
 /* ============================================================
-  18. FAQ
+  19. FAQ
 =============================================================== */
 
 #af-pt-shell .faq-list {
+
   display:
     grid;
 
   gap:
     0;
+
 }
 
 
 #af-pt-shell .faq-item {
+
   padding:
     14px 0;
 
   border-bottom:
     1px solid
-    rgba(159, 196, 227, .09);
+    rgba(255,255,255,.09);
+
 }
 
 
 #af-pt-shell .faq-item:first-child {
+
   padding-top:
     0;
+
 }
 
 
 #af-pt-shell .faq-item:last-child {
+
   padding-bottom:
     0;
 
   border-bottom:
     0;
+
 }
 
 
 #af-pt-shell .faq-item h3 {
+
   margin:
     0 0 7px;
 
   color:
-    #f0f5fa;
+    rgba(248,250,255,.95);
 
   font-size:
     14px;
@@ -2732,10 +3151,12 @@ body::before {
 
   letter-spacing:
     -.015em;
+
 }
 
 
 #af-pt-shell .faq-item p {
+
   margin:
     0;
 
@@ -2744,14 +3165,16 @@ body::before {
 
   line-height:
     1.55;
+
 }
 
 
 /* ============================================================
-  19. ACCESSIBILITY
+  20. ACCESSIBILITY
 =============================================================== */
 
 #af-pt-shell label {
+
   color:
     inherit;
 
@@ -2760,6 +3183,7 @@ body::before {
 
   cursor:
     pointer;
+
 }
 
 
@@ -2773,10 +3197,11 @@ body::before {
 
   outline:
     2px solid
-    var(--afpt-blue-bright);
+    #a8e7d6;
 
   outline-offset:
     3px;
+
 }
 
 
@@ -2808,18 +3233,21 @@ body::before {
 
   border:
     0 !important;
+
 }
 
 
 /* ============================================================
-  20. NARROW PHONE — 320px
+  21. NARROW PHONE — 320px
 =============================================================== */
 
 @media (max-width:339px) {
 
   #af-pt-shell .app {
+
     width:
       calc(100% - 18px);
+
   }
 
 
@@ -2832,18 +3260,23 @@ body::before {
 
     padding-right:
       13px;
+
   }
 
 
   #af-pt-shell .title {
+
     font-size:
       29px;
+
   }
 
 
   #af-pt-shell .profile-grid {
+
     grid-template-columns:
       1fr;
+
   }
 
 
@@ -2854,6 +3287,7 @@ body::before {
 
     gap:
       10px;
+
   }
 
 
@@ -2867,12 +3301,15 @@ body::before {
 
     flex-basis:
       106px;
+
   }
 
 
   #af-pt-shell .score-number {
+
     font-size:
       31px;
+
   }
 
 
@@ -2880,6 +3317,7 @@ body::before {
 
     font-size:
       14px;
+
   }
 
 
@@ -2887,6 +3325,7 @@ body::before {
 
     font-size:
       10px;
+
   }
 
 
@@ -2903,6 +3342,7 @@ body::before {
 
     margin-top:
       10px;
+
   }
 
 
@@ -2910,6 +3350,7 @@ body::before {
 
     text-align:
       left;
+
   }
 
 
@@ -2917,6 +3358,7 @@ body::before {
 
     padding-left:
       0;
+
   }
 
 
@@ -2931,6 +3373,7 @@ body::before {
 
     row-gap:
       8px !important;
+
   }
 
 
@@ -2939,6 +3382,7 @@ body::before {
 
     border-right:
       none !important;
+
   }
 
 
@@ -2953,27 +3397,32 @@ body::before {
 
     border-top:
       1px solid
-      rgba(164,199,226,.08) !important;
+      rgba(255,255,255,.08) !important;
+
   }
 
 }
 
 
 /* ============================================================
-  21. NORMAL iPHONE — 375 → 430
+  22. NORMAL iPHONE — 375 → 430
 =============================================================== */
 
 @media (min-width:375px) {
 
   #af-pt-shell .app {
+
     width:
       calc(100% - 28px);
+
   }
 
 
   #af-pt-shell .panel {
+
     padding:
       19px 18px;
+
   }
 
 
@@ -2982,12 +3431,15 @@ body::before {
 
     padding:
       19px 18px;
+
   }
 
 
   #af-pt-shell .title {
+
     font-size:
       39px;
+
   }
 
 
@@ -2998,6 +3450,7 @@ body::before {
 
     gap:
       16px;
+
   }
 
 
@@ -3011,6 +3464,7 @@ body::before {
 
     flex-basis:
       132px;
+
   }
 
 
@@ -3018,6 +3472,7 @@ body::before {
 
     font-size:
       40px;
+
   }
 
 
@@ -3025,6 +3480,7 @@ body::before {
 
     font-size:
       18px;
+
   }
 
 
@@ -3032,6 +3488,7 @@ body::before {
 
     font-size:
       12px;
+
   }
 
 
@@ -3042,13 +3499,14 @@ body::before {
 
     padding-right:
       13px;
+
   }
 
 }
 
 
 /* ============================================================
-  22. LARGE PHONE — 402 → 430
+  23. LARGE PHONE — 402 → 430
 =============================================================== */
 
 @media (min-width:402px) {
@@ -3057,6 +3515,7 @@ body::before {
 
     width:
       calc(100% - 32px);
+
   }
 
 
@@ -3064,6 +3523,7 @@ body::before {
 
     margin-bottom:
       24px;
+
   }
 
 
@@ -3071,6 +3531,7 @@ body::before {
 
     padding:
       20px 19px;
+
   }
 
 
@@ -3078,6 +3539,7 @@ body::before {
 
     grid-template-columns:
       145px minmax(0, 1fr);
+
   }
 
 
@@ -3091,6 +3553,7 @@ body::before {
 
     flex-basis:
       138px;
+
   }
 
 
@@ -3098,6 +3561,7 @@ body::before {
 
     font-size:
       42px;
+
   }
 
 
@@ -3111,6 +3575,7 @@ body::before {
 
     flex-basis:
       40px;
+
   }
 
 
@@ -3119,13 +3584,14 @@ body::before {
 
     padding-left:
       50px;
+
   }
 
 }
 
 
 /* ============================================================
-  23. TABLET
+  24. TABLET
 =============================================================== */
 
 @media (min-width:700px) {
@@ -3133,10 +3599,12 @@ body::before {
   #af-pt-shell .afpt-stage {
 
     padding-top:
+
       calc(
         28px +
         env(safe-area-inset-top, 0px)
       );
+
   }
 
 
@@ -3147,6 +3615,7 @@ body::before {
 
     max-width:
       900px;
+
   }
 
 
@@ -3154,6 +3623,7 @@ body::before {
 
     margin-bottom:
       28px;
+
   }
 
 
@@ -3161,6 +3631,7 @@ body::before {
 
     font-size:
       48px;
+
   }
 
 
@@ -3168,6 +3639,7 @@ body::before {
 
     font-size:
       17px;
+
   }
 
 
@@ -3178,6 +3650,7 @@ body::before {
 
     padding:
       24px;
+
   }
 
 
@@ -3185,6 +3658,7 @@ body::before {
 
     font-size:
       21px;
+
   }
 
 
@@ -3192,6 +3666,7 @@ body::before {
 
     font-size:
       13px;
+
   }
 
 
@@ -3202,6 +3677,7 @@ body::before {
 
     gap:
       26px;
+
   }
 
 
@@ -3215,6 +3691,7 @@ body::before {
 
     flex-basis:
       168px;
+
   }
 
 
@@ -3222,6 +3699,7 @@ body::before {
 
     inset:
       12px;
+
   }
 
 
@@ -3229,6 +3707,7 @@ body::before {
 
     font-size:
       50px;
+
   }
 
 
@@ -3236,6 +3715,7 @@ body::before {
 
     font-size:
       23px;
+
   }
 
 
@@ -3243,6 +3723,7 @@ body::before {
 
     font-size:
       14px;
+
   }
 
 
@@ -3251,6 +3732,7 @@ body::before {
 
     font-size:
       10px !important;
+
   }
 
 
@@ -3259,6 +3741,7 @@ body::before {
 
     font-size:
       16px !important;
+
   }
 
 
@@ -3266,6 +3749,7 @@ body::before {
 
     gap:
       14px;
+
   }
 
 
@@ -3273,6 +3757,7 @@ body::before {
 
     padding:
       14px;
+
   }
 
 
@@ -3280,6 +3765,7 @@ body::before {
 
     padding:
       16px;
+
   }
 
 
@@ -3293,6 +3779,7 @@ body::before {
 
     flex-basis:
       44px;
+
   }
 
 
@@ -3300,6 +3787,7 @@ body::before {
 
     font-size:
       16px;
+
   }
 
 
@@ -3307,6 +3795,7 @@ body::before {
 
     font-size:
       20px;
+
   }
 
 
@@ -3315,6 +3804,7 @@ body::before {
 
     padding-left:
       54px;
+
   }
 
 
@@ -3322,6 +3812,7 @@ body::before {
 
     font-size:
       11px;
+
   }
 
 
@@ -3329,6 +3820,7 @@ body::before {
 
     font-size:
       14px;
+
   }
 
 
@@ -3337,13 +3829,14 @@ body::before {
 
     font-size:
       14px;
+
   }
 
 }
 
 
 /* ============================================================
-  24. DESKTOP
+  25. DESKTOP
 =============================================================== */
 
 @media (min-width:1000px) {
@@ -3352,6 +3845,7 @@ body::before {
 
     max-width:
       1120px;
+
   }
 
 
@@ -3359,6 +3853,7 @@ body::before {
 
     padding-top:
       12px;
+
   }
 
 
@@ -3366,6 +3861,7 @@ body::before {
 
     font-size:
       56px;
+
   }
 
 
@@ -3373,6 +3869,7 @@ body::before {
 
     padding:
       28px 30px;
+
   }
 
 
@@ -3389,6 +3886,7 @@ body::before {
 
     gap:
       38px;
+
   }
 
 
@@ -3402,6 +3900,7 @@ body::before {
 
     flex-basis:
       205px;
+
   }
 
 
@@ -3409,6 +3908,7 @@ body::before {
 
     inset:
       15px;
+
   }
 
 
@@ -3419,6 +3919,7 @@ body::before {
 
     font-size:
       61px;
+
   }
 
 
@@ -3429,6 +3930,7 @@ body::before {
 
     font-size:
       15px;
+
   }
 
 
@@ -3436,6 +3938,7 @@ body::before {
 
     font-size:
       27px;
+
   }
 
 
@@ -3443,6 +3946,7 @@ body::before {
 
     font-size:
       15px;
+
   }
 
 
@@ -3456,12 +3960,13 @@ body::before {
 
     margin-right:
       auto;
+
   }
 
 
-  /*
-    Desktop can afford the deeper visual breakdown.
-  */
+  /* =========================================================
+    DESKTOP DETAIL CHART
+  ========================================================= */
 
   #af-pt-shell .pt-detail-chart {
 
@@ -3479,7 +3984,8 @@ body::before {
 
     border-top:
       1px solid
-      rgba(159, 196, 227, .09);
+      rgba(255,255,255,.09);
+
   }
 
 
@@ -3503,17 +4009,28 @@ body::before {
     padding:
       18px 26px;
 
+    border:
+      1px solid
+      rgba(255,255,255,.055);
+
     border-radius:
-      16px;
+      18px;
 
     background:
+
+      linear-gradient(
+        180deg,
+        rgba(255,255,255,.055),
+        rgba(255,255,255,.018)
+      ),
+
       repeating-linear-gradient(
         to top,
 
-        rgba(255,255,255,.045)
+        rgba(255,255,255,.055)
         0,
 
-        rgba(255,255,255,.045)
+        rgba(255,255,255,.055)
         1px,
 
         transparent
@@ -3522,6 +4039,7 @@ body::before {
         transparent
         48px
       );
+
   }
 
 
@@ -3544,6 +4062,7 @@ body::before {
 
     height:
       100%;
+
   }
 
 
@@ -3559,10 +4078,15 @@ body::before {
       38px;
 
     border-radius:
-      9px 9px 5px 5px;
+      10px 10px 7px 7px;
 
     background:
       rgba(255,255,255,.08);
+
+    box-shadow:
+      0 8px 18px
+      rgba(3,15,30,.12);
+
   }
 
 
@@ -3585,50 +4109,59 @@ body::before {
 
     transition:
       height .20s ease;
+
   }
 
 
   #af-pt-shell .bar-aqua {
 
     background:
+
       linear-gradient(
         180deg,
-        #63d7df,
-        #3397bb
+        rgba(150,224,234,.96),
+        rgba(110,195,216,.82)
       );
+
   }
 
 
   #af-pt-shell .bar-peach {
 
     background:
+
       linear-gradient(
         180deg,
-        #e8ac90,
-        #bd765b
+        rgba(244,194,161,.96),
+        rgba(233,146,110,.84)
       );
+
   }
 
 
   #af-pt-shell .bar-lav {
 
     background:
+
       linear-gradient(
         180deg,
-        #aea5f4,
-        #6f68c7
+        rgba(206,216,255,.96),
+        rgba(146,160,222,.84)
       );
+
   }
 
 
   #af-pt-shell .bar-mint {
 
     background:
+
       linear-gradient(
         180deg,
-        #6ce2bd,
-        #32a881
+        rgba(184,235,215,.96),
+        rgba(127,210,188,.84)
       );
+
   }
 
 
@@ -3638,7 +4171,7 @@ body::before {
       11px;
 
     color:
-      rgba(214, 229, 240, .72);
+      rgba(244,247,255,.78);
 
     font-size:
       12px;
@@ -3651,6 +4184,7 @@ body::before {
 
     text-align:
       center;
+
   }
 
 
@@ -3660,6 +4194,7 @@ body::before {
 
     padding:
       28px 30px;
+
   }
 
 
@@ -3670,6 +4205,7 @@ body::before {
         4,
         minmax(0, 1fr)
       );
+
   }
 
 
@@ -3677,6 +4213,7 @@ body::before {
 
     margin-top:
       14px;
+
   }
 
 
@@ -3698,6 +4235,7 @@ body::before {
 
     padding:
       16px 18px;
+
   }
 
 
@@ -3705,6 +4243,7 @@ body::before {
 
     align-self:
       center;
+
   }
 
 
@@ -3718,6 +4257,7 @@ body::before {
 
     padding:
       0;
+
   }
 
 
@@ -3728,6 +4268,7 @@ body::before {
 
     margin-bottom:
       4px;
+
   }
 
 
@@ -3735,6 +4276,7 @@ body::before {
 
     text-align:
       left;
+
   }
 
 
@@ -3745,6 +4287,7 @@ body::before {
 
     padding:
       0;
+
   }
 
 
@@ -3755,6 +4298,7 @@ body::before {
 
     font-size:
       11px;
+
   }
 
 
@@ -3763,21 +4307,20 @@ body::before {
 
     padding:
       26px 30px;
+
   }
 
 }
 
 
 /* ============================================================
-  25. HOVER — DESKTOP ONLY
+  26. HOVER — DESKTOP ONLY
 =============================================================== */
 
 @media (hover:hover) and (pointer:fine) {
 
   #af-pt-shell .profile-field,
-
   #af-pt-shell .event-card,
-
   #af-pt-shell .source-link {
 
     transition:
@@ -3787,38 +4330,40 @@ body::before {
       border-color .16s ease,
 
       transform .16s ease;
+
   }
 
 
   #af-pt-shell .profile-field:hover,
-
   #af-pt-shell .event-card:hover {
 
     border-color:
-      rgba(118, 181, 231, .22);
+      rgba(255,255,255,.18);
 
     background-color:
-      rgba(255,255,255,.022);
+      rgba(255,255,255,.035);
+
   }
 
 
   #af-pt-shell .source-link:hover {
 
     color:
-      #a6d1ff;
+      #ddf5eb;
 
     border-color:
-      rgba(89, 167, 230, .32);
+      rgba(255,255,255,.22);
 
     background:
-      rgba(43, 133, 213, .13);
+      rgba(255,255,255,.09);
+
   }
 
 }
 
 
 /* ============================================================
-  26. REDUCED MOTION
+  27. REDUCED MOTION
 =============================================================== */
 
 @media (prefers-reduced-motion:reduce) {
@@ -3827,6 +4372,7 @@ body::before {
 
     scroll-behavior:
       auto;
+
   }
 
 
@@ -3842,13 +4388,14 @@ body::before {
 
     transition-duration:
       .01ms !important;
+
   }
 
 }
 
 
 /* ============================================================
-  27. SAFARI / PERFORMANCE FALLBACK
+  28. SAFARI / GLASS FALLBACK
 =============================================================== */
 
 @supports not (
@@ -3859,14 +4406,20 @@ body::before {
   #af-pt-shell .glass {
 
     background:
-      rgba(7, 34, 58, .97);
+
+      linear-gradient(
+        180deg,
+        rgba(78,101,122,.94),
+        rgba(62,81,101,.94)
+      );
+
   }
 
 }
 
 
 /* ============================================================
-  28. PRINT
+  29. PRINT
 =============================================================== */
 
 @media print {
@@ -3878,13 +4431,16 @@ body::before {
 
     background:
       #fff;
+
   }
 
 
-  body::before {
+  body::before,
+  body::after {
 
     display:
       none;
+
   }
 
 
@@ -3907,6 +4463,7 @@ body::before {
 
     -webkit-backdrop-filter:
       none;
+
   }
 
 
@@ -3916,6 +4473,7 @@ body::before {
 
     color:
       #111;
+
   }
 
 }
