@@ -1625,6 +1625,7 @@ body::before {
 
 /* ============================================================
   12. RANGE SLIDERS — MOBILE TOUCH
+  Transparent Track Background Fix
 =============================================================== */
 
 #af-pt-shell .slider,
@@ -1666,6 +1667,9 @@ body::before {
   touch-action:
     pan-y;
 
+  background-color:
+    transparent;
+
   background-repeat:
     no-repeat;
 
@@ -1674,10 +1678,15 @@ body::before {
 
   background-size:
     100% 8px;
+
+  box-shadow:
+    none;
 }
 
 
-/* HEIGHT */
+/* ============================================================
+  HEIGHT
+=============================================================== */
 
 #af-pt-shell .mini-slider {
 
@@ -1699,7 +1708,9 @@ body::before {
 }
 
 
-/* WAIST */
+/* ============================================================
+  WAIST
+=============================================================== */
 
 #af-pt-shell .slider.mint-track {
 
@@ -1721,7 +1732,9 @@ body::before {
 }
 
 
-/* STRENGTH + CORE */
+/* ============================================================
+  STRENGTH + CORE
+=============================================================== */
 
 #af-pt-shell .slider.peach-track {
 
@@ -1743,7 +1756,9 @@ body::before {
 }
 
 
-/* CARDIO */
+/* ============================================================
+  CARDIO
+=============================================================== */
 
 #af-pt-shell .slider.teal-track {
 
@@ -1765,7 +1780,33 @@ body::before {
 }
 
 
-/* WebKit thumb */
+/* ============================================================
+  WEBKIT / SAFARI / CHROME TRACK
+=============================================================== */
+
+#af-pt-shell .slider::-webkit-slider-runnable-track,
+#af-pt-shell .mini-slider::-webkit-slider-runnable-track {
+
+  height:
+    8px;
+
+  border:
+    0;
+
+  border-radius:
+    999px;
+
+  background:
+    transparent;
+
+  box-shadow:
+    none;
+}
+
+
+/* ============================================================
+  WEBKIT / SAFARI / CHROME THUMB
+=============================================================== */
 
 #af-pt-shell .slider::-webkit-slider-thumb,
 #af-pt-shell .mini-slider::-webkit-slider-thumb {
@@ -1781,6 +1822,9 @@ body::before {
 
   height:
     28px;
+
+  margin-top:
+    -10px;
 
   border:
     2px solid
@@ -1812,7 +1856,9 @@ body::before {
 }
 
 
-/* Firefox */
+/* ============================================================
+  FIREFOX TRACK
+=============================================================== */
 
 #af-pt-shell .slider::-moz-range-track,
 #af-pt-shell .mini-slider::-moz-range-track {
@@ -1827,9 +1873,37 @@ body::before {
     999px;
 
   background:
-    rgba(170, 201, 225, .18);
+    transparent;
+
+  box-shadow:
+    none;
 }
 
+
+/* ============================================================
+  FIREFOX PROGRESS
+=============================================================== */
+
+#af-pt-shell .slider::-moz-range-progress,
+#af-pt-shell .mini-slider::-moz-range-progress {
+
+  height:
+    8px;
+
+  border:
+    0;
+
+  border-radius:
+    999px;
+
+  background:
+    transparent;
+}
+
+
+/* ============================================================
+  FIREFOX THUMB
+=============================================================== */
 
 #af-pt-shell .slider::-moz-range-thumb,
 #af-pt-shell .mini-slider::-moz-range-thumb {
@@ -1852,10 +1926,25 @@ body::before {
 
   box-shadow:
     0 4px 12px
-      rgba(0, 10, 22, .38);
+      rgba(0, 10, 22, .38),
+
+    0 0 0 4px
+      rgba(255,255,255,.055);
 
   cursor:
     grab;
+}
+
+
+/* ============================================================
+  ACTIVE STATE
+=============================================================== */
+
+#af-pt-shell .slider:active::-moz-range-thumb,
+#af-pt-shell .mini-slider:active::-moz-range-thumb {
+
+  cursor:
+    grabbing;
 }
 
 
