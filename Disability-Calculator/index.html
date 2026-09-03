@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="description"
+    content="See how the VA combines multiple disability ratings under 38 CFR 4.25 and estimate your monthly VA disability compensation."
+  >
+
+  <meta
+    name="theme-color"
+    content="#173b57"
+  >
+
+  <title>
+    VA Disability Rating Calculator | TheWing.ai
+  </title>
+
+  <!-- =========================================================
+    THEWING.AI • VA DISABILITY RATING CALCULATOR
+    MOBILE-FIRST AURORA UI
+    INDEX v1.0.0
+
+    PURPOSE
+    -------------------------------------------------------------
+    - Simple disability-rating input experience
+    - Visual explanation of 38 CFR 4.25 combined-rating math
+    - Estimated official VA rating after final rounding
+    - Estimated monthly VA disability compensation
+    - Ask Amy can provide deeper explanation outside this core flow
+
+    IMPORTANT
+    -------------------------------------------------------------
+    - Calculation logic belongs in disability.js
+    - Compensation source-of-truth remains TheWing.ai / official-va.js
+    - Do not round intermediate combined values to the nearest 10
+    - Final rounding happens only after all disability ratings are combined
+  ========================================================== -->
+
+  <!-- Fonts -->
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Calculator Styles -->
+  <link
+    rel="stylesheet"
+    href="./disability.css"
+  >
+
+  <!-- Calculator Logic -->
+  <script
+    src="./disability.js"
+    defer
+  ></script>
+</head>
+
+
+<body>
+
+  <main
+    id="thewing-disability-calculator"
+    class="dc-app-shell"
+    data-ready="false"
+  >
+
+
+    <!-- =======================================================
+      BACKGROUND
+    ======================================================== -->
+
+    <div
+      class="dc-background"
+      aria-hidden="true"
+    >
+      <span class="dc-aura dc-aura-top"></span>
+      <span class="dc-aura dc-aura-bottom"></span>
+      <span class="dc-grid"></span>
+      <span class="dc-grain"></span>
+    </div>
+
+
+    <!-- =======================================================
+      APP CONTAINER
+    ======================================================== -->
+
+    <div class="dc-container">
+
+
+      <!-- =====================================================
+        PAGE HEADER
+      ====================================================== -->
+
+      <header
+        class="dc-page-header"
+        aria-labelledby="dc-page-title"
+      >
+
+        <div class="dc-page-eyebrow">
+          THEWING.AI
+        </div>
+
+        <h1
+          id="dc-page-title"
+          class="dc-page-title"
+        >
+          VA Disability Rating Calculator
+        </h1>
+
+        <p class="dc-page-subtitle">
+          See how VA combines multiple disability ratings
+          and estimate your monthly compensation.
+        </p>
+
+      </header>
+
+
+      <!-- =====================================================
+        RESULT OVERVIEW
+      ====================================================== -->
+
+      <section
+        class="dc-panel dc-overview-panel"
+        aria-labelledby="dc-overview-title"
+      >
+
+        <div class="dc-panel-topline">
+
+          <div>
+            <div class="dc-section-eyebrow">
+              YOUR ESTIMATE
+            </div>
+
+            <h2
+              id="dc-overview-title"
+              class="dc-section-title"
+            >
+              VA Rating Overview
+            </h2>
+          </div>
+
+          <div
+            class="dc-live-pill"
+            aria-label="Live calculator result"
+          >
+            LIVE
+          </div>
+
+        </div>
+
+
+        <div class="dc-overview-main">
+
+          <!-- SCORE RING -->
+
+          <div class="dc-score-ring-wrap">
+
+            <div
+              id="dcScoreRing"
+              class="dc-score-ring"
+              style="--rating-percent:80;"
+            >
+
+              <div class="dc-score-ring-inner">
+
+                <div
+                  id="dcOfficialRating"
+                  class="dc-score-number"
+                  aria-live="polite"
+                >
+                  80%
+                </div>
+
+                <div class="dc-score-label">
+                  Estimated VA Rating
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- HERO COPY -->
+
+          <div class="dc-overview-copy">
+
+            <div class="dc-overview-metrics">
+
+              <div class="dc-overview-metric">
+
+                <span
+                  class="dc-overview-metric-icon dc-icon-combined"
+                  aria-hidden="true"
+                >
+                  ★
+                </span>
+
+                <div>
+                  <strong
+                    id="dcCombinedValue"
+                    class="dc-overview-metric-value"
+                  >
+                    81%
+                  </strong>
+
+                  <span class="dc-overview-metric-label">
+                    Combined Value
+                  </span>
+                </div>
+
+              </div>
+
+
+              <div class="dc-overview-metric">
+
+                <span
+                  class="dc-overview-metric-icon dc-icon-money"
+                  aria-hidden="true"
+                >
+                  $
+                </span>
+
+                <div>
+                  <strong
+                    id="dcMonthlyCompensation"
+                    class="dc-overview-metric-value"
+                  >
+                    $2,102.15
+                  </strong>
+
+                  <span class="dc-overview-metric-label">
+                    Estimated Compensation
+                  </span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- HERO BREAKDOWN -->
+
+        <div class="dc-overview-breakdown">
+
+          <div class="dc-overview-stat">
+            <div class="dc-stat-label">
+              Highest Rating
+            </div>
+
+            <div
+              id="dcHighestRating"
+              class="dc-stat-value"
+            >
+              60%
+            </div>
+          </div>
+
+
+          <div class="dc-overview-stat">
+            <div class="dc-stat-label">
+              Combined Value
+            </div>
+
+            <div
+              id="dcCombinedValueSummary"
+              class="dc-stat-value"
+            >
+              81%
+            </div>
+          </div>
+
+
+          <div class="dc-overview-stat">
+            <div class="dc-stat-label">
+              Official VA Rating
+            </div>
+
+            <div
+              id="dcOfficialRatingSummary"
+              class="dc-stat-value"
+            >
+              80%
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+        1. YOUR DISABILITIES
+      ====================================================== -->
+
+      <section
+        class="dc-panel dc-section dc-disabilities-section"
+        aria-labelledby="dc-disabilities-title"
+      >
+
+        <div class="dc-section-heading">
+
+          <div class="dc-step">
+            1
+          </div>
+
+          <div>
+            <div class="dc-section-eyebrow">
+              YOUR DISABILITIES
+            </div>
+
+            <h2
+              id="dc-disabilities-title"
+              class="dc-section-title"
+            >
+              Enter Your Ratings
+            </h2>
+
+            <p class="dc-section-description">
+              Enter each service-connected disability rating.
+              TheWing automatically applies them from highest to lowest.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div
+          id="dcDisabilityList"
+          class="dc-disability-grid"
+          aria-live="polite"
+        >
+
+          <!-- DISABILITY 1 -->
+
+          <div
+            class="dc-rating-card"
+            data-disability-row="1"
+          >
+
+            <label
+              class="dc-rating-label"
+              for="dcDisability1"
+            >
+              Disability 1
+            </label>
+
+            <div class="dc-select-shell">
+
+              <select
+                id="dcDisability1"
+                name="disability1"
+                class="dc-rating-select"
+                data-disability-rating
+                aria-label="Disability 1 rating"
+              >
+                <option value="0">0%</option>
+                <option value="10">10%</option>
+                <option value="20">20%</option>
+                <option value="30">30%</option>
+                <option value="40">40%</option>
+                <option value="50">50%</option>
+                <option value="60" selected>60%</option>
+                <option value="70">70%</option>
+                <option value="80">80%</option>
+                <option value="90">90%</option>
+                <option value="100">100%</option>
+              </select>
+
+              <span
+                class="dc-chevron"
+                aria-hidden="true"
+              ></span>
+
+            </div>
+
+          </div>
+
+
+          <!-- DISABILITY 2 -->
+
+          <div
+            class="dc-rating-card"
+            data-disability-row="2"
+          >
+
+            <label
+              class="dc-rating-label"
+              for="dcDisability2"
+            >
+              Disability 2
+            </label>
+
+            <div class="dc-select-shell">
+
+              <select
+                id="dcDisability2"
+                name="disability2"
+                class="dc-rating-select"
+                data-disability-rating
+                aria-label="Disability 2 rating"
+              >
+                <option value="0">0%</option>
+                <option value="10">10%</option>
+                <option value="20">20%</option>
+                <option value="30">30%</option>
+                <option value="40" selected>40%</option>
+                <option value="50">50%</option>
+                <option value="60">60%</option>
+                <option value="70">70%</option>
+                <option value="80">80%</option>
+                <option value="90">90%</option>
+                <option value="100">100%</option>
+              </select>
+
+              <span
+                class="dc-chevron"
+                aria-hidden="true"
+              ></span>
+
+            </div>
+
+          </div>
+
+
+          <!-- DISABILITY 3 -->
+
+          <div
+            class="dc-rating-card"
+            data-disability-row="3"
+          >
+
+            <label
+              class="dc-rating-label"
+              for="dcDisability3"
+            >
+              Disability 3
+            </label>
+
+            <div class="dc-select-shell">
+
+              <select
+                id="dcDisability3"
+                name="disability3"
+                class="dc-rating-select"
+                data-disability-rating
+                aria-label="Disability 3 rating"
+              >
+                <option value="0">0%</option>
+                <option value="10">10%</option>
+                <option value="20" selected>20%</option>
+                <option value="30">30%</option>
+                <option value="40">40%</option>
+                <option value="50">50%</option>
+                <option value="60">60%</option>
+                <option value="70">70%</option>
+                <option value="80">80%</option>
+                <option value="90">90%</option>
+                <option value="100">100%</option>
+              </select>
+
+              <span
+                class="dc-chevron"
+                aria-hidden="true"
+              ></span>
+
+            </div>
+
+          </div>
+
+
+          <!-- ADD DISABILITY -->
+
+          <button
+            id="dcAddDisabilityButton"
+            class="dc-add-disability-button"
+            type="button"
+          >
+            <span
+              class="dc-add-icon"
+              aria-hidden="true"
+            >
+              +
+            </span>
+
+            <span>
+              Add Disability
+            </span>
+          </button>
+
+        </div>
+
+
+        <div class="dc-input-note">
+          Ratings are combined from highest to lowest.
+          Zero-percent conditions do not change the combined value.
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+        2. HOW YOUR VA RATING BUILDS
+      ====================================================== -->
+
+      <section
+        class="dc-panel dc-section dc-rating-build-section"
+        aria-labelledby="dc-rating-build-title"
+      >
+
+        <div class="dc-section-heading">
+
+          <div class="dc-step">
+            2
+          </div>
+
+          <div>
+            <div class="dc-section-eyebrow">
+              38 CFR § 4.25
+            </div>
+
+            <h2
+              id="dc-rating-build-title"
+              class="dc-section-title"
+            >
+              How Your VA Rating Builds
+            </h2>
+
+            <p class="dc-section-description">
+              Each additional rating is applied to the efficiency
+              you have remaining.
+            </p>
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+          RATING BUILD GRAPH
+        ==================================================== -->
+
+        <div
+          id="dcRatingBuildGraph"
+          class="dc-rating-build-graph"
+          aria-label="Visual breakdown of the VA combined rating calculation"
+        >
+
+
+          <!-- WHOLE PERSON -->
+
+          <div
+            class="dc-build-row"
+            data-build-step="0"
+          >
+
+            <div class="dc-build-value">
+              100%
+            </div>
+
+            <div class="dc-build-main">
+
+              <div class="dc-build-track">
+
+                <span
+                  class="dc-build-fill dc-build-fill-whole"
+                  style="width:100%;"
+                ></span>
+
+              </div>
+
+              <div class="dc-build-note">
+                Whole Person
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- FIRST RATING -->
+
+          <div
+            class="dc-build-row"
+            data-build-step="1"
+          >
+
+            <div
+              id="dcBuildValue1"
+              class="dc-build-value"
+            >
+              60%
+            </div>
+
+            <div class="dc-build-main">
+
+              <div class="dc-build-track">
+
+                <span
+                  id="dcBuildFill1"
+                  class="dc-build-fill"
+                  style="width:60%;"
+                ></span>
+
+              </div>
+
+              <div class="dc-build-meta">
+
+                <span id="dcBuildAdded1">
+                  +60% disability
+                </span>
+
+                <span id="dcBuildRemaining1">
+                  40% remaining
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- SECOND RATING -->
+
+          <div
+            class="dc-build-row"
+            data-build-step="2"
+          >
+
+            <div
+              id="dcBuildValue2"
+              class="dc-build-value"
+            >
+              76%
+            </div>
+
+            <div class="dc-build-main">
+
+              <div class="dc-build-track">
+
+                <span
+                  id="dcBuildFill2"
+                  class="dc-build-fill"
+                  style="width:76%;"
+                ></span>
+
+              </div>
+
+              <div class="dc-build-meta">
+
+                <span id="dcBuildAdded2">
+                  +16% from your 40% rating
+                </span>
+
+                <span id="dcBuildRemaining2">
+                  24% remaining
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- THIRD RATING -->
+
+          <div
+            class="dc-build-row"
+            data-build-step="3"
+          >
+
+            <div
+              id="dcBuildValue3"
+              class="dc-build-value"
+            >
+              81%
+            </div>
+
+            <div class="dc-build-main">
+
+              <div class="dc-build-track">
+
+                <span
+                  id="dcBuildFill3"
+                  class="dc-build-fill"
+                  style="width:81%;"
+                ></span>
+
+              </div>
+
+              <div class="dc-build-meta">
+
+                <span id="dcBuildAdded3">
+                  +5% from your 20% rating
+                </span>
+
+                <span id="dcBuildRemaining3">
+                  19% remaining
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- DYNAMIC ADDITIONAL STEPS -->
+
+          <div
+            id="dcAdditionalBuildSteps"
+            class="dc-additional-build-steps"
+          ></div>
+
+
+          <!-- FINAL RESULT -->
+
+          <div class="dc-build-final">
+
+            <div class="dc-build-final-item">
+
+              <span>
+                Combined Value
+              </span>
+
+              <strong id="dcBuildCombinedFinal">
+                81%
+              </strong>
+
+            </div>
+
+
+            <span
+              class="dc-build-final-arrow"
+              aria-hidden="true"
+            >
+              →
+            </span>
+
+
+            <div class="dc-build-final-item">
+
+              <span>
+                Official VA Rating
+              </span>
+
+              <strong id="dcBuildOfficialFinal">
+                80%
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="dc-graph-note">
+          VA does not simply add your percentages together.
+          The final combined value is rounded to the nearest 10%
+          after all ratings are combined.
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+        3. ESTIMATED MONTHLY VA COMPENSATION
+      ====================================================== -->
+
+      <section
+        class="dc-panel dc-section dc-compensation-section"
+        aria-labelledby="dc-compensation-title"
+      >
+
+        <div class="dc-section-heading">
+
+          <div class="dc-step">
+            3
+          </div>
+
+          <div>
+
+            <div class="dc-section-eyebrow">
+              YOUR COMPENSATION
+            </div>
+
+            <h2
+              id="dc-compensation-title"
+              class="dc-section-title"
+            >
+              Estimated Monthly VA Compensation
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+          COMPENSATION RESULT
+        ==================================================== -->
+
+        <div class="dc-compensation-card">
+
+
+          <!-- MONTHLY AMOUNT -->
+
+          <div class="dc-compensation-amount-wrap">
+
+            <span
+              class="dc-compensation-icon"
+              aria-hidden="true"
+            >
+              $
+            </span>
+
+            <div>
+
+              <strong
+                id="dcCompensationAmount"
+                class="dc-compensation-amount"
+              >
+                $2,102.15
+              </strong>
+
+              <span class="dc-compensation-period">
+                per month
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- DEPENDENT PROFILE -->
+
+          <label
+            class="dc-dependent-card"
+            for="dcDependentProfile"
+          >
+
+            <span class="dc-dependent-label">
+              Dependent Profile
+            </span>
+
+            <span class="dc-select-shell">
+
+              <select
+                id="dcDependentProfile"
+                name="dependentProfile"
+                class="dc-dependent-select"
+                aria-label="Dependent profile"
+              >
+
+                <option value="veteran-only">
+                  Veteran Only
+                </option>
+
+                <option
+                  value="veteran-spouse"
+                  selected
+                >
+                  Veteran + Spouse
+                </option>
+
+                <option value="veteran-child">
+                  Veteran + Child
+                </option>
+
+                <option value="veteran-spouse-child">
+                  Veteran + Spouse + Child
+                </option>
+
+                <option value="custom">
+                  Custom Dependents
+                </option>
+
+              </select>
+
+              <span
+                class="dc-chevron"
+                aria-hidden="true"
+              ></span>
+
+            </span>
+
+          </label>
+
+        </div>
+
+
+        <!-- ===================================================
+          CUSTOM DEPENDENTS
+          Hidden unless Custom Dependents is selected.
+        ==================================================== -->
+
+        <div
+          id="dcCustomDependents"
+          class="dc-custom-dependents"
+          hidden
+        >
+
+
+          <!-- SPOUSE -->
+
+          <label class="dc-dependent-input-card">
+
+            <span>
+              Spouse
+            </span>
+
+            <input
+              id="dcHasSpouse"
+              name="hasSpouse"
+              type="checkbox"
+            >
+
+          </label>
+
+
+          <!-- CHILDREN UNDER 18 -->
+
+          <label class="dc-dependent-input-card">
+
+            <span>
+              Children Under 18
+            </span>
+
+            <input
+              id="dcChildrenUnder18"
+              name="childrenUnder18"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              max="20"
+              step="1"
+              value="0"
+            >
+
+          </label>
+
+
+          <!-- CHILDREN 18+ IN SCHOOL -->
+
+          <label class="dc-dependent-input-card">
+
+            <span>
+              Children 18+ in School
+            </span>
+
+            <input
+              id="dcChildrenSchool"
+              name="childrenSchool"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              max="20"
+              step="1"
+              value="0"
+            >
+
+          </label>
+
+
+          <!-- DEPENDENT PARENTS -->
+
+          <label class="dc-dependent-input-card">
+
+            <span>
+              Dependent Parents
+            </span>
+
+            <select
+              id="dcDependentParents"
+              name="dependentParents"
+            >
+
+              <option
+                value="0"
+                selected
+              >
+                0
+              </option>
+
+              <option value="1">
+                1
+              </option>
+
+              <option value="2">
+                2
+              </option>
+
+            </select>
+
+          </label>
+
+        </div>
+
+
+        <!-- COMPENSATION NOTE -->
+
+        <div class="dc-compensation-note">
+          Compensation is based on your estimated official VA rating
+          and dependent profile. Dependent additions generally begin
+          at a 30% VA disability rating.
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+        ASK AMY HANDOFF
+
+        Reserved for the page-level Ask Amy HUD integration.
+
+        The calculator itself stays intentionally simple.
+        Amy can explain:
+        - why ratings do not simply add together
+        - remaining efficiency
+        - final rounding
+        - dependent compensation
+        - bilateral-factor concepts when supported
+        - other VA questions
+      ====================================================== -->
+
+      <div
+        id="dcAmyHudSlot"
+        class="dc-amy-hud-slot"
+        aria-hidden="true"
+      ></div>
+
+
+      <!-- =====================================================
+        FOOTER / DISCLAIMER
+      ====================================================== -->
+
+      <footer class="dc-footer">
+
+
+        <div class="dc-footer-notice">
+
+          <span
+            class="dc-footer-icon"
+            aria-hidden="true"
+          >
+            i
+          </span>
+
+          <span>
+            This calculator is an educational estimate and is not an
+            official Department of Veterans Affairs rating decision.
+            Official disability evaluations, combined ratings, and
+            compensation are determined by the VA.
+          </span>
+
+        </div>
+
+
+        <div class="dc-footer-bottom">
+
+          <span>
+            TheWing calculates. Amy explains.
+          </span>
+
+          <span>
+            38 CFR § 4.25
+          </span>
+
+        </div>
+
+      </footer>
+
+    </div>
+
+
+    <!-- =======================================================
+      LIVE REGION
+    ======================================================== -->
+
+    <div
+      id="dcLiveRegion"
+      class="dc-visually-hidden"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+
+
+    <!-- =======================================================
+      NOSCRIPT
+    ======================================================== -->
+
+    <noscript>
+
+      <div class="dc-noscript">
+        JavaScript must be enabled to calculate a VA disability rating.
+      </div>
+
+    </noscript>
+
+  </main>
+
+</body>
+
+</html>
