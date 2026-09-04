@@ -438,6 +438,8 @@ console.log("====================================");
           clientContext?.pt_score ||
           clientContext?.widget?.ptScore ||
           null,
+        disability:
+          clientContext?.disability || null,
         scenario: deterministic?.internal?.scenario || null,
         selectedBase: deterministic?.public?.base_info || null,
         metadata: {
@@ -2196,12 +2198,30 @@ function collectPublicClientContext(body) {
     null
   );
 
+  const disabilityRaw = pickFirst(
+    body?.disability,
+    body?.vaDisability,
+    body?.va_disability,
+    body?.disabilityCalculator,
+    body?.disability_calculator,
+    context?.disability,
+    context?.vaDisability,
+    context?.va_disability,
+    context?.disabilityCalculator,
+    context?.disability_calculator,
+    null
+  );
+
   return {
     profile: isPlainObject(profile) ? profile : {},
     bridge: isPlainObject(bridge) ? bridge : {},
     compensation: pickFirst(body?.compensation, context?.compensation, null),
     mortgage: pickFirst(body?.mortgage, context?.mortgage, null),
     pt: sanitizePublicPtContext(ptRaw),
+    disability:
+      isPlainObject(disabilityRaw)
+        ? redactSensitive(disabilityRaw)
+        : null,
     financial_intake: redactSensitive(
       mergeDeep(
         {},
@@ -3399,7 +3419,7 @@ async function buildTruthPacket({
     });
   }
 
-  if (intent === "va_loan" || /\bva\b/.test(safeStr(message).toLowerCase())) {
+  if (intent === "va_loan") {
     const vaLoan = await buildVaLoanContextSafe({
       message,
       normalizedProfile,
