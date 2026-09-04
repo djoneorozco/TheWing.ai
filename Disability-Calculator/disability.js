@@ -1,117 +1,65 @@
 /* ============================================================
   THEWING.AI • VA DISABILITY RATING CALCULATOR
   disability.js
-  v1.0.0
+  v1.1.0
 
   PURPOSE
   -------------------------------------------------------------
-  1. Read individual VA disability ratings
-  2. Sort ratings from highest to lowest
-  3. Combine ratings using the VA "whole person" method
-  4. Preserve intermediate combined values
-  5. Perform final VA rounding only after all ratings combine
-  6. Render the simple "How Your VA Rating Builds" graph
-  7. Estimate standard monthly VA disability compensation
-  8. Expose clean state for future Ask Amy HUD integration
-
-  SOURCE / RULE BASIS
-  -------------------------------------------------------------
-  - Combined rating:
-      38 CFR § 4.25
-
-  - Compensation:
-      Browser-side mirror of:
-      netlify/functions/_share/official-va.js
-      RATE_VERSION = official-va-2026.2
+  - Calculate VA combined ratings under 38 CFR § 4.25
+  - Render the new segmented whole-person graph
+  - Estimate standard monthly VA disability compensation
+  - Expose live calculator state for Ask Amy
 
   IMPORTANT
   -------------------------------------------------------------
-  - This calculator does NOT implement 38 CFR § 4.26 bilateral factor
-  - This calculator does NOT implement SMC
-  - This calculator does NOT implement spouse A&A
-  - This calculator does NOT implement DIC
-  - This calculator does NOT calculate retirement pay
-  - 0% disabilities do not change the combined rating
-  - Intermediate combined values are NOT rounded to nearest 10
-  - Final nearest-10 rounding occurs only once, at the end
-
-  FUTURE BACKEND MIGRATION
-  -------------------------------------------------------------
-  When TheWing.ai exposes a dedicated public VA compensation route,
-  the getVACompensation() function can be replaced by that API call
-  without changing the calculator UI or §4.25 rating engine.
+  - No 38 CFR § 4.26 bilateral-factor calculation
+  - No SMC, spouse A&A, DIC, retirement pay, or offset logic
+  - 0% conditions do not increase the combined value
+  - Intermediate values are carried forward as whole numbers
+  - Final nearest-10 rounding happens only after all ratings combine
 ============================================================ */
 
-
 (function () {
-
   "use strict";
 
-
-  /* ============================================================
-    1. ROOT
-  ============================================================ */
-
-  const ROOT =
-    document.getElementById(
-      "thewing-disability-calculator"
-    );
-
-
-  if (!ROOT) {
-    return;
-  }
-
+  const ROOT = document.getElementById("thewing-disability-calculator");
 
   if (
+    !ROOT ||
     ROOT.dataset.runtimeBound === "true"
   ) {
     return;
   }
 
+  ROOT.dataset.runtimeBound = "true";
 
-  ROOT.dataset.runtimeBound =
-    "true";
+  const $ = (selector) =>
+    ROOT.querySelector(selector);
 
-
-  const $ = function (selector) {
-
-    return ROOT.querySelector(
-      selector
+  const $$ = (selector) =>
+    Array.from(
+      ROOT.querySelectorAll(selector)
     );
-  };
-
-
-  const $$ = function (selector) {
-
-    return Array.from(
-      ROOT.querySelectorAll(
-        selector
-      )
-    );
-  };
-
 
 
   /* ============================================================
-    2. VERSION / CONFIGURATION
+    1. CONFIGURATION
   ============================================================ */
 
   const DISABILITY_RUNTIME_VERSION =
-    "disability-2026.1";
-
+    "disability-2026.2";
 
   const COMBINED_RATING_RULE_VERSION =
     "38-cfr-4.25";
 
-
   const VA_RATE_VERSION =
     "official-va-2026.2";
-
 
   const MAX_DISABILITIES =
     20;
 
+  const GRAPH_COLOR_COUNT =
+    8;
 
   const VALID_RATINGS =
     Object.freeze([
@@ -128,7 +76,6 @@
       100
     ]);
 
-
   const SUPPORTED_COMPENSATION_RATINGS =
     Object.freeze([
       10,
@@ -144,9 +91,8 @@
     ]);
 
 
-
   /* ============================================================
-    3. DOM REFERENCES
+    2. DOM REFERENCES
   ============================================================ */
 
   const els = {
@@ -184,13 +130,25 @@
       $("#dcAddDisabilityButton"),
 
 
-    /* GRAPH */
+    /* NEW GRAPH */
 
     ratingBuildGraph:
       $("#dcRatingBuildGraph"),
 
-    additionalBuildSteps:
-      $("#dcAdditionalBuildSteps"),
+    graphCombinedValue:
+      $("#dcGraphCombinedValue"),
+
+    contributionTrack:
+      $("#dcContributionTrack"),
+
+    graphWholePersonLabel:
+      $("#dcGraphWholePersonLabel"),
+
+    graphRemaining:
+      $("#dcGraphRemaining"),
+
+    graphDisabilityRows:
+      $("#dcGraphDisabilityRows"),
 
     buildCombinedFinal:
       $("#dcBuildCombinedFinal"),
@@ -239,19 +197,12 @@
   };
 
 
-
   /* ============================================================
-    4. CURRENT VA COMPENSATION TABLES
+    3. CURRENT VA COMPENSATION TABLES
 
     Browser mirror of official-va.js
     Rate version: official-va-2026.2
-
-    Rates effective Dec. 1, 2025.
-  ============================================================ */
-
-
-  /* ============================================================
-    4A. 10% / 20%
+    Effective Dec. 1, 2025
   ============================================================ */
 
   const SOLO_10_20 =
@@ -266,517 +217,240 @@
     });
 
 
-
-  /* ============================================================
-    4B. 30%–60% — NO CHILDREN
-  ============================================================ */
-
   const BASE_30_60_NO_CHILDREN =
     Object.freeze({
 
       alone: {
-
-        30:
-          552.47,
-
-        40:
-          795.84,
-
-        50:
-          1132.90,
-
-        60:
-          1435.02
+        30: 552.47,
+        40: 795.84,
+        50: 1132.90,
+        60: 1435.02
       },
-
 
       spouse: {
-
-        30:
-          617.47,
-
-        40:
-          882.84,
-
-        50:
-          1241.90,
-
-        60:
-          1566.02
+        30: 617.47,
+        40: 882.84,
+        50: 1241.90,
+        60: 1566.02
       },
-
 
       spouse_1_parent: {
-
-        30:
-          669.47,
-
-        40:
-          952.84,
-
-        50:
-          1329.90,
-
-        60:
-          1671.02
+        30: 669.47,
+        40: 952.84,
+        50: 1329.90,
+        60: 1671.02
       },
-
 
       spouse_2_parents: {
-
-        30:
-          721.47,
-
-        40:
-          1022.84,
-
-        50:
-          1417.90,
-
-        60:
-          1776.02
+        30: 721.47,
+        40: 1022.84,
+        50: 1417.90,
+        60: 1776.02
       },
-
 
       one_parent: {
-
-        30:
-          604.47,
-
-        40:
-          865.84,
-
-        50:
-          1220.90,
-
-        60:
-          1540.02
+        30: 604.47,
+        40: 865.84,
+        50: 1220.90,
+        60: 1540.02
       },
 
-
       two_parents: {
-
-        30:
-          656.47,
-
-        40:
-          935.84,
-
-        50:
-          1308.90,
-
-        60:
-          1645.02
+        30: 656.47,
+        40: 935.84,
+        50: 1308.90,
+        60: 1645.02
       }
 
     });
 
-
-
-  /* ============================================================
-    4C. 30%–60% — WITH CHILDREN
-  ============================================================ */
 
   const BASE_30_60_WITH_CHILDREN =
     Object.freeze({
 
       child_only: {
-
-        30:
-          596.47,
-
-        40:
-          853.84,
-
-        50:
-          1205.90,
-
-        60:
-          1523.02
+        30: 596.47,
+        40: 853.84,
+        50: 1205.90,
+        60: 1523.02
       },
-
 
       spouse_child: {
-
-        30:
-          666.47,
-
-        40:
-          947.84,
-
-        50:
-          1322.90,
-
-        60:
-          1663.02
+        30: 666.47,
+        40: 947.84,
+        50: 1322.90,
+        60: 1663.02
       },
-
 
       spouse_child_1_parent: {
-
-        30:
-          718.47,
-
-        40:
-          1017.84,
-
-        50:
-          1410.90,
-
-        60:
-          1768.02
+        30: 718.47,
+        40: 1017.84,
+        50: 1410.90,
+        60: 1768.02
       },
-
 
       spouse_child_2_parents: {
-
-        30:
-          770.47,
-
-        40:
-          1087.84,
-
-        50:
-          1498.90,
-
-        60:
-          1873.02
+        30: 770.47,
+        40: 1087.84,
+        50: 1498.90,
+        60: 1873.02
       },
-
 
       child_1_parent: {
-
-        30:
-          648.47,
-
-        40:
-          923.84,
-
-        50:
-          1293.90,
-
-        60:
-          1628.02
+        30: 648.47,
+        40: 923.84,
+        50: 1293.90,
+        60: 1628.02
       },
 
-
       child_2_parents: {
-
-        30:
-          700.47,
-
-        40:
-          993.84,
-
-        50:
-          1381.90,
-
-        60:
-          1733.02
+        30: 700.47,
+        40: 993.84,
+        50: 1381.90,
+        60: 1733.02
       }
 
     });
 
-
-
-  /* ============================================================
-    4D. 30%–60% — ADDITIONAL CHILDREN
-  ============================================================ */
 
   const ADDED_30_60 =
     Object.freeze({
 
       childUnder18: {
-
-        30:
-          32.00,
-
-        40:
-          43.00,
-
-        50:
-          54.00,
-
-        60:
-          65.00
+        30: 32.00,
+        40: 43.00,
+        50: 54.00,
+        60: 65.00
       },
 
-
       childOver18School: {
-
-        30:
-          105.00,
-
-        40:
-          140.00,
-
-        50:
-          176.00,
-
-        60:
-          211.00
+        30: 105.00,
+        40: 140.00,
+        50: 176.00,
+        60: 211.00
       }
 
     });
 
-
-
-  /* ============================================================
-    4E. 70%–100% — NO CHILDREN
-  ============================================================ */
 
   const BASE_70_100_NO_CHILDREN =
     Object.freeze({
 
       alone: {
-
-        70:
-          1808.45,
-
-        80:
-          2102.15,
-
-        90:
-          2362.30,
-
-        100:
-          3938.58
+        70: 1808.45,
+        80: 2102.15,
+        90: 2362.30,
+        100: 3938.58
       },
-
 
       spouse: {
-
-        70:
-          1961.45,
-
-        80:
-          2277.15,
-
-        90:
-          2559.30,
-
-        100:
-          4158.17
+        70: 1961.45,
+        80: 2277.15,
+        90: 2559.30,
+        100: 4158.17
       },
-
 
       spouse_1_parent: {
-
-        70:
-          2084.45,
-
-        80:
-          2417.15,
-
-        90:
-          2717.30,
-
-        100:
-          4334.41
+        70: 2084.45,
+        80: 2417.15,
+        90: 2717.30,
+        100: 4334.41
       },
-
 
       spouse_2_parents: {
-
-        70:
-          2207.45,
-
-        80:
-          2557.15,
-
-        90:
-          2875.30,
-
-        100:
-          4510.65
+        70: 2207.45,
+        80: 2557.15,
+        90: 2875.30,
+        100: 4510.65
       },
-
 
       one_parent: {
-
-        70:
-          1931.45,
-
-        80:
-          2242.15,
-
-        90:
-          2520.30,
-
-        100:
-          4114.82
+        70: 1931.45,
+        80: 2242.15,
+        90: 2520.30,
+        100: 4114.82
       },
 
-
       two_parents: {
-
-        70:
-          2054.45,
-
-        80:
-          2382.15,
-
-        90:
-          2678.30,
-
-        100:
-          4291.06
+        70: 2054.45,
+        80: 2382.15,
+        90: 2678.30,
+        100: 4291.06
       }
 
     });
 
-
-
-  /* ============================================================
-    4F. 70%–100% — WITH CHILDREN
-  ============================================================ */
 
   const BASE_70_100_WITH_CHILDREN =
     Object.freeze({
 
       child_only: {
-
-        70:
-          1910.45,
-
-        80:
-          2219.15,
-
-        90:
-          2494.30,
-
-        100:
-          4085.43
+        70: 1910.45,
+        80: 2219.15,
+        90: 2494.30,
+        100: 4085.43
       },
-
 
       spouse_child: {
-
-        70:
-          2074.45,
-
-        80:
-          2406.15,
-
-        90:
-          2704.30,
-
-        100:
-          4318.99
+        70: 2074.45,
+        80: 2406.15,
+        90: 2704.30,
+        100: 4318.99
       },
-
 
       spouse_child_1_parent: {
-
-        70:
-          2197.45,
-
-        80:
-          2546.15,
-
-        90:
-          2862.30,
-
-        100:
-          4495.23
+        70: 2197.45,
+        80: 2546.15,
+        90: 2862.30,
+        100: 4495.23
       },
-
 
       spouse_child_2_parents: {
-
-        70:
-          2320.45,
-
-        80:
-          2686.15,
-
-        90:
-          3020.30,
-
-        100:
-          4671.47
+        70: 2320.45,
+        80: 2686.15,
+        90: 3020.30,
+        100: 4671.47
       },
-
 
       child_1_parent: {
-
-        70:
-          2033.45,
-
-        80:
-          2359.15,
-
-        90:
-          2652.30,
-
-        100:
-          4261.67
+        70: 2033.45,
+        80: 2359.15,
+        90: 2652.30,
+        100: 4261.67
       },
 
-
       child_2_parents: {
-
-        70:
-          2156.45,
-
-        80:
-          2499.15,
-
-        90:
-          2810.30,
-
-        100:
-          4437.91
+        70: 2156.45,
+        80: 2499.15,
+        90: 2810.30,
+        100: 4437.91
       }
 
     });
 
-
-
-  /* ============================================================
-    4G. 70%–100% — ADDITIONAL CHILDREN
-  ============================================================ */
 
   const ADDED_70_100 =
     Object.freeze({
 
       childUnder18: {
-
-        70:
-          76.00,
-
-        80:
-          87.00,
-
-        90:
-          98.00,
-
-        100:
-          109.11
+        70: 76.00,
+        80: 87.00,
+        90: 98.00,
+        100: 109.11
       },
 
-
       childOver18School: {
-
-        70:
-          246.00,
-
-        80:
-          281.00,
-
-        90:
-          317.00,
-
-        100:
-          352.45
+        70: 246.00,
+        80: 281.00,
+        90: 317.00,
+        100: 352.45
       }
 
     });
 
 
-
   /* ============================================================
-    5. BASIC HELPERS
+    4. HELPERS
   ============================================================ */
 
   function clamp(
@@ -801,7 +475,8 @@
 
     return Number(
       (
-        Number(value) || 0
+        Number(value) ||
+        0
       ).toFixed(2)
     );
   }
@@ -811,12 +486,11 @@
     value
   ) {
 
-    const n =
-      Number(value) || 0;
-
-
     return "$" +
-      n.toLocaleString(
+      (
+        Number(value) ||
+        0
+      ).toLocaleString(
         undefined,
         {
           minimumFractionDigits:
@@ -838,7 +512,6 @@
       return;
     }
 
-
     element.textContent =
       String(
         value == null
@@ -850,27 +523,21 @@
 
   function toNonNegativeInt(
     value,
-    fallback
+    fallback = 0
   ) {
 
-    const n =
+    const number =
       Number(value);
 
-
-    if (
-      !Number.isFinite(n) ||
-      n < 0
-    ) {
-
-      return Number(
-        fallback || 0
-      );
-    }
-
-
-    return Math.floor(
-      n
-    );
+    return (
+      Number.isFinite(number) &&
+      number >= 0
+    )
+      ? Math.floor(number)
+      : Number(
+          fallback ||
+          0
+        );
   }
 
 
@@ -884,72 +551,48 @@
   }
 
 
-
   /* ============================================================
-    6. FINAL VA ROUNDING
-
-    38 CFR § 4.25:
-    - final value converts to nearest degree divisible by 10
-    - values ending in 5 round upward
-    - this happens only after all disabilities are combined
+    5. FINAL VA ROUNDING
   ============================================================ */
 
   function roundFinalVARating(
     combinedValue
   ) {
 
-    const n =
+    const value =
       clamp(
         Math.round(
-          Number(combinedValue) || 0
+          Number(combinedValue) ||
+          0
         ),
         0,
         100
       );
 
+    if (
+      value === 0
+    ) {
 
-    if (n === 0) {
       return 0;
     }
 
-
     return clamp(
-
       Math.floor(
         (
-          n + 5
-        ) / 10
-      ) * 10,
-
+          value +
+          5
+        ) /
+        10
+      ) *
+      10,
       0,
       100
     );
   }
 
 
-
   /* ============================================================
-    7. COMBINE TWO RATINGS
-
-    WHOLE PERSON CONCEPT
-
-    Example:
-    60% rating
-
-    Remaining efficiency:
-    100 - 60 = 40
-
-    Add a 40% rating:
-    40% of remaining 40 = 16
-
-    60 + 16 = 76
-
-    Result:
-    76% combined value
-
-    IMPORTANT:
-    The whole-number intermediate result continues forward.
-    It is NOT rounded to nearest 10 here.
+    6. COMBINE TWO RATINGS
   ============================================================ */
 
   function combineTwoRatings(
@@ -959,35 +602,34 @@
 
     const current =
       clamp(
-        Number(currentCombined) || 0,
+        Number(currentCombined) ||
+        0,
         0,
         100
       );
-
 
     const rating =
       clamp(
-        Number(nextRating) || 0,
+        Number(nextRating) ||
+        0,
         0,
         100
       );
 
-
     const remainingBefore =
-      100 - current;
-
+      100 -
+      current;
 
     const rawContribution =
       remainingBefore *
       (
-        rating / 100
+        rating /
+        100
       );
-
 
     const rawCombined =
       current +
       rawContribution;
-
 
     const combined =
       clamp(
@@ -997,7 +639,6 @@
         0,
         100
       );
-
 
     return {
 
@@ -1014,24 +655,30 @@
       combined,
 
       contribution:
-        combined - current,
+        combined -
+        current,
 
       remainingAfter:
-        100 - combined
+        100 -
+        combined
+
     };
   }
 
 
-
   /* ============================================================
-    8. COMPLETE 38 CFR § 4.25 CALCULATION
+    7. COMPLETE 38 CFR § 4.25 CALCULATION
+
+    sourceIndex preserves the current input-card identity so the
+    graph can keep each Disability # tied to one color even after
+    ratings are sorted highest-to-lowest for the VA calculation.
   ============================================================ */
 
   function calculateCombinedRating(
     inputRatings
   ) {
 
-    const ratings =
+    const ratingEntries =
       (
         Array.isArray(
           inputRatings
@@ -1040,43 +687,60 @@
           : []
       )
 
-        .map(function (
-          value
-        ) {
+        .map(
+          (
+            value,
+            index
+          ) => ({
+            rating:
+              Number(value),
 
-          return Number(
-            value
-          );
-        })
+            sourceIndex:
+              index + 1
+          })
+        )
 
-        .filter(function (
-          value
-        ) {
-
-          return (
+        .filter(
+          entry =>
             isValidRating(
-              value
+              entry.rating
             ) &&
-            value > 0
-          );
-        })
+            entry.rating > 0
+        )
 
-        .sort(function (
-          a,
-          b
-        ) {
+        .sort(
+          (
+            a,
+            b
+          ) =>
+            (
+              b.rating -
+              a.rating
+            ) ||
+            (
+              a.sourceIndex -
+              b.sourceIndex
+            )
+        );
 
-          return b - a;
-        });
+
+    const ratings =
+      ratingEntries.map(
+        entry =>
+          entry.rating
+      );
 
 
     if (
-      ratings.length === 0
+      !ratingEntries.length
     ) {
 
       return {
 
         ratings:
+          [],
+
+        ratingEntries:
           [],
 
         highestRating:
@@ -1093,6 +757,7 @@
 
         steps:
           []
+
       };
     }
 
@@ -1100,131 +765,147 @@
     const steps =
       [];
 
-
     let combined =
       0;
 
 
-    ratings.forEach(function (
-      rating,
-      index
-    ) {
+    ratingEntries.forEach(
+      (
+        entry,
+        index
+      ) => {
 
-      if (
-        index === 0
-      ) {
+        const rating =
+          entry.rating;
+
+
+        if (
+          index === 0
+        ) {
+
+          combined =
+            rating;
+
+          steps.push({
+
+            index:
+              1,
+
+            sourceIndex:
+              entry.sourceIndex,
+
+            rating,
+
+            previousCombined:
+              0,
+
+            remainingBefore:
+              100,
+
+            rawContribution:
+              rating,
+
+            contribution:
+              rating,
+
+            rawCombined:
+              rating,
+
+            combined,
+
+            remainingAfter:
+              100 -
+              combined
+
+          });
+
+          return;
+        }
+
+
+        const result =
+          combineTwoRatings(
+            combined,
+            rating
+          );
+
 
         combined =
-          rating;
+          result.combined;
 
 
         steps.push({
 
           index:
-            1,
+            index + 1,
+
+          sourceIndex:
+            entry.sourceIndex,
 
           rating,
 
           previousCombined:
-            0,
+            result.current,
 
           remainingBefore:
-            100,
+            result.remainingBefore,
 
           rawContribution:
-            rating,
+            result.rawContribution,
 
           contribution:
-            rating,
+            result.contribution,
 
           rawCombined:
-            rating,
+            result.rawCombined,
 
-          combined,
+          combined:
+            result.combined,
 
           remainingAfter:
-            100 - combined
+            result.remainingAfter
 
         });
 
-
-        return;
       }
-
-
-      const result =
-        combineTwoRatings(
-          combined,
-          rating
-        );
-
-
-      combined =
-        result.combined;
-
-
-      steps.push({
-
-        index:
-          index + 1,
-
-        rating,
-
-        previousCombined:
-          result.current,
-
-        remainingBefore:
-          result.remainingBefore,
-
-        rawContribution:
-          result.rawContribution,
-
-        contribution:
-          result.contribution,
-
-        rawCombined:
-          result.rawCombined,
-
-        combined:
-          result.combined,
-
-        remainingAfter:
-          result.remainingAfter
-
-      });
-
-    });
-
-
-    const officialRating =
-      roundFinalVARating(
-        combined
-      );
+    );
 
 
     return {
 
       ratings,
 
+      ratingEntries:
+        ratingEntries.map(
+          entry => ({
+            ...entry
+          })
+        ),
+
       highestRating:
-        ratings[0] || 0,
+        ratings[0] ||
+        0,
 
       combinedValue:
         combined,
 
-      officialRating,
+      officialRating:
+        roundFinalVARating(
+          combined
+        ),
 
       remainingEfficiency:
-        100 - combined,
+        100 -
+        combined,
 
       steps
+
     };
   }
 
 
-
   /* ============================================================
-    9. READ DISABILITY RATINGS
+    8. READ RATINGS
   ============================================================ */
 
   function getRatingSelects() {
@@ -1238,28 +919,26 @@
   function readRatings() {
 
     return getRatingSelects()
-      .map(function (
-        select
-      ) {
+      .map(
+        select => {
 
-        const rating =
-          Number(
-            select.value
-          );
+          const rating =
+            Number(
+              select.value
+            );
 
-
-        return isValidRating(
-          rating
-        )
-          ? rating
-          : 0;
-      });
+          return isValidRating(
+            rating
+          )
+            ? rating
+            : 0;
+        }
+      );
   }
 
 
-
   /* ============================================================
-    10. DEPENDENT PROFILE
+    9. DEPENDENT PROFILE
   ============================================================ */
 
   function getDependentProfileLabel(
@@ -1282,8 +961,8 @@
 
       "custom":
         "Custom Dependents"
-    };
 
+    };
 
     return (
       labels[value] ||
@@ -1302,6 +981,12 @@
       );
 
 
+    const profileLabel =
+      getDependentProfileLabel(
+        profile
+      );
+
+
     if (
       profile ===
       "veteran-spouse"
@@ -1311,10 +996,7 @@
 
         profile,
 
-        profileLabel:
-          getDependentProfileLabel(
-            profile
-          ),
+        profileLabel,
 
         spouse:
           true,
@@ -1327,6 +1009,7 @@
 
         dependentParents:
           0
+
       };
     }
 
@@ -1340,10 +1023,7 @@
 
         profile,
 
-        profileLabel:
-          getDependentProfileLabel(
-            profile
-          ),
+        profileLabel,
 
         spouse:
           false,
@@ -1356,6 +1036,7 @@
 
         dependentParents:
           0
+
       };
     }
 
@@ -1369,10 +1050,7 @@
 
         profile,
 
-        profileLabel:
-          getDependentProfileLabel(
-            profile
-          ),
+        profileLabel,
 
         spouse:
           true,
@@ -1385,6 +1063,7 @@
 
         dependentParents:
           0
+
       };
     }
 
@@ -1398,10 +1077,7 @@
 
         profile,
 
-        profileLabel:
-          getDependentProfileLabel(
-            profile
-          ),
+        profileLabel,
 
         spouse:
           Boolean(
@@ -1413,16 +1089,14 @@
           toNonNegativeInt(
             els.childrenUnder18
               ? els.childrenUnder18.value
-              : 0,
-            0
+              : 0
           ),
 
         childrenInSchoolOver18:
           toNonNegativeInt(
             els.childrenSchool
               ? els.childrenSchool.value
-              : 0,
-            0
+              : 0
           ),
 
         dependentParents:
@@ -1430,12 +1104,12 @@
             toNonNegativeInt(
               els.dependentParents
                 ? els.dependentParents.value
-                : 0,
-              0
+                : 0
             ),
             0,
             2
           )
+
       };
     }
 
@@ -1459,28 +1133,27 @@
 
       dependentParents:
         0
+
     };
   }
 
 
-
   /* ============================================================
-    11. DEPENDENT TABLE HELPERS
+    10. COMPENSATION HELPERS
   ============================================================ */
 
   function getRateBand(
     rating
   ) {
 
-    const n =
+    const value =
       Number(
         rating
       );
 
-
     if (
-      n === 10 ||
-      n === 20
+      value === 10 ||
+      value === 20
     ) {
 
       return "10_20";
@@ -1494,7 +1167,7 @@
         50,
         60
       ].includes(
-        n
+        value
       )
     ) {
 
@@ -1509,7 +1182,7 @@
         90,
         100
       ].includes(
-        n
+        value
       )
     ) {
 
@@ -1535,55 +1208,43 @@
         spouse &&
         parents === 0
       ) {
-
         return "spouse";
       }
-
 
       if (
         spouse &&
         parents === 1
       ) {
-
         return "spouse_1_parent";
       }
-
 
       if (
         spouse &&
         parents === 2
       ) {
-
         return "spouse_2_parents";
       }
-
 
       if (
         !spouse &&
         parents === 0
       ) {
-
         return "alone";
       }
-
 
       if (
         !spouse &&
         parents === 1
       ) {
-
         return "one_parent";
       }
-
 
       if (
         !spouse &&
         parents === 2
       ) {
-
         return "two_parents";
       }
-
     }
 
 
@@ -1595,55 +1256,43 @@
         spouse &&
         parents === 0
       ) {
-
         return "spouse_child";
       }
-
 
       if (
         spouse &&
         parents === 1
       ) {
-
         return "spouse_child_1_parent";
       }
-
 
       if (
         spouse &&
         parents === 2
       ) {
-
         return "spouse_child_2_parents";
       }
-
 
       if (
         !spouse &&
         parents === 0
       ) {
-
         return "child_only";
       }
-
 
       if (
         !spouse &&
         parents === 1
       ) {
-
         return "child_1_parent";
       }
-
 
       if (
         !spouse &&
         parents === 2
       ) {
-
         return "child_2_parents";
       }
-
     }
 
 
@@ -1668,9 +1317,7 @@
     ) {
 
       return hasAnyChildren
-
         ? BASE_30_60_WITH_CHILDREN
-
         : BASE_30_60_NO_CHILDREN;
     }
 
@@ -1681,9 +1328,7 @@
     ) {
 
       return hasAnyChildren
-
         ? BASE_70_100_WITH_CHILDREN
-
         : BASE_70_100_NO_CHILDREN;
     }
 
@@ -1724,20 +1369,16 @@
   }
 
 
-
   /* ============================================================
-    12. VA COMPENSATION CALCULATION
-
-    Mirrors current official-va.js behavior.
+    11. VA COMPENSATION
   ============================================================ */
 
   function getVACompensation(
-    input
+    input = {}
   ) {
 
     const rating =
       Number(
-        input &&
         input.rating
       );
 
@@ -1771,6 +1412,7 @@
 
         rateVersion:
           VA_RATE_VERSION
+
       };
     }
 
@@ -1796,6 +1438,7 @@
 
         rateVersion:
           VA_RATE_VERSION
+
       };
     }
 
@@ -1809,8 +1452,7 @@
     const dependentParents =
       clamp(
         toNonNegativeInt(
-          input.dependentParents,
-          0
+          input.dependentParents
         ),
         0,
         2
@@ -1819,24 +1461,15 @@
 
     const childrenUnder18 =
       toNonNegativeInt(
-        input.childrenUnder18,
-        0
+        input.childrenUnder18
       );
 
 
     const childrenInSchoolOver18 =
       toNonNegativeInt(
-        input.childrenInSchoolOver18,
-        0
+        input.childrenInSchoolOver18
       );
 
-
-    /*
-      10% / 20%
-      ----------------------------------------------------------
-      Current official-va.js does not apply dependent additions
-      at these ratings.
-    */
 
     if (
       rating === 10 ||
@@ -1879,6 +1512,7 @@
 
         rateVersion:
           VA_RATE_VERSION
+
       };
     }
 
@@ -1887,7 +1521,8 @@
       (
         childrenUnder18 +
         childrenInSchoolOver18
-      ) > 0;
+      ) >
+      0;
 
 
     const baseKey =
@@ -1928,6 +1563,7 @@
 
         rateVersion:
           VA_RATE_VERSION
+
       };
     }
 
@@ -1963,6 +1599,7 @@
 
         rateVersion:
           VA_RATE_VERSION
+
       };
     }
 
@@ -1981,14 +1618,6 @@
       );
 
 
-    /*
-      Current official-va.js behavior:
-
-      - Base "with children" rate includes one child
-      - Additional under-18 children are added after the first
-      - School-age children are added separately
-    */
-
     if (
       hasAnyChildren &&
       addedTable
@@ -1997,7 +1626,8 @@
       const extraUnder18Count =
         Math.max(
           0,
-          childrenUnder18 - 1
+          childrenUnder18 -
+          1
         );
 
 
@@ -2011,7 +1641,8 @@
           addedTable
             .childUnder18[
               rating
-            ] || 0
+            ] ||
+          0
         );
 
 
@@ -2021,20 +1652,10 @@
           addedTable
             .childOver18School[
               rating
-            ] || 0
+            ] ||
+          0
         );
     }
-
-
-    const monthlyVA =
-      round2(
-
-        baseMonthlyVA +
-
-        addedChildrenUnder18 +
-
-        addedChildrenInSchoolOver18
-      );
 
 
     return {
@@ -2052,7 +1673,12 @@
 
       childrenInSchoolOver18,
 
-      monthlyVA,
+      monthlyVA:
+        round2(
+          baseMonthlyVA +
+          addedChildrenUnder18 +
+          addedChildrenInSchoolOver18
+        ),
 
       baseMonthlyVA:
         round2(
@@ -2074,13 +1700,13 @@
 
       rateVersion:
         VA_RATE_VERSION
+
     };
   }
 
 
-
   /* ============================================================
-    13. UPDATE CUSTOM DEPENDENT VISIBILITY
+    12. DEPENDENT VISIBILITY
   ============================================================ */
 
   function updateCustomDependentVisibility() {
@@ -2094,19 +1720,14 @@
     }
 
 
-    const isCustom =
-      els.dependentProfile.value ===
-      "custom";
-
-
     els.customDependents.hidden =
-      !isCustom;
+      els.dependentProfile.value !==
+      "custom";
   }
 
 
-
   /* ============================================================
-    14. OVERVIEW RENDERING
+    13. OVERVIEW RENDERING
   ============================================================ */
 
   function renderOverview(
@@ -2116,25 +1737,29 @@
 
     const combined =
       Number(
-        result.combinedValue || 0
+        result.combinedValue ||
+        0
       );
 
 
     const official =
       Number(
-        result.officialRating || 0
+        result.officialRating ||
+        0
       );
 
 
     const highest =
       Number(
-        result.highestRating || 0
+        result.highestRating ||
+        0
       );
 
 
     const monthly =
       Number(
-        compensation.monthlyVA || 0
+        compensation.monthlyVA ||
+        0
       );
 
 
@@ -2157,13 +1782,15 @@
 
     setText(
       els.officialRating,
-      official + "%"
+      official +
+      "%"
     );
 
 
     setText(
       els.combinedValue,
-      combined + "%"
+      combined +
+      "%"
     );
 
 
@@ -2177,144 +1804,265 @@
 
     setText(
       els.highestRating,
-      highest + "%"
+      highest +
+      "%"
     );
 
 
     setText(
       els.combinedValueSummary,
-      combined + "%"
+      combined +
+      "%"
     );
 
 
     setText(
       els.officialRatingSummary,
-      official + "%"
+      official +
+      "%"
     );
   }
 
 
-
   /* ============================================================
-    15. GRAPH — FIXED STEP RENDERER
+    14. GRAPH HELPERS
   ============================================================ */
 
-  function renderFixedBuildStep(
-    stepNumber,
-    step
+  function getGraphColorClass(
+    sourceIndex
   ) {
 
-    const row =
-      ROOT.querySelector(
-        '[data-build-step="' +
-        stepNumber +
-        '"]'
+    const safeIndex =
+      Math.max(
+        1,
+        Number(
+          sourceIndex
+        ) ||
+        1
       );
 
 
-    if (!row) {
+    const colorIndex =
+      (
+        (
+          safeIndex -
+          1
+        ) %
+        GRAPH_COLOR_COUNT
+      ) +
+      1;
+
+
+    return (
+      "dc-graph-color-" +
+      colorIndex
+    );
+  }
+
+
+  function createGraphSpan(
+    className
+  ) {
+
+    const span =
+      document.createElement(
+        "span"
+      );
+
+
+    span.className =
+      className;
+
+
+    span.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+
+    return span;
+  }
+
+
+  /* ============================================================
+    15. MAIN CUMULATIVE CONTRIBUTION BAR
+
+    Main-bar widths use actual whole-person contribution:
+
+      50 / 50 / 20
+
+      #1 contributes 50 points
+      #2 contributes 25 points
+      #3 contributes  5 points
+
+      20 points remain
+
+    The individual rows below still show 50%, 50%, and 20%.
+  ============================================================ */
+
+  function renderContributionTrack(
+    result
+  ) {
+
+    if (
+      !els.contributionTrack
+    ) {
+
       return;
     }
 
 
-    if (!step) {
-
-      row.hidden =
-        true;
-
-      return;
-    }
+    els.contributionTrack
+      .replaceChildren();
 
 
-    row.hidden =
-      false;
+    const steps =
+      Array.isArray(
+        result.steps
+      )
+        ? result.steps
+        : [];
 
 
-    const value =
-      $(
-        "#dcBuildValue" +
-        stepNumber
-      );
+    steps.forEach(
+      step => {
+
+        const contribution =
+          clamp(
+            Number(
+              step.contribution
+            ) ||
+            0,
+            0,
+            100
+          );
 
 
-    const fill =
-      $(
-        "#dcBuildFill" +
-        stepNumber
-      );
+        if (
+          contribution <= 0
+        ) {
+
+          return;
+        }
 
 
-    const added =
-      $(
-        "#dcBuildAdded" +
-        stepNumber
-      );
+        const sourceIndex =
+          step.sourceIndex ||
+          step.index;
+
+
+        const segment =
+          createGraphSpan(
+            "dc-contribution-segment " +
+            getGraphColorClass(
+              sourceIndex
+            )
+          );
+
+
+        segment.style.width =
+          contribution +
+          "%";
+
+
+        segment.dataset.contribution =
+          String(
+            contribution
+          );
+
+
+        segment.dataset.rating =
+          String(
+            step.rating
+          );
+
+
+        segment.dataset.disabilityIndex =
+          String(
+            sourceIndex
+          );
+
+
+        els.contributionTrack
+          .appendChild(
+            segment
+          );
+      }
+    );
 
 
     const remaining =
-      $(
-        "#dcBuildRemaining" +
-        stepNumber
+      clamp(
+        Number(
+          result.remainingEfficiency
+        ) ||
+        0,
+        0,
+        100
       );
 
 
-    setText(
-      value,
-      step.combined + "%"
-    );
-
-
-    if (fill) {
-
-      fill.style.width =
-        clamp(
-          step.combined,
-          0,
-          100
-        ) + "%";
-    }
-
-
-    if (
-      stepNumber === 1
-    ) {
-
-      setText(
-        added,
-        "+" +
-        step.rating +
-        "% disability"
+    const remainingSegment =
+      createGraphSpan(
+        "dc-contribution-remaining"
       );
 
-    } else {
 
-      setText(
-        added,
-        "+" +
-        step.contribution +
-        "% from your " +
-        step.rating +
-        "% rating"
+    remainingSegment.style.width =
+      remaining +
+      "%";
+
+
+    remainingSegment.dataset.contributionRemaining =
+      "true";
+
+
+    els.contributionTrack
+      .appendChild(
+        remainingSegment
       );
-    }
 
 
-    setText(
-      remaining,
-      step.remainingAfter +
-      "% remaining"
+    els.contributionTrack.setAttribute(
+      "aria-label",
+      "Combined disability contribution bar showing " +
+      result.combinedValue +
+      "% combined disability and " +
+      remaining +
+      "% remaining efficiency."
     );
   }
 
 
-
   /* ============================================================
-    16. GRAPH — DYNAMIC STEP CREATION
+    16. INDIVIDUAL DISABILITY ROWS
+
+    Individual row width = assigned rating.
+    Main cumulative segment width = actual contribution.
   ============================================================ */
 
-  function createDynamicBuildStep(
+  function createDisabilityGraphRow(
     step
   ) {
+
+    const sourceIndex =
+      Number(
+        step.sourceIndex ||
+        step.index ||
+        1
+      );
+
+
+    const rating =
+      clamp(
+        Number(
+          step.rating
+        ) ||
+        0,
+        0,
+        100
+      );
+
 
     const row =
       document.createElement(
@@ -2323,12 +2071,19 @@
 
 
     row.className =
-      "dc-build-row";
+      "dc-disability-graph-row";
 
 
-    row.dataset.buildStep =
+    row.dataset.graphDisabilityRow =
       String(
-        step.index
+        sourceIndex
+      );
+
+
+    row.dataset.calculationStep =
+      String(
+        step.index ||
+        1
       );
 
 
@@ -2339,11 +2094,11 @@
 
 
     value.className =
-      "dc-build-value";
+      "dc-disability-graph-value";
 
 
     value.textContent =
-      step.combined +
+      rating +
       "%";
 
 
@@ -2354,7 +2109,7 @@
 
 
     main.className =
-      "dc-build-main";
+      "dc-disability-graph-main";
 
 
     const track =
@@ -2364,25 +2119,21 @@
 
 
     track.className =
-      "dc-build-track";
+      "dc-disability-graph-track";
 
 
     const fill =
-      document.createElement(
-        "span"
+      createGraphSpan(
+        "dc-disability-graph-fill " +
+        getGraphColorClass(
+          sourceIndex
+        )
       );
 
 
-    fill.className =
-      "dc-build-fill";
-
-
     fill.style.width =
-      clamp(
-        step.combined,
-        0,
-        100
-      ) + "%";
+      rating +
+      "%";
 
 
     track.appendChild(
@@ -2397,60 +2148,37 @@
 
 
     meta.className =
-      "dc-build-meta";
+      "dc-disability-graph-meta";
 
 
-    const added =
+    const label =
       document.createElement(
         "span"
       );
 
 
-    added.textContent =
-      "+" +
-      step.contribution +
-      "% from your " +
-      step.rating +
-      "% rating";
+    label.className =
+      "dc-disability-graph-label";
 
 
-    const remaining =
-      document.createElement(
-        "span"
-      );
-
-
-    remaining.textContent =
-      step.remainingAfter +
-      "% remaining";
+    label.textContent =
+      "Disability #" +
+      sourceIndex;
 
 
     meta.appendChild(
-      added
+      label
     );
 
 
-    meta.appendChild(
-      remaining
-    );
-
-
-    main.appendChild(
-      track
-    );
-
-
-    main.appendChild(
+    main.append(
+      track,
       meta
     );
 
 
-    row.appendChild(
-      value
-    );
-
-
-    row.appendChild(
+    row.append(
+      value,
       main
     );
 
@@ -2458,6 +2186,162 @@
     return row;
   }
 
+
+  function createEmptyDisabilityGraphRow() {
+
+    const row =
+      document.createElement(
+        "div"
+      );
+
+
+    row.className =
+      "dc-disability-graph-row dc-disability-graph-row-empty";
+
+
+    const value =
+      document.createElement(
+        "div"
+      );
+
+
+    value.className =
+      "dc-disability-graph-value";
+
+
+    value.textContent =
+      "0%";
+
+
+    const main =
+      document.createElement(
+        "div"
+      );
+
+
+    main.className =
+      "dc-disability-graph-main";
+
+
+    const track =
+      document.createElement(
+        "div"
+      );
+
+
+    track.className =
+      "dc-disability-graph-track";
+
+
+    const fill =
+      createGraphSpan(
+        "dc-disability-graph-fill dc-graph-color-1"
+      );
+
+
+    fill.style.width =
+      "0%";
+
+
+    track.appendChild(
+      fill
+    );
+
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+
+    meta.className =
+      "dc-disability-graph-meta";
+
+
+    const label =
+      document.createElement(
+        "span"
+      );
+
+
+    label.className =
+      "dc-disability-graph-label";
+
+
+    label.textContent =
+      "No compensable disability rating entered";
+
+
+    meta.appendChild(
+      label
+    );
+
+
+    main.append(
+      track,
+      meta
+    );
+
+
+    row.append(
+      value,
+      main
+    );
+
+
+    return row;
+  }
+
+
+  function renderDisabilityRows(
+    result
+  ) {
+
+    if (
+      !els.graphDisabilityRows
+    ) {
+
+      return;
+    }
+
+
+    els.graphDisabilityRows
+      .replaceChildren();
+
+
+    const steps =
+      Array.isArray(
+        result.steps
+      )
+        ? result.steps
+        : [];
+
+
+    if (
+      !steps.length
+    ) {
+
+      els.graphDisabilityRows
+        .appendChild(
+          createEmptyDisabilityGraphRow()
+        );
+
+      return;
+    }
+
+
+    steps.forEach(
+      step => {
+
+        els.graphDisabilityRows
+          .appendChild(
+            createDisabilityGraphRow(
+              step
+            )
+          );
+      }
+    );
+  }
 
 
   /* ============================================================
@@ -2468,66 +2352,95 @@
     result
   ) {
 
-    const steps =
-      result.steps || [];
+    const combinedValue =
+      clamp(
+        Number(
+          result.combinedValue
+        ) ||
+        0,
+        0,
+        100
+      );
 
 
-    renderFixedBuildStep(
-      1,
-      steps[0] || null
+    const officialRating =
+      clamp(
+        Number(
+          result.officialRating
+        ) ||
+        0,
+        0,
+        100
+      );
+
+
+    const remaining =
+      clamp(
+        Number.isFinite(
+          Number(
+            result.remainingEfficiency
+          )
+        )
+          ? Number(
+              result.remainingEfficiency
+            )
+          : (
+              100 -
+              combinedValue
+            ),
+        0,
+        100
+      );
+
+
+    setText(
+      els.graphCombinedValue,
+      combinedValue +
+      "%"
     );
 
 
-    renderFixedBuildStep(
-      2,
-      steps[1] || null
+    setText(
+      els.graphWholePersonLabel,
+      "100% Whole Person"
     );
 
 
-    renderFixedBuildStep(
-      3,
-      steps[2] || null
+    setText(
+      els.graphRemaining,
+      remaining +
+      "% Remaining"
     );
 
 
-    if (
-      els.additionalBuildSteps
-    ) {
+    renderContributionTrack({
+      ...result,
 
-      els.additionalBuildSteps
-        .replaceChildren();
+      combinedValue,
+
+      remainingEfficiency:
+        remaining
+    });
 
 
-      steps
-        .slice(3)
-        .forEach(function (
-          step
-        ) {
-
-          els.additionalBuildSteps
-            .appendChild(
-              createDynamicBuildStep(
-                step
-              )
-            );
-        });
-    }
+    renderDisabilityRows(
+      result
+    );
 
 
     setText(
       els.buildCombinedFinal,
-      result.combinedValue +
+      combinedValue +
       "%"
     );
 
 
     setText(
       els.buildOfficialFinal,
-      result.officialRating +
+      officialRating +
       "%"
     );
   }
-
 
 
   /* ============================================================
@@ -2562,25 +2475,26 @@
 
 
     if (
-      result.officialRating === 0
+      result.officialRating ===
+      0
     ) {
 
       els.compensationNote.textContent =
         "Add a compensable disability rating to estimate monthly VA compensation.";
-
 
       return;
     }
 
 
     if (
-      result.officialRating === 10 ||
-      result.officialRating === 20
+      result.officialRating ===
+        10 ||
+      result.officialRating ===
+        20
     ) {
 
       els.compensationNote.textContent =
         "At 10% and 20%, the standard VA compensation amount does not change based on dependent status.";
-
 
       return;
     }
@@ -2591,9 +2505,8 @@
   }
 
 
-
   /* ============================================================
-    19. LIVE REGION
+    19. ACCESSIBILITY ANNOUNCEMENT
   ============================================================ */
 
   let lastAnnouncement =
@@ -2616,13 +2529,12 @@
     const message =
       "Estimated VA rating " +
       result.officialRating +
-      " percent. " +
-      "Combined value " +
+      " percent. Combined value " +
       result.combinedValue +
-      " percent. " +
-      "Estimated monthly compensation " +
+      " percent. Estimated monthly compensation " +
       money2(
-        compensation.monthlyVA || 0
+        compensation.monthlyVA ||
+        0
       ) +
       ".";
 
@@ -2645,20 +2557,8 @@
   }
 
 
-
   /* ============================================================
     20. ASK AMY / PAGE EVENT
-
-    Future HUD integrations can listen for:
-
-    window.addEventListener(
-      "thewing:disability-updated",
-      function (event) {
-        console.log(event.detail);
-      }
-    );
-
-    No localStorage / sessionStorage required.
   ============================================================ */
 
   function emitDisabilityEvent(
@@ -2668,7 +2568,6 @@
     try {
 
       window.dispatchEvent(
-
         new CustomEvent(
           "thewing:disability-updated",
           {
@@ -2678,22 +2577,16 @@
         )
       );
 
-    } catch (
-      error
-    ) {
+    } catch (_) {
 
-      /*
-        The calculator must continue even if
-        CustomEvent is unavailable.
-      */
+      /* Fail open */
 
     }
   }
 
 
-
   /* ============================================================
-    21. CREATE RATING OPTIONS
+    21. DYNAMIC DISABILITY INPUTS
   ============================================================ */
 
   function populateRatingOptions(
@@ -2701,48 +2594,43 @@
     selectedValue
   ) {
 
-    VALID_RATINGS.forEach(function (
-      rating
-    ) {
+    VALID_RATINGS.forEach(
+      rating => {
 
-      const option =
-        document.createElement(
-          "option"
+        const option =
+          document.createElement(
+            "option"
+          );
+
+
+        option.value =
+          String(
+            rating
+          );
+
+
+        option.textContent =
+          rating +
+          "%";
+
+
+        if (
+          rating ===
+          selectedValue
+        ) {
+
+          option.selected =
+            true;
+        }
+
+
+        select.appendChild(
+          option
         );
-
-
-      option.value =
-        String(
-          rating
-        );
-
-
-      option.textContent =
-        rating +
-        "%";
-
-
-      if (
-        rating ===
-        selectedValue
-      ) {
-
-        option.selected =
-          true;
       }
-
-
-      select.appendChild(
-        option
-      );
-    });
+    );
   }
 
-
-
-  /* ============================================================
-    22. CREATE NEW DISABILITY CARD
-  ============================================================ */
 
   function createDisabilityCard() {
 
@@ -2863,27 +2751,15 @@
     );
 
 
-    shell.appendChild(
-      select
-    );
-
-
-    shell.appendChild(
+    shell.append(
+      select,
       chevron
     );
 
 
-    card.appendChild(
-      actions
-    );
-
-
-    card.appendChild(
-      label
-    );
-
-
-    card.appendChild(
+    card.append(
+      actions,
+      label,
       shell
     );
 
@@ -2892,95 +2768,88 @@
   }
 
 
-
-  /* ============================================================
-    23. RENUMBER DISABILITY CARDS
-  ============================================================ */
-
   function renumberDisabilityCards() {
 
-    const cards =
-      $$(
-        ".dc-rating-card"
-      );
+    $$(
+      ".dc-rating-card"
+    ).forEach(
+      (
+        card,
+        index
+      ) => {
+
+        const number =
+          index +
+          1;
 
 
-    cards.forEach(function (
-      card,
-      index
-    ) {
-
-      const number =
-        index + 1;
+        const label =
+          card.querySelector(
+            ".dc-rating-label"
+          );
 
 
-      const label =
-        card.querySelector(
-          ".dc-rating-label"
-        );
+        const select =
+          card.querySelector(
+            "[data-disability-rating]"
+          );
 
 
-      const select =
-        card.querySelector(
-          "[data-disability-rating]"
-        );
+        if (
+          !select
+        ) {
+
+          return;
+        }
 
 
-      if (!select) {
-        return;
-      }
+        const id =
+          "dcDisability" +
+          number;
 
 
-      const id =
-        "dcDisability" +
-        number;
+        card.dataset.disabilityRow =
+          String(
+            number
+          );
 
 
-      card.dataset.disabilityRow =
-        String(
-          number
-        );
-
-
-      select.id =
-        id;
-
-
-      select.name =
-        "disability" +
-        number;
-
-
-      select.setAttribute(
-        "aria-label",
-        "Disability " +
-        number +
-        " rating"
-      );
-
-
-      if (label) {
-
-        label.htmlFor =
+        select.id =
           id;
 
 
-        label.textContent =
-          "Disability " +
+        select.name =
+          "disability" +
           number;
-      }
 
-    });
+
+        select.setAttribute(
+          "aria-label",
+          "Disability " +
+          number +
+          " rating"
+        );
+
+
+        if (
+          label
+        ) {
+
+          label.htmlFor =
+            id;
+
+
+          label.textContent =
+            "Disability " +
+            number;
+        }
+      }
+    );
 
 
     updateAddButtonState();
   }
 
-
-
-  /* ============================================================
-    24. ADD BUTTON STATE
-  ============================================================ */
 
   function updateAddButtonState() {
 
@@ -2992,13 +2861,9 @@
     }
 
 
-    const count =
-      getRatingSelects()
-        .length;
-
-
     const atMaximum =
-      count >=
+      getRatingSelects()
+        .length >=
       MAX_DISABILITIES;
 
 
@@ -3006,30 +2871,14 @@
       atMaximum;
 
 
-    if (
+    els.addDisabilityButton.setAttribute(
+      "aria-label",
       atMaximum
-    ) {
-
-      els.addDisabilityButton.setAttribute(
-        "aria-label",
-        "Maximum number of disabilities reached"
-      );
-
-
-    } else {
-
-      els.addDisabilityButton.setAttribute(
-        "aria-label",
-        "Add another disability"
-      );
-    }
+        ? "Maximum number of disabilities reached"
+        : "Add another disability"
+    );
   }
 
-
-
-  /* ============================================================
-    25. ADD DISABILITY
-  ============================================================ */
 
   function addDisability() {
 
@@ -3071,7 +2920,9 @@
       );
 
 
-    if (select) {
+    if (
+      select
+    ) {
 
       select.focus();
     }
@@ -3080,11 +2931,6 @@
     run();
   }
 
-
-
-  /* ============================================================
-    26. REMOVE DISABILITY
-  ============================================================ */
 
   function removeDisability(
     button
@@ -3096,7 +2942,10 @@
       );
 
 
-    if (!card) {
+    if (
+      !card
+    ) {
+
       return;
     }
 
@@ -3111,9 +2960,8 @@
   }
 
 
-
   /* ============================================================
-    27. CURRENT CALCULATOR STATE
+    22. CALCULATOR STATE
   ============================================================ */
 
   let currentState =
@@ -3177,6 +3025,14 @@
         result.ratings.slice(),
 
 
+      ratingEntries:
+        result.ratingEntries.map(
+          entry => ({
+            ...entry
+          })
+        ),
+
+
       highestRating:
         result.highestRating,
 
@@ -3195,14 +3051,9 @@
 
       steps:
         result.steps.map(
-          function (
-            step
-          ) {
-
-            return {
-              ...step
-            };
-          }
+          step => ({
+            ...step
+          })
         ),
 
 
@@ -3216,13 +3067,13 @@
         {
           ...compensation
         }
+
     };
   }
 
 
-
   /* ============================================================
-    28. MAIN RUN
+    23. MAIN RUN
   ============================================================ */
 
   function run() {
@@ -3257,6 +3108,7 @@
 
       steps:
         state.steps
+
     };
 
 
@@ -3318,9 +3170,8 @@
   }
 
 
-
   /* ============================================================
-    29. EVENT BINDING — DISABILITIES
+    24. EVENT BINDING
   ============================================================ */
 
   if (
@@ -3329,9 +3180,7 @@
 
     els.disabilityList.addEventListener(
       "change",
-      function (
-        event
-      ) {
+      event => {
 
         if (
           event.target.matches(
@@ -3347,9 +3196,7 @@
 
     els.disabilityList.addEventListener(
       "click",
-      function (
-        event
-      ) {
+      event => {
 
         const removeButton =
           event.target.closest(
@@ -3370,11 +3217,6 @@
   }
 
 
-
-  /* ============================================================
-    30. EVENT BINDING — ADD DISABILITY
-  ============================================================ */
-
   if (
     els.addDisabilityButton
   ) {
@@ -3386,18 +3228,13 @@
   }
 
 
-
-  /* ============================================================
-    31. EVENT BINDING — DEPENDENT PROFILE
-  ============================================================ */
-
   if (
     els.dependentProfile
   ) {
 
     els.dependentProfile.addEventListener(
       "change",
-      function () {
+      () => {
 
         updateCustomDependentVisibility();
 
@@ -3407,80 +3244,45 @@
   }
 
 
-
-  /* ============================================================
-    32. EVENT BINDING — CUSTOM DEPENDENTS
-  ============================================================ */
-
   [
     els.hasSpouse,
     els.childrenUnder18,
     els.childrenSchool,
     els.dependentParents
 
-  ].forEach(function (
-    element
-  ) {
+  ].forEach(
+    element => {
 
-    if (!element) {
-      return;
-    }
+      if (
+        !element
+      ) {
 
+        return;
+      }
 
-    element.addEventListener(
-      "change",
-      run
-    );
-
-
-    /*
-      Number inputs can update live.
-      Checkbox/select changes are already handled above.
-    */
-
-    if (
-      element.type ===
-      "number"
-    ) {
 
       element.addEventListener(
-        "input",
+        "change",
         run
       );
+
+
+      if (
+        element.type ===
+        "number"
+      ) {
+
+        element.addEventListener(
+          "input",
+          run
+        );
+      }
     }
-
-  });
-
+  );
 
 
   /* ============================================================
-    33. INITIALIZE
-  ============================================================ */
-
-  function initialize() {
-
-    renumberDisabilityCards();
-
-
-    updateCustomDependentVisibility();
-
-
-    updateAddButtonState();
-
-
-    run();
-  }
-
-
-
-  /* ============================================================
-    34. PUBLIC API
-
-    Useful later for:
-    - Ask Amy HUD
-    - debugging
-    - automated tests
-    - subscriber/account integrations
+    25. PUBLIC API
   ============================================================ */
 
   window.THEWING_DISABILITY =
@@ -3489,60 +3291,63 @@
       version:
         DISABILITY_RUNTIME_VERSION,
 
-
       ruleVersion:
         COMBINED_RATING_RULE_VERSION,
-
 
       rateVersion:
         VA_RATE_VERSION,
 
-
       run,
-
 
       calculateCombinedRating,
 
-
       combineTwoRatings,
-
 
       roundFinalVARating,
 
-
       getVACompensation,
 
-
       readRatings,
-
 
       readDependents,
 
 
-      getState:
-        function () {
+      getState() {
 
-          if (!currentState) {
-            return null;
-          }
+        if (
+          !currentState
+        ) {
 
-
-          return JSON.parse(
-            JSON.stringify(
-              currentState
-            )
-          );
+          return null;
         }
+
+
+        return JSON.parse(
+          JSON.stringify(
+            currentState
+          )
+        );
+      }
 
     });
 
 
-
   /* ============================================================
-    35. BOOT
+    26. INITIALIZE
   ============================================================ */
 
-  initialize();
+  function initialize() {
 
+    renumberDisabilityCards();
+
+    updateCustomDependentVisibility();
+
+    updateAddButtonState();
+
+    run();
+  }
+
+
+  initialize();
 
 })();
