@@ -268,6 +268,7 @@
         <div class="dc-overview-breakdown">
 
           <div class="dc-overview-stat">
+
             <div class="dc-stat-label">
               Highest Rating
             </div>
@@ -278,10 +279,12 @@
             >
               60%
             </div>
+
           </div>
 
 
           <div class="dc-overview-stat">
+
             <div class="dc-stat-label">
               Combined Value
             </div>
@@ -292,10 +295,12 @@
             >
               81%
             </div>
+
           </div>
 
 
           <div class="dc-overview-stat">
+
             <div class="dc-stat-label">
               Official VA Rating
             </div>
@@ -306,6 +311,7 @@
             >
               80%
             </div>
+
           </div>
 
         </div>
@@ -329,6 +335,7 @@
           </div>
 
           <div>
+
             <div class="dc-section-eyebrow">
               YOUR DISABILITIES
             </div>
@@ -344,6 +351,7 @@
               Enter each service-connected disability rating.
               TheWing automatically applies them from highest to lowest.
             </p>
+
           </div>
 
         </div>
@@ -354,6 +362,7 @@
           class="dc-disability-grid"
           aria-live="polite"
         >
+
 
           <!-- DISABILITY 1 -->
 
@@ -378,6 +387,7 @@
                 data-disability-rating
                 aria-label="Disability 1 rating"
               >
+
                 <option value="0">0%</option>
                 <option value="10">10%</option>
                 <option value="20">20%</option>
@@ -389,6 +399,7 @@
                 <option value="80">80%</option>
                 <option value="90">90%</option>
                 <option value="100">100%</option>
+
               </select>
 
               <span
@@ -424,6 +435,7 @@
                 data-disability-rating
                 aria-label="Disability 2 rating"
               >
+
                 <option value="0">0%</option>
                 <option value="10">10%</option>
                 <option value="20">20%</option>
@@ -435,6 +447,7 @@
                 <option value="80">80%</option>
                 <option value="90">90%</option>
                 <option value="100">100%</option>
+
               </select>
 
               <span
@@ -470,6 +483,7 @@
                 data-disability-rating
                 aria-label="Disability 3 rating"
               >
+
                 <option value="0">0%</option>
                 <option value="10">10%</option>
                 <option value="20" selected>20%</option>
@@ -481,6 +495,7 @@
                 <option value="80">80%</option>
                 <option value="90">90%</option>
                 <option value="100">100%</option>
+
               </select>
 
               <span
@@ -500,6 +515,7 @@
             class="dc-add-disability-button"
             type="button"
           >
+
             <span
               class="dc-add-icon"
               aria-hidden="true"
@@ -510,6 +526,7 @@
             <span>
               Add Disability
             </span>
+
           </button>
 
         </div>
@@ -539,6 +556,7 @@
           </div>
 
           <div>
+
             <div class="dc-section-eyebrow">
               38 CFR § 4.25
             </div>
@@ -554,6 +572,7 @@
               Each additional rating is applied to the efficiency
               you have remaining.
             </p>
+
           </div>
 
         </div>
@@ -561,6 +580,13 @@
 
         <!-- ===================================================
           RATING BUILD GRAPH
+
+          NEW GRAPH MODEL
+          -----------------------------------------------------
+          - Main bar = cumulative whole-person result
+          - Each color = actual contribution from one disability
+          - Individual rows = original assigned disability rating
+          - Remaining portion = efficiency still unaffected
         ==================================================== -->
 
         <div
@@ -570,157 +596,87 @@
         >
 
 
-          <!-- WHOLE PERSON -->
+          <!-- =================================================
+            CUMULATIVE WHOLE-PERSON BAR
+          ================================================== -->
 
-          <div
-            class="dc-build-row"
-            data-build-step="0"
-          >
-
-            <div class="dc-build-value">
-              100%
-            </div>
-
-            <div class="dc-build-main">
-
-              <div class="dc-build-track">
-
-                <span
-                  class="dc-build-fill dc-build-fill-whole"
-                  style="width:100%;"
-                ></span>
-
-              </div>
-
-              <div class="dc-build-note">
-                Whole Person
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <!-- FIRST RATING -->
-
-          <div
-            class="dc-build-row"
-            data-build-step="1"
-          >
+          <div class="dc-whole-person-summary">
 
             <div
-              id="dcBuildValue1"
-              class="dc-build-value"
-            >
-              60%
-            </div>
-
-            <div class="dc-build-main">
-
-              <div class="dc-build-track">
-
-                <span
-                  id="dcBuildFill1"
-                  class="dc-build-fill"
-                  style="width:60%;"
-                ></span>
-
-              </div>
-
-              <div class="dc-build-meta">
-
-                <span id="dcBuildAdded1">
-                  +60% disability
-                </span>
-
-                <span id="dcBuildRemaining1">
-                  40% remaining
-                </span>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <!-- SECOND RATING -->
-
-          <div
-            class="dc-build-row"
-            data-build-step="2"
-          >
-
-            <div
-              id="dcBuildValue2"
-              class="dc-build-value"
-            >
-              76%
-            </div>
-
-            <div class="dc-build-main">
-
-              <div class="dc-build-track">
-
-                <span
-                  id="dcBuildFill2"
-                  class="dc-build-fill"
-                  style="width:76%;"
-                ></span>
-
-              </div>
-
-              <div class="dc-build-meta">
-
-                <span id="dcBuildAdded2">
-                  +16% from your 40% rating
-                </span>
-
-                <span id="dcBuildRemaining2">
-                  24% remaining
-                </span>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <!-- THIRD RATING -->
-
-          <div
-            class="dc-build-row"
-            data-build-step="3"
-          >
-
-            <div
-              id="dcBuildValue3"
-              class="dc-build-value"
+              id="dcGraphCombinedValue"
+              class="dc-whole-person-value"
+              aria-label="Current combined disability value"
             >
               81%
             </div>
 
-            <div class="dc-build-main">
 
-              <div class="dc-build-track">
+            <div class="dc-whole-person-main">
+
+              <div
+                id="dcContributionTrack"
+                class="dc-contribution-track"
+                role="img"
+                aria-label="Combined disability contribution bar showing 81 percent disabled and 19 percent remaining"
+              >
+
+                <!--
+                  Initial visual state matches the default
+                  60% + 40% + 20% calculator inputs.
+
+                  60% rating contributes 60 points.
+                  40% rating contributes 16 points.
+                  20% rating contributes 5 points.
+                  19% efficiency remains.
+
+                  disability.js will rebuild these segments live.
+                -->
 
                 <span
-                  id="dcBuildFill3"
-                  class="dc-build-fill"
-                  style="width:81%;"
+                  class="dc-contribution-segment dc-graph-color-1"
+                  data-contribution-segment="1"
+                  style="width:60%;"
+                  aria-hidden="true"
+                ></span>
+
+                <span
+                  class="dc-contribution-segment dc-graph-color-2"
+                  data-contribution-segment="2"
+                  style="width:16%;"
+                  aria-hidden="true"
+                ></span>
+
+                <span
+                  class="dc-contribution-segment dc-graph-color-3"
+                  data-contribution-segment="3"
+                  style="width:5%;"
+                  aria-hidden="true"
+                ></span>
+
+                <span
+                  class="dc-contribution-remaining"
+                  data-contribution-remaining
+                  style="width:19%;"
+                  aria-hidden="true"
                 ></span>
 
               </div>
 
-              <div class="dc-build-meta">
 
-                <span id="dcBuildAdded3">
-                  +5% from your 20% rating
+              <div class="dc-whole-person-meta">
+
+                <span
+                  id="dcGraphWholePersonLabel"
+                  class="dc-whole-person-label"
+                >
+                  100% Whole Person
                 </span>
 
-                <span id="dcBuildRemaining3">
-                  19% remaining
+                <span
+                  id="dcGraphRemaining"
+                  class="dc-whole-person-remaining-label"
+                >
+                  19% Remaining
                 </span>
 
               </div>
@@ -730,15 +686,124 @@
           </div>
 
 
-          <!-- DYNAMIC ADDITIONAL STEPS -->
+          <!-- =================================================
+            INDIVIDUAL DISABILITY RATING ROWS
+
+            These rows display the assigned rating itself.
+            They do NOT display cumulative combined values.
+
+            disability.js will rebuild this container whenever
+            ratings change.
+          ================================================== -->
 
           <div
-            id="dcAdditionalBuildSteps"
-            class="dc-additional-build-steps"
-          ></div>
+            id="dcGraphDisabilityRows"
+            class="dc-graph-disability-rows"
+            aria-label="Individual disability ratings"
+          >
 
 
-          <!-- FINAL RESULT -->
+            <!-- DISABILITY 1 -->
+
+            <div
+              class="dc-disability-graph-row"
+              data-graph-disability-row="1"
+            >
+
+              <div class="dc-disability-graph-value">
+                60%
+              </div>
+
+              <div class="dc-disability-graph-main">
+
+                <div class="dc-disability-graph-track">
+
+                  <span
+                    class="dc-disability-graph-fill dc-graph-color-1"
+                    style="width:60%;"
+                    aria-hidden="true"
+                  ></span>
+
+                </div>
+
+                <div class="dc-disability-graph-label">
+                  Disability #1
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- DISABILITY 2 -->
+
+            <div
+              class="dc-disability-graph-row"
+              data-graph-disability-row="2"
+            >
+
+              <div class="dc-disability-graph-value">
+                40%
+              </div>
+
+              <div class="dc-disability-graph-main">
+
+                <div class="dc-disability-graph-track">
+
+                  <span
+                    class="dc-disability-graph-fill dc-graph-color-2"
+                    style="width:40%;"
+                    aria-hidden="true"
+                  ></span>
+
+                </div>
+
+                <div class="dc-disability-graph-label">
+                  Disability #2
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- DISABILITY 3 -->
+
+            <div
+              class="dc-disability-graph-row"
+              data-graph-disability-row="3"
+            >
+
+              <div class="dc-disability-graph-value">
+                20%
+              </div>
+
+              <div class="dc-disability-graph-main">
+
+                <div class="dc-disability-graph-track">
+
+                  <span
+                    class="dc-disability-graph-fill dc-graph-color-3"
+                    style="width:20%;"
+                    aria-hidden="true"
+                  ></span>
+
+                </div>
+
+                <div class="dc-disability-graph-label">
+                  Disability #3
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+            FINAL RESULT
+          ================================================== -->
 
           <div class="dc-build-final">
 
@@ -782,8 +847,8 @@
 
         <div class="dc-graph-note">
           VA does not simply add your percentages together.
-          The final combined value is rounded to the nearest 10%
-          after all ratings are combined.
+          Each additional rating applies only to the efficiency you have remaining,
+          and the final combined value is rounded to the nearest 10% after all ratings are combined.
         </div>
 
       </section>
