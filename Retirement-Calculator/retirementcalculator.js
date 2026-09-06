@@ -1,74 +1,49 @@
 /* ============================================================
   THEWING.AI • RETIREMENT CALCULATOR
   retirementcalculator.js
-  v1.0.0
+  v2.0.0
 
   PURPOSE
   -------------------------------------------------------------
-  - Drive the mobile-first Retirement Calculator UI
-  - Build a projected 36-month High-3 basic-pay array
-  - Use official-pay-2026.1 as the projection baseline
-  - Apply the user-selected annual future pay-growth assumption
-  - Send the exact projected High-36 array to TheWing's public API
-  - Keep official-retirement.js as the retirement formula authority
-  - Return projected gross monthly + yearly retired pay
+  - Drives the Retirement Calculator UI
+  - Uses Retirement-Calculator/retirement-projection.js to build
+    the exact 36 monthly BASIC PAY values
+  - Sends that High-36 array to TheWing's public backend
+  - Keeps official-retirement.js as the retirement math authority
+  - Exposes calculator state for future Ask Amy integration
 
-  CURRENT BACKEND BRIDGE
+  REQUIRED SCRIPT ORDER
   -------------------------------------------------------------
-  The current public endpoint exposes RETIREMENT_VA rather than a
-  retirement-only route. This client sends vaRating: 0 so the endpoint
-  reaches official-retirement.js without adding VA compensation.
+  1. retirement-projection.js
+  2. retirementcalculator.js
 
   IMPORTANT
   -------------------------------------------------------------
-  - No localStorage or sessionStorage
+  - No pay tables are duplicated here
   - No retirement multiplier formula is recreated here
   - No retired-pay formula is recreated here
-  - The browser only projects the 36 monthly BASIC PAY values
-  - official-retirement.js calculates the High-3 base, multiplier,
-    and gross monthly retired pay on the server
-  - Selected retirement rank is assumed for the full projected
-    High-3 window unless the UI is expanded later with promotion dates
-  - Future pay raises are estimates, not published DFAS pay tables
+  - No localStorage / sessionStorage
 ============================================================ */
 
 (function () {
   "use strict";
 
+  /* ============================================================
+    1. ROOT / CONFIG
+  ============================================================ */
+
   const ROOT = document.getElementById("tw-retirement-shell");
 
-  if (
-    !ROOT ||
-    ROOT.dataset.runtimeBound === "true"
-  ) {
+  if (!ROOT || ROOT.dataset.runtimeBound === "true") {
     return;
   }
 
   ROOT.dataset.runtimeBound = "true";
   ROOT.dataset.ready = "false";
 
+  const $ = (selector) => ROOT.querySelector(selector);
 
-  const $ = (selector) =>
-    ROOT.querySelector(selector);
-
-  const $$ = (selector) =>
-    Array.from(
-      ROOT.querySelectorAll(selector)
-    );
-
-
-  /* ============================================================
-    1. CONFIGURATION
-  ============================================================ */
-
-  const RUNTIME_VERSION =
-    "retirement-2026.1";
-
-  const PAY_BASELINE_YEAR =
-    2026;
-
-  const PAY_BASELINE_VERSION =
-    "official-pay-2026.1";
+  const RUNTIME_VERSION = "retirement-calculator-2026.2";
 
   const API_ENDPOINT =
     "https://thewing.netlify.app/api/opensource-brain";
@@ -79,23 +54,33 @@
   const HIGH36_MONTHS =
     36;
 
-  const PERIOD_MONTHS =
-    12;
+  const MIN_REGULAR_RETIREMENT_MONTHS =
+    240;
 
-  const MIN_GROWTH_PERCENT =
+  const MIN_LONG_RANGE_GROWTH_PERCENT =
     0;
 
-  const MAX_GROWTH_PERCENT =
+  const MAX_LONG_RANGE_GROWTH_PERCENT =
     10;
+
+  const DEFAULT_LONG_RANGE_GROWTH_PERCENT =
+    2.5;
+
+
+  /*
+    retirement-projection.js must load before this file.
+  */
+
+  const PROJECTION =
+    window.THEWING_RETIREMENT_PROJECTION ||
+    null;
 
 
   /* ============================================================
-    2. DOM REFERENCES
+    2. DOM
   ============================================================ */
 
   const els = {
-
-    /* INPUTS */
 
     system:
       $("#ret-system"),
@@ -112,6 +97,7 @@
     payGrowth:
       $("#ret-pay-growth"),
 
+
     calculateButton:
       $("#ret-calculate-button"),
 
@@ -121,8 +107,6 @@
     formMessage:
       $("#ret-form-message"),
 
-
-    /* OVERVIEW */
 
     livePill:
       $("#ret-live-pill"),
@@ -146,8 +130,6 @@
       $("#ret-overview-status"),
 
 
-    /* DERIVED PROFILE */
-
     serviceAtRetirement:
       $("#ret-service-at-retirement"),
 
@@ -155,13 +137,9 @@
       $("#ret-multiplier"),
 
 
-    /* ASSUMPTIONS */
-
     assumptionsCurrent:
       $(".ret-assumptions-current"),
 
-
-    /* BREAKDOWN */
 
     breakdownSystem:
       $("#ret-breakdown-system"),
@@ -185,13 +163,12 @@
       $("#ret-breakdown-yearly"),
 
 
-    /* PROJECTION */
-
     projectionIntro:
       $(".ret-projection-intro"),
 
     growthPillValue:
       $("#ret-growth-pill-value"),
+
 
     projectionYear1:
       $("#ret-projection-year-1"),
@@ -202,6 +179,7 @@
     projectionYear3:
       $("#ret-projection-year-3"),
 
+
     projectionPay1:
       $("#ret-projection-pay-1"),
 
@@ -211,519 +189,16 @@
     projectionPay3:
       $("#ret-projection-pay-3"),
 
+
     high36Average:
       $("#ret-high36-average")
+
   };
 
 
   /* ============================================================
-    3. 2026 BASIC-PAY BASELINE
-
-    Browser projection mirror of:
-
-      netlify/functions/_share/official-pay.js
-
-    Version lock:
-
-      official-pay-2026.1
-
-    Only ranks exposed by the current Retirement Calculator UI
-    are included here.
-
-    The backend remains the canonical source module.
+    3. SMALL HELPERS
   ============================================================ */
-
-  const PAY_2026 =
-    Object.freeze({
-
-
-      /* ========================================================
-        ENLISTED
-      ======================================================== */
-
-      "E-5":
-        Object.freeze({
-
-          0: 3342.90,
-          2: 3598.20,
-          3: 3775.80,
-          4: 3946.80,
-          6: 4110.00,
-          8: 4299.90,
-          10: 4395.30,
-          12: 4421.70,
-          14: 4421.70,
-          16: 4421.70,
-          18: 4421.70,
-          20: 4421.70,
-          22: 4421.70,
-          24: 4421.70,
-          26: 4421.70,
-          28: 4421.70,
-          30: 4421.70,
-          32: 4421.70,
-          34: 4421.70,
-          36: 4421.70,
-          38: 4421.70,
-          40: 4421.70
-
-        }),
-
-
-      "E-6":
-        Object.freeze({
-
-          0: 3401.10,
-          2: 3743.10,
-          3: 3908.10,
-          4: 4068.90,
-          6: 4235.70,
-          8: 4612.80,
-          10: 4759.50,
-          12: 5043.30,
-          14: 5130.30,
-          16: 5193.60,
-          18: 5267.70,
-          20: 5267.70,
-          22: 5267.70,
-          24: 5267.70,
-          26: 5267.70,
-          28: 5267.70,
-          30: 5267.70,
-          32: 5267.70,
-          34: 5267.70,
-          36: 5267.70,
-          38: 5267.70,
-          40: 5267.70
-
-        }),
-
-
-      "E-7":
-        Object.freeze({
-
-          0: 3932.10,
-          2: 4291.50,
-          3: 4456.20,
-          4: 4673.10,
-          6: 4843.80,
-          8: 5135.70,
-          10: 5300.40,
-          12: 5591.70,
-          14: 5835.00,
-          16: 6000.90,
-          18: 6177.30,
-          20: 6245.70,
-          22: 6475.20,
-          24: 6598.20,
-          26: 7067.40,
-          28: 7067.40,
-          30: 7067.40,
-          32: 7067.40,
-          34: 7067.40,
-          36: 7067.40,
-          38: 7067.40,
-          40: 7067.40
-
-        }),
-
-
-      "E-8":
-        Object.freeze({
-
-          8: 5656.50,
-          10: 5907.00,
-          12: 6061.80,
-          14: 6247.20,
-          16: 6448.20,
-          18: 6811.20,
-          20: 6995.40,
-          22: 7308.30,
-          24: 7481.70,
-          26: 7908.90,
-          28: 7908.90,
-          30: 8067.30,
-          32: 8067.30,
-          34: 8067.30,
-          36: 8067.30,
-          38: 8067.30,
-          40: 8067.30
-
-        }),
-
-
-      "E-9":
-        Object.freeze({
-
-          10: 6910.20,
-          12: 7066.50,
-          14: 7263.60,
-          16: 7496.10,
-          18: 7730.70,
-          20: 8105.10,
-          22: 8423.10,
-          24: 8756.70,
-          26: 9267.90,
-          28: 9267.90,
-          30: 9730.20,
-          32: 9730.20,
-          34: 10217.40,
-          36: 10217.40,
-          38: 10729.20,
-          40: 10729.20
-
-        }),
-
-
-
-      /* ========================================================
-        OFFICERS
-      ======================================================== */
-
-      "O-1":
-        Object.freeze({
-
-          0: 4150.20,
-          2: 4320.00,
-          3: 5222.40,
-          4: 5222.40,
-          6: 5222.40,
-          8: 5222.40,
-          10: 5222.40,
-          12: 5222.40,
-          14: 5222.40,
-          16: 5222.40,
-          18: 5222.40,
-          20: 5222.40,
-          22: 5222.40,
-          24: 5222.40,
-          26: 5222.40,
-          28: 5222.40,
-          30: 5222.40,
-          32: 5222.40,
-          34: 5222.40,
-          36: 5222.40,
-          38: 5222.40,
-          40: 5222.40
-
-        }),
-
-
-      "O-2":
-        Object.freeze({
-
-          0: 4782.00,
-          2: 5446.20,
-          3: 6272.40,
-          4: 6484.50,
-          6: 6617.70,
-          8: 6617.70,
-          10: 6617.70,
-          12: 6617.70,
-          14: 6617.70,
-          16: 6617.70,
-          18: 6617.70,
-          20: 6617.70,
-          22: 6617.70,
-          24: 6617.70,
-          26: 6617.70,
-          28: 6617.70,
-          30: 6617.70,
-          32: 6617.70,
-          34: 6617.70,
-          36: 6617.70,
-          38: 6617.70,
-          40: 6617.70
-
-        }),
-
-
-      "O-3":
-        Object.freeze({
-
-          0: 5534.10,
-          2: 6273.90,
-          3: 6770.40,
-          4: 7382.70,
-          6: 7737.00,
-          8: 8125.50,
-          10: 8375.70,
-          12: 8788.20,
-          14: 9004.20,
-          16: 9004.20,
-          18: 9004.20,
-          20: 9004.20,
-          22: 9004.20,
-          24: 9004.20,
-          26: 9004.20,
-          28: 9004.20,
-          30: 9004.20,
-          32: 9004.20,
-          34: 9004.20,
-          36: 9004.20,
-          38: 9004.20,
-          40: 9004.20
-
-        }),
-
-
-      "O-4":
-        Object.freeze({
-
-          0: 6294.60,
-          2: 7286.40,
-          3: 7773.60,
-          4: 7881.00,
-          6: 8332.20,
-          8: 8816.40,
-          10: 9420.00,
-          12: 9888.30,
-          14: 10214.40,
-          16: 10401.60,
-          18: 10509.90,
-          20: 10509.90,
-          22: 10509.90,
-          24: 10509.90,
-          26: 10509.90,
-          28: 10509.90,
-          30: 10509.90,
-          32: 10509.90,
-          34: 10509.90,
-          36: 10509.90,
-          38: 10509.90,
-          40: 10509.90
-
-        }),
-
-
-      "O-5":
-        Object.freeze({
-
-          0: 7295.40,
-          2: 8218.20,
-          3: 8787.00,
-          4: 8894.10,
-          6: 9249.60,
-          8: 9461.40,
-          10: 9928.50,
-          12: 10271.70,
-          14: 10715.10,
-          16: 11391.30,
-          18: 11713.80,
-          20: 12032.70,
-          22: 12394.80,
-          24: 12394.80,
-          26: 12394.80,
-          28: 12394.80,
-          30: 12394.80,
-          32: 12394.80,
-          34: 12394.80,
-          36: 12394.80,
-          38: 12394.80,
-          40: 12394.80
-
-        }),
-
-
-      "O-6":
-        Object.freeze({
-
-          0: 8751.30,
-          2: 9613.80,
-          3: 10245.00,
-          4: 10245.00,
-          6: 10284.30,
-          8: 10725.00,
-          10: 10783.50,
-          12: 10783.50,
-          14: 11396.40,
-          16: 12479.70,
-          18: 13115.40,
-          20: 13751.10,
-          22: 14112.90,
-          24: 14479.20,
-          26: 15188.70,
-          28: 15188.70,
-          30: 15408.30,
-          32: 15408.30,
-          34: 15408.30,
-          36: 15408.30,
-          38: 15408.30,
-          40: 15408.30
-
-        }),
-
-
-      "O-7":
-        Object.freeze({
-
-          0: 11540.10,
-          2: 12076.20,
-          3: 12324.30,
-          4: 12522.00,
-          6: 12878.70,
-          8: 13231.80,
-          10: 13639.20,
-          12: 14045.70,
-          14: 14454.30,
-          16: 15735.30,
-          18: 16817.70,
-          20: 16817.70,
-          22: 16817.70,
-          24: 16817.70,
-          26: 16904.40,
-          28: 16904.40,
-          30: 17242.20,
-          32: 17242.20,
-          34: 17242.20,
-          36: 17242.20,
-          38: 17242.20,
-          40: 17242.20
-
-        }),
-
-
-      "O-8":
-        Object.freeze({
-
-          0: 13888.50,
-          2: 14343.90,
-          3: 14645.40,
-          4: 14729.40,
-          6: 15106.50,
-          8: 15735.30,
-          10: 15882.00,
-          12: 16479.60,
-          14: 16651.80,
-          16: 17166.60,
-          18: 17911.80,
-          20: 18598.20,
-          22: 18999.90,
-          24: 18999.90,
-          26: 18999.90,
-          28: 18999.90,
-          30: 18999.90,
-          32: 18999.90,
-          34: 18999.90,
-          36: 18999.90,
-          38: 18999.90,
-          40: 18999.90
-
-        }),
-
-
-
-      /* ========================================================
-        PRIOR-ENLISTED OFFICERS
-      ======================================================== */
-
-      "O-1E":
-        Object.freeze({
-
-          4: 5222.40,
-          6: 5576.70,
-          8: 5783.10,
-          10: 5993.70,
-          12: 6200.70,
-          14: 6484.50,
-          16: 6484.50,
-          18: 6484.50,
-          20: 6484.50,
-          22: 6484.50,
-          24: 6484.50,
-          26: 6484.50,
-          28: 6484.50,
-          30: 6484.50,
-          32: 6484.50,
-          34: 6484.50,
-          36: 6484.50,
-          38: 6484.50,
-          40: 6484.50
-
-        }),
-
-
-      "O-2E":
-        Object.freeze({
-
-          4: 6484.50,
-          6: 6617.70,
-          8: 6828.00,
-          10: 7183.80,
-          12: 7458.90,
-          14: 7663.50,
-          16: 7663.50,
-          18: 7663.50,
-          20: 7663.50,
-          22: 7663.50,
-          24: 7663.50,
-          26: 7663.50,
-          28: 7663.50,
-          30: 7663.50,
-          32: 7663.50,
-          34: 7663.50,
-          36: 7663.50,
-          38: 7663.50,
-          40: 7663.50
-
-        }),
-
-
-      "O-3E":
-        Object.freeze({
-
-          4: 7382.70,
-          6: 7737.00,
-          8: 8125.50,
-          10: 8375.70,
-          12: 8788.20,
-          14: 9137.10,
-          16: 9336.90,
-          18: 9609.60,
-          20: 9609.60,
-          22: 9609.60,
-          24: 9609.60,
-          26: 9609.60,
-          28: 9609.60,
-          30: 9609.60,
-          32: 9609.60,
-          34: 9609.60,
-          36: 9609.60,
-          38: 9609.60,
-          40: 9609.60
-
-        })
-
-    });
-
-
-  const SUPPORTED_RANKS =
-    Object.freeze(
-      Object.keys(
-        PAY_2026
-      )
-    );
-
-
-  /* ============================================================
-    4. SMALL HELPERS
-  ============================================================ */
-
-  function clamp(
-    value,
-    min,
-    max
-  ) {
-
-    return Math.max(
-      min,
-      Math.min(
-        max,
-        value
-      )
-    );
-  }
-
 
   function round2(
     value
@@ -734,37 +209,6 @@
         Number(value) ||
         0
       ).toFixed(2)
-    );
-  }
-
-
-  function average(
-    values
-  ) {
-
-    if (
-      !Array.isArray(values) ||
-      !values.length
-    ) {
-
-      return 0;
-    }
-
-
-    return (
-      values.reduce(
-        (
-          sum,
-          value
-        ) =>
-          sum +
-          Number(
-            value ||
-            0
-          ),
-        0
-      ) /
-      values.length
     );
   }
 
@@ -809,10 +253,7 @@
     value
   ) {
 
-    if (
-      !element
-    ) {
-
+    if (!element) {
       return;
     }
 
@@ -826,89 +267,30 @@
   }
 
 
-  function normalizeRank(
-    rank
+  function selectedOptionText(
+    select
   ) {
+
+    if (
+      !select ||
+      select.selectedIndex < 0
+    ) {
+
+      return "";
+    }
+
 
     return String(
-      rank ||
+      select.options[
+        select.selectedIndex
+      ]?.textContent ||
       ""
     )
-      .trim()
-      .toUpperCase()
       .replace(
         /\s+/g,
-        ""
-      );
-  }
-
-
-  /* ============================================================
-    5. DATE HELPERS
-
-    UTC dates are used intentionally to prevent timezone movement
-    when the calculator is used from Japan, CONUS, Europe, etc.
-  ============================================================ */
-
-  function parseDateInput(
-    value
-  ) {
-
-    const raw =
-      String(
-        value ||
-        ""
-      ).trim();
-
-
-    if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(
-        raw
+        " "
       )
-    ) {
-
-      return null;
-    }
-
-
-    const [
-      year,
-      month,
-      day
-    ] =
-      raw
-        .split("-")
-        .map(
-          Number
-        );
-
-
-    const date =
-      new Date(
-        Date.UTC(
-          year,
-          month - 1,
-          day
-        )
-      );
-
-
-    if (
-      date.getUTCFullYear() !==
-        year ||
-
-      date.getUTCMonth() !==
-        month - 1 ||
-
-      date.getUTCDate() !==
-        day
-    ) {
-
-      return null;
-    }
-
-
-    return date;
+      .trim();
   }
 
 
@@ -956,128 +338,15 @@
   }
 
 
-  function addUtcMonths(
-    date,
-    months
-  ) {
-
-    return new Date(
-      Date.UTC(
-        date.getUTCFullYear(),
-        date.getUTCMonth() +
-          Number(
-            months ||
-            0
-          ),
-        1
-      )
-    );
-  }
-
-
-  function startOfUtcMonth(
-    date
-  ) {
-
-    return new Date(
-      Date.UTC(
-        date.getUTCFullYear(),
-        date.getUTCMonth(),
-        1
-      )
-    );
-  }
-
-
-  /* ============================================================
-    6. SERVICE CREDIT
-
-    We use completed service months because retirement service
-    multipliers are naturally expressed in years + months.
-
-    Example:
-
-      24 years 6 months
-      =
-      294 months
-      =
-      24.5 years
-
-    official-retirement.js still owns the multiplier formula.
-  ============================================================ */
-
-  function completedServiceMonths(
-    entryDate,
-    targetDate
-  ) {
-
-    if (
-      !entryDate ||
-      !targetDate ||
-      targetDate <
-        entryDate
-    ) {
-
-      return 0;
-    }
-
-
-    let months =
-
-      (
-        targetDate.getUTCFullYear() -
-        entryDate.getUTCFullYear()
-      ) *
-
-      12 +
-
-      (
-        targetDate.getUTCMonth() -
-        entryDate.getUTCMonth()
-      );
-
-
-    if (
-      targetDate.getUTCDate() <
-      entryDate.getUTCDate()
-    ) {
-
-      months -=
-        1;
-    }
-
-
-    return Math.max(
-      0,
-      months
-    );
-  }
-
-
-  function serviceYearsFromMonths(
-    months
-  ) {
-
-    return round2(
-      Math.max(
-        0,
-        Number(months) ||
-        0
-      ) /
-      12
-    );
-  }
-
-
   function formatServiceMonths(
-    months
+    serviceMonths
   ) {
 
     const total =
       Math.max(
         0,
         Math.floor(
-          Number(months) ||
+          Number(serviceMonths) ||
           0
         )
       );
@@ -1090,52 +359,157 @@
       );
 
 
-    const remainder =
+    const months =
       total %
       12;
 
 
     return (
-      `${years}y ${remainder}m`
+      `${years}y ${months}m`
     );
   }
 
 
-  function formatPercentFromMultiplier(
-    multiplier
+  /*
+    DO NOT round this before sending it to the backend.
+
+    Example:
+
+      241 months / 12
+      =
+      20.083333333333332 years
+  */
+
+  function exactYearsFromMonths(
+    serviceMonths
   ) {
 
-    const percent =
-      round2(
-        (
-          Number(multiplier) ||
-          0
-        ) *
-        100
-      );
-
-
-    return percent.toLocaleString(
-      "en-US",
-      {
-        minimumFractionDigits:
-          percent %
-          1 ===
-          0
-            ? 1
-            : 0,
-
-        maximumFractionDigits:
-          2
-      }
-    ) +
-    "%";
+    return (
+      Math.max(
+        0,
+        Number(serviceMonths) ||
+        0
+      ) /
+      12
+    );
   }
 
 
-  function formatMonthYear(
-    date
+  function formatMultiplier(
+    retirementRecord
   ) {
+
+    const directPercent =
+      Number(
+        retirementRecord
+          ?.multiplierPercent
+      );
+
+
+    if (
+      Number.isFinite(
+        directPercent
+      )
+    ) {
+
+      return (
+        directPercent.toLocaleString(
+          "en-US",
+          {
+            minimumFractionDigits:
+              directPercent %
+              1 ===
+              0
+                ? 1
+                : 0,
+
+            maximumFractionDigits:
+              4
+          }
+        ) +
+        "%"
+      );
+    }
+
+
+    const multiplier =
+      Number(
+        retirementRecord
+          ?.multiplier
+      );
+
+
+    if (
+      !Number.isFinite(
+        multiplier
+      )
+    ) {
+
+      return "—";
+    }
+
+
+    const percent =
+      multiplier *
+      100;
+
+
+    return (
+      percent.toLocaleString(
+        "en-US",
+        {
+          minimumFractionDigits:
+            percent %
+            1 ===
+            0
+              ? 1
+              : 0,
+
+          maximumFractionDigits:
+            4
+        }
+      ) +
+      "%"
+    );
+  }
+
+
+  function monthKeyToLabel(
+    value
+  ) {
+
+    const raw =
+      String(
+        value ||
+        ""
+      );
+
+
+    const match =
+      raw.match(
+        /^(\d{4})-(\d{2})/
+      );
+
+
+    if (!match) {
+      return raw;
+    }
+
+
+    const date =
+      new Date(
+        Date.UTC(
+          Number(
+            match[1]
+          ),
+          Number(
+            match[2]
+          ) -
+          1,
+          1
+        )
+      );
+
 
     return new Intl.DateTimeFormat(
       "en-US",
@@ -1155,399 +529,126 @@
   }
 
 
-  function formatPeriodLabel(
-    start,
-    end
+  function cloneForPublic(
+    value
   ) {
 
-    const startYear =
-      start.getUTCFullYear();
-
-
-    const endYear =
-      end.getUTCFullYear();
-
-
-    if (
-      startYear ===
-      endYear
-    ) {
-
-      return String(
-        startYear
-      );
-    }
-
-
-    return (
-      `${startYear}–${String(endYear).slice(-2)}`
+    return JSON.parse(
+      JSON.stringify(
+        value
+      )
     );
   }
 
 
-  function selectedOptionText(
-    select
-  ) {
+  /* ============================================================
+    4. PROJECTION ENGINE BRIDGE
+  ============================================================ */
+
+  function requireProjectionEngine() {
 
     if (
-      !select ||
-      select.selectedIndex <
-        0
+      !PROJECTION ||
+      typeof PROJECTION
+        .buildHigh36Projection !==
+        "function"
     ) {
 
-      return "";
+      throw new Error(
+        "The retirement projection engine did not load. " +
+        "Confirm retirement-projection.js loads before retirementcalculator.js."
+      );
+    }
+
+
+    return PROJECTION;
+  }
+
+
+  function normalizeRank(
+    rank
+  ) {
+
+    const engine =
+      requireProjectionEngine();
+
+
+    if (
+      typeof engine
+        .normalizeRank ===
+      "function"
+    ) {
+
+      return engine.normalizeRank(
+        rank
+      );
     }
 
 
     return String(
-      select.options[
-        select.selectedIndex
-      ]?.textContent ||
+      rank ||
       ""
     )
+      .trim()
+      .toUpperCase()
       .replace(
         /\s+/g,
-        " "
-      )
-      .trim();
+        ""
+      );
   }
 
 
-  /* ============================================================
-    7. 2026 BASIC-PAY LOOKUP
-
-    This mirrors official-pay.js threshold behavior:
-
-      Choose the highest official threshold <= YOS.
-
-    Example:
-
-      E-7
-      YOS 21.5
-      ->
-      "Over 20"
-
-      E-7
-      YOS 22.0
-      ->
-      "Over 22"
-  ============================================================ */
-
-  function pickThreshold(
-    row,
-    yearsOfService
+  function parseDateInput(
+    value
   ) {
 
-    const keys =
-      Object.keys(
-        row
-      )
-        .map(
-          Number
-        )
-        .filter(
-          Number.isFinite
-        )
-        .sort(
-          (
-            a,
-            b
-          ) =>
-            a -
-            b
-        );
+    const engine =
+      requireProjectionEngine();
 
 
     if (
-      !keys.length
+      typeof engine
+        .parseDateInput !==
+      "function"
     ) {
 
       throw new Error(
-        "No official basic-pay thresholds are available for this rank."
+        "The retirement projection engine is missing parseDateInput()."
       );
     }
 
 
-    const yos =
-      clamp(
-        Number(
-          yearsOfService
-        ) ||
-        0,
-        0,
-        40
-      );
-
-
-    const firstKey =
-      keys[0];
-
-
-    if (
-      yos <
-      firstKey
-    ) {
-
-      throw new Error(
-        `No official 2026 pay value exists for this rank at ${yos.toFixed(2)} years of service.`
-      );
-    }
-
-
-    let chosen =
-      firstKey;
-
-
-    for (
-      const key
-      of keys
-    ) {
-
-      if (
-        yos >=
-        key
-      ) {
-
-        chosen =
-          key;
-      }
-    }
-
-
-    return chosen;
-  }
-
-
-  function getBasicPay2026(
-    rank,
-    yearsOfService
-  ) {
-
-    const rankKey =
-      normalizeRank(
-        rank
-      );
-
-
-    const row =
-      PAY_2026[
-        rankKey
-      ];
-
-
-    if (
-      !row ||
-      !SUPPORTED_RANKS.includes(
-        rankKey
-      )
-    ) {
-
-      throw new Error(
-        `Unsupported retirement rank: ${rank || "UNKNOWN"}.`
-      );
-    }
-
-
-    const threshold =
-      pickThreshold(
-        row,
-        yearsOfService
-      );
-
-
-    const amount =
-      Number(
-        row[
-          threshold
-        ]
-      );
-
-
-    if (
-      !Number.isFinite(
-        amount
-      ) ||
-      amount <=
-        0
-    ) {
-
-      throw new Error(
-        `Unable to find official 2026 basic pay for ${rankKey} at ${yearsOfService} YOS.`
-      );
-    }
-
-
-    return amount;
-  }
-
-
-  /* ============================================================
-    8. FUTURE BASIC-PAY PROJECTION
-
-    2026:
-      Official DFAS 2026 basic pay.
-
-    2027:
-      2026 pay × 1.025
-
-    2028:
-      2026 pay × 1.025²
-
-    2029:
-      2026 pay × 1.025³
-
-    The growth percentage remains user-configurable.
-  ============================================================ */
-
-  function getProjectionFactor(
-    calendarYear,
-    annualGrowthPercent
-  ) {
-
-    const year =
-      Number(
-        calendarYear
-      );
-
-
-    const growth =
-      Number(
-        annualGrowthPercent
-      );
-
-
-    if (
-      !Number.isInteger(
-        year
-      )
-    ) {
-
-      throw new Error(
-        "Invalid calendar year in retirement projection."
-      );
-    }
-
-
-    if (
-      year <
-      PAY_BASELINE_YEAR
-    ) {
-
-      throw new Error(
-        `The current projection baseline begins in ${PAY_BASELINE_YEAR}. ` +
-        `A High-3 window containing earlier years needs historical pay tables.`
-      );
-    }
-
-
-    if (
-      !Number.isFinite(
-        growth
-      ) ||
-
-      growth <
-        MIN_GROWTH_PERCENT ||
-
-      growth >
-        MAX_GROWTH_PERCENT
-    ) {
-
-      throw new Error(
-        `Annual pay growth must be between ${MIN_GROWTH_PERCENT}% and ${MAX_GROWTH_PERCENT}%.`
-      );
-    }
-
-
-    const yearsForward =
-      year -
-      PAY_BASELINE_YEAR;
-
-
-    const annualFactor =
-      1 +
-      growth /
-      100;
-
-
-    return Math.pow(
-      annualFactor,
-      yearsForward
+    return engine.parseDateInput(
+      value
     );
   }
 
 
-  function projectMonthlyBasicPay(
-    rank,
-    yearsOfService,
-    calendarYear,
-    annualGrowthPercent
-  ) {
-
-    const base2026 =
-      getBasicPay2026(
-        rank,
-        yearsOfService
-      );
-
-
-    const factor =
-      getProjectionFactor(
-        calendarYear,
-        annualGrowthPercent
-      );
-
-
-    return round2(
-      base2026 *
-      factor
-    );
-  }
-
-
-  /* ============================================================
-    9. HIGH-36 WINDOW
-
-    Planned Retirement Date is treated as the retirement-effective
-    date.
-
-    If retirement occurs on the first of a month, the previous
-    month is treated as the final active-duty pay month.
-
-    EXAMPLE
-
-      Retirement date:
-        2029-09-01
-
-      Final active-duty pay month:
-        2029-08
-
-      High-36:
-        2026-09 through 2029-08
-  ============================================================ */
-
-  function getFinalActivePayMonth(
+  function completedServiceMonths(
+    entryDate,
     retirementDate
   ) {
 
-    const monthStart =
-      startOfUtcMonth(
-        retirementDate
-      );
+    const engine =
+      requireProjectionEngine();
 
 
     if (
-      retirementDate.getUTCDate() ===
-      1
+      typeof engine
+        .completedServiceMonths !==
+      "function"
     ) {
 
-      return addUtcMonths(
-        monthStart,
-        -1
+      throw new Error(
+        "The retirement projection engine is missing completedServiceMonths()."
       );
     }
 
 
-    return monthStart;
+    return engine.completedServiceMonths(
+      entryDate,
+      retirementDate
+    );
   }
 
 
@@ -1555,322 +656,30 @@
     input
   ) {
 
-    const rank =
-      normalizeRank(
-        input.rank
-      );
+    const engine =
+      requireProjectionEngine();
 
 
-    const entryDate =
-      input.entryDate;
+    return engine.buildHigh36Projection({
 
+      rank:
+        input.rank,
 
-    const retirementDate =
-      input.retirementDate;
+      entryDate:
+        input.entryDate,
 
+      retirementDate:
+        input.retirementDate,
 
-    const annualGrowthPercent =
-      Number(
-        input.annualGrowthPercent
-      );
+      longRangeGrowthPercent:
+        input.longRangeGrowthPercent
 
-
-    if (
-      !entryDate ||
-      !retirementDate
-    ) {
-
-      throw new Error(
-        "Date Entered Service and Planned Retirement Date are required."
-      );
-    }
-
-
-    if (
-      retirementDate <=
-      entryDate
-    ) {
-
-      throw new Error(
-        "Planned Retirement Date must be after Date Entered Service."
-      );
-    }
-
-
-    if (
-      !SUPPORTED_RANKS.includes(
-        rank
-      )
-    ) {
-
-      throw new Error(
-        "Select a supported planned retirement rank."
-      );
-    }
-
-
-    if (
-      !Number.isFinite(
-        annualGrowthPercent
-      ) ||
-
-      annualGrowthPercent <
-        MIN_GROWTH_PERCENT ||
-
-      annualGrowthPercent >
-        MAX_GROWTH_PERCENT
-    ) {
-
-      throw new Error(
-        `Annual pay growth must be between ${MIN_GROWTH_PERCENT}% and ${MAX_GROWTH_PERCENT}%.`
-      );
-    }
-
-
-    const finalMonth =
-      getFinalActivePayMonth(
-        retirementDate
-      );
-
-
-    const firstMonth =
-      addUtcMonths(
-        finalMonth,
-        -(
-          HIGH36_MONTHS -
-          1
-        )
-      );
-
-
-    /* ========================================================
-      We do NOT invent pre-2026 pay.
-
-      If the High-3 window crosses before the current official
-      pay baseline, stop and require historical tables.
-    ======================================================== */
-
-    if (
-      firstMonth.getUTCFullYear() <
-      PAY_BASELINE_YEAR
-    ) {
-
-      throw new Error(
-        `This High-3 window begins in ${firstMonth.getUTCFullYear()}. ` +
-        `The current calculator uses the official ${PAY_BASELINE_YEAR} pay table as its projection baseline, ` +
-        `so historical pay tables must be added before projecting this retirement date.`
-      );
-    }
-
-
-    const months =
-      [];
-
-
-    for (
-      let index = 0;
-      index < HIGH36_MONTHS;
-      index += 1
-    ) {
-
-      const monthDate =
-        addUtcMonths(
-          firstMonth,
-          index
-        );
-
-
-      const serviceMonths =
-        completedServiceMonths(
-          entryDate,
-          monthDate
-        );
-
-
-      const yearsOfService =
-        serviceYearsFromMonths(
-          serviceMonths
-        );
-
-
-      const calendarYear =
-        monthDate.getUTCFullYear();
-
-
-      const base2026 =
-        round2(
-          getBasicPay2026(
-            rank,
-            yearsOfService
-          )
-        );
-
-
-      const projectionFactor =
-        getProjectionFactor(
-          calendarYear,
-          annualGrowthPercent
-        );
-
-
-      const projectedBasicPay =
-        round2(
-          base2026 *
-          projectionFactor
-        );
-
-
-      months.push({
-
-        index:
-          index +
-          1,
-
-        month:
-          dateToInputValue(
-            monthDate
-          ).slice(
-            0,
-            7
-          ),
-
-        date:
-          monthDate,
-
-        calendarYear,
-
-        rank,
-
-        serviceMonths,
-
-        yearsOfService,
-
-        base2026,
-
-        projectionFactor:
-          round2(
-            projectionFactor
-          ),
-
-        projectedBasicPay
-
-      });
-    }
-
-
-    const high36MonthlyArray =
-      months.map(
-        month =>
-          month.projectedBasicPay
-      );
-
-
-    const high36AverageClient =
-      round2(
-        average(
-          high36MonthlyArray
-        )
-      );
-
-
-    /* ========================================================
-      Split High-36 into three chronological 12-month blocks.
-
-      This remains accurate even when the High-3 window crosses
-      four calendar years.
-
-      Example:
-
-        Sep 2026 – Aug 2027
-        Sep 2027 – Aug 2028
-        Sep 2028 – Aug 2029
-    ======================================================== */
-
-    const periods =
-      [];
-
-
-    for (
-      let start = 0;
-      start < HIGH36_MONTHS;
-      start += PERIOD_MONTHS
-    ) {
-
-      const block =
-        months.slice(
-          start,
-          start +
-          PERIOD_MONTHS
-        );
-
-
-      const blockStart =
-        block[0];
-
-
-      const blockEnd =
-        block[
-          block.length -
-          1
-        ];
-
-
-      periods.push({
-
-        index:
-          periods.length +
-          1,
-
-        startDate:
-          blockStart.date,
-
-        endDate:
-          blockEnd.date,
-
-        label:
-          formatPeriodLabel(
-            blockStart.date,
-            blockEnd.date
-          ),
-
-        averageBasicPay:
-          round2(
-            average(
-              block.map(
-                month =>
-                  month.projectedBasicPay
-              )
-            )
-          )
-
-      });
-    }
-
-
-    return {
-
-      rank,
-
-      annualGrowthPercent,
-
-      firstMonth,
-
-      finalMonth,
-
-      months,
-
-      high36MonthlyArray,
-
-      high36AverageClient,
-
-      periods
-
-    };
+    });
   }
 
 
   /* ============================================================
-    10. READ USER INPUT
+    5. READ INPUTS
   ============================================================ */
 
   function readInputs() {
@@ -1880,7 +689,9 @@
         els.system
           ? els.system.value
           : "HIGH3"
-      ).trim();
+      )
+        .trim()
+        .toUpperCase();
 
 
     const rank =
@@ -1907,17 +718,23 @@
       );
 
 
-    const annualGrowthPercent =
+    const longRangeGrowthPercent =
       Number(
         els.payGrowth
           ? els.payGrowth.value
-          : 2.5
+          : DEFAULT_LONG_RANGE_GROWTH_PERCENT
       );
 
 
     return {
 
       retirementSystem,
+
+      systemLabel:
+        selectedOptionText(
+          els.system
+        ),
+
 
       rank,
 
@@ -1926,23 +743,20 @@
           els.rank
         ),
 
-      systemLabel:
-        selectedOptionText(
-          els.system
-        ),
 
       entryDate,
 
       retirementDate,
 
-      annualGrowthPercent
+
+      longRangeGrowthPercent
 
     };
   }
 
 
   /* ============================================================
-    11. VALIDATION
+    6. VALIDATION
   ============================================================ */
 
   function validateInputs(
@@ -1953,6 +767,10 @@
     const requireDates =
       options.requireDates !==
       false;
+
+
+    const engine =
+      requireProjectionEngine();
 
 
     if (
@@ -1970,14 +788,23 @@
     }
 
 
+    const supportedRanks =
+      Array.isArray(
+        engine.supportedRanks
+      )
+        ? engine.supportedRanks
+        : [];
+
+
     if (
-      !SUPPORTED_RANKS.includes(
+      supportedRanks.length &&
+      !supportedRanks.includes(
         input.rank
       )
     ) {
 
       throw new Error(
-        "Select a planned retirement rank."
+        "Select a supported planned retirement rank."
       );
     }
 
@@ -2019,19 +846,47 @@
 
     if (
       !Number.isFinite(
-        input.annualGrowthPercent
+        input.longRangeGrowthPercent
       ) ||
 
-      input.annualGrowthPercent <
-        MIN_GROWTH_PERCENT ||
+      input.longRangeGrowthPercent <
+        MIN_LONG_RANGE_GROWTH_PERCENT ||
 
-      input.annualGrowthPercent >
-        MAX_GROWTH_PERCENT
+      input.longRangeGrowthPercent >
+        MAX_LONG_RANGE_GROWTH_PERCENT
     ) {
 
       throw new Error(
-        `Annual pay growth must be between ${MIN_GROWTH_PERCENT}% and ${MAX_GROWTH_PERCENT}%.`
+        `Long-range annual pay growth must be between ` +
+        `${MIN_LONG_RANGE_GROWTH_PERCENT}% and ` +
+        `${MAX_LONG_RANGE_GROWTH_PERCENT}%.`
       );
+    }
+
+
+    if (
+      input.entryDate &&
+      input.retirementDate
+    ) {
+
+      const serviceMonths =
+        completedServiceMonths(
+          input.entryDate,
+          input.retirementDate
+        );
+
+
+      if (
+        serviceMonths <
+        MIN_REGULAR_RETIREMENT_MONTHS
+      ) {
+
+        throw new Error(
+          `Active-duty regular retirement requires at least 20 years ` +
+          `of creditable service. Your selected dates produce ` +
+          `${formatServiceMonths(serviceMonths)}.`
+        );
+      }
     }
 
 
@@ -2040,26 +895,24 @@
 
 
   /* ============================================================
-    12. SERVICE PROFILE
-
-    The service date calculation happens locally.
-
-    The retirement MULTIPLIER does not.
-
-    We pass decimal YOS into official-retirement.js and allow that
-    official server module to determine:
-
-      HIGH3:
-        multiplier
-
-      BRS:
-        multiplier
+    7. DERIVED PROFILE
   ============================================================ */
 
   function buildServiceProfile(
     entryDate,
     retirementDate
   ) {
+
+    if (
+      !entryDate ||
+      !retirementDate ||
+      retirementDate <=
+        entryDate
+    ) {
+
+      return null;
+    }
+
 
     const serviceMonths =
       completedServiceMonths(
@@ -2073,7 +926,7 @@
       serviceMonths,
 
       yearsOfService:
-        serviceYearsFromMonths(
+        exactYearsFromMonths(
           serviceMonths
         ),
 
@@ -2086,12 +939,139 @@
   }
 
 
+  function updateAssumptionLabels(
+    growthPercent
+  ) {
+
+    const growth =
+      Number.isFinite(
+        Number(
+          growthPercent
+        )
+      )
+        ? Number(
+            growthPercent
+          )
+        : DEFAULT_LONG_RANGE_GROWTH_PERCENT;
+
+
+    setText(
+      els.assumptionsCurrent,
+      `2027–2030 forecast · ${round2(growth)}% long-range`
+    );
+
+
+    setText(
+      els.growthPillValue,
+      `${round2(growth)}% 2031+`
+    );
+  }
+
+
+  function renderDerivedProfile(
+    input
+  ) {
+
+    updateAssumptionLabels(
+      input.longRangeGrowthPercent
+    );
+
+
+    setText(
+      els.breakdownSystem,
+      input.systemLabel ||
+        input.retirementSystem ||
+        "High-3"
+    );
+
+
+    setText(
+      els.breakdownRank,
+      input.rankLabel ||
+        input.rank ||
+        "—"
+    );
+
+
+    const service =
+      buildServiceProfile(
+        input.entryDate,
+        input.retirementDate
+      );
+
+
+    if (!service) {
+
+      setText(
+        els.serviceAtRetirement,
+        "—"
+      );
+
+
+      setText(
+        els.breakdownYos,
+        "—"
+      );
+
+
+      setText(
+        els.multiplier,
+        "—"
+      );
+
+
+      setText(
+        els.breakdownMultiplier,
+        "—"
+      );
+
+
+      return null;
+    }
+
+
+    setText(
+      els.serviceAtRetirement,
+      service.display
+    );
+
+
+    setText(
+      els.breakdownYos,
+      service.display
+    );
+
+
+    /*
+      official-retirement.js owns the multiplier.
+
+      Leave this blank until the server returns
+      the official calculation.
+    */
+
+    setText(
+      els.multiplier,
+      "—"
+    );
+
+
+    setText(
+      els.breakdownMultiplier,
+      "—"
+    );
+
+
+    return service;
+  }
+
+
   /* ============================================================
-    13. API BRIDGE TO OFFICIAL RETIREMENT ENGINE
+    8. OFFICIAL RETIREMENT API
   ============================================================ */
 
   let activeController =
     null;
+
 
   let requestSequence =
     0;
@@ -2102,13 +1082,7 @@
     projection
   ) {
 
-    /* ========================================================
-      Cancel stale calculator requests.
-    ======================================================== */
-
-    if (
-      activeController
-    ) {
+    if (activeController) {
 
       try {
 
@@ -2130,48 +1104,125 @@
       ++requestSequence;
 
 
-    const service =
-      buildServiceProfile(
-        input.entryDate,
-        input.retirementDate
+    const serviceMonths =
+      Number(
+        projection
+          .retirementServiceMonths
       );
 
 
-    /* ========================================================
-      CURRENT API BRIDGE
+    if (
+      !Number.isFinite(
+        serviceMonths
+      )
+    ) {
 
-      The existing public endpoint currently routes retirement
-      through RETIREMENT_VA.
+      throw new Error(
+        "The projection engine did not return retirement service months."
+      );
+    }
 
-      vaRating: 0 means:
 
-        VA compensation = $0
+    /*
+      Preserve exact service precision.
 
-      while still allowing the endpoint to pass the exact
-      high36MonthlyArray to official-retirement.js.
-    ======================================================== */
+      DO NOT use projection.retirementYearsOfService here because
+      that value is presentation-rounded by the projection module.
+
+      Example:
+
+        241 / 12
+        =
+        20.083333333333332
+    */
+
+    const exactYearsOfService =
+      exactYearsFromMonths(
+        serviceMonths
+      );
+
+
+    const high36MonthlyArray =
+      Array.isArray(
+        projection.high36MonthlyArray
+      )
+        ? projection
+            .high36MonthlyArray
+            .map(
+              Number
+            )
+        : [];
+
+
+    if (
+      high36MonthlyArray.length !==
+      HIGH36_MONTHS
+    ) {
+
+      throw new Error(
+        `The retirement projection must contain exactly ` +
+        `${HIGH36_MONTHS} monthly basic-pay values.`
+      );
+    }
+
+
+    if (
+      high36MonthlyArray.some(
+        value =>
+          !Number.isFinite(
+            value
+          ) ||
+          value <=
+            0
+      )
+    ) {
+
+      throw new Error(
+        "The retirement projection contains an invalid monthly basic-pay value."
+      );
+    }
+
+
+    /*
+      CURRENT BACKEND BRIDGE
+      -----------------------------------------------------------
+      opensource-brain currently exposes RETIREMENT_VA.
+
+      vaRating: 0 keeps the request retirement-only.
+
+      serviceMonths is included for forward compatibility with
+      official-retirement.js v1.2+, while exact yos remains
+      necessary for the current opensource-brain bridge.
+    */
 
     const body = {
 
       tool:
         API_TOOL,
 
+
       input: {
 
         rank:
           input.rank,
 
+
         yos:
-          service.yearsOfService,
+          exactYearsOfService,
 
         yearsOfService:
-          service.yearsOfService,
+          exactYearsOfService,
+
+        serviceMonths,
+
 
         retirementSystem:
           input.retirementSystem,
 
 
-        /* RETIREMENT ONLY */
+        /*
+          RETIREMENT ONLY
+        */
 
         vaRating:
           0,
@@ -2189,12 +1240,14 @@
           0,
 
 
-        /* EXACT PROJECTED HIGH-36 */
+        /*
+          EXACT HIGH-36
+        */
 
-        high36MonthlyArray:
-          projection.high36MonthlyArray
+        high36MonthlyArray
 
       }
+
     };
 
 
@@ -2202,21 +1255,28 @@
       await fetch(
         API_ENDPOINT,
         {
+
           method:
             "POST",
 
+
           headers: {
+
             "Content-Type":
               "application/json"
+
           },
+
 
           body:
             JSON.stringify(
               body
             ),
 
+
           signal:
             activeController.signal
+
         }
       );
 
@@ -2238,11 +1298,6 @@
     }
 
 
-    /* ========================================================
-      Ignore a response from a request that has already been
-      replaced by a newer calculation.
-    ======================================================== */
-
     if (
       sequence !==
       requestSequence
@@ -2263,10 +1318,8 @@
     ) {
 
       throw new Error(
-        data
-          ? data.error ||
-            `Retirement service error (${response.status}).`
-          : `Retirement service error (${response.status}).`
+        data?.error ||
+        `Retirement service error (${response.status}).`
       );
     }
 
@@ -2281,18 +1334,14 @@
 
       payload.retirementRecord ||
 
-      (
-        payload.calculator
-          ? payload.calculator.retirementRecord
-          : null
-      ) ||
+      payload
+        .calculator
+        ?.retirementRecord ||
 
-      (
-        payload.compensation &&
-        payload.compensation.detail
-          ? payload.compensation.detail.retirementRecord
-          : null
-      ) ||
+      payload
+        .compensation
+        ?.detail
+        ?.retirementRecord ||
 
       null;
 
@@ -2304,22 +1353,17 @@
     ) {
 
       throw new Error(
-        retirementRecord &&
-        retirementRecord.error
-          ? retirementRecord.error
-          : "The official retirement engine did not return a calculation."
+        retirementRecord?.error ||
+        "The official retirement engine did not return a calculation."
       );
     }
 
 
-    /* ========================================================
-      CRITICAL VALIDATION
+    /*
+      Do not accept a final-month-pay proxy.
 
-      We do not accept a final-month-pay estimate.
-
-      This calculator is specifically intended to use the
-      projected High-36 average.
-    ======================================================== */
+      This calculator must use the exact projected High-36.
+    */
 
     if (
       retirementRecord.baseMethod !==
@@ -2334,56 +1378,64 @@
 
     if (
       Number(
-        retirementRecord.monthsUsedForBase ||
+        retirementRecord
+          .monthsUsedForBase ||
         0
       ) !==
       HIGH36_MONTHS
     ) {
 
       throw new Error(
-        `Expected ${HIGH36_MONTHS} months in the High-3 calculation, but the server used ` +
-        `${retirementRecord.monthsUsedForBase || 0}.`
+        `Expected ${HIGH36_MONTHS} months in the High-3 calculation, ` +
+        `but the server used ${retirementRecord.monthsUsedForBase || 0}.`
       );
     }
 
 
-    /* ========================================================
-      PAY SOURCE VERSION LOCK
+    /*
+      VERSION LOCK
+      -----------------------------------------------------------
+      retirement-projection.js mirrors official-pay-2026.1.
 
-      Because the browser uses a projection mirror of the 2026
-      table, stop rather than silently calculate with stale pay
-      data if the backend official-pay version changes.
-    ======================================================== */
+      If official-pay.js is updated later, stop rather than silently
+      calculating from a stale browser projection baseline.
+    */
 
     const backendPayVersion =
 
       payload.payRateVersion ||
 
-      (
-        data.meta &&
-        data.meta.sourceVersions
-          ? data.meta.sourceVersions.payVersion
-          : null
-      ) ||
+      data.meta
+        ?.sourceVersions
+        ?.payVersion ||
 
-      (
-        payload.sourceVersions
-          ? payload.sourceVersions.payVersion
-          : null
-      ) ||
+      payload.sourceVersions
+        ?.payVersion ||
+
+      null;
+
+
+    const projectionPayVersion =
+
+      projection.payBaselineVersion ||
+
+      PROJECTION
+        ?.payBaselineVersion ||
 
       null;
 
 
     if (
       backendPayVersion &&
+      projectionPayVersion &&
       backendPayVersion !==
-        PAY_BASELINE_VERSION
+        projectionPayVersion
     ) {
 
       throw new Error(
-        `Pay-table version mismatch. This browser projection uses ${PAY_BASELINE_VERSION}, ` +
-        `but the backend reports ${backendPayVersion}. Update retirementcalculator.js before publishing results.`
+        `Pay-table version mismatch. retirement-projection.js uses ` +
+        `${projectionPayVersion}, but the backend reports ` +
+        `${backendPayVersion}.`
       );
     }
 
@@ -2396,20 +1448,17 @@
 
       retirementRecord,
 
-      service,
+      exactYearsOfService,
+
+      serviceMonths,
+
 
       sourceVersions:
 
-        (
-          data.meta &&
-          data.meta.sourceVersions
-        )
+        data.meta
+          ?.sourceVersions ||
 
-        ||
-
-        payload.sourceVersions
-
-        ||
+        payload.sourceVersions ||
 
         {}
 
@@ -2418,7 +1467,7 @@
 
 
   /* ============================================================
-    14. UI HELPERS
+    9. UI STATE
   ============================================================ */
 
   function setLoading(
@@ -2455,11 +1504,8 @@
     ) {
 
       els.calculateButtonLabel.textContent =
-
         isLoading
-
           ? "Calculating..."
-
           : "Calculate Retirement Pay";
     }
   }
@@ -2493,126 +1539,8 @@
     setText(
       els.formMessage,
       message ||
-      "Unable to calculate retirement pay."
+        "Unable to calculate retirement pay."
     );
-  }
-
-
-  function updateGrowthLabels(
-    growthPercent
-  ) {
-
-    const growth =
-
-      Number.isFinite(
-        Number(
-          growthPercent
-        )
-      )
-
-        ? Number(
-            growthPercent
-          )
-
-        : 2.5;
-
-
-    const label =
-      `${round2(growth)}%`;
-
-
-    setText(
-      els.growthPillValue,
-      label
-    );
-
-
-    if (
-      els.assumptionsCurrent
-    ) {
-
-      els.assumptionsCurrent.textContent =
-        `${round2(growth)}% annual basic-pay growth`;
-    }
-  }
-
-
-  function renderDerivedProfile(
-    input
-  ) {
-
-    updateGrowthLabels(
-      input.annualGrowthPercent
-    );
-
-
-    if (
-      !input.entryDate ||
-      !input.retirementDate
-    ) {
-
-      setText(
-        els.serviceAtRetirement,
-        "—"
-      );
-
-
-      setText(
-        els.multiplier,
-        "—"
-      );
-
-
-      return null;
-    }
-
-
-    if (
-      input.retirementDate <=
-      input.entryDate
-    ) {
-
-      setText(
-        els.serviceAtRetirement,
-        "—"
-      );
-
-
-      setText(
-        els.multiplier,
-        "—"
-      );
-
-
-      return null;
-    }
-
-
-    const service =
-      buildServiceProfile(
-        input.entryDate,
-        input.retirementDate
-      );
-
-
-    setText(
-      els.serviceAtRetirement,
-      service.display
-    );
-
-
-    /* ========================================================
-      The multiplier stays blank until official-retirement.js
-      returns it.
-    ======================================================== */
-
-    setText(
-      els.multiplier,
-      "—"
-    );
-
-
-    return service;
   }
 
 
@@ -2620,8 +1548,8 @@
     options = {}
   ) {
 
-    const preserveService =
-      options.preserveService ===
+    const preserveProfile =
+      options.preserveProfile ===
       true;
 
 
@@ -2639,8 +1567,6 @@
       );
     }
 
-
-    /* OVERVIEW */
 
     setText(
       els.monthlyPay,
@@ -2666,8 +1592,6 @@
     );
 
 
-    /* BREAKDOWN */
-
     setText(
       els.breakdownHigh3,
       "$0"
@@ -2687,12 +1611,16 @@
 
 
     setText(
-      els.breakdownMultiplier,
+      els.multiplier,
       "—"
     );
 
 
-    /* HIGH-36 */
+    setText(
+      els.breakdownMultiplier,
+      "—"
+    );
+
 
     setText(
       els.high36Average,
@@ -2737,43 +1665,39 @@
 
 
     if (
-      !preserveService
+      !preserveProfile
     ) {
 
       setText(
         els.serviceAtRetirement,
         "—"
       );
+
+
+      setText(
+        els.breakdownYos,
+        "—"
+      );
     }
 
 
     setText(
-      els.multiplier,
-      "—"
+      els.projectionIntro,
+      "Your final 36 months of basic pay are assembled from " +
+      "historical pay data and future planning projections " +
+      "to estimate your High-3 average."
     );
 
 
-    if (
-      els.projectionIntro
-    ) {
-
-      els.projectionIntro.textContent =
-        "Your final 36 months of projected basic pay are used to estimate your High-3 average.";
-    }
-
-
-    if (
-      els.overviewStatus
-    ) {
-
-      els.overviewStatus.textContent =
-        "Enter your retirement profile below to build your estimate.";
-    }
+    setText(
+      els.overviewStatus,
+      "Enter your retirement profile below to build your estimate."
+    );
   }
 
 
   /* ============================================================
-    15. PROJECTION PERIOD RENDERING
+    10. PROJECTION UI
   ============================================================ */
 
   function renderProjectionPeriods(
@@ -2781,11 +1705,14 @@
   ) {
 
     const periods =
-      projection.periods ||
-      [];
+      Array.isArray(
+        projection.periods
+      )
+        ? projection.periods
+        : [];
 
 
-    const yearEls = [
+    const labelElements = [
 
       els.projectionYear1,
 
@@ -2796,7 +1723,7 @@
     ];
 
 
-    const payEls = [
+    const payElements = [
 
       els.projectionPay1,
 
@@ -2807,56 +1734,224 @@
     ];
 
 
-    periods
-      .slice(
-        0,
-        3
-      )
-      .forEach(
-        (
-          period,
+    for (
+      let index = 0;
+      index < 3;
+      index += 1
+    ) {
+
+      const period =
+        periods[
           index
-        ) => {
-
-          setText(
-            yearEls[
-              index
-            ],
-            period.label
-          );
+        ];
 
 
-          setText(
-            payEls[
-              index
-            ],
-            money0(
-              period.averageBasicPay
-            )
-          );
-        }
+      setText(
+        labelElements[
+          index
+        ],
+        period?.label ||
+        "—"
       );
 
 
-    /* ========================================================
-      Because each card is a true 12-month block, make that
-      explicit instead of implying one calendar-year pay table.
-    ======================================================== */
+      setText(
+        payElements[
+          index
+        ],
+        period
+          ? money0(
+              period.averageBasicPay
+            )
+          : "$0"
+      );
+    }
+  }
 
-    $$(
-      ".ret-year-caption"
-    ).forEach(
-      caption => {
 
-        caption.textContent =
-          "12-mo average basic pay";
+  function getProjectionModes(
+    projection
+  ) {
+
+    const modes =
+      new Set();
+
+
+    const months =
+      Array.isArray(
+        projection.months
+      )
+        ? projection.months
+        : [];
+
+
+    months.forEach(
+      month => {
+
+        if (
+          month?.paySourceMode
+        ) {
+
+          modes.add(
+            month.paySourceMode
+          );
+        }
+
       }
+    );
+
+
+    return modes;
+  }
+
+
+  function updateProjectionPill(
+    projection,
+    growthPercent
+  ) {
+
+    const modes =
+      getProjectionModes(
+        projection
+      );
+
+
+    if (
+      modes.has(
+        "LONG_RANGE_FORECAST"
+      )
+    ) {
+
+      setText(
+        els.growthPillValue,
+        `${round2(growthPercent)}% 2031+`
+      );
+
+
+      return;
+    }
+
+
+    if (
+      modes.has(
+        "THEWING_FORECAST"
+      )
+    ) {
+
+      setText(
+        els.growthPillValue,
+        "FORECAST"
+      );
+
+
+      return;
+    }
+
+
+    if (
+      modes.has(
+        "HISTORICAL_RECONSTRUCTION"
+      )
+    ) {
+
+      setText(
+        els.growthPillValue,
+        "HISTORY"
+      );
+
+
+      return;
+    }
+
+
+    setText(
+      els.growthPillValue,
+      "OFFICIAL"
+    );
+  }
+
+
+  function buildProjectionStatus(
+    projection,
+    input
+  ) {
+
+    const modes =
+      getProjectionModes(
+        projection
+      );
+
+
+    const parts =
+      [];
+
+
+    if (
+      modes.has(
+        "HISTORICAL_RECONSTRUCTION"
+      )
+    ) {
+
+      parts.push(
+        "historical pay reconstruction"
+      );
+    }
+
+
+    if (
+      modes.has(
+        "OFFICIAL_2026"
+      )
+    ) {
+
+      parts.push(
+        "official 2026 basic pay"
+      );
+    }
+
+
+    if (
+      modes.has(
+        "THEWING_FORECAST"
+      )
+    ) {
+
+      parts.push(
+        "TheWing 2027–2030 forecast"
+      );
+    }
+
+
+    if (
+      modes.has(
+        "LONG_RANGE_FORECAST"
+      )
+    ) {
+
+      parts.push(
+        `${round2(input.longRangeGrowthPercent)}% long-range growth`
+      );
+    }
+
+
+    const sourceText =
+      parts.length
+        ? parts.join(
+            ", "
+          )
+        : "the retirement pay model";
+
+
+    return (
+      `High-3 window ${monthKeyToLabel(projection.firstHigh36Month)} ` +
+      `through ${monthKeyToLabel(projection.finalHigh36Month)} using ` +
+      `${sourceText}.`
     );
   }
 
 
   /* ============================================================
-    16. RESULT RENDERING
+    11. RESULT RENDERING
   ============================================================ */
 
   function renderResult(
@@ -2869,63 +1964,88 @@
       official.retirementRecord;
 
 
-    const service =
-      official.service;
-
-
     const monthly =
       Number(
 
-        retirementRecord.grossMonthlyRetiredPay
+        retirementRecord
+          .grossMonthlyRetiredPay
 
         ??
 
-        retirementRecord.retiredPayGross
+        retirementRecord
+          .retiredPayGross
 
         ??
 
-        retirementRecord.monthlyRetirement
+        retirementRecord
+          .monthlyRetirement
 
         ??
 
         0
+
+      );
+
+
+    const annualFromServer =
+      Number(
+
+        retirementRecord
+          .grossAnnualRetiredPay
+
+        ??
+
+        retirementRecord
+          .annualRetirement
+
       );
 
 
     const yearly =
-      monthly *
-      12;
+      Number.isFinite(
+        annualFromServer
+      )
+        ? annualFromServer
+        : monthly *
+          12;
 
 
     const high3 =
       Number(
-        retirementRecord.retiredPayBase ||
+        retirementRecord
+          .retiredPayBase ||
         0
       );
 
 
     const multiplier =
       Number(
-        retirementRecord.multiplier ||
+        retirementRecord
+          .multiplier ||
         0
       );
 
 
     const multiplierPercent =
-      clamp(
-        multiplier *
-        100,
-        0,
-        100
-      );
+      Number.isFinite(
+        Number(
+          retirementRecord
+            .multiplierPercent
+        )
+      )
+        ? Number(
+            retirementRecord
+              .multiplierPercent
+          )
+        : multiplier *
+          100;
 
 
     if (
       !Number.isFinite(
         monthly
       ) ||
-      monthly <
-        0
+      monthly < 0
     ) {
 
       throw new Error(
@@ -2938,8 +2058,7 @@
       !Number.isFinite(
         high3
       ) ||
-      high3 <=
-        0
+      high3 <= 0
     ) {
 
       throw new Error(
@@ -2948,17 +2067,22 @@
     }
 
 
-    /* ========================================================
-      RING
+    if (
+      !Number.isFinite(
+        multiplier
+      ) ||
+      multiplier <= 0
+    ) {
 
-      The ring reflects the official retirement multiplier.
+      throw new Error(
+        "The retirement engine returned an invalid retirement multiplier."
+      );
+    }
 
-      Example:
 
-        24 YOS HIGH3
-        ->
-        60%
-    ======================================================== */
+    /*
+      RING REPRESENTS THE OFFICIAL RETIREMENT MULTIPLIER
+    */
 
     if (
       els.payRing
@@ -2967,8 +2091,12 @@
       els.payRing.style.setProperty(
         "--pct",
         String(
-          round2(
-            multiplierPercent
+          Math.max(
+            0,
+            Math.min(
+              100,
+              multiplierPercent
+            )
           )
         )
       );
@@ -3012,20 +2140,33 @@
 
 
     /* ========================================================
-      DERIVED PROFILE
+      SERVICE
     ======================================================== */
+
+    const serviceDisplay =
+      projection
+        .retirementServiceDisplay ||
+
+      formatServiceMonths(
+        official.serviceMonths
+      );
+
+
+    const multiplierDisplay =
+      formatMultiplier(
+        retirementRecord
+      );
+
 
     setText(
       els.serviceAtRetirement,
-      service.display
+      serviceDisplay
     );
 
 
     setText(
       els.multiplier,
-      formatPercentFromMultiplier(
-        multiplier
-      )
+      multiplierDisplay
     );
 
 
@@ -3036,28 +2177,26 @@
     setText(
       els.breakdownSystem,
       input.systemLabel ||
-      input.retirementSystem
+        input.retirementSystem
     );
 
 
     setText(
       els.breakdownRank,
       input.rankLabel ||
-      input.rank
+        input.rank
     );
 
 
     setText(
       els.breakdownYos,
-      service.display
+      serviceDisplay
     );
 
 
     setText(
       els.breakdownMultiplier,
-      formatPercentFromMultiplier(
-        multiplier
-      )
+      multiplierDisplay
     );
 
 
@@ -3086,13 +2225,8 @@
 
 
     /* ========================================================
-      HIGH-3 PROJECTION
+      HIGH-36
     ======================================================== */
-
-    updateGrowthLabels(
-      input.annualGrowthPercent
-    );
-
 
     renderProjectionPeriods(
       projection
@@ -3107,36 +2241,29 @@
     );
 
 
-    if (
-      els.projectionIntro
-    ) {
-
-      els.projectionIntro.textContent =
-
-        `High-3 window: ${formatMonthYear(projection.firstMonth)} through ` +
-
-        `${formatMonthYear(projection.finalMonth)}. ` +
-
-        `The 36 projected monthly basic-pay values are averaged before the retirement multiplier is applied.`;
-    }
+    updateProjectionPill(
+      projection,
+      input.longRangeGrowthPercent
+    );
 
 
-    /* ========================================================
-      OVERVIEW CONTEXT
-    ======================================================== */
+    setText(
+      els.projectionIntro,
+      `High-3 window: ` +
+      `${monthKeyToLabel(projection.firstHigh36Month)} through ` +
+      `${monthKeyToLabel(projection.finalHigh36Month)}. ` +
+      `The 36 monthly basic-pay values are averaged before the ` +
+      `official retirement multiplier is applied.`
+    );
 
-    if (
-      els.overviewStatus
-    ) {
 
-      els.overviewStatus.textContent =
-
-        `Projected using ${HIGH36_MONTHS} monthly basic-pay values, ` +
-
-        `${round2(input.annualGrowthPercent)}% annual pay growth, and ` +
-
-        `${input.rank} as the selected rank throughout the High-3 window.`;
-    }
+    setText(
+      els.overviewStatus,
+      buildProjectionStatus(
+        projection,
+        input
+      )
+    );
 
 
     ROOT.dataset.hasResult =
@@ -3159,46 +2286,20 @@
 
       high3,
 
-      multiplier
+      multiplier,
+
+      multiplierPercent
 
     };
   }
 
 
   /* ============================================================
-    17. STATE + ASK AMY EVENT
+    12. PUBLIC STATE / ASK AMY EVENT
   ============================================================ */
 
   let currentState =
     null;
-
-
-  function cloneForPublic(
-    value
-  ) {
-
-    return JSON.parse(
-      JSON.stringify(
-        value,
-        (
-          key,
-          item
-        ) => {
-
-          if (
-            item instanceof
-            Date
-          ) {
-
-            return item.toISOString();
-          }
-
-
-          return item;
-        }
-      )
-    );
-  }
 
 
   function emitRetirementEvent(
@@ -3227,8 +2328,278 @@
   }
 
 
+  function buildPublicState(
+    input,
+    projection,
+    official,
+    result
+  ) {
+
+    return {
+
+      ok:
+        true,
+
+
+      runtimeVersion:
+        RUNTIME_VERSION,
+
+
+      projectionVersion:
+
+        projection.version ||
+
+        PROJECTION?.version ||
+
+        null,
+
+
+      payBaselineVersion:
+
+        projection.payBaselineVersion ||
+
+        PROJECTION?.payBaselineVersion ||
+
+        null,
+
+
+      generatedAt:
+        new Date().toISOString(),
+
+
+      /* ========================================================
+        INPUTS
+      ======================================================== */
+
+      inputs: {
+
+        retirementSystem:
+          input.retirementSystem,
+
+        retirementSystemLabel:
+          input.systemLabel,
+
+
+        retirementRank:
+          input.rank,
+
+        retirementRankLabel:
+          input.rankLabel,
+
+
+        entryDate:
+          dateToInputValue(
+            input.entryDate
+          ),
+
+
+        retirementDate:
+          dateToInputValue(
+            input.retirementDate
+          ),
+
+
+        longRangeGrowthPercent:
+          input.longRangeGrowthPercent
+
+      },
+
+
+      /* ========================================================
+        SERVICE
+      ======================================================== */
+
+      service: {
+
+        serviceMonths:
+          official.serviceMonths,
+
+
+        yearsOfService:
+          official.exactYearsOfService,
+
+
+        display:
+
+          projection
+            .retirementServiceDisplay ||
+
+          formatServiceMonths(
+            official.serviceMonths
+          )
+
+      },
+
+
+      /* ========================================================
+        ASSUMPTIONS
+      ======================================================== */
+
+      assumptions: {
+
+        retirementRankAppliedAcrossHigh36:
+          true,
+
+
+        retirementDateTreatedAsEffectiveDate:
+          true,
+
+
+        forecastSchedule:
+          cloneForPublic(
+            projection
+              .forecastSchedule ||
+            {}
+          ),
+
+
+        longRangeGrowthPercent:
+          input.longRangeGrowthPercent,
+
+
+        historicalYearsBefore2026AreReconstructed:
+          Boolean(
+            projection
+              .assumptions
+              ?.historicalYearsBefore2026AreReconstructed
+          )
+
+      },
+
+
+      /* ========================================================
+        PROJECTION
+      ======================================================== */
+
+      projection: {
+
+        firstHigh36Month:
+          projection.firstHigh36Month,
+
+
+        finalHigh36Month:
+          projection.finalHigh36Month,
+
+
+        high36MonthlyArray:
+          projection
+            .high36MonthlyArray
+            .slice(),
+
+
+        high36AverageClient:
+          projection.high36Average,
+
+
+        periods:
+          cloneForPublic(
+            projection.periods ||
+            []
+          ),
+
+
+        calendarYears:
+          cloneForPublic(
+            projection.calendarYears ||
+            []
+          )
+
+      },
+
+
+      /* ========================================================
+        OFFICIAL RETIREMENT RESULT
+      ======================================================== */
+
+      retirement: {
+
+        retirementSystem:
+          official
+            .retirementRecord
+            .retirementSystem,
+
+
+        yearsOfService:
+          official
+            .retirementRecord
+            .yearsOfService,
+
+
+        serviceMonths:
+
+          official
+            .retirementRecord
+            .serviceMonths
+
+          ??
+
+          null,
+
+
+        multiplier:
+          official
+            .retirementRecord
+            .multiplier,
+
+
+        multiplierPercent:
+
+          official
+            .retirementRecord
+            .multiplierPercent
+
+          ??
+
+          result.multiplierPercent,
+
+
+        retiredPayBase:
+          official
+            .retirementRecord
+            .retiredPayBase,
+
+
+        baseMethod:
+          official
+            .retirementRecord
+            .baseMethod,
+
+
+        monthsUsedForBase:
+          official
+            .retirementRecord
+            .monthsUsedForBase,
+
+
+        grossMonthlyRetiredPay:
+          result.monthly,
+
+
+        grossYearlyRetiredPay:
+          result.yearly,
+
+
+        rateVersion:
+
+          official
+            .retirementRecord
+            .rateVersion ||
+
+          null
+
+      },
+
+
+      sourceVersions: {
+        ...official.sourceVersions
+      }
+
+    };
+  }
+
+
   /* ============================================================
-    18. MAIN CALCULATION
+    13. MAIN CALCULATION
   ============================================================ */
 
   let hasCalculatedOnce =
@@ -3244,23 +2615,23 @@
       true;
 
 
-    const input =
-      readInputs();
-
-
     clearError();
 
 
-    renderDerivedProfile(
-      input
-    );
+    let input =
+      null;
 
-
-    /* ========================================================
-      BASIC VALIDATION
-    ======================================================== */
 
     try {
+
+      input =
+        readInputs();
+
+
+      renderDerivedProfile(
+        input
+      );
+
 
       validateInputs(
         input
@@ -3271,22 +2642,29 @@
     ) {
 
       resetResults({
-        preserveService:
+        preserveProfile:
           true
       });
 
 
-      renderDerivedProfile(
+      if (
         input
-      );
+      ) {
+
+        renderDerivedProfile(
+          input
+        );
+      }
 
 
       if (
-        userInitiated
+        userInitiated ||
+        hasCalculatedOnce
       ) {
 
         showError(
-          error.message
+          error?.message ||
+          "Check your retirement inputs."
         );
       }
 
@@ -3303,18 +2681,8 @@
     try {
 
       /* ======================================================
-        SERVICE CREDIT
-      ====================================================== */
-
-      const service =
-        buildServiceProfile(
-          input.entryDate,
-          input.retirementDate
-        );
-
-
-      /* ======================================================
-        BUILD EXACT PROJECTED HIGH-36
+        STEP 1
+        BUILD HIGH-36 VIA retirement-projection.js
       ====================================================== */
 
       const projection =
@@ -3323,8 +2691,41 @@
         );
 
 
+      if (
+        !projection ||
+        projection.ok ===
+          false
+      ) {
+
+        throw new Error(
+          projection?.error ||
+          "Unable to build the High-36 retirement projection."
+        );
+      }
+
+
+      if (
+        !Array.isArray(
+          projection
+            .high36MonthlyArray
+        ) ||
+
+        projection
+          .high36MonthlyArray
+          .length !==
+          HIGH36_MONTHS
+      ) {
+
+        throw new Error(
+          `The projection engine did not return exactly ` +
+          `${HIGH36_MONTHS} months.`
+        );
+      }
+
+
       /* ======================================================
-        SEND TO OFFICIAL RETIREMENT ENGINE
+        STEP 2
+        SEND HIGH-36 TO official-retirement.js
       ====================================================== */
 
       const official =
@@ -3335,7 +2736,8 @@
 
 
       /* ======================================================
-        RENDER
+        STEP 3
+        RENDER RESULT
       ====================================================== */
 
       const result =
@@ -3350,218 +2752,13 @@
         true;
 
 
-      /* ======================================================
-        PUBLIC STATE
-      ====================================================== */
-
-      currentState = {
-
-        ok:
-          true,
-
-        runtimeVersion:
-          RUNTIME_VERSION,
-
-        payBaselineYear:
-          PAY_BASELINE_YEAR,
-
-        payBaselineVersion:
-          PAY_BASELINE_VERSION,
-
-        generatedAt:
-          new Date().toISOString(),
-
-
-        /* USER INPUT */
-
-        inputs: {
-
-          retirementSystem:
-            input.retirementSystem,
-
-          retirementSystemLabel:
-            input.systemLabel,
-
-          retirementRank:
-            input.rank,
-
-          retirementRankLabel:
-            input.rankLabel,
-
-          entryDate:
-            dateToInputValue(
-              input.entryDate
-            ),
-
-          retirementDate:
-            dateToInputValue(
-              input.retirementDate
-            ),
-
-          annualGrowthPercent:
-            input.annualGrowthPercent
-
-        },
-
-
-        /* SERVICE */
-
-        service: {
-
-          serviceMonths:
-            service.serviceMonths,
-
-          yearsOfService:
-            service.yearsOfService,
-
-          display:
-            service.display
-
-        },
-
-
-        /* PROJECTION ASSUMPTIONS */
-
-        assumptions: {
-
-          selectedRankAppliesAcrossHigh36:
-            true,
-
-          annualPayGrowthPercent:
-            input.annualGrowthPercent,
-
-          projectionBaselineYear:
-            PAY_BASELINE_YEAR,
-
-          projectionBaselineVersion:
-            PAY_BASELINE_VERSION,
-
-          retirementDateTreatedAsEffectiveDate:
-            true
-
-        },
-
-
-        /* HIGH-36 */
-
-        projection: {
-
-          firstMonth:
-            dateToInputValue(
-              projection.firstMonth
-            ).slice(
-              0,
-              7
-            ),
-
-          finalMonth:
-            dateToInputValue(
-              projection.finalMonth
-            ).slice(
-              0,
-              7
-            ),
-
-          high36MonthlyArray:
-            projection
-              .high36MonthlyArray
-              .slice(),
-
-          high36AverageClient:
-            projection.high36AverageClient,
-
-          periods:
-
-            projection.periods.map(
-              period => ({
-
-                index:
-                  period.index,
-
-                label:
-                  period.label,
-
-                startMonth:
-                  dateToInputValue(
-                    period.startDate
-                  ).slice(
-                    0,
-                    7
-                  ),
-
-                endMonth:
-                  dateToInputValue(
-                    period.endDate
-                  ).slice(
-                    0,
-                    7
-                  ),
-
-                averageBasicPay:
-                  period.averageBasicPay
-
-              })
-            )
-
-        },
-
-
-        /* OFFICIAL RETIREMENT RESULT */
-
-        retirement: {
-
-          retirementSystem:
-            official
-              .retirementRecord
-              .retirementSystem,
-
-          yearsOfService:
-            official
-              .retirementRecord
-              .yearsOfService,
-
-          multiplier:
-            official
-              .retirementRecord
-              .multiplier,
-
-          retiredPayBase:
-            official
-              .retirementRecord
-              .retiredPayBase,
-
-          baseMethod:
-            official
-              .retirementRecord
-              .baseMethod,
-
-          monthsUsedForBase:
-            official
-              .retirementRecord
-              .monthsUsedForBase,
-
-          grossMonthlyRetiredPay:
-            result.monthly,
-
-          grossYearlyRetiredPay:
-            result.yearly,
-
-          rateVersion:
-            official
-              .retirementRecord
-              .rateVersion ||
-            null
-
-        },
-
-
-        /* SOURCE VERSIONS */
-
-        sourceVersions: {
-          ...official.sourceVersions
-        }
-
-      };
+      currentState =
+        buildPublicState(
+          input,
+          projection,
+          official,
+          result
+        );
 
 
       clearError();
@@ -3580,13 +2777,8 @@
       error
     ) {
 
-      /* ======================================================
-        ABORTED REQUESTS ARE NOT USER ERRORS
-      ====================================================== */
-
       if (
-        error &&
-        error.name ===
+        error?.name ===
           "AbortError"
       ) {
 
@@ -3594,24 +2786,9 @@
       }
 
 
-      resetResults({
-        preserveService:
-          true
-      });
-
-
-      renderDerivedProfile(
-        input
-      );
-
-
       showError(
-        error &&
-        error.message
-
-          ? error.message
-
-          : "Unable to calculate retirement pay."
+        error?.message ||
+        "Unable to calculate retirement pay."
       );
 
 
@@ -3620,17 +2797,14 @@
         ok:
           false,
 
+
         runtimeVersion:
           RUNTIME_VERSION,
 
+
         error:
-
-          error &&
-          error.message
-
-            ? error.message
-
-            : "Unable to calculate retirement pay."
+          error?.message ||
+          "Unable to calculate retirement pay."
 
       };
 
@@ -3651,18 +2825,16 @@
 
 
   /* ============================================================
-    19. LIVE RECALCULATION
+    14. INPUT CHANGES
 
-    FIRST USE
+    BEFORE FIRST CALCULATION
     -------------------------------------------------------------
-    Once both dates exist, calculate automatically.
+    Show service preview only.
+    Do not automatically hit the backend.
 
-    AFTER FIRST RESULT
+    AFTER FIRST SUCCESSFUL CALCULATION
     -------------------------------------------------------------
-    Input changes recalculate quickly so the calculator feels live.
-
-    The explicit Calculate button remains available for clarity
-    and touch-first usability.
+    Recalculate after a short debounce.
   ============================================================ */
 
   let debounceTimer =
@@ -3676,36 +2848,17 @@
     );
 
 
-    const input =
-      readInputs();
+    let input =
+      null;
 
 
-    clearError();
+    try {
+
+      input =
+        readInputs();
 
 
-    renderDerivedProfile(
-      input
-    );
-
-
-    updateGrowthLabels(
-      input.annualGrowthPercent
-    );
-
-
-    /* ========================================================
-      Do not call the API until both dates exist.
-    ======================================================== */
-
-    if (
-      !input.entryDate ||
-      !input.retirementDate
-    ) {
-
-      resetResults({
-        preserveService:
-          true
-      });
+      clearError();
 
 
       renderDerivedProfile(
@@ -3713,30 +2866,96 @@
       );
 
 
-      return;
-    }
-
-
-    debounceTimer =
-      window.setTimeout(
-        () => {
-
-          calculate({
-            userInitiated:
-              false
-          });
-
-        },
-
-        hasCalculatedOnce
-          ? 260
-          : 420
+      updateAssumptionLabels(
+        input.longRangeGrowthPercent
       );
+
+
+      if (
+        !input.entryDate ||
+        !input.retirementDate
+      ) {
+
+        resetResults({
+          preserveProfile:
+            true
+        });
+
+
+        renderDerivedProfile(
+          input
+        );
+
+
+        return;
+      }
+
+
+      /*
+        Keep the first interaction button-driven.
+      */
+
+      if (
+        !hasCalculatedOnce
+      ) {
+
+        return;
+      }
+
+
+      validateInputs(
+        input
+      );
+
+
+      debounceTimer =
+        window.setTimeout(
+          () => {
+
+            calculate({
+              userInitiated:
+                false
+            });
+
+          },
+          280
+        );
+
+    } catch (
+      error
+    ) {
+
+      if (
+        hasCalculatedOnce
+      ) {
+
+        resetResults({
+          preserveProfile:
+            true
+        });
+
+
+        if (
+          input
+        ) {
+
+          renderDerivedProfile(
+            input
+          );
+        }
+
+
+        showError(
+          error?.message ||
+          "Check your retirement inputs."
+        );
+      }
+    }
   }
 
 
   /* ============================================================
-    20. EVENT BINDING
+    15. EVENTS
   ============================================================ */
 
   [
@@ -3752,10 +2971,7 @@
   ].forEach(
     element => {
 
-      if (
-        !element
-      ) {
-
+      if (!element) {
         return;
       }
 
@@ -3764,6 +2980,7 @@
         "change",
         scheduleCalculation
       );
+
     }
   );
 
@@ -3802,16 +3019,14 @@
           userInitiated:
             true
         });
+
       }
     );
   }
 
 
   /* ============================================================
-    21. PUBLIC API
-
-    This makes the calculator state available to a future
-    page-specific Ask Amy module without localStorage.
+    16. PUBLIC API
   ============================================================ */
 
   window.THEWING_RETIREMENT =
@@ -3820,52 +3035,41 @@
       version:
         RUNTIME_VERSION,
 
-      payBaselineYear:
-        PAY_BASELINE_YEAR,
-
-      payBaselineVersion:
-        PAY_BASELINE_VERSION,
-
-
-      /* MAIN */
 
       calculate,
 
 
-      /* INPUT */
-
       readInputs,
 
 
-      /* PROJECTION */
-
       buildHigh36Projection,
 
-      getBasicPay2026,
-
-      projectMonthlyBasicPay,
 
       buildServiceProfile,
 
 
-      /* STATE */
+      getProjectionEngine() {
+
+        return PROJECTION;
+
+      },
+
 
       getState() {
 
         return currentState
-
           ? cloneForPublic(
               currentState
             )
-
           : null;
+
       }
 
     });
 
 
   /* ============================================================
-    22. INITIALIZE
+    17. INITIALIZE
   ============================================================ */
 
   function initialize() {
@@ -3882,48 +3086,60 @@
       "false";
 
 
-    const input =
-      readInputs();
+    try {
+
+      /*
+        Confirm retirement-projection.js loaded correctly.
+      */
+
+      requireProjectionEngine();
 
 
-    updateGrowthLabels(
-      input.annualGrowthPercent
-    );
+      const input =
+        readInputs();
 
 
-    renderDerivedProfile(
-      input
-    );
+      updateAssumptionLabels(
+        input.longRangeGrowthPercent
+      );
 
 
-    resetResults({
-      preserveService:
-        true
-    });
+      resetResults({
+        preserveProfile:
+          true
+      });
 
 
-    renderDerivedProfile(
-      input
-    );
+      renderDerivedProfile(
+        input
+      );
 
 
-    setText(
-      els.breakdownSystem,
-      input.systemLabel ||
-      "High-3"
-    );
+      ROOT.dataset.ready =
+        "true";
+
+    } catch (
+      error
+    ) {
+
+      ROOT.dataset.ready =
+        "true";
 
 
-    setText(
-      els.breakdownRank,
-      input.rankLabel ||
-      input.rank ||
-      "—"
-    );
+      showError(
+        error?.message ||
+        "The retirement calculator could not initialize."
+      );
 
 
-    ROOT.dataset.ready =
-      "true";
+      if (
+        els.calculateButton
+      ) {
+
+        els.calculateButton.disabled =
+          true;
+      }
+    }
   }
 
 
