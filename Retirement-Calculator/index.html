@@ -6,7 +6,7 @@
   <!-- ============================================================
     THEWING.AI • RETIREMENT CALCULATOR
     MOBILE-FIRST AURORA UI
-    v1.0.0
+    v1.1.0
 
     PURPOSE
     -------------------------------------------------------------
@@ -23,12 +23,22 @@
     IMPORTANT
     -------------------------------------------------------------
     - This HTML contains NO retirement formulas.
-    - official-pay.js remains the official basic-pay source.
+    - official-pay.js remains the canonical 2026 basic-pay source.
     - official-retirement.js remains the retirement source of truth.
-    - retirementcalculator.js will handle UI/API communication.
-    - Future basic pay uses a configurable projection assumption.
-    - High-3 calculations will use a projected 36-month pay array.
-    - Mobile-first / iPhone-first interface.
+    - retirement-projection.js builds the exact projected High-36 array.
+    - retirementcalculator.js handles UI/API communication.
+
+    PAY PROJECTION MODEL
+    -------------------------------------------------------------
+    2027: 3.6%
+    2028: 3.3%
+    2029: 3.2%
+    2030: 3.0%
+    2031+: configurable long-range assumption (default 2.5%)
+
+    LOAD ORDER
+    -------------------------------------------------------------
+    retirement-projection.js MUST load before retirementcalculator.js.
   ============================================================= -->
 
 
@@ -55,7 +65,7 @@
 
   <meta
     name="description"
-    content="Estimate your projected monthly and yearly military retirement pay using High-3 or BRS, future basic-pay projections, and your planned retirement date."
+    content="Estimate your projected monthly and yearly military retirement pay using High-3 or BRS, historical military basic pay, and future pay projections."
   />
 
   <link
@@ -80,7 +90,7 @@
 
   <meta
     property="og:description"
-    content="Project your future military retirement pay using your retirement system, planned rank, service dates, and projected future basic pay."
+    content="Project your future military retirement pay using your retirement system, planned rank, service dates, historical pay, and future pay assumptions."
   />
 
   <meta
@@ -136,7 +146,7 @@
 
   <link
     rel="stylesheet"
-    href="./retirementcalculator.css?v=20260906-1"
+    href="./retirementcalculator.css?v=20260906-2"
   />
 
 </head>
@@ -149,7 +159,13 @@
   RETIREMENT CALCULATOR ROOT
 =============================================================== -->
 
-<div id="tw-retirement-shell">
+<div
+  id="tw-retirement-shell"
+  data-ready="false"
+  data-loading="false"
+  data-error="false"
+  data-has-result="false"
+>
 
   <div class="ret-stage">
 
@@ -158,9 +174,6 @@
 
       <!-- ========================================================
         PAGE INTRO
-
-        Intentionally compact on mobile.
-        Main estimate appears almost immediately.
       ========================================================= -->
 
       <header class="ret-page-header">
@@ -223,9 +236,7 @@
 
 
 
-        <!-- ======================================================
-          PRIMARY RESULT
-        ======================================================= -->
+        <!-- PRIMARY RESULT -->
 
         <div class="ret-overview-main">
 
@@ -237,7 +248,7 @@
             <div
               id="ret-pay-ring"
               class="ret-pay-ring"
-              style="--pct:62;"
+              style="--pct:0;"
             >
 
               <div class="ret-ring-center">
@@ -408,7 +419,7 @@
 
 
 
-        <!-- STATUS / CONTEXT -->
+        <!-- STATUS -->
 
         <div
           class="ret-overview-status"
@@ -463,19 +474,14 @@
 
 
         <!-- ======================================================
-          INPUTS
-
-          Four primary inputs.
-          No unnecessary duplicate fields.
+          PRIMARY INPUTS
         ======================================================= -->
 
         <div class="ret-input-list">
 
 
 
-          <!-- ====================================================
-            RETIREMENT SYSTEM
-          ===================================================== -->
+          <!-- RETIREMENT SYSTEM -->
 
           <label
             class="ret-input-card"
@@ -512,6 +518,7 @@
                   name="retirementSystem"
                   aria-label="Retirement System"
                 >
+
                   <option
                     value="HIGH3"
                     selected
@@ -522,6 +529,7 @@
                   <option value="BRS">
                     Blended Retirement System (BRS)
                   </option>
+
                 </select>
 
                 <span
@@ -537,9 +545,7 @@
 
 
 
-          <!-- ====================================================
-            PLANNED RETIREMENT RANK
-          ===================================================== -->
+          <!-- PLANNED RETIREMENT RANK -->
 
           <label
             class="ret-input-card"
@@ -577,7 +583,11 @@
                   aria-label="Planned Retirement Rank"
                 >
 
+
+                  <!-- ENLISTED -->
+
                   <optgroup label="Enlisted">
+
                     <option value="E-5">
                       E-5 · Staff Sergeant
                     </option>
@@ -600,10 +610,14 @@
                     <option value="E-9">
                       E-9 · Chief Master Sergeant
                     </option>
+
                   </optgroup>
 
 
+                  <!-- OFFICERS -->
+
                   <optgroup label="Officers">
+
                     <option value="O-1">
                       O-1 · Second Lieutenant
                     </option>
@@ -635,10 +649,14 @@
                     <option value="O-8">
                       O-8 · Major General
                     </option>
+
                   </optgroup>
 
 
+                  <!-- PRIOR ENLISTED OFFICERS -->
+
                   <optgroup label="Prior-Enlisted Officers">
+
                     <option value="O-1E">
                       O-1E · Second Lieutenant
                     </option>
@@ -650,6 +668,7 @@
                     <option value="O-3E">
                       O-3E · Captain
                     </option>
+
                   </optgroup>
 
                 </select>
@@ -668,9 +687,7 @@
 
 
 
-          <!-- ====================================================
-            DATE ENTERED SERVICE
-          ===================================================== -->
+          <!-- DATE ENTERED SERVICE -->
 
           <label
             class="ret-input-card"
@@ -726,9 +743,7 @@
 
 
 
-          <!-- ====================================================
-            PLANNED RETIREMENT DATE
-          ===================================================== -->
+          <!-- PLANNED RETIREMENT DATE -->
 
           <label
             class="ret-input-card"
@@ -744,6 +759,7 @@
                 viewBox="0 0 24 24"
                 aria-hidden="true"
               >
+
                 <rect
                   x="3"
                   y="5"
@@ -756,6 +772,7 @@
                 <path d="M16 3v4"></path>
                 <path d="M3 10h18"></path>
                 <path d="m9 15 2 2 4-4"></path>
+
               </svg>
 
             </span>
@@ -836,10 +853,10 @@
 
 
         <!-- ======================================================
-          ADVANCED ASSUMPTIONS
+          PAY PROJECTION ASSUMPTIONS
 
-          Hidden behind a disclosure so normal users don't need
-          to think about this.
+          2027-2030 use fixed TheWing planning assumptions.
+          This control applies only to 2031+.
         ======================================================= -->
 
         <details
@@ -852,11 +869,11 @@
             <span>
 
               <span class="ret-assumptions-title">
-                Projection Assumptions
+                Pay Projection Assumptions
               </span>
 
               <span class="ret-assumptions-current">
-                2.5% annual basic-pay growth
+                2027–2030 forecast · 2.5% long-range
               </span>
 
             </span>
@@ -879,7 +896,7 @@
             >
 
               <span class="ret-assumption-label">
-                Expected Annual Basic-Pay Increase
+                Long-Range Pay Increase (2031+)
               </span>
 
               <span class="ret-assumption-control">
@@ -887,7 +904,7 @@
                 <input
                   type="number"
                   id="ret-pay-growth"
-                  name="annualPayGrowth"
+                  name="longRangeGrowthPercent"
                   value="2.5"
                   min="0"
                   max="10"
@@ -905,8 +922,10 @@
 
 
             <p class="ret-assumption-help">
-              Future military basic pay is unknown. TheWing uses this
-              annual growth assumption to project future pay tables.
+              TheWing uses 3.6% for 2027, 3.3% for 2028,
+              3.2% for 2029, and 3.0% for 2030.
+              This field controls the annual planning assumption
+              beginning in 2031.
             </p>
 
           </div>
@@ -917,9 +936,6 @@
 
         <!-- ======================================================
           PRIMARY ACTION
-
-          JS may also calculate live on input.
-          Button remains useful/mobile-friendly and explicit.
         ======================================================= -->
 
         <button
@@ -937,6 +953,7 @@
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
+
               <rect
                 x="5"
                 y="2"
@@ -952,6 +969,7 @@
               <path d="M14 14h2"></path>
               <path d="M8 18h2"></path>
               <path d="M14 18h2"></path>
+
             </svg>
 
           </span>
@@ -1057,7 +1075,7 @@
 
 
 
-          <!-- YOS -->
+          <!-- YEARS OF SERVICE -->
 
           <div class="ret-breakdown-row">
 
@@ -1130,6 +1148,7 @@
 
             </div>
 
+
             <div
               class="ret-breakdown-value ret-value-mint"
               id="ret-breakdown-monthly"
@@ -1180,7 +1199,7 @@
           <div>
 
             <div class="ret-section-eyebrow">
-              FUTURE BASIC PAY
+              BASIC PAY
             </div>
 
             <h2
@@ -1205,7 +1224,7 @@
             <span
               id="ret-growth-pill-value"
             >
-              2.5%
+              FORECAST
             </span>
 
           </div>
@@ -1215,16 +1234,15 @@
 
 
         <p class="ret-projection-intro">
-          Your final 36 months of projected basic pay are used
+          Your final 36 months of basic pay are assembled from
+          historical pay data and future planning projections
           to estimate your High-3 average.
         </p>
 
 
 
         <!-- ======================================================
-          THREE-YEAR SUMMARY
-
-          JS populates these from the actual projected high-36 array.
+          THREE 12-MONTH HIGH-3 PERIODS
         ======================================================= -->
 
         <div
@@ -1233,7 +1251,7 @@
         >
 
 
-          <!-- YEAR 1 -->
+          <!-- PERIOD 1 -->
 
           <div class="ret-year-card">
 
@@ -1252,14 +1270,12 @@
             </div>
 
             <div class="ret-year-caption">
-              Projected Basic Pay
+              12-mo average basic pay
             </div>
 
           </div>
 
 
-
-          <!-- ARROW -->
 
           <div
             class="ret-year-arrow"
@@ -1270,7 +1286,7 @@
 
 
 
-          <!-- YEAR 2 -->
+          <!-- PERIOD 2 -->
 
           <div class="ret-year-card">
 
@@ -1289,14 +1305,12 @@
             </div>
 
             <div class="ret-year-caption">
-              Projected Basic Pay
+              12-mo average basic pay
             </div>
 
           </div>
 
 
-
-          <!-- ARROW -->
 
           <div
             class="ret-year-arrow"
@@ -1307,7 +1321,7 @@
 
 
 
-          <!-- YEAR 3 -->
+          <!-- PERIOD 3 -->
 
           <div class="ret-year-card">
 
@@ -1326,7 +1340,7 @@
             </div>
 
             <div class="ret-year-caption">
-              Projected Basic Pay
+              12-mo average basic pay
             </div>
 
           </div>
@@ -1346,7 +1360,7 @@
             </div>
 
             <div class="ret-high36-sub">
-              Average of the projected final 36 months
+              Average of the final 36 monthly basic-pay values
             </div>
 
           </div>
@@ -1421,12 +1435,12 @@
             <div>
 
               <div class="ret-how-step-title">
-                Future Pay
+                Basic Pay
               </div>
 
               <p>
-                We project future basic pay from the current
-                official pay table using your selected growth rate.
+                We use historical pay for prior years and
+                TheWing's forecast schedule for future years.
               </p>
 
             </div>
@@ -1450,8 +1464,8 @@
               </div>
 
               <p>
-                Your projected final 36 months of basic pay
-                are averaged.
+                Your final 36 monthly basic-pay values are
+                averaged to calculate your High-3.
               </p>
 
             </div>
@@ -1512,10 +1526,11 @@
           </strong>
 
           <p>
-            Future military pay tables have not yet been published.
-            Projected future basic pay is an estimate based on the
-            annual growth assumption selected above. Actual retired
-            pay may differ.
+            Historical years use the available pay-history model.
+            Future years are planning estimates: 3.6% for 2027,
+            3.3% for 2028, 3.2% for 2029, 3.0% for 2030,
+            and the selected long-range assumption beginning
+            in 2031. Actual retired pay may differ.
           </p>
 
         </div>
@@ -1550,22 +1565,53 @@
 
 
 <!-- ==============================================================
-  CALCULATOR JAVASCRIPT
+  RETIREMENT PROJECTION + CALCULATOR JAVASCRIPT
 
-  Future file:
-  Retirement-Calculator/retirementcalculator.js
+  LOAD ORDER IS CRITICAL
+  -------------------------------------------------------------
 
-  This file will:
-  - read the four primary inputs
-  - calculate exact YOS from dates
-  - request projected retirement calculation
-  - populate all result IDs above
-  - render the three-year High-3 summary
-  - update automatically when inputs change
+  1. retirement-projection.js
+
+     Creates:
+
+       window.THEWING_RETIREMENT_PROJECTION
+
+     retirementcalculator.js will call:
+
+       window.THEWING_RETIREMENT_PROJECTION
+         .buildHigh36Projection(...)
+
+
+  2. retirementcalculator.js
+
+     Reads the page inputs, calls the projection engine,
+     sends the resulting exact High-36 monthly array to
+     the backend retirement engine, and renders the result.
+
+
+  BOTH USE "defer"
+  -------------------------------------------------------------
+
+  Deferred scripts execute in document order.
+
+  Therefore:
+
+    retirement-projection.js
+             ↓
+    retirementcalculator.js
+
+  is guaranteed as long as both files load successfully.
 =============================================================== -->
 
+
 <script
-  src="./retirementcalculator.js?v=20260906-1"
+  src="./retirement-projection.js?v=20260906-1"
+  defer
+></script>
+
+
+<script
+  src="./retirementcalculator.js?v=20260906-2"
   defer
 ></script>
 
