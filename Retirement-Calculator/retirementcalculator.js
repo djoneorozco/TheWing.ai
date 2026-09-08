@@ -659,7 +659,7 @@
     if (
       typeof engine
         .completedServiceMonths !==
-        "function"
+      "function"
     ) {
       throw new Error(
         "The retirement projection engine is missing completedServiceMonths()."
@@ -1514,6 +1514,8 @@
     ROOT.dataset.hasResult =
       "false";
 
+    emitRetirementCleared();
+
     setText(
       els.formMessage,
       message ||
@@ -1530,6 +1532,8 @@
 
     ROOT.dataset.hasResult =
       "false";
+
+    emitRetirementCleared();
 
     if (
       els.payRing
@@ -2148,25 +2152,173 @@
   let currentState =
     null;
 
-  function emitRetirementEvent(
-    state
+  function postRetirementMessage(
+    message,
+    targetWindow = null,
+    targetOrigin = "*"
   ) {
+    const target =
+      targetWindow ||
+      (
+        window.parent &&
+        window.parent !== window
+          ? window.parent
+          : null
+      );
+
+    if (
+      !target ||
+      typeof target.postMessage !==
+        "function"
+    ) {
+      return;
+    }
+
+    try {
+      target.postMessage(
+        cloneForPublic(
+          message
+        ),
+        targetOrigin ||
+          "*"
+      );
+    } catch (_) {
+      /* Fail open */
+    }
+  }
+
+  function emitRetirementCleared() {
     try {
       window.dispatchEvent(
         new CustomEvent(
-          "thewing:retirement-updated",
+          "thewing:retirement-cleared",
           {
-            detail:
-              cloneForPublic(
-                state
-              )
+            detail: {
+              source:
+                "thewing-retirement-calculator"
+            }
           }
         )
       );
     } catch (_) {
       /* Fail open */
     }
+
+    postRetirementMessage({
+      type:
+        "thewing:retirement-cleared",
+
+      source:
+        "thewing-retirement-calculator"
+    });
   }
+
+  function emitRetirementEvent(
+    state
+  ) {
+    const publicState =
+      cloneForPublic(
+        state
+      );
+
+    try {
+      window.dispatchEvent(
+        new CustomEvent(
+          "thewing:retirement-updated",
+          {
+            detail:
+              publicState
+          }
+        )
+      );
+    } catch (_) {
+      /* Fail open */
+    }
+
+    postRetirementMessage({
+      type:
+        "thewing:retirement-updated",
+
+      source:
+        "thewing-retirement-calculator",
+
+      retirement:
+        publicState
+    });
+  }
+
+  function respondToRetirementStateRequest(
+    event
+  ) {
+    const data =
+      event?.data;
+
+    if (
+      !data ||
+      typeof data !==
+        "object" ||
+      data.type !==
+        "thewing:retirement-request-state" ||
+      data.source !==
+        "ask-amy-retirement"
+    ) {
+      return;
+    }
+
+    const targetWindow =
+      event.source;
+
+    const targetOrigin =
+      event.origin &&
+      event.origin !==
+        "null"
+        ? event.origin
+        : "*";
+
+    if (
+      ROOT.dataset.hasResult ===
+        "true" &&
+      currentState &&
+      currentState.ok ===
+        true
+    ) {
+      postRetirementMessage(
+        {
+          type:
+            "thewing:retirement-updated",
+
+          source:
+            "thewing-retirement-calculator",
+
+          retirement:
+            cloneForPublic(
+              currentState
+            )
+        },
+        targetWindow,
+        targetOrigin
+      );
+
+      return;
+    }
+
+    postRetirementMessage(
+      {
+        type:
+          "thewing:retirement-cleared",
+
+        source:
+          "thewing-retirement-calculator"
+      },
+      targetWindow,
+      targetOrigin
+    );
+  }
+
+  window.addEventListener(
+    "message",
+    respondToRetirementStateRequest
+  );
 
   function buildPublicState(
     input,
