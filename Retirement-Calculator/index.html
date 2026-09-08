@@ -6,7 +6,7 @@
   <!-- ============================================================
     THEWING.AI • RETIREMENT CALCULATOR
     MOBILE-FIRST AURORA UI
-    v1.1.0
+    v1.1.1
 
     PURPOSE
     -------------------------------------------------------------
@@ -17,7 +17,7 @@
     1. Select retirement system
     2. Select planned retirement rank
     3. Enter Date Entered Service
-    4. Enter planned retirement date
+    4. Enter retirement effective date
     5. View projected monthly + yearly retirement pay
 
     IMPORTANT
@@ -27,6 +27,10 @@
     - official-retirement.js remains the retirement source of truth.
     - retirement-projection.js builds the exact projected High-36 array.
     - retirementcalculator.js handles UI/API communication.
+    - Planned Retirement Date is the retirement-effective date.
+    - Creditable service ends the day before the retirement-effective date.
+    - Selected retirement rank is currently applied across the full High-36.
+    - 2023-2025 pay values are reconstructed planning estimates, not archived tables.
 
     PAY PROJECTION MODEL
     -------------------------------------------------------------
@@ -65,7 +69,7 @@
 
   <meta
     name="description"
-    content="Estimate your projected monthly and yearly military retirement pay using High-3 or BRS, historical military basic pay, and future pay projections."
+    content="Estimate projected monthly and yearly military retirement pay using High-3 or BRS, reconstructed prior-year basic pay, official 2026 basic pay, and future pay projections."
   />
 
   <link
@@ -90,7 +94,7 @@
 
   <meta
     property="og:description"
-    content="Project your future military retirement pay using your retirement system, planned rank, service dates, historical pay, and future pay assumptions."
+    content="Project future military retirement pay using your retirement system, planned rank, service dates, reconstructed prior-year basic pay, official 2026 pay, and future pay assumptions."
   />
 
   <meta
@@ -581,6 +585,7 @@
                   id="ret-rank"
                   name="rank"
                   aria-label="Planned Retirement Rank"
+                  aria-describedby="ret-profile-accuracy-note"
                 >
 
 
@@ -743,7 +748,7 @@
 
 
 
-          <!-- PLANNED RETIREMENT DATE -->
+          <!-- RETIREMENT EFFECTIVE DATE -->
 
           <label
             class="ret-input-card"
@@ -781,7 +786,7 @@
             <span class="ret-input-content">
 
               <span class="ret-input-label">
-                Planned Retirement Date
+                Retirement Effective Date
               </span>
 
               <span class="ret-date-wrap">
@@ -790,7 +795,8 @@
                   type="date"
                   id="ret-retirement-date"
                   name="retirementDate"
-                  aria-label="Planned Retirement Date"
+                  aria-label="Retirement Effective Date"
+                  aria-describedby="ret-profile-accuracy-note"
                   autocomplete="off"
                 />
 
@@ -801,6 +807,17 @@
           </label>
 
         </div>
+
+
+        <p
+          class="ret-assumption-help"
+          id="ret-profile-accuracy-note"
+        >
+          Planning note: your selected retirement rank is applied
+          throughout the full 36-month High-3 period. The Retirement
+          Effective Date is the date retirement begins; active-duty
+          service is calculated through the day before that date.
+        </p>
 
 
 
@@ -922,6 +939,9 @@
 
 
             <p class="ret-assumption-help">
+              2023–2025 basic pay is reconstructed from the official
+              2026 baseline using published annual general pay adjustments;
+              those values are planning estimates, not archived pay tables.
               TheWing uses 3.6% for 2027, 3.3% for 2028,
               3.2% for 2029, and 3.0% for 2030.
               This field controls the annual planning assumption
@@ -1234,9 +1254,9 @@
 
 
         <p class="ret-projection-intro">
-          Your final 36 months of basic pay are assembled from
-          historical pay data and future planning projections
-          to estimate your High-3 average.
+          Your final 36 months are assembled from reconstructed
+          prior-year basic pay, official 2026 basic pay, and future
+          planning projections to estimate your High-3 average.
         </p>
 
 
@@ -1439,8 +1459,9 @@
               </div>
 
               <p>
-                We use historical pay for prior years and
-                TheWing's forecast schedule for future years.
+                We use reconstructed prior-year basic pay for 2023–2025,
+                official 2026 basic pay, and TheWing's planning forecast
+                schedule for future years.
               </p>
 
             </div>
@@ -1526,11 +1547,14 @@
           </strong>
 
           <p>
-            Historical years use the available pay-history model.
-            Future years are planning estimates: 3.6% for 2027,
-            3.3% for 2028, 3.2% for 2029, 3.0% for 2030,
-            and the selected long-range assumption beginning
-            in 2031. Actual retired pay may differ.
+            2023–2025 basic pay is reconstructed from the official 2026
+            baseline using published annual general pay adjustments and is
+            not an archived historical pay table. Future years are planning
+            estimates: 3.6% for 2027, 3.3% for 2028, 3.2% for 2029,
+            3.0% for 2030, and the selected long-range assumption beginning
+            in 2031. The selected retirement rank is applied across the
+            full High-3 period. Results show gross retired pay before taxes,
+            SBP, or other deductions. Actual retired pay may differ.
           </p>
 
         </div>
@@ -1605,7 +1629,7 @@
 
 
 <script
-  src="./retirement-projection.js?v=20260906-1"
+  src="./retirement-projection.js?v=20260908-1"
   defer
 ></script>
 
