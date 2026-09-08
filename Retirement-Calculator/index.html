@@ -6,7 +6,7 @@
   <!-- ============================================================
     THEWING.AI • RETIREMENT CALCULATOR
     MOBILE-FIRST AURORA UI
-    v1.1.2
+    v1.2.0
 
     PURPOSE
     -------------------------------------------------------------
@@ -15,10 +15,11 @@
     PRIMARY FLOW
     -------------------------------------------------------------
     1. Select retirement system
-    2. Select planned retirement rank
-    3. Enter Date Entered Service
-    4. Enter retirement effective date
-    5. View projected monthly + yearly retirement pay
+    2. Select retirement rank
+    3. Report any promotion during the final 36 months
+    4. Enter Date Entered Service
+    5. Enter retirement effective date
+    6. View projected monthly + yearly retirement pay
 
     IMPORTANT
     -------------------------------------------------------------
@@ -27,9 +28,10 @@
     - official-retirement.js remains the retirement source of truth.
     - retirement-projection.js builds the exact projected High-36 array.
     - retirementcalculator.js handles UI/API communication.
-    - Planned Retirement Date is the retirement-effective date.
+    - Retirement Effective Date is the retirement-effective date.
     - Creditable service ends the day before the retirement-effective date.
-    - Selected retirement rank is currently applied across the full High-36.
+    - If a final-36 promotion is reported, pre-promotion months use Previous Rank.
+    - The promotion month and later use Retirement Rank.
     - 2023-2025 pay values are reconstructed planning estimates, not archived tables.
 
     PAY PROJECTION MODEL
@@ -150,7 +152,7 @@
 
   <link
     rel="stylesheet"
-    href="./retirementcalculator.css?v=20260908-2"
+    href="./retirementcalculator.css?v=20260908-3"
   />
 
 </head>
@@ -549,7 +551,7 @@
 
 
 
-          <!-- PLANNED RETIREMENT RANK -->
+          <!-- RETIREMENT RANK -->
 
           <label
             class="ret-input-card"
@@ -576,7 +578,7 @@
             <span class="ret-input-content">
 
               <span class="ret-input-label">
-                Planned Retirement Rank
+                Retirement Rank
               </span>
 
               <span class="ret-select-wrap">
@@ -584,7 +586,7 @@
                 <select
                   id="ret-rank"
                   name="rank"
-                  aria-label="Planned Retirement Rank"
+                  aria-label="Retirement Rank"
                   aria-describedby="ret-profile-accuracy-note"
                 >
 
@@ -683,6 +685,284 @@
                   class="ret-chevron"
                   aria-hidden="true"
                 ></span>
+
+              </span>
+
+            </span>
+
+          </label>
+
+
+
+          <!-- PROMOTION DURING FINAL 36 MONTHS -->
+
+          <label
+            class="ret-input-card ret-promotion-question"
+            for="ret-promoted-final-36"
+          >
+
+            <span
+              class="ret-input-icon ret-icon-blue"
+              aria-hidden="true"
+            >
+
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M12 20V4"></path>
+                <path d="m7 9 5-5 5 5"></path>
+                <path d="M5 20h14"></path>
+              </svg>
+
+            </span>
+
+
+            <span class="ret-input-content">
+
+              <span class="ret-input-label">
+                Were you promoted during your final 36 months?
+              </span>
+
+              <span class="ret-select-wrap">
+
+                <select
+                  id="ret-promoted-final-36"
+                  name="promotedFinal36"
+                  aria-label="Were you promoted during your final 36 months?"
+                  aria-controls="ret-previous-rank ret-promotion-date"
+                  aria-describedby="ret-profile-accuracy-note"
+                >
+
+                  <option
+                    value="NO"
+                    selected
+                  >
+                    No
+                  </option>
+
+                  <option value="YES">
+                    Yes
+                  </option>
+
+                </select>
+
+                <span
+                  class="ret-chevron"
+                  aria-hidden="true"
+                ></span>
+
+              </span>
+
+            </span>
+
+          </label>
+
+
+
+          <!-- PREVIOUS RANK -->
+
+          <label
+            class="ret-input-card ret-promotion-detail"
+            for="ret-previous-rank"
+            id="ret-previous-rank-card"
+            hidden
+          >
+
+            <span
+              class="ret-input-icon ret-icon-lav"
+              aria-hidden="true"
+            >
+
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="m4 7 8 5 8-5"></path>
+                <path d="m4 12 8 5 8-5"></path>
+                <path d="M4 17h10"></path>
+              </svg>
+
+            </span>
+
+
+            <span class="ret-input-content">
+
+              <span class="ret-input-label">
+                Previous Rank
+              </span>
+
+              <span class="ret-select-wrap">
+
+                <select
+                  id="ret-previous-rank"
+                  name="previousRank"
+                  aria-label="Previous Rank"
+                  aria-describedby="ret-profile-accuracy-note"
+                  disabled
+                >
+
+                  <option
+                    value=""
+                    selected
+                    disabled
+                  >
+                    Select previous rank
+                  </option>
+
+
+                  <!-- ENLISTED -->
+
+                  <optgroup label="Enlisted">
+
+                    <option value="E-5">
+                      E-5 · Staff Sergeant
+                    </option>
+
+                    <option value="E-6">
+                      E-6 · Technical Sergeant
+                    </option>
+
+                    <option value="E-7">
+                      E-7 · Master Sergeant
+                    </option>
+
+                    <option value="E-8">
+                      E-8 · Senior Master Sergeant
+                    </option>
+
+                    <option value="E-9">
+                      E-9 · Chief Master Sergeant
+                    </option>
+
+                  </optgroup>
+
+
+                  <!-- OFFICERS -->
+
+                  <optgroup label="Officers">
+
+                    <option value="O-1">
+                      O-1 · Second Lieutenant
+                    </option>
+
+                    <option value="O-2">
+                      O-2 · First Lieutenant
+                    </option>
+
+                    <option value="O-3">
+                      O-3 · Captain
+                    </option>
+
+                    <option value="O-4">
+                      O-4 · Major
+                    </option>
+
+                    <option value="O-5">
+                      O-5 · Lieutenant Colonel
+                    </option>
+
+                    <option value="O-6">
+                      O-6 · Colonel
+                    </option>
+
+                    <option value="O-7">
+                      O-7 · Brigadier General
+                    </option>
+
+                    <option value="O-8">
+                      O-8 · Major General
+                    </option>
+
+                  </optgroup>
+
+
+                  <!-- PRIOR ENLISTED OFFICERS -->
+
+                  <optgroup label="Prior-Enlisted Officers">
+
+                    <option value="O-1E">
+                      O-1E · Second Lieutenant
+                    </option>
+
+                    <option value="O-2E">
+                      O-2E · First Lieutenant
+                    </option>
+
+                    <option value="O-3E">
+                      O-3E · Captain
+                    </option>
+
+                  </optgroup>
+
+                </select>
+
+
+                <span
+                  class="ret-chevron"
+                  aria-hidden="true"
+                ></span>
+
+              </span>
+
+            </span>
+
+          </label>
+
+
+
+          <!-- PROMOTION DATE -->
+
+          <label
+            class="ret-input-card ret-promotion-detail"
+            for="ret-promotion-date"
+            id="ret-promotion-date-card"
+            hidden
+          >
+
+            <span
+              class="ret-input-icon ret-icon-mint"
+              aria-hidden="true"
+            >
+
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <rect
+                  x="3"
+                  y="5"
+                  width="18"
+                  height="16"
+                  rx="2"
+                ></rect>
+
+                <path d="M8 3v4"></path>
+                <path d="M16 3v4"></path>
+                <path d="M3 10h18"></path>
+                <path d="m9 16 2 2 4-5"></path>
+              </svg>
+
+            </span>
+
+
+            <span class="ret-input-content">
+
+              <span class="ret-input-label">
+                Promotion Date
+              </span>
+
+              <span class="ret-date-wrap">
+
+                <input
+                  type="date"
+                  id="ret-promotion-date"
+                  name="promotionDate"
+                  aria-label="Promotion Date"
+                  aria-describedby="ret-profile-accuracy-note"
+                  autocomplete="off"
+                  disabled
+                />
 
               </span>
 
@@ -813,10 +1093,12 @@
           class="ret-assumption-help"
           id="ret-profile-accuracy-note"
         >
-          Planning note: your selected retirement rank is applied
-          throughout the full 36-month High-3 period. The Retirement
-          Effective Date is the date retirement begins; active-duty
-          service is calculated through the day before that date.
+          Planning note: if you report a promotion during the final 36 months,
+          months before the promotion month use Previous Rank and the promotion
+          month forward uses Retirement Rank. If you select No, Retirement Rank
+          is used across all 36 months. The Retirement Effective Date is the date
+          retirement begins; active-duty service is calculated through the day
+          before that date.
         </p>
 
 
@@ -1552,8 +1834,10 @@
             not an archived historical pay table. Future years are planning
             estimates: 3.6% for 2027, 3.3% for 2028, 3.2% for 2029,
             3.0% for 2030, and the selected long-range assumption beginning
-            in 2031. The selected retirement rank is applied across the
-            full High-3 period. Results show gross retired pay before taxes,
+            in 2031. If a promotion during the final 36 months is reported,
+            pre-promotion months use Previous Rank and the promotion month
+            forward uses Retirement Rank; otherwise Retirement Rank is applied
+            across all 36 months. Results show gross retired pay before taxes,
             SBP, or other deductions. Actual retired pay may differ.
           </p>
 
@@ -1629,13 +1913,13 @@
 
 
 <script
-  src="./retirement-projection.js?v=20260908-1"
+  src="./retirement-projection.js?v=20260908-3"
   defer
 ></script>
 
 
 <script
-  src="./retirementcalculator.js?v=20260908-1"
+  src="./retirementcalculator.js?v=20260908-3"
   defer
 ></script>
 
