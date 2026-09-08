@@ -1,7 +1,7 @@
 /* ============================================================
   THEWING.AI • RETIREMENT CALCULATOR
   retirementcalculator.js
-  v2.0.0
+  v2.0.1
 
   PURPOSE
   -------------------------------------------------------------
@@ -43,7 +43,7 @@
 
   const $ = (selector) => ROOT.querySelector(selector);
 
-  const RUNTIME_VERSION = "retirement-calculator-2026.2";
+  const RUNTIME_VERSION = "retirement-calculator-2026.3";
 
   const API_ENDPOINT =
     "https://thewing.netlify.app/api/opensource-brain";
@@ -110,6 +110,9 @@
 
     livePill:
       $("#ret-live-pill"),
+
+    overviewPanel:
+      $(".ret-overview"),
 
     payRing:
       $("#ret-pay-ring"),
@@ -537,6 +540,48 @@
       JSON.stringify(
         value
       )
+    );
+  }
+
+
+  function revealInitialResultOnMobile() {
+
+    if (
+      !els.overviewPanel ||
+      typeof window.matchMedia !== "function" ||
+      !window.matchMedia("(max-width: 768px)").matches
+    ) {
+      return;
+    }
+
+    const reduceMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+    window.requestAnimationFrame(
+      () => {
+
+        const top =
+          els.overviewPanel
+            .getBoundingClientRect()
+            .top +
+          window.scrollY -
+          16;
+
+        window.scrollTo({
+          top:
+            Math.max(
+              0,
+              top
+            ),
+
+          behavior:
+            reduceMotion
+              ? "auto"
+              : "smooth"
+        });
+      }
     );
   }
 
@@ -1683,9 +1728,9 @@
 
     setText(
       els.projectionIntro,
-      "Your final 36 months of basic pay are assembled from " +
-      "historical pay data and future planning projections " +
-      "to estimate your High-3 average."
+      "Your final 36 months are assembled from reconstructed " +
+      "prior-year basic pay, official 2026 basic pay, and future " +
+      "planning projections to estimate your High-3 average."
     );
 
 
@@ -2614,6 +2659,10 @@
       options.userInitiated ===
       true;
 
+    const shouldRevealInitialResult =
+      userInitiated &&
+      !hasCalculatedOnce;
+
 
     clearError();
 
@@ -2767,6 +2816,13 @@
       emitRetirementEvent(
         currentState
       );
+
+
+      if (
+        shouldRevealInitialResult
+      ) {
+        revealInitialResultOnMobile();
+      }
 
 
       return cloneForPublic(
