@@ -1,199 +1,100 @@
-/* ============================================================
-  THEWING.AI • RETIREMENT CALCULATOR
-  retirementcalculator.css
-  v1.0.0
-
-  MOBILE-FIRST AURORA INTERFACE
-
-  DESIGN GOALS
-  -------------------------------------------------------------
-  - Match TheWing.ai SaaS visual system
-  - iPhone-first
-  - Large touch targets
-  - Result-first calculator flow
-  - Aurora / glass interface
-  - Minimal visual friction
-  - Native mobile form controls where practical
-  - Desktop enhancement without changing mobile hierarchy
-============================================================ */
-
-
-/* ============================================================
-  1. DESIGN TOKENS
-============================================================ */
-
 :root {
-
-  /* BACKGROUND */
-
   --ret-bg-deep:
     #071d2b;
-
   --ret-bg-1:
     #0b2b40;
-
   --ret-bg-2:
     #16435f;
-
   --ret-bg-3:
     #315b76;
-
   --ret-bg-soft:
     #52697b;
-
-
-  /* GLASS */
-
   --ret-glass:
     rgba(73, 118, 151, .30);
-
   --ret-glass-strong:
     rgba(61, 105, 139, .43);
-
   --ret-glass-dark:
     rgba(16, 53, 79, .55);
-
   --ret-input:
     rgba(19, 58, 88, .54);
-
   --ret-input-hover:
     rgba(25, 70, 103, .64);
-
-
-  /* BORDERS */
-
   --ret-line:
     rgba(183, 216, 238, .24);
-
   --ret-line-soft:
     rgba(186, 217, 237, .13);
-
   --ret-line-bright:
     rgba(198, 229, 247, .34);
-
-
-  /* TEXT */
-
   --ret-ink:
     #f6f9fc;
-
   --ret-ink-soft:
     rgba(239, 247, 252, .90);
-
   --ret-muted:
     rgba(208, 226, 239, .76);
-
   --ret-soft:
     rgba(191, 215, 231, .58);
-
-
-  /* ACCENTS */
-
   --ret-blue:
     #8fc4ff;
-
   --ret-blue-strong:
     #54a7ff;
-
   --ret-cyan:
     #75dfe9;
-
   --ret-teal:
     #80e3da;
-
   --ret-mint:
     #a9efd4;
-
   --ret-mint-strong:
     #76ddb8;
-
   --ret-lav:
     #cdbdff;
-
   --ret-peach:
     #efaa83;
-
   --ret-amber:
     #edd284;
-
   --ret-gold:
     #efdba1;
-
   --ret-danger:
     #f0a1a1;
-
-
-  /* SHADOWS */
-
   --ret-shadow:
     0 20px 46px
     rgba(1, 16, 28, .26);
-
   --ret-shadow-soft:
     0 10px 26px
     rgba(2, 18, 31, .17);
-
   --ret-shadow-button:
     0 12px 28px
     rgba(49, 199, 195, .20);
-
-
-  /* RADII */
-
   --ret-radius:
     28px;
-
   --ret-radius-md:
     20px;
-
   --ret-radius-sm:
     15px;
-
-
-  /* EFFECTS */
-
   --ret-blur:
     24px;
-
   --ret-transition:
     .20s ease;
 }
-
-
-/* ============================================================
-  2. RESET
-============================================================ */
-
 *,
 *::before,
 *::after {
-
   box-sizing:
     border-box;
 }
-
-
 html,
 body {
-
   margin:
     0;
-
   padding:
     0;
-
   width:
     100%;
-
   min-width:
     0;
-
   min-height:
     100%;
-
   overflow-x:
     hidden;
-
   font-family:
     "Inter",
     system-ui,
@@ -201,126 +102,83 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-
   color:
     var(--ret-ink);
-
   background:
     #092234;
-
   -webkit-text-size-adjust:
     100%;
-
   text-rendering:
     optimizeLegibility;
 }
-
-
 body {
-
   min-height:
     100vh;
-
   min-height:
     100dvh;
 }
-
-
 button,
 input,
 select,
 summary {
-
   font:
     inherit;
 }
-
-
 button,
 select,
 summary {
-
   -webkit-tap-highlight-color:
     transparent;
 }
-
-
 button,
 select {
-
   cursor:
     pointer;
 }
-
-
 button {
-
   border:
     0;
 }
-
-
 svg {
-
   display:
     block;
 }
-
-
 [hidden] {
-
   display:
     none !important;
 }
-
-
-/* ============================================================
-  3. APP SHELL
-============================================================ */
-
 #tw-retirement-shell {
-
   position:
     relative;
-
   isolation:
     isolate;
-
   width:
     100%;
-
   min-height:
     100vh;
-
   min-height:
     100dvh;
-
   overflow:
     hidden;
-
   background:
-
     radial-gradient(
       680px 440px
       at 8% 2%,
       rgba(85, 184, 223, .17),
       transparent 66%
     ),
-
     radial-gradient(
       720px 520px
       at 96% 12%,
       rgba(160, 167, 211, .13),
       transparent 64%
     ),
-
     radial-gradient(
       720px 500px
       at 72% 100%,
       rgba(226, 181, 122, .08),
       transparent 68%
     ),
-
     linear-gradient(
       142deg,
       #082437 0%,
@@ -328,27 +186,18 @@ svg {
       #4a6072 100%
     );
 }
-
-
 #tw-retirement-shell::before {
-
   content:
     "";
-
   position:
     fixed;
-
   inset:
     0;
-
   z-index:
     0;
-
   pointer-events:
     none;
-
   background:
-
     repeating-linear-gradient(
       180deg,
       rgba(255,255,255,.012) 0,
@@ -356,47 +205,33 @@ svg {
       transparent 1px,
       transparent 31px
     ),
-
     linear-gradient(
       180deg,
       rgba(255,255,255,.025),
       transparent 20%
     );
-
   opacity:
     .78;
 }
-
-
 #tw-retirement-shell::after {
-
   content:
     "";
-
   position:
     fixed;
-
   width:
     620px;
-
   height:
     620px;
-
   right:
     -320px;
-
   top:
     -280px;
-
   z-index:
     0;
-
   pointer-events:
     none;
-
   border-radius:
     50%;
-
   background:
     radial-gradient(
       circle,
@@ -404,1058 +239,678 @@ svg {
       rgba(113, 211, 231, .035) 48%,
       transparent 70%
     );
-
   filter:
     blur(10px);
 }
-
-
 .ret-stage {
-
   position:
     relative;
-
   z-index:
     2;
-
   width:
     100%;
 }
-
-
 .ret-app {
-
   width:
     min(
       1120px,
       calc(100vw - 18px)
     );
-
   margin:
     0 auto;
-
   padding:
-
     max(
       18px,
       env(safe-area-inset-top)
     )
-
     0
-
     calc(
       34px +
       env(safe-area-inset-bottom)
     );
 }
-
-
-/* ============================================================
-  4. PAGE INTRO
-============================================================ */
-
 .ret-page-header {
-
   padding:
     11px 8px 20px;
 }
-
-
 .ret-page-eyebrow {
-
   margin-bottom:
     8px;
-
   color:
     var(--ret-cyan);
-
   font-size:
     10px;
-
   line-height:
     1;
-
   font-weight:
     800;
-
   letter-spacing:
     .15em;
-
   text-transform:
     uppercase;
 }
-
-
 .ret-page-title {
-
   margin:
     0;
-
   color:
     rgba(250,253,255,.98);
-
   font-family:
     "Merriweather",
     Georgia,
     serif;
-
   font-size:
     clamp(
       29px,
       8vw,
       42px
     );
-
   line-height:
     1.03;
-
   font-weight:
     700;
-
   letter-spacing:
     -.035em;
-
   text-shadow:
     0 3px 18px
     rgba(3, 17, 29, .18);
 }
-
-
 .ret-page-subtitle {
-
   max-width:
     660px;
-
   margin:
     10px 0 0;
-
   color:
     var(--ret-muted);
-
   font-size:
     13px;
-
   line-height:
     1.48;
-
   font-weight:
     500;
 }
-
-
-/* ============================================================
-  5. SHARED GLASS PANELS
-============================================================ */
-
 .ret-panel {
-
   position:
     relative;
-
   width:
     100%;
-
   min-width:
     0;
-
   margin:
     0 0 13px;
-
   overflow:
     hidden;
-
   border:
     1px solid
     var(--ret-line);
-
   border-radius:
     var(--ret-radius);
-
   background:
-
     radial-gradient(
       440px 220px
       at 8% 0%,
       rgba(166, 218, 244, .075),
       transparent 72%
     ),
-
     linear-gradient(
       180deg,
       rgba(116, 157, 188, .28),
       rgba(53, 97, 130, .30)
     );
-
   box-shadow:
-
     var(--ret-shadow),
-
     inset
     0 1px 0
     rgba(255,255,255,.095);
-
   backdrop-filter:
     blur(var(--ret-blur))
     saturate(138%);
-
   -webkit-backdrop-filter:
     blur(var(--ret-blur))
     saturate(138%);
 }
-
-
 .ret-panel::before {
-
   content:
     "";
-
   position:
     absolute;
-
   inset:
     0;
-
   pointer-events:
     none;
-
   border-radius:
     inherit;
-
   background:
-
     linear-gradient(
       180deg,
       rgba(255,255,255,.055),
       transparent 40%
     );
-
   opacity:
     .92;
 }
-
-
 .ret-panel > * {
-
   position:
     relative;
-
   z-index:
     1;
 }
-
-
 .ret-glass {
-
   isolation:
     isolate;
 }
-
-
-/* ============================================================
-  6. SHARED SECTION HEADINGS
-============================================================ */
-
 .ret-section-header {
-
   display:
     flex;
-
   align-items:
     flex-start;
-
   justify-content:
     space-between;
-
   gap:
     14px;
 }
-
-
 .ret-section-eyebrow {
-
   margin-bottom:
     6px;
-
   color:
     var(--ret-cyan);
-
   font-size:
     9px;
-
   line-height:
     1;
-
   font-weight:
     800;
-
   letter-spacing:
     .13em;
-
   text-transform:
     uppercase;
 }
-
-
 .ret-section-title {
-
   margin:
     0;
-
   color:
     var(--ret-ink);
-
   font-size:
     23px;
-
   line-height:
     1.08;
-
   font-weight:
     800;
-
   letter-spacing:
     -.032em;
 }
-
-
-/* ============================================================
-  7. LIVE PILL
-============================================================ */
-
 .ret-live-pill {
-
   flex:
     0 0 auto;
-
   display:
     inline-flex;
-
   align-items:
     center;
-
   justify-content:
     center;
-
   min-width:
     57px;
-
   height:
     32px;
-
   padding:
     0 12px;
-
   border:
     1px solid
     rgba(169,239,212,.38);
-
   border-radius:
     999px;
-
   background:
     rgba(169,239,212,.075);
-
   color:
     var(--ret-mint);
-
   font-size:
     9px;
-
   line-height:
     1;
-
   font-weight:
     800;
-
   letter-spacing:
     .11em;
-
   text-transform:
     uppercase;
 }
-
-
-/* ============================================================
-  8. RETIREMENT OVERVIEW
-============================================================ */
-
 .ret-overview {
-
   padding:
     20px 18px 19px;
 }
-
-
 .ret-overview .ret-section-header {
-
   margin-bottom:
     20px;
 }
-
-
 .ret-overview-main {
-
   display:
     grid;
-
   grid-template-columns:
     145px
     minmax(0, 1fr);
-
   align-items:
     center;
-
   gap:
     14px;
-
   min-width:
     0;
 }
-
-
-/* ============================================================
-  9. PAY RING
-============================================================ */
-
 .ret-ring-wrap {
-
   display:
     flex;
-
   align-items:
     center;
-
   justify-content:
     center;
-
   min-width:
     0;
 }
-
-
 .ret-pay-ring {
-
   --pct:
     0;
-
   position:
     relative;
-
   width:
     145px;
-
   height:
     145px;
-
   flex:
     0 0 145px;
-
   border-radius:
     50%;
-
   background:
-
     conic-gradient(
-
       from 0deg,
-
       var(--ret-cyan)
       0deg,
-
       var(--ret-teal)
       calc(
         var(--pct) * 3.6deg * .60
       ),
-
       var(--ret-mint)
       calc(
         var(--pct) * 3.6deg * .60
       ),
-
       var(--ret-amber)
       calc(
         var(--pct) * 3.6deg
       ),
-
       rgba(193, 222, 240, .18)
       calc(
         var(--pct) * 3.6deg
       ),
-
       rgba(193, 222, 240, .18)
       360deg
     );
-
   box-shadow:
-
     inset
     0 2px 8px
     rgba(255,255,255,.12),
-
     0 13px 28px
     rgba(2, 20, 34, .19);
 }
-
-
 .ret-pay-ring::before {
-
   content:
     "";
-
   position:
     absolute;
-
   inset:
     13px;
-
   border:
     1px solid
     rgba(207, 233, 247, .15);
-
   border-radius:
     50%;
-
   background:
-
     radial-gradient(
       circle
       at 31% 23%,
       rgba(255,255,255,.14),
       transparent 28%
     ),
-
     radial-gradient(
       circle
       at 48% 70%,
       rgba(119, 226, 219, .10),
       transparent 58%
     ),
-
     rgba(22, 59, 83, .75);
-
   box-shadow:
     inset
     0 1px 1px
     rgba(255,255,255,.09);
-
   backdrop-filter:
     blur(14px);
-
   -webkit-backdrop-filter:
     blur(14px);
 }
-
-
 .ret-ring-center {
-
   position:
     absolute;
-
   inset:
     0;
-
   z-index:
     2;
-
   display:
     flex;
-
   flex-direction:
     column;
-
   align-items:
     center;
-
   justify-content:
     center;
-
   padding:
     17px;
-
   text-align:
     center;
 }
-
-
 .ret-ring-value {
-
   width:
     100%;
-
   overflow:
     hidden;
-
   color:
     rgba(255,255,255,.99);
-
   font-size:
     clamp(
       29px,
       8vw,
       40px
     );
-
   line-height:
     .98;
-
   font-weight:
     800;
-
   letter-spacing:
     -.055em;
-
   font-variant-numeric:
     tabular-nums;
-
   text-overflow:
     ellipsis;
-
   white-space:
     nowrap;
-
   text-shadow:
     0 4px 14px
     rgba(0,0,0,.18);
 }
-
-
 .ret-ring-label {
-
   max-width:
     110px;
-
   margin-top:
     7px;
-
   color:
     var(--ret-mint);
-
   font-size:
     8px;
-
   line-height:
     1.3;
-
   font-weight:
     800;
-
   letter-spacing:
     .045em;
-
   text-transform:
     uppercase;
 }
-
-
-/* ============================================================
-  10. OVERVIEW METRICS
-============================================================ */
-
 .ret-overview-metrics {
-
   display:
     grid;
-
   grid-template-columns:
     1fr;
-
   gap:
     7px;
-
   min-width:
     0;
 }
-
-
 .ret-metric {
-
   display:
     flex;
-
   align-items:
     center;
-
   gap:
     9px;
-
   min-width:
     0;
-
   padding:
     9px 10px;
-
   border:
     1px solid
     rgba(183, 216, 238, .16);
-
   border-radius:
     15px;
-
   background:
     linear-gradient(
       180deg,
       rgba(24, 66, 98, .42),
       rgba(17, 54, 82, .40)
     );
-
   box-shadow:
     inset
     0 1px 0
     rgba(255,255,255,.035);
 }
-
-
 .ret-metric-icon,
 .ret-input-icon {
-
   display:
     flex;
-
   align-items:
     center;
-
   justify-content:
     center;
 }
-
-
 .ret-metric-icon {
-
   flex:
     0 0 35px;
-
   width:
     35px;
-
   height:
     35px;
-
   border:
     1px solid
     rgba(255,255,255,.12);
-
   border-radius:
     11px;
-
   background:
     rgba(18, 57, 85, .48);
-
   box-shadow:
     inset
     0 1px 0
     rgba(255,255,255,.06);
 }
-
-
 .ret-metric-icon svg,
 .ret-input-icon svg,
 .ret-calculate-icon svg {
-
   width:
     20px;
-
   height:
     20px;
-
   fill:
     none;
-
   stroke:
     currentColor;
-
   stroke-width:
     1.8;
-
   stroke-linecap:
     round;
-
   stroke-linejoin:
     round;
 }
-
-
 .ret-icon-blue {
-
   color:
     var(--ret-blue);
 }
-
-
 .ret-icon-mint {
-
   color:
     var(--ret-mint);
 }
-
-
 .ret-icon-lav {
-
   color:
     var(--ret-lav);
 }
-
-
 .ret-icon-peach {
-
   color:
     var(--ret-peach);
 }
-
-
 .ret-metric-copy {
-
   min-width:
     0;
 }
-
-
 .ret-metric-label {
-
   color:
     var(--ret-muted);
-
   font-size:
     9px;
-
   line-height:
     1.25;
-
   font-weight:
     600;
 }
-
-
 .ret-metric-value {
-
   max-width:
     100%;
-
   margin-top:
     4px;
-
   overflow:
     hidden;
-
   color:
     var(--ret-mint);
-
   font-size:
     18px;
-
   line-height:
     1;
-
   font-weight:
     800;
-
   letter-spacing:
     -.035em;
-
   font-variant-numeric:
     tabular-nums;
-
   text-overflow:
     ellipsis;
-
   white-space:
     nowrap;
 }
-
-
 .ret-overview-status {
-
   margin-top:
     17px;
-
   padding-top:
     14px;
-
   border-top:
     1px solid
     rgba(194, 222, 240, .15);
-
   color:
     var(--ret-muted);
-
   font-size:
     10.5px;
-
   line-height:
     1.45;
-
   font-weight:
     500;
-
   text-align:
     center;
 }
-
-
-/* ============================================================
-  11. PROFILE PANEL
-============================================================ */
-
 .ret-profile {
-
   padding:
     20px 17px 21px;
 }
-
-
 .ret-profile-heading {
-
   display:
     flex;
-
   align-items:
     center;
-
   gap:
     13px;
-
   margin-bottom:
     18px;
 }
-
-
 .ret-step-badge {
-
   flex:
     0 0 43px;
-
   width:
     43px;
-
   height:
     43px;
-
   display:
     flex;
-
   align-items:
     center;
-
   justify-content:
     center;
-
   border:
     1px solid
     rgba(180, 221, 255, .32);
-
   border-radius:
     50%;
-
   background:
     linear-gradient(
       180deg,
       #5db3ff,
       #2b82dc
     );
-
   color:
     #fff;
-
   font-size:
     18px;
-
   line-height:
     1;
-
   font-weight:
     800;
-
   box-shadow:
-
     inset
     0 1px 0
     rgba(255,255,255,.33),
-
     0 8px 18px
     rgba(28, 106, 177, .24);
 }
-
-
-/* ============================================================
-  12. INPUT LIST
-============================================================ */
-
 .ret-input-list {
-
   display:
     grid;
-
   grid-template-columns:
     1fr;
-
   gap:
     10px;
 }
-
-
 .ret-input-card {
-
   position:
     relative;
-
   display:
     grid;
-
   grid-template-columns:
     54px
     minmax(0,1fr);
-
   align-items:
     center;
-
   gap:
     14px;
-
   min-width:
     0;
-
   min-height:
     86px;
-
   padding:
     13px 14px;
-
   border:
     1px solid
     rgba(179, 211, 233, .20);
-
   border-radius:
     19px;
-
   background:
     linear-gradient(
       180deg,
       rgba(29, 71, 104, .49),
       rgba(20, 59, 90, .46)
     );
-
   box-shadow:
     inset
     0 1px 0
     rgba(255,255,255,.035);
-
   transition:
-
     border-color
     var(--ret-transition),
-
     background
     var(--ret-transition),
-
     transform
     var(--ret-transition);
 }
-
-
 .ret-input-card:hover {
-
   border-color:
     rgba(183, 222, 245, .29);
-
   background:
     linear-gradient(
       180deg,
@@ -1463,1193 +918,743 @@ svg {
       rgba(22, 66, 98, .52)
     );
 }
-
-
 .ret-input-card:focus-within {
-
   border-color:
     rgba(126, 225, 218, .52);
-
   box-shadow:
-
     inset
     0 1px 0
     rgba(255,255,255,.04),
-
     0 0 0 3px
     rgba(126, 225, 218, .065);
 }
-
-
 .ret-input-icon {
-
   width:
     54px;
-
   height:
     54px;
-
   border:
     1px solid
     rgba(185, 218, 240, .17);
-
   border-radius:
     16px;
-
   background:
     rgba(37, 82, 115, .36);
-
   box-shadow:
     inset
     0 1px 0
     rgba(255,255,255,.04);
 }
-
-
 .ret-input-icon svg {
-
   width:
     26px;
-
   height:
     26px;
 }
-
-
 .ret-input-content {
-
   display:
     block;
-
   min-width:
     0;
 }
-
-
 .ret-input-label {
-
   display:
     block;
-
   margin-bottom:
     7px;
-
   color:
     var(--ret-muted);
-
   font-size:
     11px;
-
   line-height:
     1.15;
-
   font-weight:
     600;
 }
-
-
-/* ============================================================
-  13. SELECTS
-============================================================ */
-
 .ret-select-wrap {
-
   position:
     relative;
-
   display:
     block;
-
   width:
     100%;
-
   min-width:
     0;
 }
-
-
 .ret-select-wrap select {
-
   width:
     100%;
-
   min-width:
     0;
-
   margin:
     0;
-
   padding:
     0 31px 0 0;
-
   border:
     0;
-
   outline:
     0;
-
   appearance:
     none;
-
   -webkit-appearance:
     none;
-
   -moz-appearance:
     none;
-
   background:
     transparent;
-
   color:
     var(--ret-ink);
-
   font-size:
     16px;
-
   line-height:
     1.2;
-
   font-weight:
     700;
-
   letter-spacing:
     -.017em;
-
   text-overflow:
     ellipsis;
-
   white-space:
     nowrap;
 }
-
-
 .ret-select-wrap select option,
 .ret-select-wrap select optgroup {
-
   color:
     #112d42;
-
   background:
     #eef6fa;
 }
-
-
 .ret-chevron {
-
   position:
     absolute;
-
   right:
     4px;
-
   top:
     50%;
-
   width:
     9px;
-
   height:
     9px;
-
   margin-top:
     -7px;
-
   border-right:
     2px solid
     rgba(218, 235, 246, .78);
-
   border-bottom:
     2px solid
     rgba(218, 235, 246, .78);
-
   transform:
     rotate(45deg);
-
   pointer-events:
     none;
 }
-
-
-/* ============================================================
-  14. DATE INPUTS
-============================================================ */
-
 .ret-date-wrap {
-
   display:
     block;
-
   width:
     100%;
 }
-
-
 .ret-date-wrap input[type="date"] {
-
   width:
     100%;
-
   min-width:
     0;
-
   margin:
     0;
-
   padding:
     0;
-
   border:
     0;
-
   outline:
     0;
-
   background:
     transparent;
-
   color:
     var(--ret-ink);
-
   font-size:
     16px;
-
   line-height:
     1.2;
-
   font-weight:
     700;
-
   letter-spacing:
     -.017em;
-
   color-scheme:
     dark;
-
   -webkit-appearance:
     none;
 }
-
-
 .ret-date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
-
   opacity:
     .75;
-
   filter:
     invert(1);
-
   cursor:
     pointer;
 }
-
-
-/* ============================================================
-  15. DERIVED SERVICE SUMMARY
-============================================================ */
-
 .ret-derived-summary {
-
   display:
     grid;
-
   grid-template-columns:
     1fr
     auto
     1fr;
-
   align-items:
     stretch;
-
   gap:
     13px;
-
   margin-top:
     14px;
-
   padding:
     14px;
-
   border:
     1px solid
     rgba(180, 212, 233, .16);
-
   border-radius:
     17px;
-
   background:
     rgba(21, 59, 88, .31);
 }
-
-
 .ret-derived-item {
-
   min-width:
     0;
-
   text-align:
     center;
 }
-
-
 .ret-derived-label {
-
   color:
     var(--ret-muted);
-
   font-size:
     9px;
-
   line-height:
     1.3;
-
   font-weight:
     600;
 }
-
-
 .ret-derived-value {
-
   margin-top:
     6px;
-
   color:
     var(--ret-mint);
-
   font-size:
     17px;
-
   line-height:
     1;
-
   font-weight:
     800;
-
   letter-spacing:
     -.025em;
-
   font-variant-numeric:
     tabular-nums;
 }
-
-
 .ret-derived-divider {
-
   width:
     1px;
-
   background:
     rgba(190, 220, 239, .16);
 }
-
-
-/* ============================================================
-  16. PROJECTION ASSUMPTIONS
-============================================================ */
-
 .ret-assumptions {
-
   margin-top:
     13px;
-
   overflow:
     hidden;
-
   border:
     1px solid
     rgba(180, 213, 234, .16);
-
   border-radius:
     17px;
-
   background:
     rgba(20, 58, 87, .28);
 }
-
-
 .ret-assumptions-summary {
-
   position:
     relative;
-
   display:
     flex;
-
   align-items:
     center;
-
   justify-content:
     space-between;
-
   gap:
     14px;
-
   min-height:
     66px;
-
   padding:
     13px 15px;
-
   list-style:
     none;
-
   cursor:
     pointer;
 }
-
-
 .ret-assumptions-summary::-webkit-details-marker {
-
   display:
     none;
 }
-
-
 .ret-assumptions-summary::marker {
-
   display:
     none;
 }
-
-
 .ret-assumptions-title {
-
   display:
     block;
-
   color:
     var(--ret-ink-soft);
-
   font-size:
     13px;
-
   line-height:
     1.25;
-
   font-weight:
     700;
 }
-
-
 .ret-assumptions-current {
-
   display:
     block;
-
   margin-top:
     4px;
-
   color:
     var(--ret-muted);
-
   font-size:
     10px;
-
   line-height:
     1.3;
-
   font-weight:
     500;
 }
-
-
 .ret-assumptions-chevron {
-
   flex:
     0 0 10px;
-
   width:
     10px;
-
   height:
     10px;
-
   margin-right:
     4px;
-
   border-right:
     2px solid
     rgba(217, 235, 246, .75);
-
   border-bottom:
     2px solid
     rgba(217, 235, 246, .75);
-
   transform:
     rotate(45deg);
-
   transition:
     transform
     var(--ret-transition);
 }
-
-
 .ret-assumptions[open]
 .ret-assumptions-chevron {
-
   transform:
     rotate(225deg);
 }
-
-
 .ret-assumptions-body {
-
   padding:
     0 15px 15px;
-
   border-top:
     1px solid
     rgba(190, 220, 239, .12);
 }
-
-
 .ret-assumption-field {
-
   display:
     flex;
-
   align-items:
     center;
-
   justify-content:
     space-between;
-
   gap:
     14px;
-
   padding-top:
     14px;
 }
-
-
 .ret-assumption-label {
-
   color:
     var(--ret-muted);
-
   font-size:
     11px;
-
   line-height:
     1.35;
-
   font-weight:
     600;
 }
-
-
 .ret-assumption-control {
-
   flex:
     0 0 auto;
-
   display:
     flex;
-
   align-items:
     center;
-
   min-width:
     94px;
-
   overflow:
     hidden;
-
   border:
     1px solid
     rgba(179, 213, 234, .20);
-
   border-radius:
     13px;
-
   background:
     rgba(13, 48, 75, .52);
 }
-
-
 .ret-assumption-control input {
-
   width:
     68px;
-
   min-width:
     0;
-
   padding:
     10px 6px 10px 12px;
-
   border:
     0;
-
   outline:
     0;
-
   background:
     transparent;
-
   color:
     var(--ret-ink);
-
   font-size:
     15px;
-
   line-height:
     1;
-
   font-weight:
     800;
-
   text-align:
     right;
-
   font-variant-numeric:
     tabular-nums;
 }
-
-
 .ret-assumption-suffix {
-
   padding-right:
     12px;
-
   color:
     var(--ret-mint);
-
   font-size:
     14px;
-
   font-weight:
     800;
 }
-
-
 .ret-assumption-help {
-
   margin:
     12px 0 0;
-
   color:
     var(--ret-muted);
-
   font-size:
     10px;
-
   line-height:
     1.5;
-
   font-weight:
     500;
 }
-
-
-/* ============================================================
-  17. CALCULATE BUTTON
-============================================================ */
-
 .ret-calculate-button {
-
   width:
     100%;
-
   min-height:
     58px;
-
   margin-top:
     14px;
-
   padding:
     12px 17px;
-
   display:
     grid;
-
   grid-template-columns:
     26px
     minmax(0,1fr)
     22px;
-
   align-items:
     center;
-
   gap:
     11px;
-
   border:
     1px solid
     rgba(207, 255, 242, .50);
-
   border-radius:
     18px;
-
   background:
-
     radial-gradient(
       280px 100px
       at 20% 0%,
       rgba(255,255,255,.20),
       transparent 70%
     ),
-
     linear-gradient(
       100deg,
       #75dee4 0%,
       #91ead4 52%,
       #9becc7 100%
     );
-
   color:
     #08283c;
-
   font-size:
     15px;
-
   line-height:
     1.15;
-
   font-weight:
     800;
-
   letter-spacing:
     -.015em;
-
   box-shadow:
-
     var(--ret-shadow-button),
-
     inset
     0 1px 0
     rgba(255,255,255,.40);
-
   transition:
-
     transform
     var(--ret-transition),
-
     box-shadow
     var(--ret-transition),
-
     filter
     var(--ret-transition);
 }
-
-
 .ret-calculate-button:hover {
-
   filter:
     brightness(1.035);
-
   box-shadow:
-
     0 15px 32px
     rgba(49, 199, 195, .25),
-
     inset
     0 1px 0
     rgba(255,255,255,.44);
 }
-
-
 .ret-calculate-button:active {
-
   transform:
     translateY(1px);
 }
-
-
 .ret-calculate-button:disabled {
-
   cursor:
     default;
-
   opacity:
     .52;
-
   filter:
     saturate(.60);
 }
-
-
 .ret-calculate-icon {
-
   display:
     flex;
-
   align-items:
     center;
-
   justify-content:
     center;
 }
-
-
 .ret-calculate-icon svg {
-
   width:
     23px;
-
   height:
     23px;
-
   stroke-width:
     2;
 }
-
-
 .ret-calculate-arrow {
-
   display:
     block;
-
   font-size:
     23px;
-
   line-height:
     1;
-
   font-weight:
     500;
 }
-
-
-/* ============================================================
-  18. FORM MESSAGE
-============================================================ */
-
 .ret-form-message {
-
   min-height:
     0;
-
   margin-top:
     10px;
-
   color:
     var(--ret-muted);
-
   font-size:
     11px;
-
   line-height:
     1.4;
-
   font-weight:
     600;
-
   text-align:
     center;
 }
-
-
 .ret-form-message:empty {
-
   display:
     none;
 }
-
-
-/* ============================================================
-  19. BREAKDOWN
-============================================================ */
-
 .ret-breakdown {
-
   padding:
     21px 18px;
 }
-
-
 .ret-breakdown .ret-section-header {
-
   margin-bottom:
     17px;
 }
-
-
 .ret-breakdown-list {
-
   overflow:
     hidden;
-
   border:
     1px solid
     rgba(180, 213, 234, .17);
-
   border-radius:
     18px;
-
   background:
     rgba(16, 54, 82, .30);
 }
-
-
 .ret-breakdown-row {
-
   display:
     flex;
-
   align-items:
     center;
-
   justify-content:
     space-between;
-
   gap:
     16px;
-
   min-height:
     58px;
-
   padding:
     13px 15px;
 }
-
-
 .ret-breakdown-row +
 .ret-breakdown-row {
-
   border-top:
     1px solid
     rgba(190, 220, 239, .11);
 }
-
-
 .ret-breakdown-label {
-
   color:
     var(--ret-muted);
-
   font-size:
     11px;
-
   line-height:
     1.35;
-
   font-weight:
     600;
 }
-
-
 .ret-breakdown-value {
-
   flex:
     0 0 auto;
-
   max-width:
     50%;
-
   overflow:
     hidden;
-
   color:
     var(--ret-ink);
-
   font-size:
     14px;
-
   line-height:
     1.2;
-
   font-weight:
     800;
-
   letter-spacing:
     -.015em;
-
   font-variant-numeric:
     tabular-nums;
-
   text-overflow:
     ellipsis;
-
   white-space:
     nowrap;
-
   text-align:
     right;
 }
-
-
 .ret-breakdown-note {
-
   margin-top:
     4px;
-
   color:
     var(--ret-soft);
-
   font-size:
     9px;
-
   line-height:
     1.35;
-
   font-weight:
     500;
 }
-
-
 .ret-value-mint {
-
   color:
     var(--ret-mint);
 }
-
-
 .ret-breakdown-total {
-
   min-height:
     70px;
-
   background:
     rgba(70, 133, 147, .07);
 }
-
-
 .ret-breakdown-total
 .ret-breakdown-value {
-
   font-size:
     18px;
 }
-
-
-/* ============================================================
-  20. HIGH-3 PROJECTION PANEL
-============================================================ */
-
 .ret-projection {
-
   padding:
     21px 18px;
 }
-
-
 .ret-projection .ret-section-header {
-
   align-items:
     center;
 }
-
-
 .ret-growth-pill {
-
   flex:
     0 0 auto;
-
   display:
     inline-flex;
-
   align-items:
     center;
-
   gap:
     5px;
-
   min-height:
     32px;
-
   padding:
     0 11px;
-
   border:
     1px solid
     rgba(169, 239, 212, .27);
-
   border-radius:
     999px;
-
   background:
     rgba(62, 140, 121, .10);
-
   color:
     var(--ret-mint);
-
   font-size:
     10px;
-
   line-height:
     1;
-
   font-weight:
     800;
 }
-
-
 .ret-growth-icon {
-
   font-size:
     14px;
 }
-
-
 .ret-projection-intro {
-
   margin:
     13px 0 17px;
-
   color:
     var(--ret-muted);
-
   font-size:
     11px;
-
   line-height:
     1.5;
-
   font-weight:
     500;
 }
-
-
-/* ============================================================
-  21. YEAR PROJECTION CARDS
-============================================================ */
-
 .ret-projection-years {
-
   display:
     grid;
-
   grid-template-columns:
     1fr;
-
   gap:
     8px;
 }
-
-
 .ret-year-card {
-
   display:
     grid;
-
   grid-template-columns:
     60px
     minmax(0,1fr);
-
   grid-template-areas:
-
     "year pay"
     "caption caption";
-
   align-items:
     center;
-
   gap:
     4px 12px;
-
   min-width:
     0;
-
   padding:
     13px 14px;
-
   border:
     1px solid
     rgba(180, 213, 234, .16);
-
   border-radius:
     16px;
-
   background:
     linear-gradient(
       180deg,
@@ -2657,127 +1662,80 @@ svg {
       rgba(18, 56, 85, .37)
     );
 }
-
-
 .ret-year-label {
-
   grid-area:
     year;
-
   color:
     var(--ret-blue);
-
   font-size:
     12px;
-
   line-height:
     1;
-
   font-weight:
     800;
 }
-
-
 .ret-year-pay {
-
   grid-area:
     pay;
-
   min-width:
     0;
-
   overflow:
     hidden;
-
   color:
     var(--ret-mint);
-
   font-size:
     20px;
-
   line-height:
     1;
-
   font-weight:
     800;
-
   letter-spacing:
     -.03em;
-
   font-variant-numeric:
     tabular-nums;
-
   text-align:
     right;
-
   text-overflow:
     ellipsis;
-
   white-space:
     nowrap;
 }
-
-
 .ret-year-caption {
-
   grid-area:
     caption;
-
   margin-top:
     3px;
-
   color:
     var(--ret-muted);
-
   font-size:
     9px;
-
   line-height:
     1.25;
-
   font-weight:
     500;
 }
-
-
 .ret-year-arrow {
-
   display:
     none;
 }
-
-
-/* ============================================================
-  22. HIGH-36 SUMMARY
-============================================================ */
-
 .ret-high36-summary {
-
   display:
     flex;
-
   align-items:
     center;
-
   justify-content:
     space-between;
-
   gap:
     14px;
-
   margin-top:
     12px;
-
   padding:
     15px;
-
   border:
     1px solid
     rgba(169, 239, 212, .20);
-
   border-radius:
     17px;
-
   background:
     linear-gradient(
       180deg,
@@ -2785,1917 +1743,1152 @@ svg {
       rgba(19, 61, 84, .25)
     );
 }
-
-
 .ret-high36-summary > div:first-child {
-
   min-width:
     0;
 }
-
-
 .ret-high36-label {
-
   color:
     var(--ret-ink-soft);
-
   font-size:
     12px;
-
   line-height:
     1.3;
-
   font-weight:
     700;
 }
-
-
 .ret-high36-sub {
-
   margin-top:
     4px;
-
   color:
     var(--ret-muted);
-
   font-size:
     9px;
-
   line-height:
     1.4;
-
   font-weight:
     500;
 }
-
-
 .ret-high36-value {
-
   flex:
     0 0 auto;
-
   max-width:
     48%;
-
   overflow:
     hidden;
-
   color:
     var(--ret-mint);
-
   font-size:
     23px;
-
   line-height:
     1;
-
   font-weight:
     800;
-
   letter-spacing:
     -.04em;
-
   font-variant-numeric:
     tabular-nums;
-
   text-overflow:
     ellipsis;
-
   white-space:
     nowrap;
 }
-
-
-/* ============================================================
-  23. HOW IT WORKS
-============================================================ */
-
 .ret-how {
-
   padding:
     20px 18px;
 }
-
-
 .ret-how-heading {
-
   display:
     flex;
-
   align-items:
     center;
-
   gap:
     12px;
 }
-
-
 .ret-how-icon {
-
   flex:
     0 0 31px;
-
   width:
     31px;
-
   height:
     31px;
-
   display:
     flex;
-
   align-items:
     center;
-
   justify-content:
     center;
-
   border:
     1px solid
     rgba(143, 196, 255, .42);
-
   border-radius:
     50%;
-
   color:
     var(--ret-blue);
-
   font-family:
     Georgia,
     serif;
-
   font-size:
     16px;
-
   font-weight:
     700;
 }
-
-
 .ret-how-title {
-
   margin:
     0;
-
   color:
     var(--ret-ink);
-
   font-size:
     21px;
-
   line-height:
     1.08;
-
   font-weight:
     800;
-
   letter-spacing:
     -.027em;
 }
-
-
 .ret-how-steps {
-
   display:
     grid;
-
   grid-template-columns:
     1fr;
-
   gap:
     0;
-
   margin-top:
     17px;
-
   overflow:
     hidden;
-
   border:
     1px solid
     rgba(180, 213, 234, .14);
-
   border-radius:
     17px;
-
   background:
     rgba(18, 57, 85, .27);
 }
-
-
 .ret-how-step {
-
   display:
     grid;
-
   grid-template-columns:
     34px
     minmax(0,1fr);
-
   gap:
     11px;
-
   padding:
     14px;
 }
-
-
 .ret-how-step +
 .ret-how-step {
-
   border-top:
     1px solid
     rgba(190, 220, 239, .11);
 }
-
-
 .ret-how-number {
-
   width:
     29px;
-
   height:
     29px;
-
   display:
     flex;
-
   align-items:
     center;
-
   justify-content:
     center;
-
   border:
     1px solid
     rgba(143, 196, 255, .32);
-
   border-radius:
     50%;
-
   background:
     rgba(62, 122, 174, .18);
-
   color:
     var(--ret-blue);
-
   font-size:
     12px;
-
   line-height:
     1;
-
   font-weight:
     800;
 }
-
-
 .ret-how-step-title {
-
   color:
     var(--ret-ink-soft);
-
   font-size:
     12px;
-
   line-height:
     1.3;
-
   font-weight:
     800;
 }
-
-
 .ret-how-step p {
-
   margin:
     5px 0 0;
-
   color:
     var(--ret-muted);
-
   font-size:
     10px;
-
   line-height:
     1.5;
-
   font-weight:
     500;
 }
-
-
-/* ============================================================
-  24. PLANNING ESTIMATE NOTE
-============================================================ */
-
 .ret-estimate-note {
-
   display:
     flex;
-
   align-items:
     flex-start;
-
   gap:
     11px;
-
   margin:
     0 2px 13px;
-
   padding:
     13px 14px;
-
   border:
     1px solid
     rgba(182, 214, 235, .17);
-
   border-radius:
     16px;
-
   background:
     rgba(28, 67, 96, .26);
-
   color:
     var(--ret-muted);
 }
-
-
 .ret-note-icon {
-
   flex:
     0 0 24px;
-
   width:
     24px;
-
   height:
     24px;
-
   display:
     flex;
-
   align-items:
     center;
-
   justify-content:
     center;
-
   border:
     1px solid
     rgba(131, 225, 223, .42);
-
   border-radius:
     50%;
-
   color:
     var(--ret-teal);
-
   font-family:
     Georgia,
     serif;
-
   font-size:
     13px;
-
   line-height:
     1;
-
   font-weight:
     700;
 }
-
-
 .ret-estimate-note strong {
-
   display:
     block;
-
   color:
     var(--ret-ink-soft);
-
   font-size:
     11px;
-
   line-height:
     1.3;
-
   font-weight:
     800;
 }
-
-
 .ret-estimate-note p {
-
   margin:
     4px 0 0;
-
   color:
     var(--ret-muted);
-
   font-size:
     10px;
-
   line-height:
     1.5;
-
   font-weight:
     500;
 }
-
-
-/* ============================================================
-  25. FOOTER
-============================================================ */
-
 .ret-footer {
-
   display:
     flex;
-
   flex-direction:
     column;
-
   align-items:
     center;
-
   justify-content:
     center;
-
   gap:
     4px;
-
   padding:
     8px 8px 4px;
-
   text-align:
     center;
 }
-
-
 .ret-footer-brand {
-
   color:
     var(--ret-gold);
-
   font-size:
     10px;
-
   line-height:
     1;
-
   font-weight:
     800;
-
   letter-spacing:
     .11em;
 }
-
-
 .ret-footer-copy {
-
   color:
     var(--ret-soft);
-
   font-size:
     9px;
-
   line-height:
     1.4;
-
   font-weight:
     600;
 }
-
-
-/* ============================================================
-  26. ACCESSIBILITY / FOCUS
-============================================================ */
-
 .ret-select-wrap select:focus-visible,
 .ret-date-wrap input:focus-visible,
 .ret-assumption-control input:focus-visible {
-
   outline:
     2px solid
     rgba(126, 225, 218, .76);
-
   outline-offset:
     5px;
-
   border-radius:
     5px;
 }
-
-
 .ret-calculate-button:focus-visible {
-
   outline:
     3px solid
     rgba(191, 236, 255, .82);
-
   outline-offset:
     3px;
 }
-
-
 .ret-assumptions-summary:focus-visible {
-
   outline:
     2px solid
     rgba(143, 196, 255, .72);
-
   outline-offset:
     -2px;
-
   border-radius:
     inherit;
 }
-
-
-/* ============================================================
-  27. SMALL IPHONES
-============================================================ */
-
 @media (max-width:374px) {
-
   .ret-app {
-
     width:
       calc(100vw - 12px);
   }
-
-
   .ret-page-header {
-
     padding-left:
       6px;
-
     padding-right:
       6px;
   }
-
-
   .ret-page-title {
-
     font-size:
       26px;
   }
-
-
   .ret-overview {
-
     padding-left:
       14px;
-
     padding-right:
       14px;
   }
-
-
   .ret-overview-main {
-
     grid-template-columns:
       122px
       minmax(0,1fr);
-
     gap:
       9px;
   }
-
-
   .ret-pay-ring {
-
     width:
       122px;
-
     height:
       122px;
-
     flex-basis:
       122px;
   }
-
-
   .ret-pay-ring::before {
-
     inset:
       10px;
   }
-
-
   .ret-ring-value {
-
     font-size:
       31px;
   }
-
-
   .ret-ring-label {
-
     display:
       none;
   }
-
-
   .ret-metric {
-
     padding:
       8px;
   }
-
-
   .ret-metric-icon {
-
     display:
       none;
   }
-
-
   .ret-metric-value {
-
     font-size:
       16px;
   }
-
-
   .ret-metric-label {
-
     font-size:
       8.5px;
   }
-
-
   .ret-profile,
   .ret-breakdown,
   .ret-projection,
   .ret-how {
-
     padding-left:
       14px;
-
     padding-right:
       14px;
   }
-
-
   .ret-section-title {
-
     font-size:
       20px;
   }
-
-
   .ret-input-card {
-
     grid-template-columns:
       46px
       minmax(0,1fr);
-
     min-height:
       78px;
-
     gap:
       10px;
-
     padding:
       11px;
   }
-
-
   .ret-input-icon {
-
     width:
       46px;
-
     height:
       46px;
-
     border-radius:
       14px;
   }
-
-
   .ret-input-icon svg {
-
     width:
       22px;
-
     height:
       22px;
   }
-
-
   .ret-input-label {
-
     font-size:
       10px;
   }
-
-
   .ret-select-wrap select,
   .ret-date-wrap input[type="date"] {
-
     font-size:
       14px;
   }
-
-
   .ret-derived-summary {
-
     gap:
       8px;
-
     padding:
       12px 8px;
   }
-
-
   .ret-derived-label {
-
     font-size:
       8px;
   }
-
-
   .ret-derived-value {
-
     font-size:
       14px;
   }
-
-
   .ret-calculate-button {
-
     padding-left:
       13px;
-
     padding-right:
       13px;
-
     font-size:
       13px;
   }
-
-
   .ret-breakdown-row {
-
     padding-left:
       12px;
-
     padding-right:
       12px;
   }
-
-
   .ret-breakdown-value {
-
     font-size:
       13px;
   }
-
-
   .ret-breakdown-total
   .ret-breakdown-value {
-
     font-size:
       16px;
   }
-
-
   .ret-high36-value {
-
     font-size:
       19px;
   }
-
 }
-
-
-/* ============================================================
-  28. STANDARD IPHONES
-============================================================ */
-
 @media (
   min-width:375px
 ) and (
   max-width:520px
 ) {
-
   .ret-app {
-
     width:
       calc(100vw - 16px);
   }
-
-
   .ret-overview-main {
-
     grid-template-columns:
       145px
       minmax(0,1fr);
   }
-
 }
-
-
-/* ============================================================
-  29. LARGE PHONES / SMALL TABLETS
-============================================================ */
-
 @media (min-width:521px) {
-
   .ret-app {
-
     width:
       min(
         760px,
         calc(100vw - 28px)
       );
-
     padding-top:
       24px;
   }
-
-
   .ret-page-header {
-
     padding:
       16px 8px 25px;
   }
-
-
   .ret-page-eyebrow {
-
     font-size:
       11px;
   }
-
-
   .ret-page-title {
-
     font-size:
       42px;
   }
-
-
   .ret-page-subtitle {
-
     font-size:
       15px;
   }
-
-
   .ret-panel {
-
     margin-bottom:
       16px;
   }
-
-
   .ret-overview {
-
     padding:
       25px 25px 24px;
   }
-
-
   .ret-overview-main {
-
     grid-template-columns:
       200px
       minmax(0,1fr);
-
     gap:
       26px;
   }
-
-
   .ret-pay-ring {
-
     width:
       190px;
-
     height:
       190px;
-
     flex-basis:
       190px;
   }
-
-
   .ret-pay-ring::before {
-
     inset:
       16px;
   }
-
-
   .ret-ring-value {
-
     font-size:
       47px;
   }
-
-
   .ret-ring-label {
-
     max-width:
       140px;
-
     font-size:
       10px;
   }
-
-
   .ret-overview-metrics {
-
     gap:
       10px;
   }
-
-
   .ret-metric {
-
     padding:
       13px 14px;
   }
-
-
   .ret-metric-icon {
-
     flex-basis:
       44px;
-
     width:
       44px;
-
     height:
       44px;
-
     border-radius:
       13px;
   }
-
-
   .ret-metric-icon svg {
-
     width:
       23px;
-
     height:
       23px;
   }
-
-
   .ret-metric-label {
-
     font-size:
       11px;
   }
-
-
   .ret-metric-value {
-
     font-size:
       24px;
   }
-
-
   .ret-overview-status {
-
     font-size:
       12px;
   }
-
-
   .ret-profile,
   .ret-breakdown,
   .ret-projection,
   .ret-how {
-
     padding:
       25px;
   }
-
-
   .ret-section-eyebrow {
-
     font-size:
       10px;
   }
-
-
   .ret-section-title {
-
     font-size:
       27px;
   }
-
-
   .ret-input-list {
-
     grid-template-columns:
       repeat(2,minmax(0,1fr));
-
     gap:
       12px;
   }
-
-
   .ret-input-card {
-
     min-height:
       96px;
-
     grid-template-columns:
       58px
       minmax(0,1fr);
-
     padding:
       15px;
   }
-
-
   .ret-input-icon {
-
     width:
       58px;
-
     height:
       58px;
   }
-
-
   .ret-input-label {
-
     font-size:
       12px;
   }
-
-
   .ret-select-wrap select,
   .ret-date-wrap input[type="date"] {
-
     font-size:
       17px;
   }
-
-
   .ret-derived-summary {
-
     margin-top:
       16px;
-
     padding:
       16px;
   }
-
-
   .ret-derived-label {
-
     font-size:
       10px;
   }
-
-
   .ret-derived-value {
-
     font-size:
       20px;
   }
-
-
   .ret-calculate-button {
-
     min-height:
       62px;
-
     font-size:
       17px;
   }
-
-
   .ret-breakdown-label {
-
     font-size:
       12px;
   }
-
-
   .ret-breakdown-value {
-
     font-size:
       16px;
   }
-
-
   .ret-breakdown-total
   .ret-breakdown-value {
-
     font-size:
       21px;
   }
-
-
   .ret-projection-intro {
-
     font-size:
       12px;
   }
-
-
   .ret-projection-years {
-
     grid-template-columns:
       1fr
       auto
       1fr
       auto
       1fr;
-
     align-items:
       center;
-
     gap:
       10px;
   }
-
-
   .ret-year-card {
-
     display:
       block;
-
     min-width:
       0;
-
     padding:
       15px 12px;
-
     text-align:
       center;
   }
-
-
   .ret-year-label {
-
     font-size:
       11px;
   }
-
-
   .ret-year-pay {
-
     margin-top:
       8px;
-
     font-size:
       20px;
-
     text-align:
       center;
   }
-
-
   .ret-year-caption {
-
     margin-top:
       7px;
-
     font-size:
       9px;
   }
-
-
   .ret-year-arrow {
-
     display:
       block;
-
     color:
       var(--ret-blue);
-
     font-size:
       20px;
-
     line-height:
       1;
-
     opacity:
       .65;
   }
-
-
   .ret-high36-summary {
-
     padding:
       17px;
   }
-
-
   .ret-high36-value {
-
     font-size:
       27px;
   }
-
-
   .ret-how-steps {
-
     grid-template-columns:
       repeat(3,minmax(0,1fr));
   }
-
-
   .ret-how-step {
-
     display:
       block;
-
     min-width:
       0;
-
     padding:
       16px;
   }
-
-
   .ret-how-step +
   .ret-how-step {
-
     border-top:
       0;
-
     border-left:
       1px solid
       rgba(190, 220, 239, .11);
   }
-
-
   .ret-how-number {
-
     margin-bottom:
       10px;
   }
-
-
   .ret-how-step-title {
-
     font-size:
       12px;
   }
-
-
   .ret-how-step p {
-
     font-size:
       10.5px;
   }
-
 }
-
-
-/* ============================================================
-  30. DESKTOP
-============================================================ */
-
 @media (min-width:900px) {
-
   .ret-app {
-
     width:
       min(
         1080px,
         calc(100vw - 42px)
       );
-
     padding-top:
       34px;
-
     padding-bottom:
       48px;
   }
-
-
   .ret-page-header {
-
     padding:
       19px 8px 30px;
   }
-
-
   .ret-page-title {
-
     font-size:
       50px;
   }
-
-
   .ret-page-subtitle {
-
     font-size:
       17px;
   }
-
-
   .ret-panel {
-
     border-radius:
       30px;
   }
-
-
   .ret-overview {
-
     padding:
       31px 34px 30px;
   }
-
-
   .ret-section-header {
-
     gap:
       22px;
   }
-
-
   .ret-section-eyebrow {
-
     font-size:
       11px;
   }
-
-
   .ret-section-title {
-
     font-size:
       31px;
   }
-
-
   .ret-live-pill {
-
     min-width:
       68px;
-
     height:
       37px;
-
     font-size:
       10px;
   }
-
-
   .ret-overview-main {
-
     grid-template-columns:
       270px
       minmax(0,1fr);
-
     gap:
       42px;
   }
-
-
   .ret-pay-ring {
-
     width:
       245px;
-
     height:
       245px;
-
     flex-basis:
       245px;
   }
-
-
   .ret-pay-ring::before {
-
     inset:
       19px;
   }
-
-
   .ret-ring-value {
-
     font-size:
       60px;
   }
-
-
   .ret-ring-label {
-
     max-width:
       165px;
-
     font-size:
       11px;
   }
-
-
   .ret-overview-metrics {
-
     grid-template-columns:
       repeat(3,minmax(0,1fr));
-
     gap:
       13px;
   }
-
-
   .ret-metric {
-
     display:
       block;
-
     min-height:
       138px;
-
     padding:
       17px;
   }
-
-
   .ret-metric-icon {
-
     width:
       48px;
-
     height:
       48px;
-
     margin-bottom:
       15px;
   }
-
-
   .ret-metric-label {
-
     font-size:
       11px;
   }
-
-
   .ret-metric-value {
-
     margin-top:
       8px;
-
     font-size:
       25px;
   }
-
-
   .ret-overview-status {
-
     margin-top:
       24px;
-
     padding-top:
       18px;
-
     font-size:
       12px;
   }
-
-
   .ret-profile,
   .ret-breakdown,
   .ret-projection,
   .ret-how {
-
     padding:
       30px 32px;
   }
-
-
   .ret-profile-heading {
-
     margin-bottom:
       24px;
   }
-
-
   .ret-step-badge {
-
     flex-basis:
       50px;
-
     width:
       50px;
-
     height:
       50px;
-
     font-size:
       20px;
   }
-
-
   .ret-input-list {
-
     gap:
       14px;
   }
-
-
   .ret-input-card {
-
     min-height:
       104px;
-
     grid-template-columns:
       64px
       minmax(0,1fr);
-
     gap:
       17px;
-
     padding:
       17px;
   }
-
-
   .ret-input-icon {
-
     width:
       64px;
-
     height:
       64px;
-
     border-radius:
       18px;
   }
-
-
   .ret-input-icon svg {
-
     width:
       29px;
-
     height:
       29px;
   }
-
-
   .ret-input-label {
-
     font-size:
       13px;
   }
-
-
   .ret-select-wrap select,
   .ret-date-wrap input[type="date"] {
-
     font-size:
       20px;
   }
-
-
   .ret-derived-summary {
-
     margin-top:
       18px;
-
     padding:
       18px;
   }
-
-
   .ret-derived-label {
-
     font-size:
       11px;
   }
-
-
   .ret-derived-value {
-
     font-size:
       23px;
   }
-
-
   .ret-assumptions {
-
     margin-top:
       15px;
   }
-
-
   .ret-assumptions-summary {
-
     min-height:
       72px;
-
     padding:
       16px 18px;
   }
-
-
   .ret-assumptions-title {
-
     font-size:
       14px;
   }
-
-
   .ret-assumptions-current {
-
     font-size:
       11px;
   }
-
-
   .ret-assumption-help {
-
     font-size:
       11px;
   }
-
-
   .ret-calculate-button {
-
     min-height:
       66px;
-
     margin-top:
       17px;
-
     border-radius:
       20px;
-
     font-size:
       18px;
   }
-
-
   .ret-breakdown-row {
-
     min-height:
       65px;
-
     padding:
       15px 19px;
   }
-
-
   .ret-breakdown-label {
-
     font-size:
       13px;
   }
-
-
   .ret-breakdown-value {
-
     font-size:
       18px;
   }
-
-
   .ret-breakdown-note {
-
     font-size:
       10px;
   }
-
-
   .ret-breakdown-total {
-
     min-height:
       78px;
   }
-
-
   .ret-breakdown-total
   .ret-breakdown-value {
-
     font-size:
       25px;
   }
-
-
   .ret-growth-pill {
-
     min-height:
       36px;
-
     padding:
       0 14px;
-
     font-size:
       11px;
   }
-
-
   .ret-projection-intro {
-
     font-size:
       13px;
   }
-
-
   .ret-year-card {
-
     padding:
       18px 14px;
   }
-
-
   .ret-year-label {
-
     font-size:
       12px;
   }
-
-
   .ret-year-pay {
-
     font-size:
       25px;
   }
-
-
   .ret-year-caption {
-
     font-size:
       10px;
   }
-
-
   .ret-high36-summary {
-
     margin-top:
       16px;
-
     padding:
       19px;
   }
-
-
   .ret-high36-label {
-
     font-size:
       13px;
   }
-
-
   .ret-high36-sub {
-
     font-size:
       10px;
   }
-
-
   .ret-high36-value {
-
     font-size:
       31px;
   }
-
-
   .ret-how-title {
-
     font-size:
       27px;
   }
-
-
   .ret-how-step {
-
     padding:
       19px;
   }
-
-
   .ret-how-step-title {
-
     font-size:
       13px;
   }
-
-
   .ret-how-step p {
-
     font-size:
       11px;
   }
-
-
   .ret-estimate-note {
-
     margin-left:
       4px;
-
     margin-right:
       4px;
-
     padding:
       16px 18px;
   }
-
-
   .ret-estimate-note strong {
-
     font-size:
       12px;
   }
-
-
   .ret-estimate-note p {
-
     font-size:
       11px;
   }
-
 }
-
-
-/* ============================================================
-  31. VERY LARGE DESKTOP
-============================================================ */
-
 @media (min-width:1200px) {
-
   .ret-app {
-
     width:
       1120px;
   }
-
-
   .ret-overview-main {
-
     grid-template-columns:
       285px
       minmax(0,1fr);
   }
-
-
   .ret-pay-ring {
-
     width:
       255px;
-
     height:
       255px;
-
     flex-basis:
       255px;
   }
-
-
   .ret-profile,
   .ret-breakdown,
   .ret-projection,
   .ret-how {
-
     padding:
       32px 36px;
   }
-
 }
-
-
-/* ============================================================
-  32. REDUCED MOTION
-============================================================ */
-
 @media (
   prefers-reduced-motion:
   reduce
 ) {
-
   #tw-retirement-shell,
   #tw-retirement-shell * {
-
     scroll-behavior:
       auto !important;
-
     animation-duration:
       .01ms !important;
-
     animation-iteration-count:
       1 !important;
-
     transition-duration:
       .01ms !important;
   }
-
 }
-
-
-/* ============================================================
-  33. FORCED COLORS / ACCESSIBILITY
-============================================================ */
-
 @media (forced-colors:active) {
-
   .ret-panel,
   .ret-input-card,
   .ret-breakdown-list,
@@ -4703,65 +2896,38 @@ svg {
   .ret-high36-summary,
   .ret-assumptions,
   .ret-how-steps {
-
     border:
       1px solid CanvasText;
   }
-
-
   .ret-pay-ring {
-
     border:
       4px solid Highlight;
-
     background:
       transparent;
   }
-
-
   .ret-calculate-button {
-
     border:
       2px solid ButtonText;
-
     background:
       ButtonFace;
-
     color:
       ButtonText;
   }
-
 }
-
-
-/* ============================================================
-  34. NUMERIC OVERFLOW PROTECTION
-============================================================ */
-
 .ret-ring-value,
 .ret-metric-value,
 .ret-derived-value,
 .ret-breakdown-value,
 .ret-year-pay,
 .ret-high36-value {
-
   max-width:
     100%;
 }
-
-
-/* ============================================================
-  35. OPTIONAL JS STATES
-============================================================ */
-
 #tw-retirement-shell[data-ready="false"]
 .ret-pay-ring {
-
   --pct:
     0;
 }
-
-
 #tw-retirement-shell[data-ready="false"]
 .ret-ring-value,
 #tw-retirement-shell[data-ready="false"]
@@ -4774,12 +2940,9 @@ svg {
 .ret-year-pay,
 #tw-retirement-shell[data-ready="false"]
 .ret-high36-value {
-
   transition:
     none;
 }
-
-
 #tw-retirement-shell[data-ready="true"]
 .ret-ring-value,
 #tw-retirement-shell[data-ready="true"]
@@ -4792,109 +2955,61 @@ svg {
 .ret-year-pay,
 #tw-retirement-shell[data-ready="true"]
 .ret-high36-value {
-
   transition:
     color .18s ease;
 }
-
-
-/* ============================================================
-  36. LOADING STATE
-============================================================ */
-
 #tw-retirement-shell[data-loading="true"]
 .ret-calculate-button {
-
   pointer-events:
     none;
-
   opacity:
     .72;
 }
-
-
 #tw-retirement-shell[data-loading="true"]
 .ret-calculate-button
 .ret-calculate-arrow {
-
   animation:
     retPulseArrow
     .8s ease-in-out
     infinite alternate;
 }
-
-
 @keyframes retPulseArrow {
-
   from {
-
     transform:
       translateX(0);
-
     opacity:
       .55;
   }
-
   to {
-
     transform:
       translateX(4px);
-
     opacity:
       1;
   }
-
 }
-
-
-/* ============================================================
-  37. ERROR STATE
-============================================================ */
-
 #tw-retirement-shell[data-error="true"]
 .ret-form-message {
-
   display:
     block;
-
   padding:
     10px 12px;
-
   border:
     1px solid
     rgba(240, 161, 161, .24);
-
   border-radius:
     12px;
-
   background:
     rgba(112, 47, 56, .20);
-
   color:
     #ffd4d4;
 }
-
-
-/* ============================================================
-  38. VALID RESULT STATE
-============================================================ */
-
 #tw-retirement-shell[data-has-result="true"]
 .ret-overview {
-
   border-color:
     rgba(158, 233, 213, .28);
 }
-
-
 #tw-retirement-shell[data-has-result="true"]
 .ret-overview-status {
-
   color:
     rgba(190, 240, 218, .88);
 }
-
-
-/* ============================================================
-  END
-============================================================ */
