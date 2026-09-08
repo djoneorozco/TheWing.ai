@@ -1,15 +1,17 @@
 /* ============================================================
   THEWING.AI • RETIREMENT PAY PROJECTION ENGINE
   retirement-projection.js
-  v1.0.1
+  v1.0.2
 
   UPDATE
   -------------------------------------------------------------
-  - Planned Retirement Date is treated as the retirement-effective date.
+  - Retirement Effective Date is treated as the retirement-effective date.
   - Creditable service now ends the day BEFORE that effective date.
   - Prevents a 1st-of-month retirement from adding a phantom month.
   - High-36 window behavior is unchanged.
   - 2023-2025 remain reconstructed planning estimates.
+  - Prior-year pay is reconstructed backward from official 2026 pay using
+    the applicable annual general pay raises (2026 3.8%, 2025 4.5%, 2024 5.2%).
   - 2027-2030 use TheWing forecast assumptions.
 ============================================================ */
 
@@ -23,7 +25,7 @@
     return;
   }
 
-  const VERSION = "retirement-projection-2026.2";
+  const VERSION = "retirement-projection-2026.3";
   const PAY_BASELINE_VERSION = "official-pay-2026.1";
   const BASELINE_YEAR = 2026;
   const HISTORICAL_MIN_YEAR = 2023;
@@ -34,6 +36,21 @@
   const MIN_LONG_RANGE_GROWTH_PERCENT = 0;
   const MAX_LONG_RANGE_GROWTH_PERCENT = 10;
 
+  /*
+    Historical general military pay raises.
+
+    Each key is the raise that took effect INTO that calendar year.
+
+    For the supported reconstruction window:
+
+      2025 pay = 2026 pay / 1.038
+      2024 pay = 2025 pay / 1.045
+      2023 pay = 2024 pay / 1.052
+
+    2023's 4.6% value is retained as historical metadata but is not
+    needed to reconstruct a 2023 value from the 2026 baseline because
+    the reconstruction stops at 2023.
+  */
   const HISTORICAL_PAY_RAISES = Object.freeze({
     2023: 4.6,
     2024: 5.2,
@@ -533,7 +550,7 @@
   ============================================================ */
 
   /*
-    Planned Retirement Date is treated as the
+    Retirement Effective Date is treated as the
     retirement-effective date.
 
     If retirement is effective on the first of the month,
@@ -1288,7 +1305,7 @@
       !retirementDate
     ) {
       throw new Error(
-        "Planned Retirement Date is required."
+        "Retirement Effective Date is required."
       );
     }
 
@@ -1297,7 +1314,7 @@
       entryDate
     ) {
       throw new Error(
-        "Planned Retirement Date must be after Date Entered Service."
+        "Retirement Effective Date must be after Date Entered Service."
       );
     }
 
