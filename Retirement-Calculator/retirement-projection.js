@@ -1,14 +1,17 @@
 /* ============================================================
   THEWING.AI • RETIREMENT PAY PROJECTION ENGINE
   retirement-projection.js
-  v1.0.2
+  v1.1.0
 
   UPDATE
   -------------------------------------------------------------
-  - Retirement Effective Date is treated as the retirement-effective date.
-  - Creditable service now ends the day BEFORE that effective date.
-  - Prevents a 1st-of-month retirement from adding a phantom month.
-  - High-36 window behavior is unchanged.
+  - Supports one promotion during the final 36 months.
+  - Months before the promotion month use Previous Rank.
+  - The promotion month and all later High-36 months use Retirement Rank.
+  - If no promotion is reported, Retirement Rank still applies to all 36 months.
+  - Retirement Effective Date remains the retirement-effective date.
+  - Creditable service still ends the day BEFORE that effective date.
+  - High-36 remains exactly 36 monthly basic-pay values.
   - 2023-2025 remain reconstructed planning estimates.
   - Prior-year pay is reconstructed backward from official 2026 pay using
     the applicable annual general pay raises (2026 3.8%, 2025 4.5%, 2024 5.2%).
@@ -25,7 +28,7 @@
     return;
   }
 
-  const VERSION = "retirement-projection-2026.3";
+  const VERSION = "retirement-projection-2026.4";
   const PAY_BASELINE_VERSION = "official-pay-2026.1";
   const BASELINE_YEAR = 2026;
   const HISTORICAL_MIN_YEAR = 2023;
@@ -1262,6 +1265,43 @@
         source.rankAtRetirement
       );
 
+    const promotionFlag =
+      String(
+        source.promotedFinal36 !==
+          undefined
+          ? source.promotedFinal36
+          : source.promotionDuringFinal36 ||
+            ""
+      )
+        .trim()
+        .toUpperCase();
+
+    const promotionDuringFinal36 =
+      source.promotedFinal36 ===
+        true ||
+      source.promotionDuringFinal36 ===
+        true ||
+      promotionFlag ===
+        "YES" ||
+      promotionFlag ===
+        "TRUE" ||
+      promotionFlag ===
+        "1";
+
+    const previousRank =
+      promotionDuringFinal36
+        ? normalizeRank(
+            source.previousRank
+          )
+        : "";
+
+    const promotionDate =
+      promotionDuringFinal36
+        ? parseDateInput(
+            source.promotionDate
+          )
+        : null;
+
     const entryDate =
       parseDateInput(
         source.entryDate ||
@@ -1289,7 +1329,37 @@
       )
     ) {
       throw new Error(
-        "Select a supported planned retirement rank."
+        "Select a supported retirement rank."
+      );
+    }
+
+    if (
+      promotionDuringFinal36 &&
+      !SUPPORTED_RANKS.includes(
+        previousRank
+      )
+    ) {
+      throw new Error(
+        "Select a supported previous rank."
+      );
+    }
+
+    if (
+      promotionDuringFinal36 &&
+      previousRank ===
+        rank
+    ) {
+      throw new Error(
+        "Previous Rank must be different from Retirement Rank."
+      );
+    }
+
+    if (
+      promotionDuringFinal36 &&
+      !promotionDate
+    ) {
+      throw new Error(
+        "Promotion Date is required when a final-36 promotion is reported."
       );
     }
 
@@ -1320,6 +1390,12 @@
 
     return {
       rank,
+
+      promotionDuringFinal36,
+
+      previousRank,
+
+      promotionDate,
 
       entryDate,
 
@@ -1503,6 +1579,15 @@
     const rank =
       normalized.rank;
 
+    const promotionDuringFinal36 =
+      normalized.promotionDuringFinal36;
+
+    const previousRank =
+      normalized.previousRank;
+
+    const promotionDate =
+      normalized.promotionDate;
+
     const entryDate =
       normalized.entryDate;
 
@@ -1559,6 +1644,37 @@
       );
     }
 
+    const promotionMonth =
+      promotionDuringFinal36
+        ? startOfUtcMonth(
+            promotionDate
+          )
+        : null;
+
+    if (
+      promotionDuringFinal36 &&
+      (
+        promotionMonth <
+          firstMonth ||
+        promotionMonth >
+          finalMonth
+      )
+    ) {
+      throw new Error(
+        "Promotion Date must fall within the final 36-month High-3 window."
+      );
+    }
+
+    if (
+      promotionDuringFinal36 &&
+      promotionDate >
+        lastActiveDutyDate
+    ) {
+      throw new Error(
+        "Promotion Date cannot be after the last active-duty date."
+      );
+    }
+
     const months =
       [];
 
@@ -1600,9 +1716,24 @@
       const calendarYear =
         monthDate.getUTCFullYear();
 
+      /*
+        Promotion semantics are month-based.
+
+        Months before the promotion month use Previous Rank.
+        The promotion month itself and all later months use
+        Retirement Rank.
+      */
+      const monthRank =
+        promotionDuringFinal36 &&
+        monthDate <
+          promotionMonth
+          ? previousRank
+          : rank;
+
       const pay =
         getBasicPayForYear({
-          rank,
+          rank:
+            monthRank,
 
           yearsOfService,
 
@@ -1629,7 +1760,15 @@
 
         calendarYear,
 
-        rank,
+        rank:
+          monthRank,
+
+        rankSource:
+          promotionDuringFinal36 &&
+          monthDate <
+            promotionMonth
+            ? "PREVIOUS_RANK"
+            : "RETIREMENT_RANK",
 
         serviceMonths,
 
@@ -1707,6 +1846,33 @@
         PAY_BASELINE_VERSION,
 
       rank,
+
+      retirementRank:
+        rank,
+
+      promotionDuringFinal36,
+
+      previousRank:
+        promotionDuringFinal36
+          ? previousRank
+          : null,
+
+      promotionDate:
+        promotionDuringFinal36
+          ? toIsoDate(
+              promotionDate
+            )
+          : null,
+
+      promotionMonth:
+        promotionDuringFinal36
+          ? toIsoDate(
+              promotionMonth
+            ).slice(
+              0,
+              7
+            )
+          : null,
 
       entryDate:
         toIsoDate(
@@ -1809,6 +1975,12 @@
           true,
 
         retirementRankAppliedAcrossHigh36:
+          !promotionDuringFinal36,
+
+        promotionRankHistoryApplied:
+          promotionDuringFinal36,
+
+        promotionMonthUsesRetirementRank:
           true,
 
         historicalYearsBefore2026AreReconstructed:
@@ -1905,7 +2077,7 @@
           entryDate
           retirementDate
 
-        so its service preview and 20-year validation now receive
+        so its service preview and 20-year validation continue to receive
         the corrected retirement-service months automatically.
       */
       completedServiceMonths,
