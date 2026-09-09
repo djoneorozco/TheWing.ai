@@ -2558,12 +2558,140 @@
 
 
   /* ============================================================
-    20. ASK AMY / PAGE EVENT
+    20. ASK AMY / PAGE EVENT + IFRAME BRIDGE
+
+    PURPOSE
+    -------------------------------------------------------------
+    - Keep the existing same-window disability-updated event
+    - Broadcast calculator state to the parent Webflow page
+    - Answer Ask Amy state requests from the parent page
+
+    MESSAGE CONTRACT
+    -------------------------------------------------------------
+    Calculator → Parent
+
+    {
+      type: "thewing:disability-updated",
+      source: "thewing-disability-calculator",
+      disability: <current calculator state>
+    }
+
+    Parent → Calculator
+
+    {
+      type: "thewing:disability-request-state",
+      source: "ask-amy-disability"
+    }
+
+    CORE PRINCIPLE
+    -------------------------------------------------------------
+    TheWing calculates.
+    Amy explains.
   ============================================================ */
+
+  function cloneDisabilityState(
+    state
+  ) {
+
+    if (
+      !state ||
+      typeof state !==
+        "object"
+    ) {
+
+      return null;
+    }
+
+
+    try {
+
+      return JSON.parse(
+        JSON.stringify(
+          state
+        )
+      );
+
+    } catch (_) {
+
+      return null;
+
+    }
+  }
+
+
+  function postDisabilityStateToParent(
+    state
+  ) {
+
+    const snapshot =
+      cloneDisabilityState(
+        state
+      );
+
+
+    if (
+      !snapshot
+    ) {
+
+      return;
+    }
+
+
+    try {
+
+      if (
+        window.parent &&
+        window.parent !==
+          window
+      ) {
+
+        window.parent.postMessage(
+          {
+
+            type:
+              "thewing:disability-updated",
+
+            source:
+              "thewing-disability-calculator",
+
+            disability:
+              snapshot
+
+          },
+          "*"
+        );
+
+      }
+
+    } catch (_) {
+
+      /* Fail open */
+
+    }
+  }
+
 
   function emitDisabilityEvent(
     state
   ) {
+
+    const snapshot =
+      cloneDisabilityState(
+        state
+      );
+
+
+    if (
+      !snapshot
+    ) {
+
+      return;
+    }
+
+
+    /*
+      Same-document listeners.
+    */
 
     try {
 
@@ -2572,7 +2700,7 @@
           "thewing:disability-updated",
           {
             detail:
-              state
+              snapshot
           }
         )
       );
@@ -2582,7 +2710,116 @@
       /* Fail open */
 
     }
+
+
+    /*
+      Parent Webflow page / Ask Amy.
+    */
+
+    postDisabilityStateToParent(
+      snapshot
+    );
   }
+
+
+  function respondToDisabilityStateRequest(
+    event
+  ) {
+
+    const message =
+      event &&
+      event.data;
+
+
+    if (
+      !message ||
+      typeof message !==
+        "object"
+    ) {
+
+      return;
+    }
+
+
+    if (
+      message.type !==
+        "thewing:disability-request-state" ||
+      message.source !==
+        "ask-amy-disability"
+    ) {
+
+      return;
+    }
+
+
+    const snapshot =
+      cloneDisabilityState(
+        currentState
+      );
+
+
+    if (
+      !snapshot
+    ) {
+
+      return;
+    }
+
+
+    /*
+      Reply directly to the requesting window.
+      In the Webflow configuration this will normally
+      be the parent page hosting Ask Amy.
+    */
+
+    try {
+
+      if (
+        event.source &&
+        typeof event.source.postMessage ===
+          "function"
+      ) {
+
+        event.source.postMessage(
+          {
+
+            type:
+              "thewing:disability-updated",
+
+            source:
+              "thewing-disability-calculator",
+
+            disability:
+              snapshot
+
+          },
+          "*"
+        );
+
+        return;
+      }
+
+    } catch (_) {
+
+      /* Continue to parent fallback */
+
+    }
+
+
+    /*
+      Fallback if event.source is unavailable.
+    */
+
+    postDisabilityStateToParent(
+      snapshot
+    );
+  }
+
+
+  window.addEventListener(
+    "message",
+    respondToDisabilityStateRequest
+  );
 
 
   /* ============================================================
