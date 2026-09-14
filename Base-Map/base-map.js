@@ -1,29 +1,42 @@
 /* =========================================================
-   PCSUnited Base Demographics Map
-   Map Engine v3.1.2
-   Base Essentials Sidebar v2.1.0
-========================================================= */
+   PCSUnited Interactive U.S. Air Force Base Map
+   Map Engine v4.1.0
 
-/* =========================================================
-   MAP ENGINE
+   REQUIRED FLOW
+   1. User clicks a state.
+   2. USAF bases in that state appear above the map.
+   3. A location dot is drawn for every listed base in that state.
+   4. User clicks a base card.
+   5. The base remains on this page; its JSON is loaded directly.
+   6. The right panel shows Operator Phone, Gate Hours,
+      Mission, Base Population, plus Visitor Control Center.
+   7. ONLY the "Go to Base Demographics" link navigates away.
+
+   DIRECT JSON ONLY
+   This file does NOT call /api/base-data.
+
+   JSON root priority:
+   1. window.PCSU_BASE_JSON_ROOT
+   2. data-json-root on #pcsu-real-us-map
+   3. ./cities/
 ========================================================= */
 
 (() => {
   "use strict";
 
-  const VERSION = "3.1.2";
-  const MOUNT_KEY = "PCSU_US_BASE_MAP_V312_MOUNTED";
+  const VERSION = "4.1.0";
+  const MOUNT_KEY = "PCSU_US_BASE_MAP_V410_MOUNTED";
 
   if (window[MOUNT_KEY]) {
-    console.warn(
-      "[PCSU Base Map] Duplicate mount blocked:",
-      VERSION
-    );
-
+    console.warn("[PCSU Base Map] Duplicate mount blocked:", VERSION);
     return;
   }
 
   window[MOUNT_KEY] = true;
+
+  /* =======================================================
+     REQUIRED DOM
+  ======================================================= */
 
   const mapRoot =
     document.getElementById("pcsu-real-us-map");
@@ -34,14 +47,16 @@
   const baseListEl =
     document.getElementById("pcsu-base-list");
 
-  const selectedStateEl =
+  const selectedBaseNameEl =
     document.getElementById("pcsu-selected-state");
-
-  const selectedBaseHeaderEl =
-    document.getElementById("pcsu-selected-base-header");
 
   const panelCopyEl =
     document.getElementById("pcsu-panel-copy");
+
+  const demographicsLinkEl =
+    document.getElementById(
+      "pcsu-base-demographics-link"
+    );
 
   if (
     !mapRoot ||
@@ -66,60 +81,35 @@
     return;
   }
 
-  const SCROLL_DEBUG =
-    window.PCSU_SCROLL_DEBUG === true ||
-    /(?:\?|&)pcsuScrollDebug=1(?:&|$)/.test(
-      window.location.search || ""
-    );
+  const d3 = window.d3;
+  const topojson = window.topojson;
 
-  function logScrollDebug(tag, extra) {
-    if (!SCROLL_DEBUG) {
-      return;
-    }
-
-    console.log(
-      "[PCSU Scroll Debug · Base Map]",
-      {
-        tag,
-        scrollX:
-          window.scrollX ||
-          window.pageXOffset ||
-          0,
-
-        scrollY:
-          window.scrollY ||
-          window.pageYOffset ||
-          0,
-
-        version: VERSION,
-
-        ...(extra || {})
-      }
-    );
-  }
-
-  window.PCSU_US_BASE_MAP = {
-    version: VERSION,
-    __mounted_v312: true
-  };
-
-  const STORAGE_KEY =
-    "pcsunited.selectedBase.v1";
-
-  const JSON_URL_KEY =
-    "pcsunited.selectedCityJsonUrl.v1";
-
-  const SLUG_STORAGE_KEY =
-    "pcsunited.selectedBaseSlug.v1";
+  /* =======================================================
+     CONFIGURATION
+  ======================================================= */
 
   const LIVE_BASE_DEMOGRAPHICS_URL =
+    window.PCSU_BASE_DEMOGRAPHICS_URL ||
     "https://pcsunited-com-28346d.webflow.io/air-force/base-demographics-air-force";
 
-  const JSON_BASE_URL =
-    window.PCSU_CITIES_BASE_URL ||
-    "https://thewing.netlify.app/api/base-data?file=";
+  /*
+    If your JSON files are NOT in ./cities/,
+    define this before base-map.js loads:
+
+    window.PCSU_BASE_JSON_ROOT =
+      "https://your-domain.com/cities/";
+  */
+
+  const BASE_JSON_ROOT =
+    window.PCSU_BASE_JSON_ROOT ||
+    mapRoot.dataset.jsonRoot ||
+    "./cities/";
 
   const DEFAULT_STATE = "TX";
+
+  /* =======================================================
+     STATE LOOKUPS
+  ======================================================= */
 
   const FIPS_TO_ABBR = {
     "01": "AL",
@@ -229,7 +219,21 @@
     DC: "District of Columbia"
   };
 
+  /* =======================================================
+     BASE REGISTRY
+
+     Format:
+     [
+       Base Name,
+       JSON Filename,
+       City / State,
+       Latitude,
+       Longitude
+     ]
+  ======================================================= */
+
   const BASE_REGISTRY = {
+
     AK: [
       [
         "Joint Base Elmendorf-Richardson",
@@ -740,117 +744,21 @@
     ]
   };
 
-  const BASICBRAIN_BASE_ALIASES = {
-    "Andrews AFB": "MD",
-    "Joint Base Andrews": "MD",
+  /* =======================================================
+     STATE / BASE NORMALIZATION
+  ======================================================= */
 
-    "Barksdale AFB": "LA",
-    "Beale AFB": "CA",
-    "Cannon AFB": "NM",
-
-    "Charleston AFB": "SC",
-    "Joint Base Charleston": "SC",
-
-    "Columbus AFB": "MS",
-    "Creech AFB": "NV",
-    "Davis-Monthan AFB": "AZ",
-    "Dover AFB": "DE",
-    "Dyess AFB": "TX",
-    "Edwards AFB": "CA",
-    "Eglin AFB": "FL",
-    "Eielson AFB": "AK",
-    "Ellsworth AFB": "SD",
-    "Elmendorf AFB": "AK",
-    "Joint Base Elmendorf-Richardson": "AK",
-    "Fairchild AFB": "WA",
-
-    "FE Warren AFB": "WY",
-    "F.E. Warren AFB": "WY",
-    "F. E. Warren AFB": "WY",
-
-    "Goodfellow AFB": "TX",
-    "Grand Forks AFB": "ND",
-    "Hanscom AFB": "MA",
-    "Hickam AFB": "HI",
-    "Joint Base Pearl Harbor-Hickam": "HI",
-    "Hill AFB": "UT",
-    "Holloman AFB": "NM",
-    "Hurlburt Field": "FL",
-
-    "JBSA Fort Sam Houston": "TX",
-    "Fort Sam Houston": "TX",
-    "Joint Base San Antonio-Fort Sam Houston": "TX",
-
-    "JBSA Lackland": "TX",
-    "Lackland AFB": "TX",
-    "Joint Base San Antonio-Lackland": "TX",
-
-    "JBSA Randolph": "TX",
-    "Randolph AFB": "TX",
-    "Joint Base San Antonio-Randolph": "TX",
-
-    "Keesler AFB": "MS",
-    "Kirtland AFB": "NM",
-
-    "Langley AFB": "VA",
-    "Joint Base Langley-Eustis": "VA",
-
-    "Laughlin AFB": "TX",
-    "Little Rock AFB": "AR",
-    "Los Angeles AFB": "CA",
-    "Luke AFB": "AZ",
-    "MacDill AFB": "FL",
-    "Malmstrom AFB": "MT",
-    "Maxwell AFB": "AL",
-    "McChord AFB": "WA",
-    "Joint Base Lewis-McChord": "WA",
-    "McConnell AFB": "KS",
-
-    "McGuire AFB": "NJ",
-    "Joint Base McGuire-Dix-Lakehurst": "NJ",
-
-    "Minot AFB": "ND",
-    "Moody AFB": "GA",
-    "Mountain Home AFB": "ID",
-    "Nellis AFB": "NV",
-    "Offutt AFB": "NE",
-    "Patrick SFB": "FL",
-    "Peterson SFB": "CO",
-    "Robins AFB": "GA",
-    "Schriever SFB": "CO",
-    "Scott AFB": "IL",
-    "Seymour Johnson AFB": "NC",
-    "Shaw AFB": "SC",
-    "Sheppard AFB": "TX",
-    "Tinker AFB": "OK",
-    "Travis AFB": "CA",
-    "Tyndall AFB": "FL",
-    "U.S. Air Force Academy": "CO",
-    "Air Force Academy": "CO",
-    "Vance AFB": "OK",
-    "Vandenberg SFB": "CA",
-    "Whiteman AFB": "MO",
-    "Wright-Patterson AFB": "OH"
-  };
-
-  const svg = d3.select(svgElement);
-
-  let mapReady = false;
-
-  let pendingStateCode = "";
-  let pendingBaseId = "";
-
-  let pendingAllowScroll = false;
-  let pendingAllowSectionScroll = false;
-
-  let currentStateCode = "";
-  let currentBaseId = "";
-
-  let projection = null;
-  let markerLayer = null;
+  function clean(value) {
+    return (
+      value === undefined ||
+      value === null
+    )
+      ? ""
+      : String(value).trim();
+  }
 
   function esc(value) {
-    return String(value ?? "")
+    return clean(value)
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
@@ -859,23 +767,61 @@
   }
 
   function slugify(fileName) {
-    return String(fileName || "")
+    return clean(fileName)
       .replace(/\.json$/i, "")
-      .trim()
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
   }
 
   function normalizeKey(value) {
-    return String(value || "")
+    return clean(value)
       .toLowerCase()
-      .replace(/jointbase/g, "jb")
-      .replace(/airforcebase/g, "afb")
+      .replace(/joint\s*base/g, "jb")
+      .replace(/air\s*force\s*base/g, "afb")
       .replace(/[^a-z0-9]/g, "");
   }
 
-  function makeBase(row, stateCode) {
+  function directJsonUrl(fileName) {
+    const file =
+      clean(fileName);
+
+    if (!file) {
+      return "";
+    }
+
+    try {
+      const root =
+        new URL(
+          BASE_JSON_ROOT,
+          window.location.href
+        );
+
+      if (
+        !root.pathname.endsWith("/")
+      ) {
+        root.pathname += "/";
+      }
+
+      return new URL(
+        file,
+        root
+      ).toString();
+
+    } catch (_) {
+      return (
+        String(BASE_JSON_ROOT)
+          .replace(/\/+$/, "") +
+        "/" +
+        file
+      );
+    }
+  }
+
+  function makeBase(
+    row,
+    stateCode
+  ) {
     const [
       name,
       fileName,
@@ -884,16 +830,18 @@
       lng
     ] = row;
 
-    const id = slugify(fileName);
+    const id =
+      slugify(fileName);
 
     return {
       id,
       slug: id,
+
       fileName,
 
       base: name,
-      label: name,
       name,
+      label: name,
 
       city,
 
@@ -904,16 +852,20 @@
       lng,
 
       jsonUrl:
-        JSON_BASE_URL +
-        fileName
+        directJsonUrl(
+          fileName
+        )
     };
   }
 
   const STATE_BASES =
     Object.fromEntries(
-      Object.entries(BASE_REGISTRY).map(
+      Object.entries(
+        BASE_REGISTRY
+      ).map(
         ([stateCode, rows]) => [
           stateCode,
+
           rows.map(
             row =>
               makeBase(
@@ -928,9 +880,13 @@
   const BASE_TO_STATE = (() => {
     const out = {};
 
-    Object.entries(STATE_BASES).forEach(
+    Object.entries(
+      STATE_BASES
+    ).forEach(
       ([stateCode, bases]) => {
+
         bases.forEach(base => {
+
           [
             base.base,
             base.name,
@@ -939,191 +895,210 @@
             base.id,
             base.slug
           ].forEach(value => {
+
             const key =
-              normalizeKey(value);
+              normalizeKey(
+                value
+              );
 
             if (key) {
-              out[key] = stateCode;
+              out[key] =
+                stateCode;
             }
           });
+
         });
-      }
-    );
 
-    Object.entries(
-      BASICBRAIN_BASE_ALIASES
-    ).forEach(
-      ([baseName, stateCode]) => {
-        const key =
-          normalizeKey(baseName);
-
-        if (key) {
-          out[key] = stateCode;
-        }
       }
     );
 
     return out;
   })();
 
-  function getDestinationUrl() {
-    return new URL(
-      LIVE_BASE_DEMOGRAPHICS_URL
+  /* =======================================================
+     MAP STATE
+  ======================================================= */
+
+  const svg =
+    d3.select(
+      svgElement
+    );
+
+  let mapReady = false;
+  let projection = null;
+  let markerLayer = null;
+
+  let currentStateCode = "";
+  let currentBaseId = "";
+
+  let pendingSelection = null;
+
+  function getBases(
+    stateCode
+  ) {
+    return (
+      STATE_BASES[
+        clean(stateCode)
+          .toUpperCase()
+      ] ||
+      []
     );
   }
 
-  function getBaseDestinationUrl(item) {
-    const destination =
-      getDestinationUrl();
+  function getBaseById(
+    stateCode,
+    baseId
+  ) {
+    return (
+      getBases(stateCode)
+        .find(
+          base =>
+            base.id ===
+            clean(baseId)
+        ) ||
+      null
+    );
+  }
 
-    if (item && item.id) {
-      destination.searchParams.set(
+  function projectBase(base) {
+    if (
+      !projection ||
+      !base
+    ) {
+      return null;
+    }
+
+    const lat =
+      Number(base.lat);
+
+    const lng =
+      Number(base.lng);
+
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng)
+    ) {
+      return null;
+    }
+
+    return projection(
+      [lng, lat]
+    );
+  }
+
+  /* =======================================================
+     BASE DEMOGRAPHICS CTA
+  ======================================================= */
+
+  function baseDemographicsUrl(
+    base
+  ) {
+    const url =
+      new URL(
+        LIVE_BASE_DEMOGRAPHICS_URL,
+        window.location.href
+      );
+
+    if (
+      base &&
+      base.id
+    ) {
+      url.searchParams.set(
         "base",
-        item.id
+        base.id
       );
     }
 
-    return destination;
+    return url.toString();
   }
 
-  function saveSelection(item) {
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(item)
-      );
-
-      localStorage.setItem(
-        JSON_URL_KEY,
-        item.jsonUrl || ""
-      );
-
-      localStorage.setItem(
-        SLUG_STORAGE_KEY,
-        item.id || ""
-      );
-    } catch (error) {
-      console.warn(
-        "[PCSU Base Map] Selection storage failed:",
-        error
-      );
-    }
-  }
-
-  function dispatchBaseSelection(
-    item,
-    options
+  function updateDemographicsLink(
+    base
   ) {
-    const opts =
-      options &&
-      typeof options === "object"
-        ? options
-        : {};
-
-    const detail = {
-      ...item,
-
-      selectedBase: {
-        ...item
-      },
-
-      autoNavigate:
-        opts.autoNavigate === true,
-
-      source:
-        opts.source ||
-        "pcsunited-interactive-base-map",
-
-      updated_at:
-        new Date().toISOString()
-    };
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "pcsunited:map-base-selected",
-        {
-          detail
-        }
-      )
-    );
-  }
-
-  function openBase(item) {
-    if (!item) {
+    if (
+      !demographicsLinkEl
+    ) {
       return;
     }
 
-    saveSelection(item);
+    if (!base) {
 
-    dispatchBaseSelection(
-      item,
-      {
-        autoNavigate: false,
+      demographicsLinkEl
+        .removeAttribute(
+          "href"
+        );
 
-        source:
-          "pcsunited-interactive-base-map-card"
-      }
-    );
+      demographicsLinkEl
+        .setAttribute(
+          "aria-disabled",
+          "true"
+        );
 
-    const destination =
-      getBaseDestinationUrl(item);
+      demographicsLinkEl
+        .setAttribute(
+          "tabindex",
+          "-1"
+        );
 
-    window.open(
-      destination.toString(),
-      "_blank",
-      "noopener,noreferrer"
-    );
-  }
+      demographicsLinkEl
+        .setAttribute(
+          "aria-label",
+          "Choose a base before opening Base Demographics"
+        );
 
-  function updateSidebarHeaderLink(
-    selectedBase
-  ) {
-    if (!selectedBaseHeaderEl) {
       return;
     }
 
-    if (!selectedBase) {
-      selectedBaseHeaderEl.removeAttribute(
-        "href"
+    demographicsLinkEl.href =
+      baseDemographicsUrl(
+        base
       );
 
-      selectedBaseHeaderEl.setAttribute(
+    demographicsLinkEl
+      .setAttribute(
         "aria-disabled",
-        "true"
+        "false"
       );
 
-      selectedBaseHeaderEl.setAttribute(
+    demographicsLinkEl
+      .setAttribute(
+        "tabindex",
+        "0"
+      );
+
+    demographicsLinkEl
+      .setAttribute(
         "aria-label",
-        "Choose a base to open Base Demographics"
+        `Go to ${base.base} Base Demographics`
       );
-
-      selectedBaseHeaderEl.removeAttribute(
-        "title"
-      );
-
-      return;
-    }
-
-    selectedBaseHeaderEl.href =
-      getBaseDestinationUrl(
-        selectedBase
-      ).toString();
-
-    selectedBaseHeaderEl.setAttribute(
-      "aria-disabled",
-      "false"
-    );
-
-    selectedBaseHeaderEl.setAttribute(
-      "aria-label",
-      `Open ${selectedBase.base} Base Demographics`
-    );
-
-    selectedBaseHeaderEl.title =
-      `Open ${selectedBase.base} Base Demographics`;
   }
 
-  function clearBaseMarker() {
+  if (demographicsLinkEl) {
+
+    demographicsLinkEl
+      .addEventListener(
+        "click",
+        event => {
+
+          if (
+            demographicsLinkEl
+              .getAttribute(
+                "aria-disabled"
+              ) === "true"
+          ) {
+            event.preventDefault();
+          }
+
+        }
+      );
+
+  }
+
+  /* =======================================================
+     MARKERS / DOTS
+  ======================================================= */
+
+  function clearMarkers() {
     if (markerLayer) {
       markerLayer
         .selectAll("*")
@@ -1131,35 +1106,109 @@
     }
   }
 
-  function drawBaseMarker(base) {
-    clearBaseMarker();
+  function drawBaseDots(
+    bases,
+    selectedBase
+  ) {
+    clearMarkers();
 
     if (
-      !base ||
       !markerLayer ||
       !projection
     ) {
       return;
     }
 
-    const lat = Number(base.lat);
-    const lng = Number(base.lng);
+    bases.forEach(base => {
+
+      const point =
+        projectBase(base);
+
+      if (!point) {
+        return;
+      }
+
+      const [x, y] =
+        point;
+
+      const selected =
+        selectedBase &&
+        selectedBase.id ===
+          base.id;
+
+      markerLayer
+        .append("circle")
+        .attr(
+          "class",
+          "pcsu-base-location-dot"
+        )
+        .attr(
+          "cx",
+          x
+        )
+        .attr(
+          "cy",
+          y
+        )
+        .attr(
+          "r",
+          selected
+            ? 6
+            : 4.5
+        )
+        .attr(
+          "fill",
+          selected
+            ? "#f6d06d"
+            : "#8ef3c5"
+        )
+        .attr(
+          "stroke",
+          "#ffffff"
+        )
+        .attr(
+          "stroke-width",
+          selected
+            ? 1.6
+            : 1.1
+        )
+        .attr(
+          "opacity",
+          selected
+            ? 1
+            : 0.92
+        )
+        .style(
+          "filter",
+          selected
+            ? "drop-shadow(0 0 10px rgba(246,208,109,.9))"
+            : "drop-shadow(0 0 7px rgba(142,243,197,.75))"
+        );
+
+    });
+
+    if (selectedBase) {
+      drawSelectedMarker(
+        selectedBase
+      );
+    }
+  }
+
+  function drawSelectedMarker(
+    base
+  ) {
+    const point =
+      projectBase(base);
 
     if (
-      !Number.isFinite(lat) ||
-      !Number.isFinite(lng)
+      !point ||
+      !markerLayer
     ) {
       return;
     }
 
-    const point =
-      projection([lng, lat]);
-
-    if (!point) {
-      return;
-    }
-
-    const [x, y] = point;
+    const [x, y] =
+      point;
 
     const label =
       base.base ||
@@ -1169,15 +1218,20 @@
       base.city ||
       "";
 
-    let labelX = x + 18;
-    let labelY = y - 18;
+    let labelX =
+      x + 18;
+
+    let labelY =
+      y - 18;
 
     if (x > 760) {
-      labelX = x - 190;
+      labelX =
+        x - 190;
     }
 
     if (y < 70) {
-      labelY = y + 18;
+      labelY =
+        y + 18;
     }
 
     const labelWidth =
@@ -1189,7 +1243,7 @@
         )
       );
 
-    const group =
+    const marker =
       markerLayer
         .append("g")
         .attr(
@@ -1201,23 +1255,18 @@
           `translate(${x},${y})`
         );
 
-    group
+    marker
       .append("circle")
       .attr(
         "class",
         "pcsu-base-marker-ring"
       )
-      .attr("r", 5);
-
-    group
-      .append("circle")
       .attr(
-        "class",
-        "pcsu-base-marker-dot"
-      )
-      .attr("r", 6);
+        "r",
+        5
+      );
 
-    group
+    marker
       .append("path")
       .attr(
         "class",
@@ -1232,10 +1281,16 @@
         "translate(0,-12)"
       );
 
-    group
+    marker
       .append("circle")
-      .attr("fill", "#071018")
-      .attr("r", 3.3)
+      .attr(
+        "fill",
+        "#071018"
+      )
+      .attr(
+        "r",
+        3.3
+      )
       .attr(
         "transform",
         "translate(0,-14)"
@@ -1263,9 +1318,18 @@
         "width",
         labelWidth
       )
-      .attr("height", 42)
-      .attr("x", 0)
-      .attr("y", 0);
+      .attr(
+        "height",
+        42
+      )
+      .attr(
+        "x",
+        0
+      )
+      .attr(
+        "y",
+        0
+      );
 
     labelGroup
       .append("text")
@@ -1273,9 +1337,17 @@
         "class",
         "pcsu-base-marker-label"
       )
-      .attr("x", 12)
-      .attr("y", 17)
-      .text(label);
+      .attr(
+        "x",
+        12
+      )
+      .attr(
+        "y",
+        17
+      )
+      .text(
+        label
+      );
 
     labelGroup
       .append("text")
@@ -1283,153 +1355,82 @@
         "class",
         "pcsu-base-marker-sub"
       )
-      .attr("x", 12)
-      .attr("y", 31)
-      .text(city);
-  }
-
-  function scrollSelectedButtonIntoList(
-    selectedButton
-  ) {
-    if (
-      !selectedButton ||
-      !baseListEl
-    ) {
-      return;
-    }
-
-    const listLeft =
-      baseListEl.scrollLeft;
-
-    const listWidth =
-      baseListEl.clientWidth;
-
-    const buttonLeft =
-      selectedButton.offsetLeft;
-
-    const buttonWidth =
-      selectedButton.offsetWidth;
-
-    const nextScroll =
-      Math.max(
-        0,
-        buttonLeft -
-          Math.max(
-            0,
-            (
-              listWidth -
-              buttonWidth
-            ) / 2
-          )
+      .attr(
+        "x",
+        12
+      )
+      .attr(
+        "y",
+        31
+      )
+      .text(
+        city
       );
-
-    if (
-      Math.abs(
-        nextScroll -
-        listLeft
-      ) > 2
-    ) {
-      baseListEl.scrollTo({
-        left: nextScroll,
-        behavior: "smooth"
-      });
-    }
   }
 
-  function scrollMapSectionIntoView() {
-    if (!mapRoot) {
-      return;
-    }
+  /* =======================================================
+     RIGHT PANEL HEADER
+  ======================================================= */
 
-    logScrollDebug(
-      "intentional-map-scroll:before"
-    );
-
-    mapRoot.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-
-    setTimeout(() => {
-      logScrollDebug(
-        "intentional-map-scroll:after"
-      );
-    }, 400);
-  }
-
-  function getBaseById(
-    stateCode,
-    baseId
-  ) {
-    const bases =
-      STATE_BASES[
-        String(
-          stateCode || ""
-        ).toUpperCase()
-      ] || [];
-
-    return (
-      bases.find(
-        base =>
-          base.id === baseId
-      ) || null
-    );
-  }
-
-  function updateSelectedBasePanel(
+  function updatePanelHeader(
     stateCode,
     selectedBase,
     bases
   ) {
-    if (!selectedStateEl) {
+
+    if (selectedBaseNameEl) {
+
+      selectedBaseNameEl
+        .textContent =
+          selectedBase
+            ? selectedBase.base
+            : "Choose a base";
+
+    }
+
+    updateDemographicsLink(
+      selectedBase
+    );
+
+    if (!panelCopyEl) {
       return;
     }
 
     if (selectedBase) {
-      selectedStateEl.textContent =
-        selectedBase.base;
 
-      updateSidebarHeaderLink(
-        selectedBase
-      );
-
-      if (panelCopyEl) {
-        panelCopyEl.textContent =
-          "Open the selected gaining base profile.";
-      }
+      panelCopyEl.textContent =
+        selectedBase.city ||
+        STATE_NAMES[stateCode] ||
+        stateCode;
 
       return;
     }
 
-    selectedStateEl.textContent =
-      "Choose a base";
+    const stateName =
+      STATE_NAMES[stateCode] ||
+      stateCode;
 
-    updateSidebarHeaderLink(null);
-
-    if (panelCopyEl) {
-      const stateName =
-        STATE_NAMES[stateCode] ||
-        stateCode;
-
-      if (bases && bases.length) {
-        panelCopyEl.textContent =
-          `${bases.length} supported base profile${bases.length > 1 ? "s" : ""} available in ${stateName}. Select a base above.`;
-      } else {
-        panelCopyEl.textContent =
-          "PCSUnited does not have supported Base Demographics profiles for this state yet.";
-      }
-    }
+    panelCopyEl.textContent =
+      bases.length
+        ? `${bases.length} Air Force base${bases.length === 1 ? "" : "s"} in ${stateName}. Select a base above.`
+        : `No supported Air Force bases are currently listed for ${stateName}.`;
   }
+
+  /* =======================================================
+     EVENTS
+  ======================================================= */
 
   function emitMapState(
     stateCode,
     selectedBase
   ) {
+
     window.dispatchEvent(
       new CustomEvent(
         "pcsunited:base-map-updated",
         {
           detail: {
+
             source:
               "pcsunited-interactive-base-map",
 
@@ -1455,96 +1456,188 @@
                 : null,
 
             updated_at:
-              new Date().toISOString()
+              new Date()
+                .toISOString()
           }
         }
       )
     );
+
   }
+
+  function emitBaseSelection(
+    base
+  ) {
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "pcsunited:map-base-selected",
+        {
+          detail: {
+
+            ...base,
+
+            selectedBase: {
+              ...base
+            },
+
+            autoNavigate:
+              false,
+
+            source:
+              "pcsunited-interactive-base-map-card",
+
+            updated_at:
+              new Date()
+                .toISOString()
+          }
+        }
+      )
+    );
+
+  }
+
+  /* =======================================================
+     BASE CARDS
+  ======================================================= */
+
+  function renderBaseCards(
+    bases,
+    selectedBase
+  ) {
+
+    baseListEl.innerHTML =
+      bases
+        .map(base => `
+          <button
+            class="pcsu-base-btn${selectedBase && selectedBase.id === base.id ? " is-selected" : ""}"
+            type="button"
+            data-base-id="${esc(base.id)}"
+            aria-label="Select ${esc(base.base)}"
+            aria-pressed="${selectedBase && selectedBase.id === base.id ? "true" : "false"}">
+
+            <span class="pcsu-base-name">
+              ${esc(base.base)}
+            </span>
+
+            <span class="pcsu-base-meta">
+              ${esc(base.city)} • Select Base
+            </span>
+
+          </button>
+        `)
+        .join("");
+
+    baseListEl
+      .querySelectorAll(
+        ".pcsu-base-btn"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const base =
+              bases.find(
+                item =>
+                  item.id ===
+                  button.dataset.baseId
+              );
+
+            if (base) {
+              selectBase(base);
+            }
+
+          }
+        );
+
+      });
+  }
+
+  function scrollSelectedCardIntoView() {
+
+    const selected =
+      baseListEl
+        .querySelector(
+          ".pcsu-base-btn.is-selected"
+        );
+
+    if (!selected) {
+      return;
+    }
+
+    try {
+
+      selected.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center"
+      });
+
+    } catch (_) {
+      /*
+        Older browser fallback:
+        simply leave card at current position.
+      */
+    }
+  }
+
+  /* =======================================================
+     STATE / BASE SELECTION
+  ======================================================= */
 
   function renderState(
     stateCode,
-    selectedBaseId,
-    options
+    selectedBaseId = "",
+    options = {}
   ) {
-    const opts =
-      options &&
-      typeof options === "object"
-        ? options
-        : {};
-
-    const allowScroll =
-      opts.allowScroll === true;
-
-    const allowSectionScroll =
-      opts.allowSectionScroll === true;
-
-    const beforeY =
-      window.scrollY ||
-      window.pageYOffset ||
-      0;
 
     const safeState =
-      String(
-        stateCode || ""
-      ).toUpperCase();
-
-    let safeBaseId =
-      String(
-        selectedBaseId || ""
-      ).trim();
-
-    if (
-      !safeBaseId &&
-      safeState === currentStateCode &&
-      currentBaseId
-    ) {
-      safeBaseId =
-        currentBaseId;
-    }
-
-    logScrollDebug(
-      "renderState:before",
-      {
-        stateCode: safeState,
-        selectedBaseId: safeBaseId,
-        allowScroll,
-        allowSectionScroll
-      }
-    );
+      clean(stateCode)
+        .toUpperCase();
 
     if (!safeState) {
       return;
     }
 
     if (!mapReady) {
-      pendingStateCode =
-        safeState;
 
-      pendingBaseId =
-        safeBaseId;
+      pendingSelection = {
+        stateCode:
+          safeState,
 
-      pendingAllowScroll =
-        allowScroll;
+        selectedBaseId,
 
-      pendingAllowSectionScroll =
-        allowSectionScroll;
+        options
+      };
 
       return;
     }
 
     const bases =
-      STATE_BASES[safeState] ||
-      [];
+      getBases(
+        safeState
+      );
+
+    const selectedBase =
+      getBaseById(
+        safeState,
+        selectedBaseId
+      );
 
     currentStateCode =
       safeState;
 
     currentBaseId =
-      safeBaseId;
+      selectedBase
+        ? selectedBase.id
+        : "";
 
     svg
-      .selectAll(".pcsu-state")
+      .selectAll(
+        ".pcsu-state"
+      )
       .classed(
         "is-active",
         false
@@ -1559,97 +1652,17 @@
         true
       );
 
-    if (!bases.length) {
-      baseListEl.innerHTML = "";
+    renderBaseCards(
+      bases,
+      selectedBase
+    );
 
-      clearBaseMarker();
+    drawBaseDots(
+      bases,
+      selectedBase
+    );
 
-      updateSelectedBasePanel(
-        safeState,
-        null,
-        bases
-      );
-
-      emitMapState(
-        safeState,
-        null
-      );
-
-      logScrollDebug(
-        "renderState:after-empty",
-        {
-          deltaY:
-            (
-              window.scrollY ||
-              0
-            ) -
-            beforeY
-        }
-      );
-
-      return;
-    }
-
-    baseListEl.innerHTML =
-      bases
-        .map(
-          base => `
-            <button
-              class="pcsu-base-btn${base.id === currentBaseId ? " is-selected" : ""}"
-              type="button"
-              data-base-id="${esc(base.id)}"
-              aria-label="Open ${esc(base.base)} Base Demographics"
-              aria-pressed="${base.id === currentBaseId ? "true" : "false"}">
-
-              <span class="pcsu-base-name">
-                ${esc(base.base)}
-              </span>
-
-              <span class="pcsu-base-meta">
-                ${esc(base.city)} • Open Base Demographics
-              </span>
-            </button>
-          `
-        )
-        .join("");
-
-    baseListEl
-      .querySelectorAll(
-        ".pcsu-base-btn"
-      )
-      .forEach(button => {
-        button.addEventListener(
-          "click",
-          () => {
-            const selected =
-              bases.find(
-                base =>
-                  base.id ===
-                  button.dataset.baseId
-              );
-
-            if (selected) {
-              openBase(selected);
-            }
-          }
-        );
-      });
-
-    const selectedBase =
-      getBaseById(
-        safeState,
-        currentBaseId
-      );
-
-    if (selectedBase) {
-      drawBaseMarker(
-        selectedBase
-      );
-    } else {
-      clearBaseMarker();
-    }
-
-    updateSelectedBasePanel(
+    updatePanelHeader(
       safeState,
       selectedBase,
       bases
@@ -1660,57 +1673,91 @@
       selectedBase
     );
 
-    const selectedButton =
-      baseListEl.querySelector(
-        ".pcsu-base-btn.is-selected"
-      );
-
     if (
-      selectedButton &&
-      allowScroll
+      selectedBase &&
+      options.scrollCard !== false
     ) {
-      scrollSelectedButtonIntoList(
-        selectedButton
-      );
+      scrollSelectedCardIntoView();
     }
+  }
 
-    if (allowSectionScroll) {
-      scrollMapSectionIntoView();
-    }
+  function selectState(
+    stateCode
+  ) {
 
-    const afterY =
-      window.scrollY ||
-      window.pageYOffset ||
-      0;
-
-    logScrollDebug(
-      "renderState:after",
+    renderState(
+      stateCode,
+      "",
       {
-        deltaY:
-          afterY -
-          beforeY,
-
-        allowScroll,
-        allowSectionScroll
+        scrollCard:
+          false
       }
     );
+
   }
+
+  function selectBase(
+    base
+  ) {
+
+    if (!base) {
+      return;
+    }
+
+    /*
+      IMPORTANT:
+      Selecting a base DOES NOT navigate away.
+
+      It only:
+      - selects the base
+      - updates the marker
+      - loads the JSON
+      - fills the information panel
+    */
+
+    renderState(
+      base.stateCode ||
+      base.state,
+
+      base.id,
+
+      {
+        scrollCard:
+          true
+      }
+    );
+
+    emitBaseSelection(
+      base
+    );
+  }
+
+  /* =======================================================
+     OPTIONAL BASICBRAIN / EXISTING PCSU EVENT COMPATIBILITY
+  ======================================================= */
 
   function findStateFromBaseName(
     baseName
   ) {
+
     const key =
-      normalizeKey(baseName);
+      normalizeKey(
+        baseName
+      );
 
     if (!key) {
       return "";
     }
 
-    if (BASE_TO_STATE[key]) {
-      return BASE_TO_STATE[key];
+    if (
+      BASE_TO_STATE[key]
+    ) {
+      return (
+        BASE_TO_STATE[key]
+      );
     }
 
-    const foundKey =
+    const fuzzyKey =
       Object.keys(
         BASE_TO_STATE
       ).find(
@@ -1719,1483 +1766,1217 @@
           key.includes(existingKey)
       );
 
-    return foundKey
-      ? BASE_TO_STATE[foundKey]
+    return fuzzyKey
+      ? BASE_TO_STATE[
+          fuzzyKey
+        ]
       : "";
   }
 
-  function findBaseIdInState(
+  function findBaseId(
     stateCode,
     baseName
   ) {
-    const safeState =
-      String(
-        stateCode || ""
-      ).toUpperCase();
 
     const bases =
-      STATE_BASES[safeState] ||
-      [];
+      getBases(
+        stateCode
+      );
 
     const key =
-      normalizeKey(baseName);
+      normalizeKey(
+        baseName
+      );
 
-    if (
-      !safeState ||
-      !key ||
-      !bases.length
-    ) {
+    if (!key) {
       return "";
     }
 
     const exact =
-      bases.find(base => {
-        return [
-          base.base,
-          base.name,
-          base.label,
-          base.fileName,
-          base.id,
-          base.slug
-        ].some(
-          value =>
-            normalizeKey(value) ===
-            key
-        );
-      });
+      bases.find(
+        base =>
+
+          [
+            base.base,
+            base.name,
+            base.label,
+            base.fileName,
+            base.id
+          ].some(
+            value =>
+              normalizeKey(
+                value
+              ) === key
+          )
+      );
 
     if (exact) {
       return exact.id;
     }
 
     const fuzzy =
-      bases.find(base => {
-        return [
-          base.base,
-          base.name,
-          base.label,
-          base.fileName,
-          base.id,
-          base.slug
-        ].some(value => {
-          const baseKey =
-            normalizeKey(value);
+      bases.find(
+        base =>
 
-          return (
-            baseKey.includes(key) ||
-            key.includes(baseKey)
-          );
-        });
-      });
+          [
+            base.base,
+            base.name,
+            base.label,
+            base.fileName,
+            base.id
+          ].some(
+            value => {
+
+              const candidate =
+                normalizeKey(
+                  value
+                );
+
+              return (
+                candidate.includes(
+                  key
+                ) ||
+                key.includes(
+                  candidate
+                )
+              );
+            }
+          )
+      );
 
     return fuzzy
       ? fuzzy.id
       : "";
   }
 
-  function findSelectionFromDetail(
+  function selectionFromDetail(
     detail
   ) {
+
     const data =
       detail &&
       typeof detail === "object"
         ? detail
         : {};
 
-    const basicbrain =
-      data.basicbrain &&
-      typeof data.basicbrain === "object"
-        ? data.basicbrain
+    const selected =
+      data.selectedBase &&
+      typeof data.selectedBase ===
+        "object"
+        ? data.selectedBase
         : {};
 
     const profile =
       data.profile &&
-      typeof data.profile === "object"
+      typeof data.profile ===
+        "object"
         ? data.profile
         : {};
 
-    const bridge =
-      data.bridge &&
-      typeof data.bridge === "object"
-        ? data.bridge
+    const basicbrain =
+      data.basicbrain &&
+      typeof data.basicbrain ===
+        "object"
+        ? data.basicbrain
         : {};
 
-    const directSelectedBase =
-      data.selectedBase &&
-      typeof data.selectedBase === "object"
-        ? data.selectedBase
-        : {};
+    const baseName =
 
-    const basicBrainSelectedBase =
-      basicbrain.selectedBase &&
-      typeof basicbrain.selectedBase === "object"
-        ? basicbrain.selectedBase
-        : {};
+      selected.base ||
+      selected.name ||
+      selected.label ||
 
-    const selectedBase = {
-      ...basicBrainSelectedBase,
-      ...directSelectedBase
-    };
+      data.base ||
+      data.name ||
+      data.label ||
 
-    const directState =
-      selectedBase.state ||
-      selectedBase.stateCode ||
-      profile.stateCode ||
-      profile.state ||
-      bridge.stateCode ||
-      bridge.state ||
-      basicbrain.stateCode ||
-      basicbrain.state ||
+      profile.selected_base ||
+      profile.base ||
+      profile.pcs_base ||
+      profile.current_base ||
+
+      basicbrain.selected_base ||
+      basicbrain.base ||
+      basicbrain.pcs_base ||
+      basicbrain.current_base ||
+
+      "";
+
+    const rawState =
+
+      selected.stateCode ||
+      selected.state ||
+
       data.stateCode ||
       (
-        typeof data.state === "string"
+        typeof data.state ===
+        "string"
           ? data.state
           : ""
       ) ||
+
+      profile.stateCode ||
+      profile.state ||
+
+      basicbrain.stateCode ||
+      basicbrain.state ||
+
       "";
 
-    const baseName =
-      selectedBase.base ||
-      selectedBase.name ||
-      selectedBase.label ||
-
-      profile.selected_base ||
-      (
-        typeof profile.selectedBase === "string"
-          ? profile.selectedBase
-          : ""
-      ) ||
-      profile.pcs_base ||
-      profile.pcsBase ||
-      profile.current_base ||
-      profile.currentBase ||
-      profile.base ||
-
-      bridge.selected_base ||
-      (
-        typeof bridge.selectedBase === "string"
-          ? bridge.selectedBase
-          : ""
-      ) ||
-      bridge.pcs_base ||
-      bridge.pcsBase ||
-      bridge.current_base ||
-      bridge.currentBase ||
-      bridge.base ||
-
-      basicbrain.selected_base ||
-      (
-        typeof basicbrain.selectedBase === "string"
-          ? basicbrain.selectedBase
-          : ""
-      ) ||
-      basicbrain.pcs_base ||
-      basicbrain.pcsBase ||
-      basicbrain.current_base ||
-      basicbrain.currentBase ||
-      basicbrain.base ||
-
-      (
-        typeof data.base === "string"
-          ? data.base
-          : ""
-      ) ||
-      data.name ||
-      data.label ||
-      "";
-
-    const normalizedState =
-      String(
-        directState || ""
-      ).toUpperCase();
+    const candidateState =
+      clean(rawState)
+        .toUpperCase();
 
     const stateCode =
-      normalizedState &&
-      STATE_NAMES[normalizedState]
-        ? normalizedState
+      STATE_NAMES[
+        candidateState
+      ]
+        ? candidateState
         : findStateFromBaseName(
             baseName
           );
-
-    if (!stateCode) {
-      return {
-        stateCode: "",
-        baseId: "",
-        baseName: ""
-      };
-    }
 
     return {
       stateCode,
 
       baseId:
-        findBaseIdInState(
-          stateCode,
-          baseName
-        ),
-
-      baseName:
-        baseName || ""
+        stateCode
+          ? findBaseId(
+              stateCode,
+              baseName
+            )
+          : ""
     };
   }
 
-  function preselectFromDetail(
-    detail,
-    options
+  function applyExternalSelection(
+    detail
   ) {
+
     const selection =
-      findSelectionFromDetail(
+      selectionFromDetail(
         detail
       );
 
-    if (!selection.stateCode) {
+    if (
+      !selection.stateCode
+    ) {
       return false;
     }
 
     renderState(
       selection.stateCode,
       selection.baseId,
-      options
+      {
+        scrollCard:
+          false
+      }
     );
 
     return true;
   }
 
-  function preselectFromCurrentBasicBrain() {
-    const candidates = [
-      window.PCSU_BASICBRAIN_CURRENT,
-      window.PCSU_BASICBRAIN_TEMP,
-      window.PCSU_BASICBRAIN?.getLastGood?.(),
-      window.PCSU_BASICBRAIN?.getState?.()
-    ];
+  [
+    "pcsunited:basicbrain-updated",
+    "pcsunited:base-preview-ready",
+    "pcsunited:profile-ready",
+    "pcsunited:bridge-ready",
+    "pcsunited:compensation-ready",
+    "pcsu:base-selected"
 
-    for (const candidate of candidates) {
-      if (
-        preselectFromDetail(
-          candidate,
-          {
-            allowScroll: false,
-            allowSectionScroll: false
-          }
-        )
-      ) {
-        return true;
-      }
-    }
+  ].forEach(
+    eventName => {
 
-    return false;
-  }
-
-  function isIntentionalNavigation(
-    detail
-  ) {
-    return Boolean(
-      detail &&
-      typeof detail === "object" &&
-      detail.autoNavigate === true
-    );
-  }
-
-  function handlePassiveBaseSelection(
-    detail
-  ) {
-    logScrollDebug(
-      "passive-base-selection",
-      {
-        source:
-          detail?.source ||
-          "unknown"
-      }
-    );
-
-    preselectFromDetail(
-      detail,
-      {
-        allowScroll: false,
-        allowSectionScroll: false
-      }
-    );
-  }
-
-  function handleIntentionalBaseSelection(
-    detail
-  ) {
-    logScrollDebug(
-      "intentional-base-selection",
-      {
-        source:
-          detail?.source ||
-          "unknown"
-      }
-    );
-
-    preselectFromDetail(
-      detail,
-      {
-        allowScroll: true,
-        allowSectionScroll: true
-      }
-    );
-  }
-
-  function bindNavigationEvents() {
-    [
-      "pcsunited:basicbrain-updated",
-      "pcsunited:base-preview-ready",
-      "pcsunited:profile-ready",
-      "pcsunited:bridge-ready",
-      "pcsunited:compensation-ready"
-    ].forEach(eventName => {
       window.addEventListener(
         eventName,
         event => {
-          handlePassiveBaseSelection(
-            event.detail || {}
+
+          applyExternalSelection(
+            event.detail ||
+            {}
           );
+
         }
       );
-    });
 
-    window.addEventListener(
-      "pcsu:base-selected",
-      event => {
-        const detail =
-          event.detail || {};
+    }
+  );
 
-        if (
-          isIntentionalNavigation(
-            detail
-          )
-        ) {
-          handleIntentionalBaseSelection(
-            detail
-          );
+  /* =======================================================
+     PUBLIC MAP API
+  ======================================================= */
 
-          return;
-        }
+  window.PCSU_US_BASE_MAP = {
 
-        handlePassiveBaseSelection(
-          detail
-        );
-      }
-    );
+    version:
+      VERSION,
 
-    window.addEventListener(
-      "message",
-      event => {
-        const data =
-          event &&
-          event.data &&
-          typeof event.data === "object"
-            ? event.data
-            : {};
+    selectState,
 
-        if (
-          data.type ===
-          "pcsunited-basicbrain"
-        ) {
-          handlePassiveBaseSelection(
-            data
-          );
-        }
-      }
-    );
-  }
+    selectBase,
 
-  window.PCSU_US_BASE_MAP.renderState =
-    renderState;
+    renderState,
 
-  window.PCSU_US_BASE_MAP.selectState =
-    renderState;
-
-  window.PCSU_US_BASE_MAP.preselectFromBasicBrain =
-    (detail, options) =>
-      preselectFromDetail(
-        detail,
-        options
-      );
-
-  window.PCSU_US_BASE_MAP.findSelectionFromDetail =
-    findSelectionFromDetail;
-
-  window.PCSU_US_BASE_MAP.getCurrentState =
-    () => currentStateCode;
-
-  window.PCSU_US_BASE_MAP.getCurrentBase =
-    () => currentBaseId;
-
-  window.PCSU_US_BASE_MAP.getStateBases =
-    stateCode => [
-      ...(
-        STATE_BASES[
-          String(
-            stateCode || ""
-          ).toUpperCase()
-        ] || []
-      )
-    ];
-
-  window.PCSU_US_BASE_MAP.getSelectedBase =
-    () =>
-      getBaseById(
+    getCurrentState:
+      () =>
         currentStateCode,
-        currentBaseId
-      );
 
-  window.PCSU_US_BASE_MAP.openBase =
-    item => openBase(item);
+    getCurrentBaseId:
+      () =>
+        currentBaseId,
 
-  window.PCSU_US_BASE_MAP.getDestinationUrl =
-    item =>
-      getBaseDestinationUrl(
-        item
-      ).toString();
+    getSelectedBase:
+      () =>
+        getBaseById(
+          currentStateCode,
+          currentBaseId
+        ),
 
-  window.PCSU_US_BASE_MAP.logScrollDebug =
-    logScrollDebug;
-
-  bindNavigationEvents();
-
-  d3.json(
-    "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
-  )
-    .then(us => {
-      const states =
-        topojson
-          .feature(
-            us,
-            us.objects.states
-          )
-          .features;
-
-      projection =
-        d3
-          .geoAlbersUsa()
-          .translate([480, 300])
-          .scale(1250);
-
-      const path =
-        d3.geoPath(
-          projection
-        );
-
-      svg
-        .append("g")
-        .attr(
-          "class",
-          "pcsu-state-layer"
+    getStateBases:
+      stateCode => [
+        ...getBases(
+          stateCode
         )
-        .selectAll("path")
-        .data(states)
-        .join("path")
-        .attr("class", state => {
-          const stateCode =
-            FIPS_TO_ABBR[
-              String(
-                state.id
-              ).padStart(
-                2,
-                "0"
-              )
-            ];
+      ],
 
-          return STATE_BASES[stateCode]
-            ? "pcsu-state has-bases"
-            : "pcsu-state";
-        })
-        .attr("id", state => {
-          const stateCode =
-            FIPS_TO_ABBR[
-              String(
-                state.id
-              ).padStart(
-                2,
-                "0"
-              )
-            ];
+    getJsonUrl:
+      base =>
+        base &&
+        base.jsonUrl
+          ? base.jsonUrl
+          : directJsonUrl(
+              base
+                ? base.fileName
+                : ""
+            ),
 
-          return `state-${stateCode}`;
-        })
-        .attr("d", path)
-        .on(
-          "click",
-          (event, state) => {
-            const stateCode =
-              FIPS_TO_ABBR[
-                String(
-                  state.id
-                ).padStart(
-                  2,
-                  "0"
-                )
-              ];
-
-            renderState(
-              stateCode,
-              "",
-              {
-                allowScroll: false,
-                allowSectionScroll: false
-              }
-            );
-          }
-        );
-
-      svg
-        .append("path")
-        .datum(
-          topojson.mesh(
-            us,
-            us.objects.states,
-            (a, b) =>
-              a !== b
-          )
+    getBaseDemographicsUrl:
+      base =>
+        baseDemographicsUrl(
+          base
         )
-        .attr("fill", "none")
-        .attr(
-          "stroke",
-          "rgba(16,20,38,.75)"
-        )
-        .attr(
-          "stroke-width",
-          1
-        )
-        .attr(
-          "pointer-events",
-          "none"
-        )
-        .attr("d", path);
+  };
 
-      svg
-        .append("g")
-        .attr(
-          "class",
-          "pcsu-state-label-layer"
-        )
-        .selectAll("text")
-        .data(states)
-        .join("text")
-        .attr(
-          "class",
-          "pcsu-state-label"
-        )
-        .attr("x", state => {
-          const centroid =
-            path.centroid(state);
+  /* =======================================================
+     BASE INFORMATION PANEL
+  ======================================================= */
 
-          return Number.isFinite(
-            centroid[0]
-          )
-            ? centroid[0]
-            : -100;
-        })
-        .attr("y", state => {
-          const centroid =
-            path.centroid(state);
-
-          return Number.isFinite(
-            centroid[1]
-          )
-            ? centroid[1]
-            : -100;
-        })
-        .text(state => {
-          return (
-            FIPS_TO_ABBR[
-              String(
-                state.id
-              ).padStart(
-                2,
-                "0"
-              )
-            ] || ""
-          );
-        })
-        .style(
-          "display",
-          state => {
-            const stateCode =
-              FIPS_TO_ABBR[
-                String(
-                  state.id
-                ).padStart(
-                  2,
-                  "0"
-                )
-              ];
-
-            return [
-              "RI",
-              "DE",
-              "CT",
-              "NJ",
-              "MD",
-              "MA",
-              "DC"
-            ].includes(stateCode)
-              ? "none"
-              : "block";
-          }
-        );
-
-      markerLayer =
-        svg
-          .append("g")
-          .attr(
-            "id",
-            "pcsu-base-marker-layer"
-          );
-
-      mapReady = true;
-
-      if (pendingStateCode) {
-        renderState(
-          pendingStateCode,
-          pendingBaseId,
-          {
-            allowScroll:
-              pendingAllowScroll,
-
-            allowSectionScroll:
-              pendingAllowSectionScroll
-          }
-        );
-      } else if (
-        !preselectFromCurrentBasicBrain()
-      ) {
-        renderState(
-          DEFAULT_STATE,
-          "",
-          {
-            allowScroll: false,
-            allowSectionScroll: false
-          }
-        );
-      }
-
-      window.dispatchEvent(
-        new CustomEvent(
-          "pcsunited:base-map-ready",
-          {
-            detail: {
-              source:
-                "pcsunited-interactive-base-map",
-
-              version:
-                VERSION,
-
-              state:
-                currentStateCode,
-
-              baseId:
-                currentBaseId,
-
-              selectedBase:
-                getBaseById(
-                  currentStateCode,
-                  currentBaseId
-                ),
-
-              updated_at:
-                new Date().toISOString()
-            }
-          }
-        )
-      );
-    })
-    .catch(error => {
-      console.warn(
-        "[PCSU Base Map] Map data could not load:",
-        error
-      );
-
-      updateSidebarHeaderLink(null);
-
-      if (selectedStateEl) {
-        selectedStateEl.textContent =
-          "Map unavailable";
-      }
-
-      if (panelCopyEl) {
-        panelCopyEl.textContent =
-          "The map data could not load. Please refresh the page.";
-      }
-
-      baseListEl.innerHTML = `
-        <div
-          style="
-            width:100%;
-            padding:14px;
-            border:1px solid rgba(255,255,255,.10);
-            border-radius:14px;
-            color:#aeb8db;
-            font-size:12px;
-            font-weight:700;
-            line-height:1.5;
-            text-align:center;
-          ">
-          The map data could not load. Please refresh the page.
-        </div>
-      `;
-    });
-})();
-
-/* =========================================================
-   BASE ESSENTIALS SIDEBAR
-========================================================= */
-
-(() => {
-  "use strict";
-
-  const VERSION = "2.1.0";
-
-  const MOUNT_KEY =
-    "PCSU_BASE_ESSENTIALS_SIDEBAR_V210_MOUNTED";
-
-  const API =
-    "https://thewing.netlify.app/api/base-data";
-
-  if (window[MOUNT_KEY]) {
-    return;
-  }
-
-  window[MOUNT_KEY] = true;
-
-  const root =
+  const panelRoot =
     document.getElementById(
       "pcsu-base-essentials-module"
     );
 
-  const slot =
-    document.getElementById(
-      "pcsu-map-sidebar-slot"
-    );
+  const panel =
+    panelRoot
+      ? {
 
-  if (!root) {
-    return;
-  }
+          status:
+            panelRoot.querySelector(
+              "#pcsu-be-status"
+            ),
 
-  if (
-    slot &&
-    root.parentElement !== slot
+          statusText:
+            panelRoot.querySelector(
+              "#pcsu-be-status-text"
+            ),
+
+          content:
+            panelRoot.querySelector(
+              "#pcsu-be-content"
+            ),
+
+          overviewSection:
+            panelRoot.querySelector(
+              "#pcsu-be-overview-section"
+            ),
+
+          locationCard:
+            panelRoot.querySelector(
+              "#pcsu-be-location-card"
+            ),
+
+          location:
+            panelRoot.querySelector(
+              "#pcsu-be-location"
+            ),
+
+          branchCard:
+            panelRoot.querySelector(
+              "#pcsu-be-branch-card"
+            ),
+
+          branch:
+            panelRoot.querySelector(
+              "#pcsu-be-branch"
+            ),
+
+          operatorSection:
+            panelRoot.querySelector(
+              "#pcsu-be-operator-section"
+            ),
+
+          operatorName:
+            panelRoot.querySelector(
+              "#pcsu-be-operator-name"
+            ),
+
+          operatorCall:
+            panelRoot.querySelector(
+              "#pcsu-be-operator-call"
+            ),
+
+          operatorPhone:
+            panelRoot.querySelector(
+              "#pcsu-be-operator-phone"
+            ),
+
+          populationSection:
+            panelRoot.querySelector(
+              "#pcsu-be-population-section"
+            ),
+
+          populationTotal:
+            panelRoot.querySelector(
+              "#pcsu-be-population-total"
+            ),
+
+          populationDetails:
+            panelRoot.querySelector(
+              "#pcsu-be-population-details"
+            ),
+
+          missionSection:
+            panelRoot.querySelector(
+              "#pcsu-be-mission-section"
+            ),
+
+          mission:
+            panelRoot.querySelector(
+              "#pcsu-be-mission"
+            ),
+
+          gatesSection:
+            panelRoot.querySelector(
+              "#pcsu-be-gates-section"
+            ),
+
+          gateList:
+            panelRoot.querySelector(
+              "#pcsu-be-gate-list"
+            ),
+
+          extraGates:
+            panelRoot.querySelector(
+              "#pcsu-be-extra-gates"
+            ),
+
+          gateToggle:
+            panelRoot.querySelector(
+              "#pcsu-be-gate-toggle"
+            ),
+
+          visitorSection:
+            panelRoot.querySelector(
+              "#pcsu-be-visitor-section"
+            ),
+
+          visitorName:
+            panelRoot.querySelector(
+              "#pcsu-be-visitor-name"
+            ),
+
+          visitorDetails:
+            panelRoot.querySelector(
+              "#pcsu-be-visitor-details"
+            ),
+
+          visitorLink:
+            panelRoot.querySelector(
+              "#pcsu-be-visitor-link"
+            )
+        }
+
+      : null;
+
+  let panelRequest = 0;
+
+  let loadedFile = "";
+
+  let loadedJson = null;
+
+  /* =======================================================
+     PANEL HELPERS
+  ======================================================= */
+
+  function showPanelStatus(
+    message
   ) {
-    slot.innerHTML = "";
-    slot.appendChild(root);
+
+    if (!panel) {
+      return;
+    }
+
+    if (panel.status) {
+      panel.status.hidden =
+        false;
+    }
+
+    if (panel.content) {
+      panel.content.hidden =
+        true;
+    }
+
+    if (panel.statusText) {
+      panel.statusText.textContent =
+        message;
+    }
   }
 
-  const $ =
-    selector =>
-      root.querySelector(
-        selector
-      );
+  function showPanelContent() {
 
-  const el = {
-    status:
-      $("#pcsu-be-status"),
+    if (!panel) {
+      return;
+    }
 
-    statusText:
-      $("#pcsu-be-status-text"),
+    if (panel.status) {
+      panel.status.hidden =
+        true;
+    }
 
-    content:
-      $("#pcsu-be-content"),
-
-    visitorSection:
-      $("#pcsu-be-visitor-section"),
-
-    visitorName:
-      $("#pcsu-be-visitor-name"),
-
-    visitorDetails:
-      $("#pcsu-be-visitor-details"),
-
-    visitorLink:
-      $("#pcsu-be-visitor-link"),
-
-    gatesSection:
-      $("#pcsu-be-gates-section"),
-
-    gateList:
-      $("#pcsu-be-gate-list"),
-
-    extraGates:
-      $("#pcsu-be-extra-gates"),
-
-    gateToggle:
-      $("#pcsu-be-gate-toggle"),
-
-    housingSection:
-      $("#pcsu-be-housing-section"),
-
-    housingName:
-      $("#pcsu-be-housing-name"),
-
-    housingDetails:
-      $("#pcsu-be-housing-details"),
-
-    housingCall:
-      $("#pcsu-be-housing-call"),
-
-    housingEmail:
-      $("#pcsu-be-housing-email"),
-
-    housingLink:
-      $("#pcsu-be-housing-link"),
-
-    servicesSection:
-      $("#pcsu-be-services-section"),
-
-    serviceGrid:
-      $("#pcsu-be-service-grid"),
-
-    watchout:
-      $("#pcsu-be-watchout"),
-
-    watchoutTitle:
-      $("#pcsu-be-watchout-title"),
-
-    watchoutMessage:
-      $("#pcsu-be-watchout-message")
-  };
-
-  let sequence = 0;
-  let currentBase = null;
-  let currentData = null;
-  let currentFile = "";
-
-  function clean(value) {
-    return (
-      value === undefined ||
-      value === null
-    )
-      ? ""
-      : String(value).trim();
+    if (panel.content) {
+      panel.content.hidden =
+        false;
+    }
   }
 
-  function esc(value) {
-    return clean(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
+  function safeUrl(
+    value
+  ) {
 
-  function normal(value) {
-    return clean(value)
-      .toLowerCase()
-      .replace(
-        /joint\s*base/g,
-        "jb"
-      )
-      .replace(
-        /air\s*force\s*base/g,
-        "afb"
-      )
-      .replace(
-        /space\s*force\s*base/g,
-        "sfb"
-      )
-      .replace(
-        /[^a-z0-9]/g,
-        ""
-      );
-  }
+    const raw =
+      clean(value);
 
-  function safeUrl(value) {
-    if (!clean(value)) {
+    if (!raw) {
       return "";
     }
 
     try {
-      return new URL(
-        value,
-        window.location.origin
-      ).toString();
+
+      const url =
+        new URL(
+          raw,
+          window.location.href
+        );
+
+      return (
+        [
+          "http:",
+          "https:"
+        ].includes(
+          url.protocol
+        )
+          ? url.toString()
+          : ""
+      );
+
     } catch (_) {
+
       return "";
     }
   }
 
-  function phone(value) {
-    const first =
-      clean(value)
-        .split("/")
-        .map(
-          item =>
-            item.trim()
-        )
-        .find(Boolean) ||
-      "";
+  function telUrl(
+    value
+  ) {
 
-    const normalized =
+    const raw =
+      clean(value);
+
+    if (!raw) {
+      return "";
+    }
+
+    const first =
+      raw
+        .split(/[\/|,]/)[0]
+        .trim();
+
+    const digits =
       first.replace(
         /[^0-9+]/g,
         ""
       );
 
-    return normalized
-      ? `tel:${normalized}`
+    return digits
+      ? `tel:${digits}`
       : "";
   }
 
-  function email(value) {
-    return clean(value)
-      ? `mailto:${clean(value)}`
-      : "";
+  function formatNumber(
+    value
+  ) {
+
+    if (
+      value === undefined ||
+      value === null ||
+      value === ""
+    ) {
+      return "";
+    }
+
+    const number =
+      Number(
+        String(value)
+          .replace(/,/g, "")
+      );
+
+    return (
+      Number.isFinite(number)
+        ? new Intl.NumberFormat(
+            "en-US"
+          ).format(
+            number
+          )
+        : clean(value)
+    );
   }
 
-  function link(node, href) {
-    if (!node) {
+  function getProfile(
+    json
+  ) {
+
+    return (
+      json &&
+      json.base_profile &&
+      typeof json.base_profile ===
+        "object"
+    )
+      ? json.base_profile
+      : {};
+  }
+
+  /* =======================================================
+     BASE OVERVIEW
+  ======================================================= */
+
+  function renderOverview(
+    profile,
+    base
+  ) {
+
+    if (!panel) {
       return;
     }
 
-    node.hidden = !href;
+    const city =
+      clean(
+        profile.city
+      ) ||
+      clean(
+        base
+          ? base.city
+          : ""
+      )
+        .split(",")[0];
 
-    if (href) {
-      node.href = href;
-    } else {
-      node.removeAttribute(
-        "href"
+    const state =
+      clean(
+        profile.state
+      ) ||
+      clean(
+        profile.state_abbr
+      ) ||
+      clean(
+        base
+          ? base.stateCode
+          : ""
       );
+
+    const location =
+      [
+        city,
+        state
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+    const branch =
+      clean(
+        profile.branch
+      ) ||
+      "Air Force";
+
+    if (
+      panel.locationCard
+    ) {
+      panel.locationCard.hidden =
+        !location;
+    }
+
+    if (panel.location) {
+      panel.location.textContent =
+        location;
+    }
+
+    if (
+      panel.branchCard
+    ) {
+      panel.branchCard.hidden =
+        !branch;
+    }
+
+    if (panel.branch) {
+      panel.branch.textContent =
+        branch;
+    }
+
+    if (
+      panel.overviewSection
+    ) {
+      panel.overviewSection.hidden =
+        !location &&
+        !branch;
     }
   }
 
-  function showStatus(message) {
-    el.statusText.textContent =
-      message;
+  /* =======================================================
+     OPERATOR PHONE
+  ======================================================= */
 
-    el.status.hidden =
-      false;
+  function getOperator(
+    profile,
+    json
+  ) {
 
-    el.content.hidden =
-      true;
-  }
+    const objectValue =
 
-  function showContent() {
-    el.status.hidden =
-      true;
+      (
+        profile.base_operator &&
+        typeof profile.base_operator ===
+          "object" &&
+        profile.base_operator
+      ) ||
 
-    el.content.hidden =
-      false;
-  }
+      (
+        profile.operator &&
+        typeof profile.operator ===
+          "object" &&
+        profile.operator
+      ) ||
 
-  function mapBase() {
-    const api =
-      window.PCSU_US_BASE_MAP;
+      (
+        profile.installation_operator &&
+        typeof profile.installation_operator ===
+          "object" &&
+        profile.installation_operator
+      ) ||
 
-    return (
-      api &&
-      typeof api.getSelectedBase ===
-        "function"
-    )
-      ? api.getSelectedBase()
-      : null;
-  }
+      {};
 
-  function brainBase() {
-    const candidates = [
-      window.PCSU_BASICBRAIN_CURRENT,
-      window.PCSU_BASICBRAIN_TEMP,
-      window.PCSU_BASICBRAIN?.getLastGood?.(),
-      window.PCSU_BASICBRAIN?.getState?.()
-    ];
+    const label =
+      clean(
+        objectValue.label ||
+        objectValue.name ||
+        profile.main_phone_label ||
+        profile.operator_phone_label
+      ) ||
+      "Installation Operator";
 
-    for (const candidate of candidates) {
-      if (
-        !candidate ||
-        typeof candidate !== "object"
-      ) {
-        continue;
-      }
+    const phone =
+      clean(
+        objectValue.phone ||
+        objectValue.telephone ||
+        objectValue.number ||
 
-      const basicbrain =
-        candidate.basicbrain || {};
+        profile.operator_phone ||
+        profile.base_operator_phone ||
+        profile.installation_operator_phone ||
+        profile.main_phone ||
+        profile.main_base_phone ||
 
-      const profile =
-        candidate.profile || {};
-
-      const bridge =
-        candidate.bridge || {};
-
-      const selected =
-        candidate.selectedBase ||
-        basicbrain.selectedBase ||
-        profile.selectedBase ||
-        bridge.selectedBase;
-
-      if (
-        selected &&
-        typeof selected === "object"
-      ) {
-        return selected;
-      }
-
-      const name =
         (
-          typeof candidate.selectedBase ===
-          "string"
-            ? candidate.selectedBase
+          json
+            ? json.operator_phone
             : ""
         ) ||
 
-        candidate.selected_base ||
-        candidate.pcs_base ||
-        candidate.current_base ||
-        candidate.base ||
-
-        basicbrain.selected_base ||
-        basicbrain.pcs_base ||
-        basicbrain.current_base ||
-        basicbrain.base ||
-
-        profile.selected_base ||
-        profile.pcs_base ||
-        profile.current_base ||
-        profile.base ||
-
-        bridge.selected_base ||
-        bridge.pcs_base ||
-        bridge.current_base ||
-        bridge.base;
-
-      if (name) {
-        return {
-          base: name,
-          name,
-          label: name,
-
-          state:
-            candidate.state ||
-            basicbrain.state ||
-            profile.state ||
-            bridge.state ||
-            "",
-
-          stateCode:
-            candidate.stateCode ||
-            basicbrain.stateCode ||
-            profile.stateCode ||
-            bridge.stateCode ||
-            ""
-        };
-      }
-    }
-
-    return null;
-  }
-
-  function storedBase() {
-    try {
-      const raw =
-        localStorage.getItem(
-          "pcsunited.selectedBase.v1"
-        );
-
-      return raw
-        ? JSON.parse(raw)
-        : null;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  function selectedBase() {
-    return (
-      mapBase() ||
-      brainBase() ||
-      storedBase()
-    );
-  }
-
-  function fileFromUrl(value) {
-    if (!clean(value)) {
-      return "";
-    }
-
-    try {
-      const parsed =
-        new URL(
-          value,
-          window.location.origin
-        );
-
-      const file =
-        decodeURIComponent(
-          parsed.pathname
-        )
-          .split("/")
-          .filter(Boolean)
-          .pop() ||
-        "";
-
-      return /\.json$/i.test(file)
-        ? file
-        : "";
-    } catch (_) {
-      const file =
-        clean(value)
-          .split("?")[0]
-          .split("#")[0]
-          .split("/")
-          .pop() ||
-        "";
-
-      return /\.json$/i.test(file)
-        ? file
-        : "";
-    }
-  }
-
-  function fileName(base) {
-    if (
-      !base ||
-      typeof base !== "object"
-    ) {
-      return "";
-    }
-
-    let file =
-      clean(
-        base.fileName ||
-        base.filename ||
-        base.file ||
-        base.jsonFile ||
-        base.json_file
-      );
-
-    if (file) {
-      return /\.json$/i.test(file)
-        ? file
-        : `${file}.json`;
-    }
-
-    file =
-      fileFromUrl(
-        base.jsonUrl ||
-        base.json_url ||
-        base.cityJsonUrl ||
-        base.city_json_url
-      );
-
-    if (file) {
-      return file;
-    }
-
-    const api =
-      window.PCSU_US_BASE_MAP;
-
-    if (
-      api &&
-      typeof api.getStateBases ===
-        "function"
-    ) {
-      const state =
-        base.stateCode ||
-        base.state ||
         (
-          typeof api.getCurrentState ===
-          "function"
-            ? api.getCurrentState()
+          json
+            ? json.base_operator_phone
             : ""
-        );
+        ) ||
 
-      const keys = [
-        base.id,
-        base.slug,
-        base.base,
-        base.name,
-        base.label
-      ]
-        .map(normal)
-        .filter(Boolean);
-
-      const match =
         (
-          api.getStateBases(state) ||
-          []
-        ).find(item => {
-          const itemKeys = [
-            item.id,
-            item.slug,
-            item.base,
-            item.name,
-            item.label,
-            item.fileName
-          ]
-            .map(normal)
-            .filter(Boolean);
-
-          return keys.some(key => {
-            return itemKeys.some(
-              itemKey =>
-                itemKey === key ||
-                itemKey.includes(key) ||
-                key.includes(itemKey)
-            );
-          });
-        });
-
-      if (match) {
-        return (
-          clean(match.fileName) ||
-          fileFromUrl(
-            match.jsonUrl
-          )
-        );
-      }
-    }
-
-    try {
-      return fileFromUrl(
-        localStorage.getItem(
-          "pcsunited.selectedCityJsonUrl.v1"
+          json
+            ? json.main_phone
+            : ""
         )
       );
-    } catch (_) {
-      return "";
+
+    return {
+      label,
+      phone
+    };
+  }
+
+  function renderOperator(
+    profile,
+    json
+  ) {
+
+    if (!panel) {
+      return;
     }
-  }
 
-  function apiUrl(file) {
-    const endpoint =
-      new URL(API);
+    const operator =
+      getOperator(
+        profile,
+        json
+      );
 
-    endpoint.searchParams.set(
-      "file",
-      file
-    );
-
-    endpoint.searchParams.set(
-      "pcsuSidebar",
-      Date.now()
-    );
-
-    return endpoint.toString();
-  }
-
-  function format(value) {
     if (
-      value === undefined ||
-      value === null
+      panel.operatorSection
     ) {
-      return "";
-    }
-
-    if (Array.isArray(value)) {
-      return value
-        .map(format)
-        .filter(Boolean)
-        .join(" • ");
+      panel.operatorSection.hidden =
+        false;
     }
 
     if (
-      typeof value === "object"
+      panel.operatorName
     ) {
-      return Object.entries(value)
-        .map(([key, child]) => {
-          const label =
-            key
-              .replaceAll(
-                "_",
-                " "
-              )
-              .replace(
-                /\b\w/g,
-                letter =>
-                  letter.toUpperCase()
-              );
-
-          const text =
-            format(child);
-
-          return text
-            ? `${label}: ${text}`
-            : "";
-        })
-        .filter(Boolean)
-        .join(" • ");
+      panel.operatorName.textContent =
+        operator.label;
     }
 
-    return clean(value);
+    if (
+      panel.operatorPhone
+    ) {
+      panel.operatorPhone.textContent =
+        operator.phone ||
+        "Not yet available";
+    }
+
+    if (
+      panel.operatorCall
+    ) {
+
+      const tel =
+        telUrl(
+          operator.phone
+        );
+
+      panel.operatorCall.hidden =
+        false;
+
+      if (tel) {
+
+        panel.operatorCall.href =
+          tel;
+
+        panel.operatorCall
+          .setAttribute(
+            "aria-disabled",
+            "false"
+          );
+
+      } else {
+
+        panel.operatorCall
+          .removeAttribute(
+            "href"
+          );
+
+        panel.operatorCall
+          .setAttribute(
+            "aria-disabled",
+            "true"
+          );
+      }
+    }
   }
 
-  function gateHours(gate) {
-    const values = [
-      gate?.hours,
-      gate?.gate_hours,
-      gate?.operating_hours,
-      gate?.operation_hours,
-      gate?.hours_of_operation,
-      gate?.schedule,
-      gate?.operating_schedule,
-      gate?.access_hours,
-      gate?.open_hours,
-      gate?.daily_hours
+  /* =======================================================
+     BASE POPULATION
+  ======================================================= */
+
+  function getPopulation(
+    profile,
+    json
+  ) {
+
+    const raw =
+
+      profile.installation_population ??
+
+      profile.base_population ??
+
+      profile.population_on_base ??
+
+      (
+        json
+          ? json.installation_population
+          : null
+      ) ??
+
+      (
+        json
+          ? json.base_population
+          : null
+      ) ??
+
+      null;
+
+    /*
+      IMPORTANT:
+
+      Do NOT fall back to:
+
+        json.population
+
+      because in the PCSUnited base/city JSON
+      structure that represents the surrounding
+      CITY population, not the installation.
+    */
+
+    if (
+      raw === null ||
+      raw === undefined ||
+      raw === ""
+    ) {
+
+      return {
+        total: "",
+        details: []
+      };
+    }
+
+    if (
+      typeof raw !== "object" ||
+      Array.isArray(raw)
+    ) {
+
+      return {
+        total:
+          formatNumber(
+            raw
+          ),
+
+        details:
+          []
+      };
+    }
+
+    const total =
+      formatNumber(
+
+        raw.total ??
+
+        raw.total_population ??
+
+        raw.estimated_total ??
+
+        raw.population ??
+
+        ""
+      );
+
+    const candidates = [
+
+      [
+        "active_duty",
+        "Active Duty"
+      ],
+
+      [
+        "military",
+        "Military"
+      ],
+
+      [
+        "civilian",
+        "Civilians"
+      ],
+
+      [
+        "civilians",
+        "Civilians"
+      ],
+
+      [
+        "dependents",
+        "Dependents"
+      ],
+
+      [
+        "family_members",
+        "Family Members"
+      ],
+
+      [
+        "reservists",
+        "Reserve / Guard"
+      ],
+
+      [
+        "reserve_guard",
+        "Reserve / Guard"
+      ],
+
+      [
+        "retirees",
+        "Retirees"
+      ]
     ];
 
-    for (const value of values) {
-      const text =
-        format(value);
+    const details = [];
 
-      if (text) {
-        return text;
-      }
-    }
+    const usedLabels =
+      new Set();
 
-    const parts = [];
+    candidates.forEach(
+      ([key, label]) => {
 
-    const weekday =
-      format(
-        gate?.weekday_hours ||
-        gate?.weekdays ||
-        gate?.monday_friday ||
-        gate?.mon_fri
-      );
+        if (
+          usedLabels.has(
+            label
+          )
+        ) {
+          return;
+        }
 
-    const weekend =
-      format(
-        gate?.weekend_hours ||
-        gate?.weekends
-      );
+        const value =
+          raw[key];
 
-    const saturday =
-      format(
-        gate?.saturday_hours ||
-        gate?.saturday
-      );
+        if (
+          value === undefined ||
+          value === null ||
+          value === ""
+        ) {
+          return;
+        }
 
-    const sunday =
-      format(
-        gate?.sunday_hours ||
-        gate?.sunday
-      );
+        usedLabels.add(
+          label
+        );
 
-    if (weekday) {
-      parts.push(
-        `Mon–Fri: ${weekday}`
-      );
-    }
-
-    if (weekend) {
-      parts.push(
-        `Weekends: ${weekend}`
-      );
-    } else {
-      if (saturday) {
-        parts.push(
-          `Sat: ${saturday}`
+        details.push(
+          `${label}: ${formatNumber(value)}`
         );
       }
+    );
 
-      if (sunday) {
-        parts.push(
-          `Sun: ${sunday}`
-        );
-      }
+    const note =
+      clean(
+        raw.note ||
+        raw.notes ||
+        raw.as_of_note
+      );
+
+    if (note) {
+      details.push(
+        note
+      );
     }
 
-    return parts.join(" • ");
+    return {
+      total,
+      details
+    };
   }
 
-  function gates(profile) {
-    const source =
-      profile?.gates ||
-      profile?.gate_information ||
-      profile?.gate_info ||
-      [];
+  function renderPopulation(
+    profile,
+    json
+  ) {
 
-    if (Array.isArray(source)) {
-      return source
-        .map((gate, index) => {
-          if (
-            gate &&
-            typeof gate === "object"
-          ) {
-            return {
-              ...gate,
+    if (!panel) {
+      return;
+    }
 
-              name:
-                gate.name ||
-                gate.gate_name ||
-                gate.label ||
-                `Gate ${index + 1}`
-            };
-          }
+    const population =
+      getPopulation(
+        profile,
+        json
+      );
 
-          return clean(gate)
-            ? {
-                name: clean(gate)
-              }
-            : null;
-        })
-        .filter(Boolean);
+    if (
+      panel.populationSection
+    ) {
+      panel.populationSection.hidden =
+        false;
     }
 
     if (
-      source &&
-      typeof source === "object"
+      panel.populationTotal
     ) {
-      return Object.entries(source)
-        .map(([key, value]) => {
-          if (
-            value &&
-            typeof value === "object"
-          ) {
-            return {
-              name:
-                value.name ||
-                value.gate_name ||
-                value.label ||
-                key,
 
-              ...value
-            };
-          }
+      panel.populationTotal.textContent =
+        population.total
+          ? `${population.total} people`
+          : "Not yet available";
+    }
 
-          return {
-            name: key,
-            hours: value
-          };
-        });
+    if (
+      panel.populationDetails
+    ) {
+
+      panel.populationDetails.innerHTML =
+        population.details
+          .map(
+            item => `
+              <div style="margin-top:4px">
+                ${esc(item)}
+              </div>
+            `
+          )
+          .join("");
+    }
+  }
+
+  /* =======================================================
+     MISSION
+  ======================================================= */
+
+  function renderMission(
+    profile
+  ) {
+
+    if (!panel) {
+      return;
+    }
+
+    const mission =
+      clean(
+        profile.primary_mission_summary ||
+        profile.mission_summary ||
+        profile.mission ||
+        profile.primary_mission
+      );
+
+    if (
+      panel.missionSection
+    ) {
+      panel.missionSection.hidden =
+        !mission;
+    }
+
+    if (
+      panel.mission
+    ) {
+      panel.mission.textContent =
+        mission;
+    }
+  }
+
+  /* =======================================================
+     GATES
+  ======================================================= */
+
+  function normalizeGates(
+    profile
+  ) {
+
+    const value =
+      profile
+        ? profile.gates
+        : null;
+
+    if (
+      Array.isArray(value)
+    ) {
+      return value;
+    }
+
+    if (
+      value &&
+      typeof value ===
+        "object"
+    ) {
+
+      return Object.entries(
+        value
+      ).map(
+        ([name, gate]) => {
+
+          return (
+            gate &&
+            typeof gate ===
+              "object"
+          )
+            ? {
+                name,
+                ...gate
+              }
+
+            : {
+                name,
+                hours:
+                  gate
+              };
+        }
+      );
     }
 
     return [];
   }
 
-  function gateClass(gate) {
-    const text =
+  function gateHours(
+    gate
+  ) {
+
+    return clean(
+
       (
-        `${clean(gate?.status)} ` +
-        gateHours(gate)
-      ).toLowerCase();
+        gate
+          ? gate.hours
+          : ""
+      ) ||
 
-    if (
-      text.includes("closed") ||
-      text.includes("inactive")
-    ) {
-      return "is-closed";
-    }
+      (
+        gate
+          ? gate.operating_hours
+          : ""
+      ) ||
 
-    if (
-      text.includes("limited") ||
-      text.includes("weekday") ||
-      text.includes("morning") ||
-      text.includes("part time") ||
-      text.includes("part-time") ||
-      text.includes("restricted")
-    ) {
-      return "is-limited";
-    }
+      (
+        gate
+          ? gate.hours_of_operation
+          : ""
+      ) ||
 
-    return "is-open";
+      (
+        gate
+          ? gate.schedule
+          : ""
+      )
+    );
   }
 
-  function gateStatus(gate) {
+  function gateStatus(
+    gate
+  ) {
+
     const explicit =
       clean(
-        gate?.status ||
-        gate?.operating_status ||
-        gate?.access_status
+
+        (
+          gate
+            ? gate.status
+            : ""
+        ) ||
+
+        (
+          gate
+            ? gate.operating_status
+            : ""
+        ) ||
+
+        (
+          gate
+            ? gate.access_status
+            : ""
+        )
+
       ).replaceAll(
         "_",
         " "
@@ -3206,21 +2987,32 @@
     }
 
     const hours =
-      gateHours(gate)
-        .toLowerCase();
+      gateHours(
+        gate
+      ).toLowerCase();
 
     if (
-      hours.includes("24/7") ||
-      hours.includes("24 hours") ||
-      hours.includes("24-hour")
+      hours.includes(
+        "closed"
+      )
     ) {
-      return "Open 24/7";
+      return "Closed";
     }
 
     if (
-      hours.includes("closed")
+      hours.includes(
+        "24/7"
+      ) ||
+
+      hours.includes(
+        "24 hours"
+      ) ||
+
+      hours.includes(
+        "24-hour"
+      )
     ) {
-      return "Closed";
+      return "Open 24/7";
     }
 
     if (hours) {
@@ -3230,27 +3022,127 @@
     return "Hours Unavailable";
   }
 
-  function gateCard(gate) {
+  function gateClass(
+    gate
+  ) {
+
+    const text =
+      (
+        clean(
+          gate
+            ? gate.status
+            : ""
+        ) +
+        " " +
+        gateHours(
+          gate
+        )
+      ).toLowerCase();
+
+    if (
+      text.includes(
+        "closed"
+      )
+    ) {
+      return "is-closed";
+    }
+
+    if (
+      text.includes(
+        "limited"
+      ) ||
+
+      text.includes(
+        "weekday"
+      ) ||
+
+      text.includes(
+        "morning"
+      ) ||
+
+      text.includes(
+        "restricted"
+      ) ||
+
+      text.includes(
+        "outbound only"
+      )
+    ) {
+      return "is-limited";
+    }
+
+    return "is-open";
+  }
+
+  function gateCard(
+    gate
+  ) {
+
     const hours =
-      gateHours(gate);
+      gateHours(
+        gate
+      );
 
     const location =
       clean(
-        gate?.location ||
-        gate?.address ||
-        gate?.intersection ||
-        gate?.entrance
+
+        (
+          gate
+            ? gate.location
+            : ""
+        ) ||
+
+        (
+          gate
+            ? gate.address
+            : ""
+        ) ||
+
+        (
+          gate
+            ? gate.intersection
+            : ""
+        ) ||
+
+        (
+          gate
+            ? gate.entrance
+            : ""
+        ) ||
+
+        (
+          gate
+            ? gate.map_zone
+            : ""
+        )
       );
 
     const number =
       clean(
-        gate?.phone ||
-        gate?.telephone ||
-        gate?.contact_phone
+
+        (
+          gate
+            ? gate.phone
+            : ""
+        ) ||
+
+        (
+          gate
+            ? gate.telephone
+            : ""
+        ) ||
+
+        (
+          gate
+            ? gate.contact_phone
+            : ""
+        )
       );
 
-    const telephone =
-      phone(number);
+    const tel =
+      telUrl(
+        number
+      );
 
     return `
       <div class="pcsu-be-gate ${gateClass(gate)}">
@@ -3259,8 +3151,16 @@
 
           <div class="pcsu-be-gate-name">
             ${esc(
-              gate?.name ||
-              gate?.gate_name ||
+              (
+                gate
+                  ? gate.name
+                  : ""
+              ) ||
+              (
+                gate
+                  ? gate.gate_name
+                  : ""
+              ) ||
               "Base Gate"
             )}
           </div>
@@ -3276,8 +3176,15 @@
           }
 
           <div class="pcsu-be-gate-status">
+
             <span class="pcsu-be-gate-status-dot"></span>
-            ${esc(gateStatus(gate))}
+
+            ${esc(
+              gateStatus(
+                gate
+              )
+            )}
+
           </div>
 
         </div>
@@ -3297,15 +3204,17 @@
             number
               ? `
                 <span class="pcsu-be-gate-phone">
+
                   ${
-                    telephone
+                    tel
                       ? `
-                        <a href="${esc(telephone)}">
+                        <a href="${esc(tel)}">
                           ${esc(number)}
                         </a>
                       `
                       : esc(number)
                   }
+
                 </span>
               `
               : ""
@@ -3317,161 +3226,187 @@
     `;
   }
 
-  function services(profile) {
-    const source =
-      profile?.major_services;
+  function renderGates(
+    profile
+  ) {
 
-    if (Array.isArray(source)) {
-      return source;
+    if (!panel) {
+      return;
+    }
+
+    const gates =
+      normalizeGates(
+        profile
+      );
+
+    if (
+      panel.gatesSection
+    ) {
+      panel.gatesSection.hidden =
+        !gates.length;
+    }
+
+    if (!gates.length) {
+
+      if (
+        panel.gateList
+      ) {
+        panel.gateList.innerHTML =
+          "";
+      }
+
+      if (
+        panel.extraGates
+      ) {
+        panel.extraGates.innerHTML =
+          "";
+      }
+
+      if (
+        panel.gateToggle
+      ) {
+        panel.gateToggle.hidden =
+          true;
+      }
+
+      return;
+    }
+
+    const withHours =
+      gates.filter(
+        gate =>
+          gateHours(
+            gate
+          )
+      );
+
+    const pool =
+      withHours.length
+        ? withHours
+        : gates;
+
+    const visible = [];
+
+    pool
+      .filter(
+        gate => {
+
+          const hours =
+            gateHours(
+              gate
+            ).toLowerCase();
+
+          return (
+            hours.includes(
+              "24/7"
+            ) ||
+
+            hours.includes(
+              "24 hours"
+            ) ||
+
+            hours.includes(
+              "24-hour"
+            )
+          );
+        }
+      )
+      .slice(
+        0,
+        2
+      )
+      .forEach(
+        gate =>
+          visible.push(
+            gate
+          )
+      );
+
+    pool.forEach(
+      gate => {
+
+        if (
+          visible.length < 3 &&
+          !visible.includes(
+            gate
+          )
+        ) {
+          visible.push(
+            gate
+          );
+        }
+
+      }
+    );
+
+    const extra =
+      gates.filter(
+        gate =>
+          !visible.includes(
+            gate
+          )
+      );
+
+    if (
+      panel.gateList
+    ) {
+
+      panel.gateList.innerHTML =
+        visible
+          .map(
+            gateCard
+          )
+          .join("");
     }
 
     if (
-      source &&
-      typeof source === "object"
+      panel.extraGates
     ) {
-      return Object.entries(source)
-        .map(([category, value]) => {
-          return (
-            value &&
-            typeof value === "object"
+
+      panel.extraGates.innerHTML =
+        extra
+          .map(
+            gateCard
           )
-            ? {
-                category,
-                ...value
-              }
-            : {
-                category,
-                name: value
-              };
-        });
+          .join("");
+
+      panel.extraGates
+        .classList
+        .remove(
+          "is-open"
+        );
     }
 
-    return [];
+    if (
+      panel.gateToggle
+    ) {
+
+      panel.gateToggle.hidden =
+        !extra.length;
+
+      panel.gateToggle.textContent =
+        "View All";
+    }
   }
 
-  function serviceIcon(category) {
-    const icons = {
-      medical: "🏥",
-      hospital: "🏥",
-      clinic: "🏥",
-      commissary: "🛒",
-      exchange_bx: "🛍",
-      bx: "🛍",
-      exchange: "🛍",
-      military_clothing: "🎖",
-      housing_office: "🏠",
-      housing: "🏠",
-      unaccompanied_housing: "🛏",
-      lodging: "🧳",
-      banking: "🏦",
-      bank: "🏦",
-      admin_support: "📄",
-      family_support: "👨‍👩‍👧",
-      legal: "⚖️",
-      finance: "💳"
-    };
-
-    return (
-      icons[
-        clean(category)
-          .toLowerCase()
-      ] ||
-      "📍"
-    );
-  }
-
-  function housing(
-    profile,
-    list
-  ) {
-    const housingData =
-      profile?.on_base_housing &&
-      typeof profile.on_base_housing ===
-        "object"
-        ? profile.on_base_housing
-        : {};
-
-    const service =
-      list.find(item => {
-        const category =
-          clean(
-            item?.category
-          ).toLowerCase();
-
-        const name =
-          clean(
-            item?.name
-          ).toLowerCase();
-
-        return (
-          category ===
-            "housing_office" ||
-          category ===
-            "housing" ||
-          name.includes(
-            "housing office"
-          ) ||
-          name.includes(
-            "military housing"
-          )
-        );
-      }) || {};
-
-    return {
-      name:
-        service.name ||
-        housingData.housing_office_name ||
-        housingData.office_name ||
-        housingData.name ||
-        "Military Housing Office",
-
-      address:
-        service.address ||
-        service.location ||
-        housingData.housing_office_address ||
-        housingData.office_address ||
-        housingData.address ||
-        "",
-
-      phone:
-        service.phone ||
-        service.telephone ||
-        housingData.housing_office_phone ||
-        housingData.office_phone ||
-        housingData.phone ||
-        "",
-
-      email:
-        service.email ||
-        housingData.housing_office_email ||
-        housingData.office_email ||
-        housingData.email ||
-        "",
-
-      hours:
-        format(
-          service.hours ||
-          service.operating_hours ||
-          housingData.housing_office_hours ||
-          housingData.office_hours ||
-          housingData.hours
-        ),
-
-      website:
-        service.website ||
-        service.url ||
-        housingData.website ||
-        housingData.url ||
-        ""
-    };
-  }
+  /* =======================================================
+     VISITOR CENTER
+  ======================================================= */
 
   function officialLink(
     links,
     keys
   ) {
-    for (const key of keys) {
-      if (links?.[key]) {
+
+    for (
+      const key of keys
+    ) {
+
+      if (
+        links &&
+        links[key]
+      ) {
+
         return safeUrl(
           links[key]
         );
@@ -3482,62 +3417,101 @@
   }
 
   function renderVisitor(
-    visitor,
+    profile,
     links
   ) {
-    const value =
-      visitor &&
-      typeof visitor === "object"
-        ? visitor
+
+    if (!panel) {
+      return;
+    }
+
+    const visitor =
+      (
+        profile &&
+        profile.visitor_control_center &&
+        typeof profile.visitor_control_center ===
+          "object"
+      )
+        ? profile.visitor_control_center
         : {};
 
     const available =
       Boolean(
-        value.name ||
-        value.phone ||
-        value.address ||
-        value.location ||
-        value.hours ||
-        value.operating_hours
+
+        visitor.name ||
+
+        visitor.phone ||
+
+        visitor.address ||
+
+        visitor.location ||
+
+        visitor.hours ||
+
+        visitor.operating_hours
       );
 
-    el.visitorSection.hidden =
-      !available;
+    if (
+      panel.visitorSection
+    ) {
+
+      panel.visitorSection.hidden =
+        !available;
+    }
 
     if (!available) {
-      el.visitorDetails.innerHTML =
-        "";
 
-      link(
-        el.visitorLink,
-        ""
-      );
+      if (
+        panel.visitorDetails
+      ) {
+        panel.visitorDetails.innerHTML =
+          "";
+      }
+
+      if (
+        panel.visitorLink
+      ) {
+        panel.visitorLink.hidden =
+          true;
+      }
 
       return;
     }
 
-    el.visitorName.textContent =
-      value.name ||
-      "Visitor Control Center";
+    if (
+      panel.visitorName
+    ) {
+
+      panel.visitorName.textContent =
+        visitor.name ||
+        "Visitor Control Center";
+    }
 
     const rows = [];
 
     const address =
-      value.address ||
-      value.location ||
-      "";
+      clean(
+        visitor.address ||
+        visitor.location
+      );
 
     const hours =
-      format(
-        value.hours ||
-        value.operating_hours ||
-        value.hours_of_operation ||
-        value.schedule
+      clean(
+
+        visitor.hours ||
+
+        visitor.operating_hours ||
+
+        visitor.hours_of_operation ||
+
+        visitor.schedule
       );
 
     if (address) {
+
       rows.push(`
         <div class="pcsu-be-detail-row">
+
           <div class="pcsu-be-detail-icon">
             📍
           </div>
@@ -3545,13 +3519,19 @@
           <div class="pcsu-be-detail-value">
             ${esc(address)}
           </div>
+
         </div>
       `);
     }
 
-    if (value.phone) {
-      const telephone =
-        phone(value.phone);
+    if (
+      visitor.phone
+    ) {
+
+      const tel =
+        telUrl(
+          visitor.phone
+        );
 
       rows.push(`
         <div class="pcsu-be-detail-row">
@@ -3561,15 +3541,19 @@
           </div>
 
           <div class="pcsu-be-detail-value">
+
             ${
-              telephone
+              tel
                 ? `
-                  <a href="${esc(telephone)}">
-                    ${esc(value.phone)}
+                  <a href="${esc(tel)}">
+                    ${esc(visitor.phone)}
                   </a>
                 `
-                : esc(value.phone)
+                : esc(
+                    visitor.phone
+                  )
             }
+
           </div>
 
         </div>
@@ -3577,6 +3561,7 @@
     }
 
     if (hours) {
+
       rows.push(`
         <div class="pcsu-be-detail-row">
 
@@ -3592,458 +3577,85 @@
       `);
     }
 
-    if (value.notes) {
-      rows.push(`
-        <div class="pcsu-be-detail-row">
+    if (
+      panel.visitorDetails
+    ) {
 
-          <div class="pcsu-be-detail-icon">
-            ℹ
-          </div>
-
-          <div class="pcsu-be-detail-value">
-            ${esc(value.notes)}
-          </div>
-
-        </div>
-      `);
+      panel.visitorDetails.innerHTML =
+        rows.join("");
     }
 
-    el.visitorDetails.innerHTML =
-      rows.join("");
+    if (
+      panel.visitorLink
+    ) {
 
-    link(
-      el.visitorLink,
+      const href =
 
-      safeUrl(
-        value.website ||
-        value.url
-      ) ||
+        safeUrl(
+          visitor.website ||
+          visitor.url
+        ) ||
 
-      officialLink(
-        links,
-        [
-          "visitor_info",
-          "visitor_information",
-          "visitor_center",
-          "visitor_control_center",
-          "jbsa_lackland_visitor_info"
-        ]
-      )
-    );
-  }
-
-  function renderGates(profile) {
-    const list =
-      gates(profile);
-
-    el.gatesSection.hidden =
-      !list.length;
-
-    if (!list.length) {
-      el.gateList.innerHTML =
-        "";
-
-      el.extraGates.innerHTML =
-        "";
-
-      el.gateToggle.hidden =
-        true;
-
-      return;
-    }
-
-    const withHours =
-      list.filter(
-        gate =>
-          gateHours(gate)
-      );
-
-    const pool =
-      withHours.length
-        ? withHours
-        : list;
-
-    const visible = [];
-
-    pool
-      .filter(gate => {
-        const hours =
-          gateHours(gate)
-            .toLowerCase();
-
-        return (
-          hours.includes("24/7") ||
-          hours.includes("24 hours") ||
-          hours.includes("24-hour")
+        officialLink(
+          links,
+          [
+            "visitor_info",
+            "visitor_information",
+            "visitor_center",
+            "visitor_control_center",
+            "jbsa_lackland_visitor_info"
+          ]
         );
-      })
-      .slice(0, 2)
-      .forEach(
-        gate =>
-          visible.push(gate)
-      );
 
-    pool.forEach(gate => {
-      if (
-        visible.length < 3 &&
-        !visible.includes(gate)
-      ) {
-        visible.push(gate);
+      if (href) {
+
+        panel.visitorLink.href =
+          href;
+
+        panel.visitorLink.hidden =
+          false;
+
+      } else {
+
+        panel.visitorLink.hidden =
+          true;
       }
-    });
-
-    const extra =
-      list.filter(
-        gate =>
-          !visible.includes(gate)
-      );
-
-    el.gateList.innerHTML =
-      visible
-        .map(gateCard)
-        .join("");
-
-    el.extraGates.innerHTML =
-      extra
-        .map(gateCard)
-        .join("");
-
-    el.extraGates.classList.remove(
-      "is-open"
-    );
-
-    el.gateToggle.hidden =
-      !extra.length;
-
-    el.gateToggle.textContent =
-      "View All";
+    }
   }
 
-  function renderHousing(
-    profile,
-    list,
-    links
+  /* =======================================================
+     RENDER BASE JSON
+  ======================================================= */
+
+  function renderBaseInformation(
+    json,
+    base
   ) {
-    const value =
-      housing(
-        profile,
-        list
-      );
 
-    const available =
-      Boolean(
-        value.name ||
-        value.phone ||
-        value.email ||
-        value.address ||
-        value.hours ||
-        value.website
-      );
-
-    el.housingSection.hidden =
-      !available;
-
-    if (!available) {
-      link(
-        el.housingCall,
-        ""
-      );
-
-      link(
-        el.housingEmail,
-        ""
-      );
-
-      link(
-        el.housingLink,
-        ""
-      );
-
+    if (!panel) {
       return;
     }
 
-    el.housingName.textContent =
-      value.name;
-
-    el.housingDetails.innerHTML =
-      [
-        value.address,
-        value.phone,
-        value.hours
-      ]
-        .filter(Boolean)
-        .map(
-          item =>
-            `<div style="margin-top:4px">${esc(item)}</div>`
-        )
-        .join("");
-
-    link(
-      el.housingCall,
-      phone(value.phone)
-    );
-
-    link(
-      el.housingEmail,
-      email(value.email)
-    );
-
-    link(
-      el.housingLink,
-
-      safeUrl(
-        value.website
-      ) ||
-
-      officialLink(
-        links,
-        [
-          "housing",
-          "housing_office",
-          "military_housing_office",
-          "jbsa_housing",
-          "air_force_housing_jbsa"
-        ]
-      )
-    );
-  }
-
-  function renderServices(list) {
-    const desired = [
-      "medical",
-      "hospital",
-      "commissary",
-      "exchange_bx",
-      "bx",
-      "unaccompanied_housing",
-      "lodging",
-      "banking"
-    ];
-
-    const selected = [];
-
-    desired.forEach(category => {
-      const match =
-        list.find(
-          item =>
-            clean(
-              item?.category
-            ).toLowerCase() ===
-            category
-        );
-
-      if (
-        match &&
-        !selected.includes(match)
-      ) {
-        selected.push(match);
-      }
-    });
-
-    list.forEach(item => {
-      if (
-        selected.length < 4 &&
-        !selected.includes(item)
-      ) {
-        selected.push(item);
-      }
-    });
-
-    const items =
-      selected.slice(0, 4);
-
-    el.servicesSection.hidden =
-      !items.length;
-
-    if (!items.length) {
-      el.serviceGrid.innerHTML =
-        "";
-
-      return;
-    }
-
-    el.serviceGrid.innerHTML =
-      items
-        .map(service => {
-          const contact =
-            service.phone ||
-            format(
-              service.hours ||
-              service.operating_hours
-            ) ||
-            service.address ||
-            service.location ||
-            "";
-
-          const telephone =
-            phone(
-              service.phone
-            );
-
-          return `
-            <div class="pcsu-be-service">
-
-              <div class="pcsu-be-service-icon">
-                ${serviceIcon(service.category)}
-              </div>
-
-              <div class="pcsu-be-service-name">
-                ${esc(
-                  service.name ||
-                  service.label ||
-                  "Base Service"
-                )}
-              </div>
-
-              <div class="pcsu-be-service-contact">
-                ${
-                  telephone
-                    ? `
-                      <a href="${esc(telephone)}">
-                        ${esc(contact)}
-                      </a>
-                    `
-                    : esc(contact)
-                }
-              </div>
-
-            </div>
-          `;
-        })
-        .join("");
-  }
-
-  function watchout(profile) {
-    const list =
-      Array.isArray(
-        profile?.pcs_watchouts
-      )
-        ? profile.pcs_watchouts
-        : [];
-
-    if (list.length) {
-      const items =
-        list.map(item => {
-          return (
-            item &&
-            typeof item === "object"
-          )
-            ? item
-            : {
-                title:
-                  "PCS Watchout",
-
-                message:
-                  clean(item)
-              };
-        });
-
-      return (
-        items.find(item => {
-          const text =
-            (
-              `${clean(item.title)} ` +
-              clean(item.message)
-            ).toLowerCase();
-
-          return (
-            text.includes("gate") ||
-            text.includes("access") ||
-            text.includes("arrival") ||
-            text.includes("commute")
-          );
-        }) ||
-        items[0]
-      );
-    }
-
-    const arrival =
-      Array.isArray(
-        profile?.arrival_checklist
-      )
-        ? profile.arrival_checklist[0]
-        : "";
-
-    if (arrival) {
-      return (
-        typeof arrival === "object"
-      )
-        ? arrival
-        : {
-            title:
-              "Arrival Reminder",
-
-            message:
-              arrival
-          };
-    }
-
-    const commute =
-      clean(
-        profile
-          ?.commute_intelligence
-          ?.commute_bluf
-      );
-
-    return commute
-      ? {
-          title:
-            "Commute Planning",
-
-          message:
-            commute
-        }
-      : {
-          title:
-            "Verify Before Travel",
-
-          message:
-            "Gate hours, access requirements, office hours, and installation procedures may change."
-        };
-  }
-
-  function renderWatchout(profile) {
-    const item =
-      watchout(profile);
-
-    el.watchout.hidden =
-      !item;
-
-    if (!item) {
-      return;
-    }
-
-    el.watchoutTitle.textContent =
-      item.title ||
-      item.name ||
-      "PCS Watchout";
-
-    el.watchoutMessage.textContent =
-      item.message ||
-      item.description ||
-      item.note ||
-      "";
-  }
-
-  function render(json) {
     const data =
       json &&
-      typeof json === "object"
+      typeof json ===
+        "object"
         ? json
         : {};
 
     const profile =
-      data.base_profile &&
-      typeof data.base_profile ===
-        "object"
-        ? data.base_profile
-        : {};
+      getProfile(
+        data
+      );
 
     const links =
-      profile.official_links &&
-      typeof profile.official_links ===
-        "object"
+      (
+        profile.official_links &&
+        typeof profile.official_links ===
+          "object"
+      )
         ? profile.official_links
+
         : (
             data.official_links &&
             typeof data.official_links ===
@@ -4052,90 +3664,173 @@
               : {}
           );
 
-    const list =
-      services(profile);
+    renderOverview(
+      profile,
+      base
+    );
+
+    renderOperator(
+      profile,
+      data
+    );
+
+    renderPopulation(
+      profile,
+      data
+    );
+
+    renderMission(
+      profile
+    );
+
+    renderGates(
+      profile
+    );
 
     renderVisitor(
-      profile.visitor_control_center,
-      links
-    );
-
-    renderGates(profile);
-
-    renderHousing(
       profile,
-      list,
       links
     );
 
-    renderServices(list);
-
-    renderWatchout(profile);
-
-    showContent();
+    showPanelContent();
   }
 
-  async function load(base) {
+  /* =======================================================
+     DIRECT JSON LOADING
+  ======================================================= */
+
+  function getBaseFileName(
+    base
+  ) {
+
+    const file =
+      clean(
+
+        (
+          base
+            ? base.fileName
+            : ""
+        ) ||
+
+        (
+          base
+            ? base.filename
+            : ""
+        ) ||
+
+        (
+          base
+            ? base.file
+            : ""
+        ) ||
+
+        (
+          base
+            ? base.jsonFile
+            : ""
+        ) ||
+
+        (
+          base
+            ? base.json_file
+            : ""
+        )
+      );
+
+    if (!file) {
+      return "";
+    }
+
+    return (
+      /\.json$/i.test(
+        file
+      )
+        ? file
+        : `${file}.json`
+    );
+  }
+
+  async function loadBaseInformation(
+    base
+  ) {
+
+    if (!panel) {
+      return;
+    }
+
     const request =
-      ++sequence;
+      ++panelRequest;
 
-    if (
-      !base ||
-      typeof base !== "object"
-    ) {
-      currentBase = null;
-      currentData = null;
-      currentFile = "";
+    if (!base) {
 
-      showStatus(
-        "Select a gaining base in BasicBrain or choose a base from the map."
+      loadedFile = "";
+
+      loadedJson = null;
+
+      showPanelStatus(
+        "Select a state and choose an Air Force base to view installation information."
       );
 
       return;
     }
 
     const file =
-      fileName(base);
+      getBaseFileName(
+        base
+      );
 
-    if (!file) {
-      currentBase = base;
+    const url =
+      (
+        base &&
+        base.jsonUrl
+      )
+        ? base.jsonUrl
+        : directJsonUrl(
+            file
+          );
 
-      showStatus(
-        "The selected base was found, but its Base Intelligence filename is unavailable."
+    if (
+      !file ||
+      !url
+    ) {
+
+      showPanelStatus(
+        "The selected base does not have a JSON file configured."
       );
 
       return;
     }
 
     if (
-      currentData &&
-      currentFile.toLowerCase() ===
+      loadedJson &&
+      loadedFile
+        .toLowerCase() ===
         file.toLowerCase()
     ) {
-      currentBase = base;
 
-      render(
-        currentData
+      renderBaseInformation(
+        loadedJson,
+        base
       );
 
       return;
     }
 
-    currentBase = base;
-    currentFile = file;
-
-    showStatus(
-      "Loading selected base essentials..."
+    showPanelStatus(
+      "Loading selected base information..."
     );
 
     try {
+
       const response =
         await fetch(
-          apiUrl(file),
+          url,
           {
-            method: "GET",
-            mode: "cors",
-            cache: "no-store",
+            method:
+              "GET",
+
+            cache:
+              "no-store",
 
             headers: {
               Accept:
@@ -4144,7 +3839,10 @@
           }
         );
 
-      if (!response.ok) {
+      if (
+        !response.ok
+      ) {
+
         throw new Error(
           `HTTP ${response.status}`
         );
@@ -4153,173 +3851,548 @@
       const result =
         await response.json();
 
-      if (request !== sequence) {
+      if (
+        request !==
+        panelRequest
+      ) {
         return;
       }
 
-      if (
-        !result ||
-        result.ok === false
-      ) {
-        throw new Error(
-          result?.error ||
-          result?.message ||
-          "Invalid base-data response."
-        );
-      }
+      /*
+        Direct JSON is expected.
+
+        This also tolerates:
+        {
+          "data": { ... }
+        }
+        if you ever wrap it later.
+      */
 
       const json =
-        result.data &&
-        typeof result.data ===
-          "object"
+        (
+          result &&
+          result.data &&
+          typeof result.data ===
+            "object"
+        )
           ? result.data
-          : null;
+          : result;
 
-      if (!json) {
+      if (
+        !json ||
+        typeof json !==
+          "object"
+      ) {
+
         throw new Error(
-          "Missing data object."
+          "Invalid JSON payload."
         );
       }
 
-      currentData = json;
+      loadedFile =
+        file;
 
-      render(json);
+      loadedJson =
+        json;
+
+      renderBaseInformation(
+        json,
+        base
+      );
+
     } catch (error) {
-      if (request !== sequence) {
+
+      if (
+        request !==
+        panelRequest
+      ) {
         return;
       }
 
       console.warn(
-        "[PCSU Base Essentials] Base-data API load failed:",
+        `[PCSU Base Map] Could not load ${file}:`,
         error
       );
 
-      showStatus(
-        "The selected base information could not load. Please select the base again or refresh the page."
+      loadedFile = "";
+
+      loadedJson = null;
+
+      showPanelStatus(
+        `Base information for ${base.base || "this installation"} could not load. Verify the direct JSON path.`
       );
     }
   }
 
-  function refresh() {
-    load(
-      selectedBase()
-    );
+  /* =======================================================
+     GATE VIEW ALL BUTTON
+  ======================================================= */
+
+  if (
+    panel &&
+    panel.gateToggle
+  ) {
+
+    panel.gateToggle
+      .addEventListener(
+        "click",
+        () => {
+
+          if (
+            !panel.extraGates
+          ) {
+            return;
+          }
+
+          const open =
+            panel.extraGates
+              .classList
+              .toggle(
+                "is-open"
+              );
+
+          panel.gateToggle.textContent =
+            open
+              ? "Show Less"
+              : "View All";
+        }
+      );
   }
 
-  el.gateToggle.addEventListener(
-    "click",
-    () => {
-      const open =
-        el.extraGates
-          .classList
-          .toggle(
-            "is-open"
-          );
-
-      el.gateToggle.textContent =
-        open
-          ? "Show Less"
-          : "View All";
-    }
-  );
+  /* =======================================================
+     MAP -> PANEL CONNECTION
+  ======================================================= */
 
   window.addEventListener(
     "pcsunited:base-map-updated",
     event => {
-      load(
-        event.detail?.selectedBase ||
-        mapBase()
+
+      loadBaseInformation(
+        event.detail &&
+        event.detail.selectedBase
+          ? event.detail.selectedBase
+          : null
       );
+
     }
   );
 
-  window.addEventListener(
-    "pcsunited:map-base-selected",
-    event => {
-      load(
-        event.detail?.selectedBase ||
-        event.detail
-      );
-    }
+  /* =======================================================
+     INITIAL EMPTY STATE
+  ======================================================= */
+
+  updateDemographicsLink(
+    null
   );
 
-  [
-    "pcsunited:basicbrain-updated",
-    "pcsunited:base-preview-ready",
-    "pcsunited:profile-ready",
-    "pcsunited:bridge-ready",
-    "pcsunited:compensation-ready",
-    "pcsu:base-selected",
-    "pcsunited:base-map-ready"
-  ].forEach(eventName => {
-    window.addEventListener(
-      eventName,
-      () =>
-        setTimeout(
-          refresh,
-          0
+  showPanelStatus(
+    "Select a state and choose an Air Force base to view installation information."
+  );
+
+  /* =======================================================
+     BUILD THE USA MAP
+  ======================================================= */
+
+  d3.json(
+    "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
+  )
+
+    .then(us => {
+
+      const states =
+        topojson
+          .feature(
+            us,
+            us.objects.states
+          )
+          .features;
+
+      projection =
+        d3
+          .geoAlbersUsa()
+          .translate(
+            [480, 300]
+          )
+          .scale(
+            1250
+          );
+
+      const path =
+        d3.geoPath(
+          projection
+        );
+
+      /* ===================================================
+         STATE SHAPES
+      =================================================== */
+
+      svg
+        .append("g")
+        .attr(
+          "class",
+          "pcsu-state-layer"
         )
-    );
-  });
+        .selectAll(
+          "path"
+        )
+        .data(
+          states
+        )
+        .join(
+          "path"
+        )
+        .attr(
+          "class",
+          state => {
 
-  window.addEventListener(
-    "message",
-    event => {
+            const code =
+              FIPS_TO_ABBR[
+                String(
+                  state.id
+                ).padStart(
+                  2,
+                  "0"
+                )
+              ];
+
+            return (
+              STATE_BASES[
+                code
+              ]
+                ? "pcsu-state has-bases"
+                : "pcsu-state"
+            );
+          }
+        )
+        .attr(
+          "id",
+          state => {
+
+            const code =
+              FIPS_TO_ABBR[
+                String(
+                  state.id
+                ).padStart(
+                  2,
+                  "0"
+                )
+              ];
+
+            return (
+              `state-${code}`
+            );
+          }
+        )
+        .attr(
+          "d",
+          path
+        )
+        .on(
+          "click",
+          (
+            event,
+            state
+          ) => {
+
+            const code =
+              FIPS_TO_ABBR[
+                String(
+                  state.id
+                ).padStart(
+                  2,
+                  "0"
+                )
+              ];
+
+            if (code) {
+              selectState(
+                code
+              );
+            }
+          }
+        );
+
+      /* ===================================================
+         STATE BORDER MESH
+      =================================================== */
+
+      svg
+        .append(
+          "path"
+        )
+        .datum(
+          topojson.mesh(
+            us,
+            us.objects.states,
+            (a, b) =>
+              a !== b
+          )
+        )
+        .attr(
+          "fill",
+          "none"
+        )
+        .attr(
+          "stroke",
+          "rgba(16,20,38,.75)"
+        )
+        .attr(
+          "stroke-width",
+          1
+        )
+        .attr(
+          "pointer-events",
+          "none"
+        )
+        .attr(
+          "d",
+          path
+        );
+
+      /* ===================================================
+         STATE LABELS
+      =================================================== */
+
+      svg
+        .append("g")
+        .attr(
+          "class",
+          "pcsu-state-label-layer"
+        )
+        .selectAll(
+          "text"
+        )
+        .data(
+          states
+        )
+        .join(
+          "text"
+        )
+        .attr(
+          "class",
+          "pcsu-state-label"
+        )
+        .attr(
+          "x",
+          state => {
+
+            const centroid =
+              path.centroid(
+                state
+              );
+
+            return (
+              Number.isFinite(
+                centroid[0]
+              )
+                ? centroid[0]
+                : -100
+            );
+          }
+        )
+        .attr(
+          "y",
+          state => {
+
+            const centroid =
+              path.centroid(
+                state
+              );
+
+            return (
+              Number.isFinite(
+                centroid[1]
+              )
+                ? centroid[1]
+                : -100
+            );
+          }
+        )
+        .text(
+          state => {
+
+            return (
+              FIPS_TO_ABBR[
+                String(
+                  state.id
+                ).padStart(
+                  2,
+                  "0"
+                )
+              ] ||
+              ""
+            );
+          }
+        )
+        .style(
+          "display",
+          state => {
+
+            const code =
+              FIPS_TO_ABBR[
+                String(
+                  state.id
+                ).padStart(
+                  2,
+                  "0"
+                )
+              ];
+
+            return (
+              [
+                "RI",
+                "DE",
+                "CT",
+                "NJ",
+                "MD",
+                "MA",
+                "DC"
+              ].includes(
+                code
+              )
+                ? "none"
+                : "block"
+            );
+          }
+        );
+
+      /* ===================================================
+         BASE MARKER LAYER
+      =================================================== */
+
+      markerLayer =
+        svg
+          .append("g")
+          .attr(
+            "id",
+            "pcsu-base-marker-layer"
+          );
+
+      mapReady =
+        true;
+
+      /* ===================================================
+         INITIAL STATE
+      =================================================== */
+
       if (
-        event.data?.type ===
-        "pcsunited-basicbrain"
+        pendingSelection
       ) {
-        setTimeout(
-          refresh,
-          0
+
+        const pending =
+          pendingSelection;
+
+        pendingSelection =
+          null;
+
+        renderState(
+          pending.stateCode,
+          pending.selectedBaseId,
+          pending.options
+        );
+
+      } else {
+
+        /*
+          Keep Texas as the existing default state,
+          but DO NOT auto-select a base.
+        */
+
+        renderState(
+          DEFAULT_STATE,
+          "",
+          {
+            scrollCard:
+              false
+          }
         );
       }
-    }
-  );
 
-  window.PCSUBaseEssentialsSidebar = {
-    version:
-      VERSION,
+      /* ===================================================
+         READY EVENT
+      =================================================== */
 
-    endpoint:
-      API,
+      window.dispatchEvent(
+        new CustomEvent(
+          "pcsunited:base-map-ready",
+          {
+            detail: {
 
-    refresh,
+              source:
+                "pcsunited-interactive-base-map",
 
-    getSelectedBase:
-      () => currentBase,
+              version:
+                VERSION,
 
-    getData:
-      () => currentData,
+              state:
+                currentStateCode,
 
-    getFileName:
-      () => currentFile,
+              baseId:
+                currentBaseId,
 
-    clear() {
-      sequence++;
+              selectedBase:
+                getBaseById(
+                  currentStateCode,
+                  currentBaseId
+                ),
 
-      currentBase = null;
-      currentData = null;
-      currentFile = "";
-
-      showStatus(
-        "Select a gaining base in BasicBrain or choose a base from the map."
+              updated_at:
+                new Date()
+                  .toISOString()
+            }
+          }
+        )
       );
-    }
-  };
 
-  setTimeout(
-    refresh,
-    0
-  );
+    })
 
-  setTimeout(
-    refresh,
-    350
-  );
+    .catch(error => {
 
-  setTimeout(
-    refresh,
-    900
-  );
+      console.warn(
+        "[PCSU Base Map] USA map data could not load:",
+        error
+      );
+
+      if (
+        selectedBaseNameEl
+      ) {
+
+        selectedBaseNameEl.textContent =
+          "Map unavailable";
+      }
+
+      if (
+        panelCopyEl
+      ) {
+
+        panelCopyEl.textContent =
+          "The map could not load. Please refresh the page.";
+      }
+
+      baseListEl.innerHTML = `
+        <div
+          style="
+            width:100%;
+            padding:14px;
+            border:1px solid rgba(255,255,255,.10);
+            border-radius:14px;
+            color:#aeb8db;
+            font-size:12px;
+            font-weight:700;
+            line-height:1.5;
+            text-align:center;
+          ">
+
+          The map data could not load.
+          Please refresh the page.
+
+        </div>
+      `;
+
+      showPanelStatus(
+        "The map data could not load. Please refresh the page."
+      );
+
+    });
+
 })();
