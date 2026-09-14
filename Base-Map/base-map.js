@@ -101,9 +101,8 @@
   */
 
   const BASE_JSON_ROOT =
-    window.PCSU_BASE_JSON_ROOT ||
-    mapRoot.dataset.jsonRoot ||
-    "./cities/";
+  window.PCSU_BASE_JSON_ROOT ||
+  "https://thewing.netlify.app/netlify/functions/cities/";
 
   const DEFAULT_STATE = "TX";
 
