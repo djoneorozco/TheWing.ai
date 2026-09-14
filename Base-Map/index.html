@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1.0">
 
   <title>
-    PCSUnited Base Demographics Map
+    PCSUnited Interactive U.S. Air Force Base Map
   </title>
 
   <link
@@ -23,361 +23,631 @@
 <body>
 
   <!-- =========================================================
-    PCSUnited • Real Interactive U.S. Base Demographics Map
-    GitHub Build
+    PCSUnited • Interactive U.S. Air Force Base Map
 
-    Shell v3.0.12
-    Map Engine v3.1.2
-    Base Essentials Sidebar v2.1.0
+    Shell v4.0.0
+
+    User Flow:
+    1. Select State
+    2. Select USAF Base
+    3. Show exact base marker on map
+    4. Load Base Essentials from selected base JSON
+    5. User may optionally open full Base Demographics
+
+    IMPORTANT:
+    Selecting a base DOES NOT automatically navigate away.
+    Navigation occurs only through:
+    #pcsu-base-demographics-link
   ========================================================== -->
+
 
   <div id="pcsu-real-us-map">
 
+
     <div id="pcsu-map-card">
+
 
       <!-- =====================================================
            PAGE HEADER
       ====================================================== -->
 
       <h2 id="pcsu-map-title">
-        Base Demographics
+        Interactive U.S. Air Force Base Map
       </h2>
 
+
       <div id="pcsu-map-copy">
-        Hover over a state to explore available PCSUnited base
-        markets. Click a state to view supported Air Force bases
-        and open the matching Base Demographics profile.
+        Select a state to view Air Force installations located
+        there. Choose a base to see its location, mission,
+        operator information, gate hours, and installation
+        population.
       </div>
 
+
+
       <!-- =====================================================
-           MAP + SIDEBAR LAYOUT
+           MAP + BASE INFORMATION LAYOUT
       ====================================================== -->
 
       <div id="pcsu-map-layout">
 
+
         <!-- ===================================================
-             LEFT MAP COLUMN
+             LEFT COLUMN
+             STATE MAP + BASE CARDS
         ==================================================== -->
 
         <div id="pcsu-map-stage">
 
+
+          <!-- =================================================
+               BASES IN SELECTED STATE
+
+               Populated dynamically by base-map.js.
+          ================================================== -->
+
           <div
             id="pcsu-base-list"
-            aria-label="Available base profiles">
+            aria-label="Air Force bases in selected state">
           </div>
+
+
+
+          <!-- =================================================
+               INTERACTIVE UNITED STATES MAP
+
+               Existing D3 / TopoJSON map mounts here.
+          ================================================== -->
 
           <svg
             id="pcsu-us-svg"
             viewBox="0 0 960 600"
             preserveAspectRatio="xMidYMid meet"
             role="img"
-            aria-label="Interactive United States Air Force base map">
+            aria-label="Interactive map of United States Air Force bases">
           </svg>
+
 
         </div>
 
+
+
         <!-- ===================================================
-             RIGHT SIDEBAR COLUMN
+             RIGHT COLUMN
+             SELECTED BASE INFORMATION
         ==================================================== -->
 
-        <aside id="pcsu-base-panel">
+        <aside
+          id="pcsu-base-panel"
+          aria-label="Selected Air Force base information">
+
 
           <!-- =================================================
-               SELECTED BASE CTA
+               SELECTED BASE HEADER
           ================================================== -->
 
-          <a
-            id="pcsu-selected-base-header"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Choose a base to open Base Demographics"
-            aria-disabled="true">
+          <div id="pcsu-selected-base-header">
 
-            <div id="pcsu-panel-kicker">
-              Go to Base Demographics
-            </div>
 
-            <div id="pcsu-selected-state">
+            <!-- ===============================================
+                 BASE DEMOGRAPHICS CTA
+
+                 This is the ONLY control that should navigate
+                 to the Base Demographics page.
+
+                 base-map.js will populate href after a base
+                 has been selected.
+            ================================================ -->
+
+            <a
+              id="pcsu-base-demographics-link"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-disabled="true"
+              tabindex="-1">
+
+              <span id="pcsu-panel-kicker">
+                Go to Base Demographics
+              </span>
+
+            </a>
+
+
+
+            <!-- ===============================================
+                 SELECTED BASE NAME
+            ================================================ -->
+
+            <div
+              id="pcsu-selected-state"
+              aria-live="polite">
+
               Choose a base
-            </div>
-
-            <div id="pcsu-panel-action">
-
-              <span>
-                Open Base Profile
-              </span>
-
-              <span
-                id="pcsu-panel-action-arrow"
-                aria-hidden="true">
-                →
-              </span>
 
             </div>
+
+
+
+            <!-- ===============================================
+                 SMALL LOCATION / STATUS LINE
+            ================================================ -->
 
             <div id="pcsu-panel-copy">
-              Click a state to view available bases.
+
+              Select a state, then choose an Air Force base.
+
             </div>
 
-          </a>
+
+          </div>
+
+
 
           <!-- =================================================
-               BASE ESSENTIALS MOUNT SLOT
+               BASE INFORMATION MOUNT AREA
           ================================================== -->
 
-          <div id="pcsu-map-sidebar-slot"></div>
+          <div id="pcsu-map-sidebar-slot">
+
+
+            <!-- ===============================================
+                 BASE INFORMATION MODULE
+            ================================================ -->
+
+            <div id="pcsu-base-essentials-module">
+
+
+              <!-- =============================================
+                   EMPTY / LOADING STATE
+              ============================================== -->
+
+              <div id="pcsu-be-status">
+
+
+                <div class="pcsu-be-status-card">
+
+
+                  <div class="pcsu-be-status-dot"></div>
+
+
+                  <div id="pcsu-be-status-text">
+
+                    Select a state and choose an Air Force base
+                    to view installation information.
+
+                  </div>
+
+
+                </div>
+
+
+              </div>
+
+
+
+              <!-- =============================================
+                   LOADED BASE CONTENT
+              ============================================== -->
+
+              <div
+                id="pcsu-be-content"
+                hidden>
+
+
+
+                <!-- ===========================================
+                     BASE OVERVIEW
+                ============================================ -->
+
+                <section
+                  id="pcsu-be-overview-section"
+                  class="pcsu-be-section">
+
+
+                  <div class="pcsu-be-section-heading">
+
+
+                    <h4 class="pcsu-be-section-title">
+
+
+                      <span class="pcsu-be-section-icon">
+                        📍
+                      </span>
+
+
+                      Base Overview
+
+
+                    </h4>
+
+
+                  </div>
+
+
+
+                  <div id="pcsu-be-overview-grid">
+
+
+                    <!-- =======================================
+                         LOCATION
+                    ======================================== -->
+
+                    <div
+                      id="pcsu-be-location-card"
+                      class="pcsu-be-overview-item">
+
+
+                      <div class="pcsu-be-overview-label">
+                        Location
+                      </div>
+
+
+                      <div
+                        id="pcsu-be-location"
+                        class="pcsu-be-overview-value">
+                      </div>
+
+
+                    </div>
+
+
+
+                    <!-- =======================================
+                         BRANCH
+                    ======================================== -->
+
+                    <div
+                      id="pcsu-be-branch-card"
+                      class="pcsu-be-overview-item">
+
+
+                      <div class="pcsu-be-overview-label">
+                        Branch
+                      </div>
+
+
+                      <div
+                        id="pcsu-be-branch"
+                        class="pcsu-be-overview-value">
+                      </div>
+
+
+                    </div>
+
+
+                  </div>
+
+
+                </section>
+
+
+
+                <!-- ===========================================
+                     OPERATOR PHONE
+                ============================================ -->
+
+                <section
+                  id="pcsu-be-operator-section"
+                  class="pcsu-be-section">
+
+
+                  <div class="pcsu-be-section-heading">
+
+
+                    <h4 class="pcsu-be-section-title">
+
+
+                      <span class="pcsu-be-section-icon">
+                        ☎
+                      </span>
+
+
+                      Base Operator
+
+
+                    </h4>
+
+
+                  </div>
+
+
+
+                  <div
+                    id="pcsu-be-operator-name"
+                    class="pcsu-be-primary">
+
+                    Installation Operator
+
+                  </div>
+
+
+
+                  <div
+                    id="pcsu-be-operator-details"
+                    class="pcsu-be-secondary">
+
+
+                    <a
+                      id="pcsu-be-operator-call"
+                      class="pcsu-be-phone-link"
+                      href="#"
+                      hidden>
+
+                      <span id="pcsu-be-operator-phone"></span>
+
+                    </a>
+
+
+                  </div>
+
+
+                </section>
+
+
+
+                <!-- ===========================================
+                     BASE POPULATION
+                ============================================ -->
+
+                <section
+                  id="pcsu-be-population-section"
+                  class="pcsu-be-section">
+
+
+                  <div class="pcsu-be-section-heading">
+
+
+                    <h4 class="pcsu-be-section-title">
+
+
+                      <span class="pcsu-be-section-icon">
+                        👥
+                      </span>
+
+
+                      Base Population
+
+
+                    </h4>
+
+
+                  </div>
+
+
+
+                  <div
+                    id="pcsu-be-population-total"
+                    class="pcsu-be-primary">
+                  </div>
+
+
+
+                  <div
+                    id="pcsu-be-population-details"
+                    class="pcsu-be-secondary">
+                  </div>
+
+
+                </section>
+
+
+
+                <!-- ===========================================
+                     MISSION
+                ============================================ -->
+
+                <section
+                  id="pcsu-be-mission-section"
+                  class="pcsu-be-section">
+
+
+                  <div class="pcsu-be-section-heading">
+
+
+                    <h4 class="pcsu-be-section-title">
+
+
+                      <span class="pcsu-be-section-icon">
+                        ✈
+                      </span>
+
+
+                      Mission
+
+
+                    </h4>
+
+
+                  </div>
+
+
+
+                  <div
+                    id="pcsu-be-mission"
+                    class="pcsu-be-mission-copy">
+                  </div>
+
+
+                </section>
+
+
+
+                <!-- ===========================================
+                     GATE HOURS
+                ============================================ -->
+
+                <section
+                  id="pcsu-be-gates-section"
+                  class="pcsu-be-section">
+
+
+                  <div class="pcsu-be-section-heading">
+
+
+                    <h4 class="pcsu-be-section-title">
+
+
+                      <span class="pcsu-be-section-icon">
+                        🚧
+                      </span>
+
+
+                      Gate Hours
+
+
+                    </h4>
+
+
+
+                    <button
+                      id="pcsu-be-gate-toggle"
+                      class="pcsu-be-section-link"
+                      type="button"
+                      hidden>
+
+                      View All
+
+                    </button>
+
+
+                  </div>
+
+
+
+                  <!-- =========================================
+                       PRIMARY / FIRST GATES
+                  ========================================== -->
+
+                  <div id="pcsu-be-gate-list"></div>
+
+
+
+                  <!-- =========================================
+                       REMAINING GATES
+                  ========================================== -->
+
+                  <div id="pcsu-be-extra-gates"></div>
+
+
+
+                  <div id="pcsu-be-gate-warning">
+
+                    Gate schedules and access procedures can
+                    change. Verify current information with the
+                    installation before travel.
+
+                  </div>
+
+
+                </section>
+
+
+
+                <!-- ===========================================
+                     VISITOR CONTROL CENTER
+                     OPTIONAL / SUPPORTING INFORMATION
+                ============================================ -->
+
+                <section
+                  id="pcsu-be-visitor-section"
+                  class="pcsu-be-section">
+
+
+                  <div class="pcsu-be-section-heading">
+
+
+                    <h4 class="pcsu-be-section-title">
+
+
+                      <span class="pcsu-be-section-icon">
+                        🪪
+                      </span>
+
+
+                      Visitor Control Center
+
+
+                    </h4>
+
+
+
+                    <a
+                      id="pcsu-be-visitor-link"
+                      class="pcsu-be-section-link"
+                      href="#"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      hidden>
+
+                      Official Info
+
+                    </a>
+
+
+                  </div>
+
+
+
+                  <div
+                    id="pcsu-be-visitor-name"
+                    class="pcsu-be-primary">
+                  </div>
+
+
+
+                  <div id="pcsu-be-visitor-details"></div>
+
+
+                </section>
+
+
+
+                <!-- ===========================================
+                     DATA NOTICE
+                ============================================ -->
+
+                <div id="pcsu-be-footer">
+
+
+                  <span id="pcsu-be-footer-dot"></span>
+
+
+                  <span>
+
+                    PCSUnited is not an official DoD source.
+                    Gate hours, access requirements, phone
+                    numbers, population figures, and installation
+                    procedures may change. Verify time-sensitive
+                    information directly with the installation.
+
+                  </span>
+
+
+                </div>
+
+
+              </div>
+
+
+            </div>
+
+
+          </div>
+
 
         </aside>
 
+
       </div>
 
+
     </div>
+
 
   </div>
 
-  <!-- =========================================================
-       BASE ESSENTIALS SIDEBAR
 
-       base-map.js automatically moves this module into:
-       #pcsu-map-sidebar-slot
-  ========================================================== -->
-
-  <div id="pcsu-base-essentials-module">
-
-    <!-- =======================================================
-         LOADING / EMPTY STATUS
-    ======================================================== -->
-
-    <div id="pcsu-be-status">
-
-      <div class="pcsu-be-status-card">
-
-        <div class="pcsu-be-status-dot"></div>
-
-        <div id="pcsu-be-status-text">
-          Select a gaining base in BasicBrain or choose a base
-          from the map.
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- =======================================================
-         LOADED SIDEBAR CONTENT
-    ======================================================== -->
-
-    <div
-      id="pcsu-be-content"
-      hidden>
-
-      <!-- =====================================================
-           VISITOR & ARRIVAL
-      ====================================================== -->
-
-      <section
-        id="pcsu-be-visitor-section"
-        class="pcsu-be-section">
-
-        <div class="pcsu-be-section-heading">
-
-          <h4 class="pcsu-be-section-title">
-
-            <span class="pcsu-be-section-icon">
-              🪪
-            </span>
-
-            Visitor &amp; Arrival
-
-          </h4>
-
-          <a
-            id="pcsu-be-visitor-link"
-            class="pcsu-be-section-link"
-            href="#"
-            target="_blank"
-            rel="noopener noreferrer"
-            hidden>
-            Visitor Info
-          </a>
-
-        </div>
-
-        <div
-          id="pcsu-be-visitor-name"
-          class="pcsu-be-primary">
-        </div>
-
-        <div id="pcsu-be-visitor-details"></div>
-
-      </section>
-
-      <!-- =====================================================
-           GATE HOURS
-      ====================================================== -->
-
-      <section
-        id="pcsu-be-gates-section"
-        class="pcsu-be-section">
-
-        <div class="pcsu-be-section-heading">
-
-          <h4 class="pcsu-be-section-title">
-
-            <span class="pcsu-be-section-icon">
-              🚧
-            </span>
-
-            Gate Hours
-
-          </h4>
-
-          <button
-            id="pcsu-be-gate-toggle"
-            class="pcsu-be-section-link"
-            type="button"
-            hidden>
-            View All
-          </button>
-
-        </div>
-
-        <div id="pcsu-be-gate-list"></div>
-
-        <div id="pcsu-be-extra-gates"></div>
-
-        <div id="pcsu-be-gate-warning">
-          Gate schedules and access procedures can change.
-          Verify current information before travel.
-        </div>
-
-      </section>
-
-      <!-- =====================================================
-           HOUSING SUPPORT
-      ====================================================== -->
-
-      <section
-        id="pcsu-be-housing-section"
-        class="pcsu-be-section">
-
-        <div class="pcsu-be-section-heading">
-
-          <h4 class="pcsu-be-section-title">
-
-            <span class="pcsu-be-section-icon">
-              🏠
-            </span>
-
-            Housing Support
-
-          </h4>
-
-        </div>
-
-        <div
-          id="pcsu-be-housing-name"
-          class="pcsu-be-primary">
-        </div>
-
-        <div
-          id="pcsu-be-housing-details"
-          class="pcsu-be-secondary">
-        </div>
-
-        <div id="pcsu-be-housing-actions">
-
-          <a
-            id="pcsu-be-housing-call"
-            class="pcsu-be-action"
-            href="#"
-            hidden>
-            Call
-          </a>
-
-          <a
-            id="pcsu-be-housing-email"
-            class="pcsu-be-action"
-            href="#"
-            hidden>
-            Email
-          </a>
-
-          <a
-            id="pcsu-be-housing-link"
-            class="pcsu-be-action"
-            href="#"
-            target="_blank"
-            rel="noopener noreferrer"
-            hidden>
-            Website
-          </a>
-
-        </div>
-
-      </section>
-
-      <!-- =====================================================
-           BASE ESSENTIALS
-      ====================================================== -->
-
-      <section
-        id="pcsu-be-services-section"
-        class="pcsu-be-section">
-
-        <div class="pcsu-be-section-heading">
-
-          <h4 class="pcsu-be-section-title">
-
-            <span class="pcsu-be-section-icon">
-              📍
-            </span>
-
-            Base Essentials
-
-          </h4>
-
-        </div>
-
-        <div id="pcsu-be-service-grid"></div>
-
-      </section>
-
-      <!-- =====================================================
-           PCS WATCHOUT
-      ====================================================== -->
-
-      <div id="pcsu-be-watchout">
-
-        <div id="pcsu-be-watchout-label">
-          ⚠ PCS Watchout
-        </div>
-
-        <div id="pcsu-be-watchout-title"></div>
-
-        <div id="pcsu-be-watchout-message"></div>
-
-      </div>
-
-      <!-- =====================================================
-           DISCLAIMER
-      ====================================================== -->
-
-      <div id="pcsu-be-footer">
-
-        <span id="pcsu-be-footer-dot"></span>
-
-        <span>
-          PCSUnited is not an official DoD source. Verify gate
-          hours, access requirements, office hours, and contact
-          information with the installation before travel.
-        </span>
-
-      </div>
-
-    </div>
-
-  </div>
 
   <!-- =========================================================
        MAP LIBRARIES
@@ -387,11 +657,14 @@
 
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 
+
+
   <!-- =========================================================
-       PCSUNITED MAP ENGINE + BASE ESSENTIALS SIDEBAR
+       PCSUNITED MAP ENGINE
   ========================================================== -->
 
   <script src="./base-map.js"></script>
+
 
 </body>
 </html>
