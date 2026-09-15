@@ -43,7 +43,6 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 
 /* ============================================================
@@ -110,43 +109,84 @@ const MAX_BASE_JSON_BYTES =
   750000;
 
 
-const MODULE_DIR =
-  path.dirname(
-    fileURLToPath(
-      import.meta.url
-    )
-  );
+/*
 
+  NETLIFY / LOCAL FILE ROOT
+
+  Netlify deploys the bundled function under /var/task.
+
+  LAMBDA_TASK_ROOT is preferred in production.
+
+  process.cwd() provides the local-development fallback.
+
+  Do NOT use import.meta.url here because Netlify may bundle
+
+  this server through a CommonJS wrapper.
+
+*/
+
+const FUNCTION_ROOT =
+
+  process.env.LAMBDA_TASK_ROOT ||
+
+  process.cwd();
 
 /*
-  Supports either architecture:
 
-  1. This file lives in netlify/functions
-  2. This file lives elsewhere and is imported by a
-     thin Netlify function wrapper.
+  Authoritative base JSON directory candidates.
 
-  Your existing netlify.toml already includes:
-  netlify/functions/cities/**
+  Production expected location:
+
+  /var/task/netlify/functions/cities/<base>.json
+
+  Local development expected location:
+
+  <repo>/netlify/functions/cities/<base>.json
+
 */
 
 const CITIES_DIR_CANDIDATES =
+
   Object.freeze([
 
     path.join(
-      MODULE_DIR,
-      "cities"
-    ),
 
-    path.join(
-      process.cwd(),
+      FUNCTION_ROOT,
+
       "netlify",
+
       "functions",
+
       "cities"
+
     ),
 
     path.join(
+
       process.cwd(),
+
+      "netlify",
+
+      "functions",
+
       "cities"
+
+    ),
+
+    path.join(
+
+      FUNCTION_ROOT,
+
+      "cities"
+
+    ),
+
+    path.join(
+
+      process.cwd(),
+
+      "cities"
+
     )
 
   ]);
