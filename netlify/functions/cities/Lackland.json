@@ -10,18 +10,25 @@
   "geo_id": "1600000US4865000",
   "year": 2026,
   "last_updated_data_from_sources": "2026-07",
+  "last_verified_base_profile": "2026-09-15",
+  "gold_standard_profile": {
+    "status": "canonical",
+    "purpose": "PCSUnited Base Map, Ask Amy Base Map Concierge, Base Demographics, and related PCS planning experiences",
+    "profile_version": "pcsu-base-profile-v1.1.0",
+    "verified_on": "2026-09-15",
+    "verification_scope": "Installation identity, mission, operator, installation population, visitor control centers, gate hours/status, housing contacts, medical, commissary, family readiness, lodging, MPS, school support, and PCS arrival references.",
+    "market_data_note": "Existing housing-market and demographic values are preserved from the file's recorded July 2026 sources and are not re-dated by this installation-profile verification."
+  },
   "image_url": "https://cdn.prod.website-files.com/69b6b526f23748df9f189b16/69c0dc6d478fad1e706ff1f4_dc56ce56878bed382d61aab987ab76eb_San_Antonio.png",
   "base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f75f2d5218031764a79775_Lackland.png",
   "city_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/6a4f938767d6ca9e1ea9cee7_SanAntonio2.png",
   "zip": "78236",
   "market_label": "San Antonio Metro",
   "profile": "Military-friendly Lackland AFB housing snapshot anchored to the San Antonio metro, built for PCSUnited base-level market overviews.",
-
   "avg_home_value": 319900,
   "average_home_value": 319900,
   "avgHome": 319900,
   "city_avg_home": 319900,
-
   "snapshot": {
     "population_city": 1458954,
     "population_metro": 2750000,
@@ -31,7 +38,6 @@
     "traffic_level": "High",
     "employment_status": "Stable"
   },
-
   "market_metrics": {
     "median_list_price": 319900,
     "median_sold_price": 319900,
@@ -45,7 +51,6 @@
     "zillow_one_year_change_percent": -3.0,
     "as_of": "2026-07"
   },
-
   "metrics": {
     "median_list_price": 319900,
     "median_sold_price": 319900,
@@ -58,7 +63,6 @@
     "property_tax_rate": 0.0215,
     "as_of": "2026-07"
   },
-
   "mortgage_assumptions": {
     "apr_percent": 6.2,
     "term_years": 30,
@@ -66,13 +70,11 @@
     "includes": "va_loan_all_in",
     "defaults_note": "Based on March 2026 San Antonio VA loan planning assumptions."
   },
-
   "property_tax_rate": 0.0215,
   "property_tax_rate_percent": 2.15,
   "insurance_rate": 0.0085,
   "insurance_rate_percent": 0.85,
   "hoa_monthly": 25,
-
   "ownership_costs": {
     "property_tax_rate": 0.0215,
     "property_tax_rate_percent": 2.15,
@@ -86,69 +88,56 @@
       "A lower purchase price can still produce a higher monthly payment when taxes, insurance, HOA, utilities, and maintenance are included."
     ]
   },
-
   "costs": {
     "property_tax_rate": 0.0215,
     "insurance_annual_default": 2338,
     "hoa_monthly_default": 25
   },
-
   "avg_home_mortgage_monthly": {
     "avg": 2150,
     "as_of": "2026-03",
     "notes": "VA loan planning estimate for the San Antonio / Lackland-area market."
   },
-
   "population": {
     "estimate": 1458954,
     "median_age": 34.6,
     "persons_per_household": 2.62
   },
-
   "households": {
     "total_households": 547883
   },
-
   "income": {
     "median_household_income": 62917,
     "per_capita_income": 32983,
     "poverty_rate_percent": 17.1
   },
-
   "education": {
     "high_school_grad_or_higher_percent": 84.3,
     "bachelors_degree_or_higher_percent": 28.7
   },
-
   "veterans": {
     "veteran_population_percent": 12.4,
     "veteran_population": 209130
   },
-
   "immigration": {
     "foreign_born_percent": 6.4
   },
-
   "labor": {
     "mean_travel_time_to_work_minutes": 24.6,
     "unemployment_rate_percent": 5.8
   },
-
   "crime_status": {
-    "installation": "Extremely safe; gated military access with 24/7 security.",
+    "installation": "Controlled-access military installation with 24/7 security operations; users should follow current JBSA force-protection and visitor-access guidance.",
     "metro_san_antonio": "Property crime rates are moderate; users should screen neighborhood-level safety, especially across parts of the West Side and older close-in corridors."
   },
-
   "school_quality": {
     "on_base": "Lackland ISD serves on-base students and is often a major planning advantage for families living on installation.",
     "off_base": "School quality varies materially across San Antonio. Northside ISD, Medina Valley ISD, Southwest ISD, and other nearby districts should be verified by exact address."
   },
-
   "rental_vacancy": {
     "rate_percent": 9.2,
     "notes": "Healthy inventory for military renters in 2026."
   },
-
   "rental_metrics": {
     "median_rent": 1775,
     "vacancy_rate_percent": 9.2,
@@ -160,26 +149,22 @@
     "new_listings": 125,
     "as_of": "2026-07"
   },
-
   "climate_weather": {
     "spring": "Warm/Humid; 70–85°F",
     "summer": "Hot/Humid; 95–105°F",
     "fall": "Warm/Mild; 65–85°F",
     "winter": "Cool/Mild; 45–65°F"
   },
-
   "special_events": [
     "The Great Texas Airshow",
     "Fiesta San Antonio",
     "San Antonio Stock Show & Rodeo",
     "Spurs NBA Games"
   ],
-
   "military_lifestyle_fit": {
     "rating": "Exceptional",
     "description": "Gateway to the Air Force; massive military infrastructure, deep San Antonio military culture, strong veteran presence, and broad local support."
   },
-
   "financial_brief": {
     "bah_vs_buy_position": "Favorable",
     "bah_vs_rent_position": "Strong",
@@ -187,7 +172,6 @@
     "buyer_opportunity": "Strong equity potential in West and Southwest San Antonio expansion areas when buyers keep taxes, insurance, commute, and school fit under control.",
     "renter_advantage": false
   },
-
   "market_bluf": {
     "bluf_headline": "Affordable Entry-Level Haven",
     "bluf_summary": "Lackland-area housing offers strong military home-buying value inside a major metro, but the best decision depends on all-in monthly cost, school zones, commute, and neighborhood-level screening.",
@@ -198,7 +182,6 @@
     "verdict_color": "green",
     "confidence_score": 88
   },
-
   "scorecard": {
     "affordability_score": 92,
     "growth_score": 75,
@@ -206,13 +189,11 @@
     "military_fit_score": 98,
     "overall_score": 87
   },
-
   "rules": {
     "max_safe_housing_ratio": 0.3,
     "warning_ratio": 0.35,
     "danger_ratio": 0.4
   },
-
   "summary_points": [
     "Lackland AFB sits inside one of the more affordable major Texas metros for military buyers entering the market.",
     "Current San Antonio market posture is buyer-leaning, with increasing inventory and relatively healthy leverage.",
@@ -220,7 +201,6 @@
     "Property taxes and insurance still materially shape true monthly ownership cost in this market.",
     "West and Southwest growth corridors appear to offer stronger buyer opportunity than more expensive Texas metros."
   ],
-
   "opportunities": [
     "Buyer leverage appears stronger here than in many larger Texas metros.",
     "Entry-level and mid-range inventory remains comparatively accessible near the Lackland corridor.",
@@ -228,7 +208,6 @@
     "West and Southwest expansion areas may offer stronger upside for budget-conscious military buyers.",
     "Healthy rental inventory gives PCS families more flexibility than tighter high-cost military markets."
   ],
-
   "risks": [
     "Texas property taxes can erode affordability if buyers only focus on purchase price.",
     "Insurance and utilities can widen the gap between principal-and-interest and true all-in payment.",
@@ -236,7 +215,6 @@
     "Property crime exposure is more moderate off-installation, especially in some West Side corridors.",
     "Rising inventory can pressure sellers and make property selection more important for resale."
   ],
-
   "buyer_notes": [
     "Lackland AFB is attractive for buyers who want a lower entry price than Austin or Dallas while staying inside a major Texas metro.",
     "The real decision should be made on all-in monthly ownership cost, not just mortgage principal and interest.",
@@ -244,35 +222,30 @@
     "This market is stronger for disciplined buyers who compare taxes, insurance, commute, school quality, and future resale flexibility together.",
     "Close-in housing may improve commute but still requires property-condition and neighborhood-level screening."
   ],
-
   "seller_notes": [
     "Sellers should price realistically against rising inventory rather than assume aggressive premium pricing.",
     "Move-in-ready presentation and sharper pricing discipline will matter more in a buyer-leaning setup.",
     "Homes near stable Lackland military demand nodes may still attract resilient buyer pools.",
     "Military-friendly listing positioning should emphasize commute, condition, payment practicality, and proximity to daily services."
   ],
-
   "investor_angles": [
     "Healthy renter inventory and military turnover support rental relevance, but investors should stress-test taxes, insurance, and vacancy.",
     "The Lackland corridor can work best for investors focused on durable occupancy rather than purely speculative appreciation.",
     "Bedroom-specific rent bands make this market more useful for practical underwriting than broad metro averages alone.",
     "Properties with strong commute access, clean condition, and manageable tax drag are better positioned for military renters."
   ],
-
   "neighborhoods": [
     "Lackland AFB / Southwest corridor",
     "West Side",
     "Southwest expansion areas",
     "Northside ISD off-base pockets"
   ],
-
   "target_neighborhoods": [
     "Lackland AFB / Southwest corridor",
     "West Side",
     "Southwest expansion areas",
     "Northside ISD off-base pockets"
   ],
-
   "buyer_guidance": [
     "Use all-in payment, not just list price, as the primary screen.",
     "Compare taxes, insurance, commute, and school quality before locking a neighborhood.",
@@ -280,21 +253,18 @@
     "A slightly lower purchase price can materially improve monthly flexibility in Texas.",
     "Use PCSUnited calculators to compare rent, buy, residual income, assignment length, and exit risk before committing."
   ],
-
   "seller_guidance": [
     "Price against current inventory and days on market, not older peak assumptions.",
     "Condition and presentation matter more when buyers have leverage.",
     "Military-adjacent demand can be a strength if framed correctly in listing positioning.",
     "PCS buyers need practical monthly value, clear property condition, and confidence in the exit plan."
   ],
-
   "landlord_notes": [
     "Military renter demand can improve occupancy durability near the Lackland area.",
     "Investors should still model vacancy, tax drag, insurance, repairs, and maintenance conservatively.",
     "A good rental here is about stable spread, not just headline affordability.",
     "Homes with functional layouts, practical commute access, and clean condition are better positioned for military tenants."
   ],
-
   "by_bedroom": {
     "2": {
       "rent_monthly": {
@@ -449,7 +419,6 @@
       }
     }
   },
-
   "housing": {
     "housing_units": 603213,
     "median_value_owner_occupied": 219700,
@@ -489,12 +458,13 @@
       ]
     }
   },
-
   "base_profile": {
-    "schema_version": "pcsu-base-profile-v1.0.0",
+    "schema_version": "pcsu-base-profile-v1.1.0",
+    "profile_status": "gold_standard",
+    "last_verified": "2026-09-15",
     "base_id": "jbsa-lackland",
     "base_name": "JBSA-Lackland",
-    "display_name": "Joint Base San Antonio - Lackland",
+    "display_name": "Joint Base San Antonio-Lackland",
     "short_name": "Lackland",
     "branch": "Air Force",
     "joint_base": true,
@@ -505,19 +475,74 @@
     "zip": "78236",
     "metro": "San Antonio-New Braunfels, TX",
     "market_label": "San Antonio / JBSA-Lackland Military Housing Market",
-    "installation_type": "Training / Medical / Cyber / Joint Base Support",
-    "host_or_major_command": "Joint Base San Antonio / 502nd Air Base Wing",
-    "primary_mission_summary": "JBSA-Lackland is a major Air Force training and support installation on the west side of San Antonio. The base is strongly associated with Basic Military Training, technical training, medical support, cyber/intelligence-related missions, and joint-base support functions.",
-    "pcs_personality": "Training-heavy, high-traffic, newcomer-heavy, family-relevant, and highly tied to gate access, BAH fit, commute timing, and neighborhood selection.",
-    "base_bluf": "Lackland is not just a San Antonio housing decision. It is a gate-access, commute, BAH, school-zone, and neighborhood-fit decision. Families should compare nearby areas by realistic gate commute and monthly housing pressure instead of judging only by distance to the base.",
-
+    "installation_type": "Joint Base / Training / Medical / Cyber & ISR / Flying / Mission Support",
+    "host_or_major_command": "502d Air Base Wing (installation support) / 37th Training Wing (primary training mission)",
+    "primary_mission_summary": "JBSA-Lackland is a major multi-mission Air Force installation on the west side of San Antonio and home to the 37th Training Wing, the largest training wing in the U.S. Air Force. The 37th TRW conducts Basic Military Training for Air Force and Space Force enlisted accessions, technical training, international English-language training, Spanish-language partner-nation training, medical specialty training, and Department of Defense Military Working Dog training. The installation also hosts major cyber and intelligence, medical, Air National Guard fighter, reserve, special warfare, and installation-support organizations.",
+    "mission_partners": [
+      "502d Air Base Wing JBSA-Lackland Annex",
+      "Sixteenth Air Force",
+      "37th Training Wing",
+      "59th Medical Wing",
+      "67th Cyberspace Wing",
+      "149th Fighter Wing",
+      "688th Cyberspace Wing",
+      "Air Force Installation and Mission Support Center",
+      "Cryptologic & Cyber Systems Division / Air Force Life Cycle Management Center",
+      "NSA Texas",
+      "Special Warfare Training Wing",
+      "JBSA Air Force Honor Guard"
+    ],
+    "pcs_personality": "Training-heavy, high-traffic, newcomer-heavy, family-relevant, and strongly shaped by gate access, BAH fit, commute timing, school considerations, and neighborhood selection.",
+    "base_bluf": "For a PCS to JBSA-Lackland, gate access and duty location matter as much as straight-line distance. Compare housing choices by realistic gate commute, BAH and total monthly cost, school-zone needs, family services, and assignment horizon—not mileage alone.",
+    "base_operator": {
+      "label": "JBSA-Lackland Automated Base Operator",
+      "phone": "210-671-1110",
+      "type": "automated_directory",
+      "availability": "Directory assistance / automated operator",
+      "verification_status": "verified_official",
+      "verified_on": "2026-09-15",
+      "source_label": "Joint Base San Antonio Contact Us — Directory Assistance / Auto Attendant"
+    },
+    "base_operator_phone": "210-671-1110",
+    "installation_operator_phone": "210-671-1110",
+    "installation_population": {
+      "total": "More than 45,000",
+      "active_duty": "More than 24,000",
+      "civilian": 10000,
+      "published_combined_contractors_and_family_members": 11000,
+      "note": "The official JBSA-Lackland factsheet states more than 24,000 active-duty members, 10,000 DoD civilians, and 11,000 contractors and family members combined. MilitaryINSTALLATIONS continues to publish the same Lackland-specific figures. The source does not separate contractors from family members and does not identify a current headcount date; treat this as the current published installation profile, not a live population count.",
+      "source_freshness": "Official JBSA factsheet published 2021; figures still reproduced on the current MilitaryINSTALLATIONS installation overview as verified 2026-09-15.",
+      "verified_on": "2026-09-15"
+    },
+    "security_contacts": {
+      "base_defense_operations_center": {
+        "name": "JBSA-Lackland Base Defense Operations Center",
+        "phone": "210-671-2018",
+        "alternate_phone": "210-671-3030",
+        "availability": "24/7 access/security concerns",
+        "verified_on": "2026-09-15"
+      },
+      "emergency": {
+        "phone": "911",
+        "note": "Use 911 for emergencies."
+      }
+    },
+    "access_guidance": {
+      "bluf": "Visitors without an accepted DoD/JBSA access credential must use a Visitor Control Center and should verify current access requirements before travel.",
+      "current_posture": [
+        "JBSA states that visitors must have a valid form of identification and a sponsor with a valid DoD ID card, subject to current access policy.",
+        "Criminal history checks are required for unescorted personnel requesting installation access under current JBSA guidance.",
+        "Gate and Visitor Control Center hours are time-sensitive and should be checked immediately before travel."
+      ],
+      "access_questions_contact": "JBSA-Lackland Base Defense Operations Center: 210-671-2018",
+      "verified_on": "2026-09-15"
+    },
     "user_positioning": {
       "military_family_bluf": "Prioritize gate access, school-zone verification, BAH fit, and commute testing before signing a lease or purchase contract.",
       "single_airman_bluf": "Prioritize commute simplicity, affordability, roommate/rental flexibility, and access to food, gyms, and daily services.",
       "realtor_bluf": "The strongest Lackland housing conversations are about gate access, BAH realism, commute risk, and family lifestyle fit — not generic San Antonio market stats.",
       "investor_bluf": "Rental demand near Lackland is influenced by training volume, PCS movement, BMT graduations, medical/cyber presence, and military-family turnover."
     },
-
     "base_map_image": {
       "url": "",
       "alt": "PCSUnited public-facing JBSA-Lackland base orientation map showing gates, family housing, major services, and nearby recommended neighborhoods.",
@@ -529,70 +554,146 @@
       "confidence": "medium_high",
       "safety_note": "This is not an official DoD map. It is a public-facing PCS orientation graphic using publicly available information and should not be used for access control, emergency routing, or official navigation."
     },
-
     "official_links": {
       "jbsa_gate_hours": "https://www.jbsa.mil/Information/Gate-Hours-Visitor-Information/Gate-Hours/JBSA-LAK-Gates/",
       "jbsa_lackland_visitor_info": "https://www.jbsa.mil/Information/Gate-Hours-Visitor-Information/JBSA-Lackland-Visitor-Info/",
       "jbsa_housing": "https://www.jbsa.mil/Resources/Housing/",
-      "air_force_housing_jbsa": "https://www.housing.af.mil/Home-depricated/Units/Joint-Base-San-Antonio/",
+      "air_force_housing_jbsa": "https://www.housing.af.mil/Home/Installations/Joint-Base-San-Antonio/",
       "lackland_commissary": "https://corp.commissaries.com/shopping/store-locations/lackland-jbsa",
       "lackland_main_exchange": "https://www.shopmyexchange.com/store-locator/jbsa-lackland-main-exchange",
-      "wilford_hall": "https://wilfordhall.tricare.mil/About-Us"
+      "wilford_hall": "https://wilfordhall.tricare.mil/About-Us",
+      "gate_hours": "https://www.jbsa.mil/Information/Gate-Hours-Visitor-Information/Gate-Hours/JBSA-LAK-Gates/",
+      "visitor_info": "https://www.jbsa.mil/Information/Gate-Hours-Visitor-Information/JBSA-Lackland-Visitor-Info/",
+      "housing": "https://www.housing.af.mil/Home/Installations/Joint-Base-San-Antonio/",
+      "medical": "https://wilfordhall.tricare.mil/About-Us",
+      "commissary": "https://corp.commissaries.com/shopping/store-locations/lackland-jbsa",
+      "exchange": "https://www.shopmyexchange.com/store-locator/jbsa-lackland-main-exchange",
+      "base_home": "https://www.jbsa.mil/Information/JBSA-History-Fact-Sheets/Article-View/Article/2664929/jbsa-lackland/",
+      "military_installations": "https://installations.militaryonesource.mil/in-depth-overview/joint-base-san-antonio-lackland-randolph-sam-houston",
+      "family_readiness": "https://www.jbsa.mil/Resources/Military-Family-Readiness/",
+      "temporary_lodging": "https://www.jbsa.mil/Resources/Family-Support/Temporary-Lodging/",
+      "newcomers": "https://www.jbsa.mil/Information/Welcome/dvpTag/Lackland/",
+      "mps": "https://www.jbsa.mil/Resources/802d-Military-Personnel-Flight/Lackland-MPS/",
+      "school_liaison": "https://www.lacklandisd.net/joint-base-san-antonio-school-liais"
     },
-
     "visitor_control_center": {
-      "name": "Luke East Visitor Control Center",
-      "building": "1196",
-      "address": "2602 Luke Blvd, JBSA-Lackland, TX 78236",
-      "phone": "210-671-6174",
+      "name": "Valley Hi Visitor Control Center",
+      "status": "open_24_7",
+      "location": "Valley Hi Gate / Visitor Control Center, JBSA-Lackland",
       "hours": "24/7",
       "best_for": [
         "Visitors",
         "Newcomers",
-        "Family members without routine installation access",
+        "BMT graduation visitors",
+        "Family members who need visitor processing",
         "PCS arrival planning"
       ],
-      "map_label": "Luke East VCC",
-      "map_zone": "east / Luke Boulevard access area",
-      "note": "Use official JBSA visitor information before arrival. Access requirements, sponsor rules, gate procedures, and hours can change."
+      "map_label": "Valley Hi VCC",
+      "map_zone": "Valley Hi Gate / southwest access area",
+      "note": "Current official JBSA gate information lists Valley Hi VCC as open 24/7 and states that Luke East VCC is temporarily closed and moved to Valley Hi VCC. The current JBSA gate-hours page does not publish a Valley Hi VCC phone number; for access concerns, use the JBSA-Lackland operator or Base Defense Operations Center. Verify status before travel.",
+      "verification_status": "verified_official",
+      "verified_on": "2026-09-15"
     },
-
+    "visitor_control_centers": [
+      {
+        "name": "Valley Hi Visitor Control Center",
+        "status": "open_24_7",
+        "hours": "24/7",
+        "location": "Valley Hi Gate / JBSA-Lackland",
+        "role": "primary_current_vcc",
+        "note": "Current primary visitor-processing location while Luke East VCC is temporarily closed.",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Growdon / Growden Gate Visitor Control Center",
+        "status": "scheduled",
+        "hours": "Daily, 5:00 a.m. to 5:00 p.m.; closed on federal holidays and AETC Resiliency Days",
+        "location": "Growdon Commercial Gate area / JBSA-Lackland",
+        "role": "scheduled_vcc",
+        "note": "The current JBSA gate page spells the VCC listing as 'Growden Gate VCC' while the gate is listed as 'Growdon Commercial Gate.'",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Luke East Visitor Control Center",
+        "status": "temporarily_closed",
+        "hours": "Temporarily closed",
+        "location": "Luke East Gate / JBSA-Lackland",
+        "role": "temporarily_unavailable",
+        "note": "Official JBSA gate page states: temporarily closed; visitor processing moved to Valley Hi VCC.",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "McMullen Visitor Control Center",
+        "status": "closed",
+        "hours": "Closed",
+        "location": "McMullen Gate / JBSA-Lackland",
+        "role": "closed",
+        "verified_on": "2026-09-15"
+      }
+    ],
     "gates": [
       {
+        "name": "Growdon Commercial Gate",
+        "type": "commercial_and_general_access_gate",
+        "status": "scheduled",
+        "hours": "Daily, 5:00 a.m. to 5:00 p.m. (inbound/outbound); closed on federal holidays and AETC Resiliency Days",
+        "map_label": "Growdon Commercial Gate",
+        "map_zone": "commercial access area",
+        "best_for": [
+          "Commercial traffic",
+          "Deliveries",
+          "Mover coordination when directed",
+          "General access during posted hours"
+        ],
+        "commute_notes": "Scheduled daily access; not a 24/7 default gate.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official JBSA gate-hours page immediately before travel.",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "JBSA-Chapman Training Annex Gate",
+        "type": "annex_access",
+        "status": "open_24_7",
+        "hours": "24/7",
+        "map_label": "Chapman Training Annex",
+        "map_zone": "JBSA-Chapman Training Annex",
+        "best_for": [
+          "Personnel and visitors whose destination is the Chapman Training Annex"
+        ],
+        "commute_notes": "This is an annex access point and should not be treated as a default gate for the main Lackland cantonment.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official JBSA gate-hours page immediately before travel.",
+        "verified_on": "2026-09-15"
+      },
+      {
         "name": "Luke East Gate",
-        "type": "primary_visitor_gate",
+        "type": "primary_general_access_gate",
         "status": "open_24_7",
         "hours": "24/7",
         "map_label": "Luke East Gate",
         "map_zone": "east side / Luke Boulevard",
         "best_for": [
-          "Visitors",
-          "Newcomers",
           "General base access",
-          "Visitor Control Center access"
+          "Newcomer routing",
+          "Many east-side approaches"
         ],
-        "commute_notes": "Strong default gate for visitors and newcomer routing. Good anchor point for PCS orientation.",
-        "user_warning": "Verify current gate status with official JBSA sources before travel."
+        "commute_notes": "A major 24/7 access point. The Luke East VCC itself is temporarily closed; visitors requiring processing should use Valley Hi VCC.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official JBSA gate-hours page immediately before travel.",
+        "verified_on": "2026-09-15"
       },
       {
-        "name": "Valley Hi Gate",
-        "type": "commuter_gate",
-        "status": "open_24_7",
-        "hours": "24/7",
-        "map_label": "Valley Hi Gate",
-        "map_zone": "southwest / Valley Hi area",
-        "best_for": [
-          "West San Antonio access",
-          "Valley Hi area",
-          "Marbach corridor",
-          "Potranco / Far West San Antonio access depending on route"
-        ],
-        "commute_notes": "Useful for users living west or southwest of the installation.",
-        "user_warning": "Commute can vary heavily by school traffic, work schedule, and peak gate flow."
+        "name": "Luke West Gate",
+        "type": "closed_gate",
+        "status": "closed",
+        "hours": "Closed",
+        "map_label": "Luke West — Closed",
+        "map_zone": "west / Luke corridor",
+        "best_for": [],
+        "commute_notes": "Do not route users through this gate while it is listed as closed.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official JBSA gate-hours page immediately before travel.",
+        "verified_on": "2026-09-15"
       },
       {
         "name": "McMullen Gate",
-        "type": "commuter_gate",
+        "type": "primary_general_access_gate",
         "status": "open_24_7",
         "hours": "24/7",
         "map_label": "McMullen Gate",
@@ -600,80 +701,87 @@
         "best_for": [
           "Daily commuters",
           "Southwest San Antonio access",
-          "Alternate gate planning"
+          "Alternate 24/7 access"
         ],
-        "commute_notes": "Important alternate 24/7 gate for commute planning.",
-        "user_warning": "Verify route suitability based on the user's neighborhood and duty location."
+        "commute_notes": "Important 24/7 alternative for commute planning. McMullen VCC is closed.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official JBSA gate-hours page immediately before travel.",
+        "verified_on": "2026-09-15"
       },
       {
         "name": "Security Hill Gate",
         "type": "limited_hour_gate",
         "status": "weekday_limited",
-        "hours": "Monday-Friday, 6:00 a.m. to 6:00 p.m.",
+        "hours": "Monday-Friday, 6:00 a.m. to 6:00 p.m.; closed on federal holidays and AETC Resiliency Days",
         "map_label": "Security Hill Gate",
         "map_zone": "north / Security Hill area",
         "best_for": [
           "Personnel assigned near Security Hill",
           "Weekday access where applicable"
         ],
-        "commute_notes": "Important for certain duty locations, but not a universal default gate.",
-        "user_warning": "Limited hours can affect commute reliability. Do not assume this gate is available outside posted windows."
+        "commute_notes": "Useful for certain duty locations, but not a universal default gate.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official JBSA gate-hours page immediately before travel.",
+        "verified_on": "2026-09-15"
       },
       {
         "name": "Selfridge East Gate",
         "type": "limited_hour_gate",
         "status": "weekday_morning_limited",
-        "hours": "Monday-Friday, 5:00 a.m. to 8:00 a.m.",
+        "hours": "Monday-Friday, 5:00 a.m. to 8:00 a.m. (inbound/outbound); closed on federal holidays and AETC Resiliency Days",
         "map_label": "Selfridge East",
         "map_zone": "Selfridge corridor",
         "best_for": [
-          "Specific morning commute patterns"
+          "Specific early-morning commute patterns"
         ],
-        "commute_notes": "Limited morning-only access makes this a specialized commute gate.",
-        "user_warning": "Not recommended as a primary planning gate unless the user's schedule matches posted hours."
+        "commute_notes": "Morning-only scheduled gate; do not use as the primary route unless the user's report window matches.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official JBSA gate-hours page immediately before travel.",
+        "verified_on": "2026-09-15"
       },
       {
         "name": "Selfridge West Gate",
         "type": "limited_hour_gate",
         "status": "limited_schedule",
-        "hours": "Monday, Tuesday, Thursday, Friday: 5:00 a.m. to 8:00 a.m. and 3:00 p.m. to 5:00 p.m. outbound only; Wednesday: 5:00 a.m. to 5:00 p.m. inbound and outbound",
+        "hours": "Monday, Tuesday, Thursday and Friday: 5:00-8:00 a.m. and 3:00-5:00 p.m. (inbound/outbound); Wednesday: 5:00 a.m. to 5:00 p.m. (inbound/outbound); closed on federal holidays and AETC Resiliency Days",
         "map_label": "Selfridge West",
         "map_zone": "Selfridge corridor",
         "best_for": [
           "Specific weekday commute windows",
-          "Outbound movement during listed times"
+          "Personnel whose duty location or route favors Selfridge access"
         ],
-        "commute_notes": "Useful only when the user's schedule aligns with posted access rules.",
-        "user_warning": "Outbound-only periods matter. Do not use this as a default route without checking official hours."
+        "commute_notes": "Current official listing shows inbound and outbound access during the posted windows, including the afternoon periods.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official JBSA gate-hours page immediately before travel.",
+        "verified_on": "2026-09-15"
       },
       {
-        "name": "Growdon / Commercial Gate",
-        "type": "commercial_or_limited_gate",
-        "status": "limited",
-        "hours": "Verify official JBSA gate page",
-        "map_label": "Growdon / Commercial",
-        "map_zone": "commercial access area",
+        "name": "Tinker Gate",
+        "type": "limited_hour_gate",
+        "status": "weekday_morning_inbound_only",
+        "hours": "Monday-Friday, 6:00 a.m. to 8:00 a.m. (inbound only); closed on federal holidays and AETC Resiliency Days",
+        "map_label": "Tinker Gate",
+        "map_zone": "Tinker access area",
         "best_for": [
-          "Commercial traffic",
-          "Deliveries",
-          "Mover coordination when directed"
+          "Specific weekday morning inbound commute patterns"
         ],
-        "commute_notes": "Useful for commercial or delivery planning, not a default family commute gate.",
-        "user_warning": "Movers and commercial deliveries should verify procedures through official base access guidance."
+        "commute_notes": "Inbound-only during the posted morning window.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official JBSA gate-hours page immediately before travel.",
+        "verified_on": "2026-09-15"
       },
       {
-        "name": "Luke West Gate",
-        "type": "closed_or_check_status_gate",
-        "status": "closed",
-        "hours": "Closed per current JBSA gate listing",
-        "map_label": "Luke West - Closed",
-        "map_zone": "west / Luke corridor",
-        "best_for": [],
-        "commute_notes": "Do not use as a default route while listed as closed.",
-        "user_warning": "Always verify official JBSA gate information before travel."
+        "name": "Valley Hi Gate",
+        "type": "primary_general_and_visitor_access_gate",
+        "status": "open_24_7",
+        "hours": "24/7",
+        "map_label": "Valley Hi Gate",
+        "map_zone": "southwest / Valley Hi area",
+        "best_for": [
+          "Visitors needing the current 24/7 VCC",
+          "West and southwest San Antonio access",
+          "General base access"
+        ],
+        "commute_notes": "Current primary visitor-processing route because Valley Hi VCC is open 24/7 and Luke East VCC is temporarily closed.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official JBSA gate-hours page immediately before travel.",
+        "verified_on": "2026-09-15"
       }
     ],
-
     "major_services": [
       {
         "name": "Wilford Hall Ambulatory Surgical Center",
@@ -681,15 +789,32 @@
         "map_label": "Wilford Hall",
         "address": "1100 Wilford Hall Loop, JBSA-Lackland, TX 78236",
         "phone": "210-292-4277 / 210-292-7412",
-        "hours": "Monday, Tuesday, Thursday, Friday 7:30 a.m. to 4:30 p.m.; Wednesday 9:15 a.m. to 4:30 p.m. per public medical page",
+        "hours": "Monday, Tuesday, Thursday, Friday 7:30 a.m. to 4:30 p.m.; Wednesday 9:15 a.m. to 4:30 p.m.",
         "best_for": [
-          "Primary military medical services",
-          "Specialty clinics",
-          "Pharmacy-related planning",
-          "Family medical orientation"
+          "Military medical services",
+          "Specialty care",
+          "Family medical orientation",
+          "Medical readiness support"
         ],
         "map_zone": "medical district / Wilford Hall Loop",
-        "user_note": "Treat this as a major medical facility for PCS planning. Verify emergency care options, clinic availability, and pharmacy details directly with official medical sources."
+        "user_note": "Wilford Hall is an ambulatory facility. For life-threatening emergencies call 911; current official guidance identifies Brooke Army Medical Center as the primary DoD emergency department in the San Antonio military health system.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Wilford Hall Urgent Care Center",
+        "category": "urgent_care",
+        "map_label": "Urgent Care",
+        "address": "1100 Wilford Hall Loop, 1st Floor, A-Wing, JBSA-Lackland, TX 78236",
+        "phone": "210-292-3403",
+        "hours": "Daily, 6:00 a.m. to 9:00 p.m.",
+        "best_for": [
+          "Acute non-life-threatening medical conditions requiring prompt care"
+        ],
+        "map_zone": "Wilford Hall / A-Wing",
+        "user_note": "The Urgent Care Center transition took effect April 4, 2026. For emergencies call 911 or go to the nearest emergency department.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
       },
       {
         "name": "Lackland Commissary",
@@ -697,13 +822,16 @@
         "map_label": "Commissary",
         "address": "2250 Foulois Street, Bldg. 8400, JBSA-Lackland, TX 78236-1039",
         "phone": "210-276-2113",
+        "hours": "Sunday 7:30 a.m.-6:00 p.m.; Monday-Friday 7:30 a.m.-8:00 p.m.; Saturday 7:30 a.m.-6:00 p.m. Holiday and special hours can vary.",
         "best_for": [
-          "Grocery savings",
-          "Family shopping",
-          "BAH and monthly budget planning"
+          "Grocery shopping",
+          "Military family budgeting",
+          "CLICK2GO pickup"
         ],
         "map_zone": "main services / retail area",
-        "user_note": "Commissary access can materially affect monthly food budget for eligible users."
+        "user_note": "DeCA publishes current store and special-holiday hours. Verify the store page before travel, especially around holidays.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
       },
       {
         "name": "JBSA Lackland Main Exchange",
@@ -711,7 +839,7 @@
         "map_label": "BX / Exchange",
         "address": "2180 Reese Street, Bldg. 1385, Lackland AFB, TX 78236",
         "phone": "210-674-6467",
-        "hours": "Mon-Sat 0900-1900 per Exchange store locator; verify current hours before travel",
+        "hours": "Verify current hours on the official Exchange store locator before travel.",
         "best_for": [
           "Shopping",
           "Uniform-related errands",
@@ -719,21 +847,9 @@
           "Family convenience"
         ],
         "map_zone": "main services / Reese Street",
-        "user_note": "Important daily-life anchor for new arrivals and families."
-      },
-      {
-        "name": "Military Clothing Store",
-        "category": "military_clothing",
-        "map_label": "Military Clothing",
-        "address": "1461 Patrick Street, Bldg. 7037, Lackland AFB, TX 78236",
-        "hours": "Mon-Fri 0800-1700 per Exchange store locator; verify current hours",
-        "best_for": [
-          "Uniform items",
-          "New arrivals",
-          "Technical training / permanent party needs"
-        ],
-        "map_zone": "Patrick Street / services area",
-        "user_note": "Useful for military-specific shopping needs after arrival."
+        "user_note": "Address and phone are retained from the existing PCSUnited AAFES-sourced profile. Current operating hours should be verified directly with AAFES.",
+        "verification_status": "official_source_retained_hours_require_recheck",
+        "verified_on": "2026-09-15"
       },
       {
         "name": "JBSA-Lackland Military Housing Office",
@@ -741,102 +857,200 @@
         "map_label": "Housing Office",
         "address": "2525 Fairchild Street, Bldg. 1524, JBSA-Lackland, TX 78236",
         "phone": "210-671-1840",
-        "email": "502CES.Housing.orgbox@us.af.mil",
-        "hours": "Monday-Friday, 7:30 a.m. to 4:30 p.m.; closed holidays",
+        "email": "802CES.Lackland.MilitaryHousing@us.af.mil",
+        "hours": "Monday-Friday, 8:00 a.m. to 4:00 p.m.; closed on Family Days and holidays",
         "best_for": [
           "On-base housing questions",
           "Off-base housing guidance",
           "PCS housing counseling",
-          "Unaccompanied housing questions"
+          "Lease and purchase counseling"
         ],
         "map_zone": "Fairchild Street / housing support area",
-        "user_note": "Military families should contact the housing office before committing to on-base or off-base housing."
+        "user_note": "Current Air Force Housing listing. Contact the office before signing a lease or sales contract when required by current PCS guidance.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
       },
       {
-        "name": "Unaccompanied Housing Office",
+        "name": "JBSA-Lackland Unaccompanied Housing",
         "category": "unaccompanied_housing",
         "map_label": "Unaccompanied Housing",
         "address": "2525 Fairchild Street, Bldg. 1524, JBSA-Lackland, TX 78236",
         "phone": "210-671-5008 / 210-671-6021",
-        "email": "502CES.Housing.orgbox@us.af.mil",
-        "hours": "Monday-Friday, 7:30 a.m. to 4:30 p.m.; closed holidays",
+        "email": "802CES.JBSA.LACKLANDPPDORMS@us.af.mil",
+        "hours": "Monday-Friday, 8:00 a.m. to 4:00 p.m.; closed on Family Days and holidays",
         "best_for": [
           "Dormitory questions",
           "Single service member housing",
           "Unaccompanied PCS planning"
         ],
         "map_zone": "Fairchild Street / housing support area",
-        "user_note": "Eligibility and availability should be verified directly with the housing office."
+        "user_note": "Eligibility and availability must be confirmed with the housing office.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
       },
       {
-        "name": "Bank / Credit Union / ATM Services",
-        "category": "banking",
-        "map_label": "Bank / ATM",
-        "address": "Verify current branch or ATM location before travel",
+        "name": "Lackland Privatized Housing",
+        "category": "privatized_housing",
+        "map_label": "Privatized Housing",
+        "address": "2254 Brian McElroy, San Antonio, TX 78236",
+        "phone": "210-674-9366",
+        "hours": "Monday-Thursday 8:00 a.m. to 6:00 p.m.; Friday 8:00 a.m. to 5:00 p.m.",
         "best_for": [
-          "Daily banking",
-          "PCS funds access",
-          "ATM convenience",
-          "Relocation errands"
+          "Privatized family housing availability",
+          "Resident services",
+          "Family housing applications"
         ],
-        "map_zone": "main services / retail area",
-        "user_note": "Specific bank or credit union locations may change. Use current official branch locator or base directory before routing users."
+        "map_zone": "family housing area",
+        "user_note": "Current Air Force Housing listing. Availability, waitlists, eligibility, pet rules, and BAH treatment can change.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
       },
       {
-        "name": "Legal / Finance / Admin Services",
-        "category": "admin_support",
-        "map_label": "Admin Support",
-        "address": "Verify current office location before travel",
+        "name": "JBSA-Lackland Military & Family Readiness Center",
+        "category": "family_readiness",
+        "map_label": "M&FRC",
+        "address": "1550 Wurtsmith St., Bldg. 5725, Room 212, JBSA-Lackland, TX 78236-5113",
+        "phone": "210-671-3722",
+        "email": "802fss.fsfr@us.af.mil",
+        "hours": "Monday, Tuesday, Wednesday, Friday 7:30 a.m. to 4:30 p.m.; Thursday 7:30 a.m. to 1:00 p.m.; closed Federal and AETC Family Holidays",
         "best_for": [
-          "Power of attorney",
-          "PCS documents",
-          "Pay questions",
-          "Arrival admin"
+          "Relocation readiness",
+          "Information and referral",
+          "Family support",
+          "Transition assistance referrals",
+          "PCS resources"
         ],
-        "map_zone": "administrative services area",
-        "user_note": "Use this as a planning category in the Base tab; exact office routing should point to official base directory links."
+        "map_zone": "Wurtsmith Street / family readiness",
+        "user_note": "Strong first-stop resource for PCS and family support.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
       },
       {
-        "name": "Child / Youth / Family Support Services",
-        "category": "family_support",
-        "map_label": "Family Support",
-        "address": "Verify current CDC, youth center, and school liaison locations before travel",
+        "name": "JBSA-Lackland Military Personnel Services",
+        "category": "personnel_admin",
+        "map_label": "MPS",
+        "address": "1561 Stewart St., Bldg. 5616, JBSA-Lackland, TX 78236",
+        "phone": "210-671-3303",
+        "hours": "Monday-Thursday 7:30 a.m. to 3:00 p.m.; Friday 7:30 a.m. to noon",
         "best_for": [
-          "Childcare planning",
-          "Youth programs",
-          "School transition support",
-          "Family PCS support"
+          "ID cards and DEERS support",
+          "Base in-processing",
+          "Career development",
+          "Assignments",
+          "Retirements and separations"
         ],
-        "map_zone": "family services / youth support areas",
-        "user_note": "Critical for families. Exact program availability, waitlists, and eligibility should be verified with official JBSA resources."
+        "map_zone": "Stewart Street / administrative services",
+        "user_note": "Current JBSA MPS page. Individual services may use appointments or service-specific procedures.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "JBSA-Lackland Personal Property Processing Office",
+        "category": "personal_property",
+        "map_label": "Personal Property",
+        "address": "1561 Stewart Street, Bldg. 5616, Room 112, JBSA-Lackland, TX 78236",
+        "phone": "210-671-2823",
+        "best_for": [
+          "Household-goods movement",
+          "PCS personal property questions",
+          "Move coordination"
+        ],
+        "map_zone": "Stewart Street / administrative services",
+        "user_note": "Current JBSA newcomer information.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Inns of Lackland / Gateway Inn",
+        "category": "temporary_lodging",
+        "map_label": "Lodging",
+        "address": "Gateway Inn: 1750 Femoyer St., Bldg. 10203, San Antonio, TX 78236",
+        "phone": "210-671-4277",
+        "email": "innsof.lackland@lackland.af.mil",
+        "best_for": [
+          "PCS temporary lodging",
+          "TDY lodging",
+          "Newcomer arrival planning"
+        ],
+        "map_zone": "Femoyer Street / lodging",
+        "user_note": "JBSA lists Gateway Inn, Gateway Villa, Gateway Lodge and Kelly Inn among Lackland lodging locations. Contact lodging directly for availability and pet/family room requirements.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "JBSA-Lackland School Liaison",
+        "category": "school_liaison",
+        "map_label": "School Liaison",
+        "phone": "210-671-8388",
+        "email": "jbsa.slo@us.af.mil",
+        "best_for": [
+          "K-12 transition support",
+          "School boundary questions",
+          "Interstate Compact guidance",
+          "Homeschool and community school information"
+        ],
+        "map_zone": "JBSA-Lackland / family support network",
+        "user_note": "Lackland ISD publishes the JBSA-Lackland School Liaison contact. School assignments must still be verified by exact residence and current district rules.",
+        "verification_status": "verified_current_school_district_source",
+        "verified_on": "2026-09-15"
       }
     ],
-
+    "temporary_lodging": {
+      "primary_contact_name": "Inns of Lackland",
+      "reservations_phone": "210-671-4277",
+      "email": "innsof.lackland@lackland.af.mil",
+      "locations": [
+        {
+          "name": "Gateway Inn",
+          "address": "1750 Femoyer St., Bldg. 10203, San Antonio, TX 78236"
+        },
+        {
+          "name": "Gateway Villa",
+          "address": "2435 Larson St., San Antonio, TX 78236"
+        },
+        {
+          "name": "Gateway Lodge",
+          "address": "7426 Patrick St., San Antonio, TX 78236"
+        },
+        {
+          "name": "Kelly Inn",
+          "address": "250 Donald Goodrich, Bldg. 1650, San Antonio, TX 78236"
+        }
+      ],
+      "note": "Contact lodging directly for availability, children, pet-friendly rooms, and current reservation procedures.",
+      "verified_on": "2026-09-15"
+    },
     "on_base_housing": {
-      "housing_type": "Privatized and military housing support environment",
+      "housing_type": "Privatized family housing plus military housing and unaccompanied-housing support",
       "housing_office_name": "JBSA-Lackland Military Housing Office",
       "housing_office_address": "2525 Fairchild Street, Bldg. 1524, JBSA-Lackland, TX 78236",
       "housing_office_phone": "210-671-1840",
-      "housing_office_email": "502CES.Housing.orgbox@us.af.mil",
-      "housing_office_hours": "Monday-Friday, 7:30 a.m. to 4:30 p.m.; closed holidays",
+      "housing_office_email": "802CES.Lackland.MilitaryHousing@us.af.mil",
+      "housing_office_hours": "Monday-Friday, 8:00 a.m. to 4:00 p.m.; closed on Family Days and holidays",
+      "privatized_housing_name": "Lackland Family Homes",
+      "privatized_housing_phone": "210-674-9366",
+      "privatized_housing_address": "2254 Brian McElroy, San Antonio, TX 78236",
+      "privatized_housing_hours": "Monday-Thursday, 8:00 a.m. to 6:00 p.m.; Friday, 8:00 a.m. to 5:00 p.m.",
       "map_label": "Family Housing / Housing Office",
-      "map_zone": "central / Fairchild Street and family housing support area",
+      "map_zone": "Fairchild Street and Lackland family housing areas",
       "best_for": [
         "Families prioritizing proximity",
-        "New arrivals wanting simplicity",
-        "Users who value base-connected lifestyle",
-        "Families wanting to reduce commute uncertainty"
+        "New arrivals wanting simpler commute planning",
+        "Users comparing BAH-funded on-base and off-base options",
+        "Families who value access to on-installation schools and services"
       ],
       "watchouts": [
         "Availability and waitlists can change",
-        "On-base housing may capture BAH differently than off-base renting",
+        "Privatized housing rent/BAH arrangements must be confirmed directly",
         "Pet policies and breed restrictions should be verified",
-        "School assignment must be verified by exact address",
-        "Home age, condition, and neighborhood fit should be reviewed before commitment"
+        "School assignment must be verified by exact residence",
+        "Home type and neighborhood fit should be reviewed before commitment"
       ],
-      "pcsu_strategy_note": "Compare on-base housing against off-base rent and mortgage options. The best choice depends on rank, dependents, BAH, commute tolerance, school priorities, pet needs, and how long the assignment may last."
+      "pcsu_strategy_note": "Compare on-base housing against off-base rent and mortgage options. The best choice depends on rank, dependents, BAH, commute tolerance, school priorities, pet needs, assignment length, and current housing availability.",
+      "verification_status": "verified_official",
+      "verified_on": "2026-09-15",
+      "source_conflict_note": "Some older JBSA pages still display legacy 7:30 a.m.-4:30 p.m. housing-office hours and the older 502CES.Housing.orgbox email. This Gold Standard uses the current Air Force Housing installation page values: 8:00 a.m.-4:00 p.m. and 802CES.Lackland.MilitaryHousing@us.af.mil."
     },
-
     "recommended_neighborhoods": [
       {
         "name": "Westover Hills",
@@ -1029,7 +1243,6 @@
         "pcsu_recommendation": "Better for lifestyle-focused singles or couples than family-first PCS planning."
       }
     ],
-
     "commute_intelligence": {
       "commute_bluf": "For Lackland, gate access matters more than straight-line distance. A home that looks close may not be the best choice if the gate, road pattern, or duty schedule creates friction.",
       "primary_commute_factors": [
@@ -1070,7 +1283,6 @@
       ],
       "user_instruction": "Before signing a lease or contract, users should test the commute from the exact property address to the expected gate during the same time window they would normally report to work."
     },
-
     "bah_market_reality": {
       "bah_bluf": "Lackland-area housing decisions should compare BAH against rent, mortgage, utilities, debt, and commute. BAH may support renting more comfortably than buying for some ranks unless debt is low, down payment is available, or the user targets a lower price band.",
       "recommended_calculations": [
@@ -1093,91 +1305,116 @@
       ],
       "base_tab_message": "Show BAH as a decision filter, not a promise of affordability. The Base tab should push users into the PCSUnited financial calculator when the housing gap looks tight."
     },
-
     "family_readiness": {
-      "family_bluf": "Families PCSing to Lackland should verify school zones, childcare options, medical access, commute reality, and housing availability before choosing a neighborhood.",
+      "family_bluf": "Families PCSing to Lackland should verify school assignment, childcare availability, medical access, gate commute, and housing availability before choosing a neighborhood.",
       "school_guidance": {
-        "school_zone_warning": "Always verify school assignment by exact address before signing a lease or purchase contract.",
-        "nearby_school_district_note": "Common Lackland-area school district research may include Northside ISD, Medina Valley ISD, Southwest ISD, and other address-specific districts depending on the neighborhood.",
-        "school_liaison_note": "Use official school liaison resources where available for military school transition support."
+        "on_base_district": "Lackland Independent School District",
+        "district_boundary_note": "Lackland ISD states that its district boundary is coterminous with JBSA-Lackland; families living on JBSA-Lackland are in Lackland ISD.",
+        "schools": [
+          "Lackland Elementary School (PK-5)",
+          "Virginia Allred Stacey Jr./Sr. High School (6-12)"
+        ],
+        "school_liaison_phone": "210-671-8388",
+        "school_liaison_email": "jbsa.slo@us.af.mil",
+        "school_zone_warning": "For off-base housing, always verify school assignment by exact address before signing a lease or purchase contract.",
+        "nearby_school_district_note": "Common off-base district research can include Northside ISD, Medina Valley ISD, Southwest ISD, and other address-specific districts depending on the property."
       },
       "childcare_guidance": {
-        "cdc_note": "Child Development Center availability, waitlists, and eligibility should be verified directly with official base resources.",
+        "cdc_note": "Child Development Center availability, waitlists, eligibility and current operating details should be verified through MilitaryChildCare.com or current JBSA resources.",
         "youth_program_note": "Youth programs and school-age care can materially affect family housing decisions."
       },
       "medical_guidance": {
         "primary_medical_anchor": "Wilford Hall Ambulatory Surgical Center",
-        "medical_warning": "Verify clinic availability, pharmacy procedures, and emergency care options directly with official medical sources before relying on any single facility."
+        "urgent_care": "Wilford Hall Urgent Care Center operates daily 6:00 a.m.-9:00 p.m. for acute non-life-threatening conditions.",
+        "medical_warning": "For emergencies call 911 or use the nearest emergency department. Verify clinic availability, referrals, pharmacy procedures and current hours directly with official medical sources."
       },
-      "spouse_employment_note": "San Antonio can offer broader spouse employment options than smaller duty stations, but commute, childcare, and credentialing should be considered together."
+      "military_family_readiness_center": {
+        "name": "JBSA-Lackland Military & Family Readiness Center",
+        "address": "1550 Wurtsmith St., Bldg. 5725, Room 212, JBSA-Lackland, TX 78236-5113",
+        "phone": "210-671-3722",
+        "email": "802fss.fsfr@us.af.mil",
+        "hours": "Monday, Tuesday, Wednesday, Friday 7:30 a.m.-4:30 p.m.; Thursday 7:30 a.m.-1:00 p.m.; closed Federal and AETC Family Holidays"
+      },
+      "spouse_employment_note": "San Antonio generally offers broader spouse-employment options than many smaller duty stations, but childcare, commute, licensing/credentialing, and work location should be considered together.",
+      "verified_on": "2026-09-15"
     },
-
     "arrival_checklist": {
       "before_arrival": [
-        "Verify official gate and Visitor Control Center hours.",
+        "Verify current gate and Visitor Control Center status on the official JBSA gate-hours page.",
         "Confirm sponsor contact and unit reporting instructions.",
-        "Confirm lodging or temporary housing plan.",
-        "Review housing office guidance before signing any lease or purchase contract.",
-        "Compare BAH against rent, mortgage, utilities, and debt.",
-        "Shortlist neighborhoods by likely gate and commute band.",
-        "Verify school zones by exact property address.",
-        "Check pet policies for on-base housing, rentals, and temporary lodging."
+        "Confirm lodging or temporary housing plan and call lodging directly if traveling with children or pets.",
+        "Review Military Housing Office guidance before signing a lease or purchase contract.",
+        "Compare BAH against rent or mortgage, utilities, debt, savings goals, and commute.",
+        "Shortlist neighborhoods by realistic 24/7 gate access and expected report time.",
+        "Verify school assignment by exact residence; on-base JBSA-Lackland residents are within Lackland ISD.",
+        "Check current pet policies for privatized housing, rentals, and temporary lodging.",
+        "If visitor access is needed, plan around Valley Hi VCC as the current 24/7 VCC while Luke East VCC remains temporarily closed."
+      ],
+      "arrival_and_inprocessing": [
+        "Report to your Commander's Support Staff or follow your unit's current reporting instructions.",
+        "If you do not have a CSS, use the current JBSA Newcomers guidance for Lackland customer-service/in-processing routing.",
+        "Contact Military Personnel Services for ID card, DEERS, in-processing, career development, assignment, or separation support as applicable.",
+        "Contact the Personal Property Processing Office for household-goods or move issues.",
+        "Use the Military & Family Readiness Center for relocation information and referrals."
       ],
       "first_week": [
-        "Complete unit check-in requirements.",
+        "Complete unit check-in and required in-processing appointments.",
         "Visit or contact the housing office if still deciding between on-base and off-base options.",
-        "Confirm medical/pharmacy setup.",
-        "Handle ID/admin/finance/legal needs as applicable.",
-        "Drive the commute from target neighborhoods during expected report time.",
+        "Confirm medical, urgent-care, pharmacy and emergency-care procedures.",
+        "Drive the commute from target neighborhoods during the actual expected report window.",
         "Tour properties before committing when possible.",
-        "Avoid choosing purely by distance or rent price."
+        "Avoid choosing housing solely by distance, rent, or list price."
       ],
       "first_30_days": [
-        "Finalize housing only after comparing commute, BAH fit, school zones, and total monthly cost.",
-        "Save emergency, medical, gate, and housing office contact information.",
-        "Update PCSUnited profile and financial readiness dashboard with final housing numbers.",
-        "Review whether the selected area supports the user's assignment length and family needs."
-      ]
+        "Finalize housing only after comparing commute, BAH fit, school needs and total monthly cost.",
+        "Save operator, BDOC, medical, gate, housing and family-readiness contacts.",
+        "Update PCSUnited financial inputs with final housing numbers.",
+        "Review whether the selected area supports assignment length, family needs, resale/rental exit risk and daily quality of life."
+      ],
+      "verified_on": "2026-09-15"
     },
-
     "pcs_watchouts": [
       {
-        "title": "Gate hours can change",
+        "title": "Gate and VCC hours can change",
         "severity": "high",
-        "message": "Use official JBSA gate pages before travel or commute planning."
+        "message": "Use the official JBSA gate-hours page immediately before travel. As of 2026-09-15, Valley Hi VCC is 24/7 and Luke East VCC is temporarily closed with processing moved to Valley Hi."
+      },
+      {
+        "title": "Visitor access procedures are security-sensitive",
+        "severity": "high",
+        "message": "Visitors should follow current JBSA identification, sponsorship and background-check requirements. For access concerns, contact the JBSA-Lackland BDOC at 210-671-2018."
       },
       {
         "title": "Distance is not the same as commute",
         "severity": "high",
-        "message": "Neighborhoods should be compared by realistic gate access and traffic timing."
+        "message": "Neighborhoods should be compared by realistic gate access, duty location and traffic timing."
       },
       {
-        "title": "School zones are address-specific",
+        "title": "School assignments are residence-specific",
         "severity": "high",
-        "message": "Never assume a school assignment from neighborhood name alone."
+        "message": "On-base residents are served by Lackland ISD; off-base school assignment must be verified by exact property address."
       },
       {
         "title": "BAH is not the full affordability picture",
         "severity": "high",
-        "message": "Users must compare rent or mortgage against income, debt, expenses, utilities, and savings goals."
+        "message": "Compare rent or mortgage against income, debt, utilities, taxes, insurance, HOA, savings goals and assignment length."
       },
       {
-        "title": "Close-in housing varies widely",
+        "title": "Published installation population is not a live headcount",
         "severity": "medium_high",
-        "message": "Some areas near base may be very convenient but require stronger property-level review."
+        "message": "The current public Lackland profile still reports more than 24,000 active duty, 10,000 DoD civilians, and 11,000 contractors and family members combined, but the underlying data year is not stated."
       },
       {
-        "title": "Limited-hour gates can distort commute estimates",
-        "severity": "medium_high",
-        "message": "A route that works at 7 a.m. may not work at 7 p.m. if the gate schedule changes."
+        "title": "Some official JBSA pages retain legacy housing-office details",
+        "severity": "medium",
+        "message": "Use the current Air Force Housing installation page for Lackland office hours and email; verify before travel."
       },
       {
         "title": "On-base housing is not automatically the best financial answer",
         "severity": "medium",
-        "message": "Compare waitlist, BAH capture, commute, home condition, schools, and lifestyle before deciding."
+        "message": "Compare availability, BAH treatment, commute, home fit, schools and lifestyle before deciding."
       }
     ],
-
     "realtor_intelligence": {
       "buyer_personas": [
         {
@@ -1221,7 +1458,7 @@
       ],
       "listing_angles": [
         "Near JBSA-Lackland gate access",
-        "Convenient to Luke East Visitor Control Center",
+        "Convenient to Valley Hi visitor processing while Luke East VCC is temporarily closed",
         "Short drive to Lackland services",
         "West San Antonio military-family location",
         "BAH-conscious rental or purchase option",
@@ -1246,95 +1483,195 @@
         "Avoid generic San Antonio advice when the user is assigned to Lackland."
       ]
     },
-
     "data_confidence": {
-      "overall": "medium_high",
-      "gate_data": "high_public_official",
-      "visitor_control_center": "high_public_official",
-      "housing_office": "high_public_official",
-      "major_services": "medium_high_public_sources",
+      "overall": "high_for_current_base_essentials_medium_high_for_curated_pcs_intelligence",
+      "identity": "high_public_official",
+      "mission": "high_current_37trw_and_jbsa_sources",
+      "base_operator": "high_current_public_official",
+      "installation_population": "medium_published_profile_not_live_headcount",
+      "gate_data": "high_current_public_official_time_sensitive",
+      "visitor_control_center": "high_current_public_official_status_location_specific_phone_not_published",
+      "housing_office": "high_current_air_force_housing",
+      "unaccompanied_housing": "high_current_air_force_housing",
+      "privatized_housing": "high_current_air_force_housing",
+      "medical": "high_current_tricare",
+      "commissary": "high_current_deca",
+      "exchange": "medium_official_source_retained_hours_require_direct_recheck",
+      "military_family_readiness": "high_current_jbsa",
+      "school_liaison": "high_current_lackland_isd",
       "recommended_neighborhoods": "curated_pcsunited_intelligence",
-      "commute_bands": "estimated_requires_address_level_validation",
+      "commute_bands": "estimated_requires_address_and_report_time_validation",
       "bah_market_guidance": "strategy_layer_requires_rank_family_and_financial_inputs",
-      "last_reviewed": "2026-05-03"
+      "housing_market_demographics": "preserved_from_existing_2026_07_source_records_not_revalidated_in_this_installation_profile_pass",
+      "last_reviewed": "2026-09-15"
     },
-
     "source_notes": [
       {
         "label": "Official JBSA gate hours",
-        "type": "official",
-        "url": "https://www.jbsa.mil/Information/Gate-Hours-Visitor-Information/Gate-Hours/JBSA-LAK-Gates/",
+        "type": "official_current",
+        "source_key": "official_links.gate_hours",
+        "verified_on": "2026-09-15",
         "used_for": [
           "Gate names",
           "Gate status",
-          "Gate hours"
+          "Gate hours",
+          "Visitor Control Center status",
+          "Valley Hi VCC as current 24/7 VCC",
+          "Luke East VCC temporary closure"
         ]
       },
       {
-        "label": "Official JBSA-Lackland visitor information",
-        "type": "official",
-        "url": "https://www.jbsa.mil/Information/Gate-Hours-Visitor-Information/JBSA-Lackland-Visitor-Info/",
+        "label": "Joint Base San Antonio Contact Us — Directory Assistance",
+        "type": "official_current",
+        "verified_on": "2026-09-15",
         "used_for": [
-          "Luke East Visitor Control Center",
-          "VCC address",
-          "VCC hours",
-          "VCC phone"
+          "JBSA-Lackland automated base operator 210-671-1110"
         ]
       },
       {
-        "label": "Official JBSA housing page",
-        "type": "official",
-        "url": "https://www.jbsa.mil/Resources/Housing/",
+        "label": "Official JBSA-Lackland factsheet",
+        "type": "official_published_profile",
+        "published": "2021-06-21",
+        "verified_still_live_on": "2026-09-15",
         "used_for": [
-          "Lackland housing office",
-          "Housing office contact"
-        ]
+          "Published Lackland installation population categories"
+        ],
+        "freshness_note": "The public factsheet does not state the underlying population data year; population should be treated as a published profile rather than a live headcount."
       },
       {
-        "label": "Air Force Housing - Joint Base San Antonio",
-        "type": "official",
-        "url": "https://www.housing.af.mil/Home-depricated/Units/Joint-Base-San-Antonio/",
+        "label": "MilitaryINSTALLATIONS — Joint Base San Antonio in-depth overview",
+        "type": "official_dod_current_portal",
+        "verified_on": "2026-09-15",
         "used_for": [
-          "Military housing office address",
-          "Housing phone",
-          "Housing email",
-          "Housing hours",
-          "Unaccompanied housing contact"
+          "Current reproduction of Lackland population profile",
+          "Automated base operator",
+          "Base Defense Operations Center",
+          "Newcomer and installation context"
         ]
       },
       {
-        "label": "DeCA Lackland Commissary",
-        "type": "official_commercial_military",
-        "url": "https://corp.commissaries.com/shopping/store-locations/lackland-jbsa",
+        "label": "37th Training Wing About / Fact Sheet",
+        "type": "official_current",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Primary training mission",
+          "37th TRW status as largest Air Force training wing",
+          "Air Force and Space Force BMT",
+          "Technical training",
+          "International language training",
+          "Medical specialty training",
+          "Military Working Dog training"
+        ]
+      },
+      {
+        "label": "JBSA Protocol mission-partner listing",
+        "type": "official_current",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Major current JBSA-Lackland mission partners"
+        ]
+      },
+      {
+        "label": "Air Force Housing — Joint Base San Antonio",
+        "type": "official_current",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Lackland Military Housing Office",
+          "Unaccompanied Housing",
+          "Privatized Housing",
+          "Current phone, email, address and office hours"
+        ]
+      },
+      {
+        "label": "DeCA Lackland JBSA Commissary",
+        "type": "official_current",
+        "source_key": "official_links.commissary",
+        "verified_on": "2026-09-15",
         "used_for": [
           "Commissary address",
-          "Commissary phone"
-        ]
-      },
-      {
-        "label": "AAFES JBSA Lackland Main Exchange",
-        "type": "official_commercial_military",
-        "url": "https://www.shopmyexchange.com/store-locator/jbsa-lackland-main-exchange",
-        "used_for": [
-          "Exchange address",
-          "Exchange hours"
+          "Phone",
+          "Normal store hours",
+          "Holiday-hours verification requirement"
         ]
       },
       {
         "label": "Wilford Hall Ambulatory Surgical Center",
-        "type": "official_medical",
-        "url": "https://wilfordhall.tricare.mil/About-Us",
+        "type": "official_medical_current",
+        "source_key": "official_links.medical",
+        "verified_on": "2026-09-15",
         "used_for": [
           "Medical facility address",
-          "Medical facility phone",
-          "Medical facility hours"
+          "Information Desk phone",
+          "General hours",
+          "59th Medical Wing medical context"
         ]
+      },
+      {
+        "label": "Wilford Hall Urgent Care Center",
+        "type": "official_medical_current",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Urgent Care Center hours",
+          "Phone",
+          "Location",
+          "Emergency-care warning"
+        ]
+      },
+      {
+        "label": "JBSA Military & Family Readiness Services",
+        "type": "official_current",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "JBSA-Lackland Military & Family Readiness Center address",
+          "Phone",
+          "Email",
+          "Hours"
+        ]
+      },
+      {
+        "label": "JBSA Temporary Lodging",
+        "type": "official_current",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Gateway Inn and other Lackland lodging locations",
+          "Reservations phone",
+          "Lodging email"
+        ]
+      },
+      {
+        "label": "JBSA 802d Military Personnel Flight / Lackland MPS",
+        "type": "official_current",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "MPS phone",
+          "Location",
+          "Current operating hours",
+          "In-processing/admin services"
+        ]
+      },
+      {
+        "label": "Lackland Independent School District",
+        "type": "official_school_district_current",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "On-base school district boundary",
+          "PK-12 school structure",
+          "JBSA-Lackland School Liaison phone and email"
+        ]
+      },
+      {
+        "label": "AAFES JBSA Lackland Main Exchange",
+        "type": "official_commercial_military_retained",
+        "source_key": "official_links.exchange",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Exchange reference link"
+        ],
+        "freshness_note": "Current hours were not independently readable during this verification pass; the Gold Standard instructs users to verify hours directly with AAFES."
       }
     ],
-
-    "disclaimer": "PCSUnited is not an official DoD source. This Base tab is intended for public-facing PCS orientation, housing research, and relocation planning. Users should verify gate hours, access requirements, medical services, housing availability, school zones, and official procedures directly with the installation or official service provider before travel, lease signing, or home purchase."
+    "disclaimer": "PCSUnited is not an official DoD or Department of the Air Force source. This profile is for public-facing PCS orientation, housing research, relocation planning, and Ask Amy explanations. Time-sensitive information—especially gate/VCC status, access rules, medical operations, housing availability, lodging, and office hours—must be verified with the official installation or service provider before travel or making a housing decision."
   },
-
   "sources": {
     "demographics": {
       "provider": "US Census Bureau ACS 5-Year Profile",
@@ -1352,8 +1689,10 @@
       "as_of": "2026-07"
     },
     "base_profile": {
-      "provider": "PCSUnited planning profile using public-facing installation, housing, and market research structure",
-      "as_of": "2026-07"
+      "provider": "PCSUnited Gold Standard installation profile using official JBSA, 37th Training Wing, Air Force Housing, MilitaryINSTALLATIONS, DeCA, TRICARE, JBSA family-readiness/newcomer resources, and Lackland ISD sources",
+      "as_of": "2026-09-15",
+      "verification_level": "official-source-validated for Base Map / Ask Amy essentials",
+      "market_data_scope_note": "Housing-market and demographic data elsewhere in this file retain their own source dates and were not re-dated during this installation-profile verification."
     },
     "housing_market": {
       "provider": "RentCast",
@@ -1377,13 +1716,12 @@
       ]
     }
   },
-
   "compatibility": {
     "orozco_realty_ready": true,
     "pcsunited_ready": true,
     "intended_primary_slug": "lackland-afb",
     "schema_family": "pcsunited-city-base-json",
-    "schema_version": "pcsu-base-profile-v1.0.0",
+    "schema_version": "pcsu-base-profile-v1.1.0",
     "base_demographics_shell_ready": true,
     "base_tab_ready": true,
     "uses_placeholder_base_image": false,
@@ -1396,7 +1734,13 @@
       "Preserves duplicate median price aliases for median_list_price, median_sold_price, and median_sale_price.",
       "Preserves by_bedroom entries for 2, 3, 4, and 5-bedroom Market Insight compatibility.",
       "Expanded base_profile to include map image, official links, visitor control center, gates, major services, on-base housing, recommended neighborhoods, commute intelligence, BAH market reality, family readiness, arrival checklist, PCS watchouts, realtor intelligence, data confidence, source notes, and disclaimer.",
-      "RentCast July 2026 values are retained for median sale price, median list price, rental metrics, active listings, days on market, and selected housing-market ZIP summaries through sources.housing_market raw file references."
-    ]
+      "RentCast July 2026 values are retained for median sale price, median list price, rental metrics, active listings, days on market, and selected housing-market ZIP summaries through sources.housing_market raw file references.",
+      "Gold Standard v1.1.0 adds canonical base_operator and installation_population objects recognized by Base-Map/base-map.js and Base-Map/ask-amy-base-map-server.js.",
+      "Gold Standard v1.1.0 standardizes official_links aliases used by Ask Amy: gate_hours, visitor_info, housing, medical, commissary, and exchange.",
+      "Current 2026-09-15 gate/VCC data supersedes older Luke East VCC and Selfridge West gate schedule information in prior Lackland profiles."
+    ],
+    "gold_standard_base_map_ask_amy_ready": true,
+    "base_map_required_fields_ready": true,
+    "ask_amy_server_required_fields_ready": true
   }
 }
