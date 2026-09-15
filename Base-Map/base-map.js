@@ -1,6 +1,6 @@
 /* =========================================================
    PCSUnited Interactive U.S. Air Force Base Map
-   Map Engine v4.1.0
+   Map Engine v4.2.0
 
    REQUIRED FLOW
    1. User clicks a state.
@@ -18,17 +18,32 @@
    JSON root priority:
    1. window.PCSU_BASE_JSON_ROOT
    2. data-json-root on #pcsu-real-us-map
-   3. ./cities/
+   3. TheWing cities directory
+
+   v4.2.0
+   ---------------------------------------------------------
+   Added parent/iframe bridge for Ask Amy.
+
+   Map -> Parent:
+   - pcsunited:base-map-state
+   - pcsunited:base-selected
+   - pcsunited:base-map-ready
+
+   Parent -> Map:
+   - pcsunited:base-map-request-state
 ========================================================= */
 
 (() => {
   "use strict";
 
-  const VERSION = "4.1.0";
-  const MOUNT_KEY = "PCSU_US_BASE_MAP_V410_MOUNTED";
+  const VERSION = "4.2.0";
+  const MOUNT_KEY = "PCSU_US_BASE_MAP_V420_MOUNTED";
 
   if (window[MOUNT_KEY]) {
-    console.warn("[PCSU Base Map] Duplicate mount blocked:", VERSION);
+    console.warn(
+      "[PCSU Base Map] Duplicate mount blocked:",
+      VERSION
+    );
     return;
   }
 
@@ -39,19 +54,29 @@
   ======================================================= */
 
   const mapRoot =
-    document.getElementById("pcsu-real-us-map");
+    document.getElementById(
+      "pcsu-real-us-map"
+    );
 
   const svgElement =
-    document.getElementById("pcsu-us-svg");
+    document.getElementById(
+      "pcsu-us-svg"
+    );
 
   const baseListEl =
-    document.getElementById("pcsu-base-list");
+    document.getElementById(
+      "pcsu-base-list"
+    );
 
   const selectedBaseNameEl =
-    document.getElementById("pcsu-selected-state");
+    document.getElementById(
+      "pcsu-selected-state"
+    );
 
   const panelCopyEl =
-    document.getElementById("pcsu-panel-copy");
+    document.getElementById(
+      "pcsu-panel-copy"
+    );
 
   const demographicsLinkEl =
     document.getElementById(
@@ -81,8 +106,11 @@
     return;
   }
 
-  const d3 = window.d3;
-  const topojson = window.topojson;
+  const d3 =
+    window.d3;
+
+  const topojson =
+    window.topojson;
 
   /* =======================================================
      CONFIGURATION
@@ -92,19 +120,12 @@
     window.PCSU_BASE_DEMOGRAPHICS_URL ||
     "https://pcsunited-com-28346d.webflow.io/air-force/base-demographics-air-force";
 
-  /*
-    If your JSON files are NOT in ./cities/,
-    define this before base-map.js loads:
-
-    window.PCSU_BASE_JSON_ROOT =
-      "https://your-domain.com/cities/";
-  */
-
   const BASE_JSON_ROOT =
-  window.PCSU_BASE_JSON_ROOT ||
-  "https://thewing.netlify.app/netlify/functions/cities/";
+    window.PCSU_BASE_JSON_ROOT ||
+    "https://thewing.netlify.app/netlify/functions/cities/";
 
-  const DEFAULT_STATE = "TX";
+  const DEFAULT_STATE =
+    "TX";
 
   /* =======================================================
      STATE LOOKUPS
@@ -758,38 +779,81 @@
 
   function esc(value) {
     return clean(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+      .replaceAll(
+        "&",
+        "&amp;"
+      )
+      .replaceAll(
+        "<",
+        "&lt;"
+      )
+      .replaceAll(
+        ">",
+        "&gt;"
+      )
+      .replaceAll(
+        '"',
+        "&quot;"
+      )
+      .replaceAll(
+        "'",
+        "&#039;"
+      );
   }
 
   function slugify(fileName) {
-    return clean(fileName)
-      .replace(/\.json$/i, "")
+    return clean(
+      fileName
+    )
+      .replace(
+        /\.json$/i,
+        ""
+      )
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
+      .replace(
+        /[^a-z0-9]+/g,
+        "-"
+      )
+      .replace(
+        /^-+|-+$/g,
+        ""
+      );
   }
 
   function normalizeKey(value) {
-    return clean(value)
+    return clean(
+      value
+    )
       .toLowerCase()
-      .replace(/joint\s*base/g, "jb")
-      .replace(/air\s*force\s*base/g, "afb")
-      .replace(/[^a-z0-9]/g, "");
+      .replace(
+        /joint\s*base/g,
+        "jb"
+      )
+      .replace(
+        /air\s*force\s*base/g,
+        "afb"
+      )
+      .replace(
+        /[^a-z0-9]/g,
+        ""
+      );
   }
 
-  function directJsonUrl(fileName) {
+  function directJsonUrl(
+    fileName
+  ) {
+
     const file =
-      clean(fileName);
+      clean(
+        fileName
+      );
 
     if (!file) {
       return "";
     }
 
     try {
+
       const root =
         new URL(
           BASE_JSON_ROOT,
@@ -797,9 +861,12 @@
         );
 
       if (
-        !root.pathname.endsWith("/")
+        !root.pathname.endsWith(
+          "/"
+        )
       ) {
-        root.pathname += "/";
+        root.pathname +=
+          "/";
       }
 
       return new URL(
@@ -808,9 +875,15 @@
       ).toString();
 
     } catch (_) {
+
       return (
-        String(BASE_JSON_ROOT)
-          .replace(/\/+$/, "") +
+        String(
+          BASE_JSON_ROOT
+        )
+          .replace(
+            /\/+$/,
+            ""
+          ) +
         "/" +
         file
       );
@@ -821,6 +894,7 @@
     row,
     stateCode
   ) {
+
     const [
       name,
       fileName,
@@ -830,24 +904,35 @@
     ] = row;
 
     const id =
-      slugify(fileName);
+      slugify(
+        fileName
+      );
 
     return {
       id,
-      slug: id,
+
+      slug:
+        id,
 
       fileName,
 
-      base: name,
+      base:
+        name,
+
       name,
-      label: name,
+
+      label:
+        name,
 
       city,
 
-      state: stateCode,
+      state:
+        stateCode,
+
       stateCode,
 
       lat,
+
       lng,
 
       jsonUrl:
@@ -862,7 +947,11 @@
       Object.entries(
         BASE_REGISTRY
       ).map(
-        ([stateCode, rows]) => [
+        ([
+          stateCode,
+          rows
+        ]) => [
+
           stateCode,
 
           rows.map(
@@ -877,41 +966,49 @@
     );
 
   const BASE_TO_STATE = (() => {
-    const out = {};
+
+    const out =
+      {};
 
     Object.entries(
       STATE_BASES
     ).forEach(
-      ([stateCode, bases]) => {
+      ([
+        stateCode,
+        bases
+      ]) => {
 
-        bases.forEach(base => {
+        bases.forEach(
+          base => {
 
-          [
-            base.base,
-            base.name,
-            base.label,
-            base.fileName,
-            base.id,
-            base.slug
-          ].forEach(value => {
+            [
+              base.base,
+              base.name,
+              base.label,
+              base.fileName,
+              base.id,
+              base.slug
+            ].forEach(
+              value => {
 
-            const key =
-              normalizeKey(
-                value
-              );
+                const key =
+                  normalizeKey(
+                    value
+                  );
 
-            if (key) {
-              out[key] =
-                stateCode;
-            }
-          });
-
-        });
-
+                if (key) {
+                  out[key] =
+                    stateCode;
+                }
+              }
+            );
+          }
+        );
       }
     );
 
     return out;
+
   })();
 
   /* =======================================================
@@ -923,22 +1020,33 @@
       svgElement
     );
 
-  let mapReady = false;
-  let projection = null;
-  let markerLayer = null;
+  let mapReady =
+    false;
 
-  let currentStateCode = "";
-  let currentBaseId = "";
+  let projection =
+    null;
 
-  let pendingSelection = null;
+  let markerLayer =
+    null;
+
+  let currentStateCode =
+    "";
+
+  let currentBaseId =
+    "";
+
+  let pendingSelection =
+    null;
 
   function getBases(
     stateCode
   ) {
+
     return (
       STATE_BASES[
-        clean(stateCode)
-          .toUpperCase()
+        clean(
+          stateCode
+        ).toUpperCase()
       ] ||
       []
     );
@@ -948,18 +1056,25 @@
     stateCode,
     baseId
   ) {
+
     return (
-      getBases(stateCode)
-        .find(
-          base =>
-            base.id ===
-            clean(baseId)
-        ) ||
+      getBases(
+        stateCode
+      ).find(
+        base =>
+          base.id ===
+          clean(
+            baseId
+          )
+      ) ||
       null
     );
   }
 
-  function projectBase(base) {
+  function projectBase(
+    base
+  ) {
+
     if (
       !projection ||
       !base
@@ -968,20 +1083,31 @@
     }
 
     const lat =
-      Number(base.lat);
+      Number(
+        base.lat
+      );
 
     const lng =
-      Number(base.lng);
+      Number(
+        base.lng
+      );
 
     if (
-      !Number.isFinite(lat) ||
-      !Number.isFinite(lng)
+      !Number.isFinite(
+        lat
+      ) ||
+      !Number.isFinite(
+        lng
+      )
     ) {
       return null;
     }
 
     return projection(
-      [lng, lat]
+      [
+        lng,
+        lat
+      ]
     );
   }
 
@@ -992,6 +1118,7 @@
   function baseDemographicsUrl(
     base
   ) {
+
     const url =
       new URL(
         LIVE_BASE_DEMOGRAPHICS_URL,
@@ -1002,6 +1129,7 @@
       base &&
       base.id
     ) {
+
       url.searchParams.set(
         "base",
         base.id
@@ -1014,6 +1142,7 @@
   function updateDemographicsLink(
     base
   ) {
+
     if (
       !demographicsLinkEl
     ) {
@@ -1072,7 +1201,9 @@
       );
   }
 
-  if (demographicsLinkEl) {
+  if (
+    demographicsLinkEl
+  ) {
 
     demographicsLinkEl
       .addEventListener(
@@ -1083,14 +1214,14 @@
             demographicsLinkEl
               .getAttribute(
                 "aria-disabled"
-              ) === "true"
+              ) ===
+              "true"
           ) {
+
             event.preventDefault();
           }
-
         }
       );
-
   }
 
   /* =======================================================
@@ -1098,9 +1229,15 @@
   ======================================================= */
 
   function clearMarkers() {
-    if (markerLayer) {
+
+    if (
       markerLayer
-        .selectAll("*")
+    ) {
+
+      markerLayer
+        .selectAll(
+          "*"
+        )
         .remove();
     }
   }
@@ -1109,6 +1246,7 @@
     bases,
     selectedBase
   ) {
+
     clearMarkers();
 
     if (
@@ -1118,75 +1256,87 @@
       return;
     }
 
-    bases.forEach(base => {
+    bases.forEach(
+      base => {
 
-      const point =
-        projectBase(base);
+        const point =
+          projectBase(
+            base
+          );
 
-      if (!point) {
-        return;
-      }
+        if (
+          !point
+        ) {
+          return;
+        }
 
-      const [x, y] =
-        point;
-
-      const selected =
-        selectedBase &&
-        selectedBase.id ===
-          base.id;
-
-      markerLayer
-        .append("circle")
-        .attr(
-          "class",
-          "pcsu-base-location-dot"
-        )
-        .attr(
-          "cx",
-          x
-        )
-        .attr(
-          "cy",
+        const [
+          x,
           y
-        )
-        .attr(
-          "r",
-          selected
-            ? 6
-            : 4.5
-        )
-        .attr(
-          "fill",
-          selected
-            ? "#f6d06d"
-            : "#8ef3c5"
-        )
-        .attr(
-          "stroke",
-          "#ffffff"
-        )
-        .attr(
-          "stroke-width",
-          selected
-            ? 1.6
-            : 1.1
-        )
-        .attr(
-          "opacity",
-          selected
-            ? 1
-            : 0.92
-        )
-        .style(
-          "filter",
-          selected
-            ? "drop-shadow(0 0 10px rgba(246,208,109,.9))"
-            : "drop-shadow(0 0 7px rgba(142,243,197,.75))"
-        );
+        ] = point;
 
-    });
+        const selected =
+          selectedBase &&
+          selectedBase.id ===
+            base.id;
 
-    if (selectedBase) {
+        markerLayer
+          .append(
+            "circle"
+          )
+          .attr(
+            "class",
+            "pcsu-base-location-dot"
+          )
+          .attr(
+            "cx",
+            x
+          )
+          .attr(
+            "cy",
+            y
+          )
+          .attr(
+            "r",
+            selected
+              ? 6
+              : 4.5
+          )
+          .attr(
+            "fill",
+            selected
+              ? "#f6d06d"
+              : "#8ef3c5"
+          )
+          .attr(
+            "stroke",
+            "#ffffff"
+          )
+          .attr(
+            "stroke-width",
+            selected
+              ? 1.6
+              : 1.1
+          )
+          .attr(
+            "opacity",
+            selected
+              ? 1
+              : 0.92
+          )
+          .style(
+            "filter",
+            selected
+              ? "drop-shadow(0 0 10px rgba(246,208,109,.9))"
+              : "drop-shadow(0 0 7px rgba(142,243,197,.75))"
+          );
+      }
+    );
+
+    if (
+      selectedBase
+    ) {
+
       drawSelectedMarker(
         selectedBase
       );
@@ -1196,8 +1346,11 @@
   function drawSelectedMarker(
     base
   ) {
+
     const point =
-      projectBase(base);
+      projectBase(
+        base
+      );
 
     if (
       !point ||
@@ -1206,8 +1359,10 @@
       return;
     }
 
-    const [x, y] =
-      point;
+    const [
+      x,
+      y
+    ] = point;
 
     const label =
       base.base ||
@@ -1223,12 +1378,16 @@
     let labelY =
       y - 18;
 
-    if (x > 760) {
+    if (
+      x > 760
+    ) {
       labelX =
         x - 190;
     }
 
-    if (y < 70) {
+    if (
+      y < 70
+    ) {
       labelY =
         y + 18;
     }
@@ -1238,13 +1397,17 @@
         126,
         Math.min(
           230,
-          label.length * 7.2 + 26
+          label.length *
+            7.2 +
+            26
         )
       );
 
     const marker =
       markerLayer
-        .append("g")
+        .append(
+          "g"
+        )
         .attr(
           "class",
           "pcsu-base-marker"
@@ -1255,7 +1418,9 @@
         );
 
     marker
-      .append("circle")
+      .append(
+        "circle"
+      )
       .attr(
         "class",
         "pcsu-base-marker-ring"
@@ -1266,7 +1431,9 @@
       );
 
     marker
-      .append("path")
+      .append(
+        "path"
+      )
       .attr(
         "class",
         "pcsu-base-marker-pin"
@@ -1281,7 +1448,9 @@
       );
 
     marker
-      .append("circle")
+      .append(
+        "circle"
+      )
       .attr(
         "fill",
         "#071018"
@@ -1297,7 +1466,9 @@
 
     const labelGroup =
       markerLayer
-        .append("g")
+        .append(
+          "g"
+        )
         .attr(
           "class",
           "pcsu-base-marker-label-group"
@@ -1308,7 +1479,9 @@
         );
 
     labelGroup
-      .append("rect")
+      .append(
+        "rect"
+      )
       .attr(
         "class",
         "pcsu-base-marker-label-bg"
@@ -1331,7 +1504,9 @@
       );
 
     labelGroup
-      .append("text")
+      .append(
+        "text"
+      )
       .attr(
         "class",
         "pcsu-base-marker-label"
@@ -1349,7 +1524,9 @@
       );
 
     labelGroup
-      .append("text")
+      .append(
+        "text"
+      )
       .attr(
         "class",
         "pcsu-base-marker-sub"
@@ -1377,36 +1554,44 @@
     bases
   ) {
 
-    if (selectedBaseNameEl) {
-
+    if (
       selectedBaseNameEl
-        .textContent =
-          selectedBase
-            ? selectedBase.base
-            : "Choose a base";
+    ) {
 
+      selectedBaseNameEl.textContent =
+        selectedBase
+          ? selectedBase.base
+          : "Choose a base";
     }
 
     updateDemographicsLink(
       selectedBase
     );
 
-    if (!panelCopyEl) {
+    if (
+      !panelCopyEl
+    ) {
       return;
     }
 
-    if (selectedBase) {
+    if (
+      selectedBase
+    ) {
 
       panelCopyEl.textContent =
         selectedBase.city ||
-        STATE_NAMES[stateCode] ||
+        STATE_NAMES[
+          stateCode
+        ] ||
         stateCode;
 
       return;
     }
 
     const stateName =
-      STATE_NAMES[stateCode] ||
+      STATE_NAMES[
+        stateCode
+      ] ||
       stateCode;
 
     panelCopyEl.textContent =
@@ -1416,6 +1601,323 @@
   }
 
   /* =======================================================
+     PARENT / IFRAME BRIDGE
+
+     The map is inside its own Webflow frame.
+     Ask Amy is on the parent page.
+
+     CustomEvent does NOT cross that frame boundary.
+
+     Map -> Parent:
+       pcsunited:base-map-state
+       pcsunited:base-selected
+       pcsunited:base-map-ready
+
+     Parent -> Map:
+       pcsunited:base-map-request-state
+  ======================================================= */
+
+  const BASE_MAP_MESSAGE_SOURCE =
+    "pcsunited-base-map";
+
+  function cloneBaseForBridge(
+    base
+  ) {
+
+    if (
+      !base
+    ) {
+      return null;
+    }
+
+    return {
+      id:
+        clean(
+          base.id
+        ),
+
+      slug:
+        clean(
+          base.slug ||
+          base.id
+        ),
+
+      fileName:
+        clean(
+          base.fileName
+        ),
+
+      base:
+        clean(
+          base.base ||
+          base.name
+        ),
+
+      name:
+        clean(
+          base.name ||
+          base.base
+        ),
+
+      label:
+        clean(
+          base.label ||
+          base.base ||
+          base.name
+        ),
+
+      city:
+        clean(
+          base.city
+        ),
+
+      state:
+        clean(
+          base.state ||
+          base.stateCode
+        ),
+
+      stateCode:
+        clean(
+          base.stateCode ||
+          base.state
+        ),
+
+      lat:
+        Number.isFinite(
+          Number(
+            base.lat
+          )
+        )
+          ? Number(
+              base.lat
+            )
+          : null,
+
+      lng:
+        Number.isFinite(
+          Number(
+            base.lng
+          )
+        )
+          ? Number(
+              base.lng
+            )
+          : null,
+
+      jsonUrl:
+        clean(
+          base.jsonUrl ||
+          directJsonUrl(
+            base.fileName
+          )
+        )
+    };
+  }
+
+  function currentBridgeState() {
+
+    const selectedBase =
+      getBaseById(
+        currentStateCode,
+        currentBaseId
+      );
+
+    return {
+      source:
+        BASE_MAP_MESSAGE_SOURCE,
+
+      version:
+        VERSION,
+
+      state:
+        currentStateCode,
+
+      stateCode:
+        currentStateCode,
+
+      stateName:
+        STATE_NAMES[
+          currentStateCode
+        ] ||
+        currentStateCode,
+
+      baseId:
+        selectedBase
+          ? selectedBase.id
+          : "",
+
+      selectedBase:
+        cloneBaseForBridge(
+          selectedBase
+        ),
+
+      base:
+        cloneBaseForBridge(
+          selectedBase
+        ),
+
+      updated_at:
+        new Date()
+          .toISOString()
+    };
+  }
+
+  function postBridgeMessage(
+    type,
+    detail = {},
+    targetWindow = null
+  ) {
+
+    const target =
+      targetWindow ||
+      (
+        window.parent &&
+        window.parent !== window
+          ? window.parent
+          : null
+      );
+
+    if (
+      !target
+    ) {
+      return false;
+    }
+
+    try {
+
+      target.postMessage(
+        {
+          type,
+
+          source:
+            BASE_MAP_MESSAGE_SOURCE,
+
+          version:
+            VERSION,
+
+          ...detail
+        },
+        "*"
+      );
+
+      return true;
+
+    } catch (
+      error
+    ) {
+
+      console.warn(
+        "[PCSU Base Map] Parent bridge postMessage failed:",
+        error
+      );
+
+      return false;
+    }
+  }
+
+  function postCurrentStateToParent(
+    targetWindow = null
+  ) {
+
+    return postBridgeMessage(
+      "pcsunited:base-map-state",
+      currentBridgeState(),
+      targetWindow
+    );
+  }
+
+  function postSelectedBaseToParent(
+    base,
+    targetWindow = null
+  ) {
+
+    const selectedBase =
+      cloneBaseForBridge(
+        base
+      );
+
+    return postBridgeMessage(
+      "pcsunited:base-selected",
+      {
+        ...currentBridgeState(),
+
+        baseId:
+          selectedBase
+            ? selectedBase.id
+            : "",
+
+        selectedBase,
+
+        base:
+          selectedBase,
+
+        autoNavigate:
+          false
+      },
+      targetWindow
+    );
+  }
+
+  function postReadyToParent(
+    targetWindow = null
+  ) {
+
+    return postBridgeMessage(
+      "pcsunited:base-map-ready",
+      currentBridgeState(),
+      targetWindow
+    );
+  }
+
+  /*
+    Ask Amy can request current state at any time.
+
+    This handles the case where:
+    1. User chooses Lackland.
+    2. Later opens Ask Amy.
+    3. Amy asks the iframe what base is selected.
+  */
+
+  window.addEventListener(
+    "message",
+    event => {
+
+      const data =
+        event &&
+        event.data &&
+        typeof event.data ===
+          "object"
+          ? event.data
+          : null;
+
+      if (
+        !data
+      ) {
+        return;
+      }
+
+      if (
+        data.type !==
+        "pcsunited:base-map-request-state"
+      ) {
+        return;
+      }
+
+      const requester =
+        event.source &&
+        typeof event.source.postMessage ===
+          "function"
+          ? event.source
+          : null;
+
+      postCurrentStateToParent(
+        requester
+      );
+    }
+  );
+
+  /* =======================================================
      EVENTS
   ======================================================= */
 
@@ -1423,6 +1925,10 @@
     stateCode,
     selectedBase
   ) {
+
+    /*
+      Existing SAME-FRAME event.
+    */
 
     window.dispatchEvent(
       new CustomEvent(
@@ -1439,7 +1945,9 @@
             stateCode,
 
             stateName:
-              STATE_NAMES[stateCode] ||
+              STATE_NAMES[
+                stateCode
+              ] ||
               stateCode,
 
             baseId:
@@ -1462,11 +1970,21 @@
       )
     );
 
+    /*
+      NEW:
+      Mirror same state to parent page.
+    */
+
+    postCurrentStateToParent();
   }
 
   function emitBaseSelection(
     base
   ) {
+
+    /*
+      Existing SAME-FRAME event.
+    */
 
     window.dispatchEvent(
       new CustomEvent(
@@ -1494,6 +2012,26 @@
       )
     );
 
+    /*
+      NEW:
+      Send selected base to parent / Ask Amy.
+
+      Example:
+
+      {
+        type: "pcsunited:base-selected",
+        source: "pcsunited-base-map",
+        base: {
+          id: "lackland",
+          fileName: "Lackland.json",
+          base: "Joint Base San Antonio-Lackland"
+        }
+      }
+    */
+
+    postSelectedBaseToParent(
+      base
+    );
   }
 
   /* =======================================================
@@ -1507,51 +2045,60 @@
 
     baseListEl.innerHTML =
       bases
-        .map(base => `
-          <button
-            class="pcsu-base-btn${selectedBase && selectedBase.id === base.id ? " is-selected" : ""}"
-            type="button"
-            data-base-id="${esc(base.id)}"
-            aria-label="Select ${esc(base.base)}"
-            aria-pressed="${selectedBase && selectedBase.id === base.id ? "true" : "false"}">
+        .map(
+          base => `
+            <button
+              class="pcsu-base-btn${selectedBase && selectedBase.id === base.id ? " is-selected" : ""}"
+              type="button"
+              data-base-id="${esc(base.id)}"
+              aria-label="Select ${esc(base.base)}"
+              aria-pressed="${selectedBase && selectedBase.id === base.id ? "true" : "false"}">
 
-            <span class="pcsu-base-name">
-              ${esc(base.base)}
-            </span>
+              <span class="pcsu-base-name">
+                ${esc(base.base)}
+              </span>
 
-            <span class="pcsu-base-meta">
-              ${esc(base.city)} • Select Base
-            </span>
+              <span class="pcsu-base-meta">
+                ${esc(base.city)} • Select Base
+              </span>
 
-          </button>
-        `)
-        .join("");
+            </button>
+          `
+        )
+        .join(
+          ""
+        );
 
     baseListEl
       .querySelectorAll(
         ".pcsu-base-btn"
       )
-      .forEach(button => {
+      .forEach(
+        button => {
 
-        button.addEventListener(
-          "click",
-          () => {
+          button.addEventListener(
+            "click",
+            () => {
 
-            const base =
-              bases.find(
-                item =>
-                  item.id ===
-                  button.dataset.baseId
-              );
+              const base =
+                bases.find(
+                  item =>
+                    item.id ===
+                    button.dataset.baseId
+                );
 
-            if (base) {
-              selectBase(base);
+              if (
+                base
+              ) {
+
+                selectBase(
+                  base
+                );
+              }
             }
-
-          }
-        );
-
-      });
+          );
+        }
+      );
   }
 
   function scrollSelectedCardIntoView() {
@@ -1562,24 +2109,26 @@
           ".pcsu-base-btn.is-selected"
         );
 
-    if (!selected) {
+    if (
+      !selected
+    ) {
       return;
     }
 
     try {
 
       selected.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center"
+        behavior:
+          "smooth",
+
+        block:
+          "nearest",
+
+        inline:
+          "center"
       });
 
-    } catch (_) {
-      /*
-        Older browser fallback:
-        simply leave card at current position.
-      */
-    }
+    } catch (_) {}
   }
 
   /* =======================================================
@@ -1593,14 +2142,19 @@
   ) {
 
     const safeState =
-      clean(stateCode)
-        .toUpperCase();
+      clean(
+        stateCode
+      ).toUpperCase();
 
-    if (!safeState) {
+    if (
+      !safeState
+    ) {
       return;
     }
 
-    if (!mapReady) {
+    if (
+      !mapReady
+    ) {
 
       pendingSelection = {
         stateCode:
@@ -1674,8 +2228,10 @@
 
     if (
       selectedBase &&
-      options.scrollCard !== false
+      options.scrollCard !==
+        false
     ) {
+
       scrollSelectedCardIntoView();
     }
   }
@@ -1692,26 +2248,27 @@
           false
       }
     );
-
   }
 
   function selectBase(
     base
   ) {
 
-    if (!base) {
+    if (
+      !base
+    ) {
       return;
     }
 
     /*
-      IMPORTANT:
       Selecting a base DOES NOT navigate away.
 
       It only:
       - selects the base
-      - updates the marker
-      - loads the JSON
-      - fills the information panel
+      - updates marker
+      - loads JSON
+      - fills right panel
+      - tells parent/Ask Amy what base was selected
     */
 
     renderState(
@@ -1744,16 +2301,21 @@
         baseName
       );
 
-    if (!key) {
+    if (
+      !key
+    ) {
       return "";
     }
 
     if (
-      BASE_TO_STATE[key]
+      BASE_TO_STATE[
+        key
+      ]
     ) {
-      return (
-        BASE_TO_STATE[key]
-      );
+
+      return BASE_TO_STATE[
+        key
+      ];
     }
 
     const fuzzyKey =
@@ -1761,8 +2323,12 @@
         BASE_TO_STATE
       ).find(
         existingKey =>
-          existingKey.includes(key) ||
-          key.includes(existingKey)
+          existingKey.includes(
+            key
+          ) ||
+          key.includes(
+            existingKey
+          )
       );
 
     return fuzzyKey
@@ -1787,14 +2353,15 @@
         baseName
       );
 
-    if (!key) {
+    if (
+      !key
+    ) {
       return "";
     }
 
     const exact =
       bases.find(
         base =>
-
           [
             base.base,
             base.name,
@@ -1805,18 +2372,20 @@
             value =>
               normalizeKey(
                 value
-              ) === key
+              ) ===
+              key
           )
       );
 
-    if (exact) {
+    if (
+      exact
+    ) {
       return exact.id;
     }
 
     const fuzzy =
       bases.find(
         base =>
-
           [
             base.base,
             base.name,
@@ -1854,7 +2423,8 @@
 
     const data =
       detail &&
-      typeof detail === "object"
+      typeof detail ===
+        "object"
         ? detail
         : {};
 
@@ -1880,7 +2450,6 @@
         : {};
 
     const baseName =
-
       selected.base ||
       selected.name ||
       selected.label ||
@@ -1902,14 +2471,13 @@
       "";
 
     const rawState =
-
       selected.stateCode ||
       selected.state ||
 
       data.stateCode ||
       (
         typeof data.state ===
-        "string"
+          "string"
           ? data.state
           : ""
       ) ||
@@ -1923,8 +2491,9 @@
       "";
 
     const candidateState =
-      clean(rawState)
-        .toUpperCase();
+      clean(
+        rawState
+      ).toUpperCase();
 
     const stateCode =
       STATE_NAMES[
@@ -1994,10 +2563,8 @@
             event.detail ||
             {}
           );
-
         }
       );
-
     }
   );
 
@@ -2053,7 +2620,34 @@
       base =>
         baseDemographicsUrl(
           base
-        )
+        ),
+
+    /*
+      New v4.2 diagnostic / bridge API.
+    */
+
+    getBridgeState:
+      () => ({
+        ...currentBridgeState()
+      }),
+
+    postStateToParent:
+      () =>
+        postCurrentStateToParent(),
+
+    postSelectedBaseToParent:
+      () => {
+
+        const base =
+          getBaseById(
+            currentStateCode,
+            currentBaseId
+          );
+
+        return postSelectedBaseToParent(
+          base
+        );
+      }
   };
 
   /* =======================================================
@@ -2194,14 +2788,16 @@
               "#pcsu-be-visitor-link"
             )
         }
-
       : null;
 
-  let panelRequest = 0;
+  let panelRequest =
+    0;
 
-  let loadedFile = "";
+  let loadedFile =
+    "";
 
-  let loadedJson = null;
+  let loadedJson =
+    null;
 
   /* =======================================================
      PANEL HELPERS
@@ -2211,21 +2807,32 @@
     message
   ) {
 
-    if (!panel) {
+    if (
+      !panel
+    ) {
       return;
     }
 
-    if (panel.status) {
+    if (
+      panel.status
+    ) {
+
       panel.status.hidden =
         false;
     }
 
-    if (panel.content) {
+    if (
+      panel.content
+    ) {
+
       panel.content.hidden =
         true;
     }
 
-    if (panel.statusText) {
+    if (
+      panel.statusText
+    ) {
+
       panel.statusText.textContent =
         message;
     }
@@ -2233,16 +2840,24 @@
 
   function showPanelContent() {
 
-    if (!panel) {
+    if (
+      !panel
+    ) {
       return;
     }
 
-    if (panel.status) {
+    if (
+      panel.status
+    ) {
+
       panel.status.hidden =
         true;
     }
 
-    if (panel.content) {
+    if (
+      panel.content
+    ) {
+
       panel.content.hidden =
         false;
     }
@@ -2253,9 +2868,13 @@
   ) {
 
     const raw =
-      clean(value);
+      clean(
+        value
+      );
 
-    if (!raw) {
+    if (
+      !raw
+    ) {
       return "";
     }
 
@@ -2267,16 +2886,14 @@
           window.location.href
         );
 
-      return (
-        [
-          "http:",
-          "https:"
-        ].includes(
-          url.protocol
-        )
-          ? url.toString()
-          : ""
-      );
+      return [
+        "http:",
+        "https:"
+      ].includes(
+        url.protocol
+      )
+        ? url.toString()
+        : "";
 
     } catch (_) {
 
@@ -2289,15 +2906,21 @@
   ) {
 
     const raw =
-      clean(value);
+      clean(
+        value
+      );
 
-    if (!raw) {
+    if (
+      !raw
+    ) {
       return "";
     }
 
     const first =
       raw
-        .split(/[\/|,]/)[0]
+        .split(
+          /[\/|,]/
+        )[0]
         .trim();
 
     const digits =
@@ -2325,19 +2948,25 @@
 
     const number =
       Number(
-        String(value)
-          .replace(/,/g, "")
+        String(
+          value
+        ).replace(
+          /,/g,
+          ""
+        )
       );
 
-    return (
-      Number.isFinite(number)
-        ? new Intl.NumberFormat(
-            "en-US"
-          ).format(
-            number
-          )
-        : clean(value)
-    );
+    return Number.isFinite(
+      number
+    )
+      ? new Intl.NumberFormat(
+          "en-US"
+        ).format(
+          number
+        )
+      : clean(
+          value
+        );
   }
 
   function getProfile(
@@ -2363,7 +2992,9 @@
     base
   ) {
 
-    if (!panel) {
+    if (
+      !panel
+    ) {
       return;
     }
 
@@ -2376,7 +3007,9 @@
           ? base.city
           : ""
       )
-        .split(",")[0];
+        .split(
+          ","
+        )[0];
 
     const state =
       clean(
@@ -2396,8 +3029,12 @@
         city,
         state
       ]
-        .filter(Boolean)
-        .join(", ");
+        .filter(
+          Boolean
+        )
+        .join(
+          ", "
+        );
 
     const branch =
       clean(
@@ -2408,11 +3045,15 @@
     if (
       panel.locationCard
     ) {
+
       panel.locationCard.hidden =
         !location;
     }
 
-    if (panel.location) {
+    if (
+      panel.location
+    ) {
+
       panel.location.textContent =
         location;
     }
@@ -2420,11 +3061,15 @@
     if (
       panel.branchCard
     ) {
+
       panel.branchCard.hidden =
         !branch;
     }
 
-    if (panel.branch) {
+    if (
+      panel.branch
+    ) {
+
       panel.branch.textContent =
         branch;
     }
@@ -2432,6 +3077,7 @@
     if (
       panel.overviewSection
     ) {
+
       panel.overviewSection.hidden =
         !location &&
         !branch;
@@ -2448,28 +3094,24 @@
   ) {
 
     const objectValue =
-
       (
         profile.base_operator &&
         typeof profile.base_operator ===
           "object" &&
         profile.base_operator
       ) ||
-
       (
         profile.operator &&
         typeof profile.operator ===
           "object" &&
         profile.operator
       ) ||
-
       (
         profile.installation_operator &&
         typeof profile.installation_operator ===
           "object" &&
         profile.installation_operator
       ) ||
-
       {};
 
     const label =
@@ -2523,7 +3165,9 @@
     json
   ) {
 
-    if (!panel) {
+    if (
+      !panel
+    ) {
       return;
     }
 
@@ -2536,6 +3180,7 @@
     if (
       panel.operatorSection
     ) {
+
       panel.operatorSection.hidden =
         false;
     }
@@ -2543,6 +3188,7 @@
     if (
       panel.operatorName
     ) {
+
       panel.operatorName.textContent =
         operator.label;
     }
@@ -2550,6 +3196,7 @@
     if (
       panel.operatorPhone
     ) {
+
       panel.operatorPhone.textContent =
         operator.phone ||
         "Not yet available";
@@ -2567,7 +3214,9 @@
       panel.operatorCall.hidden =
         false;
 
-      if (tel) {
+      if (
+        tel
+      ) {
 
         panel.operatorCall.href =
           tel;
@@ -2604,11 +3253,8 @@
   ) {
 
     const raw =
-
       profile.installation_population ??
-
       profile.base_population ??
-
       profile.population_on_base ??
 
       (
@@ -2626,15 +3272,8 @@
       null;
 
     /*
-      IMPORTANT:
-
-      Do NOT fall back to:
-
-        json.population
-
-      because in the PCSUnited base/city JSON
-      structure that represents the surrounding
-      CITY population, not the installation.
+      Do not use json.population.
+      That is surrounding city population.
     */
 
     if (
@@ -2644,14 +3283,20 @@
     ) {
 
       return {
-        total: "",
-        details: []
+        total:
+          "",
+
+        details:
+          []
       };
     }
 
     if (
-      typeof raw !== "object" ||
-      Array.isArray(raw)
+      typeof raw !==
+        "object" ||
+      Array.isArray(
+        raw
+      )
     ) {
 
       return {
@@ -2667,73 +3312,63 @@
 
     const total =
       formatNumber(
-
         raw.total ??
-
         raw.total_population ??
-
         raw.estimated_total ??
-
         raw.population ??
-
         ""
       );
 
     const candidates = [
-
       [
         "active_duty",
         "Active Duty"
       ],
-
       [
         "military",
         "Military"
       ],
-
       [
         "civilian",
         "Civilians"
       ],
-
       [
         "civilians",
         "Civilians"
       ],
-
       [
         "dependents",
         "Dependents"
       ],
-
       [
         "family_members",
         "Family Members"
       ],
-
       [
         "reservists",
         "Reserve / Guard"
       ],
-
       [
         "reserve_guard",
         "Reserve / Guard"
       ],
-
       [
         "retirees",
         "Retirees"
       ]
     ];
 
-    const details = [];
+    const details =
+      [];
 
     const usedLabels =
       new Set();
 
     candidates.forEach(
-      ([key, label]) => {
+      ([
+        key,
+        label
+      ]) => {
 
         if (
           usedLabels.has(
@@ -2771,7 +3406,10 @@
         raw.as_of_note
       );
 
-    if (note) {
+    if (
+      note
+    ) {
+
       details.push(
         note
       );
@@ -2788,7 +3426,9 @@
     json
   ) {
 
-    if (!panel) {
+    if (
+      !panel
+    ) {
       return;
     }
 
@@ -2801,6 +3441,7 @@
     if (
       panel.populationSection
     ) {
+
       panel.populationSection.hidden =
         false;
     }
@@ -2828,7 +3469,9 @@
               </div>
             `
           )
-          .join("");
+          .join(
+            ""
+          );
     }
   }
 
@@ -2840,7 +3483,9 @@
     profile
   ) {
 
-    if (!panel) {
+    if (
+      !panel
+    ) {
       return;
     }
 
@@ -2855,6 +3500,7 @@
     if (
       panel.missionSection
     ) {
+
       panel.missionSection.hidden =
         !mission;
     }
@@ -2862,6 +3508,7 @@
     if (
       panel.mission
     ) {
+
       panel.mission.textContent =
         mission;
     }
@@ -2881,7 +3528,9 @@
         : null;
 
     if (
-      Array.isArray(value)
+      Array.isArray(
+        value
+      )
     ) {
       return value;
     }
@@ -2895,7 +3544,10 @@
       return Object.entries(
         value
       ).map(
-        ([name, gate]) => {
+        ([
+          name,
+          gate
+        ]) => {
 
           return (
             gate &&
@@ -2906,9 +3558,9 @@
                 name,
                 ...gate
               }
-
             : {
                 name,
+
                 hours:
                   gate
               };
@@ -2924,25 +3576,21 @@
   ) {
 
     return clean(
-
       (
         gate
           ? gate.hours
           : ""
       ) ||
-
       (
         gate
           ? gate.operating_hours
           : ""
       ) ||
-
       (
         gate
           ? gate.hours_of_operation
           : ""
       ) ||
-
       (
         gate
           ? gate.schedule
@@ -2957,31 +3605,30 @@
 
     const explicit =
       clean(
-
         (
           gate
             ? gate.status
             : ""
         ) ||
-
         (
           gate
             ? gate.operating_status
             : ""
         ) ||
-
         (
           gate
             ? gate.access_status
             : ""
         )
+      )
+        .replaceAll(
+          "_",
+          " "
+        );
 
-      ).replaceAll(
-        "_",
-        " "
-      );
-
-    if (explicit) {
+    if (
+      explicit
+    ) {
       return explicit;
     }
 
@@ -3002,11 +3649,9 @@
       hours.includes(
         "24/7"
       ) ||
-
       hours.includes(
         "24 hours"
       ) ||
-
       hours.includes(
         "24-hour"
       )
@@ -3014,7 +3659,9 @@
       return "Open 24/7";
     }
 
-    if (hours) {
+    if (
+      hours
+    ) {
       return "Scheduled Access";
     }
 
@@ -3050,19 +3697,15 @@
       text.includes(
         "limited"
       ) ||
-
       text.includes(
         "weekday"
       ) ||
-
       text.includes(
         "morning"
       ) ||
-
       text.includes(
         "restricted"
       ) ||
-
       text.includes(
         "outbound only"
       )
@@ -3084,31 +3727,26 @@
 
     const location =
       clean(
-
         (
           gate
             ? gate.location
             : ""
         ) ||
-
         (
           gate
             ? gate.address
             : ""
         ) ||
-
         (
           gate
             ? gate.intersection
             : ""
         ) ||
-
         (
           gate
             ? gate.entrance
             : ""
         ) ||
-
         (
           gate
             ? gate.map_zone
@@ -3118,19 +3756,16 @@
 
     const number =
       clean(
-
         (
           gate
             ? gate.phone
             : ""
         ) ||
-
         (
           gate
             ? gate.telephone
             : ""
         ) ||
-
         (
           gate
             ? gate.contact_phone
@@ -3229,7 +3864,9 @@
     profile
   ) {
 
-    if (!panel) {
+    if (
+      !panel
+    ) {
       return;
     }
 
@@ -3241,15 +3878,19 @@
     if (
       panel.gatesSection
     ) {
+
       panel.gatesSection.hidden =
         !gates.length;
     }
 
-    if (!gates.length) {
+    if (
+      !gates.length
+    ) {
 
       if (
         panel.gateList
       ) {
+
         panel.gateList.innerHTML =
           "";
       }
@@ -3257,6 +3898,7 @@
       if (
         panel.extraGates
       ) {
+
         panel.extraGates.innerHTML =
           "";
       }
@@ -3264,6 +3906,7 @@
       if (
         panel.gateToggle
       ) {
+
         panel.gateToggle.hidden =
           true;
       }
@@ -3284,7 +3927,8 @@
         ? withHours
         : gates;
 
-    const visible = [];
+    const visible =
+      [];
 
     pool
       .filter(
@@ -3299,11 +3943,9 @@
             hours.includes(
               "24/7"
             ) ||
-
             hours.includes(
               "24 hours"
             ) ||
-
             hours.includes(
               "24-hour"
             )
@@ -3325,16 +3967,17 @@
       gate => {
 
         if (
-          visible.length < 3 &&
+          visible.length <
+            3 &&
           !visible.includes(
             gate
           )
         ) {
+
           visible.push(
             gate
           );
         }
-
       }
     );
 
@@ -3355,7 +3998,9 @@
           .map(
             gateCard
           )
-          .join("");
+          .join(
+            ""
+          );
     }
 
     if (
@@ -3367,7 +4012,9 @@
           .map(
             gateCard
           )
-          .join("");
+          .join(
+            ""
+          );
 
       panel.extraGates
         .classList
@@ -3398,7 +4045,8 @@
   ) {
 
     for (
-      const key of keys
+      const key
+      of keys
     ) {
 
       if (
@@ -3420,7 +4068,9 @@
     links
   ) {
 
-    if (!panel) {
+    if (
+      !panel
+    ) {
       return;
     }
 
@@ -3436,17 +4086,11 @@
 
     const available =
       Boolean(
-
         visitor.name ||
-
         visitor.phone ||
-
         visitor.address ||
-
         visitor.location ||
-
         visitor.hours ||
-
         visitor.operating_hours
       );
 
@@ -3458,11 +4102,14 @@
         !available;
     }
 
-    if (!available) {
+    if (
+      !available
+    ) {
 
       if (
         panel.visitorDetails
       ) {
+
         panel.visitorDetails.innerHTML =
           "";
       }
@@ -3470,6 +4117,7 @@
       if (
         panel.visitorLink
       ) {
+
         panel.visitorLink.hidden =
           true;
       }
@@ -3486,7 +4134,8 @@
         "Visitor Control Center";
     }
 
-    const rows = [];
+    const rows =
+      [];
 
     const address =
       clean(
@@ -3496,17 +4145,15 @@
 
     const hours =
       clean(
-
         visitor.hours ||
-
         visitor.operating_hours ||
-
         visitor.hours_of_operation ||
-
         visitor.schedule
       );
 
-    if (address) {
+    if (
+      address
+    ) {
 
       rows.push(`
         <div class="pcsu-be-detail-row">
@@ -3559,7 +4206,9 @@
       `);
     }
 
-    if (hours) {
+    if (
+      hours
+    ) {
 
       rows.push(`
         <div class="pcsu-be-detail-row">
@@ -3581,7 +4230,9 @@
     ) {
 
       panel.visitorDetails.innerHTML =
-        rows.join("");
+        rows.join(
+          ""
+        );
     }
 
     if (
@@ -3589,12 +4240,10 @@
     ) {
 
       const href =
-
         safeUrl(
           visitor.website ||
           visitor.url
         ) ||
-
         officialLink(
           links,
           [
@@ -3606,7 +4255,9 @@
           ]
         );
 
-      if (href) {
+      if (
+        href
+      ) {
 
         panel.visitorLink.href =
           href;
@@ -3631,7 +4282,9 @@
     base
   ) {
 
-    if (!panel) {
+    if (
+      !panel
+    ) {
       return;
     }
 
@@ -3654,7 +4307,6 @@
           "object"
       )
         ? profile.official_links
-
         : (
             data.official_links &&
             typeof data.official_links ===
@@ -3704,31 +4356,26 @@
 
     const file =
       clean(
-
         (
           base
             ? base.fileName
             : ""
         ) ||
-
         (
           base
             ? base.filename
             : ""
         ) ||
-
         (
           base
             ? base.file
             : ""
         ) ||
-
         (
           base
             ? base.jsonFile
             : ""
         ) ||
-
         (
           base
             ? base.json_file
@@ -3736,35 +4383,41 @@
         )
       );
 
-    if (!file) {
+    if (
+      !file
+    ) {
       return "";
     }
 
-    return (
-      /\.json$/i.test(
-        file
-      )
-        ? file
-        : `${file}.json`
-    );
+    return /\.json$/i.test(
+      file
+    )
+      ? file
+      : `${file}.json`;
   }
 
   async function loadBaseInformation(
     base
   ) {
 
-    if (!panel) {
+    if (
+      !panel
+    ) {
       return;
     }
 
     const request =
       ++panelRequest;
 
-    if (!base) {
+    if (
+      !base
+    ) {
 
-      loadedFile = "";
+      loadedFile =
+        "";
 
-      loadedJson = null;
+      loadedJson =
+        null;
 
       showPanelStatus(
         "Select a state and choose an Air Force base to view installation information."
@@ -3858,13 +4511,12 @@
       }
 
       /*
-        Direct JSON is expected.
+        Direct JSON expected.
 
-        This also tolerates:
+        Also tolerates:
         {
           "data": { ... }
         }
-        if you ever wrap it later.
       */
 
       const json =
@@ -3899,7 +4551,9 @@
         base
       );
 
-    } catch (error) {
+    } catch (
+      error
+    ) {
 
       if (
         request !==
@@ -3913,9 +4567,11 @@
         error
       );
 
-      loadedFile = "";
+      loadedFile =
+        "";
 
-      loadedJson = null;
+      loadedJson =
+        null;
 
       showPanelStatus(
         `Base information for ${base.base || "this installation"} could not load. Verify the direct JSON path.`
@@ -3972,7 +4628,6 @@
           ? event.detail.selectedBase
           : null
       );
-
     }
   );
 
@@ -3996,249 +4651,254 @@
     "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
   )
 
-    .then(us => {
+    .then(
+      us => {
 
-      const states =
-        topojson
-          .feature(
-            us,
-            us.objects.states
-          )
-          .features;
+        const states =
+          topojson
+            .feature(
+              us,
+              us.objects.states
+            )
+            .features;
 
-      projection =
-        d3
-          .geoAlbersUsa()
-          .translate(
-            [480, 300]
-          )
-          .scale(
-            1250
+        projection =
+          d3
+            .geoAlbersUsa()
+            .translate(
+              [
+                480,
+                300
+              ]
+            )
+            .scale(
+              1250
+            );
+
+        const path =
+          d3.geoPath(
+            projection
           );
 
-      const path =
-        d3.geoPath(
-          projection
-        );
+        /* ===================================================
+           STATE SHAPES
+        =================================================== */
 
-      /* ===================================================
-         STATE SHAPES
-      =================================================== */
+        svg
+          .append(
+            "g"
+          )
+          .attr(
+            "class",
+            "pcsu-state-layer"
+          )
+          .selectAll(
+            "path"
+          )
+          .data(
+            states
+          )
+          .join(
+            "path"
+          )
+          .attr(
+            "class",
+            state => {
 
-      svg
-        .append("g")
-        .attr(
-          "class",
-          "pcsu-state-layer"
-        )
-        .selectAll(
-          "path"
-        )
-        .data(
-          states
-        )
-        .join(
-          "path"
-        )
-        .attr(
-          "class",
-          state => {
+              const code =
+                FIPS_TO_ABBR[
+                  String(
+                    state.id
+                  ).padStart(
+                    2,
+                    "0"
+                  )
+                ];
 
-            const code =
-              FIPS_TO_ABBR[
-                String(
-                  state.id
-                ).padStart(
-                  2,
-                  "0"
-                )
-              ];
-
-            return (
-              STATE_BASES[
+              return STATE_BASES[
                 code
               ]
                 ? "pcsu-state has-bases"
-                : "pcsu-state"
-            );
-          }
-        )
-        .attr(
-          "id",
-          state => {
-
-            const code =
-              FIPS_TO_ABBR[
-                String(
-                  state.id
-                ).padStart(
-                  2,
-                  "0"
-                )
-              ];
-
-            return (
-              `state-${code}`
-            );
-          }
-        )
-        .attr(
-          "d",
-          path
-        )
-        .on(
-          "click",
-          (
-            event,
-            state
-          ) => {
-
-            const code =
-              FIPS_TO_ABBR[
-                String(
-                  state.id
-                ).padStart(
-                  2,
-                  "0"
-                )
-              ];
-
-            if (code) {
-              selectState(
-                code
-              );
+                : "pcsu-state";
             }
-          }
-        );
-
-      /* ===================================================
-         STATE BORDER MESH
-      =================================================== */
-
-      svg
-        .append(
-          "path"
-        )
-        .datum(
-          topojson.mesh(
-            us,
-            us.objects.states,
-            (a, b) =>
-              a !== b
           )
-        )
-        .attr(
-          "fill",
-          "none"
-        )
-        .attr(
-          "stroke",
-          "rgba(16,20,38,.75)"
-        )
-        .attr(
-          "stroke-width",
-          1
-        )
-        .attr(
-          "pointer-events",
-          "none"
-        )
-        .attr(
-          "d",
-          path
-        );
+          .attr(
+            "id",
+            state => {
 
-      /* ===================================================
-         STATE LABELS
-      =================================================== */
+              const code =
+                FIPS_TO_ABBR[
+                  String(
+                    state.id
+                  ).padStart(
+                    2,
+                    "0"
+                  )
+                ];
 
-      svg
-        .append("g")
-        .attr(
-          "class",
-          "pcsu-state-label-layer"
-        )
-        .selectAll(
-          "text"
-        )
-        .data(
-          states
-        )
-        .join(
-          "text"
-        )
-        .attr(
-          "class",
-          "pcsu-state-label"
-        )
-        .attr(
-          "x",
-          state => {
+              return `state-${code}`;
+            }
+          )
+          .attr(
+            "d",
+            path
+          )
+          .on(
+            "click",
+            (
+              event,
+              state
+            ) => {
 
-            const centroid =
-              path.centroid(
-                state
-              );
+              const code =
+                FIPS_TO_ABBR[
+                  String(
+                    state.id
+                  ).padStart(
+                    2,
+                    "0"
+                  )
+                ];
 
-            return (
-              Number.isFinite(
+              if (
+                code
+              ) {
+
+                selectState(
+                  code
+                );
+              }
+            }
+          );
+
+        /* ===================================================
+           STATE BORDER MESH
+        =================================================== */
+
+        svg
+          .append(
+            "path"
+          )
+          .datum(
+            topojson.mesh(
+              us,
+              us.objects.states,
+              (
+                a,
+                b
+              ) =>
+                a !== b
+            )
+          )
+          .attr(
+            "fill",
+            "none"
+          )
+          .attr(
+            "stroke",
+            "rgba(16,20,38,.75)"
+          )
+          .attr(
+            "stroke-width",
+            1
+          )
+          .attr(
+            "pointer-events",
+            "none"
+          )
+          .attr(
+            "d",
+            path
+          );
+
+        /* ===================================================
+           STATE LABELS
+        =================================================== */
+
+        svg
+          .append(
+            "g"
+          )
+          .attr(
+            "class",
+            "pcsu-state-label-layer"
+          )
+          .selectAll(
+            "text"
+          )
+          .data(
+            states
+          )
+          .join(
+            "text"
+          )
+          .attr(
+            "class",
+            "pcsu-state-label"
+          )
+          .attr(
+            "x",
+            state => {
+
+              const centroid =
+                path.centroid(
+                  state
+                );
+
+              return Number.isFinite(
                 centroid[0]
               )
                 ? centroid[0]
-                : -100
-            );
-          }
-        )
-        .attr(
-          "y",
-          state => {
+                : -100;
+            }
+          )
+          .attr(
+            "y",
+            state => {
 
-            const centroid =
-              path.centroid(
-                state
-              );
+              const centroid =
+                path.centroid(
+                  state
+                );
 
-            return (
-              Number.isFinite(
+              return Number.isFinite(
                 centroid[1]
               )
                 ? centroid[1]
-                : -100
-            );
-          }
-        )
-        .text(
-          state => {
+                : -100;
+            }
+          )
+          .text(
+            state => {
 
-            return (
-              FIPS_TO_ABBR[
-                String(
-                  state.id
-                ).padStart(
-                  2,
-                  "0"
-                )
-              ] ||
-              ""
-            );
-          }
-        )
-        .style(
-          "display",
-          state => {
+              return (
+                FIPS_TO_ABBR[
+                  String(
+                    state.id
+                  ).padStart(
+                    2,
+                    "0"
+                  )
+                ] ||
+                ""
+              );
+            }
+          )
+          .style(
+            "display",
+            state => {
 
-            const code =
-              FIPS_TO_ABBR[
-                String(
-                  state.id
-                ).padStart(
-                  2,
-                  "0"
-                )
-              ];
+              const code =
+                FIPS_TO_ABBR[
+                  String(
+                    state.id
+                  ).padStart(
+                    2,
+                    "0"
+                  )
+                ];
 
-            return (
-              [
+              return [
                 "RI",
                 "DE",
                 "CT",
@@ -4250,148 +4910,164 @@
                 code
               )
                 ? "none"
-                : "block"
-            );
-          }
-        );
-
-      /* ===================================================
-         BASE MARKER LAYER
-      =================================================== */
-
-      markerLayer =
-        svg
-          .append("g")
-          .attr(
-            "id",
-            "pcsu-base-marker-layer"
+                : "block";
+            }
           );
 
-      mapReady =
-        true;
+        /* ===================================================
+           BASE MARKER LAYER
+        =================================================== */
 
-      /* ===================================================
-         INITIAL STATE
-      =================================================== */
+        markerLayer =
+          svg
+            .append(
+              "g"
+            )
+            .attr(
+              "id",
+              "pcsu-base-marker-layer"
+            );
 
-      if (
-        pendingSelection
-      ) {
+        mapReady =
+          true;
 
-        const pending =
-          pendingSelection;
+        /* ===================================================
+           INITIAL STATE
+        =================================================== */
 
-        pendingSelection =
-          null;
+        if (
+          pendingSelection
+        ) {
 
-        renderState(
-          pending.stateCode,
-          pending.selectedBaseId,
-          pending.options
+          const pending =
+            pendingSelection;
+
+          pendingSelection =
+            null;
+
+          renderState(
+            pending.stateCode,
+            pending.selectedBaseId,
+            pending.options
+          );
+
+        } else {
+
+          /*
+            Keep Texas as current default state.
+            Do NOT auto-select a base.
+          */
+
+          renderState(
+            DEFAULT_STATE,
+            "",
+            {
+              scrollCard:
+                false
+            }
+          );
+        }
+
+        /* ===================================================
+           READY EVENT — SAME FRAME
+        =================================================== */
+
+        window.dispatchEvent(
+          new CustomEvent(
+            "pcsunited:base-map-ready",
+            {
+              detail: {
+
+                source:
+                  "pcsunited-interactive-base-map",
+
+                version:
+                  VERSION,
+
+                state:
+                  currentStateCode,
+
+                baseId:
+                  currentBaseId,
+
+                selectedBase:
+                  getBaseById(
+                    currentStateCode,
+                    currentBaseId
+                  ),
+
+                updated_at:
+                  new Date()
+                    .toISOString()
+              }
+            }
+          )
         );
-
-      } else {
 
         /*
-          Keep Texas as the existing default state,
-          but DO NOT auto-select a base.
+          NEW v4.2:
+          Tell the parent Webflow page the map iframe is ready.
+
+          Also immediately provide current state.
+
+          This means Ask Amy can initialize correctly even if it
+          mounts after/before the map.
         */
 
-        renderState(
-          DEFAULT_STATE,
-          "",
-          {
-            scrollCard:
-              false
-          }
+        postReadyToParent();
+
+        postCurrentStateToParent();
+      }
+    )
+
+    .catch(
+      error => {
+
+        console.warn(
+          "[PCSU Base Map] USA map data could not load:",
+          error
+        );
+
+        if (
+          selectedBaseNameEl
+        ) {
+
+          selectedBaseNameEl.textContent =
+            "Map unavailable";
+        }
+
+        if (
+          panelCopyEl
+        ) {
+
+          panelCopyEl.textContent =
+            "The map could not load. Please refresh the page.";
+        }
+
+        baseListEl.innerHTML = `
+          <div
+            style="
+              width:100%;
+              padding:14px;
+              border:1px solid rgba(255,255,255,.10);
+              border-radius:14px;
+              color:#aeb8db;
+              font-size:12px;
+              font-weight:700;
+              line-height:1.5;
+              text-align:center;
+            ">
+
+            The map data could not load.
+            Please refresh the page.
+
+          </div>
+        `;
+
+        showPanelStatus(
+          "The map data could not load. Please refresh the page."
         );
       }
-
-      /* ===================================================
-         READY EVENT
-      =================================================== */
-
-      window.dispatchEvent(
-        new CustomEvent(
-          "pcsunited:base-map-ready",
-          {
-            detail: {
-
-              source:
-                "pcsunited-interactive-base-map",
-
-              version:
-                VERSION,
-
-              state:
-                currentStateCode,
-
-              baseId:
-                currentBaseId,
-
-              selectedBase:
-                getBaseById(
-                  currentStateCode,
-                  currentBaseId
-                ),
-
-              updated_at:
-                new Date()
-                  .toISOString()
-            }
-          }
-        )
-      );
-
-    })
-
-    .catch(error => {
-
-      console.warn(
-        "[PCSU Base Map] USA map data could not load:",
-        error
-      );
-
-      if (
-        selectedBaseNameEl
-      ) {
-
-        selectedBaseNameEl.textContent =
-          "Map unavailable";
-      }
-
-      if (
-        panelCopyEl
-      ) {
-
-        panelCopyEl.textContent =
-          "The map could not load. Please refresh the page.";
-      }
-
-      baseListEl.innerHTML = `
-        <div
-          style="
-            width:100%;
-            padding:14px;
-            border:1px solid rgba(255,255,255,.10);
-            border-radius:14px;
-            color:#aeb8db;
-            font-size:12px;
-            font-weight:700;
-            line-height:1.5;
-            text-align:center;
-          ">
-
-          The map data could not load.
-          Please refresh the page.
-
-        </div>
-      `;
-
-      showPanelStatus(
-        "The map data could not load. Please refresh the page."
-      );
-
-    });
+    );
 
 })();
