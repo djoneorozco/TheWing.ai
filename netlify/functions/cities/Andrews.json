@@ -1,1283 +1,1788 @@
 {
-  "schema_version": "pcsu-base-profile-v1.1.0",
-  "profile_status": "gold_standard",
-  "last_verified": "2026-09-15",
-  "base_id": "andrews-afb",
-  "base_name": "Joint Base Andrews",
-  "display_name": "Joint Base Andrews",
-  "short_name": "Andrews",
-  "official_installation_name": "Joint Base Andrews-Naval Air Facility Washington",
-  "branch": "Air Force",
-  "joint_base": true,
-  "parent_installation": "Joint Base Andrews-Naval Air Facility Washington",
-  "city": "Camp Springs",
+  "slug": "andrews-afb",
+  "name": "Joint Base Andrews",
+  "city": "Joint Base Andrews",
+  "submarket": "Prince George's County / National Capital Region",
+  "place": "Camp Springs, MD",
+  "place_detail": "Camp Springs / Upper Marlboro / Prince George's County, MD",
   "state": "Maryland",
-  "state_abbr": "MD",
-  "zip": "20762",
-  "metro": "Washington-Arlington-Alexandria, DC-VA-MD-WV",
-  "market_label": "Washington DC / Andrews Military Housing Market",
-  "installation_type": "Joint Base / National Capital Region airfield / senior-leader airlift / installation support",
-  "host_or_major_command": "Air Force District of Washington / 316th Wing (host wing)",
-  "primary_mission_summary": "Joint Base Andrews is a National Capital Region joint installation hosted by the 316th Wing. The 316th Wing provides security, personnel, contracting, finance, infrastructure, and airfield support for multiple wings, headquarters, and tenant organizations, supports NCR contingency response with rotary-wing assets, and secures one of the world's highest-visibility flight lines. The 89th Airlift Wing, an Air Mobility Command tenant, provides global Special Air Mission airlift, logistics, aerial port, and communications for the President, Vice President, cabinet members, and other senior leaders.",
-  "mission_partners": [
-    "316th Wing (host wing)",
-    "Air Force District of Washington",
-    "89th Airlift Wing",
-    "844th Communications Group",
-    "Naval Air Facility Washington",
-    "113th Wing (D.C. Air National Guard)",
-    "459th Air Refueling Wing (Air Force Reserve Command)",
-    "Air National Guard Readiness Center",
-    "316th Medical Group / Malcolm Grow Medical Clinics and Surgery Center"
-  ],
-  "pcs_personality": "High-cost, commute-sensitive, school-zone-sensitive, federal-employment-connected, mission-visible, traffic-heavy, and strongly influenced by Prince George's County, Charles County, DC, Northern Virginia, and National Capital Region housing decisions.",
-  "base_bluf": "Andrews is a National Capital Region housing decision, not just a base commute decision. Families must balance BAH fit, taxes, traffic, school zones, HOA exposure, spouse employment, security/access procedures, and assignment length before choosing rent or buy.",
-  "base_operator": {
-    "label": "Joint Base Andrews Base Operator",
-    "phone": "301-981-1110",
-    "type": "directory_assistance",
-    "availability": "Directory assistance / base operator",
-    "verification_status": "verified_official",
+  "state_code": "MD",
+  "geo_id": "1600000US2412600",
+  "year": 2026,
+  "last_updated_data_from_sources": "March 2026",
+  "last_verified_base_profile": "2026-09-15",
+  "gold_standard_profile": {
+    "status": "canonical",
+    "purpose": "PCSUnited Base Map, Ask Amy Base Map Concierge, Base Demographics, and related PCS planning experiences",
+    "profile_version": "pcsu-base-profile-v1.1.0",
     "verified_on": "2026-09-15",
-    "source_label": "Official Joint Base Andrews homepage and Visitor Control Center FAQ — Base Operator"
+    "verification_scope": "Installation identity, mission, operator, published host-wing population profile, visitor control center, gate hours/status, housing contacts, medical, commissary, family readiness, lodging, MPS, school support, and PCS arrival references.",
+    "market_data_note": "Existing housing-market and demographic values are preserved from the file's recorded March 2026 sources and are not re-dated by this installation-profile verification. MARKET_REFRESH_REQUIRED: RentCast was not called during this structural repair, so market fields were not refreshed."
   },
-  "base_operator_phone": "301-981-1110",
-  "installation_operator_phone": "301-981-1110",
-  "installation_population": {
-    "total": "Approximately 9,238 (316th Wing published total force only; not a complete installation-wide headcount)",
-    "military": "Approximately 7,412 (active duty, Guard, and Reserve combined; 316th Wing factsheet)",
-    "civilian": "Approximately 1,920",
-    "active_duty": "not_separately_published",
-    "dependents": "not_separately_published",
-    "family_members": "not_separately_published",
-    "note": "The current official 316th Wing factsheet (published 16 April 2025) lists Total Force Strength of approximately 9,238, including approximately 7,412 military (active duty, Guard, and Reserve combined) and approximately 1,920 civilians. That is a host-wing published profile, not a live installation census and not a complete Joint Base Andrews headcount of all tenant wings, Naval Air Facility Washington, headquarters staffs, contractors, and family members. The same factsheet's '60,000 Airmen and families in the National Capital Region and around the world' is a support-population statement, not on-installation population. Surrounding Camp Springs, Prince George's County, and Washington, D.C. civilian population figures are not installation population and are not used here. Do not add unlike categories into a fabricated total.",
-    "source_freshness": "316th Wing factsheet dated 16 April 2025; underlying headcount year is not stated. Treat as a published profile, not a live 2026 headcount.",
-    "verified_on": "2026-09-15"
+  "image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
+  "base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
+  "zip": "20762",
+  "market_label": "Washington DC Metro / Prince George's County",
+  "profile": "High-cost National Capital Region housing snapshot anchored to Joint Base Andrews, built for PCSUnited base-level market overviews with affordability, commute, BAH, rent, ownership, and military-fit context.",
+  "avg_home_value": 455000,
+  "average_home_value": 455000,
+  "avgHome": 455000,
+  "city_avg_home": 455000,
+  "snapshot": {
+    "population_city": 23000,
+    "population_metro": 6400000,
+    "median_household_income": 120456,
+    "median_home_price": 455000,
+    "market_trend_yoy": 2.4,
+    "traffic_level": "High",
+    "employment_status": "Stable"
   },
-  "security_contacts": {
-    "base_defense_operations_center": {
-      "name": "Joint Base Andrews Base Defense Operations Center",
-      "phone": "not_published_on_current_official_public_pages",
-      "availability": "not_published",
-      "verification_status": "not_published",
+  "market_metrics": {
+    "median_list_price": 475000,
+    "median_sold_price": 455000,
+    "median_sale_price": 455000,
+    "days_on_market": 38,
+    "inventory_months": null,
+    "price_per_sqft": 255,
+    "active_listings_total": 1450,
+    "market_type_summary": "High-cost, commute-sensitive National Capital Region market with durable federal, military, and contractor demand",
+    "zillow_average_home_value": 455000,
+    "zillow_one_year_change_percent": 2.4,
+    "as_of": "2026-03"
+  },
+  "metrics": {
+    "median_list_price": 475000,
+    "median_sold_price": 455000,
+    "median_sale_price": 455000,
+    "days_on_market": 38,
+    "inventory_months": null,
+    "price_per_sqft": 255,
+    "median_rent": 2600,
+    "active_listings_total": 1450,
+    "property_tax_rate": 0.011,
+    "as_of": "2026-03"
+  },
+  "mortgage_assumptions": {
+    "apr_percent": 6.25,
+    "term_years": 30,
+    "down_payment_percent": 0,
+    "includes": "va_loan_all_in",
+    "defaults_note": "Based on March 2026 Maryland / National Capital Region VA loan assumptions."
+  },
+  "property_tax_rate": 0.011,
+  "property_tax_rate_percent": 1.1,
+  "insurance_rate": 0.0045,
+  "insurance_rate_percent": 0.45,
+  "hoa_monthly": 85,
+  "ownership_costs": {
+    "property_tax_rate": 0.011,
+    "property_tax_rate_percent": 1.1,
+    "insurance_rate_estimate": 0.0045,
+    "insurance_rate_percent": 0.45,
+    "insurance_annual_default": 2048,
+    "hoa_monthly_default": 85,
+    "notes": [
+      "Maryland and National Capital Region ownership costs require careful all-in payment screening.",
+      "Higher home prices, property taxes, HOA exposure, insurance, and commute costs can pressure BAH fit.",
+      "Strong federal employment and military demand support market stability, but affordability varies sharply by corridor."
+    ]
+  },
+  "costs": {
+    "property_tax_rate": 0.011,
+    "insurance_annual_default": 2048,
+    "hoa_monthly_default": 85
+  },
+  "avg_home_mortgage_monthly": {
+    "avg": 3550,
+    "as_of": "2026-03",
+    "notes": "VA loan estimate for Prince George's County / National Capital Region area"
+  },
+  "population": {
+    "estimate": 23000,
+    "median_age": 39.1,
+    "persons_per_household": 2.63
+  },
+  "households": {
+    "total_households": 8514
+  },
+  "income": {
+    "median_household_income": 120456,
+    "per_capita_income": 51489,
+    "poverty_rate_percent": 7.2
+  },
+  "education": {
+    "high_school_grad_or_higher_percent": 94.5,
+    "bachelors_degree_or_higher_percent": 33.8
+  },
+  "veterans": {
+    "veteran_population_percent": 7.1
+  },
+  "immigration": {
+    "foreign_born_percent": 11.6
+  },
+  "labor": {
+    "mean_travel_time_to_work_minutes": 37.7,
+    "unemployment_rate_percent": 4.8
+  },
+  "crime_status": {
+    "installation": "Extremely safe; controlled-access joint installation with major National Capital Region security posture.",
+    "metro_prince_georges_county": "Crime, traffic, school quality, and neighborhood fit vary sharply across Prince George's County and the broader DC metro; buyers should screen by exact address, school zone, commute route, and local conditions."
+  },
+  "school_quality": {
+    "on_base": "Imagine Andrews Public Charter School serves eligible Andrews-connected students; families should verify current eligibility, grade levels, enrollment, and attendance rules before choosing housing.",
+    "off_base": "Prince George's County, Charles County, Anne Arundel County, and nearby DC-area school options vary significantly; exact school assignment should be verified by property address."
+  },
+  "rental_vacancy": {
+    "rate_percent": 5.2,
+    "notes": "Rental inventory is more competitive than lower-cost military markets because of federal employment, contractor demand, and broader DC metro housing pressure."
+  },
+  "rental_metrics": {
+    "median_rent": 2600,
+    "vacancy_rate_percent": 5.2,
+    "notes": "Based on 3-bedroom rent estimates and National Capital Region military/federal housing demand.",
+    "as_of": "2026-03"
+  },
+  "climate_weather": {
+    "spring": "Mild/Wet; 55–75°F",
+    "summer": "Hot/Humid; 85–95°F",
+    "fall": "Mild/Pleasant; 55–75°F",
+    "winter": "Cold/Variable; 30–45°F"
+  },
+  "special_events": [
+    "Joint Base Andrews Air & Space Expo",
+    "National Cherry Blossom Festival",
+    "Washington DC Fourth of July events",
+    "Army-Navy and National Capital Region military ceremonies",
+    "Washington Commanders NFL Games",
+    "Washington Nationals MLB Games"
+  ],
+  "military_lifestyle_fit": {
+    "rating": "Exceptional",
+    "description": "Joint Base Andrews offers unmatched National Capital Region access, senior-leader mission support, strong federal employment connectivity, and a large military-connected housing ecosystem."
+  },
+  "financial_brief": {
+    "bah_vs_buy_position": "Mixed",
+    "bah_vs_rent_position": "Challenging but manageable",
+    "affordability_summary": "Andrews is a high-cost National Capital Region market where buying can work for disciplined households, but BAH fit must be tested against taxes, HOA, commute, insurance, debt, and assignment length.",
+    "buyer_opportunity": "Upper Marlboro, Clinton, Waldorf, Bowie, Brandywine, and selected Prince George's / Charles County corridors can provide better value than closer-in DC suburbs.",
+    "renter_advantage": true
+  },
+  "market_bluf": {
+    "bluf_headline": "High-Cost NCR Market With Strategic Stability",
+    "bluf_summary": "Andrews families face National Capital Region pricing, traffic, and school-zone complexity, but strong military, federal, and contractor demand supports long-term market stability.",
+    "status": "Stable but expensive",
+    "inventory_trend": "Stable",
+    "buyer_leverage": "Moderate",
+    "verdict": "CAUTIOUS BUY",
+    "verdict_color": "amber",
+    "confidence_score": 82
+  },
+  "scorecard": {
+    "affordability_score": 58,
+    "growth_score": 78,
+    "stability_score": 92,
+    "military_fit_score": 96,
+    "overall_score": 81
+  },
+  "rules": {
+    "max_safe_housing_ratio": 0.3,
+    "warning_ratio": 0.35,
+    "danger_ratio": 0.4
+  },
+  "summary_points": [
+    "Joint Base Andrews sits inside the high-cost Washington DC / National Capital Region housing market.",
+    "Strong federal, military, contractor, and commuter demand supports long-term housing stability.",
+    "BAH can be stretched quickly by purchase price, property taxes, HOA dues, insurance, and commute costs.",
+    "Families often compare Prince George's County, Charles County, Anne Arundel County, and Northern Virginia based on commute and school priorities.",
+    "The best PCS strategy is to compare all-in payment, gate commute, school assignment, neighborhood fit, and assignment length before choosing rent or buy."
+  ],
+  "opportunities": [
+    "Durable National Capital Region demand supports long-term resale relevance.",
+    "VA buyers may find better value in Upper Marlboro, Clinton, Brandywine, Waldorf, and selected Prince George's or Charles County corridors.",
+    "Federal employment and contractor demand can support rental demand depth.",
+    "Large metro inventory gives military families more housing choices than isolated base markets.",
+    "Strategic location can benefit households with spouse employment or long-term DC-area plans."
+  ],
+  "risks": [
+    "High purchase prices can strain BAH and residual-income discipline.",
+    "Traffic and commute reliability can materially affect quality of life.",
+    "Property taxes, HOA dues, insurance, and maintenance must be included in all-in payment.",
+    "School quality and district fit vary materially by exact address.",
+    "Short assignments may increase resale and transaction-cost risk if the household buys too aggressively."
+  ],
+  "buyer_notes": [
+    "Andrews buyers should model all-in monthly cost before choosing a neighborhood.",
+    "Do not judge affordability by purchase price alone; taxes, HOA, insurance, commute, and utilities can shift the answer.",
+    "Upper Marlboro, Clinton, Waldorf, Bowie, Brandywine, and Fort Washington may each fit different family, commute, and affordability profiles.",
+    "This market rewards disciplined buyers who test commute, school zones, VA appraisal readiness, and exit strategy before committing."
+  ],
+  "seller_notes": [
+    "Price realistically against current NCR buyer payment sensitivity.",
+    "Move-in-ready condition, commute clarity, and school-zone confidence matter heavily to military buyers.",
+    "Homes positioned around Andrews access, federal employment, and practical commuting can stand out when marketed correctly.",
+    "Strong presentation and clean maintenance history can help buyers justify higher monthly payments."
+  ],
+  "investor_angles": [
+    "Military, federal, and contractor demand can support durable rental interest near Andrews.",
+    "Cash flow may be tighter than lower-cost military markets because purchase prices are higher.",
+    "Investors should underwrite vacancy, maintenance, HOA, insurance, taxes, and management costs conservatively.",
+    "Bedroom-specific rent and commute-corridor fit matter more than broad DC metro averages."
+  ],
+  "neighborhoods": [
+    "Camp Springs",
+    "Upper Marlboro",
+    "Clinton",
+    "Waldorf",
+    "Bowie",
+    "Brandywine",
+    "Fort Washington",
+    "Alexandria / Northern Virginia commute corridor"
+  ],
+  "target_neighborhoods": [
+    "Camp Springs",
+    "Upper Marlboro",
+    "Clinton",
+    "Waldorf",
+    "Bowie",
+    "Brandywine",
+    "Fort Washington",
+    "Selected Anne Arundel or Northern Virginia corridors"
+  ],
+  "buyer_guidance": [
+    "Use total monthly cost as the primary decision filter.",
+    "Verify commute, gate access, school zones, HOA exposure, and property taxes before committing.",
+    "Compare rent versus buy using PCSUnited calculators instead of judging only by mortgage estimate.",
+    "Do not choose solely based on distance to Joint Base Andrews.",
+    "Prioritize homes with strong commute logic, clean condition, manageable HOA exposure, and resale appeal."
+  ],
+  "seller_guidance": [
+    "Align pricing with National Capital Region affordability pressure and buyer payment sensitivity.",
+    "Highlight Andrews commute access, federal employment proximity, school-zone clarity, and move-in readiness.",
+    "Emphasize roof age, HVAC condition, energy efficiency, parking, commute routes, and HOA details where available.",
+    "Military buyers respond well to practical monthly-cost clarity and PCS-friendly positioning."
+  ],
+  "landlord_notes": [
+    "Military, federal, and contractor demand supports rental relevance around Andrews.",
+    "Cash flow can be tighter than lower-cost military markets because entry prices are higher.",
+    "Vacancy risk is generally manageable when pricing and location are aligned with commute demand.",
+    "Landlords should model taxes, insurance, HOA, maintenance, turnover, and management costs conservatively."
+  ],
+  "by_bedroom": {
+    "2": {
+      "rent_monthly": {
+        "low": 1900,
+        "high": 2500,
+        "avg": 2200,
+        "as_of": "2026-03"
+      },
+      "home_price": {
+        "low": 320000,
+        "high": 430000,
+        "avg": 375000,
+        "as_of": "2026-03"
+      },
+      "mortgage_monthly": {
+        "low": 2600,
+        "high": 3400,
+        "avg": 3000,
+        "as_of": "2026-03"
+      },
+      "utilities": {
+        "electric_gas": {
+          "low": 140,
+          "high": 220,
+          "avg": 180
+        },
+        "water_sewer": {
+          "low": 60,
+          "high": 95,
+          "avg": 78
+        },
+        "total": {
+          "low": 200,
+          "high": 315,
+          "avg": 258
+        },
+        "as_of": "2026-03"
+      }
+    },
+    "3": {
+      "rent_monthly": {
+        "low": 2300,
+        "high": 3100,
+        "avg": 2600,
+        "as_of": "2026-03"
+      },
+      "home_price": {
+        "low": 390000,
+        "high": 525000,
+        "avg": 455000,
+        "as_of": "2026-03"
+      },
+      "mortgage_monthly": {
+        "low": 3050,
+        "high": 4050,
+        "avg": 3550,
+        "as_of": "2026-03"
+      },
+      "utilities": {
+        "electric_gas": {
+          "low": 170,
+          "high": 270,
+          "avg": 220
+        },
+        "water_sewer": {
+          "low": 70,
+          "high": 110,
+          "avg": 90
+        },
+        "total": {
+          "low": 240,
+          "high": 380,
+          "avg": 310
+        },
+        "as_of": "2026-03"
+      }
+    },
+    "4": {
+      "rent_monthly": {
+        "low": 3000,
+        "high": 3900,
+        "avg": 3450,
+        "as_of": "2026-03"
+      },
+      "home_price": {
+        "low": 520000,
+        "high": 700000,
+        "avg": 610000,
+        "as_of": "2026-03"
+      },
+      "mortgage_monthly": {
+        "low": 4000,
+        "high": 5300,
+        "avg": 4650,
+        "as_of": "2026-03"
+      },
+      "utilities": {
+        "electric_gas": {
+          "low": 220,
+          "high": 340,
+          "avg": 280
+        },
+        "water_sewer": {
+          "low": 85,
+          "high": 130,
+          "avg": 108
+        },
+        "total": {
+          "low": 305,
+          "high": 470,
+          "avg": 388
+        },
+        "as_of": "2026-03"
+      }
+    },
+    "5": {
+      "rent_monthly": {
+        "low": 3800,
+        "high": 5200,
+        "avg": 4500,
+        "as_of": "2026-03"
+      },
+      "home_price": {
+        "low": 675000,
+        "high": 900000,
+        "avg": 775000,
+        "as_of": "2026-03"
+      },
+      "mortgage_monthly": {
+        "low": 5150,
+        "high": 6850,
+        "avg": 5900,
+        "as_of": "2026-03"
+      },
+      "utilities": {
+        "electric_gas": {
+          "low": 280,
+          "high": 430,
+          "avg": 355
+        },
+        "water_sewer": {
+          "low": 105,
+          "high": 160,
+          "avg": 132
+        },
+        "total": {
+          "low": 385,
+          "high": 590,
+          "avg": 487
+        },
+        "as_of": "2026-03"
+      }
+    }
+  },
+  "housing": {
+    "housing_units": 9000,
+    "median_value_owner_occupied": 415000,
+    "market": {
+      "zillow_average_home_value": 455000,
+      "zillow_one_year_change_percent": 2.4,
+      "market_type_summary": "Stable but expensive with strong National Capital Region demand",
+      "average_days_on_market": 38,
+      "median_sale_price_current": 455000,
+      "median_listing_price_realtor": 475000,
+      "median_listing_price_per_sqft": 255,
+      "active_listings_total": 1450,
+      "q1_2026": {
+        "median_sale_price": 455000
+      },
+      "sale_history_36_months": [
+        {
+          "month": "2023-01",
+          "median_sale_price": 410000
+        },
+        {
+          "month": "2024-12",
+          "median_sale_price": 438000
+        },
+        {
+          "month": "2025-06",
+          "median_sale_price": 447000
+        },
+        {
+          "month": "2026-01",
+          "median_sale_price": 455000
+        }
+      ]
+    }
+  },
+  "base_profile": {
+    "schema_version": "pcsu-base-profile-v1.1.0",
+    "profile_status": "gold_standard",
+    "last_verified": "2026-09-15",
+    "base_id": "andrews-afb",
+    "base_name": "Joint Base Andrews",
+    "display_name": "Joint Base Andrews",
+    "short_name": "Andrews",
+    "official_installation_name": "Joint Base Andrews-Naval Air Facility Washington",
+    "branch": "Air Force",
+    "joint_base": true,
+    "parent_installation": "Joint Base Andrews-Naval Air Facility Washington",
+    "city": "Camp Springs",
+    "state": "Maryland",
+    "state_abbr": "MD",
+    "zip": "20762",
+    "metro": "Washington-Arlington-Alexandria, DC-VA-MD-WV",
+    "market_label": "Washington DC / Andrews Military Housing Market",
+    "installation_type": "Joint Base / National Capital Region airfield / senior-leader airlift / installation support",
+    "host_or_major_command": "Air Force District of Washington / 316th Wing (host wing)",
+    "primary_mission_summary": "Joint Base Andrews is a National Capital Region joint installation hosted by the 316th Wing. The 316th Wing provides security, personnel, contracting, finance, infrastructure, and airfield support for multiple wings, headquarters, and tenant organizations, supports NCR contingency response with rotary-wing assets, and secures one of the world's highest-visibility flight lines. The 89th Airlift Wing, an Air Mobility Command tenant, provides global Special Air Mission airlift, logistics, aerial port, and communications for the President, Vice President, cabinet members, and other senior leaders.",
+    "mission_partners": [
+      "316th Wing (host wing)",
+      "Air Force District of Washington",
+      "89th Airlift Wing",
+      "844th Communications Group",
+      "Naval Air Facility Washington",
+      "113th Wing (D.C. Air National Guard)",
+      "459th Air Refueling Wing (Air Force Reserve Command)",
+      "Air National Guard Readiness Center",
+      "316th Medical Group / Malcolm Grow Medical Clinics and Surgery Center"
+    ],
+    "pcs_personality": "High-cost, commute-sensitive, school-zone-sensitive, federal-employment-connected, mission-visible, traffic-heavy, and strongly influenced by Prince George's County, Charles County, DC, Northern Virginia, and National Capital Region housing decisions.",
+    "base_bluf": "Andrews is a National Capital Region housing decision, not just a base commute decision. Families must balance BAH fit, taxes, traffic, school zones, HOA exposure, spouse employment, security/access procedures, and assignment length before choosing rent or buy.",
+    "base_operator": {
+      "label": "Joint Base Andrews Base Operator",
+      "phone": "301-981-1110",
+      "type": "directory_assistance",
+      "availability": "Directory assistance / base operator",
+      "verification_status": "verified_official",
       "verified_on": "2026-09-15",
-      "note": "A dedicated public BDOC phone number was not published on the current official Joint Base Andrews homepage, Visitor Control Center page, or Protocol contact listing reviewed on 2026-09-15. For access questions use the Visitor Control Center or base operator."
+      "source_label": "Official Joint Base Andrews homepage and Visitor Control Center FAQ — Base Operator"
+    },
+    "base_operator_phone": "301-981-1110",
+    "installation_operator_phone": "301-981-1110",
+    "installation_population": {
+      "total": "Approximately 9,238 (316th Wing published total force only; not a complete installation-wide headcount)",
+      "military": "Approximately 7,412 (active duty, Guard, and Reserve combined; 316th Wing factsheet)",
+      "civilian": "Approximately 1,920",
+      "note": "The current official 316th Wing factsheet (published 16 April 2025) lists Total Force Strength of approximately 9,238, including approximately 7,412 military (active duty, Guard, and Reserve combined) and approximately 1,920 civilians. That is a host-wing published profile, not a live installation census and not a complete Joint Base Andrews headcount of all tenant wings, Naval Air Facility Washington, headquarters staffs, contractors, and family members. The same factsheet's '60,000 Airmen and families in the National Capital Region and around the world' is a support-population statement, not on-installation population. Surrounding Camp Springs, Prince George's County, and Washington, D.C. civilian population figures are not installation population and are not used here. Do not add unlike categories into a fabricated total.",
+      "source_freshness": "316th Wing factsheet dated 16 April 2025; underlying headcount year is not stated. Treat as a published profile, not a live 2026 headcount.",
+      "verified_on": "2026-09-15"
+    },
+    "security_contacts": {
+      "base_defense_operations_center": {
+        "name": "Joint Base Andrews Base Defense Operations Center",
+        "phone": "not_published_on_current_official_public_pages",
+        "availability": "not_published",
+        "verification_status": "not_published",
+        "verified_on": "2026-09-15",
+        "note": "A dedicated public BDOC phone number was not published on the current official Joint Base Andrews homepage, Visitor Control Center page, or Protocol contact listing reviewed on 2026-09-15. For access questions use the Visitor Control Center or base operator."
+      },
+      "visitor_control_center": {
+        "name": "Joint Base Andrews Visitor Control Center",
+        "phone": "301-981-0232 / 301-981-0689",
+        "availability": "During published VCC hours",
+        "verified_on": "2026-09-15"
+      },
+      "security_forces_base_access": {
+        "name": "Base Access / 811th Security Forces Squadron contact listed by 316th Wing Protocol",
+        "phone": "301-981-0689",
+        "verified_on": "2026-09-15",
+        "note": "Official 316th Wing Protocol page lists Base Access/811 SFS as 301-981-0689, which matches one of the two published VCC commercial numbers."
+      },
+      "emergency": {
+        "phone": "911",
+        "note": "Use 911 for emergencies."
+      }
+    },
+    "access_guidance": {
+      "bluf": "Joint Base Andrews is a closed installation. Visitors without an accepted DoD access credential must use the Visitor Control Center, present REAL ID-compliant identification or another accepted credential, and should verify current access requirements before travel.",
+      "current_posture": [
+        "Official JBA VCC guidance states the installation is closed and proper identification is required to gain access.",
+        "Accepted identification listed on the current official VCC page includes DoD Common Access Cards, military retiree ID cards, military dependent ID cards, state/federal law enforcement on official business, and sponsored guests such as DBIDS card holders.",
+        "As of 7 May 2025, official JBA guidance states all visitors need a REAL ID-compliant driver's license or other acceptable identification for base access.",
+        "The official VCC page states it cannot provide operator or base-locator services; use the base operator at 301-981-1110 for those requests.",
+        "Gate and Visitor Control Center hours are time-sensitive and should be checked immediately before travel."
+      ],
+      "access_questions_contact": "Joint Base Andrews Visitor Control Center: 301-981-0232 / 301-981-0689; Base Operator: 301-981-1110",
+      "verified_on": "2026-09-15"
+    },
+    "user_positioning": {
+      "military_family_bluf": "Prioritize school-zone verification, commute testing, BAH fit, childcare access, neighborhood safety, HOA exposure, and total monthly housing cost before signing a lease or purchase contract.",
+      "single_airman_bluf": "Prioritize commute simplicity, affordability, rental flexibility, roommate options, and access to daily services near Camp Springs, Clinton, Upper Marlboro, or selected DC-area corridors.",
+      "realtor_bluf": "The strongest Andrews housing conversations are about BAH realism, commute risk, Prince George's versus Charles County tradeoffs, school-zone confidence, HOA exposure, and all-in payment math.",
+      "investor_bluf": "Rental demand near Andrews is influenced by military turnover, federal employment, contractor demand, National Capital Region affordability pressure, and practical commute corridors."
+    },
+    "base_map_image": {
+      "url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
+      "alt": "PCSUnited public-facing Joint Base Andrews placeholder orientation image for base housing and relocation planning.",
+      "title": "Joint Base Andrews Base & Housing Overview",
+      "caption": "Placeholder PCSUnited orientation image until a dedicated Andrews gate and neighborhood map is available.",
+      "last_updated": "2026-05-05",
+      "status": "generic_placeholder_map",
+      "map_type": "generic_pcsunited_orientation_image",
+      "confidence": "medium",
+      "safety_note": "This is not an official DoD map. It is a placeholder PCSUnited orientation image and should not be used for access control, emergency routing, or official navigation."
+    },
+    "official_links": {
+      "base_home": "https://www.jba.af.mil/",
+      "gate_hours": "https://www.jba.af.mil/Resources/Visitor-Control-Center/",
+      "visitor_info": "https://www.jba.af.mil/Resources/Visitor-Control-Center/",
+      "visitor_control_center": "https://www.jba.af.mil/Resources/Visitor-Control-Center/",
+      "housing": "https://www.housing.af.mil/Home/Installations/Joint-Base-Andrews/",
+      "medical": "https://andrews.tricare.mil/",
+      "commissary": "https://corp.commissaries.com/shopping/store-locations/andrews-jb",
+      "exchange": "https://www.shopmyexchange.com/store-locator/jb-andrews-main-exchange",
+      "military_installations": "https://installations.militaryonesource.mil/in-depth-overview/joint-base-andrews-naval-air-facility-washington",
+      "family_readiness": "https://andrewsfss.com/mfrc/",
+      "temporary_lodging": "https://andrewsfss.com/the-presidential-inn/",
+      "newcomers": "https://www.jba.af.mil/Resources/Newcomers/",
+      "mps": "https://andrewsfss.com/military-personnel-flight/",
+      "school_liaison": "https://andrewsfss.com/school-liaison-office/",
+      "andrews_home": "https://www.jba.af.mil/",
+      "andrews_newcomers": "https://www.jba.af.mil/Resources/Newcomers/",
+      "andrews_housing": "https://www.housing.af.mil/Home/Installations/Joint-Base-Andrews/",
+      "air_force_housing_andrews": "https://www.housing.af.mil/Home/Installations/Joint-Base-Andrews/",
+      "andrews_exchange": "https://www.shopmyexchange.com/store-locator/jb-andrews-main-exchange",
+      "andrews_commissary": "https://corp.commissaries.com/shopping/store-locations/andrews-jb",
+      "andrews_medical": "https://andrews.tricare.mil/",
+      "andrews_vcc": "https://www.jba.af.mil/Resources/Visitor-Control-Center/",
+      "andrews_base_status": "https://www.jba.af.mil/Resources/Base-Status/",
+      "316th_wing_factsheet": "https://www.jba.af.mil/About/Fact-Sheets/Display/Article/2216129/316th-wing/",
+      "89th_airlift_wing_factsheet": "https://www.jba.af.mil/About/Fact-Sheets/Display/Article/336383/89th-airlift-wing/",
+      "liberty_park_at_andrews": "https://www.libertyparkatandrews.com/"
     },
     "visitor_control_center": {
       "name": "Joint Base Andrews Visitor Control Center",
-      "phone": "301-981-0232 / 301-981-0689",
-      "availability": "During published VCC hours",
-      "verified_on": "2026-09-15"
-    },
-    "security_forces_base_access": {
-      "name": "Base Access / 811th Security Forces Squadron contact listed by 316th Wing Protocol",
-      "phone": "301-981-0689",
-      "verified_on": "2026-09-15",
-      "note": "Official 316th Wing Protocol page lists Base Access/811 SFS as 301-981-0689, which matches one of the two published VCC commercial numbers."
-    },
-    "emergency": {
-      "phone": "911",
-      "note": "Use 911 for emergencies."
-    }
-  },
-  "access_guidance": {
-    "bluf": "Joint Base Andrews is a closed installation. Visitors without an accepted DoD access credential must use the Visitor Control Center, present REAL ID-compliant identification or another accepted credential, and should verify current access requirements before travel.",
-    "current_posture": [
-      "Official JBA VCC guidance states the installation is closed and proper identification is required to gain access.",
-      "Accepted identification listed on the current official VCC page includes DoD Common Access Cards, military retiree ID cards, military dependent ID cards, state/federal law enforcement on official business, and sponsored guests such as DBIDS card holders.",
-      "As of 7 May 2025, official JBA guidance states all visitors need a REAL ID-compliant driver's license or other acceptable identification for base access.",
-      "The official VCC page states it cannot provide operator or base-locator services; use the base operator at 301-981-1110 for those requests.",
-      "Gate and Visitor Control Center hours are time-sensitive and should be checked immediately before travel."
-    ],
-    "access_questions_contact": "Joint Base Andrews Visitor Control Center: 301-981-0232 / 301-981-0689; Base Operator: 301-981-1110",
-    "verified_on": "2026-09-15"
-  },
-  "user_positioning": {
-    "military_family_bluf": "Prioritize school-zone verification, commute testing, BAH fit, childcare access, neighborhood safety, HOA exposure, and total monthly housing cost before signing a lease or purchase contract.",
-    "single_airman_bluf": "Prioritize commute simplicity, affordability, rental flexibility, roommate options, and access to daily services near Camp Springs, Clinton, Upper Marlboro, or selected DC-area corridors.",
-    "realtor_bluf": "The strongest Andrews housing conversations are about BAH realism, commute risk, Prince George's versus Charles County tradeoffs, school-zone confidence, HOA exposure, and all-in payment math.",
-    "investor_bluf": "Rental demand near Andrews is influenced by military turnover, federal employment, contractor demand, National Capital Region affordability pressure, and practical commute corridors."
-  },
-  "base_map_image": {
-    "url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
-    "alt": "PCSUnited public-facing Joint Base Andrews placeholder orientation image for base housing and relocation planning.",
-    "title": "Joint Base Andrews Base & Housing Overview",
-    "caption": "Placeholder PCSUnited orientation image until a dedicated Andrews gate and neighborhood map is available.",
-    "last_updated": "2026-05-05",
-    "status": "generic_placeholder_map",
-    "map_type": "generic_pcsunited_orientation_image",
-    "confidence": "medium",
-    "safety_note": "This is not an official DoD map. It is a placeholder PCSUnited orientation image and should not be used for access control, emergency routing, or official navigation."
-  },
-  "official_links": {
-    "base_home": "https://www.jba.af.mil/",
-    "gate_hours": "https://www.jba.af.mil/Resources/Visitor-Control-Center/",
-    "visitor_info": "https://www.jba.af.mil/Resources/Visitor-Control-Center/",
-    "visitor_control_center": "https://www.jba.af.mil/Resources/Visitor-Control-Center/",
-    "housing": "https://www.housing.af.mil/Home/Installations/Joint-Base-Andrews/",
-    "medical": "https://andrews.tricare.mil/",
-    "commissary": "https://corp.commissaries.com/shopping/store-locations/andrews-jb",
-    "exchange": "https://www.shopmyexchange.com/store-locator/jb-andrews-main-exchange",
-    "military_installations": "https://installations.militaryonesource.mil/in-depth-overview/joint-base-andrews-naval-air-facility-washington",
-    "family_readiness": "https://andrewsfss.com/mfrc/",
-    "temporary_lodging": "https://andrewsfss.com/the-presidential-inn/",
-    "newcomers": "https://www.jba.af.mil/Resources/Newcomers/",
-    "mps": "https://andrewsfss.com/military-personnel-flight/",
-    "school_liaison": "https://andrewsfss.com/school-liaison-office/",
-    "andrews_home": "https://www.jba.af.mil/",
-    "andrews_newcomers": "https://www.jba.af.mil/Resources/Newcomers/",
-    "andrews_housing": "https://www.housing.af.mil/Home/Installations/Joint-Base-Andrews/",
-    "air_force_housing_andrews": "https://www.housing.af.mil/Home/Installations/Joint-Base-Andrews/",
-    "andrews_exchange": "https://www.shopmyexchange.com/store-locator/jb-andrews-main-exchange",
-    "andrews_commissary": "https://corp.commissaries.com/shopping/store-locations/andrews-jb",
-    "andrews_medical": "https://andrews.tricare.mil/",
-    "andrews_vcc": "https://www.jba.af.mil/Resources/Visitor-Control-Center/",
-    "andrews_base_status": "https://www.jba.af.mil/Resources/Base-Status/",
-    "316th_wing_factsheet": "https://www.jba.af.mil/About/Fact-Sheets/Display/Article/2216129/316th-wing/",
-    "89th_airlift_wing_factsheet": "https://www.jba.af.mil/About/Fact-Sheets/Display/Article/336383/89th-airlift-wing/",
-    "liberty_park_at_andrews": "https://www.libertyparkatandrews.com/"
-  },
-  "visitor_control_center": {
-    "name": "Joint Base Andrews Visitor Control Center",
-    "status": "scheduled_closed_sundays_and_federal_holidays",
-    "building": "Joint Base Andrews Visitor Control Center",
-    "address": "1832 Robert M Bond Drive, Joint Base Andrews, MD 20762",
-    "location": "1832 Robert M Bond Drive, Joint Base Andrews, MD 20762",
-    "phone": "301-981-0232 / 301-981-0689",
-    "email": "316SSPTS.visitor.center@us.af.mil",
-    "hours": "Monday-Friday 6 a.m.-6 p.m.; Saturday 8 a.m.-4 p.m.; Base Down Days 8 a.m.-4 p.m.; closed Sundays and federal holidays. The current official page also notes VCC closed 24-26 December for federal holidays.",
-    "best_for": [
-      "Visitors",
-      "Newcomers",
-      "Family members without routine installation access",
-      "Sponsored guests needing passes",
-      "PCS arrival planning"
-    ],
-    "map_label": "Visitor Control Center",
-    "map_zone": "main access / visitor processing area",
-    "note": "Use the official Joint Base Andrews Visitor Control Center page before arrival. Access requirements, sponsor rules, REAL ID requirements, visitor request timelines, gate procedures, and hours can change. The VCC cannot provide operator or base-locator services; call 301-981-1110 for those. A May 2025 JBA REAL ID article listed a different VCC email (316.spt.visitor.center@us.af.mil); the current official VCC page states the new email is 316SSPTS.visitor.center@us.af.mil.",
-    "verification_status": "verified_official",
-    "verified_on": "2026-09-15"
-  },
-  "visitor_control_centers": [
-    {
-      "name": "Joint Base Andrews Visitor Control Center",
-      "status": "scheduled",
-      "hours": "Monday-Friday 6 a.m.-6 p.m.; Saturday 8 a.m.-4 p.m.; Base Down Days 8 a.m.-4 p.m.; closed Sundays and federal holidays",
+      "status": "scheduled_closed_sundays_and_federal_holidays",
+      "building": "Joint Base Andrews Visitor Control Center",
+      "address": "1832 Robert M Bond Drive, Joint Base Andrews, MD 20762",
       "location": "1832 Robert M Bond Drive, Joint Base Andrews, MD 20762",
       "phone": "301-981-0232 / 301-981-0689",
-      "role": "primary_current_vcc",
-      "note": "Current official public VCC for Joint Base Andrews. No alternate public VCC was listed as open on the official VCC page reviewed 2026-09-15.",
-      "verified_on": "2026-09-15"
-    }
-  ],
-  "gates": [
-    {
-      "name": "Main Gate",
-      "type": "primary_gate",
-      "status": "open_24_7",
-      "hours": "Open 24/7 per the current official Joint Base Andrews Visitor Control Center / gate listing. Official Base Status guidance also states the Main Gate maintains 24-hour operations even if the installation is listed as closed, to accommodate mission-essential personnel and base residents.",
-      "map_label": "Main Gate",
-      "map_zone": "main / primary access area",
+      "email": "316SSPTS.visitor.center@us.af.mil",
+      "hours": "Monday-Friday 6 a.m.-6 p.m.; Saturday 8 a.m.-4 p.m.; Base Down Days 8 a.m.-4 p.m.; closed Sundays and federal holidays. The current official page also notes VCC closed 24-26 December for federal holidays.",
       "best_for": [
-        "Newcomer routing",
-        "General base access",
-        "Mission-essential and resident access during base-status changes",
-        "Camp Springs and Capital Beltway access"
+        "Visitors",
+        "Newcomers",
+        "Family members without routine installation access",
+        "Sponsored guests needing passes",
+        "PCS arrival planning"
       ],
-      "commute_notes": "Primary 24/7 anchor point for arrival planning and general base access. Route performance depends on gate flow, report time, Beltway traffic, and exact duty location.",
-      "user_warning": "Gate schedules are time-sensitive. Verify the official Joint Base Andrews Visitor Control Center page immediately before travel.",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "Virginia Gate",
-      "type": "commuter_gate",
-      "status": "scheduled",
-      "hours": "5 a.m.-9 p.m. per the current official Joint Base Andrews Visitor Control Center / gate listing.",
-      "map_label": "Virginia Gate",
-      "map_zone": "commuter access area",
-      "best_for": [
-        "Daily commuters during published hours",
-        "Alternate route planning",
-        "Users approaching from selected local corridors"
-      ],
-      "commute_notes": "Scheduled commuter gate; not a 24/7 default. Do not plan after-hours entry through this gate.",
-      "user_warning": "The current official VCC page also displays a June 29-30 closure note that appears date-specific. Treat standing hours as 5 a.m.-9 p.m. and verify immediately before travel because temporary changes are posted on the official page.",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "Pearl Harbor Gate",
-      "type": "commercial_or_search_gate",
-      "status": "scheduled",
-      "hours": "Inbound 5 a.m.-4 p.m.; outbound 5 a.m.-6 p.m. per the current official Joint Base Andrews Visitor Control Center / gate listing.",
-      "map_label": "Pearl Harbor Gate",
-      "map_zone": "commercial / search access area",
-      "best_for": [
-        "Commercial traffic",
-        "Contractor routing when directed",
-        "Mover coordination when directed",
-        "Oversized vehicle processing when required"
-      ],
-      "commute_notes": "Important for commercial, contractor, and mover planning; not always the default family commute gate. Not a 24/7 access point under the current official listing.",
-      "user_warning": "The current official VCC page also displays a June 29-30 both-lanes 5 a.m.-9 p.m. note that appears date-specific. Use the standing inbound/outbound hours above and verify immediately before travel. Third-party housing sites listing different outbound hours are not used here.",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "West Gate",
-      "type": "pedestrian_limited_gate",
-      "status": "weekday_morning_pedestrian_inbound",
-      "hours": "Pedestrian inbound Monday-Friday 6-9 a.m.; weekend hours closed per the current official Joint Base Andrews Visitor Control Center / gate listing.",
-      "map_label": "West Gate",
-      "map_zone": "west / pedestrian access area",
-      "best_for": [
-        "Weekday morning pedestrian inbound access during published hours"
-      ],
-      "commute_notes": "Not a general vehicle commute gate under the current official listing. Do not treat as a default family or PCS arrival gate.",
-      "user_warning": "Gate schedules are time-sensitive. Verify the official Joint Base Andrews Visitor Control Center page immediately before travel.",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "North Gate",
-      "type": "closed_or_limited_gate",
-      "status": "outbound_closed",
-      "hours": "Outbound closed per the current official Joint Base Andrews Visitor Control Center / gate listing.",
-      "map_label": "North Gate",
-      "map_zone": "north / alternate access area",
-      "best_for": [],
-      "commute_notes": "Do not route users through North Gate based on the current official outbound-closed listing.",
-      "user_warning": "The current official listing is 'North Gate Outbound Closed.' Do not assume inbound availability. Verify immediately before travel.",
-      "verified_on": "2026-09-15"
-    }
-  ],
-  "major_services": [
-    {
-      "name": "Malcolm Grow Medical Clinics and Surgery Center",
-      "category": "medical",
-      "map_label": "Medical Clinic",
-      "address": "1060 West Perimeter Road, Joint Base Andrews, MD 20762",
-      "phone": "Hospital information 240-612-1152; appointments 888-999-1212 or 855-227-6331",
-      "hours": "Monday-Friday 7:30 a.m.-4:30 p.m. Emergent Care Center daily 7 a.m.-7 p.m. TRICARE facility listing states services are limited to the Emergent Care Center on federal holidays, designated family days, and every second Thursday of the month.",
-      "best_for": [
-        "Primary military medical services",
-        "Pharmacy-related planning",
-        "Family medical orientation",
-        "PCS arrival healthcare setup"
-      ],
-      "map_zone": "medical support area / West Perimeter Road",
-      "user_note": "316th Medical Group facility. For life-threatening emergencies call 911. Official urgent/emergency-care guidance lists Emergent Care Center phone 240-857-2333 and states after-hours emergency needs are directed to a nearby civilian emergency department. Verify clinic, pharmacy, and emergency procedures before travel. TRICARE.mil facility page last updated 5 February 2026.",
+      "map_label": "Visitor Control Center",
+      "map_zone": "main access / visitor processing area",
+      "note": "Use the official Joint Base Andrews Visitor Control Center page before arrival. Access requirements, sponsor rules, REAL ID requirements, visitor request timelines, gate procedures, and hours can change. The VCC cannot provide operator or base-locator services; call 301-981-1110 for those. A May 2025 JBA REAL ID article listed a different VCC email (316.spt.visitor.center@us.af.mil); the current official VCC page states the new email is 316SSPTS.visitor.center@us.af.mil.",
       "verification_status": "verified_official",
       "verified_on": "2026-09-15"
     },
-    {
-      "name": "Joint Base Andrews Commissary",
-      "category": "commissary",
-      "map_label": "Commissary",
-      "address": "1684 Starkey Ave., JB Andrews, MD 20762-6302",
-      "phone": "301-541-1242",
-      "email": "deca.lee.store-ops-grp.list.websitez02andrews@mail.mil",
-      "hours": "Sunday-Saturday 0800-2100 per the current DeCA corporate store page. Published special hours include 12 Oct 2026 Columbus Day 0900-1700 and 11 Nov 2026 Veterans Day 0900-1700. CLICK2GO hours Sunday-Saturday 1000-2000.",
-      "best_for": [
-        "Grocery savings",
-        "Family shopping",
-        "BAH and monthly budget planning",
-        "CLICK2GO pickup"
-      ],
-      "map_zone": "main services / retail area",
-      "user_note": "DeCA corporate store locator is the source used for address, phone, and hours. shop.commissaries.com currently lists different store hours and a different phone, and MyAirForceBenefits lists 301-541-1702. Verify the DeCA store page before travel, especially around holidays.",
-      "verification_status": "verified_official",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "Joint Base Andrews Main Exchange",
-      "category": "exchange_bx",
-      "map_label": "BX / Exchange",
-      "address": "1811 G Street, Joint Base Andrews, MD 20762",
-      "phone": "301-568-1500",
-      "hours": "Verify current hours on the official Exchange store locator before travel.",
-      "best_for": [
-        "Shopping",
-        "Uniform-related errands",
-        "Food court / daily services",
-        "Family convenience"
-      ],
-      "map_zone": "main services / G Street",
-      "user_note": "Address and phone are from the official MyAirForceBenefits Maryland resource locator and the AAFES store-locator URL. Current operating hours were not independently readable from the AAFES locator page during this verification pass.",
-      "verification_status": "official_source_retained_hours_require_recheck",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "Joint Base Andrews Military Housing Office",
-      "category": "housing_office",
-      "map_label": "Housing Office",
-      "address": "2097 San Antonio Blvd, Joint Base Andrews, MD 20762",
-      "phone": "301-981-5518",
-      "email": "316.CES.Housing.Management.Office@us.af.mil",
-      "hours": "Monday-Friday 7:30 a.m.-4:30 p.m. (EST)",
-      "best_for": [
-        "On-base housing questions",
-        "Off-base housing guidance",
-        "PCS housing counseling",
-        "Lease and purchase counseling"
-      ],
-      "map_zone": "San Antonio Boulevard / housing support area",
-      "user_note": "Current Air Force Housing installation page. Contact the office before signing a lease or sales contract when required by current PCS guidance. Fax listed as 301-981-5167.",
-      "verification_status": "verified_official",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "Joint Base Andrews Unaccompanied Housing",
-      "category": "unaccompanied_housing",
-      "map_label": "Unaccompanied Housing",
-      "address": "1657 Brookely Avenue, Joint Base Andrews, MD 20762",
-      "phone": "301-981-4479",
-      "email": "11ces.ceacu@afncr.af.mil",
-      "hours": "Monday-Friday 9:00 a.m.-5:00 p.m. (EST)",
-      "best_for": [
-        "Dormitory questions",
-        "Single service member housing",
-        "Unaccompanied PCS planning"
-      ],
-      "map_zone": "unaccompanied housing campus",
-      "user_note": "Current Air Force Housing listing. UH is described as provided for unaccompanied Airmen and Sailors E-1 to E-3 and E-4 with less than 3 years of service. Eligibility and availability must be confirmed with the housing office. The published UH email still uses an 11 CES org box. MyAirForceBenefits spells the street Brookley rather than Brookely.",
-      "verification_status": "verified_official",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "Liberty Park at Andrews",
-      "category": "privatized_housing",
-      "map_label": "Family Housing",
-      "address": "2097 San Antonio Blvd, Joint Base Andrews, MD 20762",
-      "phone": "301-736-8082",
-      "hours": "Monday-Friday 7:30 a.m.-4:30 p.m. (EST)",
-      "best_for": [
-        "Privatized family housing",
-        "Active-duty family housing applications",
-        "On-base housing availability",
-        "PCS housing planning"
-      ],
-      "map_zone": "family housing / housing support area",
-      "user_note": "Current Air Force Housing listing. Liberty Park at Andrews owns and manages privatized family housing. Availability, waitlists, eligibility, pet rules, and BAH treatment can change. Official housing page also points to www.andrewsfamilyhousing.com; MyAirForceBenefits lists https://www.libertyparkatandrews.com/.",
-      "verification_status": "verified_official",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "Joint Base Andrews Military & Family Readiness Center",
-      "category": "family_readiness",
-      "map_label": "M&FRC",
-      "address": "1191 Menoher Dr, Joint Base Andrews, MD 20762",
-      "phone": "301-981-7087",
-      "email": "316fss.mfrc.workflow@us.af.mil",
-      "hours": "Monday, Tuesday, Wednesday, Friday 7:30 a.m.-4:30 p.m.; Thursday 7:30 a.m.-12:00 p.m.; closed holidays and AFDW pass days",
-      "best_for": [
-        "Relocation readiness",
-        "Information and referral",
-        "Family support",
-        "Transition assistance referrals",
-        "PCS resources"
-      ],
-      "map_zone": "Menoher Drive / family readiness",
-      "user_note": "Current 316th FSS M&FRC page. MyAirForceBenefits still lists 316.FSS.MFSC@us.af.mil as the M&FRC email; this profile uses the current FSS M&FRC page workflow email.",
-      "verification_status": "verified_official",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "Joint Base Andrews Military Personnel Flight",
-      "category": "personnel_admin",
-      "map_label": "MPS",
-      "address": "Bldg 1414 Arkansas Rd., Room 4, Joint Base Andrews, MD 20762",
-      "phone": "301-981-1776",
-      "email": "316.FSS.Customer.Support@us.af.mil",
-      "hours": "Monday-Friday 9:00 a.m.-3:00 p.m.; closed weekends, AFDW pass days, and holidays. Closed on the 2nd and 4th Thursdays of every month for training except the ID card section. ID cards by appointment Monday-Wednesday and Friday; Thursday walk-ins 9:00 a.m.-3:00 p.m. or until capacity is reached. Passports by appointment only.",
-      "best_for": [
-        "ID cards and DEERS support",
-        "Base in-processing",
-        "Career development",
-        "Assignments",
-        "Retirements and separations"
-      ],
-      "map_zone": "Arkansas Road / administrative services",
-      "user_note": "Current 316th FSS Military Personnel Flight page. Individual services may use appointments or service-specific procedures.",
-      "verification_status": "verified_official",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "Joint Base Andrews Personal Property / TMO",
-      "category": "personal_property",
-      "map_label": "Personal Property",
-      "address": "TMO office, 2nd Floor, Jones Building (1500 West Perimeter Road), Joint Base Andrews, MD 20762",
-      "phone": "301-981-7520 / 301-981-4451",
-      "email": "316.TMO.CUSTOMER.SERVICE@US.AF.MIL",
-      "hours": "Official newcomers page states mass briefings begin promptly at 9 a.m. in the TMO office; confirm current customer-service hours with TMO before travel.",
-      "best_for": [
-        "Household-goods movement",
-        "PCS personal property questions",
-        "PPM / DITY documentation",
-        "Move coordination"
-      ],
-      "map_zone": "Jones Building / administrative services",
-      "user_note": "Current official Joint Base Andrews Newcomers page. The org box is listed as the primary contact method.",
-      "verification_status": "verified_official",
-      "verified_on": "2026-09-15"
-    },
-    {
-      "name": "Presidential Inn / Inns of Andrews",
-      "category": "temporary_lodging",
-      "map_label": "Lodging",
-      "address": "1380 California Ave., Joint Base Andrews, MD 20762",
-      "phone": "301-909-8987",
+    "visitor_control_centers": [
+      {
+        "name": "Joint Base Andrews Visitor Control Center",
+        "status": "scheduled",
+        "hours": "Monday-Friday 6 a.m.-6 p.m.; Saturday 8 a.m.-4 p.m.; Base Down Days 8 a.m.-4 p.m.; closed Sundays and federal holidays",
+        "location": "1832 Robert M Bond Drive, Joint Base Andrews, MD 20762",
+        "phone": "301-981-0232 / 301-981-0689",
+        "role": "primary_current_vcc",
+        "note": "Current official public VCC for Joint Base Andrews. No alternate public VCC was listed as open on the official VCC page reviewed 2026-09-15.",
+        "verified_on": "2026-09-15"
+      }
+    ],
+    "gates": [
+      {
+        "name": "Main Gate",
+        "type": "primary_gate",
+        "status": "open_24_7",
+        "hours": "Open 24/7 per the current official Joint Base Andrews Visitor Control Center / gate listing. Official Base Status guidance also states the Main Gate maintains 24-hour operations even if the installation is listed as closed, to accommodate mission-essential personnel and base residents.",
+        "map_label": "Main Gate",
+        "map_zone": "main / primary access area",
+        "best_for": [
+          "Newcomer routing",
+          "General base access",
+          "Mission-essential and resident access during base-status changes",
+          "Camp Springs and Capital Beltway access"
+        ],
+        "commute_notes": "Primary 24/7 anchor point for arrival planning and general base access. Route performance depends on gate flow, report time, Beltway traffic, and exact duty location.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official Joint Base Andrews Visitor Control Center page immediately before travel.",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Virginia Gate",
+        "type": "commuter_gate",
+        "status": "scheduled",
+        "hours": "5 a.m.-9 p.m. per the current official Joint Base Andrews Visitor Control Center / gate listing.",
+        "map_label": "Virginia Gate",
+        "map_zone": "commuter access area",
+        "best_for": [
+          "Daily commuters during published hours",
+          "Alternate route planning",
+          "Users approaching from selected local corridors"
+        ],
+        "commute_notes": "Scheduled commuter gate; not a 24/7 default. Do not plan after-hours entry through this gate.",
+        "user_warning": "The current official VCC page also displays a June 29-30 closure note that appears date-specific. Treat standing hours as 5 a.m.-9 p.m. and verify immediately before travel because temporary changes are posted on the official page.",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Pearl Harbor Gate",
+        "type": "commercial_or_search_gate",
+        "status": "scheduled",
+        "hours": "Inbound 5 a.m.-4 p.m.; outbound 5 a.m.-6 p.m. per the current official Joint Base Andrews Visitor Control Center / gate listing.",
+        "map_label": "Pearl Harbor Gate",
+        "map_zone": "commercial / search access area",
+        "best_for": [
+          "Commercial traffic",
+          "Contractor routing when directed",
+          "Mover coordination when directed",
+          "Oversized vehicle processing when required"
+        ],
+        "commute_notes": "Important for commercial, contractor, and mover planning; not always the default family commute gate. Not a 24/7 access point under the current official listing.",
+        "user_warning": "The current official VCC page also displays a June 29-30 both-lanes 5 a.m.-9 p.m. note that appears date-specific. Use the standing inbound/outbound hours above and verify immediately before travel. Third-party housing sites listing different outbound hours are not used here.",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "West Gate",
+        "type": "pedestrian_limited_gate",
+        "status": "weekday_morning_pedestrian_inbound",
+        "hours": "Pedestrian inbound Monday-Friday 6-9 a.m.; weekend hours closed per the current official Joint Base Andrews Visitor Control Center / gate listing.",
+        "map_label": "West Gate",
+        "map_zone": "west / pedestrian access area",
+        "best_for": [
+          "Weekday morning pedestrian inbound access during published hours"
+        ],
+        "commute_notes": "Not a general vehicle commute gate under the current official listing. Do not treat as a default family or PCS arrival gate.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official Joint Base Andrews Visitor Control Center page immediately before travel.",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "North Gate",
+        "type": "closed_or_limited_gate",
+        "status": "outbound_closed",
+        "hours": "Outbound closed per the current official Joint Base Andrews Visitor Control Center / gate listing.",
+        "map_label": "North Gate",
+        "map_zone": "north / alternate access area",
+        "best_for": [],
+        "commute_notes": "Do not route users through North Gate based on the current official outbound-closed listing.",
+        "user_warning": "The current official listing is 'North Gate Outbound Closed.' Do not assume inbound availability. Verify immediately before travel.",
+        "verified_on": "2026-09-15"
+      }
+    ],
+    "major_services": [
+      {
+        "name": "Malcolm Grow Medical Clinics and Surgery Center",
+        "category": "medical",
+        "map_label": "Medical Clinic",
+        "address": "1060 West Perimeter Road, Joint Base Andrews, MD 20762",
+        "phone": "Hospital information 240-612-1152; appointments 888-999-1212 or 855-227-6331",
+        "hours": "General appointment/referral support Monday-Friday 7:30 a.m.-4:00 p.m.; individual clinic hours vary. Emergent Care Center operates daily 7:00 a.m.-7:00 p.m.",
+        "best_for": [
+          "Primary military medical services",
+          "Pharmacy-related planning",
+          "Family medical orientation",
+          "PCS arrival healthcare setup"
+        ],
+        "map_zone": "medical support area / West Perimeter Road",
+        "user_note": "316th Medical Group facility. For life-threatening emergencies call 911. Official urgent/emergency-care guidance lists Emergent Care Center phone 240-857-2333 and states after-hours emergency needs are directed to a nearby civilian emergency department. Verify clinic, pharmacy, and emergency procedures before travel. TRICARE.mil facility page last updated 5 February 2026. Do not treat general appointment hours as a facility-wide schedule. TRICARE facility listing states services are limited to the Emergent Care Center on federal holidays, designated family days, and every second Thursday of the month. Emergent Care Center phone: 240-857-2333.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Joint Base Andrews Commissary",
+        "category": "commissary",
+        "map_label": "Commissary",
+        "address": "1684 Starkey Ave., JB Andrews, MD 20762-6302",
+        "phone": "301-541-1242",
+        "email": "deca.lee.store-ops-grp.list.websitez02andrews@mail.mil",
+        "hours": "Sunday-Saturday 0800-2100 per the current DeCA corporate store page. Published special hours include 12 Oct 2026 Columbus Day 0900-1700 and 11 Nov 2026 Veterans Day 0900-1700. CLICK2GO hours Sunday-Saturday 1000-2000.",
+        "best_for": [
+          "Grocery savings",
+          "Family shopping",
+          "BAH and monthly budget planning",
+          "CLICK2GO pickup"
+        ],
+        "map_zone": "main services / retail area",
+        "user_note": "DeCA corporate store locator is the source used for address, phone, and hours. shop.commissaries.com currently lists different store hours and a different phone, and MyAirForceBenefits lists 301-541-1702. Verify the DeCA store page before travel, especially around holidays.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Joint Base Andrews Main Exchange",
+        "category": "exchange_bx",
+        "map_label": "BX / Exchange",
+        "address": "1811 G Street, Joint Base Andrews, MD 20762",
+        "phone": "301-568-1500",
+        "hours": "Verify current hours on the official Exchange store locator before travel.",
+        "best_for": [
+          "Shopping",
+          "Uniform-related errands",
+          "Food court / daily services",
+          "Family convenience"
+        ],
+        "map_zone": "main services / G Street",
+        "user_note": "Address and phone are from the official MyAirForceBenefits Maryland resource locator and the AAFES store-locator URL. Current operating hours were not independently readable from the AAFES locator page during this verification pass.",
+        "verification_status": "official_source_retained_hours_require_recheck",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Joint Base Andrews Military Housing Office",
+        "category": "housing_office",
+        "map_label": "Housing Office",
+        "address": "2097 San Antonio Blvd, Joint Base Andrews, MD 20762",
+        "phone": "301-981-5518",
+        "email": "316.CES.Housing.Management.Office@us.af.mil",
+        "hours": "Monday-Friday 7:30 a.m.-4:30 p.m. (EST)",
+        "best_for": [
+          "On-base housing questions",
+          "Off-base housing guidance",
+          "PCS housing counseling",
+          "Lease and purchase counseling"
+        ],
+        "map_zone": "San Antonio Boulevard / housing support area",
+        "user_note": "Current Air Force Housing installation page. Contact the office before signing a lease or sales contract when required by current PCS guidance. Fax listed as 301-981-5167.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Joint Base Andrews Unaccompanied Housing",
+        "category": "unaccompanied_housing",
+        "map_label": "Unaccompanied Housing",
+        "address": "1657 Brookely Avenue, Joint Base Andrews, MD 20762",
+        "phone": "301-981-4479",
+        "email": "11ces.ceacu@afncr.af.mil",
+        "hours": "Monday-Friday 9:00 a.m.-5:00 p.m. (EST)",
+        "best_for": [
+          "Dormitory questions",
+          "Single service member housing",
+          "Unaccompanied PCS planning"
+        ],
+        "map_zone": "unaccompanied housing campus",
+        "user_note": "Current Air Force Housing listing. UH is described as provided for unaccompanied Airmen and Sailors E-1 to E-3 and E-4 with less than 3 years of service. Eligibility and availability must be confirmed with the housing office. The published UH email still uses an 11 CES org box. MyAirForceBenefits spells the street Brookley rather than Brookely.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Liberty Park at Andrews",
+        "category": "privatized_housing",
+        "map_label": "Family Housing",
+        "address": "2097 San Antonio Blvd, Joint Base Andrews, MD 20762",
+        "phone": "301-736-8082",
+        "hours": "Monday-Friday 7:30 a.m.-4:30 p.m. (EST)",
+        "best_for": [
+          "Privatized family housing",
+          "Active-duty family housing applications",
+          "On-base housing availability",
+          "PCS housing planning"
+        ],
+        "map_zone": "family housing / housing support area",
+        "user_note": "Current Air Force Housing listing. Liberty Park at Andrews owns and manages privatized family housing. Availability, waitlists, eligibility, pet rules, and BAH treatment can change. Official housing page also points to www.andrewsfamilyhousing.com; MyAirForceBenefits lists https://www.libertyparkatandrews.com/.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Joint Base Andrews Military & Family Readiness Center",
+        "category": "family_readiness",
+        "map_label": "M&FRC",
+        "address": "1191 Menoher Dr, Joint Base Andrews, MD 20762",
+        "phone": "301-981-7087",
+        "email": "316fss.mfrc.workflow@us.af.mil",
+        "hours": "Monday, Tuesday, Wednesday, Friday 7:30 a.m.-4:30 p.m.; Thursday 7:30 a.m.-12:00 p.m.; closed holidays and AFDW pass days",
+        "best_for": [
+          "Relocation readiness",
+          "Information and referral",
+          "Family support",
+          "Transition assistance referrals",
+          "PCS resources"
+        ],
+        "map_zone": "Menoher Drive / family readiness",
+        "user_note": "Current 316th FSS M&FRC page. MyAirForceBenefits still lists 316.FSS.MFSC@us.af.mil as the M&FRC email; this profile uses the current FSS M&FRC page workflow email.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Joint Base Andrews Military Personnel Flight",
+        "category": "personnel_admin",
+        "map_label": "MPS",
+        "address": "Bldg 1414 Arkansas Rd., Room 4, Joint Base Andrews, MD 20762",
+        "phone": "301-981-1776",
+        "email": "316.FSS.Customer.Support@us.af.mil",
+        "hours": "Monday-Friday 9:00 a.m.-3:00 p.m.; closed weekends, AFDW pass days, and holidays. Closed on the 2nd and 4th Thursdays of every month for training except the ID card section. ID cards by appointment Monday-Wednesday and Friday; Thursday walk-ins 9:00 a.m.-3:00 p.m. or until capacity is reached. Passports by appointment only.",
+        "best_for": [
+          "ID cards and DEERS support",
+          "Base in-processing",
+          "Career development",
+          "Assignments",
+          "Retirements and separations"
+        ],
+        "map_zone": "Arkansas Road / administrative services",
+        "user_note": "Current 316th FSS Military Personnel Flight page. Individual services may use appointments or service-specific procedures.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Joint Base Andrews Personal Property / TMO",
+        "category": "personal_property",
+        "map_label": "Personal Property",
+        "address": "TMO office, 2nd Floor, Jones Building (1500 West Perimeter Road), Joint Base Andrews, MD 20762",
+        "phone": "301-981-7520 / 301-981-4451",
+        "email": "316.TMO.CUSTOMER.SERVICE@US.AF.MIL",
+        "hours": "Official newcomers page states mass briefings begin promptly at 9 a.m. in the TMO office; confirm current customer-service hours with TMO before travel.",
+        "best_for": [
+          "Household-goods movement",
+          "PCS personal property questions",
+          "PPM / DITY documentation",
+          "Move coordination"
+        ],
+        "map_zone": "Jones Building / administrative services",
+        "user_note": "Current official Joint Base Andrews Newcomers page. The org box is listed as the primary contact method.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Presidential Inn / Inns of Andrews",
+        "category": "temporary_lodging",
+        "map_label": "Lodging",
+        "address": "1380 California Ave., Joint Base Andrews, MD 20762",
+        "phone": "301-909-8987",
+        "email": "316fss.presidentialinn.reservations@us.af.mil",
+        "hours": "Front desk 24/7 per the current 316th FSS Presidential Inn page.",
+        "best_for": [
+          "PCS temporary lodging",
+          "TDY lodging",
+          "Newcomer arrival planning"
+        ],
+        "map_zone": "California Avenue / lodging",
+        "user_note": "Official 316th FSS Presidential Inn page lists 301-909-8987. Official JBA Protocol and the FSS directory also publish 301-981-4614, which matches DSN 858-4614. Contact lodging directly for availability, children, and pet-friendly rooms. Space availability is limited June-August per Air Force Inns.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      },
+      {
+        "name": "Joint Base Andrews School Liaison",
+        "category": "school_liaison",
+        "map_label": "School Liaison",
+        "address": "Bldg 1442 Concord Ave., Room 103, Joint Base Andrews, MD 20762",
+        "phone": "301-981-9211",
+        "email": "316FSS.FSY.SLO@us.af.mil",
+        "hours": "Monday-Friday 8:00 a.m.-5:00 p.m. (appointments available) per MilitaryINSTALLATIONS.",
+        "best_for": [
+          "K-12 transition support",
+          "School boundary questions",
+          "Interstate Compact guidance",
+          "Homeschool and community school information"
+        ],
+        "map_zone": "Concord Avenue / family support network",
+        "user_note": "MilitaryINSTALLATIONS and MyAirForceBenefits list 301-981-9211 and cell 202-716-0481. Official JBA Community page lists JBA School Liaison plus Prince George's County Public Schools, Imagine Andrews Public Charter School, Dr. Henry A. Wise, Jr. High School, Stephen Decatur Middle School, and Francis T. Evans Elementary School as community school references. School assignment must still be verified by exact residence. An older Air Force Housing page listed 301-981-0057 at 1191 Menoher Drive; current contacts above supersede that listing.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-15"
+      }
+    ],
+    "temporary_lodging": {
+      "primary_contact_name": "Presidential Inn / Inns of Andrews",
+      "reservations_phone": "301-909-8987",
+      "alternate_phone": "301-981-4614",
       "email": "316fss.presidentialinn.reservations@us.af.mil",
-      "hours": "Front desk 24/7 per the current 316th FSS Presidential Inn page.",
-      "best_for": [
-        "PCS temporary lodging",
-        "TDY lodging",
-        "Newcomer arrival planning"
+      "locations": [
+        {
+          "name": "Presidential Inn",
+          "address": "1380 California Ave., Joint Base Andrews, MD 20762"
+        }
       ],
-      "map_zone": "California Avenue / lodging",
-      "user_note": "Official 316th FSS Presidential Inn page lists 301-909-8987. Official JBA Protocol and the FSS directory also publish 301-981-4614, which matches DSN 858-4614. Contact lodging directly for availability, children, and pet-friendly rooms. Space availability is limited June-August per Air Force Inns.",
-      "verification_status": "verified_official",
+      "note": "Official 316th FSS Presidential Inn page lists front desk 24/7 at 301-909-8987. Official JBA Protocol and the FSS directory also publish 301-981-4614. Official newcomers guidance: if arriving after duty hours without prior dormitory or lodging arrangements, report to the Presidential Inn and report to the unit in uniform the following duty day. Contact lodging directly for availability, children, pet-friendly rooms, and current reservation procedures. Air Force Inns notes rooms may be used for higher-priority lodging guests as required by the Joint Base Andrews mission.",
       "verified_on": "2026-09-15"
     },
-    {
-      "name": "Joint Base Andrews School Liaison",
-      "category": "school_liaison",
-      "map_label": "School Liaison",
-      "address": "Bldg 1442 Concord Ave., Room 103, Joint Base Andrews, MD 20762",
-      "phone": "301-981-9211",
-      "email": "316FSS.FSY.SLO@us.af.mil",
-      "hours": "Monday-Friday 8:00 a.m.-5:00 p.m. (appointments available) per MilitaryINSTALLATIONS.",
+    "on_base_housing": {
+      "housing_type": "Privatized family housing plus military housing and unaccompanied-housing support",
+      "housing_office_name": "Joint Base Andrews Military Housing Office",
+      "housing_office_address": "2097 San Antonio Blvd, Joint Base Andrews, MD 20762",
+      "housing_office_phone": "301-981-5518",
+      "housing_office_email": "316.CES.Housing.Management.Office@us.af.mil",
+      "housing_office_hours": "Monday-Friday 7:30 a.m.-4:30 p.m. (EST)",
+      "privatized_housing_name": "Liberty Park at Andrews",
+      "privatized_housing_provider": "Liberty Park at Andrews",
+      "privatized_housing_phone": "301-736-8082",
+      "privatized_housing_address": "2097 San Antonio Blvd, Joint Base Andrews, MD 20762",
+      "privatized_housing_hours": "Monday-Friday 7:30 a.m.-4:30 p.m. (EST)",
+      "unaccompanied_housing_name": "Joint Base Andrews Unaccompanied Housing",
+      "unaccompanied_housing_phone": "301-981-4479",
+      "unaccompanied_housing_address": "1657 Brookely Avenue, Joint Base Andrews, MD 20762",
+      "unaccompanied_housing_email": "11ces.ceacu@afncr.af.mil",
+      "map_label": "Family Housing / Housing Office",
+      "map_zone": "San Antonio Boulevard and Andrews family housing areas",
       "best_for": [
-        "K-12 transition support",
-        "School boundary questions",
-        "Interstate Compact guidance",
-        "Homeschool and community school information"
+        "Families prioritizing proximity",
+        "New arrivals wanting simplicity",
+        "Users who value base-connected lifestyle",
+        "Families wanting to reduce commute uncertainty",
+        "Users comparing BAH capture against high off-base rent and mortgage costs"
       ],
-      "map_zone": "Concord Avenue / family support network",
-      "user_note": "MilitaryINSTALLATIONS and MyAirForceBenefits list 301-981-9211 and cell 202-716-0481. Official JBA Community page lists JBA School Liaison plus Prince George's County Public Schools, Imagine Andrews Public Charter School, Dr. Henry A. Wise, Jr. High School, Stephen Decatur Middle School, and Francis T. Evans Elementary School as community school references. School assignment must still be verified by exact residence. An older Air Force Housing page listed 301-981-0057 at 1191 Menoher Drive; current contacts above supersede that listing.",
+      "watchouts": [
+        "Availability and waitlists can change",
+        "On-base housing may capture BAH differently than off-base renting",
+        "Pet policies and breed restrictions should be verified",
+        "School assignment must be verified by exact address",
+        "Off-base affordability may require broader commute corridors",
+        "Traffic and school-zone tradeoffs should be reviewed before choosing distance from base"
+      ],
+      "pcsu_strategy_note": "Compare on-base housing against off-base rent and mortgage options. Around Andrews, the best choice depends on rank, dependents, BAH, debt, commute tolerance, school priorities, pet needs, spouse employment, and expected assignment length.",
       "verification_status": "verified_official",
-      "verified_on": "2026-09-15"
-    }
-  ],
-  "temporary_lodging": {
-    "primary_contact_name": "Presidential Inn / Inns of Andrews",
-    "reservations_phone": "301-909-8987",
-    "alternate_phone": "301-981-4614",
-    "email": "316fss.presidentialinn.reservations@us.af.mil",
-    "locations": [
-      {
-        "name": "Presidential Inn",
-        "address": "1380 California Ave., Joint Base Andrews, MD 20762"
-      }
-    ],
-    "note": "Official 316th FSS Presidential Inn page lists front desk 24/7 at 301-909-8987. Official JBA Protocol and the FSS directory also publish 301-981-4614. Official newcomers guidance: if arriving after duty hours without prior dormitory or lodging arrangements, report to the Presidential Inn and report to the unit in uniform the following duty day. Contact lodging directly for availability, children, pet-friendly rooms, and current reservation procedures. Air Force Inns notes rooms may be used for higher-priority lodging guests as required by the Joint Base Andrews mission.",
-    "verified_on": "2026-09-15"
-  },
-  "on_base_housing": {
-    "housing_type": "Privatized family housing plus military housing and unaccompanied-housing support",
-    "housing_office_name": "Joint Base Andrews Military Housing Office",
-    "housing_office_address": "2097 San Antonio Blvd, Joint Base Andrews, MD 20762",
-    "housing_office_phone": "301-981-5518",
-    "housing_office_email": "316.CES.Housing.Management.Office@us.af.mil",
-    "housing_office_hours": "Monday-Friday 7:30 a.m.-4:30 p.m. (EST)",
-    "privatized_housing_name": "Liberty Park at Andrews",
-    "privatized_housing_provider": "Liberty Park at Andrews",
-    "privatized_housing_phone": "301-736-8082",
-    "privatized_housing_address": "2097 San Antonio Blvd, Joint Base Andrews, MD 20762",
-    "privatized_housing_hours": "Monday-Friday 7:30 a.m.-4:30 p.m. (EST)",
-    "unaccompanied_housing_name": "Joint Base Andrews Unaccompanied Housing",
-    "unaccompanied_housing_phone": "301-981-4479",
-    "unaccompanied_housing_address": "1657 Brookely Avenue, Joint Base Andrews, MD 20762",
-    "unaccompanied_housing_email": "11ces.ceacu@afncr.af.mil",
-    "map_label": "Family Housing / Housing Office",
-    "map_zone": "San Antonio Boulevard and Andrews family housing areas",
-    "best_for": [
-      "Families prioritizing proximity",
-      "New arrivals wanting simplicity",
-      "Users who value base-connected lifestyle",
-      "Families wanting to reduce commute uncertainty",
-      "Users comparing BAH capture against high off-base rent and mortgage costs"
-    ],
-    "watchouts": [
-      "Availability and waitlists can change",
-      "On-base housing may capture BAH differently than off-base renting",
-      "Pet policies and breed restrictions should be verified",
-      "School assignment must be verified by exact address",
-      "Off-base affordability may require broader commute corridors",
-      "Traffic and school-zone tradeoffs should be reviewed before choosing distance from base"
-    ],
-    "pcsu_strategy_note": "Compare on-base housing against off-base rent and mortgage options. Around Andrews, the best choice depends on rank, dependents, BAH, debt, commute tolerance, school priorities, pet needs, spouse employment, and expected assignment length.",
-    "verification_status": "verified_official",
-    "verified_on": "2026-09-15",
-    "source_conflict_note": "Air Force Housing lists the UH street as Brookely Avenue while MyAirForceBenefits lists Brookley Avenue. This profile keeps the current Air Force Housing spelling and notes the conflict. The UH email published on Air Force Housing remains 11ces.ceacu@afncr.af.mil (legacy 11 CES org box) while the Military Housing Office email is 316.CES.Housing.Management.Office@us.af.mil."
-  },
-  "recommended_neighborhoods": [
-    {
-      "name": "Camp Springs",
-      "type": "nearby_neighborhood",
-      "fit_summary": "Closest practical Andrews corridor with strong commute logic, Metro-area access, and immediate base proximity, but price, school, and property-condition screening still matter.",
-      "best_for": [
-        "Commute-focused households",
-        "Renters",
-        "Single airmen",
-        "Users wanting close access to Joint Base Andrews"
-      ],
-      "commute_band": "Approx. 5-20 minutes depending on exact address, gate, traffic, and report time",
-      "likely_gate_logic": [
-        "Main Gate",
-        "Virginia Gate depending on route and published hours",
-        "Other gates depending on duty location and current access rules"
-      ],
-      "bah_fit": "medium",
-      "family_fit": "medium_high",
-      "single_airman_fit": "high",
-      "va_buyer_fit": "medium",
-      "traffic_risk": "medium",
-      "watchouts": [
-        "Prices can be high relative to some military BAH profiles",
-        "School assignment should be verified by exact address",
-        "Property condition and resale should be reviewed carefully"
-      ],
-      "pcsu_recommendation": "Strong for users prioritizing short commute and base proximity when the exact property, school zone, and monthly cost are sound.",
-      "intelligence_type": "curated_pcsunited_intelligence"
-    },
-    {
-      "name": "Upper Marlboro",
-      "type": "nearby_city_area",
-      "fit_summary": "Common Andrews PCS research corridor with suburban appeal, practical commute options, and stronger family-home inventory in selected pockets.",
-      "best_for": [
-        "Families",
-        "VA buyers",
-        "Users wanting suburban space",
-        "Commute-conscious households"
-      ],
-      "commute_band": "Approx. 15-35 minutes depending on exact address, gate, traffic, and report time",
-      "likely_gate_logic": [
-        "Main Gate",
-        "Virginia Gate depending on route and published hours",
-        "Other gates depending on current access rules"
-      ],
-      "bah_fit": "medium",
-      "family_fit": "high",
-      "single_airman_fit": "medium",
-      "va_buyer_fit": "medium_high",
-      "traffic_risk": "medium",
-      "watchouts": [
-        "Pricing and HOA exposure vary by subdivision",
-        "School zones must be verified by exact address",
-        "Commute should be tested during expected report hours"
-      ],
-      "pcsu_recommendation": "Strong first-look area for many Andrews families because it can balance commute, family space, and suburban lifestyle.",
-      "intelligence_type": "curated_pcsunited_intelligence"
-    },
-    {
-      "name": "Clinton",
-      "type": "nearby_city_area",
-      "fit_summary": "Practical nearby corridor with base access, established neighborhoods, and potential value compared with some premium DC-area suburbs.",
-      "best_for": [
-        "Families",
-        "VA buyers",
-        "Renters",
-        "Commute-conscious households"
-      ],
-      "commute_band": "Approx. 10-30 minutes depending on exact address, gate, traffic, and report time",
-      "likely_gate_logic": [
-        "Main Gate",
-        "Virginia Gate depending on route and published hours",
-        "Other gates depending on duty location and current access rules"
-      ],
-      "bah_fit": "medium_high",
-      "family_fit": "medium_high",
-      "single_airman_fit": "medium_high",
-      "va_buyer_fit": "medium_high",
-      "traffic_risk": "medium",
-      "watchouts": [
-        "Neighborhood quality can vary",
-        "Older homes may require maintenance reserves",
-        "Exact school zone should be verified"
-      ],
-      "pcsu_recommendation": "Good practical option for households wanting shorter commute and better value than some higher-cost NCR suburbs.",
-      "intelligence_type": "curated_pcsunited_intelligence"
-    },
-    {
-      "name": "Waldorf",
-      "type": "charles_county_commute_corridor",
-      "fit_summary": "Often considered by Andrews families seeking more house for the money, but commute reliability and Route 5/301 traffic must be tested.",
-      "best_for": [
-        "Families wanting more space",
-        "VA buyers",
-        "Longer-term assignments",
-        "Users comfortable with a longer commute"
-      ],
-      "commute_band": "Approx. 30-55 minutes depending on exact address, route, gate, traffic, and report time",
-      "likely_gate_logic": [
-        "Main Gate",
-        "Virginia Gate depending on route and published hours",
-        "Other gates depending on current access rules"
-      ],
-      "bah_fit": "medium_high",
-      "family_fit": "high",
-      "single_airman_fit": "medium_low",
-      "va_buyer_fit": "high",
-      "traffic_risk": "high",
-      "watchouts": [
-        "Traffic can become a major daily-life issue",
-        "Longer commute must be tested during report-time windows",
-        "Lifestyle and housing-size benefits must justify commute risk"
-      ],
-      "pcsu_recommendation": "Works best for families who intentionally trade commute time for more space and better purchase value.",
-      "intelligence_type": "curated_pcsunited_intelligence"
-    },
-    {
-      "name": "Bowie",
-      "type": "suburban_lifestyle_corridor",
-      "fit_summary": "Suburban option with strong lifestyle appeal and family-oriented housing, but prices and commute tradeoffs should be reviewed carefully.",
-      "best_for": [
-        "Families",
-        "Longer-term buyers",
-        "Users wanting suburban services",
-        "Buyers prioritizing neighborhood feel"
-      ],
-      "commute_band": "Approx. 25-45 minutes depending on exact address, gate, traffic, and report time",
-      "likely_gate_logic": [
-        "Main Gate",
-        "Other gates depending on route and current access rules"
-      ],
-      "bah_fit": "medium",
-      "family_fit": "high",
-      "single_airman_fit": "medium",
-      "va_buyer_fit": "medium",
-      "traffic_risk": "medium_high",
-      "watchouts": [
-        "Higher pricing can pressure affordability",
-        "Commute can vary sharply by route and timing",
-        "HOA and taxes should be modeled carefully"
-      ],
-      "pcsu_recommendation": "Strong lifestyle candidate for families if monthly payment and commute remain inside the safe lane.",
-      "intelligence_type": "curated_pcsunited_intelligence"
-    }
-  ],
-  "commute_intelligence": {
-    "commute_bluf": "For Andrews, commute risk can outweigh small payment differences. Gate access, Capital Beltway and Route 5/301 congestion, school drop-off timing, and exact address can materially change daily commute quality. Times below are approximate and depend on gate, traffic, and exact address.",
-    "overall_commute_posture": "Challenging compared with lower-traffic military markets because National Capital Region congestion, gate access, school drop-off timing, and exact address can materially change daily commute quality.",
-    "primary_commute_factors": [
-      "Gate hours",
-      "Main Gate 24/7 versus scheduled Virginia and Pearl Harbor access",
-      "Capital Beltway and Route 5 / Route 301 congestion",
-      "School drop-off timing",
-      "Choosing by mileage instead of actual report-time commute",
-      "Longer drives from Charles County or Northern Virginia",
-      "Weather and major DC-area event disruptions"
-    ],
-    "primary_commute_risks": [
-      "Capital Beltway and Route 5 / Route 301 congestion",
-      "Gate availability and peak report-time flow",
-      "School drop-off timing",
-      "Choosing by mileage instead of actual report-time commute",
-      "Longer drives from Charles County or Northern Virginia",
-      "Weather and major DC-area event disruptions"
-    ],
-    "commute_bands": [
-      {
-        "label": "Close-in",
-        "range": "Approx. 0-20 minutes depending on gate, traffic, and exact address",
-        "fit": "Best for users prioritizing proximity and daily convenience",
-        "watchout": "Close-in areas still need property, school, and safety screening."
-      },
-      {
-        "label": "Balanced",
-        "range": "Approx. 15-35 minutes depending on gate, traffic, and exact address",
-        "fit": "Often the best balance between housing quality, services, and commute",
-        "watchout": "Traffic and gate choice can still change the real commute."
-      },
-      {
-        "label": "Lifestyle tradeoff",
-        "range": "Approx. 30-55+ minutes depending on gate, traffic, and exact address",
-        "fit": "May work for families wanting larger homes, quieter areas, or specific schools",
-        "watchout": "Can become painful for early reporting, shift work, or frequent base errands."
-      }
-    ],
-    "gate_selection_logic": [
-      "Start with the user's likely duty location.",
-      "Identify the most realistic 24/7 gate (currently Main Gate).",
-      "Check Virginia Gate and Pearl Harbor Gate only as optional commute helpers during published hours.",
-      "Do not plan on North Gate based on the current official outbound-closed listing.",
-      "Compare the commute during the user's actual report window.",
-      "Do not choose a neighborhood based only on mileage."
-    ],
-    "planning_guidance": [
-      "Test the commute during the user’s expected report-time window.",
-      "Confirm which gate best supports the user’s duty location.",
-      "Compare Camp Springs, Upper Marlboro, Clinton, Waldorf, Bowie, Brandywine, Fort Washington, and selected Northern Virginia corridors by route reliability, not only distance.",
-      "Use commute plus all-in housing cost as the core PCSUnited decision screen."
-    ],
-    "user_instruction": "Before signing a lease or contract, users should test the commute from the exact property address to the expected gate during the same time window they would normally report to work. Times are approximate and depend on gate, traffic, and exact address.",
-    "pcsu_bluf": "For Andrews, commute risk can outweigh small payment differences. The best housing choice balances BAH fit, gate logic, traffic, schools, HOA, taxes, spouse employment, and assignment length.",
-    "intelligence_type": "curated_pcsunited_intelligence"
-  },
-  "bah_market_reality": {
-    "bah_bluf": "Andrews should be modeled as a high-cost but stable National Capital Region market. BAH is a decision filter, not a promise of affordability. Compare BAH against rent or mortgage, taxes, HOA, insurance, commute, debt, and assignment length.",
-    "overall_position": "Mixed for buyers and challenging but manageable for renters.",
-    "buying_power_summary": "Higher prices reduce buying power compared with lower-cost military markets, but stable federal and military demand can support long-term resale logic for disciplined buyers.",
-    "renting_summary": "Renting remains practical for shorter assignments, users with tight residual income, households still learning the DC metro, or families avoiding transaction-cost risk.",
-    "recommended_calculations": [
-      "BAH with dependents vs estimated rent",
-      "BAH without dependents vs estimated rent",
-      "BAH vs estimated mortgage payment",
-      "Total housing cost vs 30% income lane",
-      "Residual monthly income after expenses and housing",
-      "Debt-to-income pressure",
-      "Rent vs buy break-even horizon"
-    ],
-    "pcsu_decision_outputs": [
-      "Rent",
-      "Buy",
-      "Wait",
-      "Widen search",
-      "Reduce target price",
-      "Consider roommate",
-      "Use on-base housing as comparison"
-    ],
-    "watch_items": [
-      "Assignment length",
-      "Purchase price",
-      "Property taxes",
-      "HOA dues",
-      "Insurance",
-      "Commute route",
-      "School zones",
-      "Debt-to-income pressure",
-      "Spouse employment geography",
-      "Exit strategy"
-    ],
-    "base_tab_message": "Show BAH as a decision filter, not a promise of affordability. The Base tab should push users into the PCSUnited financial calculator when the housing gap looks tight.",
-    "pcsu_strategy_note": "Andrews should be modeled as a high-cost but stable market. PCSUnited should test each user’s rank, BAH, debt, savings, credit score, timeline, family needs, commute tolerance, HOA exposure, and exit plan before recommending buy versus rent.",
-    "intelligence_type": "curated_pcsunited_intelligence"
-  },
-  "family_readiness": {
-    "family_bluf": "Andrews can work well for families who want National Capital Region access and strong support infrastructure, but it requires disciplined screening for schools, commute, safety, HOA, taxes, and all-in payment.",
-    "family_fit": "High",
-    "school_guidance": {
-      "on_base_option": "Imagine Andrews Public Charter School is listed on the official Joint Base Andrews Community page among JBA assigned-school references. Families should verify current eligibility, grade levels, enrollment, and attendance rules before choosing housing.",
-      "school_liaison_phone": "301-981-9211",
-      "school_liaison_email": "316FSS.FSY.SLO@us.af.mil",
-      "school_liaison_address": "Bldg 1442 Concord Ave., Room 103, Joint Base Andrews, MD 20762",
-      "school_zone_warning": "Maryland is not a public school-of-choice state. Always verify school assignment by exact residence before signing a lease or purchase contract.",
-      "nearby_school_district_note": "Common off-base research can include Prince George's County Public Schools, Charles County, Anne Arundel County, and nearby DC-area options depending on the property. Official JBA community references also include Dr. Henry A. Wise, Jr. High School, Stephen Decatur Middle School, and Francis T. Evans Elementary School; assignment is still address-specific."
-    },
-    "childcare_guidance": {
-      "cdc_note": "Child Development Center availability, waitlists, eligibility, and current operating details should be verified through MilitaryChildCare.com or current 316th FSS Child and Youth Services resources. MyAirForceBenefits lists CDC #1 at 4575 Virginia Avenue (301-981-3055), CDC #2 at 4783 San Antonio Boulevard (301-981-3323), and CDC #3 / JP Hoyer CDC at 3725 Fetchet Avenue (240-857-3207).",
-      "youth_program_note": "Youth programs and school-age care can materially affect family housing decisions. Youth Programs are listed at Bldg 4700 Yuma Road, 301-981-5430."
-    },
-    "medical_guidance": {
-      "primary_medical_anchor": "Malcolm Grow Medical Clinics and Surgery Center / 316th Medical Group",
-      "urgent_care": "Emergent Care Center operates daily 7:00 a.m.-7:00 p.m. for urgent/emergency-care needs during those hours.",
-      "medical_warning": "For emergencies call 911. After-hours emergency needs are directed to a nearby civilian emergency department under current official medical guidance. Verify clinic availability, referrals, pharmacy procedures, and current hours directly with official medical sources."
-    },
-    "military_family_readiness_center": {
-      "name": "Joint Base Andrews Military & Family Readiness Center",
-      "address": "1191 Menoher Dr, Joint Base Andrews, MD 20762",
-      "phone": "301-981-7087",
-      "email": "316fss.mfrc.workflow@us.af.mil",
-      "hours": "Monday, Tuesday, Wednesday, Friday 7:30 a.m.-4:30 p.m.; Thursday 7:30 a.m.-12:00 p.m.; closed holidays and AFDW pass days"
-    },
-    "spouse_employment_note": "The National Capital Region generally offers broader spouse-employment options than many smaller duty stations, but childcare, commute, licensing/credentialing, security-access timing, and work location should be considered together.",
-    "strengths": [
-      "Large metro housing choice",
-      "Strong military and federal infrastructure",
-      "Access to DC-area healthcare, employment, culture, sports, and services",
-      "Multiple neighborhood and school-screening options",
-      "On-base housing can simplify the PCS for some families"
-    ],
-    "watchouts": [
-      "School assignments and program fit should be verified by exact address",
-      "Childcare availability and waitlists should be checked early",
-      "Traffic can materially affect daily life",
-      "Housing costs can pressure lower and mid-rank BAH profiles",
-      "Neighborhood safety, property condition, and school fit vary sharply across the metro"
-    ],
-    "pcsu_family_bluf": "Andrews can work well for families who want National Capital Region access and strong support infrastructure, but it requires disciplined screening for schools, commute, safety, HOA, taxes, and all-in payment.",
-    "verified_on": "2026-09-15"
-  },
-  "arrival_checklist": {
-    "before_arrival": [
-      "Verify current gate and Visitor Control Center status on the official Joint Base Andrews Visitor Control Center page.",
-      "Confirm sponsor contact and unit reporting instructions.",
-      "If visitor access is needed, plan around published VCC hours; the VCC is closed Sundays and federal holidays.",
-      "Confirm lodging or temporary housing plan and call the Presidential Inn directly if traveling with children or pets.",
-      "Review Military Housing Office guidance before signing a lease or purchase contract.",
-      "Compare BAH against rent or mortgage, utilities, taxes, HOA, debt, savings goals, and commute.",
-      "Shortlist neighborhoods by realistic 24/7 Main Gate access and expected report time.",
-      "Verify school assignment by exact residence; Maryland is not a public school-of-choice state.",
-      "Check current pet policies for privatized housing, rentals, and temporary lodging."
-    ],
-    "arrival_and_inprocessing": [
-      "If you arrive during duty hours, report to your unit as instructed.",
-      "If you arrive after duty hours without prior dormitory or lodging arrangements, official newcomers guidance says to report to the Presidential Inn and report to the unit in uniform the following duty day morning.",
-      "Contact Military Personnel Flight for ID card, DEERS, in-processing, career development, assignment, or separation support as applicable.",
-      "Contact Personal Property / TMO for household-goods or PPM issues; the org box is listed as the primary contact method.",
-      "Use the Military & Family Readiness Center for relocation information and referrals."
-    ],
-    "first_week": [
-      "Complete unit check-in and required in-processing appointments.",
-      "Visit or contact the housing office if still deciding between on-base and off-base options.",
-      "Confirm medical, Emergent Care Center, pharmacy, and emergency-care procedures.",
-      "Drive the commute from target neighborhoods during the actual expected report window.",
-      "Tour properties before committing when possible.",
-      "Avoid choosing housing solely by distance, rent, or list price."
-    ],
-    "first_30_days": [
-      "Finalize housing only after comparing commute, BAH fit, school needs, and total monthly cost.",
-      "Save operator, VCC, medical, gate, housing, and family-readiness contacts.",
-      "Update PCSUnited financial inputs with final housing numbers.",
-      "Review whether the selected area supports assignment length, family needs, resale/rental exit risk, and daily quality of life."
-    ],
-    "legacy_flat_checklist": [
-      "Verify current gate hours and visitor access procedures through official Joint Base Andrews sources.",
-      "Confirm whether on-base housing or off-base housing better fits rank, dependents, BAH, pets, school needs, spouse employment, and expected assignment length.",
-      "Compare Camp Springs, Upper Marlboro, Clinton, Waldorf, Bowie, Brandywine, Fort Washington, and selected Northern Virginia corridors using commute, schools, safety, and all-in monthly cost.",
-      "Check property tax, HOA, insurance, and commute estimates before finalizing a purchase budget.",
-      "Verify school zones by exact property address.",
-      "Test the commute during the expected report-time window before signing.",
-      "Use PCSUnited calculators to compare rent, buy, residual income, and risk level before committing."
-    ],
-    "verified_on": "2026-09-15"
-  },
-  "pcs_watchouts": [
-    {
-      "title": "Gate and VCC hours can change",
-      "severity": "high",
-      "message": "Use the official Joint Base Andrews Visitor Control Center page immediately before travel. As of 2026-09-15, Main Gate is listed 24/7, Virginia Gate 5 a.m.-9 p.m., Pearl Harbor inbound 5 a.m.-4 p.m. / outbound 5 a.m.-6 p.m., West Gate pedestrian inbound weekday mornings only, North Gate outbound closed, and the VCC is closed Sundays and federal holidays."
-    },
-    {
-      "title": "Visitor access procedures are security-sensitive",
-      "severity": "high",
-      "message": "JBA is a closed installation. Visitors should follow current identification, sponsorship, and REAL ID requirements. For access concerns, contact the VCC at 301-981-0232 / 301-981-0689."
-    },
-    {
-      "title": "Distance is not the same as commute",
-      "severity": "high",
-      "message": "Neighborhoods should be compared by realistic gate access, duty location, Beltway/Route 5/301 traffic, and report-time windows. Times are approximate and depend on gate, traffic, and exact address."
-    },
-    {
-      "title": "School assignments are residence-specific",
-      "severity": "high",
-      "message": "Maryland is not a public school-of-choice state. Verify school assignment by exact property address. Do not assume Imagine Andrews or any named community school is automatically available."
-    },
-    {
-      "title": "BAH is not the full affordability picture",
-      "severity": "high",
-      "message": "Do not assume BAH automatically covers comfortable ownership in the National Capital Region. Compare rent or mortgage against income, debt, utilities, taxes, insurance, HOA, savings goals, and assignment length."
-    },
-    {
-      "title": "Published population is host-wing profile, not a live installation census",
-      "severity": "medium_high",
-      "message": "The 316th Wing factsheet publishes approximately 9,238 total force, 7,412 military, and 1,920 civilians. That is not a complete tenant-inclusive installation headcount and is not Camp Springs, Prince George's County, or Washington, D.C. population."
-    },
-    {
-      "title": "Lodging and housing-office details have source conflicts",
-      "severity": "medium",
-      "message": "Presidential Inn phones 301-909-8987 and 301-981-4614 both appear on official pages. Commissary phone/hours differ between DeCA corporate, shop.commissaries.com, and MyAirForceBenefits. Use the contacts in this profile and verify before travel."
-    },
-    {
-      "title": "On-base housing is not automatically the best financial answer",
-      "severity": "medium",
-      "message": "Compare availability, BAH treatment, commute, home fit, schools, and lifestyle before deciding. Short assignments may favor renting or on-base housing if resale risk is high."
-    },
-    {
-      "title": "Spouse employment location can change the best housing corridor",
-      "severity": "medium",
-      "message": "NCR dual-commute households may need a different corridor than a base-only commute. Test both work locations during expected report windows."
-    }
-  ],
-  "realtor_intelligence": {
-    "best_client_positioning": "Lead with BAH realism, commute testing, all-in monthly cost, school-zone verification, and corridor strategy. Andrews clients need a National Capital Region decision guide, not generic Maryland market advice.",
-    "buyer_personas": [
-      {
-        "persona": "First-time VA buyer",
-        "likely_questions": [
-          "Can I afford to buy near Andrews?",
-          "Which areas fit my BAH?",
-          "How bad is the commute?",
-          "Should I rent first?"
-        ],
-        "agent_strategy": "Lead with BAH realism, monthly payment clarity, commute testing, and VA loan education."
-      },
-      {
-        "persona": "E-5 / E-6 family with dependents",
-        "likely_questions": [
-          "Where do military families usually live?",
-          "Which school zones should I research?",
-          "Is Waldorf too far?",
-          "Is on-base housing better?"
-        ],
-        "agent_strategy": "Compare Camp Springs, Clinton, Upper Marlboro, Bowie, Waldorf, and on-base housing against commute and monthly cost."
-      },
-      {
-        "persona": "Single airman / short-term renter",
-        "likely_questions": [
-          "What is close and affordable?",
-          "Do I need a roommate?",
-          "Where should I avoid signing too fast?"
-        ],
-        "agent_strategy": "Keep recommendations practical: commute, rent, safety, property condition, and lease flexibility."
-      },
-      {
-        "persona": "Permanent party / dual-income NCR household",
-        "likely_questions": [
-          "Should I buy if I may be here longer?",
-          "How do I balance Andrews commute and spouse employment?",
-          "What areas have resale strength?"
-        ],
-        "agent_strategy": "Use assignment length, dual-commute geography, family needs, and rent-vs-buy math to guide the recommendation."
-      }
-    ],
-    "listing_angles": [
-      "Practical commute to Joint Base Andrews",
-      "National Capital Region access",
-      "Military PCS-friendly positioning",
-      "Move-in ready condition",
-      "Low or reasonable HOA when applicable",
-      "School-zone clarity and commute-route confidence"
-    ],
-    "strong_listing_angles": [
-      "Practical commute to Joint Base Andrews",
-      "National Capital Region access",
-      "Military PCS-friendly positioning",
-      "Move-in ready condition",
-      "Low or reasonable HOA when applicable",
-      "School-zone clarity and commute-route confidence"
-    ],
-    "buyer_consultation_angles": [
-      "Rent versus buy based on assignment length",
-      "All-in payment including taxes, insurance, HOA, utilities, and maintenance",
-      "Prince George's County versus Charles County versus Northern Virginia commute tradeoffs",
-      "Property condition and VA appraisal readiness",
-      "Future resale appeal to military, federal, and contractor buyers"
-    ],
-    "investor_consultation_angles": [
-      "Military and federal renter demand",
-      "National Capital Region rental depth",
-      "Vacancy and turnover assumptions",
-      "HOA, taxes, insurance, utility, and maintenance reserves",
-      "Commute corridor quality"
-    ],
-    "common_objections": [
-      "Commute uncertainty",
-      "Gate traffic",
-      "School-zone confusion",
-      "Safety perception",
-      "Affordability gap between BAH and mortgage",
-      "HOA and tax drag",
-      "Short assignment timeline"
-    ],
-    "recommended_agent_behavior": [
-      "Do not overpromise commute times.",
-      "Always recommend school-zone verification by address.",
-      "Use payment math, not just listing price.",
-      "Discuss gate access early.",
-      "Compare on-base housing as a legitimate alternative.",
-      "Avoid generic DC-metro advice when the user is assigned to Andrews."
-    ],
-    "pcsu_realtor_bluf": "A strong Andrews realtor should sound like a BAH strategist, commute filter, school-zone guide, HOA screener, and NCR risk manager — not just a sales agent.",
-    "intelligence_type": "curated_pcsunited_intelligence"
-  },
-  "data_confidence": {
-    "overall": "high_for_current_base_essentials_medium_high_for_curated_pcs_intelligence",
-    "identity": "high_current_public_official",
-    "mission": "high_current_316th_wing_and_89th_aw_sources",
-    "base_operator": "high_current_public_official",
-    "installation_population": "medium_published_profile_not_live_headcount",
-    "gate_data": "high_current_public_official_time_sensitive",
-    "visitor_control_center": "high_current_public_official",
-    "housing_office": "high_current_air_force_housing",
-    "unaccompanied_housing": "high_current_air_force_housing",
-    "privatized_housing": "high_current_air_force_housing",
-    "medical": "high_current_tricare",
-    "commissary": "high_current_deca_with_source_conflict_note",
-    "exchange": "medium_official_source_retained_hours_require_direct_recheck",
-    "military_family_readiness": "high_current_316th_fss",
-    "school_liaison": "high_current_militaryinstallations_and_fss",
-    "recommended_neighborhoods": "curated_pcsunited_intelligence",
-    "commute_bands": "estimated_requires_address_and_report_time_validation",
-    "bah_market_guidance": "strategy_layer_requires_rank_family_and_financial_inputs",
-    "housing_market_demographics": "preserved_from_existing_2026_03_source_records_not_revalidated_in_this_installation_profile_pass",
-    "last_reviewed": "2026-09-15"
-  },
-  "source_notes": [
-    {
-      "label": "Official Joint Base Andrews homepage",
-      "type": "official_current",
-      "url": "https://www.jba.af.mil/",
       "verified_on": "2026-09-15",
-      "used_for": [
-        "Base operator 301-981-1110",
-        "Installation identity"
-      ]
+      "source_conflict_note": "Air Force Housing lists the UH street as Brookely Avenue while MyAirForceBenefits lists Brookley Avenue. This profile keeps the current Air Force Housing spelling and notes the conflict. The UH email published on Air Force Housing remains 11ces.ceacu@afncr.af.mil (legacy 11 CES org box) while the Military Housing Office email is 316.CES.Housing.Management.Office@us.af.mil."
     },
-    {
-      "label": "Official Joint Base Andrews Visitor Control Center",
-      "type": "official_current",
-      "url": "https://www.jba.af.mil/Resources/Visitor-Control-Center/",
-      "source_key": "official_links.visitor_info",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "VCC address",
-        "VCC phones",
-        "VCC email",
-        "VCC hours",
-        "Gate names",
-        "Gate status",
+    "recommended_neighborhoods": [
+      {
+        "name": "Camp Springs",
+        "type": "nearby_neighborhood",
+        "fit_summary": "Closest practical Andrews corridor with strong commute logic, Metro-area access, and immediate base proximity, but price, school, and property-condition screening still matter.",
+        "best_for": [
+          "Commute-focused households",
+          "Renters",
+          "Single airmen",
+          "Users wanting close access to Joint Base Andrews"
+        ],
+        "commute_band": "Approx. 5-20 minutes depending on exact address, gate, traffic, and report time",
+        "likely_gate_logic": [
+          "Main Gate",
+          "Virginia Gate depending on route and published hours",
+          "Other gates depending on duty location and current access rules"
+        ],
+        "bah_fit": "medium",
+        "family_fit": "medium_high",
+        "single_airman_fit": "high",
+        "va_buyer_fit": "medium",
+        "traffic_risk": "medium",
+        "watchouts": [
+          "Prices can be high relative to some military BAH profiles",
+          "School assignment should be verified by exact address",
+          "Property condition and resale should be reviewed carefully"
+        ],
+        "pcsu_recommendation": "Strong for users prioritizing short commute and base proximity when the exact property, school zone, and monthly cost are sound.",
+        "intelligence_type": "curated_pcsunited_intelligence"
+      },
+      {
+        "name": "Upper Marlboro",
+        "type": "nearby_city_area",
+        "fit_summary": "Common Andrews PCS research corridor with suburban appeal, practical commute options, and stronger family-home inventory in selected pockets.",
+        "best_for": [
+          "Families",
+          "VA buyers",
+          "Users wanting suburban space",
+          "Commute-conscious households"
+        ],
+        "commute_band": "Approx. 15-35 minutes depending on exact address, gate, traffic, and report time",
+        "likely_gate_logic": [
+          "Main Gate",
+          "Virginia Gate depending on route and published hours",
+          "Other gates depending on current access rules"
+        ],
+        "bah_fit": "medium",
+        "family_fit": "high",
+        "single_airman_fit": "medium",
+        "va_buyer_fit": "medium_high",
+        "traffic_risk": "medium",
+        "watchouts": [
+          "Pricing and HOA exposure vary by subdivision",
+          "School zones must be verified by exact address",
+          "Commute should be tested during expected report hours"
+        ],
+        "pcsu_recommendation": "Strong first-look area for many Andrews families because it can balance commute, family space, and suburban lifestyle.",
+        "intelligence_type": "curated_pcsunited_intelligence"
+      },
+      {
+        "name": "Clinton",
+        "type": "nearby_city_area",
+        "fit_summary": "Practical nearby corridor with base access, established neighborhoods, and potential value compared with some premium DC-area suburbs.",
+        "best_for": [
+          "Families",
+          "VA buyers",
+          "Renters",
+          "Commute-conscious households"
+        ],
+        "commute_band": "Approx. 10-30 minutes depending on exact address, gate, traffic, and report time",
+        "likely_gate_logic": [
+          "Main Gate",
+          "Virginia Gate depending on route and published hours",
+          "Other gates depending on duty location and current access rules"
+        ],
+        "bah_fit": "medium_high",
+        "family_fit": "medium_high",
+        "single_airman_fit": "medium_high",
+        "va_buyer_fit": "medium_high",
+        "traffic_risk": "medium",
+        "watchouts": [
+          "Neighborhood quality can vary",
+          "Older homes may require maintenance reserves",
+          "Exact school zone should be verified"
+        ],
+        "pcsu_recommendation": "Good practical option for households wanting shorter commute and better value than some higher-cost NCR suburbs.",
+        "intelligence_type": "curated_pcsunited_intelligence"
+      },
+      {
+        "name": "Waldorf",
+        "type": "charles_county_commute_corridor",
+        "fit_summary": "Often considered by Andrews families seeking more house for the money, but commute reliability and Route 5/301 traffic must be tested.",
+        "best_for": [
+          "Families wanting more space",
+          "VA buyers",
+          "Longer-term assignments",
+          "Users comfortable with a longer commute"
+        ],
+        "commute_band": "Approx. 30-55 minutes depending on exact address, route, gate, traffic, and report time",
+        "likely_gate_logic": [
+          "Main Gate",
+          "Virginia Gate depending on route and published hours",
+          "Other gates depending on current access rules"
+        ],
+        "bah_fit": "medium_high",
+        "family_fit": "high",
+        "single_airman_fit": "medium_low",
+        "va_buyer_fit": "high",
+        "traffic_risk": "high",
+        "watchouts": [
+          "Traffic can become a major daily-life issue",
+          "Longer commute must be tested during report-time windows",
+          "Lifestyle and housing-size benefits must justify commute risk"
+        ],
+        "pcsu_recommendation": "Works best for families who intentionally trade commute time for more space and better purchase value.",
+        "intelligence_type": "curated_pcsunited_intelligence"
+      },
+      {
+        "name": "Bowie",
+        "type": "suburban_lifestyle_corridor",
+        "fit_summary": "Suburban option with strong lifestyle appeal and family-oriented housing, but prices and commute tradeoffs should be reviewed carefully.",
+        "best_for": [
+          "Families",
+          "Longer-term buyers",
+          "Users wanting suburban services",
+          "Buyers prioritizing neighborhood feel"
+        ],
+        "commute_band": "Approx. 25-45 minutes depending on exact address, gate, traffic, and report time",
+        "likely_gate_logic": [
+          "Main Gate",
+          "Other gates depending on route and current access rules"
+        ],
+        "bah_fit": "medium",
+        "family_fit": "high",
+        "single_airman_fit": "medium",
+        "va_buyer_fit": "medium",
+        "traffic_risk": "medium_high",
+        "watchouts": [
+          "Higher pricing can pressure affordability",
+          "Commute can vary sharply by route and timing",
+          "HOA and taxes should be modeled carefully"
+        ],
+        "pcsu_recommendation": "Strong lifestyle candidate for families if monthly payment and commute remain inside the safe lane.",
+        "intelligence_type": "curated_pcsunited_intelligence"
+      }
+    ],
+    "commute_intelligence": {
+      "commute_bluf": "For Andrews, commute risk can outweigh small payment differences. Gate access, Capital Beltway and Route 5/301 congestion, school drop-off timing, and exact address can materially change daily commute quality. Times below are approximate and depend on gate, traffic, and exact address.",
+      "overall_commute_posture": "Challenging compared with lower-traffic military markets because National Capital Region congestion, gate access, school drop-off timing, and exact address can materially change daily commute quality.",
+      "primary_commute_factors": [
         "Gate hours",
-        "Closed-installation / REAL ID access rules",
-        "Base operator referral from VCC FAQ"
+        "Main Gate 24/7 versus scheduled Virginia and Pearl Harbor access",
+        "Capital Beltway and Route 5 / Route 301 congestion",
+        "School drop-off timing",
+        "Choosing by mileage instead of actual report-time commute",
+        "Longer drives from Charles County or Northern Virginia",
+        "Weather and major DC-area event disruptions"
       ],
-      "freshness_note": "The current official page also displays June 29-30 temporary gate notes that appear date-specific. Standing hours were used, with an explicit user warning to re-check before travel."
-    },
-    {
-      "label": "REAL ID required for base visitors after May 7",
-      "type": "official_current",
-      "url": "https://www.jba.af.mil/News/Article-Display/Article/4187143/real-id-required-for-base-visitors-after-may-7/",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "REAL ID access requirement effective 7 May 2025",
-        "Corroborating VCC address and weekday/Saturday hours"
+      "primary_commute_risks": [
+        "Capital Beltway and Route 5 / Route 301 congestion",
+        "Gate availability and peak report-time flow",
+        "School drop-off timing",
+        "Choosing by mileage instead of actual report-time commute",
+        "Longer drives from Charles County or Northern Virginia",
+        "Weather and major DC-area event disruptions"
       ],
-      "source_conflict_note": "Article lists VCC email 316.spt.visitor.center@us.af.mil. Current official VCC page states the new email is 316SSPTS.visitor.center@us.af.mil; the VCC page won."
-    },
-    {
-      "label": "Official 316th Wing factsheet",
-      "type": "official_published_profile",
-      "url": "https://www.jba.af.mil/About/Fact-Sheets/Display/Article/2216129/316th-wing/",
-      "published": "2025-04-16",
-      "verified_still_live_on": "2026-09-15",
-      "used_for": [
-        "Host-wing identity",
-        "Mission summary",
-        "Published 316th Wing total-force population profile",
-        "Major mission partners / aircraft-hosting organizations"
+      "commute_bands": [
+        {
+          "label": "Close-in",
+          "range": "Approx. 0-20 minutes depending on gate, traffic, and exact address",
+          "fit": "Best for users prioritizing proximity and daily convenience",
+          "watchout": "Close-in areas still need property, school, and safety screening."
+        },
+        {
+          "label": "Balanced",
+          "range": "Approx. 15-35 minutes depending on gate, traffic, and exact address",
+          "fit": "Often the best balance between housing quality, services, and commute",
+          "watchout": "Traffic and gate choice can still change the real commute."
+        },
+        {
+          "label": "Lifestyle tradeoff",
+          "range": "Approx. 30-55+ minutes depending on gate, traffic, and exact address",
+          "fit": "May work for families wanting larger homes, quieter areas, or specific schools",
+          "watchout": "Can become painful for early reporting, shift work, or frequent base errands."
+        }
       ],
-      "freshness_note": "Factsheet dated 16 April 2025. Underlying population data year is not stated; treat as published profile rather than a live headcount. Do not interpret the 60,000 NCR Airmen/families support statement as installation population."
-    },
-    {
-      "label": "Official 89th Airlift Wing factsheet",
-      "type": "official_current",
-      "url": "https://www.jba.af.mil/About/Fact-Sheets/Display/Article/336383/89th-airlift-wing/",
-      "published": "2025-09-26",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Special Air Mission / senior-leader airlift mission",
-        "89th AW tenant status under Air Mobility Command"
-      ]
-    },
-    {
-      "label": "Air Force District of Washington Units",
-      "type": "official_current",
-      "url": "https://www.afdw.af.mil/Units/",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "AFDW parent-command relationship",
-        "316th Wing host-wing role",
-        "844th Communications Group presence at Joint Base Andrews"
-      ]
-    },
-    {
-      "label": "Official Joint Base Andrews Newcomers",
-      "type": "official_current",
-      "url": "https://www.jba.af.mil/Resources/Newcomers/",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "After-hours Presidential Inn reporting guidance",
-        "Personal Property / TMO phone and org box",
-        "TMO briefing location"
-      ]
-    },
-    {
-      "label": "Official Joint Base Andrews Base Status",
-      "type": "official_current",
-      "url": "https://www.jba.af.mil/Resources/Base-Status/",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Main Gate 24-hour operations during base-status changes",
-        "Time-sensitive office/VCC status warning"
-      ]
-    },
-    {
-      "label": "316th Wing Protocol contact listing",
-      "type": "official_current",
-      "url": "https://www.jba.af.mil/Units/Protocol/",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Presidential Inn / lodging 301-981-4614",
-        "Base Access / 811 SFS 301-981-0689"
-      ]
-    },
-    {
-      "label": "Air Force Housing — Joint Base Andrews",
-      "type": "official_current",
-      "url": "https://www.housing.af.mil/Home/Installations/Joint-Base-Andrews/",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Military Housing Office phone, email, address, hours",
-        "Unaccompanied Housing phone, email, address, hours",
-        "Liberty Park at Andrews privatized housing contacts"
+      "gate_selection_logic": [
+        "Start with the user's likely duty location.",
+        "Identify the most realistic 24/7 gate (currently Main Gate).",
+        "Check Virginia Gate and Pearl Harbor Gate only as optional commute helpers during published hours.",
+        "Do not plan on North Gate based on the current official outbound-closed listing.",
+        "Compare the commute during the user's actual report window.",
+        "Do not choose a neighborhood based only on mileage."
       ],
-      "source_conflict_note": "UH street spelling Brookely vs Brookley on MyAirForceBenefits; UH email remains a legacy 11 CES org box on the current Air Force Housing page."
-    },
-    {
-      "label": "DeCA Andrews JB Commissary",
-      "type": "official_current",
-      "url": "https://corp.commissaries.com/shopping/store-locations/andrews-jb",
-      "source_key": "official_links.commissary",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Commissary address",
-        "Phone 301-541-1242",
-        "Normal store hours 0800-2100 daily",
-        "Published 2026 holiday hours"
+      "planning_guidance": [
+        "Test the commute during the user’s expected report-time window.",
+        "Confirm which gate best supports the user’s duty location.",
+        "Compare Camp Springs, Upper Marlboro, Clinton, Waldorf, Bowie, Brandywine, Fort Washington, and selected Northern Virginia corridors by route reliability, not only distance.",
+        "Use commute plus all-in housing cost as the core PCSUnited decision screen."
       ],
-      "source_conflict_note": "shop.commissaries.com lists different hours and 301-541-1370. MyAirForceBenefits lists 301-541-1702. DeCA corporate store page won for this Gold Standard."
+      "user_instruction": "Before signing a lease or contract, users should test the commute from the exact property address to the expected gate during the same time window they would normally report to work. Times are approximate and depend on gate, traffic, and exact address.",
+      "pcsu_bluf": "For Andrews, commute risk can outweigh small payment differences. The best housing choice balances BAH fit, gate logic, traffic, schools, HOA, taxes, spouse employment, and assignment length.",
+      "intelligence_type": "curated_pcsunited_intelligence"
     },
-    {
-      "label": "TRICARE Malcolm Grow / 316th Medical Group",
-      "type": "official_medical_current",
-      "url": "https://tricare.mil/GettingCare/FindDoctor/MTF/Facilities/316th-Medical-Group-Malcolm-Grow-Medical-Clinics-and-Surgery-Center",
-      "source_key": "official_links.medical",
-      "verified_on": "2026-09-15",
-      "published": "2026-02-05",
-      "used_for": [
-        "Medical facility address",
-        "Hospital information phone",
-        "Appointment lines",
-        "Clinic hours",
-        "Emergent Care Center hours"
-      ]
-    },
-    {
-      "label": "Andrews TRICARE Contact Us / Urgent & Emergency Care",
-      "type": "official_medical_current",
-      "url": "https://andrews.tricare.mil/About-Us/Contact-Us",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Hospital information line",
-        "Appointment lines",
-        "Emergent Care Center after-hours warning",
-        "Emergent Care Center phone on the urgent/emergency-care page"
-      ]
-    },
-    {
-      "label": "316th FSS Military & Family Readiness Center",
-      "type": "official_current",
-      "url": "https://andrewsfss.com/mfrc/",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "M&FRC address",
-        "Phone",
-        "Email",
-        "Hours"
+    "bah_market_reality": {
+      "bah_bluf": "Andrews should be modeled as a high-cost but stable National Capital Region market. BAH is a decision filter, not a promise of affordability. Compare BAH against rent or mortgage, taxes, HOA, insurance, commute, debt, and assignment length.",
+      "overall_position": "Mixed for buyers and challenging but manageable for renters.",
+      "buying_power_summary": "Higher prices reduce buying power compared with lower-cost military markets, but stable federal and military demand can support long-term resale logic for disciplined buyers.",
+      "renting_summary": "Renting remains practical for shorter assignments, users with tight residual income, households still learning the DC metro, or families avoiding transaction-cost risk.",
+      "recommended_calculations": [
+        "BAH with dependents vs estimated rent",
+        "BAH without dependents vs estimated rent",
+        "BAH vs estimated mortgage payment",
+        "Total housing cost vs 30% income lane",
+        "Residual monthly income after expenses and housing",
+        "Debt-to-income pressure",
+        "Rent vs buy break-even horizon"
       ],
-      "source_conflict_note": "MyAirForceBenefits lists 316.FSS.MFSC@us.af.mil; current FSS M&FRC page lists 316fss.mfrc.workflow@us.af.mil. FSS page won."
-    },
-    {
-      "label": "316th FSS Military Personnel Flight",
-      "type": "official_current",
-      "url": "https://andrewsfss.com/military-personnel-flight/",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "MPF phone",
-        "Location",
-        "Current operating hours",
-        "ID card / passport procedures"
-      ]
-    },
-    {
-      "label": "316th FSS Presidential Inn",
-      "type": "official_current",
-      "url": "https://andrewsfss.com/the-presidential-inn/",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Lodging name",
-        "Address",
-        "Reservations phone 301-909-8987",
-        "Lodging email",
-        "Front desk 24/7 listing"
+      "pcsu_decision_outputs": [
+        "Rent",
+        "Buy",
+        "Wait",
+        "Widen search",
+        "Reduce target price",
+        "Consider roommate",
+        "Use on-base housing as comparison"
       ],
-      "source_conflict_note": "JBA Protocol and FSS directory also publish 301-981-4614. Both official numbers are retained, with 301-909-8987 as the dedicated lodging-page primary."
-    },
-    {
-      "label": "Air Force Inns — Joint Base Andrews",
-      "type": "official_current",
-      "url": "https://af.dodlodging.net/propertys/joint-base-andrews",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Lodging address",
-        "Air Force Inns main number 301-909-8987",
-        "DSN 858-4614",
-        "June-August limited space note",
-        "Higher-priority lodging displacement warning"
-      ]
-    },
-    {
-      "label": "MilitaryINSTALLATIONS — Joint Base Andrews-Naval Air Facility Washington",
-      "type": "official_dod_current_portal",
-      "url": "https://installations.militaryonesource.mil/in-depth-overview/joint-base-andrews-naval-air-facility-washington",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Official joint-base name",
-        "Host-wing mission language",
-        "School liaison address/phone/hours"
+      "watch_items": [
+        "Assignment length",
+        "Purchase price",
+        "Property taxes",
+        "HOA dues",
+        "Insurance",
+        "Commute route",
+        "School zones",
+        "Debt-to-income pressure",
+        "Spouse employment geography",
+        "Exit strategy"
       ],
-      "freshness_note": "MilitaryINSTALLATIONS also publishes surrounding Maryland / Prince George's County / Washington, D.C. civilian population figures. Those are not installation population and were not used."
+      "base_tab_message": "Show BAH as a decision filter, not a promise of affordability. The Base tab should push users into the PCSUnited financial calculator when the housing gap looks tight.",
+      "pcsu_strategy_note": "Andrews should be modeled as a high-cost but stable market. PCSUnited should test each user’s rank, BAH, debt, savings, credit score, timeline, family needs, commute tolerance, HOA exposure, and exit plan before recommending buy versus rent.",
+      "intelligence_type": "curated_pcsunited_intelligence"
     },
-    {
-      "label": "MyAirForceBenefits Maryland Resource Locator",
-      "type": "official_current",
-      "url": "https://myairforcebenefits.us.af.mil/Benefit-Library/Resource-Locator/Maryland",
-      "published": "2025-09-23",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Base information number 301-981-1110",
-        "Exchange address and phone",
-        "School liaison address and phones",
-        "CDC and youth program contacts",
-        "Housing office corroboration"
+    "family_readiness": {
+      "family_bluf": "Andrews can work well for families who want National Capital Region access and strong support infrastructure, but it requires disciplined screening for schools, commute, safety, HOA, taxes, and all-in payment.",
+      "family_fit": "High",
+      "school_guidance": {
+        "on_base_option": "Imagine Andrews Public Charter School is listed on the official Joint Base Andrews Community page among JBA assigned-school references. Families should verify current eligibility, grade levels, enrollment, and attendance rules before choosing housing.",
+        "school_liaison_phone": "301-981-9211",
+        "school_liaison_email": "316FSS.FSY.SLO@us.af.mil",
+        "school_liaison_address": "Bldg 1442 Concord Ave., Room 103, Joint Base Andrews, MD 20762",
+        "school_zone_warning": "Maryland is not a public school-of-choice state. Always verify school assignment by exact residence before signing a lease or purchase contract.",
+        "nearby_school_district_note": "Common off-base research can include Prince George's County Public Schools, Charles County, Anne Arundel County, and nearby DC-area options depending on the property. Official JBA community references also include Dr. Henry A. Wise, Jr. High School, Stephen Decatur Middle School, and Francis T. Evans Elementary School; assignment is still address-specific."
+      },
+      "childcare_guidance": {
+        "cdc_note": "Child Development Center availability, waitlists, eligibility, and current operating details should be verified through MilitaryChildCare.com or current 316th FSS Child and Youth Services resources. MyAirForceBenefits lists CDC #1 at 4575 Virginia Avenue (301-981-3055), CDC #2 at 4783 San Antonio Boulevard (301-981-3323), and CDC #3 / JP Hoyer CDC at 3725 Fetchet Avenue (240-857-3207).",
+        "youth_program_note": "Youth programs and school-age care can materially affect family housing decisions. Youth Programs are listed at Bldg 4700 Yuma Road, 301-981-5430."
+      },
+      "medical_guidance": {
+        "primary_medical_anchor": "Malcolm Grow Medical Clinics and Surgery Center / 316th Medical Group",
+        "urgent_care": "Emergent Care Center operates daily 7:00 a.m.-7:00 p.m. Phone 240-857-2333.",
+        "medical_warning": "For emergencies call 911. Do not assume every clinic uses the same hours. After-hours emergency needs are directed to a nearby civilian emergency department under current official medical guidance. Verify clinic availability, referrals, pharmacy procedures, and current hours directly with official medical sources.",
+        "general_hours_note": "General appointment/referral support Monday-Friday 7:30 a.m.-4:00 p.m.; individual clinic hours vary."
+      },
+      "military_family_readiness_center": {
+        "name": "Joint Base Andrews Military & Family Readiness Center",
+        "address": "1191 Menoher Dr, Joint Base Andrews, MD 20762",
+        "phone": "301-981-7087",
+        "email": "316fss.mfrc.workflow@us.af.mil",
+        "hours": "Monday, Tuesday, Wednesday, Friday 7:30 a.m.-4:30 p.m.; Thursday 7:30 a.m.-12:00 p.m.; closed holidays and AFDW pass days"
+      },
+      "spouse_employment_note": "The National Capital Region generally offers broader spouse-employment options than many smaller duty stations, but childcare, commute, licensing/credentialing, security-access timing, and work location should be considered together.",
+      "strengths": [
+        "Large metro housing choice",
+        "Strong military and federal infrastructure",
+        "Access to DC-area healthcare, employment, culture, sports, and services",
+        "Multiple neighborhood and school-screening options",
+        "On-base housing can simplify the PCS for some families"
       ],
-      "freshness_note": "Document review date 23 September 2025. Used to corroborate contacts also published on more specific current pages."
-    },
-    {
-      "label": "AAFES JB Andrews Main Exchange locator",
-      "type": "official_commercial_military_retained",
-      "url": "https://www.shopmyexchange.com/store-locator/jb-andrews-main-exchange",
-      "source_key": "official_links.exchange",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Exchange reference link"
+      "watchouts": [
+        "School assignments and program fit should be verified by exact address",
+        "Childcare availability and waitlists should be checked early",
+        "Traffic can materially affect daily life",
+        "Housing costs can pressure lower and mid-rank BAH profiles",
+        "Neighborhood safety, property condition, and school fit vary sharply across the metro"
       ],
-      "freshness_note": "Current hours were not independently readable during this verification pass; the Gold Standard instructs users to verify hours directly with AAFES."
+      "pcsu_family_bluf": "Andrews can work well for families who want National Capital Region access and strong support infrastructure, but it requires disciplined screening for schools, commute, safety, HOA, taxes, and all-in payment.",
+      "verified_on": "2026-09-15"
     },
-    {
-      "label": "Official Joint Base Andrews Community / school references",
-      "type": "official_current",
-      "url": "https://www.jba.af.mil/Resources/Community/",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "JBA School Liaison community listing",
-        "Imagine Andrews and named Prince George's County school references"
-      ]
-    },
-    {
-      "label": "Existing Andrews.json market and PCSUnited intelligence",
-      "type": "preserved_internal_profile",
-      "source_key": "existing Andrews.json",
-      "verified_on": "2026-09-15",
-      "used_for": [
-        "Census / ACS demographics",
-        "March 2026 housing-market values",
-        "by-bedroom values",
-        "sale history",
-        "recommended neighborhoods",
-        "BAH / commute / realtor intelligence"
+    "arrival_checklist": {
+      "before_arrival": [
+        "Verify current gate and Visitor Control Center status on the official Joint Base Andrews Visitor Control Center page.",
+        "Confirm sponsor contact and unit reporting instructions.",
+        "If visitor access is needed, plan around published VCC hours; the VCC is closed Sundays and federal holidays.",
+        "Confirm lodging or temporary housing plan and call the Presidential Inn directly if traveling with children or pets.",
+        "Review Military Housing Office guidance before signing a lease or purchase contract.",
+        "Compare BAH against rent or mortgage, utilities, taxes, HOA, debt, savings goals, and commute.",
+        "Shortlist neighborhoods by realistic 24/7 Main Gate access and expected report time.",
+        "Verify school assignment by exact residence; Maryland is not a public school-of-choice state.",
+        "Check current pet policies for privatized housing, rentals, and temporary lodging."
       ],
-      "freshness_note": "MARKET_REFRESH_REQUIRED. Market as_of dates remain 2026-03 and were not changed because this file was verified on 2026-09-15."
+      "arrival_and_inprocessing": [
+        "If you arrive during duty hours, report to your unit as instructed.",
+        "If you arrive after duty hours without prior dormitory or lodging arrangements, official newcomers guidance says to report to the Presidential Inn and report to the unit in uniform the following duty day morning.",
+        "Contact Military Personnel Flight for ID card, DEERS, in-processing, career development, assignment, or separation support as applicable.",
+        "Contact Personal Property / TMO for household-goods or PPM issues; the org box is listed as the primary contact method.",
+        "Use the Military & Family Readiness Center for relocation information and referrals."
+      ],
+      "first_week": [
+        "Complete unit check-in and required in-processing appointments.",
+        "Visit or contact the housing office if still deciding between on-base and off-base options.",
+        "Confirm medical, Emergent Care Center, pharmacy, and emergency-care procedures.",
+        "Drive the commute from target neighborhoods during the actual expected report window.",
+        "Tour properties before committing when possible.",
+        "Avoid choosing housing solely by distance, rent, or list price."
+      ],
+      "first_30_days": [
+        "Finalize housing only after comparing commute, BAH fit, school needs, and total monthly cost.",
+        "Save operator, VCC, medical, gate, housing, and family-readiness contacts.",
+        "Update PCSUnited financial inputs with final housing numbers.",
+        "Review whether the selected area supports assignment length, family needs, resale/rental exit risk, and daily quality of life."
+      ],
+      "legacy_flat_checklist": [
+        "Verify current gate hours and visitor access procedures through official Joint Base Andrews sources.",
+        "Confirm whether on-base housing or off-base housing better fits rank, dependents, BAH, pets, school needs, spouse employment, and expected assignment length.",
+        "Compare Camp Springs, Upper Marlboro, Clinton, Waldorf, Bowie, Brandywine, Fort Washington, and selected Northern Virginia corridors using commute, schools, safety, and all-in monthly cost.",
+        "Check property tax, HOA, insurance, and commute estimates before finalizing a purchase budget.",
+        "Verify school zones by exact property address.",
+        "Test the commute during the expected report-time window before signing.",
+        "Use PCSUnited calculators to compare rent, buy, residual income, and risk level before committing."
+      ],
+      "verified_on": "2026-09-15"
+    },
+    "pcs_watchouts": [
+      {
+        "title": "Gate and VCC hours can change",
+        "severity": "high",
+        "message": "Use the official Joint Base Andrews Visitor Control Center page immediately before travel. As of 2026-09-15, Main Gate is listed 24/7, Virginia Gate 5 a.m.-9 p.m., Pearl Harbor inbound 5 a.m.-4 p.m. / outbound 5 a.m.-6 p.m., West Gate pedestrian inbound weekday mornings only, North Gate outbound closed, and the VCC is closed Sundays and federal holidays."
+      },
+      {
+        "title": "Visitor access procedures are security-sensitive",
+        "severity": "high",
+        "message": "JBA is a closed installation. Visitors should follow current identification, sponsorship, and REAL ID requirements. For access concerns, contact the VCC at 301-981-0232 / 301-981-0689."
+      },
+      {
+        "title": "Distance is not the same as commute",
+        "severity": "high",
+        "message": "Neighborhoods should be compared by realistic gate access, duty location, Beltway/Route 5/301 traffic, and report-time windows. Times are approximate and depend on gate, traffic, and exact address."
+      },
+      {
+        "title": "School assignments are residence-specific",
+        "severity": "high",
+        "message": "Maryland is not a public school-of-choice state. Verify school assignment by exact property address. Do not assume Imagine Andrews or any named community school is automatically available."
+      },
+      {
+        "title": "BAH is not the full affordability picture",
+        "severity": "high",
+        "message": "Do not assume BAH automatically covers comfortable ownership in the National Capital Region. Compare rent or mortgage against income, debt, utilities, taxes, insurance, HOA, savings goals, and assignment length."
+      },
+      {
+        "title": "Published population is host-wing profile, not a live installation census",
+        "severity": "medium_high",
+        "message": "The 316th Wing factsheet publishes approximately 9,238 total force, 7,412 military, and 1,920 civilians. That is not a complete tenant-inclusive installation headcount and is not Camp Springs, Prince George's County, or Washington, D.C. population."
+      },
+      {
+        "title": "Lodging and housing-office details have source conflicts",
+        "severity": "medium",
+        "message": "Presidential Inn phones 301-909-8987 and 301-981-4614 both appear on official pages. Commissary phone/hours differ between DeCA corporate, shop.commissaries.com, and MyAirForceBenefits. Use the contacts in this profile and verify before travel."
+      },
+      {
+        "title": "On-base housing is not automatically the best financial answer",
+        "severity": "medium",
+        "message": "Compare availability, BAH treatment, commute, home fit, schools, and lifestyle before deciding. Short assignments may favor renting or on-base housing if resale risk is high."
+      },
+      {
+        "title": "Spouse employment location can change the best housing corridor",
+        "severity": "medium",
+        "message": "NCR dual-commute households may need a different corridor than a base-only commute. Test both work locations during expected report windows."
+      }
+    ],
+    "realtor_intelligence": {
+      "best_client_positioning": "Lead with BAH realism, commute testing, all-in monthly cost, school-zone verification, and corridor strategy. Andrews clients need a National Capital Region decision guide, not generic Maryland market advice.",
+      "buyer_personas": [
+        {
+          "persona": "First-time VA buyer",
+          "likely_questions": [
+            "Can I afford to buy near Andrews?",
+            "Which areas fit my BAH?",
+            "How bad is the commute?",
+            "Should I rent first?"
+          ],
+          "agent_strategy": "Lead with BAH realism, monthly payment clarity, commute testing, and VA loan education."
+        },
+        {
+          "persona": "E-5 / E-6 family with dependents",
+          "likely_questions": [
+            "Where do military families usually live?",
+            "Which school zones should I research?",
+            "Is Waldorf too far?",
+            "Is on-base housing better?"
+          ],
+          "agent_strategy": "Compare Camp Springs, Clinton, Upper Marlboro, Bowie, Waldorf, and on-base housing against commute and monthly cost."
+        },
+        {
+          "persona": "Single airman / short-term renter",
+          "likely_questions": [
+            "What is close and affordable?",
+            "Do I need a roommate?",
+            "Where should I avoid signing too fast?"
+          ],
+          "agent_strategy": "Keep recommendations practical: commute, rent, safety, property condition, and lease flexibility."
+        },
+        {
+          "persona": "Permanent party / dual-income NCR household",
+          "likely_questions": [
+            "Should I buy if I may be here longer?",
+            "How do I balance Andrews commute and spouse employment?",
+            "What areas have resale strength?"
+          ],
+          "agent_strategy": "Use assignment length, dual-commute geography, family needs, and rent-vs-buy math to guide the recommendation."
+        }
+      ],
+      "listing_angles": [
+        "Practical commute to Joint Base Andrews",
+        "National Capital Region access",
+        "Military PCS-friendly positioning",
+        "Move-in ready condition",
+        "Low or reasonable HOA when applicable",
+        "School-zone clarity and commute-route confidence"
+      ],
+      "strong_listing_angles": [
+        "Practical commute to Joint Base Andrews",
+        "National Capital Region access",
+        "Military PCS-friendly positioning",
+        "Move-in ready condition",
+        "Low or reasonable HOA when applicable",
+        "School-zone clarity and commute-route confidence"
+      ],
+      "buyer_consultation_angles": [
+        "Rent versus buy based on assignment length",
+        "All-in payment including taxes, insurance, HOA, utilities, and maintenance",
+        "Prince George's County versus Charles County versus Northern Virginia commute tradeoffs",
+        "Property condition and VA appraisal readiness",
+        "Future resale appeal to military, federal, and contractor buyers"
+      ],
+      "investor_consultation_angles": [
+        "Military and federal renter demand",
+        "National Capital Region rental depth",
+        "Vacancy and turnover assumptions",
+        "HOA, taxes, insurance, utility, and maintenance reserves",
+        "Commute corridor quality"
+      ],
+      "common_objections": [
+        "Commute uncertainty",
+        "Gate traffic",
+        "School-zone confusion",
+        "Safety perception",
+        "Affordability gap between BAH and mortgage",
+        "HOA and tax drag",
+        "Short assignment timeline"
+      ],
+      "recommended_agent_behavior": [
+        "Do not overpromise commute times.",
+        "Always recommend school-zone verification by address.",
+        "Use payment math, not just listing price.",
+        "Discuss gate access early.",
+        "Compare on-base housing as a legitimate alternative.",
+        "Avoid generic DC-metro advice when the user is assigned to Andrews."
+      ],
+      "pcsu_realtor_bluf": "A strong Andrews realtor should sound like a BAH strategist, commute filter, school-zone guide, HOA screener, and NCR risk manager — not just a sales agent.",
+      "intelligence_type": "curated_pcsunited_intelligence"
+    },
+    "data_confidence": {
+      "overall": "high_for_current_base_essentials_medium_high_for_curated_pcs_intelligence",
+      "identity": "high_current_public_official",
+      "mission": "high_current_316th_wing_and_89th_aw_sources",
+      "base_operator": "high_current_public_official",
+      "installation_population": "medium_published_profile_not_live_headcount",
+      "gate_data": "high_current_public_official_time_sensitive",
+      "visitor_control_center": "high_current_public_official",
+      "housing_office": "high_current_air_force_housing",
+      "unaccompanied_housing": "high_current_air_force_housing",
+      "privatized_housing": "high_current_air_force_housing",
+      "medical": "high_current_tricare",
+      "commissary": "high_current_deca_with_source_conflict_note",
+      "exchange": "medium_official_source_retained_hours_require_direct_recheck",
+      "military_family_readiness": "high_current_316th_fss",
+      "school_liaison": "high_current_militaryinstallations_and_fss",
+      "recommended_neighborhoods": "curated_pcsunited_intelligence",
+      "commute_bands": "estimated_requires_address_and_report_time_validation",
+      "bah_market_guidance": "strategy_layer_requires_rank_family_and_financial_inputs",
+      "housing_market_demographics": "preserved_from_existing_2026_03_source_records_not_revalidated_in_this_installation_profile_pass",
+      "last_reviewed": "2026-09-15"
+    },
+    "source_notes": [
+      {
+        "label": "Official Joint Base Andrews homepage",
+        "type": "official_current",
+        "url": "https://www.jba.af.mil/",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Base operator 301-981-1110",
+          "Installation identity"
+        ]
+      },
+      {
+        "label": "Official Joint Base Andrews Visitor Control Center",
+        "type": "official_current",
+        "url": "https://www.jba.af.mil/Resources/Visitor-Control-Center/",
+        "source_key": "official_links.visitor_info",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "VCC address",
+          "VCC phones",
+          "VCC email",
+          "VCC hours",
+          "Gate names",
+          "Gate status",
+          "Gate hours",
+          "Closed-installation / REAL ID access rules",
+          "Base operator referral from VCC FAQ"
+        ],
+        "freshness_note": "The current official page also displays June 29-30 temporary gate notes that appear date-specific. Standing hours were used, with an explicit user warning to re-check before travel."
+      },
+      {
+        "label": "REAL ID required for base visitors after May 7",
+        "type": "official_current",
+        "url": "https://www.jba.af.mil/News/Article-Display/Article/4187143/real-id-required-for-base-visitors-after-may-7/",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "REAL ID access requirement effective 7 May 2025",
+          "Corroborating VCC address and weekday/Saturday hours"
+        ],
+        "source_conflict_note": "Article lists VCC email 316.spt.visitor.center@us.af.mil. Current official VCC page states the new email is 316SSPTS.visitor.center@us.af.mil; the VCC page won."
+      },
+      {
+        "label": "Official 316th Wing factsheet",
+        "type": "official_published_profile",
+        "url": "https://www.jba.af.mil/About/Fact-Sheets/Display/Article/2216129/316th-wing/",
+        "published": "2025-04-16",
+        "verified_still_live_on": "2026-09-15",
+        "used_for": [
+          "Host-wing identity",
+          "Mission summary",
+          "Published 316th Wing total-force population profile",
+          "Major mission partners / aircraft-hosting organizations"
+        ],
+        "freshness_note": "Factsheet dated 16 April 2025. Underlying population data year is not stated; treat as published profile rather than a live headcount. Do not interpret the 60,000 NCR Airmen/families support statement as installation population."
+      },
+      {
+        "label": "Official 89th Airlift Wing factsheet",
+        "type": "official_current",
+        "url": "https://www.jba.af.mil/About/Fact-Sheets/Display/Article/336383/89th-airlift-wing/",
+        "published": "2025-09-26",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Special Air Mission / senior-leader airlift mission",
+          "89th AW tenant status under Air Mobility Command"
+        ]
+      },
+      {
+        "label": "Air Force District of Washington Units",
+        "type": "official_current",
+        "url": "https://www.afdw.af.mil/Units/",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "AFDW parent-command relationship",
+          "316th Wing host-wing role",
+          "844th Communications Group presence at Joint Base Andrews"
+        ]
+      },
+      {
+        "label": "Official Joint Base Andrews Newcomers",
+        "type": "official_current",
+        "url": "https://www.jba.af.mil/Resources/Newcomers/",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "After-hours Presidential Inn reporting guidance",
+          "Personal Property / TMO phone and org box",
+          "TMO briefing location"
+        ]
+      },
+      {
+        "label": "Official Joint Base Andrews Base Status",
+        "type": "official_current",
+        "url": "https://www.jba.af.mil/Resources/Base-Status/",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Main Gate 24-hour operations during base-status changes",
+          "Time-sensitive office/VCC status warning"
+        ]
+      },
+      {
+        "label": "316th Wing Protocol contact listing",
+        "type": "official_current",
+        "url": "https://www.jba.af.mil/Units/Protocol/",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Presidential Inn / lodging 301-981-4614",
+          "Base Access / 811 SFS 301-981-0689"
+        ]
+      },
+      {
+        "label": "Air Force Housing — Joint Base Andrews",
+        "type": "official_current",
+        "url": "https://www.housing.af.mil/Home/Installations/Joint-Base-Andrews/",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Military Housing Office phone, email, address, hours",
+          "Unaccompanied Housing phone, email, address, hours",
+          "Liberty Park at Andrews privatized housing contacts"
+        ],
+        "source_conflict_note": "UH street spelling Brookely vs Brookley on MyAirForceBenefits; UH email remains a legacy 11 CES org box on the current Air Force Housing page."
+      },
+      {
+        "label": "DeCA Andrews JB Commissary",
+        "type": "official_current",
+        "url": "https://corp.commissaries.com/shopping/store-locations/andrews-jb",
+        "source_key": "official_links.commissary",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Commissary address",
+          "Phone 301-541-1242",
+          "Normal store hours 0800-2100 daily",
+          "Published 2026 holiday hours"
+        ],
+        "source_conflict_note": "shop.commissaries.com lists different hours and 301-541-1370. MyAirForceBenefits lists 301-541-1702. DeCA corporate store page won for this Gold Standard."
+      },
+      {
+        "label": "TRICARE Malcolm Grow / 316th Medical Group",
+        "type": "official_medical_current",
+        "url": "https://tricare.mil/GettingCare/FindDoctor/MTF/Facilities/316th-Medical-Group-Malcolm-Grow-Medical-Clinics-and-Surgery-Center",
+        "source_key": "official_links.medical",
+        "verified_on": "2026-09-15",
+        "published": "2026-02-05",
+        "used_for": [
+          "Medical facility address",
+          "Hospital information phone",
+          "Appointment lines",
+          "Clinic hours",
+          "Emergent Care Center hours"
+        ]
+      },
+      {
+        "label": "Andrews TRICARE Contact Us / Urgent & Emergency Care",
+        "type": "official_medical_current",
+        "url": "https://andrews.tricare.mil/About-Us/Contact-Us",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Hospital information line",
+          "Appointment lines",
+          "Emergent Care Center after-hours warning",
+          "Emergent Care Center phone on the urgent/emergency-care page"
+        ]
+      },
+      {
+        "label": "316th FSS Military & Family Readiness Center",
+        "type": "official_current",
+        "url": "https://andrewsfss.com/mfrc/",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "M&FRC address",
+          "Phone",
+          "Email",
+          "Hours"
+        ],
+        "source_conflict_note": "MyAirForceBenefits lists 316.FSS.MFSC@us.af.mil; current FSS M&FRC page lists 316fss.mfrc.workflow@us.af.mil. FSS page won."
+      },
+      {
+        "label": "316th FSS Military Personnel Flight",
+        "type": "official_current",
+        "url": "https://andrewsfss.com/military-personnel-flight/",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "MPF phone",
+          "Location",
+          "Current operating hours",
+          "ID card / passport procedures"
+        ]
+      },
+      {
+        "label": "316th FSS Presidential Inn",
+        "type": "official_current",
+        "url": "https://andrewsfss.com/the-presidential-inn/",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Lodging name",
+          "Address",
+          "Reservations phone 301-909-8987",
+          "Lodging email",
+          "Front desk 24/7 listing"
+        ],
+        "source_conflict_note": "JBA Protocol and FSS directory also publish 301-981-4614. Both official numbers are retained, with 301-909-8987 as the dedicated lodging-page primary."
+      },
+      {
+        "label": "Air Force Inns — Joint Base Andrews",
+        "type": "official_current",
+        "url": "https://af.dodlodging.net/propertys/joint-base-andrews",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Lodging address",
+          "Air Force Inns main number 301-909-8987",
+          "DSN 858-4614",
+          "June-August limited space note",
+          "Higher-priority lodging displacement warning"
+        ]
+      },
+      {
+        "label": "MilitaryINSTALLATIONS — Joint Base Andrews-Naval Air Facility Washington",
+        "type": "official_dod_current_portal",
+        "url": "https://installations.militaryonesource.mil/in-depth-overview/joint-base-andrews-naval-air-facility-washington",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Official joint-base name",
+          "Host-wing mission language",
+          "School liaison address/phone/hours"
+        ],
+        "freshness_note": "MilitaryINSTALLATIONS also publishes surrounding Maryland / Prince George's County / Washington, D.C. civilian population figures. Those are not installation population and were not used."
+      },
+      {
+        "label": "MyAirForceBenefits Maryland Resource Locator",
+        "type": "official_current",
+        "url": "https://myairforcebenefits.us.af.mil/Benefit-Library/Resource-Locator/Maryland",
+        "published": "2025-09-23",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Base information number 301-981-1110",
+          "Exchange address and phone",
+          "School liaison address and phones",
+          "CDC and youth program contacts",
+          "Housing office corroboration"
+        ],
+        "freshness_note": "Document review date 23 September 2025. Used to corroborate contacts also published on more specific current pages."
+      },
+      {
+        "label": "AAFES JB Andrews Main Exchange locator",
+        "type": "official_commercial_military_retained",
+        "url": "https://www.shopmyexchange.com/store-locator/jb-andrews-main-exchange",
+        "source_key": "official_links.exchange",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Exchange reference link"
+        ],
+        "freshness_note": "Current hours were not independently readable during this verification pass; the Gold Standard instructs users to verify hours directly with AAFES."
+      },
+      {
+        "label": "Official Joint Base Andrews Community / school references",
+        "type": "official_current",
+        "url": "https://www.jba.af.mil/Resources/Community/",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "JBA School Liaison community listing",
+          "Imagine Andrews and named Prince George's County school references"
+        ]
+      },
+      {
+        "label": "Existing Andrews.json market and PCSUnited intelligence",
+        "type": "preserved_internal_profile",
+        "source_key": "existing Andrews.json",
+        "verified_on": "2026-09-15",
+        "used_for": [
+          "Census / ACS demographics",
+          "March 2026 housing-market values",
+          "by-bedroom values",
+          "sale history",
+          "recommended neighborhoods",
+          "BAH / commute / realtor intelligence"
+        ],
+        "freshness_note": "MARKET_REFRESH_REQUIRED. Market as_of dates remain 2026-03 and were not changed because this file was verified on 2026-09-15."
+      }
+    ],
+    "disclaimer": "PCSUnited is not an official DoD or Department of the Air Force source. This profile is for public-facing PCS orientation, housing research, relocation planning, and Ask Amy explanations. Time-sensitive information—especially gate/VCC status, access rules, medical operations, housing availability, lodging, and office hours—must be verified with the official installation or service provider before travel or making a housing decision."
+  },
+  "sources": {
+    "demographics": {
+      "provider": "US Census Bureau QuickFacts / ACS profile for Camp Springs CDP, Maryland",
+      "as_of": "2026-03"
+    },
+    "rent": {
+      "provider": "RentCast / Zillow-style rental listing estimates / local rental market observations",
+      "as_of": "2026-03"
+    },
+    "home_price": {
+      "provider": "RentCast / Zillow-style market estimates / local MLS-style housing observations",
+      "as_of": "2026-03"
+    },
+    "base_profile": {
+      "provider": "PCSUnited Gold Standard installation profile using official Joint Base Andrews, 316th Wing, Air Force Housing, MilitaryINSTALLATIONS, TRICARE, DeCA, 316th FSS, and other public authoritative sources",
+      "as_of": "2026-09-15",
+      "verification_level": "official-source-validated for Base Map / Ask Amy essentials",
+      "market_data_scope_note": "Housing-market and demographic data elsewhere in this file retain their March 2026 source dates and were not re-dated during this structural repair. MARKET_REFRESH_REQUIRED."
     }
-  ],
-  "disclaimer": "PCSUnited is not an official DoD or Department of the Air Force source. This profile is for public-facing PCS orientation, housing research, relocation planning, and Ask Amy explanations. Time-sensitive information—especially gate/VCC status, access rules, medical operations, housing availability, lodging, and office hours—must be verified with the official installation or service provider before travel or making a housing decision."
+  },
+  "compatibility": {
+    "orozco_realty_ready": true,
+    "pcsunited_ready": true,
+    "intended_primary_slug": "andrews-afb",
+    "schema_family": "pcsunited-city-base-json",
+    "schema_version": "pcsu-base-profile-v1.1.0",
+    "base_demographics_shell_ready": true,
+    "base_tab_ready": true,
+    "uses_placeholder_base_image": true,
+    "placeholder_base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
+    "parser_notes": [
+      "Restored to the PCSUnited city/base JSON architecture: root market/demographic data, nested base_profile, root sources, then compatibility.",
+      "base_profile is nested as the object consumed by Base-Map/base-map.js getProfile(json) and Base-Map/ask-amy-base-map-server.js sanitizeBaseSnapshot().",
+      "All major PCSUnited fields preserved and adapted for Joint Base Andrews.",
+      "Compatible with PCS Snapshot, Base Demographics Shell, Base SaaS, and TOR parsing.",
+      "Preserves duplicate home-value aliases for avg_home_value, average_home_value, avgHome, and city_avg_home.",
+      "Preserves duplicate median-price aliases for median_list_price, median_sold_price, and median_sale_price.",
+      "Preserves by_bedroom entries for 2, 3, 4, and 5-bedroom Market Insight compatibility.",
+      "Current official installation facts inside base_profile were verified separately from older market data.",
+      "Andrews market data retains its March 2026 source date. MARKET_REFRESH_REQUIRED: RentCast was not called during this repair.",
+      "Gold Standard v1.1.0 adds canonical base_operator and installation_population objects recognized by Base Map and Ask Amy.",
+      "Ask Amy and Base Map compatibility are maintained via nested json.base_profile.",
+      "This file repairs the flattened Andrews.json that incorrectly placed installation fields at root."
+    ],
+    "gold_standard_base_map_ask_amy_ready": true,
+    "base_map_required_fields_ready": true,
+    "ask_amy_server_required_fields_ready": true
+  }
 }
