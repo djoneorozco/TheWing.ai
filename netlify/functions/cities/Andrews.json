@@ -17,7 +17,7 @@
     "profile_version": "pcsu-base-profile-v1.1.0",
     "verified_on": "2026-09-15",
     "verification_scope": "Installation identity, mission, operator, published host-wing population profile, visitor control center, gate hours/status, housing contacts, medical, commissary, family readiness, lodging, MPS, school support, and PCS arrival references.",
-    "market_data_note": "Existing housing-market and demographic values are preserved from the file's recorded March 2026 sources and are not re-dated by this installation-profile verification. MARKET_REFRESH_REQUIRED: RentCast credentials were not available in this environment, so market fields were not refreshed."
+    "market_data_note": "Existing housing-market and demographic values are preserved from the file's recorded March 2026 sources and are not re-dated by this installation-profile verification. MARKET_REFRESH_REQUIRED: RentCast was not called during this structural repair, so market fields were not refreshed."
   },
   "image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
   "base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
@@ -504,8 +504,8 @@
     "installation_population": {
       "total": "Approximately 9,238 (316th Wing published total force only; not a complete installation-wide headcount)",
       "military": "Approximately 7,412 (active duty, Guard, and Reserve combined; 316th Wing factsheet)",
-    "civilian": "Approximately 1,920",
-    "note": "The current official 316th Wing factsheet (published 16 April 2025) lists Total Force Strength of approximately 9,238, including approximately 7,412 military (active duty, Guard, and Reserve combined) and approximately 1,920 civilians. That is a host-wing published profile, not a live installation census and not a complete Joint Base Andrews headcount of all tenant wings, Naval Air Facility Washington, headquarters staffs, contractors, and family members. The same factsheet's '60,000 Airmen and families in the National Capital Region and around the world' is a support-population statement, not on-installation population. Surrounding Camp Springs, Prince George's County, and Washington, D.C. civilian population figures are not installation population and are not used here. Do not add unlike categories into a fabricated total.",
+      "civilian": "Approximately 1,920",
+      "note": "The current official 316th Wing factsheet (published 16 April 2025) lists Total Force Strength of approximately 9,238, including approximately 7,412 military (active duty, Guard, and Reserve combined) and approximately 1,920 civilians. That is a host-wing published profile, not a live installation census and not a complete Joint Base Andrews headcount of all tenant wings, Naval Air Facility Washington, headquarters staffs, contractors, and family members. The same factsheet's '60,000 Airmen and families in the National Capital Region and around the world' is a support-population statement, not on-installation population. Surrounding Camp Springs, Prince George's County, and Washington, D.C. civilian population figures are not installation population and are not used here. Do not add unlike categories into a fabricated total.",
       "source_freshness": "316th Wing factsheet dated 16 April 2025; underlying headcount year is not stated. Treat as a published profile, not a live 2026 headcount.",
       "verified_on": "2026-09-15"
     },
@@ -711,7 +711,7 @@
         "map_label": "Medical Clinic",
         "address": "1060 West Perimeter Road, Joint Base Andrews, MD 20762",
         "phone": "Hospital information 240-612-1152; appointments 888-999-1212 or 855-227-6331",
-        "hours": "Monday-Friday 7:30 a.m.-4:30 p.m. Emergent Care Center daily 7 a.m.-7 p.m. TRICARE facility listing states services are limited to the Emergent Care Center on federal holidays, designated family days, and every second Thursday of the month.",
+        "hours": "General appointment/referral support Monday-Friday 7:30 a.m.-4:00 p.m.; individual clinic hours vary. Emergent Care Center operates daily 7:00 a.m.-7:00 p.m.",
         "best_for": [
           "Primary military medical services",
           "Pharmacy-related planning",
@@ -719,7 +719,7 @@
           "PCS arrival healthcare setup"
         ],
         "map_zone": "medical support area / West Perimeter Road",
-        "user_note": "316th Medical Group facility. For life-threatening emergencies call 911. Official urgent/emergency-care guidance lists Emergent Care Center phone 240-857-2333 and states after-hours emergency needs are directed to a nearby civilian emergency department. Verify clinic, pharmacy, and emergency procedures before travel. TRICARE.mil facility page last updated 5 February 2026.",
+        "user_note": "316th Medical Group facility. For life-threatening emergencies call 911. Official urgent/emergency-care guidance lists Emergent Care Center phone 240-857-2333 and states after-hours emergency needs are directed to a nearby civilian emergency department. Verify clinic, pharmacy, and emergency procedures before travel. TRICARE.mil facility page last updated 5 February 2026. Do not treat general appointment hours as a facility-wide schedule. TRICARE facility listing states services are limited to the Emergent Care Center on federal holidays, designated family days, and every second Thursday of the month. Emergent Care Center phone: 240-857-2333.",
         "verification_status": "verified_official",
         "verified_on": "2026-09-15"
       },
@@ -1224,8 +1224,9 @@
       },
       "medical_guidance": {
         "primary_medical_anchor": "Malcolm Grow Medical Clinics and Surgery Center / 316th Medical Group",
-        "urgent_care": "Emergent Care Center operates daily 7:00 a.m.-7:00 p.m. for urgent/emergency-care needs during those hours.",
-        "medical_warning": "For emergencies call 911. After-hours emergency needs are directed to a nearby civilian emergency department under current official medical guidance. Verify clinic availability, referrals, pharmacy procedures, and current hours directly with official medical sources."
+        "urgent_care": "Emergent Care Center operates daily 7:00 a.m.-7:00 p.m. Phone 240-857-2333.",
+        "medical_warning": "For emergencies call 911. Do not assume every clinic uses the same hours. After-hours emergency needs are directed to a nearby civilian emergency department under current official medical guidance. Verify clinic availability, referrals, pharmacy procedures, and current hours directly with official medical sources.",
+        "general_hours_note": "General appointment/referral support Monday-Friday 7:30 a.m.-4:00 p.m.; individual clinic hours vary."
       },
       "military_family_readiness_center": {
         "name": "Joint Base Andrews Military & Family Readiness Center",
@@ -1750,11 +1751,10 @@
       "as_of": "2026-03"
     },
     "base_profile": {
-      "provider": "PCSUnited Gold Standard installation profile using official Joint Base Andrews, 316th Wing, Air Force District of Washington, Air Force Housing, TRICARE, DeCA, 316th FSS, MilitaryINSTALLATIONS, and MyAirForceBenefits sources",
+      "provider": "PCSUnited Gold Standard installation profile using official Joint Base Andrews, 316th Wing, Air Force Housing, MilitaryINSTALLATIONS, TRICARE, DeCA, 316th FSS, and other public authoritative sources",
       "as_of": "2026-09-15",
       "verification_level": "official-source-validated for Base Map / Ask Amy essentials",
-      "market_data_scope_note": "Housing-market and demographic data elsewhere in this file retain their own source dates and were not re-dated during this installation-profile verification.",
-      "direct_mil_fetch_note": "Direct HTTP fetches of jba.af.mil, housing.af.mil, and andrews.tricare.mil from this verification environment were blocked by Akamai Access Denied. Current official-page content was corroborated from live public search indexes of those same official URLs on 2026-09-15, plus directly fetched DeCA, 316th FSS, Air Force Inns, TRICARE.mil facility, and MyAirForceBenefits pages."
+      "market_data_scope_note": "Housing-market and demographic data elsewhere in this file retain their March 2026 source dates and were not re-dated during this structural repair. MARKET_REFRESH_REQUIRED."
     }
   },
   "compatibility": {
@@ -1768,18 +1768,18 @@
     "uses_placeholder_base_image": true,
     "placeholder_base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
     "parser_notes": [
-      "Follows the PCSUnited Gold Standard city/base JSON pattern used by the v1.1.0 Base Map / Ask Amy profile family.",
+      "Restored to the PCSUnited city/base JSON architecture: root market/demographic data, nested base_profile, root sources, then compatibility.",
+      "base_profile is nested as the object consumed by Base-Map/base-map.js getProfile(json) and Base-Map/ask-amy-base-map-server.js sanitizeBaseSnapshot().",
       "All major PCSUnited fields preserved and adapted for Joint Base Andrews.",
       "Compatible with PCS Snapshot, Base Demographics Shell, Base SaaS, and TOR parsing.",
-      "Preserves duplicate value aliases for avg_home_value, average_home_value, avgHome, and city_avg_home.",
-      "Preserves duplicate median price aliases for median_list_price, median_sold_price, and median_sale_price.",
-      "Expanded by_bedroom to include 2, 3, 4, and 5-bedroom entries for Market Insight compatibility.",
-      "Expanded base_profile to include map image, official links, visitor control center, gates, major services, on-base housing, recommended neighborhoods, commute intelligence, BAH market reality, family readiness, arrival checklist, PCS watchouts, realtor intelligence, data confidence, source notes, and disclaimer.",
-      "Gold Standard v1.1.0 adds canonical base_operator and installation_population objects recognized by Base-Map/base-map.js and Base-Map/ask-amy-base-map-server.js.",
-      "Gold Standard v1.1.0 standardizes official_links aliases used by Ask Amy: base_home, gate_hours, visitor_info, housing, medical, commissary, exchange, military_installations, family_readiness, temporary_lodging, newcomers, mps, and school_liaison.",
-      "Current 2026-09-15 gate/VCC data supersedes older verify-current-status placeholders and the prior Military OneSource Sunday VCC-hours listing.",
-      "Installation population uses the 316th Wing published total-force profile only. Surrounding Camp Springs / Prince George's County / Washington, D.C. population is not used as installation population.",
-      "MARKET_REFRESH_REQUIRED: March 2026 housing-market and demographic values were preserved; RentCast was not available to refresh them."
+      "Preserves duplicate home-value aliases for avg_home_value, average_home_value, avgHome, and city_avg_home.",
+      "Preserves duplicate median-price aliases for median_list_price, median_sold_price, and median_sale_price.",
+      "Preserves by_bedroom entries for 2, 3, 4, and 5-bedroom Market Insight compatibility.",
+      "Current official installation facts inside base_profile were verified separately from older market data.",
+      "Andrews market data retains its March 2026 source date. MARKET_REFRESH_REQUIRED: RentCast was not called during this repair.",
+      "Gold Standard v1.1.0 adds canonical base_operator and installation_population objects recognized by Base Map and Ask Amy.",
+      "Ask Amy and Base Map compatibility are maintained via nested json.base_profile.",
+      "This file repairs the flattened Andrews.json that incorrectly placed installation fields at root."
     ],
     "gold_standard_base_map_ask_amy_ready": true,
     "base_map_required_fields_ready": true,
