@@ -10,17 +10,24 @@
   "geo_id": "1600000US2204650",
   "year": 2026,
   "last_updated_data_from_sources": "March 2026",
+  "last_verified_base_profile": "2026-09-16",
+  "gold_standard_profile": {
+    "status": "canonical",
+    "purpose": "PCSUnited Base Map, Ask Amy Base Map Concierge, Base Demographics, and related PCS planning experiences",
+    "profile_version": "pcsu-base-profile-v1.1.0",
+    "verified_on": "2026-09-16",
+    "verification_scope": "Installation identity, mission, operator, published Newcomers population profile, visitor control centers, gate hours/status, housing contacts, medical, commissary, family readiness, lodging, MPS, school support, and PCS arrival references.",
+    "market_data_note": "Existing housing-market and demographic values are preserved from the file's recorded March 2026 sources and are not re-dated by this installation-profile verification. MARKET_REFRESH_REQUIRED: RentCast was not called during this upgrade, so market fields were not refreshed."
+  },
   "image_url": "https://cdn.prod.website-files.com/69b6b526f23748df9f189b16/69c0dd5fceecbebcef0f07c2_d994da26a0b742fc31d07ef63362cdee_Shreveport.png",
   "base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69fa02bc4135f5c4d0494910_Barkdsdale.png",
   "zip": "71110",
   "market_label": "Shreveport-Bossier Metro",
   "profile": "Military-friendly Barksdale AFB housing snapshot anchored to the Shreveport-Bossier metro, built for PCSUnited base-level market overviews.",
-
   "avg_home_value": 245000,
   "average_home_value": 245000,
   "avgHome": 245000,
   "city_avg_home": 245000,
-
   "snapshot": {
     "population_city": 4580,
     "population_metro": 395000,
@@ -30,7 +37,6 @@
     "traffic_level": "Low to Moderate",
     "employment_status": "Stable"
   },
-
   "market_metrics": {
     "median_list_price": 255000,
     "median_sold_price": 242000,
@@ -44,7 +50,6 @@
     "zillow_one_year_change_percent": 1.5,
     "as_of": "2026-03"
   },
-
   "metrics": {
     "median_list_price": 255000,
     "median_sold_price": 242000,
@@ -57,7 +62,6 @@
     "property_tax_rate": 0.0062,
     "as_of": "2026-03"
   },
-
   "mortgage_assumptions": {
     "apr_percent": 6.25,
     "term_years": 30,
@@ -65,13 +69,11 @@
     "includes": "va_loan_all_in",
     "defaults_note": "Based on March 2026 Louisiana VA loan rates."
   },
-
   "property_tax_rate": 0.0062,
   "property_tax_rate_percent": 0.62,
   "insurance_rate": 0.0095,
   "insurance_rate_percent": 0.95,
   "hoa_monthly": 20,
-
   "ownership_costs": {
     "property_tax_rate": 0.0062,
     "property_tax_rate_percent": 0.62,
@@ -85,93 +87,76 @@
       "Lower home prices offset total monthly burden relative to larger metros."
     ]
   },
-
   "costs": {
     "property_tax_rate": 0.0062,
     "insurance_annual_default": 2328,
     "hoa_monthly_default": 20
   },
-
   "avg_home_mortgage_monthly": {
     "avg": 1850,
     "as_of": "2026-03",
     "notes": "VA loan estimate for Shreveport-Bossier area"
   },
-
   "population": {
     "estimate": 4580,
     "median_age": 22.1,
     "persons_per_household": 3.2
   },
-
   "households": {
     "total_households": 1150
   },
-
   "income": {
     "median_household_income": 62500,
     "per_capita_income": 26800,
     "poverty_rate_percent": 15.8
   },
-
   "education": {
     "high_school_grad_or_higher_percent": 95.1,
     "bachelors_degree_or_higher_percent": 24.8
   },
-
   "veterans": {
     "veteran_population_percent": 13.5
   },
-
   "immigration": {
     "foreign_born_percent": 4.1
   },
-
   "labor": {
     "mean_travel_time_to_work_minutes": 19.5,
     "unemployment_rate_percent": 4.6
   },
-
   "crime_status": {
     "installation": "Extremely safe; gated military access with 24/7 security.",
     "metro_shreveport_bossier": "Bossier City is generally viewed as more family-stable than many Shreveport pockets, but property crime and neighborhood quality still require address-level screening."
   },
-
   "school_quality": {
     "on_base": "Kerr Elementary serves many base-connected families; families should verify current eligibility and attendance boundaries before choosing housing.",
     "off_base": "Bossier Parish schools are generally preferred by many military families; exact school assignment should be verified by property address."
   },
-
   "rental_vacancy": {
     "rate_percent": 8.5,
     "notes": "Healthy inventory for military renters in 2026."
   },
-
   "rental_metrics": {
     "median_rent": 1725,
     "vacancy_rate_percent": 8.5,
     "notes": "Based on 3-bedroom average rent and strong military turnover."
   },
-
   "climate_weather": {
     "spring": "Humid/Stormy; 65–80°F",
     "summer": "Very Hot/Humid; 92–102°F",
     "fall": "Pleasant; 60–80°F",
     "winter": "Cool/Damp; 40–55°F"
   },
-
   "special_events": [
     "Defenders of Liberty Air Show",
     "Mardi Gras Parades",
     "Mudbug Madness Festival",
     "Independence Bowl"
   ],
-
   "military_lifestyle_fit": {
     "rating": "Exceptional",
     "description": "Deep military integration, strong Air Force Global Strike Command identity, affordable family housing, and a stable support community."
   },
-
   "financial_brief": {
     "bah_vs_buy_position": "Strongly Favorable",
     "bah_vs_rent_position": "Favorable",
@@ -179,7 +164,6 @@
     "buyer_opportunity": "North Bossier, Benton, and Haughton provide stronger family and long-term positioning than generic Shreveport-Bossier averages.",
     "renter_advantage": false
   },
-
   "market_bluf": {
     "bluf_headline": "High-Affordability Military Market",
     "bluf_summary": "Barksdale offers some of the strongest buy conditions for military families nationwide, with lower entry prices, manageable commute patterns, and durable base-connected demand.",
@@ -190,7 +174,6 @@
     "verdict_color": "green",
     "confidence_score": 90
   },
-
   "scorecard": {
     "affordability_score": 95,
     "growth_score": 68,
@@ -198,13 +181,11 @@
     "military_fit_score": 96,
     "overall_score": 87
   },
-
   "rules": {
     "max_safe_housing_ratio": 0.3,
     "warning_ratio": 0.35,
     "danger_ratio": 0.4
   },
-
   "summary_points": [
     "Barksdale AFB sits inside one of the most affordable military housing markets in the U.S.",
     "Shreveport-Bossier provides strong entry-level buying opportunities for disciplined VA buyers.",
@@ -212,7 +193,6 @@
     "Insurance, humidity, storm exposure, and maintenance still shape the true monthly cost picture.",
     "North Bossier, Benton, and Haughton generally provide stronger long-term positioning for many military families."
   ],
-
   "opportunities": [
     "Buyer leverage is strong relative to many larger U.S. military markets.",
     "Entry-level inventory remains accessible for VA buyers.",
@@ -220,7 +200,6 @@
     "Lower purchase prices can improve monthly flexibility and cash-flow potential.",
     "Shorter commute patterns can improve quality of life compared with high-traffic military metros."
   ],
-
   "risks": [
     "Insurance costs can offset some affordability gains.",
     "The appreciation ceiling may be lower than in high-growth metros.",
@@ -228,28 +207,24 @@
     "Some areas require stronger safety and school-zone screening.",
     "Humidity, storms, older housing stock, and maintenance exposure should be factored into ownership decisions."
   ],
-
   "buyer_notes": [
     "Barksdale is ideal for disciplined VA buyers prioritizing affordability, stability, and manageable commute patterns.",
     "Focus on all-in monthly cost, not just purchase price.",
     "Neighborhood-level research is critical because market averages can hide sharp differences between Bossier, Shreveport, Benton, and Haughton.",
     "This market rewards buyers who control debt, compare insurance, and avoid overextending just because the headline price looks affordable."
   ],
-
   "seller_notes": [
     "Price realistically against current demand and inventory.",
     "Condition, maintenance history, and move-in readiness matter more than aggressive pricing.",
     "Military demand provides a stable buyer pool when the home is positioned around commute, school, and monthly affordability.",
     "Homes in stronger Bossier Parish or Haughton/Benton corridors may command better military-family attention when marketed correctly."
   ],
-
   "investor_angles": [
     "Military turnover supports rental demand stability.",
     "Lower entry price improves cash-flow math compared with expensive coastal or national-capital-region markets.",
     "This market is best suited for yield-focused investors rather than appreciation-driven investors.",
     "Investor underwriting should stress-test insurance, vacancy, maintenance, and neighborhood-level safety."
   ],
-
   "neighborhoods": [
     "North Bossier",
     "Benton",
@@ -257,7 +232,6 @@
     "South Bossier",
     "Select Shreveport areas"
   ],
-
   "target_neighborhoods": [
     "North Bossier",
     "Benton",
@@ -265,7 +239,6 @@
     "South Bossier",
     "Select Shreveport areas"
   ],
-
   "buyer_guidance": [
     "Use total monthly cost as the primary decision filter.",
     "Verify commute, gate access, school zones, and insurance assumptions before committing.",
@@ -273,21 +246,18 @@
     "Avoid choosing solely based on proximity to the base.",
     "Prioritize homes with clean condition, manageable maintenance needs, and strong resale logic."
   ],
-
   "seller_guidance": [
     "Align pricing with current market conditions and buyer payment sensitivity.",
     "Highlight military proximity, low commute friction, affordability, and move-in readiness.",
     "Emphasize roof age, HVAC condition, flood/storm considerations, and utility efficiency where available.",
     "Military buyers respond well to practical lifestyle value, not just generic listing language."
   ],
-
   "landlord_notes": [
     "Military demand supports occupancy stability near Barksdale.",
     "Cash flow is generally stronger than appreciation potential.",
     "Vacancy risk remains moderate to low when the property is priced correctly and located in a strong commute corridor.",
     "Landlords should model insurance, maintenance, turnover, and tenant quality conservatively."
   ],
-
   "by_bedroom": {
     "2": {
       "rent_monthly": {
@@ -442,7 +412,6 @@
       }
     }
   },
-
   "housing": {
     "housing_units": 8500,
     "median_value_owner_occupied": 245000,
@@ -478,35 +447,123 @@
       ]
     }
   },
-
   "base_profile": {
-    "schema_version": "pcsu-base-profile-v1.0.0",
+    "schema_version": "pcsu-base-profile-v1.1.0",
+    "profile_status": "gold_standard",
+    "last_verified": "2026-09-16",
     "base_id": "barksdale-afb",
     "base_name": "Barksdale AFB",
     "display_name": "Barksdale Air Force Base",
     "short_name": "Barksdale",
+    "official_installation_name": "Barksdale Air Force Base",
     "branch": "Air Force",
     "joint_base": false,
-    "parent_installation": "Barksdale AFB",
+    "parent_installation": "Barksdale Air Force Base",
     "city": "Bossier City",
     "state": "Louisiana",
     "state_abbr": "LA",
     "zip": "71110",
     "metro": "Shreveport-Bossier City, LA",
     "market_label": "Shreveport-Bossier / Barksdale Military Housing Market",
-    "installation_type": "Global Strike / Strategic Bomber Base",
-    "host_or_major_command": "Air Force Global Strike Command / 2nd Bomb Wing",
-    "primary_mission_summary": "Barksdale AFB is a major Air Force Global Strike Command installation supporting strategic bomber operations, nuclear deterrence, long-range strike capability, and bomber-force readiness.",
-    "pcs_personality": "Affordable, stable, family-oriented, mission-heavy, and strongly connected to Bossier City, commute simplicity, school-zone decisions, and long-term military housing demand.",
-    "base_bluf": "Barksdale is one of the more financially accessible Air Force markets in the country. For many qualified military families, buying can make more sense than renting, but the decision should still be tested against insurance, neighborhood quality, school zones, commute, and expected assignment length.",
-
-    "user_positioning": {
-      "military_family_bluf": "Prioritize school-zone verification, commute simplicity, neighborhood safety, BAH fit, and insurance costs before signing a lease or purchase contract.",
-      "single_airman_bluf": "Prioritize affordability, commute simplicity, roommate/rental flexibility, and access to daily services in Bossier City or select Shreveport areas.",
-      "realtor_bluf": "The strongest Barksdale housing conversations are about affordability, commute simplicity, Bossier versus Shreveport tradeoffs, BAH fit, and school/neighborhood confidence.",
-      "investor_bluf": "Rental demand near Barksdale is influenced by military turnover, bomber mission stability, affordability, and the steady need for clean, practical family housing."
+    "installation_type": "Air Force Global Strike Command bomber installation / host-wing Air Force base",
+    "host_or_major_command": "Air Force Global Strike Command / 2nd Bomb Wing (host wing)",
+    "primary_mission_summary": "Barksdale Air Force Base is hosted by the 2nd Bomb Wing under Air Force Global Strike Command. The 2nd Bomb Wing conducts the installation's primary mission with three B-52H Stratofortress squadrons — the 11th Bomb Squadron (training), the 20th Bomb Squadron, and the 96th Bomb Squadron — providing flexible, responsive global combat capability and training Air Force Global Strike Command and Air Force Reserve B-52 crews, including the 307th Bomb Wing mission partners at Barksdale. The installation is also home to Air Force Global Strike Command headquarters and Eighth Air Force / Joint-Global Strike Operations Center.",
+    "mission_partners": [
+      "2nd Bomb Wing (host wing)",
+      "Air Force Global Strike Command",
+      "Eighth Air Force / Joint-Global Strike Operations Center",
+      "307th Bomb Wing (Air Force Reserve Command)",
+      "11th Bomb Squadron",
+      "20th Bomb Squadron",
+      "96th Bomb Squadron",
+      "2nd Medical Group"
+    ],
+    "pcs_personality": "Affordable, family-oriented, bomber-mission-heavy, and strongly connected to Bossier Parish versus Caddo Parish housing choices, West Gate / Shreveport-Barksdale Bridge access, school-zone verification, insurance and storm-maintenance costs, and long-term military housing demand.",
+    "base_bluf": "Barksdale is one of the more financially accessible Air Force housing markets in the country. For many qualified military families, buying can make more sense than renting, but BAH is a decision input, not a guarantee of affordability. Test insurance, neighborhood quality, school assignment by exact address, gate/report-time commute, and expected assignment length before signing.",
+    "base_operator": {
+      "label": "Barksdale AFB Base Operator",
+      "phone": "318-456-1110",
+      "type": "directory_assistance",
+      "availability": "Directory assistance / base operator",
+      "verification_status": "verified_official",
+      "verified_on": "2026-09-16",
+      "source_label": "Official Barksdale AFB Contact Us page — Base Operator"
     },
-
+    "base_operator_phone": "318-456-1110",
+    "installation_operator_phone": "318-456-1110",
+    "installation_population": {
+      "total": "14,581 (official Newcomers page published profile; not a live headcount)",
+      "active_duty": 5039,
+      "reservists": 1355,
+      "military": 6394,
+      "civilian": 2530,
+      "family_members": 5657,
+      "note": "The current official Barksdale Newcomers page lists Population 14,581, Active Duty 5,039, Reservists 1,355, Total Military 6,394, Civilians 2,530, and Family Members 5,657. Those categories sum to 14,581. Treat this as a published installation profile, not a live 2026 census. MilitaryINSTALLATIONS rounds a similar mix to approximately 15,000 (over 5,000 active duty, 1,300 reservists, 5,500 family members, and 2,500 civilians) and separately notes approximately 25,000 retirees and family members living within a 50-mile radius; the retiree figure is a surrounding-area support statement, not on-installation population, and is not included here. The official 2nd Bomb Wing factsheet uses a different grouping — nearly 9,000 active-duty, Air Force Reserve, and civilian workforce plus about 6,000 dependents — and should not be added to the Newcomers total. Bossier City, Shreveport, metro, and parish civilian population figures are not installation population and are not used here. Do not add unlike categories into a fabricated total.",
+      "source_freshness": "Official Newcomers page population profile reviewed 2026-09-16; underlying headcount year is not stated on the page. Treat as a published profile, not a live headcount.",
+      "scope": "Published installation community profile from the official Newcomers page. Not Bossier City, Shreveport, or Shreveport-Bossier metro population.",
+      "verified_on": "2026-09-16"
+    },
+    "security_contacts": {
+      "base_defense_operations_center": {
+        "name": "Barksdale AFB Base Defense Operations Center",
+        "phone": "not_published_on_current_official_public_pages",
+        "availability": "not_published",
+        "status": "not_published",
+        "verification_status": "not_published",
+        "verified_on": "2026-09-16",
+        "note": "A dedicated public BDOC phone number was not published on the current official Barksdale Gate Hours, Contact Us, or MilitaryINSTALLATIONS check-in pages reviewed on 2026-09-16. For access questions use the West Gate Visitor Center, the published after-hours West Gate visitor-pass number, the gate-status line, or the base operator. Do not invent a BDOC number."
+      },
+      "visitor_control_center": {
+        "name": "West Shreveport Gate Visitor Center",
+        "phone": "318-456-4984",
+        "availability": "During published Visitor Center hours; when closed, West Gate writes visitor passes",
+        "verified_on": "2026-09-16"
+      },
+      "after_hours_visitor_pass": {
+        "name": "West Gate visitor-pass processing when Visitor Centers are closed",
+        "phone": "318-456-3587",
+        "verified_on": "2026-09-16",
+        "note": "Official Gate Hours page states that when Visitor Centers are closed, the West Gate will write visitor passes. Contact 318-456-3587 with questions."
+      },
+      "gate_status_information_line": {
+        "name": "Barksdale AFB Gate Status Information Line",
+        "phone": "318-529-2273",
+        "availability": "Recorded gate hours and closures for West (Shreveport), North (Bossier), East/Industrial, and Bodcau gates",
+        "verified_on": "2026-09-16",
+        "note": "Official 2nd Bomb Wing press release lists 318-529-BASE (2273). Also check the official Gate Hours page and the 2nd Bomb Wing listing in the U.S. Air Force Connect app."
+      },
+      "west_gate_guard": {
+        "name": "West Gate Guard (MilitaryINSTALLATIONS Welcome Center/Gates listing)",
+        "phone": "318-456-5334",
+        "verified_on": "2026-09-16",
+        "note": "MilitaryINSTALLATIONS check-in procedures list 318-456-5334 as the West Gate Guard / Welcome Center commercial number. This is not a BDOC number."
+      },
+      "emergency": {
+        "phone": "911",
+        "note": "Use 911 for emergencies. Official 2nd Medical Group guidance states Barksdale does not offer urgent or emergency care on base."
+      }
+    },
+    "access_guidance": {
+      "bluf": "Barksdale currently operates four gates. Visitors without an accepted DoD access credential should use the West Shreveport Gate Visitor Center for temporary visitor passes, present REAL ID-compliant identification or another accepted credential, and verify current hours immediately before travel because gate and Visitor Center hours are time-sensitive.",
+      "current_posture": [
+        "Official Gate Hours page: four gates — West/Shreveport (24/7 main gate and visitor-pass point at the end of the Shreveport-Barksdale Bridge), North/Bossier (scheduled; easiest lodging access), East/Industrial (weekday hours; East Reservation housing and search area), and Bodcau (East Reservation).",
+        "As of 7 May 2025, official Gate Hours guidance states REAL ID is required for Louisiana visitor passes and base access.",
+        "West Shreveport Gate Visitor Center standing published hours on the official Gate Hours page: 6:00 a.m. to 10:00 p.m. Monday-Sunday, phone 318-456-4984.",
+        "East Gate Visitor Center standing published hours: 6:00 a.m. to 5:45 p.m. Monday-Friday.",
+        "When Visitor Centers are closed, the West Gate writes visitor passes; official contact 318-456-3587.",
+        "MilitaryINSTALLATIONS currently lists Visitor Center hours as 6:00 a.m.-6:00 p.m., which conflicts with the official Gate Hours page. The installation Gate Hours page is the more specific source for standing hours.",
+        "An official Team Barksdale social-media staffing notice has previously announced reduced West Gate Visitor Center hours (weekday-only operations with weekend closures). Treat any social-media hour change as time-sensitive and verify against the official Gate Hours page and 318-529-2273 before travel.",
+        "Call the gate-status line 318-529-2273 immediately before travel. Flooding and other events have historically closed or rerouted gates."
+      ],
+      "access_questions_contact": "West Shreveport Gate Visitor Center: 318-456-4984; after-hours visitor-pass questions: 318-456-3587; Gate Status Information Line: 318-529-2273; Base Operator: 318-456-1110",
+      "verified_on": "2026-09-16"
+    },
+    "user_positioning": {
+      "military_family_bluf": "Prioritize school-zone verification by exact address, West versus North versus East/Bodcau gate logic, Bossier Parish versus Caddo Parish tradeoffs, BAH-plus-insurance monthly cost, and assignment length before signing a lease or purchase contract.",
+      "single_airman_bluf": "Prioritize unaccompanied-housing eligibility, commute simplicity through the 24/7 West Gate, rental flexibility, and daily-service access in Bossier City or selected closer-in corridors.",
+      "realtor_bluf": "The strongest Barksdale housing conversations are about affordability after insurance, commute through the actual report-time gate, Bossier versus Shreveport neighborhood screening, school assignment by address, and whether buying is justified by assignment length.",
+      "investor_bluf": "Rental demand near Barksdale is influenced by bomber-mission stability, military turnover, comparatively low entry prices, and the need for practical family housing — not by metro-wide appreciation assumptions."
+    },
     "base_map_image": {
       "url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
       "alt": "PCSUnited public-facing Barksdale AFB placeholder orientation image for base housing and relocation planning.",
@@ -518,136 +575,202 @@
       "confidence": "medium",
       "safety_note": "This is not an official DoD map. It is a placeholder PCSUnited orientation image and should not be used for access control, emergency routing, or official navigation."
     },
-
     "official_links": {
+      "base_home": "https://www.barksdale.af.mil/",
+      "gate_hours": "https://www.barksdale.af.mil/Information/Gate-Hours/",
+      "visitor_info": "https://www.barksdale.af.mil/Information/Gate-Hours/",
+      "visitor_control_center": "https://www.barksdale.af.mil/Information/Gate-Hours/",
+      "housing": "https://www.housing.af.mil/Home/Installations/Barksdale-AFB/",
+      "medical": "https://barksdale.tricare.mil/",
+      "commissary": "https://corp.commissaries.com/shopping/store-locations/barksdale-afb",
+      "exchange": "https://www.shopmyexchange.com/",
+      "military_installations": "https://installations.militaryonesource.mil/in-depth-overview/barksdale-air-force-base",
+      "family_readiness": "https://barksdalelife.com/directory/",
+      "temporary_lodging": "https://barksdalelife.com/barksdale-inn/",
+      "newcomers": "https://www.barksdale.af.mil/Newcomers/",
+      "mps": "https://barksdalelife.com/directory/",
+      "school_liaison": "https://barksdalelife.com/school-liaison/",
       "barksdale_home": "https://www.barksdale.af.mil/",
-      "barksdale_newcomers": "https://www.barksdale.af.mil/",
-      "barksdale_housing": "https://www.housing.af.mil/Home/Units/Barksdale/",
-      "air_force_housing_barksdale": "https://www.housing.af.mil/",
+      "barksdale_newcomers": "https://www.barksdale.af.mil/Newcomers/",
+      "barksdale_getting_here": "https://www.barksdale.af.mil/gettinghere/",
+      "barksdale_contact": "https://www.barksdale.af.mil/Contact-Us/",
+      "barksdale_gate_hours": "https://www.barksdale.af.mil/Information/Gate-Hours/",
+      "barksdale_gate_status_line": "https://www.barksdale.af.mil/News/Press-Releases/Display/Article/3900718/gate-status-information-line/",
+      "barksdale_housing": "https://www.housing.af.mil/Home/Installations/Barksdale-AFB/",
+      "air_force_housing_barksdale": "https://www.housing.af.mil/Home/Installations/Barksdale-AFB/",
       "barksdale_exchange": "https://www.shopmyexchange.com/",
-      "barksdale_commissary": "https://corp.commissaries.com/",
-      "barksdale_medical": "https://barksdale.tricare.mil/"
+      "barksdale_capehart_express": "https://www.shopmyexchange.com/store-locator/barksdale-afb-capehart-express",
+      "barksdale_commissary": "https://corp.commissaries.com/shopping/store-locations/barksdale-afb",
+      "barksdale_medical": "https://barksdale.tricare.mil/",
+      "barksdale_medical_contact": "https://barksdale.tricare.mil/About-Us/Contact-Us",
+      "barksdale_urgent_emergency_care": "https://barksdale.tricare.mil/Health-Services/Urgent-Emergency-Care",
+      "barksdale_vcc": "https://www.barksdale.af.mil/Information/Gate-Hours/",
+      "barksdale_school_information": "https://www.barksdale.af.mil/Information/Resources/Newcomer-Guide/School-Information/",
+      "barksdale_base_facilities": "https://www.barksdale.af.mil/Information/Resources/Newcomer-Guide/Base-Facilities/",
+      "barksdale_life_directory": "https://barksdalelife.com/directory/",
+      "barksdale_inn": "https://barksdalelife.com/barksdale-inn/",
+      "air_force_inns_barksdale": "https://af.dodlodging.net/propertys/Barksdale-Inn",
+      "2nd_bomb_wing_factsheet": "https://www.barksdale.af.mil/Units/Fact-Sheets/Article/320180/2nd-bomb-wing/",
+      "military_installations_checkin": "https://installations.militaryonesource.mil/military-installation/barksdale-air-force-base/base-essentials/check-in-procedures"
     },
-
     "visitor_control_center": {
-      "name": "Barksdale AFB Visitor Control Center",
-      "building": "Verify current building before arrival",
-      "address": "Verify current visitor center routing with official Barksdale AFB sources before arrival",
-      "phone": "Verify current phone number with official installation sources",
-      "hours": "Verify official hours before travel",
+      "name": "West Shreveport Gate Visitor Center",
+      "status": "scheduled_published_hours_time_sensitive",
+      "building": "West Shreveport Gate Visitor Center",
+      "address": "425 Lindbergh Avenue, Barksdale AFB, LA 71110",
+      "location": "West Shreveport Gate at the end of the Shreveport-Barksdale Bridge / Barksdale Blvd W; MilitaryINSTALLATIONS lists 425 Lindbergh Avenue",
+      "phone": "318-456-4984",
+      "email": "not_published_on_current_official_public_pages",
+      "hours": "Standing published hours on the official Gate Hours page: 6:00 a.m. to 10:00 p.m. Monday-Sunday. MilitaryINSTALLATIONS lists 6:00 a.m.-6:00 p.m. Official Team Barksdale social-media notices have previously reduced hours to weekdays only. Verify immediately before travel.",
       "best_for": [
         "Visitors",
         "Newcomers",
         "Family members without routine installation access",
+        "Sponsored guests needing passes",
         "PCS arrival planning"
       ],
       "map_label": "Visitor Control Center",
-      "map_zone": "main access / visitor processing area",
-      "note": "Use official Barksdale AFB visitor information before arrival. Access requirements, sponsor rules, gate procedures, and hours can change."
+      "map_zone": "West / Shreveport Gate visitor processing area",
+      "note": "Use the official Barksdale Gate Hours page and gate-status line 318-529-2273 before arrival. REAL ID is required for visitor passes and base access as of 7 May 2025 per the official Gate Hours page. When Visitor Centers are closed, the West Gate writes visitor passes; call 318-456-3587. East Gate also has a Visitor Center during weekday hours. A public VCC email was not published on the official pages reviewed 2026-09-16.",
+      "verification_status": "verified_official_with_source_conflicts",
+      "verified_on": "2026-09-16"
     },
-
-    "gates": [
+    "visitor_control_centers": [
       {
-        "name": "West Gate",
-        "type": "primary_gate",
-        "status": "verify_current_status",
-        "hours": "Verify official Barksdale AFB gate hours",
-        "map_label": "West Gate",
-        "map_zone": "west / primary access area",
-        "best_for": [
-          "Newcomer routing",
-          "General base access",
-          "Bossier City access",
-          "Visitor processing when directed"
-        ],
-        "commute_notes": "Common anchor point for arrival planning and general base access. Route performance depends on gate flow, work schedule, and exact duty location.",
-        "user_warning": "Verify current gate status with official Barksdale AFB sources before travel."
+        "name": "West Shreveport Gate Visitor Center",
+        "status": "scheduled",
+        "hours": "Official Gate Hours page: 6:00 a.m. to 10:00 p.m. Monday-Sunday. Confirm before travel.",
+        "location": "West Shreveport Gate / 425 Lindbergh Avenue, Barksdale AFB, LA 71110",
+        "phone": "318-456-4984",
+        "role": "primary_current_vcc",
+        "note": "Main visitor-pass point. Official page states this is where visiting individuals are granted access via a temporary visitor pass. After-hours: West Gate writes passes at 318-456-3587.",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "North Gate",
-        "type": "commuter_gate",
-        "status": "verify_current_status",
-        "hours": "Verify official Barksdale AFB gate hours",
-        "map_label": "North Gate",
-        "map_zone": "north / commuter access area",
-        "best_for": [
-          "Daily commuters",
-          "North Bossier access",
-          "Alternate route planning"
-        ],
-        "commute_notes": "Useful for families and commuters living in North Bossier or nearby northern corridors, depending on duty location.",
-        "user_warning": "Do not assume availability or best routing without checking current gate procedures."
-      },
-      {
-        "name": "East Gate",
-        "type": "commuter_or_limited_gate",
-        "status": "verify_current_status",
-        "hours": "Verify official Barksdale AFB gate hours",
-        "map_label": "East Gate",
-        "map_zone": "east / alternate access area",
-        "best_for": [
-          "Specific commute patterns",
-          "Haughton or east-side routing when applicable",
-          "Alternate access when directed"
-        ],
-        "commute_notes": "May support certain east-side commute patterns, but users should verify hours and current access rules.",
-        "user_warning": "Gate hours and routing can change. Confirm before relying on this gate."
-      },
-      {
-        "name": "Commercial Gate",
-        "type": "commercial_or_limited_gate",
-        "status": "verify_current_status",
-        "hours": "Verify official Barksdale AFB commercial access procedures",
-        "map_label": "Commercial Gate",
-        "map_zone": "commercial access area",
-        "best_for": [
-          "Commercial traffic",
-          "Deliveries",
-          "Mover coordination when directed"
-        ],
-        "commute_notes": "Useful for commercial or delivery planning, not a default family commute gate.",
-        "user_warning": "Movers and commercial deliveries should verify procedures through official base access guidance."
+        "name": "East Gate Visitor Center",
+        "status": "scheduled_weekdays",
+        "hours": "Official Gate Hours page: 6:00 a.m. to 5:45 p.m. Monday-Friday. Closed Saturday and Sunday with the East/Industrial Gate.",
+        "location": "East / Industrial Gate, northeast side of the installation off Industrial Drive",
+        "phone": "not_separately_published_on_current_official_gate_hours_page",
+        "role": "east_reservation_vcc",
+        "note": "Official Gate Hours page groups East Gate, East Gate Visitor's Center, and search area under the same weekday hours. Use the West Gate Visitor Center or after-hours West Gate process if this VCC is closed.",
+        "verified_on": "2026-09-16"
       }
     ],
-
-    "major_services": [
+    "gates": [
       {
-        "name": "Barksdale Medical Clinic",
-        "category": "medical",
-        "map_label": "Medical Clinic",
-        "address": "Verify current clinic address before travel",
-        "phone": "Verify through official TRICARE / Barksdale medical source",
-        "hours": "Verify current clinic and pharmacy hours",
+        "name": "West (Shreveport) Gate",
+        "type": "primary_gate",
+        "status": "open_24_7",
+        "hours": "24-hour operation, seven days a week per the current official Barksdale Gate Hours page.",
+        "map_label": "West / Shreveport Gate",
+        "map_zone": "west / Shreveport-Barksdale Bridge / primary access area",
         "best_for": [
-          "Primary military medical services",
-          "Pharmacy-related planning",
-          "Family medical orientation",
-          "PCS arrival healthcare setup"
+          "Newcomer routing",
+          "Visitor processing",
+          "General base access",
+          "After-hours and weekend entry",
+          "Shreveport and south/west Bossier approaches"
         ],
-        "map_zone": "medical support area",
-        "user_note": "Treat this as a major medical anchor for PCS planning. Verify emergency care options, pharmacy procedures, and clinic availability directly with official medical sources."
+        "commute_notes": "Official main gate at the end of the Shreveport-Barksdale Bridge. Primary 24/7 anchor for arrival planning. Route performance depends on bridge/Barksdale Boulevard flow, report time, and exact duty location.",
+        "user_warning": "Gate schedules are time-sensitive. Verify the official Gate Hours page and call 318-529-2273 immediately before travel. Flooding and other events can reroute West Gate traffic.",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Barksdale Commissary",
+        "name": "North (Bossier) Gate",
+        "type": "commuter_gate",
+        "status": "scheduled",
+        "hours": "6:00 a.m. to 5:45 p.m. Monday-Friday; 8:00 a.m. to 2:00 p.m. Saturday; closed Sunday per the current official Barksdale Gate Hours page.",
+        "map_label": "North / Bossier Gate",
+        "map_zone": "north / North Gate Road / lodging access area",
+        "best_for": [
+          "Barksdale Inn / lodging access during published hours",
+          "North Bossier commuters during published hours",
+          "Alternate weekday routing"
+        ],
+        "commute_notes": "Official page states this is the easiest way to access the Barksdale lodging office. Not a 24/7 default. Closed Sunday under the current listing.",
+        "user_warning": "Do not plan Sunday or after-hours entry through this gate. Verify hours immediately before travel.",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "East (Industrial) Gate",
+        "type": "commuter_or_search_gate",
+        "status": "scheduled_weekdays",
+        "hours": "5:45 a.m. to 5:45 p.m. Monday-Friday; closed Saturday and Sunday per the current official Barksdale Gate Hours page. The same listing covers East Gate Visitor's Center and search area.",
+        "map_label": "East / Industrial Gate",
+        "map_zone": "northeast / Industrial Drive / East Reservation housing access",
+        "best_for": [
+          "East Reservation housing residents",
+          "Subdivisions north of the installation when hours allow",
+          "Commercial / search processing when directed",
+          "Haughton or east-side routing during weekday hours"
+        ],
+        "commute_notes": "Official page says this gate is intended for residents of the two East Reservation housing areas and subdivisions north of the base. Not a weekend or after-hours family commute gate under the current listing.",
+        "user_warning": "Closed weekends under the current official listing. Movers and commercial traffic should confirm search-area procedures before relying on this gate.",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "Bodcau Gate",
+        "type": "east_reservation_gate",
+        "status": "scheduled_extended",
+        "hours": "4:30 a.m. to 11:59 p.m. Monday-Thursday; 4:30 a.m. to 1:00 a.m. Friday-Sunday per the current official Barksdale Gate Hours page.",
+        "map_label": "Bodcau Gate",
+        "map_zone": "East Reservation / Bodcau access area",
+        "best_for": [
+          "East Reservation residents",
+          "Users whose duty or housing location is on the east side",
+          "Extended-hour access when West/North/East gates do not fit the schedule"
+        ],
+        "commute_notes": "Official page states Barksdale operates three gates on the main base and one on the East Reservation to accommodate east-side residents. Confirm whether Bodcau actually shortens the commute from the exact address and duty location.",
+        "user_warning": "Not a default newcomer West-Gate arrival route. Verify current status on the official Gate Hours page and 318-529-2273 before travel.",
+        "verified_on": "2026-09-16"
+      }
+    ],
+    "major_services": [
+      {
+        "name": "2nd Medical Group",
+        "category": "medical",
+        "map_label": "Medical Clinic",
+        "address": "243 Curtiss Road, Suite 100, Barksdale AFB, LA 71110-2425",
+        "phone": "Appointments 318-456-6555; Patient Admin/Referrals/TRICARE 318-456-6402",
+        "hours": "Monday-Friday 7:30 a.m.-4:30 p.m.; closed the second Wednesday of every month for training per the official Contact Us page. Family Health walk-in hours Monday-Friday 8-10 a.m. and 1-2:30 p.m.",
+        "best_for": [
+          "Primary military medical services",
+          "Family medical orientation",
+          "TRICARE enrollment and referral questions",
+          "PCS arrival healthcare setup"
+        ],
+        "map_zone": "medical support area / Curtiss Road",
+        "user_note": "Official Urgent & Emergency Care page states Barksdale does not offer urgent or emergency care services. For life-threatening emergencies call 911. For non-life-threatening guidance use the Military Health System Nurse Advice Line at 1-800-TRICARE (874-2273). Individual clinic hours vary; do not treat appointment-line hours as a facility-wide emergency capability.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "Barksdale AFB Commissary",
         "category": "commissary",
         "map_label": "Commissary",
-        "address": "Verify current commissary address before travel",
-        "phone": "Verify current phone number with DeCA",
+        "address": "1265 Twining Drive, Bldg 4765, Barksdale AFB, LA 71110",
+        "phone": "318-761-7432",
+        "email": "deca.lee.store-ops-grp.list.websitez09barksdale@mail.mil",
+        "hours": "Sunday 0800-1830; Monday 1000-1800; Tuesday-Saturday 0700-1930 per the current DeCA corporate store page. CLICK2GO: Sunday 1000-1730; Monday 1100-1700; Tuesday-Saturday 0900-1830. CLICK2GO desk 318-761-7438.",
         "best_for": [
           "Grocery savings",
           "Family shopping",
-          "BAH and monthly budget planning"
+          "BAH and monthly budget planning",
+          "CLICK2GO pickup"
         ],
-        "map_zone": "main services / retail area",
-        "user_note": "Commissary access can materially affect monthly food budget for eligible users."
+        "map_zone": "main services / retail area / Twining Drive",
+        "user_note": "DeCA corporate store locator is the source used for address, phone, and hours. shop.commissaries.com has listed a different phone (318-761-4732). This profile uses the corporate page 318-761-7432. Verify the DeCA store page before travel, especially around holidays.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       },
       {
         "name": "Barksdale Exchange",
         "category": "exchange_bx",
         "map_label": "BX / Exchange",
-        "address": "Verify current Exchange location before travel",
-        "phone": "Verify current phone number with AAFES",
-        "hours": "Verify current Exchange hours",
+        "address": "Verify current Exchange location on the official AAFES store locator before travel.",
+        "phone": "Verify current phone number with AAFES before travel.",
+        "hours": "Verify current hours on the official Exchange store locator before travel.",
         "best_for": [
           "Shopping",
           "Uniform-related errands",
@@ -655,139 +778,228 @@
           "Family convenience"
         ],
         "map_zone": "main services / retail area",
-        "user_note": "Important daily-life anchor for new arrivals, families, and permanent party."
+        "user_note": "An official AAFES Capehart Express locator page exists for Barksdale. Current Main Exchange address, phone, and hours were not independently readable from AAFES during this verification pass. Third-party directories were not used as authoritative sources. Confirm location and hours directly with AAFES.",
+        "verification_status": "official_source_retained_hours_require_recheck",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Military Clothing Store",
-        "category": "military_clothing",
-        "map_label": "Military Clothing",
-        "address": "Verify current location before travel",
-        "hours": "Verify current hours",
-        "best_for": [
-          "Uniform items",
-          "New arrivals",
-          "Permanent party needs"
-        ],
-        "map_zone": "retail / services area",
-        "user_note": "Useful for military-specific shopping needs after arrival."
-      },
-      {
-        "name": "Barksdale AFB Housing Office",
+        "name": "Barksdale AFB Military Housing Office",
         "category": "housing_office",
         "map_label": "Housing Office",
-        "address": "Verify current housing office address before travel",
-        "phone": "Verify current housing office phone number",
-        "email": "Verify current housing office email through official sources",
-        "hours": "Verify current housing office hours",
+        "address": "334 Davis Ave. W., Barksdale AFB, LA 71110",
+        "phone": "318-456-4791",
+        "email": "2CES.CEIH.BaseHousingElement@us.af.mil",
+        "hours": "Monday-Friday 0800-1600 (CST) per current Air Force Housing.",
         "best_for": [
           "On-base housing questions",
           "Off-base housing guidance",
           "PCS housing counseling",
-          "Unaccompanied housing questions"
+          "Lease and purchase counseling"
         ],
-        "map_zone": "housing support area",
-        "user_note": "Military families should contact the housing office before committing to on-base or off-base housing."
+        "map_zone": "Davis Avenue West / housing support area",
+        "user_note": "Current Air Force Housing installation page. Contact the office before signing a lease or sales contract when required by current PCS guidance. DSN 781-4791.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Unaccompanied Housing Office",
+        "name": "Barksdale Unaccompanied Housing",
         "category": "unaccompanied_housing",
         "map_label": "Unaccompanied Housing",
-        "address": "Verify current office location before travel",
-        "phone": "Verify current phone number with official installation sources",
-        "email": "Verify current email with official installation sources",
-        "hours": "Verify current hours",
+        "address": "206 Curtis Road, Barksdale AFB, LA 71110",
+        "phone": "318-456-2779",
+        "email": "2cesdormmanagement@barksdale.af.mil",
+        "hours": "Monday-Friday 0800-1600 (CST) per current Air Force Housing.",
         "best_for": [
           "Dormitory questions",
           "Single service member housing",
           "Unaccompanied PCS planning"
         ],
-        "map_zone": "housing support area",
-        "user_note": "Eligibility and availability should be verified directly with the housing office."
+        "map_zone": "unaccompanied housing campus / Curtis Road",
+        "user_note": "Current Air Force Housing listing. UH is provided for unaccompanied Airmen E-1 to E-3 and E-4 with less than 3 years of service. Eligibility and availability must be confirmed with UH management. The published UH email appears on the older/deprecated Air Force Housing Barksdale page; the current installation housing page lists phone, address, and hours. DSN 781-2779.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Bank / Credit Union / ATM Services",
-        "category": "banking",
-        "map_label": "Bank / ATM",
-        "address": "Verify current branch or ATM location before travel",
+        "name": "Hunt Military Communities / Barksdale Family Housing",
+        "category": "privatized_housing",
+        "map_label": "Family Housing",
+        "address": "201 Langley Drive, Barksdale AFB, LA 71110",
+        "phone": "318-395-6689",
+        "email": "barksdale@huntcompanies.com",
+        "hours": "Monday-Friday 0730-1730 (CST) per current Air Force Housing.",
         "best_for": [
-          "Daily banking",
-          "PCS funds access",
-          "ATM convenience",
-          "Relocation errands"
+          "Privatized family housing",
+          "Active-duty family housing applications",
+          "On-base housing availability",
+          "PCS housing planning"
         ],
-        "map_zone": "main services / retail area",
-        "user_note": "Specific bank or credit union locations may change. Use current official branch locator or base directory before routing users."
+        "map_zone": "family housing / Langley Drive",
+        "user_note": "Current Air Force Housing listing. Hunt Military Communities manages privatized family housing. Availability, waitlists, eligibility, pet rules, and BAH treatment can change. Older Air Force Housing page also points to BarksdaleFamilyHousing.com.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Legal / Finance / Admin Services",
-        "category": "admin_support",
-        "map_label": "Admin Support",
-        "address": "Verify current office location before travel",
+        "name": "Barksdale Military & Family Readiness Center",
+        "category": "family_readiness",
+        "map_label": "M&FRC",
+        "address": "801 Kenney Ave, Suite 1400, Barksdale AFB, LA 71110",
+        "phone": "318-456-8400",
+        "email": "2bw.afrc@us.af.mil",
+        "hours": "Monday-Friday 8:00 a.m.-4:00 p.m. per the current 2nd FSS directory.",
         "best_for": [
-          "Power of attorney",
-          "PCS documents",
-          "Pay questions",
-          "Arrival admin"
+          "Relocation readiness",
+          "Information and referral",
+          "Family support",
+          "Transition assistance referrals",
+          "PCS resources"
         ],
-        "map_zone": "administrative services area",
-        "user_note": "Use this as a planning category in the Base tab; exact office routing should point to official base directory links."
+        "map_zone": "Mission Support Group / Kenney Avenue / family readiness",
+        "user_note": "Current 2nd FSS directory listing. The installation Base Facilities newcomer page lists Airman and Family Readiness Center at 318-456-8400 and has historically published different training-day hours. Use the FSS directory hours above and verify before travel.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Child / Youth / Family Support Services",
-        "category": "family_support",
-        "map_label": "Family Support",
-        "address": "Verify current CDC, youth center, and school liaison locations before travel",
+        "name": "Barksdale Military Personnel Flight",
+        "category": "personnel_admin",
+        "map_label": "MPS",
+        "address": "801 Kenney Ave, Suite 1300, Barksdale AFB, LA 71110",
+        "phone": "318-456-3710",
+        "hours": "Open by appointment only Monday-Friday 9:00 a.m.-3:00 p.m. per the current 2nd FSS directory (same listing as DEERS & IDs).",
         "best_for": [
-          "Childcare planning",
-          "Youth programs",
-          "School transition support",
-          "Family PCS support"
+          "ID cards and DEERS support",
+          "Base in-processing",
+          "Career development",
+          "Assignments",
+          "Retirements and separations"
         ],
-        "map_zone": "family services / youth support areas",
-        "user_note": "Critical for families. Exact program availability, waitlists, and eligibility should be verified with official Barksdale resources."
+        "map_zone": "Mission Support Group / Kenney Avenue / administrative services",
+        "user_note": "Current 2nd FSS directory. MilitaryINSTALLATIONS check-in procedures list additional MPF function numbers (retirements/separations 318-456-2171, outbound assignments 318-456-0068, promotions 318-456-5478, reenlistments 318-456-5272, passports 318-456-2844, force management 318-456-4129). Confirm appointment procedures before travel.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "Barksdale Personal Property / TMO",
+        "category": "personal_property",
+        "map_label": "Personal Property",
+        "address": "Third floor, Mission Support Group building, 801 Kenney Ave, Barksdale AFB, LA 71110",
+        "phone": "318-456-5338",
+        "hours": "Confirm current customer-service hours with TMO before travel. Official Getting Here page does not publish a full public hour grid.",
+        "best_for": [
+          "Household-goods movement",
+          "PCS personal property questions",
+          "PPM / DITY documentation",
+          "Move coordination"
+        ],
+        "map_zone": "Mission Support Group / Kenney Avenue / administrative services",
+        "user_note": "Official Getting Here page: any member moving to or from Barksdale should go to TMO. Phone listed as 456-5338 (local 318-456-5338) on the third floor of the Mission Support Group building at 801 Kenney Ave.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "Barksdale Inn",
+        "category": "temporary_lodging",
+        "map_label": "Lodging",
+        "address": "555 Davis Avenue West, Barksdale AFB, LA 71110",
+        "phone": "318-456-3091",
+        "email": "2fss_lodgingreservations@us.af.mil",
+        "hours": "24/7/365 check-in per the current 2nd FSS Barksdale Inn page. Check-in 2:00 p.m.; check-out 11:00 a.m. per the FSS directory and official Getting Here page.",
+        "best_for": [
+          "PCS temporary lodging",
+          "TDY lodging",
+          "Newcomer arrival planning"
+        ],
+        "map_zone": "Davis Avenue West / just inside North (Bossier) Gate",
+        "user_note": "Official FSS lodging page and Air Force Inns listing. Official Gate Hours page says North/Bossier Gate is the easiest lodging access. FSS directory also lists fss_lodgingreservations@us.af.mil; the dedicated lodging page lists 2fss_lodgingreservations@us.af.mil. The dedicated lodging page is used for email here. FSS lodging page currently notes TLF units are not available. Contact lodging directly for pets, availability, and current reservation procedures. DSN 781-3091.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "Barksdale School Liaison Program",
+        "category": "school_liaison",
+        "map_label": "School Liaison",
+        "address": "801 Kenney Avenue, Suite 2102, Barksdale AFB, LA 71110",
+        "phone": "318-456-4098; cell/text 318-564-9099",
+        "email": "BarksdaleSchoolLiaison@us.af.mil",
+        "hours": "7:30 a.m. to 4:30 p.m. Monday-Friday; closed federal holidays per the current 2nd FSS School Liaison page.",
+        "best_for": [
+          "K-12 transition support",
+          "School boundary questions",
+          "Interstate Compact guidance",
+          "Homeschool and community school information"
+        ],
+        "map_zone": "Mission Support Group / Kenney Avenue / family support",
+        "user_note": "Current 2nd FSS School Liaison page is used for address, hours, and phones. Official School Information / Getting Here pages still list the School Liaison office at 241 Curtiss Rd in the River's Edge Welcome Center and Getting Here also lists 318-456-8400 (the M&FRC number). The more specific current FSS School Liaison page wins for phone 318-456-4098 and Suite 2102. School assignment must still be verified by exact residence. Do not treat on-base zone lists or School of Choice language as a guaranteed assignment.",
+        "verification_status": "verified_official_with_source_conflicts",
+        "verified_on": "2026-09-16"
       }
     ],
-
+    "temporary_lodging": {
+      "primary_contact_name": "Barksdale Inn",
+      "reservations_phone": "318-456-3091",
+      "alternate_phone": "DSN 781-3091",
+      "email": "2fss_lodgingreservations@us.af.mil",
+      "locations": [
+        {
+          "name": "Barksdale Inn",
+          "address": "555 Davis Avenue West, Barksdale AFB, LA 71110-5000"
+        }
+      ],
+      "note": "Official 2nd FSS Barksdale Inn page lists 24/7/365 operations at 318-456-3091 and email 2fss_lodgingreservations@us.af.mil. Official Getting Here and FSS directory list check-in 2:00 p.m. and check-out 11:00 a.m. Official Gate Hours page says North/Bossier Gate is the easiest lodging access; that gate is closed Sunday under the current listing, so after-hours or Sunday arrivals should plan West Gate access. Current FSS lodging page states TLF units are not available. Contact lodging directly for pets, children, availability, and current reservation procedures.",
+      "verified_on": "2026-09-16"
+    },
     "on_base_housing": {
-      "housing_type": "Privatized and military housing support environment",
-      "housing_office_name": "Barksdale AFB Housing Office",
-      "housing_office_address": "Verify current housing office address before travel",
-      "housing_office_phone": "Verify current housing office phone number",
-      "housing_office_email": "Verify current housing office email through official sources",
-      "housing_office_hours": "Verify current housing office hours",
+      "housing_type": "Privatized family housing plus military housing and unaccompanied-housing support",
+      "housing_office_name": "Barksdale AFB Military Housing Office",
+      "housing_office_address": "334 Davis Ave. W., Barksdale AFB, LA 71110",
+      "housing_office_phone": "318-456-4791",
+      "housing_office_email": "2CES.CEIH.BaseHousingElement@us.af.mil",
+      "housing_office_hours": "Monday-Friday 0800-1600 (CST)",
+      "privatized_housing_name": "Hunt Military Communities / Barksdale Family Housing",
+      "privatized_housing_provider": "Hunt Military Communities",
+      "privatized_housing_phone": "318-395-6689",
+      "privatized_housing_address": "201 Langley Drive, Barksdale AFB, LA 71110",
+      "privatized_housing_hours": "Monday-Friday 0730-1730 (CST)",
+      "unaccompanied_housing_name": "Barksdale Unaccompanied Housing",
+      "unaccompanied_housing_phone": "318-456-2779",
+      "unaccompanied_housing_address": "206 Curtis Road, Barksdale AFB, LA 71110",
+      "unaccompanied_housing_email": "2cesdormmanagement@barksdale.af.mil",
       "map_label": "Family Housing / Housing Office",
-      "map_zone": "housing support area",
+      "map_zone": "Davis Avenue West, Langley Drive, and East Reservation housing areas",
       "best_for": [
         "Families prioritizing proximity",
         "New arrivals wanting simplicity",
         "Users who value base-connected lifestyle",
-        "Families wanting to reduce commute uncertainty"
+        "Families wanting to reduce commute uncertainty",
+        "Unaccompanied Airmen in UH-eligible ranks"
       ],
       "watchouts": [
         "Availability and waitlists can change",
         "On-base housing may capture BAH differently than off-base renting",
         "Pet policies and breed restrictions should be verified",
-        "School assignment must be verified by exact address",
-        "Off-base affordability may be strong enough that families should compare both paths carefully"
+        "School assignment must be verified by exact address; main-base and East Reservation zone lists differ and official pages conflict on some elementary names",
+        "Off-base affordability around Barksdale is often strong enough that families should compare both paths carefully",
+        "UH eligibility is rank- and time-in-service-specific"
       ],
-      "pcsu_strategy_note": "Compare on-base housing against off-base rent and mortgage options. Around Barksdale, the best choice depends on rank, dependents, BAH, debt, commute tolerance, school priorities, pet needs, and expected assignment length."
+      "pcsu_strategy_note": "Compare on-base housing against off-base rent and mortgage options. Around Barksdale, the best choice depends on rank, dependents, BAH, debt, commute tolerance, school priorities, pet needs, insurance, and expected assignment length. Lower off-base prices do not automatically make buying better than on-base housing.",
+      "verification_status": "verified_official",
+      "verified_on": "2026-09-16",
+      "source_conflict_note": "UH email 2cesdormmanagement@barksdale.af.mil is published on the deprecated Air Force Housing Barksdale page; the current installation housing page lists UH phone, address, and hours without repeating that email. Official school pages disagree on East Reservation elementary zoning (Kerr Elementary on Getting Here / School Information versus Platt / Princeton / T.L. Rhodes on the current FSS School Liaison page)."
     },
-
     "recommended_neighborhoods": [
       {
         "name": "North Bossier",
         "type": "nearby_neighborhood",
-        "fit_summary": "Strong family-oriented option with practical commute access, retail convenience, and broad military appeal.",
+        "fit_summary": "Strong family-oriented option with practical commute access, retail convenience, and broad military appeal in Bossier Parish.",
         "best_for": [
           "Families",
           "VA buyers",
           "Users wanting suburban convenience",
-          "Buyers prioritizing Bossier Parish school access"
+          "Buyers prioritizing Bossier Parish school research"
         ],
-        "commute_band": "Approx. 10-25 minutes depending on exact address, gate, and traffic",
+        "commute_band": "Approx. 10-25 minutes depending on exact address, gate, traffic, and report time",
         "likely_gate_logic": [
-          "West Gate",
-          "North Gate depending on route",
+          "West (Shreveport) Gate for 24/7 and visitor/newcomer access",
+          "North (Bossier) Gate during published weekday/Saturday hours",
           "Other gates depending on duty location and current access rules"
         ],
         "bah_fit": "high",
@@ -798,9 +1010,11 @@
         "watchouts": [
           "Pricing can be higher than older Shreveport pockets",
           "School assignment should be verified by exact address",
+          "North Gate is closed Sunday and is not 24/7",
           "Commute should be tested during expected report-time windows"
         ],
-        "pcsu_recommendation": "Strong first-look area for many Barksdale families because it balances commute, lifestyle, schools, and resale logic."
+        "pcsu_recommendation": "Strong first-look area for many Barksdale families because it can balance commute, lifestyle, Bossier Parish school research, and resale logic.",
+        "intelligence_type": "curated_pcsunited_intelligence"
       },
       {
         "name": "Benton",
@@ -812,10 +1026,10 @@
           "Longer-term assignments",
           "Users prioritizing school and neighborhood feel"
         ],
-        "commute_band": "Approx. 25-40 minutes depending on exact address, route, and gate",
+        "commute_band": "Approx. 25-40 minutes depending on exact address, gate, traffic, and report time",
         "likely_gate_logic": [
-          "North Gate",
-          "West Gate depending on route",
+          "North (Bossier) Gate during published hours",
+          "West (Shreveport) Gate for 24/7 and Sunday/after-hours access",
           "Other gates depending on current access rules"
         ],
         "bah_fit": "medium_high",
@@ -825,10 +1039,12 @@
         "traffic_risk": "medium",
         "watchouts": [
           "Longer commute tradeoff than closer Bossier pockets",
-          "Some newer homes may stretch lower-rank BAH profiles",
-          "Route reliability should be tested before committing"
+          "Some newer homes may stretch lower-rank BAH profiles once insurance is included",
+          "Route reliability should be tested before committing",
+          "School assignment must be verified by exact address"
         ],
-        "pcsu_recommendation": "Excellent candidate for families who want more space and are comfortable accepting a longer commute for lifestyle value."
+        "pcsu_recommendation": "Excellent candidate for families who want more space and are comfortable accepting a longer commute for lifestyle value.",
+        "intelligence_type": "curated_pcsunited_intelligence"
       },
       {
         "name": "Haughton",
@@ -838,13 +1054,13 @@
           "Families",
           "VA buyers",
           "Users wanting lower cost and more space",
-          "Buyers comfortable with a slightly longer commute"
+          "Buyers comfortable with east-side gate planning"
         ],
-        "commute_band": "Approx. 20-35 minutes depending on exact address, gate, and traffic",
+        "commute_band": "Approx. 20-35 minutes depending on exact address, gate, traffic, and report time",
         "likely_gate_logic": [
-          "East Gate when available",
-          "West Gate depending on route",
-          "Other gates depending on duty location and current access rules"
+          "East (Industrial) Gate during weekday published hours",
+          "Bodcau Gate for East Reservation / extended-hour patterns",
+          "West (Shreveport) Gate depending on route, weekends, and after-hours needs"
         ],
         "bah_fit": "high",
         "family_fit": "high",
@@ -852,11 +1068,13 @@
         "va_buyer_fit": "high",
         "traffic_risk": "medium",
         "watchouts": [
-          "Gate availability and route planning matter",
+          "East Gate is closed weekends under the current official listing",
           "Some properties may be farther than expected from daily services",
-          "Exact school zone should be verified"
+          "Exact school zone should be verified",
+          "Do not assume East Gate or Bodcau is always the fastest path"
         ],
-        "pcsu_recommendation": "Strong affordability and family-value candidate if the user accepts commute and route planning."
+        "pcsu_recommendation": "Strong affordability and family-value candidate if the user accepts east-side gate planning and tests the actual report-time route.",
+        "intelligence_type": "curated_pcsunited_intelligence"
       },
       {
         "name": "South Bossier",
@@ -868,10 +1086,10 @@
           "Renters",
           "Single airmen and smaller families"
         ],
-        "commute_band": "Approx. 5-20 minutes depending on exact address and gate",
+        "commute_band": "Approx. 5-20 minutes depending on exact address, gate, traffic, and report time",
         "likely_gate_logic": [
-          "West Gate",
-          "Other gates depending on duty location"
+          "West (Shreveport) Gate",
+          "North (Bossier) Gate depending on duty location and published hours"
         ],
         "bah_fit": "high",
         "family_fit": "medium",
@@ -881,23 +1099,25 @@
         "watchouts": [
           "Property age and condition can vary",
           "Neighborhood feel should be verified block by block",
-          "School and resale logic should be compared carefully"
+          "School and resale logic should be compared carefully",
+          "Closer-in does not automatically mean better schools or lower insurance"
         ],
-        "pcsu_recommendation": "Good for users prioritizing commute simplicity and affordability, especially when the specific property condition is strong."
+        "pcsu_recommendation": "Good for users prioritizing commute simplicity and affordability, especially when the specific property condition is strong.",
+        "intelligence_type": "curated_pcsunited_intelligence"
       },
       {
         "name": "Select Shreveport Areas",
         "type": "nearby_city_area",
-        "fit_summary": "Can offer affordability and older-home value, but requires stronger neighborhood, crime, school, and resale screening.",
+        "fit_summary": "Can offer affordability and older-home value, but requires stronger neighborhood, crime, school, and resale screening across Caddo Parish.",
         "best_for": [
           "Budget-sensitive buyers",
           "Investors",
           "Users comfortable with detailed property-level screening",
           "Buyers prioritizing price over suburban polish"
         ],
-        "commute_band": "Approx. 15-35 minutes depending on exact neighborhood, route, and gate",
+        "commute_band": "Approx. 15-35 minutes depending on exact address, gate, traffic, and report time",
         "likely_gate_logic": [
-          "West Gate",
+          "West (Shreveport) Gate via the Shreveport-Barksdale Bridge",
           "Other gates depending on route and current access rules"
         ],
         "bah_fit": "high",
@@ -907,86 +1127,304 @@
         "traffic_risk": "medium",
         "watchouts": [
           "Crime and property condition vary significantly by area",
-          "School zones must be verified carefully",
-          "Older housing stock may increase maintenance exposure",
-          "Resale appeal may be more neighborhood-sensitive"
+          "School zones must be verified carefully; Caddo Parish assignment is address-specific",
+          "Older housing stock may increase humidity, storm, and maintenance exposure",
+          "Resale appeal may be more neighborhood-sensitive",
+          "Bridge traffic can change the real commute even when mileage looks short"
         ],
-        "pcsu_recommendation": "Use Shreveport selectively. The strongest choices require address-level due diligence, condition review, and safety screening."
+        "pcsu_recommendation": "Use Shreveport selectively. The strongest choices require address-level due diligence, condition review, and safety screening.",
+        "intelligence_type": "curated_pcsunited_intelligence"
       }
     ],
-
     "commute_intelligence": {
-      "overall_commute_posture": "Generally favorable compared with high-traffic military metros.",
+      "commute_bluf": "Barksdale commute pressure is usually more manageable than high-traffic military metros, but gate choice still matters. West Gate is the 24/7 default; North Gate helps lodging and some Bossier routes during published hours; East Gate and Bodcau matter for East Reservation and east-side housing. Times below are approximate and depend on exact address, gate, traffic, and report time.",
+      "overall_commute_posture": "Generally favorable compared with high-traffic military metros, provided the household plans around published gate hours, the Shreveport-Barksdale Bridge, school traffic, and weather/flood risk.",
+      "primary_commute_factors": [
+        "West (Shreveport) Gate 24/7 versus scheduled North, East, and Bodcau hours",
+        "Shreveport-Barksdale Bridge / Barksdale Boulevard flow",
+        "I-20, I-49, and Arthur Ray Teague Parkway routing",
+        "School drop-off timing in Bossier Parish and Caddo Parish",
+        "Choosing by mileage instead of actual report-time commute",
+        "East Reservation versus main-base duty location",
+        "Heavy rain, flooding, and storm-related gate or road closures"
+      ],
       "primary_commute_risks": [
-        "Gate availability and peak report-time flow",
-        "Route choice from Haughton, Benton, or North Bossier",
-        "Weather-related delays during heavy rain or storm periods",
-        "Choosing by mileage instead of actual gate commute"
+        "Assuming North Gate or East Gate will be open when the user actually reports",
+        "Sunday and after-hours arrivals that must use West Gate",
+        "East-side housing that looks close but depends on weekday-only East Gate hours",
+        "Bridge congestion during peak report windows",
+        "School traffic along Bossier corridors",
+        "Weather-related delays and historic flood reroutes"
+      ],
+      "commute_bands": [
+        {
+          "label": "Close-in",
+          "range": "Approx. 0-20 minutes depending on gate, traffic, and exact address",
+          "fit": "Best for users prioritizing proximity and daily convenience",
+          "watchout": "Close-in South Bossier and selected Shreveport pockets still need property, school, and safety screening."
+        },
+        {
+          "label": "Balanced",
+          "range": "Approx. 10-25 minutes depending on gate, traffic, and exact address",
+          "fit": "Often the best balance between housing quality, services, and commute, especially in North Bossier",
+          "watchout": "Gate choice and school drop-off timing can still change the real commute."
+        },
+        {
+          "label": "Lifestyle tradeoff",
+          "range": "Approx. 25-40+ minutes depending on gate, traffic, and exact address",
+          "fit": "May work for families wanting larger homes in Benton, Haughton, or selected farther corridors",
+          "watchout": "Can become painful for early reporting, weekend duty, or frequent base errands if the chosen gate is closed."
+        }
+      ],
+      "gate_selection_logic": [
+        "Start with the user's likely duty location (main base versus East Reservation).",
+        "Identify the most realistic 24/7 gate (currently West / Shreveport Gate).",
+        "Use North / Bossier Gate only during published hours, especially for lodging.",
+        "Use East / Industrial Gate only during weekday published hours for East Reservation and north-of-base housing.",
+        "Consider Bodcau for East Reservation / extended-hour patterns, not as a default newcomer gate.",
+        "Compare the commute during the user's actual report window.",
+        "Do not choose a neighborhood based only on mileage."
       ],
       "planning_guidance": [
-        "Test the commute during the user’s expected report-time window.",
-        "Confirm which gate best supports the user’s duty location.",
-        "Compare Bossier, Benton, Haughton, and Shreveport by route reliability, not only distance.",
-        "Use commute plus all-in housing cost as the core PCSUnited decision screen."
+        "Test the commute during the user's expected report-time window.",
+        "Confirm which gate best supports the user's duty location and day of week.",
+        "Compare North Bossier, Benton, Haughton, South Bossier, and selected Shreveport areas by route reliability, not only distance.",
+        "Build a West Gate backup plan for Sundays, after-hours, and visitor access.",
+        "Use commute plus all-in housing cost, including insurance, as the core PCSUnited decision screen."
       ],
-      "pcsu_bluf": "Barksdale commute pressure is usually manageable, but the best housing choice still depends on gate logic, route reliability, and neighborhood fit."
+      "user_instruction": "Before signing a lease or contract, users should test the commute from the exact property address to the expected gate during the same time window they would normally report to work. Times are approximate and depend on gate, traffic, and exact address.",
+      "pcsu_bluf": "Barksdale commute pressure is usually manageable, but the best housing choice still depends on gate logic, report time, school traffic, and neighborhood fit — not pin-drop mileage.",
+      "intelligence_type": "curated_pcsunited_intelligence"
     },
-
     "bah_market_reality": {
-      "overall_position": "Strongly favorable for disciplined military buyers.",
-      "buying_power_summary": "Lower home prices give many Barksdale families more realistic buying power than they would have in larger military metros.",
-      "renting_summary": "Renting remains practical, but strong affordability can make buying attractive for users with stable debt, savings, and expected assignment length.",
+      "bah_bluf": "Barksdale should be modeled as a high-affordability military market. BAH is a decision filter, not a promise of affordability. Compare BAH against rent or mortgage, Louisiana insurance, utilities, maintenance, commute, debt, residual income, and assignment length.",
+      "overall_position": "Strongly favorable for disciplined military buyers; renting remains practical for short assignments or tight residual income.",
+      "buying_power_summary": "Lower home prices give many Barksdale families more realistic buying power than they would have in larger military metros, but insurance, humidity, storm exposure, and older-home maintenance can erase a headline-price advantage.",
+      "renting_summary": "Renting remains practical, especially for short tours, unaccompanied personnel, or households still screening neighborhoods. Strong affordability can make buying attractive only when debt, savings, insurance, and expected assignment length support it.",
+      "recommended_calculations": [
+        "BAH with dependents vs estimated rent",
+        "BAH without dependents vs estimated rent",
+        "BAH vs estimated mortgage payment",
+        "Total housing cost including insurance vs 30% income lane",
+        "Residual monthly income after expenses and housing",
+        "Debt-to-income pressure",
+        "Rent vs buy break-even horizon / assignment-length exit strategy"
+      ],
+      "pcsu_decision_outputs": [
+        "Rent",
+        "Buy",
+        "Wait",
+        "Widen search",
+        "Reduce target price",
+        "Consider roommate",
+        "Use on-base housing as comparison"
+      ],
       "watch_items": [
-        "Insurance premium assumptions",
+        "Assignment length",
+        "Purchase price",
+        "Louisiana insurance premiums",
         "Flood or drainage considerations where applicable",
         "Older-home maintenance exposure",
+        "Commute route and gate hours",
+        "School zones by exact address",
         "Debt-to-income pressure",
-        "School-zone and neighborhood-level tradeoffs"
+        "Exit strategy if the tour is short"
       ],
-      "pcsu_strategy_note": "Barksdale should be modeled as a strong affordability market, but PCSUnited should still test each user’s rank, BAH, debt, savings, credit score, and PCS timeline before calling buy versus rent."
+      "base_tab_message": "Show BAH as a decision filter, not a promise of affordability. The Base tab should push users into the PCSUnited financial calculator when insurance, debt, or residual income looks tight even if the purchase price looks low.",
+      "pcsu_strategy_note": "Barksdale should be modeled as a strong affordability market, but PCSUnited should still test each user's rank, BAH, debt, savings, credit score, insurance quotes, PCS timeline, and exit plan before calling buy versus rent.",
+      "intelligence_type": "curated_pcsunited_intelligence"
     },
-
     "family_readiness": {
+      "family_bluf": "Barksdale can be a strong family PCS location when the household chooses the right neighborhood, verifies school assignment by exact address, plans childcare early, and protects against hidden ownership costs such as insurance and humidity-related maintenance.",
       "family_fit": "High",
+      "school_guidance": {
+        "on_base_option": "Current 2nd FSS School Liaison page: students living on the main base are listed as zoned for Waller Elementary, Rusheon Middle School, and Bossier High School; students living on the East Reservation are listed as zoned for Platt Elementary, Princeton Elementary, T.L. Rhodes Elementary, Haughton Middle School, and Haughton High School. Official Getting Here / School Information pages instead mention Waller Elementary for Historic housing and Kerr Elementary for Eastside housing, plus Rusheon Middle and Bossier High. Treat those lists as research starting points only.",
+        "school_liaison_phone": "318-456-4098",
+        "school_liaison_email": "BarksdaleSchoolLiaison@us.af.mil",
+        "school_liaison_address": "801 Kenney Avenue, Suite 2102, Barksdale AFB, LA 71110",
+        "school_zone_warning": "Always verify school assignment by exact residence before signing a lease or purchase contract. On-base School of Choice language on official pages applies to eligible active-duty base residents in Bossier Parish up to school capacity and is not a guaranteed assignment. Off-base assignment is determined by physical residence in Bossier Parish or Caddo Parish.",
+        "nearby_school_district_note": "Common off-base research includes Bossier Parish Schools and Caddo Parish Schools. The School Liaison page directs families to each district's locator tools. Do not assume a preferred elementary such as Kerr Elementary from older newcomer language is the assigned school."
+      },
+      "childcare_guidance": {
+        "cdc_note": "Current 2nd FSS directory lists Child Development Center hours 6:00 a.m.-6:00 p.m., CDC East at 424 Kenney Avenue (318-456-1081) and CDC West at 411 Fairchild Avenue (318-456-2735). Availability, waitlists, and eligibility should be verified through MilitaryChildCare.com or current 2nd FSS Child and Youth Services resources.",
+        "youth_program_note": "Youth Programs are listed at 425 Kenney Avenue, 318-456-3448. Family Child Care coordinator is listed at 413 Curtiss Road, 318-456-9688, 2fss.barksdale.childcare@us.af.mil. Confirm current waitlists and hours before making a housing decision around childcare."
+      },
+      "medical_guidance": {
+        "primary_medical_anchor": "2nd Medical Group, 243 Curtiss Road, Suite 100",
+        "urgent_care": "Official Urgent & Emergency Care page: Barksdale does not offer urgent or emergency care services. Call 911 for emergencies. Nurse Advice Line 1-800-TRICARE (874-2273).",
+        "medical_warning": "Do not assume on-base emergency capability. Plan a civilian emergency-department backup. Verify clinic availability, referrals, pharmacy procedures, and the second-Wednesday monthly training closure directly with official medical sources.",
+        "general_hours_note": "Appointments Monday-Friday 7:30 a.m.-4:30 p.m.; closed second Wednesday of every month for training. Family Health walk-ins 8-10 a.m. and 1-2:30 p.m."
+      },
+      "military_family_readiness_center": {
+        "name": "Barksdale Military & Family Readiness Center",
+        "address": "801 Kenney Ave, Suite 1400, Barksdale AFB, LA 71110",
+        "phone": "318-456-8400",
+        "email": "2bw.afrc@us.af.mil",
+        "hours": "Monday-Friday 8:00 a.m.-4:00 p.m. per the current 2nd FSS directory"
+      },
+      "spouse_employment_note": "The Shreveport-Bossier market is smaller than large coastal metros. Spouse-employment plans should consider licensing/credentialing, childcare waitlists, commute through the actual gate, and whether a dual-commute household still fits Bossier versus Caddo geography.",
       "strengths": [
         "Affordable family-size housing options",
-        "Strong military presence",
-        "Manageable commute environment",
+        "Strong bomber-mission and command presence",
+        "Manageable commute environment relative to larger metros",
         "Bossier Parish options often appeal to military families",
-        "Lower entry price than many Air Force markets"
+        "On-base housing, CDCs, School Liaison, and M&FRC are available as planning anchors"
       ],
       "watchouts": [
-        "School assignments must be verified by exact address",
-        "Neighborhood quality varies materially",
+        "School assignments and School of Choice rules must be verified by exact address",
+        "Official pages disagree on some on-base elementary names",
+        "Neighborhood quality varies materially across Bossier and Shreveport",
         "Insurance and maintenance should be included in the budget",
-        "Humidity and storms can affect long-term home upkeep"
+        "Humidity and storms can affect long-term home upkeep",
+        "No on-base urgent or emergency care"
       ],
-      "pcsu_family_bluf": "Barksdale can be a strong family PCS location when the household chooses the right neighborhood, verifies school zones, and protects against hidden ownership costs."
+      "pcsu_family_bluf": "Barksdale can be a strong family PCS location when the household chooses the right neighborhood, verifies school zones, plans around the lack of on-base emergency care, and protects against hidden ownership costs.",
+      "verified_on": "2026-09-16"
     },
-
-    "arrival_checklist": [
-      "Verify current gate hours and visitor access procedures through official Barksdale AFB sources.",
-      "Confirm whether on-base housing or off-base housing better fits rank, dependents, BAH, pets, school needs, and expected assignment length.",
-      "Compare North Bossier, Benton, Haughton, South Bossier, and select Shreveport areas using commute, schools, safety, and all-in monthly cost.",
-      "Check insurance estimates before finalizing a purchase budget.",
-      "Verify school zones by exact property address.",
-      "Review roof, HVAC, drainage, foundation, and humidity-related maintenance exposure before buying.",
-      "Use PCSUnited calculators to compare rent, buy, residual income, and risk level before committing."
-    ],
-
+    "arrival_checklist": {
+      "before_arrival": [
+        "Verify current gate and Visitor Center status on the official Barksdale Gate Hours page and by calling 318-529-2273.",
+        "Confirm sponsor contact and unit reporting instructions.",
+        "If visitor access is needed, plan around published Visitor Center hours and REAL ID requirements; keep 318-456-4984 and after-hours 318-456-3587 available.",
+        "Confirm lodging or temporary housing plan and call Barksdale Inn at 318-456-3091. Remember North/Bossier Gate is the easiest lodging access only during published hours and is closed Sunday.",
+        "Review Military Housing Office guidance before signing a lease or purchase contract.",
+        "Compare BAH against rent or mortgage, utilities, Louisiana insurance, debt, savings goals, and commute.",
+        "Shortlist neighborhoods by realistic 24/7 West Gate access and expected report time.",
+        "Verify school assignment by exact residence with the School Liaison and the correct parish locator; do not rely on a named elementary from newcomer language.",
+        "Check current pet policies for privatized housing, rentals, and temporary lodging. Current FSS lodging page states TLF units are not available."
+      ],
+      "arrival_and_inprocessing": [
+        "Enter through West (Shreveport) Gate unless your sponsor specifically directs another open gate.",
+        "If you need a visitor pass after Visitor Center hours, use the West Gate process and 318-456-3587.",
+        "Report to your unit as instructed during duty hours.",
+        "Contact Military Personnel Flight at 318-456-3710 for DEERS/ID and in-processing; FSS currently lists appointment-only hours Monday-Friday 9:00 a.m.-3:00 p.m.",
+        "Contact TMO at 318-456-5338, third floor of 801 Kenney Ave, for household-goods issues.",
+        "Use the Military & Family Readiness Center at 801 Kenney Ave, Suite 1400, 318-456-8400, for relocation information and referrals."
+      ],
+      "first_week": [
+        "Complete unit check-in and required in-processing appointments.",
+        "Visit or contact the housing office if still deciding between on-base and off-base options.",
+        "Confirm medical, pharmacy, and emergency-care procedures. There is no on-base urgent or emergency care; call 911 for emergencies.",
+        "Drive the commute from target neighborhoods during the actual expected report window, including a West Gate backup.",
+        "Tour properties before committing when possible.",
+        "Avoid choosing housing solely by distance, rent, or list price."
+      ],
+      "first_30_days": [
+        "Finalize housing only after comparing commute, BAH fit, insurance, school needs, and total monthly cost.",
+        "Save operator, Visitor Center, gate-status, medical, housing, TMO, and family-readiness contacts.",
+        "Update PCSUnited financial inputs with final housing numbers.",
+        "Review whether the selected area supports assignment length, family needs, resale/rental exit risk, and daily quality of life."
+      ],
+      "legacy_flat_checklist": [
+        "Verify current gate hours and visitor access procedures through official Barksdale AFB sources.",
+        "Confirm whether on-base housing or off-base housing better fits rank, dependents, BAH, pets, school needs, and expected assignment length.",
+        "Compare North Bossier, Benton, Haughton, South Bossier, and select Shreveport areas using commute, schools, safety, insurance, and all-in monthly cost.",
+        "Check insurance estimates before finalizing a purchase budget.",
+        "Verify school zones by exact property address.",
+        "Review roof, HVAC, drainage, foundation, and humidity-related maintenance exposure before buying.",
+        "Use PCSUnited calculators to compare rent, buy, residual income, and risk level before committing."
+      ],
+      "verified_on": "2026-09-16"
+    },
     "pcs_watchouts": [
-      "Do not assume the cheapest home is the best financial move.",
-      "Do not choose by distance alone; gate route and neighborhood quality matter.",
-      "Insurance can materially change the affordability picture.",
-      "Older homes may need maintenance reserves even when the mortgage looks affordable.",
-      "School quality and neighborhood feel vary enough that address-level review is required.",
-      "If the assignment is short, compare transaction costs and resale risk before buying."
+      {
+        "title": "Gate and Visitor Center hours can change",
+        "severity": "high",
+        "message": "Use the official Gate Hours page and 318-529-2273 immediately before travel. As of 2026-09-16, West/Shreveport Gate is listed 24/7; North/Bossier Gate 6:00 a.m.-5:45 p.m. weekdays and 8:00 a.m.-2:00 p.m. Saturday, closed Sunday; East/Industrial Gate 5:45 a.m.-5:45 p.m. weekdays, closed weekends; Bodcau 4:30 a.m.-11:59 p.m. Monday-Thursday and 4:30 a.m.-1:00 a.m. Friday-Sunday. Visitor Center hours conflict across official sources."
+      },
+      {
+        "title": "Visitor access procedures are security-sensitive",
+        "severity": "high",
+        "message": "West Shreveport Gate is the published visitor-pass point. REAL ID is required for visitor passes and base access as of 7 May 2025 per the official Gate Hours page. VCC 318-456-4984; after-hours visitor-pass questions 318-456-3587. A public BDOC number was not published."
+      },
+      {
+        "title": "Distance is not the same as commute",
+        "severity": "high",
+        "message": "Neighborhoods should be compared by realistic gate access, duty location, bridge traffic, school drop-off timing, and report-time windows. Times are approximate and depend on gate, traffic, and exact address."
+      },
+      {
+        "title": "School assignments are residence-specific",
+        "severity": "high",
+        "message": "Verify school assignment by exact property address with Bossier Parish or Caddo Parish tools and the School Liaison. Official pages disagree on some East Reservation elementary names. On-base School of Choice is not a guaranteed assignment."
+      },
+      {
+        "title": "BAH is not the full affordability picture",
+        "severity": "high",
+        "message": "Do not assume a low purchase price automatically means a comfortable payment. Compare rent or mortgage against income, debt, utilities, Louisiana insurance, maintenance, savings goals, and assignment length."
+      },
+      {
+        "title": "Published population is a Newcomers profile, not a live census",
+        "severity": "medium_high",
+        "message": "The official Newcomers page publishes 14,581 total with 5,039 active duty, 1,355 reservists, 2,530 civilians, and 5,657 family members. That is not Bossier City, Shreveport, or metro population. MilitaryINSTALLATIONS' ~25,000 retirees within 50 miles are not installation population. The 2nd Bomb Wing factsheet uses a different workforce/dependent grouping."
+      },
+      {
+        "title": "No on-base urgent or emergency care",
+        "severity": "high",
+        "message": "Official 2nd Medical Group guidance: Barksdale does not offer urgent or emergency care. Call 911 for emergencies and use the Nurse Advice Line 1-800-TRICARE (874-2273) for non-emergency guidance."
+      },
+      {
+        "title": "On-base housing is not automatically the best financial answer",
+        "severity": "medium",
+        "message": "Off-base prices around Barksdale can look attractive, but insurance, commute, schools, pets, waitlists, and assignment length still decide the better path. Compare on-base Hunt housing against rent and buy."
+      },
+      {
+        "title": "Humidity, storms, and insurance can erase a cheap-house advantage",
+        "severity": "medium",
+        "message": "Louisiana insurance, flood/drainage, roof/HVAC age, and humidity-related maintenance should be in the monthly model before a buy recommendation."
+      }
     ],
-
     "realtor_intelligence": {
-      "best_client_positioning": "Lead with affordability, BAH fit, commute simplicity, and neighborhood confidence. Barksdale clients need practical strategy more than luxury positioning.",
+      "best_client_positioning": "Lead with affordability after insurance, BAH fit, commute through the actual report-time gate, Bossier versus Shreveport screening, and school assignment by address. Barksdale clients need practical strategy more than luxury positioning.",
+      "buyer_personas": [
+        {
+          "persona": "First-time VA buyer",
+          "likely_questions": [
+            "Can I afford to buy near Barksdale?",
+            "Which areas fit my BAH after insurance?",
+            "Should I rent first?",
+            "Is North Bossier worth the extra price?"
+          ],
+          "agent_strategy": "Lead with all-in payment clarity, insurance quotes, commute testing, and VA loan education. Do not sell on headline price alone."
+        },
+        {
+          "persona": "E-5 / E-6 family with dependents",
+          "likely_questions": [
+            "Where do military families usually live?",
+            "Which school zones should I research?",
+            "Is Benton or Haughton too far?",
+            "Is on-base housing better?"
+          ],
+          "agent_strategy": "Compare North Bossier, Benton, Haughton, South Bossier, and on-base Hunt housing against commute, parish school assignment, and monthly cost."
+        },
+        {
+          "persona": "Single airman / short-term renter",
+          "likely_questions": [
+            "Do I have to live in the dorms?",
+            "What is close and affordable?",
+            "Where should I avoid signing too fast?"
+          ],
+          "agent_strategy": "Confirm UH eligibility first. Keep off-base recommendations practical: West Gate commute, rent, safety, property condition, and lease flexibility."
+        },
+        {
+          "persona": "Permanent party / dual-income household",
+          "likely_questions": [
+            "Should I buy if I may be here longer?",
+            "How do I balance Barksdale commute and spouse employment?",
+            "What areas have resale strength with military buyers?"
+          ],
+          "agent_strategy": "Use assignment length, dual-commute geography, family needs, insurance, and rent-versus-buy math to guide the recommendation."
+        }
+      ],
+      "listing_angles": [
+        "Practical commute to Barksdale AFB",
+        "Bossier Parish school-zone clarity when accurate",
+        "Move-in ready condition",
+        "Updated roof/HVAC/mechanicals",
+        "Insurance-aware pricing",
+        "VA-friendly pricing and appraisal confidence"
+      ],
       "strong_listing_angles": [
-        "Short commute to Barksdale AFB",
+        "Short commute to Barksdale AFB with a realistic gate plan",
         "Bossier Parish school-zone clarity",
         "Move-in ready condition",
         "Updated roof/HVAC/mechanicals",
@@ -997,7 +1435,7 @@
         "Rent versus buy based on assignment length",
         "All-in payment including insurance and utilities",
         "Neighborhood safety and school verification",
-        "Commute testing during actual duty hours",
+        "Commute testing during actual duty hours and day of week",
         "Future resale appeal to military buyers"
       ],
       "investor_consultation_angles": [
@@ -1007,69 +1445,396 @@
         "Neighborhood stability",
         "Turnover and vacancy assumptions"
       ],
-      "pcsu_realtor_bluf": "A strong Barksdale realtor should sound like a financial guide, commute strategist, and neighborhood-risk filter — not just a door opener."
+      "common_objections": [
+        "Insurance sticker shock",
+        "Neighborhood quality variation across Shreveport-Bossier",
+        "School-zone confusion between main base, East Reservation, and off-base parishes",
+        "North Gate / East Gate hour limitations",
+        "Short assignment timeline",
+        "Older-home maintenance"
+      ],
+      "recommended_agent_behavior": [
+        "Do not overpromise commute times.",
+        "Always recommend school-zone verification by address.",
+        "Use payment math including insurance, not just listing price.",
+        "Discuss gate access and Sunday/after-hours West Gate backup early.",
+        "Compare on-base Hunt housing as a legitimate alternative.",
+        "Avoid generic Louisiana advice when the user is assigned to Barksdale."
+      ],
+      "pcsu_realtor_bluf": "A strong Barksdale realtor should sound like a financial guide, commute strategist, and neighborhood-risk filter — not just a door opener.",
+      "intelligence_type": "curated_pcsunited_intelligence"
     },
-
     "data_confidence": {
-      "overall": "medium",
-      "market_data": "medium",
-      "base_services": "medium",
-      "gate_data": "low_medium",
-      "neighborhood_guidance": "medium",
-      "notes": [
-        "Market and housing values are PCSUnited planning estimates and should be refreshed periodically.",
-        "Gate, visitor, service, medical, and housing office details should be verified against official installation sources before publication or use in routing.",
-        "Placeholder map image is used until a dedicated Barksdale base orientation map is created."
-      ]
+      "overall": "high_for_current_base_essentials_medium_high_for_curated_pcs_intelligence",
+      "identity": "high_current_public_official",
+      "mission": "high_current_public_official",
+      "base_operator": "high_current_public_official",
+      "installation_population": "medium_published_profile_not_live_headcount",
+      "gate_data": "high_current_public_official_time_sensitive",
+      "visitor_control_center": "high_current_public_official_with_hour_conflicts",
+      "housing_office": "high_current_air_force_housing",
+      "unaccompanied_housing": "high_current_air_force_housing",
+      "privatized_housing": "high_current_air_force_housing",
+      "medical": "high_current_tricare",
+      "commissary": "high_current_deca_with_source_conflict_note",
+      "exchange": "medium_official_source_retained_hours_require_direct_recheck",
+      "military_family_readiness": "high_current_2nd_fss_directory",
+      "school_liaison": "high_current_2nd_fss_with_address_conflict_note",
+      "recommended_neighborhoods": "curated_pcsunited_intelligence",
+      "commute_bands": "estimated_requires_address_and_report_time_validation",
+      "bah_market_guidance": "strategy_layer_requires_rank_family_and_financial_inputs",
+      "housing_market_demographics": "preserved_from_existing_2026_03_source_records_not_revalidated_in_this_installation_profile_pass",
+      "last_reviewed": "2026-09-16"
     },
-
     "source_notes": [
-      "Use official Barksdale AFB sources for gate hours, visitor control, newcomer guidance, and installation access.",
-      "Use official Air Force Housing and local housing office sources for on-base housing and privatized housing details.",
-      "Use DeCA, AAFES, and TRICARE sources for commissary, exchange, and medical details.",
-      "Use local MLS, Zillow-style indexes, rental listing aggregators, and Census-style demographic sources for housing and market refreshes."
+      {
+        "label": "Official Barksdale AFB homepage",
+        "type": "official_current",
+        "url": "https://www.barksdale.af.mil/",
+        "source_key": "official_links.base_home",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Installation identity",
+          "Official installation name"
+        ]
+      },
+      {
+        "label": "Official Barksdale AFB Contact Us",
+        "type": "official_current",
+        "url": "https://www.barksdale.af.mil/Contact-Us/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Base operator 318-456-1110",
+          "Public Affairs 318-456-1015"
+        ]
+      },
+      {
+        "label": "Official Barksdale AFB Gate Hours",
+        "type": "official_current",
+        "url": "https://www.barksdale.af.mil/Information/Gate-Hours/",
+        "source_key": "official_links.gate_hours",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Four named gates and standing hours",
+          "West Gate 24/7 main-gate / visitor-pass role",
+          "North Gate lodging-access note",
+          "East Gate housing / search-area role",
+          "West and East Visitor Center hours",
+          "After-hours visitor-pass number 318-456-3587",
+          "West VCC phone 318-456-4984",
+          "REAL ID requirement as of 7 May 2025"
+        ],
+        "freshness_note": "Gate and Visitor Center hours are time-sensitive. Verify immediately before travel.",
+        "source_conflict_note": "MilitaryINSTALLATIONS lists Visitor Center hours 6:00 a.m.-6:00 p.m. The official Gate Hours page lists West Shreveport Gate Visitor Center 6:00 a.m.-10:00 p.m. Monday-Sunday. The installation Gate Hours page won for standing published hours. Official Team Barksdale social-media staffing notices have previously reduced VCC hours to weekdays only; those notices were documented as a time-sensitive conflict, not used as the standing canonical hours."
+      },
+      {
+        "label": "Gate Status Information Line press release",
+        "type": "official_current",
+        "url": "https://www.barksdale.af.mil/News/Press-Releases/Display/Article/3900718/gate-status-information-line/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Gate status line 318-529-BASE (2273)",
+          "Four-gate naming West (Shreveport), North (Bossier), Industrial, Bodcau"
+        ]
+      },
+      {
+        "label": "Official Barksdale Newcomers",
+        "type": "official_published_profile",
+        "url": "https://www.barksdale.af.mil/Newcomers/",
+        "source_key": "official_links.newcomers",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Host-wing identity",
+          "AFGSC / Eighth Air Force / 307th Bomb Wing presence",
+          "Published installation population profile 14,581 with category breakdown"
+        ],
+        "freshness_note": "Population figures are a published profile; underlying data year is not stated. Not a live headcount and not city/metro population."
+      },
+      {
+        "label": "Official 2nd Bomb Wing factsheet",
+        "type": "official_published_profile",
+        "url": "https://www.barksdale.af.mil/Units/Fact-Sheets/Article/320180/2nd-bomb-wing/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Host-wing mission language",
+          "B-52H squadron names",
+          "307th Bomb Wing training-partner language",
+          "Workforce / dependent grouping conflict note"
+        ],
+        "freshness_note": "Factsheet groups nearly 9,000 active-duty, Reserve, and civilian personnel plus about 6,000 dependents. That grouping was not added to the Newcomers 14,581 total.",
+        "source_conflict_note": "Newcomers page category totals (14,581) and the 2nd Bomb Wing factsheet workforce/dependent grouping are different published profiles. Newcomers won for the structured installation_population object because it publishes an explicit category table. The factsheet remains in the mission summary and conflict note."
+      },
+      {
+        "label": "Official Barksdale About Us / 2nd Bomb Wing mission",
+        "type": "official_current",
+        "url": "https://www.barksdale.af.mil/About-Us/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Primary mission language",
+          "AFGSC and AFRC B-52 crew-training statement"
+        ]
+      },
+      {
+        "label": "Official Getting Here",
+        "type": "official_current",
+        "url": "https://www.barksdale.af.mil/gettinghere/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "TMO phone and 801 Kenney Ave location",
+          "Barksdale Inn address and 318-456-3091",
+          "Check-out 11:00 a.m. corroboration",
+          "Older School Liaison / Kerr Elementary zoning language documented as a conflict"
+        ],
+        "source_conflict_note": "Getting Here lists School Liaison at 318-456-8400 (M&FRC number) and Kerr Elementary for Eastside housing. Current FSS School Liaison page lists 318-456-4098 at 801 Kenney Avenue, Suite 2102, and a different East Reservation elementary list. More specific current FSS School Liaison page won for SLO contact; zoning lists are documented as conflicting research starting points, not guaranteed assignments."
+      },
+      {
+        "label": "Official School Information newcomer page",
+        "type": "official_current",
+        "url": "https://www.barksdale.af.mil/Information/Resources/Newcomer-Guide/School-Information/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "School of Choice research language",
+          "241 Curtiss Rd / River's Edge Welcome Center listing",
+          "Jacqueline Robertson 318-456-4098 / 318-564-9099"
+        ],
+        "source_conflict_note": "Address 241 Curtiss Rd conflicts with current FSS School Liaison Suite 2102 at 801 Kenney Avenue. Phone 318-456-4098 is consistent. Current FSS page won for address; Curtiss Road listing is retained as a documented conflict."
+      },
+      {
+        "label": "Air Force Housing — Barksdale AFB",
+        "type": "official_current",
+        "url": "https://www.housing.af.mil/Home/Installations/Barksdale-AFB/",
+        "source_key": "official_links.housing",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Military Housing Office phone, email, address, hours",
+          "Hunt privatized housing contacts",
+          "Unaccompanied Housing phone, address, hours"
+        ],
+        "source_conflict_note": "UH email is published on the deprecated https://www.housing.af.mil/Home-depricated/Units/Barksdale/ page as 2cesdormmanagement@barksdale.af.mil and is retained with that provenance. Current installation housing page lists UH phone/address/hours."
+      },
+      {
+        "label": "DeCA Barksdale AFB Commissary",
+        "type": "official_current",
+        "url": "https://corp.commissaries.com/shopping/store-locations/barksdale-afb",
+        "source_key": "official_links.commissary",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Commissary address",
+          "Phone 318-761-7432",
+          "Normal store hours",
+          "CLICK2GO hours and 318-761-7438",
+          "Store email"
+        ],
+        "source_conflict_note": "shop.commissaries.com has listed 318-761-4732. DeCA corporate store page 318-761-7432 won."
+      },
+      {
+        "label": "2nd Medical Group Contact Us",
+        "type": "official_medical_current",
+        "url": "https://barksdale.tricare.mil/About-Us/Contact-Us",
+        "source_key": "official_links.medical",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "243 Curtiss Road, Suite 100 address",
+          "Appointment line 318-456-6555",
+          "Patient Admin/TRICARE 318-456-6402",
+          "Monday-Friday 7:30 a.m.-4:30 p.m. and second-Wednesday training closure"
+        ]
+      },
+      {
+        "label": "2nd Medical Group Urgent & Emergency Care",
+        "type": "official_medical_current",
+        "url": "https://barksdale.tricare.mil/Health-Services/Urgent-Emergency-Care",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "No on-base urgent or emergency care",
+          "911 emergency instruction",
+          "Nurse Advice Line 1-800-TRICARE (874-2273)"
+        ]
+      },
+      {
+        "label": "2nd Medical Group Family Health",
+        "type": "official_medical_current",
+        "url": "https://barksdale.tricare.mil/Health-Services/Primary-Care/Family-Health",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Family Health walk-in hours",
+          "Suite 100 location corroboration"
+        ]
+      },
+      {
+        "label": "2nd FSS directory",
+        "type": "official_current",
+        "url": "https://barksdalelife.com/directory/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "M&FRC address, phone, email, hours",
+          "MPF / DEERS appointment hours and 318-456-3710",
+          "School Liaison directory hours and phones",
+          "Barksdale Inn 24/7 listing, check-in/out, directory email alias",
+          "CDC East/West contacts",
+          "Youth Programs and Family Child Care contacts"
+        ]
+      },
+      {
+        "label": "2nd FSS School Liaison",
+        "type": "official_current",
+        "url": "https://barksdalelife.com/school-liaison/",
+        "source_key": "official_links.school_liaison",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "801 Kenney Avenue, Suite 2102",
+          "Hours 7:30 a.m.-4:30 p.m. Monday-Friday",
+          "Phones 318-456-4098 and 318-564-9099",
+          "BarksdaleSchoolLiaison@us.af.mil",
+          "Current main-base and East Reservation zone lists",
+          "School of Choice / address-determines-district warnings"
+        ]
+      },
+      {
+        "label": "2nd FSS Barksdale Inn",
+        "type": "official_current",
+        "url": "https://barksdalelife.com/barksdale-inn/",
+        "source_key": "official_links.temporary_lodging",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Lodging name",
+          "555 Davis Avenue West",
+          "318-456-3091",
+          "2fss_lodgingreservations@us.af.mil",
+          "24/7/365 operations",
+          "North Gate lodging-access note",
+          "TLF not available note"
+        ],
+        "source_conflict_note": "FSS directory lists lodging email fss_lodgingreservations@us.af.mil; dedicated lodging page lists 2fss_lodgingreservations@us.af.mil. Dedicated lodging page won for email. Directory and Getting Here list check-out 11:00 a.m.; a lodging-page scrape also showed 11:00 p.m. Directory/Getting Here 11:00 a.m. won."
+      },
+      {
+        "label": "Air Force Inns — Barksdale Inn",
+        "type": "official_current",
+        "url": "https://af.dodlodging.net/propertys/Barksdale-Inn",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Lodging address 555 Davis Ave. West",
+          "Main 318-456-3091",
+          "DSN 781-3091"
+        ]
+      },
+      {
+        "label": "MilitaryINSTALLATIONS — Barksdale Air Force Base",
+        "type": "official_dod_current_portal",
+        "url": "https://installations.militaryonesource.mil/in-depth-overview/barksdale-air-force-base",
+        "source_key": "official_links.military_installations",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Rounded ~15,000 population corroboration",
+          "Retiree-within-50-miles statement documented as not installation population",
+          "ZIP 71110",
+          "Base operator 318-456-1110 / DSN 781-1110"
+        ],
+        "freshness_note": "MilitaryINSTALLATIONS also publishes surrounding civilian/retiree figures. Those are not installation population and were not used as installation_population totals."
+      },
+      {
+        "label": "MilitaryINSTALLATIONS check-in procedures",
+        "type": "official_dod_current_portal",
+        "url": "https://installations.militaryonesource.mil/military-installation/barksdale-air-force-base/base-essentials/check-in-procedures",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Welcome Center/Gates address 425 Lindbergh Avenue",
+          "West Gate Guard 318-456-5334",
+          "Visitor Center 318-456-4984",
+          "24-hour arrival point note for West Gate Visitor's Center",
+          "MPF function phone list"
+        ],
+        "source_conflict_note": "Lists Visitor Center open 6:00 a.m.-6:00 p.m. Official Gate Hours page lists 6:00 a.m.-10:00 p.m. Gate Hours page won for standing VCC hours."
+      },
+      {
+        "label": "AAFES shopmyexchange.com",
+        "type": "official_commercial_military_retained",
+        "url": "https://www.shopmyexchange.com/",
+        "source_key": "official_links.exchange",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Official Exchange homepage reference",
+          "Capehart Express locator URL retained as a known Barksdale AAFES location page"
+        ],
+        "freshness_note": "Current Main Exchange address, phone, and hours were not independently readable from AAFES during this verification pass. Users must verify hours directly with AAFES. Third-party directories were not used."
+      },
+      {
+        "label": "Existing Barksdale.json market and PCSUnited intelligence",
+        "type": "preserved_internal_profile",
+        "source_key": "existing Barksdale.json",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Census-style demographics",
+          "March 2026 housing-market values",
+          "by-bedroom values",
+          "sale history",
+          "recommended neighborhoods",
+          "BAH / commute / realtor intelligence foundations"
+        ],
+        "freshness_note": "MARKET_REFRESH_REQUIRED. Market as_of dates remain 2026-03 and were not changed because RentCast was not called during this installation-profile upgrade."
+      }
     ],
-
-    "disclaimer": "PCSUnited base profiles are planning tools only. They are not official DoD, Air Force, installation, legal, financial, real estate, lending, or navigation guidance. Users should verify gate access, housing rules, school zones, medical services, visitor procedures, market prices, insurance estimates, and commute conditions through official and professional sources before making decisions."
+    "disclaimer": "PCSUnited is not an official DoD or Department of the Air Force source. This profile is for public-facing PCS orientation, housing research, relocation planning, and Ask Amy explanations. Time-sensitive information—especially gate/VCC status, access rules, medical operations, housing availability, lodging, and office hours—must be verified with the official installation or service provider before travel or making a housing decision."
   },
-
   "sources": {
     "demographics": {
       "provider": "US Census Bureau / Louisiana Economic Development",
-      "as_of": "2026-03"
+      "as_of": "2026-03",
+      "status": "MARKET_REFRESH_REQUIRED",
+      "note": "Existing demographic values and as_of date were preserved. They were not re-dated by this installation-profile verification."
     },
     "rent": {
       "provider": "RentCafe / Zumper",
-      "as_of": "2026-03"
+      "as_of": "2026-03",
+      "status": "MARKET_REFRESH_REQUIRED",
+      "note": "Existing rental values were preserved. RentCast was not called during this update. These figures are not RentCast-validated."
     },
     "home_price": {
       "provider": "NWLA Realtors / Zillow",
-      "as_of": "2026-03"
+      "as_of": "2026-03",
+      "status": "MARKET_REFRESH_REQUIRED",
+      "note": "Existing home-price values were preserved. RentCast was not called during this update. These figures are not RentCast-validated."
     },
     "base_profile": {
-      "provider": "PCSUnited planning profile using public-facing installation, housing, and market research structure",
-      "as_of": "2026-05"
+      "provider": "PCSUnited Gold Standard installation profile using official Barksdale AFB, 2nd Bomb Wing, Air Force Housing, MilitaryINSTALLATIONS, TRICARE, DeCA, 2nd FSS, and other public authoritative sources",
+      "as_of": "2026-09-16",
+      "verification_level": "official-source-validated for Base Map / Ask Amy essentials",
+      "market_data_scope_note": "Housing-market and demographic data elsewhere in this file retain their March 2026 source dates and were not re-dated during this installation-profile upgrade. MARKET_REFRESH_REQUIRED."
+    },
+    "housing_market": {
+      "provider": "NWLA Realtors / Zillow-style market estimates preserved from existing file",
+      "as_of": "2026-03",
+      "status": "MARKET_REFRESH_REQUIRED",
+      "note": "RentCast was not called during this installation-profile upgrade. Existing March 2026 market values and as_of dates were preserved and are not presented as a 2026-09 refresh."
     }
   },
-
   "compatibility": {
     "orozco_realty_ready": true,
     "pcsunited_ready": true,
     "intended_primary_slug": "barksdale-afb",
     "schema_family": "pcsunited-city-base-json",
-    "schema_version": "pcsu-base-profile-v1.0.0",
+    "schema_version": "pcsu-base-profile-v1.1.0",
     "base_demographics_shell_ready": true,
     "base_tab_ready": true,
     "uses_placeholder_base_image": true,
     "placeholder_base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
     "parser_notes": [
-      "Strict schema clone of the Lackland and Andrews city/base JSON pattern.",
+      "Gold Standard architecture: root city/market/demographic data, nested base_profile, root sources, then compatibility.",
+      "Root market and demographic data were preserved, including March 2026 as_of dates.",
+      "base_profile is nested as the object consumed by Base-Map/base-map.js getProfile(json) and Base-Map/ask-amy-base-map-server.js sanitizeBaseSnapshot().",
       "All major PCSUnited fields preserved and adapted for Barksdale AFB.",
       "Compatible with PCS Snapshot, Base Demographics Shell, Base SaaS, and TOR parsing.",
-      "Preserves duplicate value aliases for avg_home_value, average_home_value, avgHome, and city_avg_home.",
-      "Preserves duplicate median price aliases for median_list_price, median_sold_price, and median_sale_price.",
-      "Expanded by_bedroom to include 2, 3, 4, and 5-bedroom entries for Market Insight compatibility.",
-      "Expanded base_profile to include map image, official links, visitor control center, gates, major services, on-base housing, recommended neighborhoods, commute intelligence, BAH market reality, family readiness, arrival checklist, PCS watchouts, realtor intelligence, data confidence, source notes, and disclaimer."
-    ]
+      "Preserves duplicate home-value aliases for avg_home_value, average_home_value, avgHome, and city_avg_home.",
+      "Preserves duplicate median-price aliases for median_list_price, median_sold_price, and median_sale_price.",
+      "Preserves by_bedroom entries for 2, 3, 4, and 5-bedroom Market Insight compatibility.",
+      "Current official installation facts inside base_profile were researched separately from older market data.",
+      "Barksdale market data retains its March 2026 source date. MARKET_REFRESH_REQUIRED: RentCast was not called during this upgrade.",
+      "Gold Standard v1.1.0 adds canonical base_operator and installation_population objects recognized by Base Map and Ask Amy.",
+      "Ask Amy and Base Map compatibility are maintained via nested json.base_profile.",
+      "Placeholder orientation image status is preserved until a dedicated Barksdale gate/neighborhood map is available."
+    ],
+    "gold_standard_base_map_ask_amy_ready": true,
+    "base_map_required_fields_ready": true,
+    "ask_amy_server_required_fields_ready": true
   }
 }
