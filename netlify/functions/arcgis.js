@@ -549,7 +549,7 @@ async function baseNearby({ lat, lon, apiKey }) {
       };
     }
   });
-
+  
   return grouped;
 }
 
