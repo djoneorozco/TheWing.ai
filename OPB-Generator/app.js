@@ -1,91 +1,262 @@
 // ============================================================
-// THEWING.AI • UNIVERSAL OPB GENERATOR
+// PCSUNITED • THEWING.AI
+// EPB BULLET STATEMENT GENERATOR
 // app.js
-// v1.0.0
+// Version 2.0.0
 //
 // PURPOSE
 // ------------------------------------------------------------
-// Front-end controller for the Universal OPB Generator.
+// Front-end controller for the Single Statement Generator.
 //
-// RESPONSIBILITIES
-// - Read accomplishment input
-// - Track character count
-// - Read selected MPA
-// - Call Universal OPB writing engine
-// - Call OPB validator
-// - Render Performance Statement
-// - Render Action / Scope / Result / Impact analysis
-// - Render validation results
-// - Copy statement
-// - Regenerate statement
-// - Reset generator
+// CURRENT WORKFLOW
+// ------------------------------------------------------------
+// 1. User enters a rough accomplishment
+// 2. User selects AF Form 716 section
+// 3. User selects rated rank
+// 4. User selects writing variation
+// 5. TheWing generates 3 statement options
+// 6. Each statement is measured against 350 characters
+// 7. User can copy or select a preferred statement
+// 8. Selected statement is exposed for future AF Form 716 use
 //
-// DOES NOT
-// - Write Performance Statements itself
-// - Invent facts
-// - Contain Air Force writing policy
-// - Determine official evaluation ratings
+// IMPORTANT
+// ------------------------------------------------------------
+// This file:
+// - DOES control interface behavior
+// - DOES enforce the 350-character display / validation
+// - DOES preserve draft state
+// - DOES expose selected statements for future integration
 //
-// WRITING ENGINE:
+// This file:
+// - DOES NOT invent accomplishments
+// - DOES NOT write Air Force content itself
+// - DOES NOT determine evaluation ratings
+// - DOES NOT truncate generated statements
+//
+// WRITING ENGINE
+// ------------------------------------------------------------
 // ./js/opb-universal.js
 //
-// VALIDATOR:
-// ./js/opb-validator.js
-//
-// GUIDANCE:
-// ./data/opb-guidance.js
+// FUTURE
+// ------------------------------------------------------------
+// Selected statements will be routed directly into:
+// - AF Form 716
+// - AF Form 716A
 // ============================================================
 
-
-// ============================================================
-// 1. IMPORTS
-// ============================================================
 
 import {
   generateOPBStatement
 } from "./js/opb-universal.js";
 
 
-import {
-  validateOPBStatement
-} from "./js/opb-validator.js";
-
-
-import {
-  MPA_LABELS
-} from "./data/opb-guidance.js";
-
-
 // ============================================================
-// 2. APP CONFIG
+// 1. APP CONFIG
 // ============================================================
 
 const APP_VERSION =
-  "1.0.0";
+  "2.0.0";
 
 
-const MAX_INPUT_CHARACTERS =
-  2000;
+const CHARACTER_LIMIT =
+  350;
 
 
-const MIN_INPUT_CHARACTERS =
+const MIN_SOURCE_CHARACTERS =
   10;
 
 
+const MAX_SOURCE_CHARACTERS =
+  1500;
+
+
+const OPTION_COUNT =
+  3;
+
+
 const STORAGE_KEY =
-  "thewing.opb-generator.draft.v1";
+  "pcsunited.epb.statement-generator.v2";
 
 
-const COPY_SUCCESS_DURATION =
+const COPY_STATUS_DURATION =
   2200;
 
 
-const GENERATION_DELAY =
-  180;
+// ============================================================
+// 2. SECTION CONFIG
+// ============================================================
+
+const SECTION_CONFIG =
+  Object.freeze({
+
+    "duty-description": {
+
+      id:
+        "duty-description",
+
+      label:
+        "Duty Description",
+
+      form:
+        "AF716",
+
+      characterLimit:
+        CHARACTER_LIMIT
+
+    },
+
+
+    "executing-the-mission": {
+
+      id:
+        "executing-the-mission",
+
+      label:
+        "Executing the Mission",
+
+      form:
+        "AF716",
+
+      characterLimit:
+        CHARACTER_LIMIT
+
+    },
+
+
+    "leading-people": {
+
+      id:
+        "leading-people",
+
+      label:
+        "Leading People",
+
+      form:
+        "AF716",
+
+      characterLimit:
+        CHARACTER_LIMIT
+
+    },
+
+
+    "managing-resources": {
+
+      id:
+        "managing-resources",
+
+      label:
+        "Managing Resources",
+
+      form:
+        "AF716",
+
+      characterLimit:
+        CHARACTER_LIMIT
+
+    },
+
+
+    "improving-the-unit": {
+
+      id:
+        "improving-the-unit",
+
+      label:
+        "Improving the Unit",
+
+      form:
+        "AF716",
+
+      characterLimit:
+        CHARACTER_LIMIT
+
+    }
+
+  });
 
 
 // ============================================================
-// 3. APP STATE
+// 3. RANK CONFIG
+// ============================================================
+
+const RANK_LABELS =
+  Object.freeze({
+
+    SrA_Below:
+      "SrA & Below",
+
+    SSgt:
+      "SSgt",
+
+    TSgt:
+      "TSgt",
+
+    MSgt:
+      "MSgt",
+
+    SMSgt:
+      "SMSgt",
+
+    CMSgt:
+      "CMSgt"
+
+  });
+
+
+// ============================================================
+// 4. VARIATION CONFIG
+// ============================================================
+
+const VARIATION_CONFIG =
+  Object.freeze({
+
+    strict: {
+
+      id:
+        "strict",
+
+      label:
+        "Strict",
+
+      description:
+        "Stay extremely close to the facts supplied by the member."
+
+    },
+
+
+    balanced: {
+
+      id:
+        "balanced",
+
+      label:
+        "Balanced",
+
+      description:
+        "Improve clarity, structure, and impact while preserving the source facts."
+
+    },
+
+
+    competitive: {
+
+      id:
+        "competitive",
+
+      label:
+        "Competitive",
+
+      description:
+        "Use the strongest defensible framing supported by the source accomplishment."
+
+    }
+
+  });
+
+
+// ============================================================
+// 5. APP STATE
 // ============================================================
 
 const state = {
@@ -96,98 +267,68 @@ const state = {
   generating:
     false,
 
+  selectedIndex:
+    null,
+
   generationCount:
     0,
 
-  lastInput:
-    "",
+  statements:
+    createEmptyStatements(),
 
-  lastMPA:
-    "auto",
-
-  lastResult:
-    null,
-
-  lastValidation:
+  lastRequest:
     null
 
 };
 
 
 // ============================================================
-// 4. DOM REFERENCES
+// 6. DOM REFERENCES
 // ============================================================
 
 const elements = {
 
-  app:
+  root:
     null,
 
-  form:
+  accomplishment:
     null,
 
-  accomplishmentInput:
+  sourceCount:
     null,
 
-  characterCount:
+  section:
     null,
 
-  mpaOptions:
+  rank:
+    null,
+
+  variation:
     null,
 
   generateButton:
     null,
 
-  formMessage:
+  status:
     null,
 
-  results:
+  sectionChip:
     null,
 
-  resultStatus:
+  rankChip:
     null,
 
-  resultMPA:
+  variationChip:
     null,
 
-  resultCharacterCount:
-    null,
-
-  resultStatement:
-    null,
-
-  analysisAction:
-    null,
-
-  analysisScope:
-    null,
-
-  analysisResult:
-    null,
-
-  analysisImpact:
-    null,
-
-  validationList:
-    null,
-
-  copyButton:
-    null,
-
-  regenerateButton:
-    null,
-
-  resetButton:
-    null,
-
-  copyStatus:
-    null
+  options:
+    []
 
 };
 
 
 // ============================================================
-// 5. INITIALIZATION
+// 7. INITIALIZATION
 // ============================================================
 
 document.addEventListener(
@@ -200,13 +341,15 @@ function initializeApp() {
 
   cacheElements();
 
+
   if (
-    !elements.form ||
-    !elements.accomplishmentInput
+    !elements.root ||
+    !elements.accomplishment ||
+    !elements.generateButton
   ) {
 
     console.error(
-      "[OPB Generator] Required DOM elements were not found."
+      "[EPB Generator] Required interface elements were not found."
     );
 
     return;
@@ -218,255 +361,282 @@ function initializeApp() {
 
   restoreDraft();
 
-  updateCharacterCount();
+  updateSourceCount();
+
+  updateChips();
+
+  renderAllOptions();
 
   state.initialized =
     true;
 
 
   console.info(
-    `[OPB Generator] Initialized v${APP_VERSION}`
+    `[EPB Generator] Initialized v${APP_VERSION}`
   );
 
 }
 
 
 // ============================================================
-// 6. CACHE DOM
+// 8. CACHE ELEMENTS
 // ============================================================
 
 function cacheElements() {
 
-  elements.app =
+  elements.root =
     document.getElementById(
-      "opb-app"
+      "pcsu-epb-statement"
     );
 
 
-  elements.form =
-    document.getElementById(
-      "opb-form"
+  if (!elements.root) {
+
+    return;
+
+  }
+
+
+  elements.accomplishment =
+    elements.root.querySelector(
+      "#epb-accomplishment"
     );
 
 
-  elements.accomplishmentInput =
-    document.getElementById(
-      "accomplishment-input"
+  elements.sourceCount =
+    elements.root.querySelector(
+      "#epb-source-count"
     );
 
 
-  elements.characterCount =
-    document.getElementById(
-      "opb-character-count"
+  elements.section =
+    elements.root.querySelector(
+      "#epb-section"
     );
 
 
-  elements.mpaOptions =
-    document.getElementById(
-      "opb-mpa-options"
+  elements.rank =
+    elements.root.querySelector(
+      "#epb-rank"
+    );
+
+
+  elements.variation =
+    elements.root.querySelector(
+      "#epb-variation"
     );
 
 
   elements.generateButton =
-    document.getElementById(
-      "generate-btn"
+    elements.root.querySelector(
+      "#epb-generate"
     );
 
 
-  elements.formMessage =
-    document.getElementById(
-      "opb-form-message"
+  elements.status =
+    elements.root.querySelector(
+      "#epb-generator-status"
     );
 
 
-  elements.results =
-    document.getElementById(
-      "opb-results"
+  elements.sectionChip =
+    elements.root.querySelector(
+      "#epb-section-chip"
     );
 
 
-  elements.resultStatus =
-    document.getElementById(
-      "result-status"
+  elements.rankChip =
+    elements.root.querySelector(
+      "#epb-rank-chip"
     );
 
 
-  elements.resultMPA =
-    document.getElementById(
-      "result-mpa"
+  elements.variationChip =
+    elements.root.querySelector(
+      "#epb-variation-chip"
     );
 
 
-  elements.resultCharacterCount =
-    document.getElementById(
-      "result-character-count"
-    );
-
-
-  elements.resultStatement =
-    document.getElementById(
-      "result-statement"
-    );
-
-
-  elements.analysisAction =
-    document.getElementById(
-      "analysis-action"
-    );
-
-
-  elements.analysisScope =
-    document.getElementById(
-      "analysis-scope"
-    );
-
-
-  elements.analysisResult =
-    document.getElementById(
-      "analysis-result"
-    );
-
-
-  elements.analysisImpact =
-    document.getElementById(
-      "analysis-impact"
-    );
-
-
-  elements.validationList =
-    document.getElementById(
-      "validation-list"
-    );
-
-
-  elements.copyButton =
-    document.getElementById(
-      "copy-btn"
-    );
-
-
-  elements.regenerateButton =
-    document.getElementById(
-      "regenerate-btn"
-    );
-
-
-  elements.resetButton =
-    document.getElementById(
-      "reset-btn"
-    );
-
-
-  elements.copyStatus =
-    document.getElementById(
-      "copy-status"
+  elements.options =
+    Array.from(
+      elements.root.querySelectorAll(
+        ".epb-option"
+      )
     );
 
 }
 
 
 // ============================================================
-// 7. EVENT BINDING
+// 9. EVENT BINDING
 // ============================================================
 
 function bindEvents() {
 
-  elements.form.addEventListener(
-    "submit",
-    handleSubmit
-  );
-
-
-  elements.accomplishmentInput.addEventListener(
+  elements.accomplishment.addEventListener(
     "input",
-    handleInput
+    handleSourceInput
   );
 
 
-  elements.accomplishmentInput.addEventListener(
+  elements.accomplishment.addEventListener(
     "keydown",
-    handleInputKeydown
+    handleKeyboardShortcut
   );
 
 
-  if (elements.mpaOptions) {
+  if (elements.section) {
 
-    elements.mpaOptions.addEventListener(
+    elements.section.addEventListener(
       "change",
-      handleMPAChange
+      handleControlChange
     );
 
   }
 
 
-  if (elements.copyButton) {
+  if (elements.rank) {
 
-    elements.copyButton.addEventListener(
-      "click",
-      handleCopy
+    elements.rank.addEventListener(
+      "change",
+      handleControlChange
     );
 
   }
 
 
-  if (elements.regenerateButton) {
+  if (elements.variation) {
 
-    elements.regenerateButton.addEventListener(
-      "click",
-      handleRegenerate
+    elements.variation.addEventListener(
+      "change",
+      handleControlChange
     );
 
   }
 
 
-  if (elements.resetButton) {
+  elements.generateButton.addEventListener(
+    "click",
+    handleGenerate
+  );
 
-    elements.resetButton.addEventListener(
-      "click",
-      handleReset
-    );
 
-  }
+  bindOptionButtons();
 
 }
 
 
 // ============================================================
-// 8. INPUT HANDLERS
+// 10. OPTION BUTTON EVENTS
 // ============================================================
 
-function handleInput() {
+function bindOptionButtons() {
 
-  updateCharacterCount();
+  elements.options.forEach(
+    (
+      optionElement,
+      index
+    ) => {
 
-  hideFormMessage();
+      const copyButton =
+        optionElement.querySelector(
+          ".epb-copy"
+        );
+
+
+      const favoriteButton =
+        optionElement.querySelector(
+          ".epb-favorite"
+        );
+
+
+      if (copyButton) {
+
+        copyButton.addEventListener(
+          "click",
+          () => {
+
+            handleCopy(
+              index
+            );
+
+          }
+        );
+
+      }
+
+
+      if (favoriteButton) {
+
+        favoriteButton.addEventListener(
+          "click",
+          () => {
+
+            handleSelect(
+              index
+            );
+
+          }
+        );
+
+      }
+
+    }
+  );
+
+}
+
+
+// ============================================================
+// 11. SOURCE INPUT
+// ============================================================
+
+function handleSourceInput() {
+
+  enforceSourceLength();
+
+  updateSourceCount();
+
+  clearStatus();
 
   saveDraft();
 
 }
 
 
-function handleMPAChange() {
+// ============================================================
+// 12. CONTROL CHANGE
+// ============================================================
 
-  state.lastMPA =
-    getSelectedMPA();
+function handleControlChange() {
+
+  updateChips();
+
+  clearStatus();
 
   saveDraft();
 
 }
 
 
-function handleInputKeydown(event) {
+// ============================================================
+// 13. KEYBOARD SHORTCUT
+// ============================================================
 
-  const generateShortcut =
+function handleKeyboardShortcut(
+  event
+) {
+
+  const isGenerateShortcut =
     (
       event.ctrlKey ||
       event.metaKey
     ) &&
-    event.key === "Enter";
+    event.key ===
+      "Enter";
 
 
-  if (!generateShortcut) {
+  if (!isGenerateShortcut) {
 
     return;
 
@@ -475,21 +645,16 @@ function handleInputKeydown(event) {
 
   event.preventDefault();
 
-  elements.form.requestSubmit();
+  handleGenerate();
 
 }
 
 
 // ============================================================
-// 9. SUBMIT
+// 14. GENERATE
 // ============================================================
 
-async function handleSubmit(
-  event
-) {
-
-  event.preventDefault();
-
+async function handleGenerate() {
 
   if (state.generating) {
 
@@ -498,164 +663,157 @@ async function handleSubmit(
   }
 
 
-  const accomplishment =
-    normalizeInput(
-      elements.accomplishmentInput.value
+  const request =
+    buildGenerationRequest();
+
+
+  const validation =
+    validateGenerationRequest(
+      request
     );
 
 
-  const selectedMPA =
-    getSelectedMPA();
+  if (!validation.ok) {
 
-
-  const inputValidation =
-    validateInput(
-      accomplishment
+    showStatus(
+      validation.message,
+      "error"
     );
 
 
-  if (!inputValidation.ok) {
-
-    showFormMessage(
-      inputValidation.message
+    focusValidationTarget(
+      validation.field
     );
+
 
     return;
 
   }
 
 
-  await generateStatement({
-    accomplishment,
-    mpa:
-      selectedMPA,
-    regenerate:
-      false
-  });
-
-}
+  state.lastRequest =
+    request;
 
 
-// ============================================================
-// 10. GENERATION
-// ============================================================
+  state.generationCount +=
+    1;
 
-async function generateStatement({
-  accomplishment,
-  mpa = "auto",
-  regenerate = false
-}) {
+
+  state.selectedIndex =
+    null;
+
+
+  clearSelection();
+
 
   setGenerating(
     true
   );
 
 
-  hideFormMessage();
+  setOptionsLoading(
+    true
+  );
 
-  clearCopyStatus();
+
+  showStatus(
+    "Generating three statement options…"
+  );
 
 
   try {
 
-    await smallDelay(
-      GENERATION_DELAY
-    );
-
-
-    state.generationCount +=
-      1;
-
-
-    const result =
-      await generateOPBStatement({
-
-        accomplishment,
-
-        mpa,
-
-        variant:
-          regenerate
-            ? state.generationCount
-            : 0
-
-      });
-
-
-    const normalizedResult =
-      normalizeGeneratorResult(
-        result,
-        accomplishment,
-        mpa
+    const generatedStatements =
+      await requestStatements(
+        request
       );
 
 
     if (
-      !normalizedResult.statement
+      !Array.isArray(
+        generatedStatements
+      ) ||
+      !generatedStatements.length
     ) {
 
       throw new Error(
-        "The writing engine did not return a Performance Statement."
+        "The writing engine did not return any Performance Statements."
       );
 
     }
 
 
-    const validation =
-      validateOPBStatement({
-
-        statement:
-          normalizedResult.statement,
-
-        sourceText:
-          accomplishment,
-
-        mpa:
-          normalizedResult.mpa,
-
-        analysis:
-          normalizedResult.analysis
-
-      });
+    const normalized =
+      normalizeGeneratedStatements(
+        generatedStatements
+      );
 
 
-    state.lastInput =
-      accomplishment;
+    state.statements =
+      normalized;
 
 
-    state.lastMPA =
-      mpa;
+    renderAllOptions();
+
+    saveDraft();
 
 
-    state.lastResult =
-      normalizedResult;
+    const overLimitCount =
+      state.statements.filter(
+        item =>
+          item.statement.length >
+          CHARACTER_LIMIT
+      ).length;
 
 
-    state.lastValidation =
-      validation;
+    if (overLimitCount > 0) {
+
+      showStatus(
+        `${overLimitCount} statement${overLimitCount === 1 ? " is" : "s are"} over the 350-character limit and need refinement.`,
+        "error"
+      );
+
+    } else {
+
+      showStatus(
+        "Three statement options generated. Select or copy the version you prefer.",
+        "success"
+      );
+
+    }
 
 
-    renderResult(
-      normalizedResult,
-      validation
+    dispatchGeneratedEvent(
+      request
     );
-
-
-    showResults();
 
   } catch (error) {
 
     console.error(
-      "[OPB Generator] Generation failed:",
+      "[EPB Generator] Generation failed:",
       error
     );
 
 
-    showFormMessage(
-      "I couldn’t generate the statement. Review your accomplishment and try again."
+    resetStatements();
+
+    renderAllOptions();
+
+
+    showStatus(
+      safeString(
+        error?.message
+      ) ||
+      "Unable to generate Performance Statements.",
+      "error"
     );
 
   } finally {
+
+    setOptionsLoading(
+      false
+    );
+
 
     setGenerating(
       false
@@ -667,78 +825,64 @@ async function generateStatement({
 
 
 // ============================================================
-// 11. NORMALIZE GENERATOR RESULT
+// 15. BUILD GENERATION REQUEST
 // ============================================================
 
-function normalizeGeneratorResult(
-  result,
-  accomplishment,
-  requestedMPA
-) {
+function buildGenerationRequest() {
 
-  const safeResult =
-    result &&
-    typeof result === "object"
-      ? result
-      : {};
+  const source =
+    normalizeSource(
+      elements.accomplishment?.value
+    );
 
 
-  const analysis =
-    safeResult.analysis &&
-    typeof safeResult.analysis === "object"
-      ? safeResult.analysis
-      : {};
+  const section =
+    safeString(
+      elements.section?.value
+    );
+
+
+  const ratedRank =
+    safeString(
+      elements.rank?.value
+    );
+
+
+  const variation =
+    safeString(
+      elements.variation?.value
+    ) ||
+    "balanced";
 
 
   return {
 
-    statement:
-      safeString(
-        safeResult.statement
-      ),
+    accomplishment:
+      source,
+
+    section,
 
     mpa:
-      safeString(
-        safeResult.mpa
-      ) ||
-      (
-        requestedMPA === "auto"
-          ? "auto"
-          : requestedMPA
-      ),
+      section,
 
-    analysis: {
+    ratedRank,
 
-      action:
-        safeString(
-          analysis.action
-        ),
+    rank:
+      ratedRank,
 
-      scope:
-        safeString(
-          analysis.scope
-        ),
+    variation,
 
-      result:
-        safeString(
-          analysis.result
-        ),
+    characterLimit:
+      CHARACTER_LIMIT,
 
-      impact:
-        safeString(
-          analysis.impact
-        )
+    optionCount:
+      OPTION_COUNT,
 
-    },
+    form:
+      "AF716",
 
-    sourceText:
-      accomplishment,
-
-    metadata:
-      safeResult.metadata &&
-      typeof safeResult.metadata === "object"
-        ? safeResult.metadata
-        : {}
+    generationId:
+      state.generationCount
 
   };
 
@@ -746,313 +890,1114 @@ function normalizeGeneratorResult(
 
 
 // ============================================================
-// 12. RENDER RESULT
+// 16. VALIDATE REQUEST
 // ============================================================
 
-function renderResult(
-  result,
-  validation
+function validateGenerationRequest(
+  request
 ) {
 
-  const statement =
-    result.statement;
+  if (
+    !request.accomplishment
+  ) {
 
+    return {
 
-  elements.resultStatement.textContent =
-    statement;
+      ok:
+        false,
 
+      field:
+        "accomplishment",
 
-  elements.resultCharacterCount.textContent =
-    String(
-      statement.length
-    );
+      message:
+        "Enter an accomplishment before generating a statement."
 
-
-  elements.resultMPA.textContent =
-    getMPALabel(
-      result.mpa
-    );
-
-
-  renderAnalysis(
-    result.analysis
-  );
-
-
-  renderValidation(
-    validation
-  );
-
-
-  renderResultStatus(
-    validation
-  );
-
-}
-
-
-// ============================================================
-// 13. RENDER ANALYSIS
-// ============================================================
-
-function renderAnalysis(
-  analysis = {}
-) {
-
-  elements.analysisAction.textContent =
-    safeString(
-      analysis.action
-    ) ||
-    "Not clearly identified";
-
-
-  elements.analysisScope.textContent =
-    safeString(
-      analysis.scope
-    ) ||
-    "No specific scope provided";
-
-
-  elements.analysisResult.textContent =
-    safeString(
-      analysis.result
-    ) ||
-    "No measurable result identified";
-
-
-  elements.analysisImpact.textContent =
-    safeString(
-      analysis.impact
-    ) ||
-    "No explicit mission impact provided";
-
-}
-
-
-// ============================================================
-// 14. RENDER VALIDATION
-// ============================================================
-
-function renderValidation(
-  validation
-) {
-
-  if (!elements.validationList) {
-
-    return;
+    };
 
   }
 
 
-  elements.validationList.innerHTML =
-    "";
+  if (
+    request.accomplishment.length <
+    MIN_SOURCE_CHARACTERS
+  ) {
+
+    return {
+
+      ok:
+        false,
+
+      field:
+        "accomplishment",
+
+      message:
+        "Add a little more detail about what was accomplished."
+
+    };
+
+  }
+
+
+  if (
+    request.accomplishment.length >
+    MAX_SOURCE_CHARACTERS
+  ) {
+
+    return {
+
+      ok:
+        false,
+
+      field:
+        "accomplishment",
+
+      message:
+        `Keep the source accomplishment under ${MAX_SOURCE_CHARACTERS} characters.`
+
+    };
+
+  }
+
+
+  if (
+    !request.section ||
+    !SECTION_CONFIG[
+      request.section
+    ]
+  ) {
+
+    return {
+
+      ok:
+        false,
+
+      field:
+        "section",
+
+      message:
+        "Select the AF Form 716 section this statement is intended for."
+
+    };
+
+  }
+
+
+  if (
+    !request.ratedRank ||
+    !RANK_LABELS[
+      request.ratedRank
+    ]
+  ) {
+
+    return {
+
+      ok:
+        false,
+
+      field:
+        "rank",
+
+      message:
+        "Select the rated rank."
+
+    };
+
+  }
+
+
+  if (
+    !VARIATION_CONFIG[
+      request.variation
+    ]
+  ) {
+
+    return {
+
+      ok:
+        false,
+
+      field:
+        "variation",
+
+      message:
+        "Select a writing variation."
+
+    };
+
+  }
+
+
+  return {
+
+    ok:
+      true,
+
+    field:
+      null,
+
+    message:
+      ""
+
+  };
+
+}
+
+
+// ============================================================
+// 17. WRITING ENGINE ADAPTER
+// ============================================================
+
+async function requestStatements(
+  request
+) {
+
+  /*
+  =============================================================
+  FUTURE THEWING EPB API
+  =============================================================
+
+  When the dedicated backend is ready, it can expose:
+
+  window.TheWingEPB.generateStatements({
+    accomplishment,
+    section,
+    ratedRank,
+    variation,
+    characterLimit,
+    optionCount
+  })
+
+  and return:
+
+  {
+    options: [
+      { statement: "..." },
+      { statement: "..." },
+      { statement: "..." }
+    ]
+  }
+
+  If present, this app automatically prefers that API.
+  =============================================================
+  */
+
+
+  if (
+    window.TheWingEPB &&
+    typeof
+      window.TheWingEPB.generateStatements ===
+      "function"
+  ) {
+
+    const response =
+      await window.TheWingEPB.generateStatements(
+        request
+      );
+
+
+    const extracted =
+      extractStatementsFromResponse(
+        response
+      );
+
+
+    if (extracted.length) {
+
+      return extracted;
+
+    }
+
+  }
+
+
+  /*
+  =============================================================
+  LEGACY / CURRENT UNIVERSAL ENGINE
+  =============================================================
+
+  Until the dedicated EPB backend is ready, call the existing
+  opb-universal.js engine once per option.
+
+  Extra context is passed now so the writing engine can use it
+  as soon as opb-universal.js is upgraded.
+  =============================================================
+  */
+
+
+  const results =
+    [];
+
+
+  for (
+    let variant = 0;
+    variant < OPTION_COUNT;
+    variant += 1
+  ) {
+
+    const response =
+      await generateOPBStatement({
+
+        accomplishment:
+          request.accomplishment,
+
+        mpa:
+          request.section,
+
+        section:
+          request.section,
+
+        ratedRank:
+          request.ratedRank,
+
+        rank:
+          request.ratedRank,
+
+        variation:
+          request.variation,
+
+        characterLimit:
+          request.characterLimit,
+
+        variant
+
+      });
+
+
+    const statement =
+      extractSingleStatement(
+        response
+      );
+
+
+    if (
+      isPlaceholderStatement(
+        statement
+      )
+    ) {
+
+      throw new Error(
+        "The writing engine is still using its placeholder response. Update opb-universal.js before live generation."
+      );
+
+    }
+
+
+    if (!statement) {
+
+      throw new Error(
+        `The writing engine did not return Option ${variant + 1}.`
+      );
+
+    }
+
+
+    results.push({
+
+      statement,
+
+      metadata:
+        safeObject(
+          response?.metadata
+        ),
+
+      analysis:
+        safeObject(
+          response?.analysis
+        )
+
+    });
+
+  }
+
+
+  return results;
+
+}
+
+
+// ============================================================
+// 18. EXTRACT MULTI-OPTION RESPONSE
+// ============================================================
+
+function extractStatementsFromResponse(
+  response
+) {
+
+  if (!response) {
+
+    return [];
+
+  }
+
+
+  if (
+    Array.isArray(
+      response
+    )
+  ) {
+
+    return response;
+
+  }
+
+
+  if (
+    Array.isArray(
+      response.options
+    )
+  ) {
+
+    return response.options;
+
+  }
+
+
+  if (
+    Array.isArray(
+      response.statements
+    )
+  ) {
+
+    return response.statements;
+
+  }
+
+
+  if (
+    response.result &&
+    Array.isArray(
+      response.result.options
+    )
+  ) {
+
+    return response.result.options;
+
+  }
+
+
+  if (
+    response.result &&
+    Array.isArray(
+      response.result.statements
+    )
+  ) {
+
+    return response.result.statements;
+
+  }
+
+
+  return [];
+
+}
+
+
+// ============================================================
+// 19. EXTRACT SINGLE STATEMENT
+// ============================================================
+
+function extractSingleStatement(
+  response
+) {
+
+  if (
+    typeof response ===
+    "string"
+  ) {
+
+    return normalizeStatement(
+      response
+    );
+
+  }
+
+
+  if (
+    response &&
+    typeof response.statement ===
+    "string"
+  ) {
+
+    return normalizeStatement(
+      response.statement
+    );
+
+  }
+
+
+  if (
+    response?.result &&
+    typeof response.result.statement ===
+    "string"
+  ) {
+
+    return normalizeStatement(
+      response.result.statement
+    );
+
+  }
+
+
+  return "";
+
+}
+
+
+// ============================================================
+// 20. NORMALIZE GENERATED OPTIONS
+// ============================================================
+
+function normalizeGeneratedStatements(
+  generated
+) {
+
+  const normalized =
+    [];
+
+
+  for (
+    let index = 0;
+    index < OPTION_COUNT;
+    index += 1
+  ) {
+
+    const sourceItem =
+      generated[
+        index
+      ];
+
+
+    const statement =
+      typeof sourceItem ===
+        "string"
+        ? normalizeStatement(
+            sourceItem
+          )
+        : normalizeStatement(
+            sourceItem?.statement
+          );
+
+
+    normalized.push(
+      createStatementRecord({
+
+        index,
+
+        statement,
+
+        metadata:
+          safeObject(
+            sourceItem?.metadata
+          ),
+
+        analysis:
+          safeObject(
+            sourceItem?.analysis
+          )
+
+      })
+    );
+
+  }
+
+
+  return normalized;
+
+}
+
+
+// ============================================================
+// 21. CREATE STATEMENT RECORD
+// ============================================================
+
+function createStatementRecord({
+  index = 0,
+  statement = "",
+  metadata = {},
+  analysis = {}
+} = {}) {
+
+  const text =
+    normalizeStatement(
+      statement
+    );
+
+
+  const count =
+    text.length;
+
+
+  return {
+
+    id:
+      createStatementId(
+        index
+      ),
+
+    option:
+      index + 1,
+
+    statement:
+      text,
+
+    characterCount:
+      count,
+
+    characterLimit:
+      CHARACTER_LIMIT,
+
+    charactersRemaining:
+      CHARACTER_LIMIT -
+      count,
+
+    withinLimit:
+      count <=
+      CHARACTER_LIMIT,
+
+    validation:
+      validateStatement(
+        text
+      ),
+
+    metadata:
+      safeObject(
+        metadata
+      ),
+
+    analysis:
+      safeObject(
+        analysis
+      )
+
+  };
+
+}
+
+
+// ============================================================
+// 22. BASIC DETERMINISTIC VALIDATION
+// ============================================================
+
+function validateStatement(
+  statement
+) {
+
+  const text =
+    normalizeStatement(
+      statement
+    );
+
+
+  const characterCount =
+    text.length;
 
 
   const checks =
-    Array.isArray(
-      validation?.checks
-    )
-      ? validation.checks
-      : [];
+    [];
 
 
-  if (!checks.length) {
+  if (!text) {
 
-    appendValidationItem({
+    checks.push({
+
+      id:
+        "statement-present",
+
+      status:
+        "error",
+
+      message:
+        "No statement was generated."
+
+    });
+
+  } else {
+
+    checks.push({
+
+      id:
+        "statement-present",
+
       status:
         "pass",
 
       message:
-        "Performance Statement generated successfully."
+        "Statement generated."
+
     });
 
-    return;
-
   }
 
 
-  for (
-    const check of checks
+  if (
+    characterCount <=
+    CHARACTER_LIMIT
   ) {
 
-    appendValidationItem(
-      check
-    );
+    checks.push({
+
+      id:
+        "character-limit",
+
+      status:
+        "pass",
+
+      message:
+        `Within ${CHARACTER_LIMIT}-character limit.`
+
+    });
+
+  } else {
+
+    checks.push({
+
+      id:
+        "character-limit",
+
+      status:
+        "error",
+
+      message:
+        `${characterCount - CHARACTER_LIMIT} characters over the ${CHARACTER_LIMIT}-character limit.`
+
+    });
 
   }
+
+
+  return {
+
+    status:
+      checks.some(
+        check =>
+          check.status ===
+          "error"
+      )
+        ? "needs-revision"
+        : "valid",
+
+    characterCount,
+
+    characterLimit:
+      CHARACTER_LIMIT,
+
+    withinLimit:
+      characterCount <=
+      CHARACTER_LIMIT,
+
+    checks
+
+  };
 
 }
 
 
 // ============================================================
-// 15. VALIDATION ITEM
+// 23. RENDER ALL OPTIONS
 // ============================================================
 
-function appendValidationItem({
-  status = "pass",
-  message = ""
-} = {}) {
+function renderAllOptions() {
 
-  if (
-    !elements.validationList ||
-    !message
+  for (
+    let index = 0;
+    index < OPTION_COUNT;
+    index += 1
   ) {
+
+    renderOption(
+      index
+    );
+
+  }
+
+
+  renderSelection();
+
+}
+
+
+// ============================================================
+// 24. RENDER SINGLE OPTION
+// ============================================================
+
+function renderOption(
+  index
+) {
+
+  const optionElement =
+    elements.options[
+      index
+    ];
+
+
+  if (!optionElement) {
 
     return;
 
   }
 
 
-  const item =
-    document.createElement(
-      "li"
+  const statementRecord =
+    state.statements[
+      index
+    ] ||
+    createStatementRecord({
+      index
+    });
+
+
+  const textElement =
+    optionElement.querySelector(
+      ".epb-option-text"
     );
 
 
-  const normalizedStatus =
-    safeString(
-      status
-    )
-      .toLowerCase();
+  if (textElement) {
+
+    if (
+      statementRecord.statement
+    ) {
+
+      textElement.textContent =
+        statementRecord.statement;
 
 
-  if (
-    normalizedStatus ===
-    "warning"
-  ) {
+      textElement.classList.remove(
+        "epb-empty"
+      );
 
-    item.classList.add(
-      "opb-warning"
-    );
+    } else {
+
+      textElement.textContent =
+        getEmptyOptionText(
+          index
+        );
+
+
+      textElement.classList.add(
+        "epb-empty"
+      );
+
+    }
 
   }
 
 
-  if (
-    normalizedStatus ===
-      "error" ||
-    normalizedStatus ===
-      "fail"
-  ) {
-
-    item.classList.add(
-      "opb-error"
-    );
-
-  }
-
-
-  item.textContent =
-    message;
-
-
-  elements.validationList.appendChild(
-    item
+  updateCharacterDisplay(
+    optionElement,
+    statementRecord.statement
   );
 
 }
 
 
 // ============================================================
-// 16. RESULT STATUS
+// 25. EMPTY OPTION TEXT
 // ============================================================
 
-function renderResultStatus(
-  validation
+function getEmptyOptionText(
+  index
 ) {
 
-  if (!elements.resultStatus) {
+  const labels = [
 
-    return;
+    "Your first generated statement will appear here.",
 
-  }
+    "Your second generated statement will appear here.",
 
+    "Your third generated statement will appear here."
 
-  const status =
-    safeString(
-      validation?.status
-    )
-      .toLowerCase();
+  ];
 
 
-  if (
-    status === "strong" ||
-    status === "pass"
-  ) {
-
-    elements.resultStatus.textContent =
-      "Strong";
-
-
-    elements.resultStatus.dataset.status =
-      "strong";
-
-
-    return;
-
-  }
-
-
-  if (
-    status === "needs-work" ||
-    status === "error" ||
-    status === "fail"
-  ) {
-
-    elements.resultStatus.textContent =
-      "Needs Review";
-
-
-    elements.resultStatus.dataset.status =
-      "needs-work";
-
-
-    return;
-
-  }
-
-
-  elements.resultStatus.textContent =
-    "Review";
-
-
-  elements.resultStatus.dataset.status =
-    "review";
+  return (
+    labels[
+      index
+    ] ||
+    "Generated statement will appear here."
+  );
 
 }
 
 
 // ============================================================
-// 17. SHOW RESULTS
+// 26. CHARACTER DISPLAY
 // ============================================================
 
-function showResults() {
+function updateCharacterDisplay(
+  optionElement,
+  statement
+) {
 
-  if (!elements.results) {
+  const text =
+    safeString(
+      statement
+    );
+
+
+  const count =
+    text.length;
+
+
+  const countElement =
+    optionElement.querySelector(
+      ".epb-char-count"
+    );
+
+
+  const fillElement =
+    optionElement.querySelector(
+      ".epb-char-fill"
+    );
+
+
+  if (!countElement) {
 
     return;
 
   }
 
 
-  elements.results.hidden =
-    false;
+  const percentage =
+    Math.min(
+      100,
+      (
+        count /
+        CHARACTER_LIMIT
+      ) *
+      100
+    );
 
 
-  requestAnimationFrame(
-    () => {
+  countElement.classList.remove(
+    "near",
+    "max",
+    "over"
+  );
 
-      elements.results.scrollIntoView({
 
-        behavior:
-          prefersReducedMotion()
-            ? "auto"
-            : "smooth",
+  if (
+    count >
+    CHARACTER_LIMIT
+  ) {
 
-        block:
-          "start"
+    const over =
+      count -
+      CHARACTER_LIMIT;
 
-      });
+
+    countElement.textContent =
+      `${count} / ${CHARACTER_LIMIT} • ${over} over`;
+
+
+    countElement.classList.add(
+      "over"
+    );
+
+
+    if (fillElement) {
+
+      fillElement.style.background =
+        "var(--epb-red)";
+
+    }
+
+  } else if (
+    count >= 336
+  ) {
+
+    countElement.textContent =
+      `${count} / ${CHARACTER_LIMIT}`;
+
+
+    countElement.classList.add(
+      "max"
+    );
+
+
+    if (fillElement) {
+
+      fillElement.style.background =
+        "var(--epb-gold-soft)";
+
+    }
+
+  } else if (
+    count >= 301
+  ) {
+
+    countElement.textContent =
+      `${count} / ${CHARACTER_LIMIT}`;
+
+
+    countElement.classList.add(
+      "near"
+    );
+
+
+    if (fillElement) {
+
+      fillElement.style.background =
+        "var(--epb-amber)";
+
+    }
+
+  } else {
+
+    countElement.textContent =
+      `${count} / ${CHARACTER_LIMIT}`;
+
+
+    if (fillElement) {
+
+      fillElement.style.background =
+        "var(--epb-green)";
+
+    }
+
+  }
+
+
+  if (fillElement) {
+
+    fillElement.style.width =
+      `${percentage}%`;
+
+  }
+
+}
+
+
+// ============================================================
+// 27. SELECT STATEMENT
+// ============================================================
+
+function handleSelect(
+  index
+) {
+
+  const statementRecord =
+    state.statements[
+      index
+    ];
+
+
+  if (
+    !statementRecord ||
+    !statementRecord.statement
+  ) {
+
+    showStatus(
+      "Generate statements before selecting one.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  if (
+    state.selectedIndex ===
+    index
+  ) {
+
+    state.selectedIndex =
+      null;
+
+
+    renderSelection();
+
+    saveDraft();
+
+
+    showStatus(
+      "Statement selection cleared."
+    );
+
+
+    return;
+
+  }
+
+
+  state.selectedIndex =
+    index;
+
+
+  renderSelection();
+
+  saveDraft();
+
+
+  const selected =
+    buildSelectedStatementObject();
+
+
+  dispatchSelectedEvent(
+    selected
+  );
+
+
+  showStatus(
+    `Option ${index + 1} selected.`,
+    "success"
+  );
+
+}
+
+
+// ============================================================
+// 28. RENDER SELECTION
+// ============================================================
+
+function renderSelection() {
+
+  elements.options.forEach(
+    (
+      optionElement,
+      index
+    ) => {
+
+      const favoriteButton =
+        optionElement.querySelector(
+          ".epb-favorite"
+        );
+
+
+      const isSelected =
+        state.selectedIndex ===
+        index;
+
+
+      optionElement.classList.toggle(
+        "is-selected",
+        isSelected
+      );
+
+
+      if (favoriteButton) {
+
+        favoriteButton.classList.toggle(
+          "selected",
+          isSelected
+        );
+
+
+        favoriteButton.textContent =
+          isSelected
+            ? "★"
+            : "☆";
+
+
+        favoriteButton.setAttribute(
+          "aria-pressed",
+          isSelected
+            ? "true"
+            : "false"
+        );
+
+      }
 
     }
   );
@@ -1061,18 +2006,46 @@ function showResults() {
 
 
 // ============================================================
-// 18. COPY
+// 29. CLEAR SELECTION
 // ============================================================
 
-async function handleCopy() {
+function clearSelection() {
 
-  const statement =
+  state.selectedIndex =
+    null;
+
+
+  renderSelection();
+
+}
+
+
+// ============================================================
+// 30. COPY STATEMENT
+// ============================================================
+
+async function handleCopy(
+  index
+) {
+
+  const statementRecord =
+    state.statements[
+      index
+    ];
+
+
+  const text =
     safeString(
-      state.lastResult?.statement
+      statementRecord?.statement
     );
 
 
-  if (!statement) {
+  if (!text) {
+
+    showStatus(
+      "Generate a statement before copying it.",
+      "error"
+    );
 
     return;
 
@@ -1082,24 +2055,43 @@ async function handleCopy() {
   try {
 
     await copyText(
-      statement
+      text
     );
 
 
-    showCopyStatus(
-      "Statement copied."
+    showStatus(
+      `Option ${index + 1} copied.`,
+      "success"
+    );
+
+
+    window.setTimeout(
+      () => {
+
+        if (
+          elements.status?.textContent ===
+          `Option ${index + 1} copied.`
+        ) {
+
+          clearStatus();
+
+        }
+
+      },
+      COPY_STATUS_DURATION
     );
 
   } catch (error) {
 
     console.error(
-      "[OPB Generator] Copy failed:",
+      "[EPB Generator] Copy failed:",
       error
     );
 
 
-    showCopyStatus(
-      "Unable to copy automatically. Select the statement and copy it manually."
+    showStatus(
+      "Unable to copy automatically. Select the statement text manually.",
+      "error"
     );
 
   }
@@ -1108,7 +2100,7 @@ async function handleCopy() {
 
 
 // ============================================================
-// 19. COPY TEXT
+// 31. COPY UTILITY
 // ============================================================
 
 async function copyText(
@@ -1117,12 +2109,15 @@ async function copyText(
 
   if (
     navigator.clipboard &&
-    window.isSecureContext
+    typeof
+      navigator.clipboard.writeText ===
+      "function"
   ) {
 
     await navigator.clipboard.writeText(
       text
     );
+
 
     return;
 
@@ -1153,10 +2148,6 @@ async function copyText(
     "0";
 
 
-  textarea.style.pointerEvents =
-    "none";
-
-
   document.body.appendChild(
     textarea
   );
@@ -1165,19 +2156,21 @@ async function copyText(
   textarea.select();
 
 
-  const success =
+  const copied =
     document.execCommand(
       "copy"
     );
 
 
-  textarea.remove();
+  document.body.removeChild(
+    textarea
+  );
 
 
-  if (!success) {
+  if (!copied) {
 
     throw new Error(
-      "Clipboard copy failed."
+      "Browser copy command failed."
     );
 
   }
@@ -1186,59 +2179,14 @@ async function copyText(
 
 
 // ============================================================
-// 20. COPY STATUS
+// 32. SOURCE CHARACTER COUNT
 // ============================================================
 
-function showCopyStatus(
-  message
-) {
-
-  if (!elements.copyStatus) {
-
-    return;
-
-  }
-
-
-  elements.copyStatus.textContent =
-    message;
-
-
-  window.clearTimeout(
-    showCopyStatus.timeout
-  );
-
-
-  showCopyStatus.timeout =
-    window.setTimeout(
-      clearCopyStatus,
-      COPY_SUCCESS_DURATION
-    );
-
-}
-
-
-function clearCopyStatus() {
-
-  if (elements.copyStatus) {
-
-    elements.copyStatus.textContent =
-      "";
-
-  }
-
-}
-
-
-// ============================================================
-// 21. REGENERATE
-// ============================================================
-
-async function handleRegenerate() {
+function updateSourceCount() {
 
   if (
-    state.generating ||
-    !state.lastInput
+    !elements.accomplishment ||
+    !elements.sourceCount
   ) {
 
     return;
@@ -1246,378 +2194,110 @@ async function handleRegenerate() {
   }
 
 
-  await generateStatement({
+  const count =
+    elements.accomplishment.value.length;
 
-    accomplishment:
-      state.lastInput,
 
-    mpa:
-      state.lastMPA,
-
-    regenerate:
-      true
-
-  });
+  elements.sourceCount.textContent =
+    `${count} / ${MAX_SOURCE_CHARACTERS}`;
 
 }
 
 
 // ============================================================
-// 22. RESET
+// 33. SOURCE LENGTH PROTECTION
 // ============================================================
 
-function handleReset() {
+function enforceSourceLength() {
 
-  state.generating =
-    false;
+  if (!elements.accomplishment) {
 
+    return;
 
-  state.generationCount =
-    0;
-
-
-  state.lastInput =
-    "";
+  }
 
 
-  state.lastMPA =
-    "auto";
+  if (
+    elements.accomplishment.value.length <=
+    MAX_SOURCE_CHARACTERS
+  ) {
+
+    return;
+
+  }
 
 
-  state.lastResult =
-    null;
-
-
-  state.lastValidation =
-    null;
-
-
-  elements.form.reset();
-
-
-  elements.accomplishmentInput.value =
-    "";
-
-
-  hideFormMessage();
-
-  clearCopyStatus();
-
-  hideResults();
-
-  updateCharacterCount();
-
-  clearDraft();
-
-
-  elements.accomplishmentInput.focus();
-
-
-  window.scrollTo({
-
-    top:
+  elements.accomplishment.value =
+    elements.accomplishment.value.slice(
       0,
-
-    behavior:
-      prefersReducedMotion()
-        ? "auto"
-        : "smooth"
-
-  });
-
-}
-
-
-// ============================================================
-// 23. HIDE RESULTS
-// ============================================================
-
-function hideResults() {
-
-  if (!elements.results) {
-
-    return;
-
-  }
-
-
-  elements.results.hidden =
-    true;
-
-
-  if (elements.resultStatement) {
-
-    elements.resultStatement.textContent =
-      "";
-
-  }
-
-
-  if (elements.validationList) {
-
-    elements.validationList.innerHTML =
-      "";
-
-  }
-
-}
-
-
-// ============================================================
-// 24. CHARACTER COUNT
-// ============================================================
-
-function updateCharacterCount() {
-
-  if (
-    !elements.accomplishmentInput ||
-    !elements.characterCount
-  ) {
-
-    return;
-
-  }
-
-
-  const length =
-    elements.accomplishmentInput.value.length;
-
-
-  elements.characterCount.textContent =
-    `${length} character${length === 1 ? "" : "s"}`;
-
-
-  elements.characterCount.dataset.level =
-    "";
-
-
-  if (
-    length >=
-    MAX_INPUT_CHARACTERS * 0.80
-  ) {
-
-    elements.characterCount.dataset.level =
-      "warning";
-
-  }
-
-
-  if (
-    length >=
-    MAX_INPUT_CHARACTERS * 0.95
-  ) {
-
-    elements.characterCount.dataset.level =
-      "danger";
-
-  }
-
-}
-
-
-// ============================================================
-// 25. SELECTED MPA
-// ============================================================
-
-function getSelectedMPA() {
-
-  const selected =
-    document.querySelector(
-      'input[name="mpa"]:checked'
+      MAX_SOURCE_CHARACTERS
     );
 
-
-  return safeString(
-    selected?.value
-  ) || "auto";
-
 }
 
 
 // ============================================================
-// 26. MPA LABEL
+// 34. RESULT META CHIPS
 // ============================================================
 
-function getMPALabel(
-  value
-) {
+function updateChips() {
 
-  const key =
+  const selectedSection =
     safeString(
-      value
+      elements.section?.value
     );
 
 
-  if (!key) {
-
-    return "Auto Detected";
-
-  }
-
-
-  if (
-    MPA_LABELS &&
-    typeof MPA_LABELS === "object" &&
-    MPA_LABELS[key]
-  ) {
-
-    return MPA_LABELS[key];
-
-  }
-
-
-  const fallbacks = {
-
-    auto:
-      "Auto Detected",
-
-    "executing-the-mission":
-      "Executing the Mission",
-
-    "leading-people":
-      "Leading People",
-
-    "managing-resources":
-      "Managing Resources",
-
-    "improving-the-unit":
-      "Improving the Unit"
-
-  };
-
-
-  return (
-    fallbacks[key] ||
-    key
-  );
-
-}
-
-
-// ============================================================
-// 27. INPUT VALIDATION
-// ============================================================
-
-function validateInput(
-  accomplishment
-) {
-
-  const text =
+  const selectedRank =
     safeString(
-      accomplishment
+      elements.rank?.value
     );
 
 
-  if (!text) {
-
-    return {
-
-      ok:
-        false,
-
-      message:
-        "Describe what you accomplished before generating a Performance Statement."
-
-    };
-
-  }
+  const selectedVariation =
+    safeString(
+      elements.variation?.value
+    ) ||
+    "balanced";
 
 
-  if (
-    text.length <
-    MIN_INPUT_CHARACTERS
-  ) {
+  if (elements.sectionChip) {
 
-    return {
-
-      ok:
-        false,
-
-      message:
-        "Give the generator a little more detail about what you accomplished."
-
-    };
+    elements.sectionChip.textContent =
+      SECTION_CONFIG[
+        selectedSection
+      ]?.label ||
+      "Select Section";
 
   }
 
 
-  if (
-    text.length >
-    MAX_INPUT_CHARACTERS
-  ) {
+  if (elements.rankChip) {
 
-    return {
-
-      ok:
-        false,
-
-      message:
-        `Keep the accomplishment under ${MAX_INPUT_CHARACTERS} characters.`
-
-    };
+    elements.rankChip.textContent =
+      RANK_LABELS[
+        selectedRank
+      ] ||
+      "Rank";
 
   }
 
 
-  return {
+  if (elements.variationChip) {
 
-    ok:
-      true,
+    elements.variationChip.textContent =
+      VARIATION_CONFIG[
+        selectedVariation
+      ]?.label ||
+      "Balanced";
 
-    message:
-      ""
-
-  };
+  }
 
 }
 
 
 // ============================================================
-// 28. FORM MESSAGE
-// ============================================================
-
-function showFormMessage(
-  message
-) {
-
-  if (!elements.formMessage) {
-
-    return;
-
-  }
-
-
-  elements.formMessage.textContent =
-    message;
-
-
-  elements.formMessage.hidden =
-    false;
-
-}
-
-
-function hideFormMessage() {
-
-  if (!elements.formMessage) {
-
-    return;
-
-  }
-
-
-  elements.formMessage.textContent =
-    "";
-
-
-  elements.formMessage.hidden =
-    true;
-
-}
-
-
-// ============================================================
-// 29. GENERATING STATE
+// 35. GENERATING STATE
 // ============================================================
 
 function setGenerating(
@@ -1630,46 +2310,158 @@ function setGenerating(
     );
 
 
-  document.body.dataset.opbLoading =
-    state.generating
-      ? "true"
-      : "false";
+  if (!elements.generateButton) {
 
-
-  if (elements.generateButton) {
-
-    elements.generateButton.disabled =
-      state.generating;
-
-
-    const label =
-      elements.generateButton.querySelector(
-        "span:first-child"
-      );
-
-
-    if (label) {
-
-      label.textContent =
-        state.generating
-          ? "Generating Statement..."
-          : "Generate Performance Statement";
-
-    }
+    return;
 
   }
 
 
-  if (elements.regenerateButton) {
-
-    elements.regenerateButton.disabled =
-      state.generating;
+  elements.generateButton.disabled =
+    state.generating;
 
 
-    elements.regenerateButton.textContent =
-      state.generating
-        ? "Generating..."
-        : "Generate Another Version";
+  elements.generateButton.innerHTML =
+    state.generating
+      ? `
+        <span aria-hidden="true">✣</span>
+        Generating…
+      `
+      : `
+        <span aria-hidden="true">✣</span>
+        Generate Statements
+      `;
+
+}
+
+
+// ============================================================
+// 36. OPTION LOADING STATE
+// ============================================================
+
+function setOptionsLoading(
+  loading
+) {
+
+  elements.options.forEach(
+    optionElement => {
+
+      optionElement.classList.toggle(
+        "is-loading",
+        Boolean(
+          loading
+        )
+      );
+
+    }
+  );
+
+}
+
+
+// ============================================================
+// 37. STATUS MESSAGE
+// ============================================================
+
+function showStatus(
+  message,
+  type = ""
+) {
+
+  if (!elements.status) {
+
+    return;
+
+  }
+
+
+  elements.status.className =
+    "epb-status";
+
+
+  if (
+    type ===
+      "success" ||
+    type ===
+      "error"
+  ) {
+
+    elements.status.classList.add(
+      type
+    );
+
+  }
+
+
+  elements.status.textContent =
+    safeString(
+      message
+    );
+
+}
+
+
+// ============================================================
+// 38. CLEAR STATUS
+// ============================================================
+
+function clearStatus() {
+
+  if (!elements.status) {
+
+    return;
+
+  }
+
+
+  elements.status.className =
+    "epb-status";
+
+
+  elements.status.textContent =
+    "";
+
+}
+
+
+// ============================================================
+// 39. FOCUS INVALID FIELD
+// ============================================================
+
+function focusValidationTarget(
+  field
+) {
+
+  const targets = {
+
+    accomplishment:
+      elements.accomplishment,
+
+    section:
+      elements.section,
+
+    rank:
+      elements.rank,
+
+    variation:
+      elements.variation
+
+  };
+
+
+  const target =
+    targets[
+      field
+    ];
+
+
+  if (
+    target &&
+    typeof target.focus ===
+      "function"
+  ) {
+
+    target.focus();
 
   }
 
@@ -1677,7 +2469,274 @@ function setGenerating(
 
 
 // ============================================================
-// 30. DRAFT STORAGE
+// 40. RESET STATEMENTS
+// ============================================================
+
+function resetStatements() {
+
+  state.statements =
+    createEmptyStatements();
+
+
+  state.selectedIndex =
+    null;
+
+}
+
+
+// ============================================================
+// 41. CREATE EMPTY STATEMENTS
+// ============================================================
+
+function createEmptyStatements() {
+
+  return Array.from(
+    {
+      length:
+        OPTION_COUNT
+    },
+    (
+      _,
+      index
+    ) =>
+      createStatementRecord({
+
+        index,
+
+        statement:
+          ""
+
+      })
+  );
+
+}
+
+
+// ============================================================
+// 42. CREATE STATEMENT ID
+// ============================================================
+
+function createStatementId(
+  index
+) {
+
+  const timestamp =
+    Date.now()
+      .toString(
+        36
+      );
+
+
+  const random =
+    Math.random()
+      .toString(
+        36
+      )
+      .slice(
+        2,
+        8
+      );
+
+
+  return (
+    `stmt_${timestamp}_${index + 1}_${random}`
+  );
+
+}
+
+
+// ============================================================
+// 43. BUILD SELECTED STATEMENT OBJECT
+// ============================================================
+
+function buildSelectedStatementObject() {
+
+  if (
+    state.selectedIndex ===
+    null
+  ) {
+
+    return null;
+
+  }
+
+
+  const record =
+    state.statements[
+      state.selectedIndex
+    ];
+
+
+  if (
+    !record ||
+    !record.statement
+  ) {
+
+    return null;
+
+  }
+
+
+  const sectionId =
+    safeString(
+      elements.section?.value
+    );
+
+
+  const rank =
+    safeString(
+      elements.rank?.value
+    );
+
+
+  const variation =
+    safeString(
+      elements.variation?.value
+    );
+
+
+  return {
+
+    id:
+      record.id,
+
+    form:
+      "AF716",
+
+    formVersion:
+      "716",
+
+    section:
+      sectionId,
+
+    sectionLabel:
+      SECTION_CONFIG[
+        sectionId
+      ]?.label ||
+      sectionId,
+
+    ratedRank:
+      rank,
+
+    ratedRankLabel:
+      RANK_LABELS[
+        rank
+      ] ||
+      rank,
+
+    variation,
+
+    variationLabel:
+      VARIATION_CONFIG[
+        variation
+      ]?.label ||
+      variation,
+
+    source:
+      normalizeSource(
+        elements.accomplishment?.value
+      ),
+
+    statement:
+      record.statement,
+
+    characterCount:
+      record.characterCount,
+
+    characterLimit:
+      CHARACTER_LIMIT,
+
+    charactersRemaining:
+      record.charactersRemaining,
+
+    withinLimit:
+      record.withinLimit,
+
+    option:
+      record.option,
+
+    validation:
+      record.validation,
+
+    analysis:
+      record.analysis,
+
+    metadata:
+      record.metadata,
+
+    status:
+      "draft"
+
+  };
+
+}
+
+
+// ============================================================
+// 44. DISPATCH GENERATED EVENT
+// ============================================================
+
+function dispatchGeneratedEvent(
+  request
+) {
+
+  window.dispatchEvent(
+    new CustomEvent(
+      "pcsunited:epb-statements-generated",
+      {
+
+        detail: {
+
+          request,
+
+          statements:
+            state.statements.map(
+              item => ({
+                ...item
+              })
+            )
+
+        }
+
+      }
+    )
+  );
+
+}
+
+
+// ============================================================
+// 45. DISPATCH SELECTED EVENT
+// ============================================================
+
+function dispatchSelectedEvent(
+  statement
+) {
+
+  if (!statement) {
+
+    return;
+
+  }
+
+
+  window.dispatchEvent(
+    new CustomEvent(
+      "pcsunited:epb-statement-selected",
+      {
+
+        detail:
+          statement
+
+      }
+    )
+  );
+
+}
+
+
+// ============================================================
+// 46. SAVE DRAFT
 // ============================================================
 
 function saveDraft() {
@@ -1686,15 +2745,47 @@ function saveDraft() {
 
     const draft = {
 
-      accomplishment:
-        elements.accomplishmentInput?.value ||
+      version:
+        APP_VERSION,
+
+      source:
+        elements.accomplishment?.value ||
         "",
 
-      mpa:
-        getSelectedMPA(),
+      section:
+        elements.section?.value ||
+        "",
+
+      rank:
+        elements.rank?.value ||
+        "",
+
+      variation:
+        elements.variation?.value ||
+        "balanced",
+
+      statements:
+        state.statements.map(
+          item => ({
+
+            statement:
+              item.statement,
+
+            metadata:
+              item.metadata,
+
+            analysis:
+              item.analysis
+
+          })
+        ),
+
+      selectedIndex:
+        state.selectedIndex,
 
       savedAt:
-        new Date().toISOString()
+        new Date()
+          .toISOString()
 
     };
 
@@ -1708,8 +2799,10 @@ function saveDraft() {
 
   } catch (error) {
 
-    // Local storage is optional.
-    // Never block the app if storage is unavailable.
+    console.warn(
+      "[EPB Generator] Unable to save draft:",
+      error
+    );
 
   }
 
@@ -1717,7 +2810,7 @@ function saveDraft() {
 
 
 // ============================================================
-// 31. RESTORE DRAFT
+// 47. RESTORE DRAFT
 // ============================================================
 
 function restoreDraft() {
@@ -1744,51 +2837,140 @@ function restoreDraft() {
 
 
     if (
-      draft?.accomplishment &&
-      elements.accomplishmentInput
+      !draft ||
+      typeof draft !==
+        "object"
     ) {
 
-      elements.accomplishmentInput.value =
-        safeString(
-          draft.accomplishment
-        ).slice(
+      return;
+
+    }
+
+
+    if (
+      elements.accomplishment &&
+      typeof draft.source ===
+        "string"
+    ) {
+
+      elements.accomplishment.value =
+        draft.source.slice(
           0,
-          MAX_INPUT_CHARACTERS
+          MAX_SOURCE_CHARACTERS
         );
 
     }
 
 
-    const savedMPA =
-      safeString(
-        draft?.mpa
-      );
+    if (
+      elements.section &&
+      SECTION_CONFIG[
+        draft.section
+      ]
+    ) {
 
-
-    if (savedMPA) {
-
-      const radio =
-        document.querySelector(
-          `input[name="mpa"][value="${cssEscape(savedMPA)}"]`
-        );
-
-
-      if (radio) {
-
-        radio.checked =
-          true;
-
-      }
+      elements.section.value =
+        draft.section;
 
     }
 
 
-    state.lastMPA =
-      getSelectedMPA();
+    if (
+      elements.rank &&
+      RANK_LABELS[
+        draft.rank
+      ]
+    ) {
+
+      elements.rank.value =
+        draft.rank;
+
+    }
+
+
+    if (
+      elements.variation &&
+      VARIATION_CONFIG[
+        draft.variation
+      ]
+    ) {
+
+      elements.variation.value =
+        draft.variation;
+
+    }
+
+
+    if (
+      Array.isArray(
+        draft.statements
+      )
+    ) {
+
+      state.statements =
+        Array.from(
+          {
+            length:
+              OPTION_COUNT
+          },
+          (
+            _,
+            index
+          ) => {
+
+            const saved =
+              draft.statements[
+                index
+              ];
+
+
+            return createStatementRecord({
+
+              index,
+
+              statement:
+                saved?.statement ||
+                "",
+
+              metadata:
+                saved?.metadata ||
+                {},
+
+              analysis:
+                saved?.analysis ||
+                {}
+
+            });
+
+          }
+        );
+
+    }
+
+
+    if (
+      Number.isInteger(
+        draft.selectedIndex
+      ) &&
+      draft.selectedIndex >= 0 &&
+      draft.selectedIndex <
+        OPTION_COUNT &&
+      state.statements[
+        draft.selectedIndex
+      ]?.statement
+    ) {
+
+      state.selectedIndex =
+        draft.selectedIndex;
+
+    }
 
   } catch (error) {
 
-    // Ignore invalid or unavailable storage.
+    console.warn(
+      "[EPB Generator] Unable to restore draft:",
+      error
+    );
 
   }
 
@@ -1796,10 +2978,10 @@ function restoreDraft() {
 
 
 // ============================================================
-// 32. CLEAR DRAFT
+// 48. CLEAR SAVED DRAFT
 // ============================================================
 
-function clearDraft() {
+function clearSavedDraft() {
 
   try {
 
@@ -1809,7 +2991,10 @@ function clearDraft() {
 
   } catch (error) {
 
-    // Storage is optional.
+    console.warn(
+      "[EPB Generator] Unable to clear saved draft:",
+      error
+    );
 
   }
 
@@ -1817,10 +3002,10 @@ function clearDraft() {
 
 
 // ============================================================
-// 33. NORMALIZE USER INPUT
+// 49. NORMALIZE SOURCE
 // ============================================================
 
-function normalizeInput(
+function normalizeSource(
   value
 ) {
 
@@ -1845,217 +3030,300 @@ function normalizeInput(
 
 
 // ============================================================
-// 34. SAFE STRING
+// 50. NORMALIZE STATEMENT
+// ============================================================
+
+function normalizeStatement(
+  value
+) {
+
+  return safeString(
+    value
+  )
+    .replace(
+      /\s+/g,
+      " "
+    )
+    .trim();
+
+}
+
+
+// ============================================================
+// 51. PLACEHOLDER DETECTION
+// ============================================================
+
+function isPlaceholderStatement(
+  statement
+) {
+
+  const normalized =
+    normalizeStatement(
+      statement
+    )
+      .toLowerCase();
+
+
+  return (
+    !normalized ||
+    normalized ===
+      "..." ||
+    normalized ===
+      "statement" ||
+    normalized ===
+      "placeholder"
+  );
+
+}
+
+
+// ============================================================
+// 52. SAFE STRING
 // ============================================================
 
 function safeString(
   value
 ) {
 
-  return String(
-    value ?? ""
-  ).trim();
-
-}
-
-
-// ============================================================
-// 35. CSS ESCAPE
-// ============================================================
-
-function cssEscape(
-  value
-) {
-
   if (
-    window.CSS &&
-    typeof window.CSS.escape === "function"
+    value ===
+      null ||
+    value ===
+      undefined
   ) {
 
-    return window.CSS.escape(
-      value
-    );
+    return "";
 
   }
 
 
   return String(
     value
-  ).replace(
-    /["\\]/g,
-    "\\$&"
   );
 
 }
 
 
 // ============================================================
-// 36. SMALL DELAY
-//
-// Provides a smoother UI transition.
-// This is NOT required by the writing engine.
+// 53. SAFE OBJECT
 // ============================================================
 
-function smallDelay(
-  milliseconds
+function safeObject(
+  value
 ) {
 
-  return new Promise(
-    (resolve) => {
+  if (
+    value &&
+    typeof value ===
+      "object" &&
+    !Array.isArray(
+      value
+    )
+  ) {
 
-      window.setTimeout(
-        resolve,
-        milliseconds
-      );
+    return value;
 
-    }
-  );
-
-}
+  }
 
 
-// ============================================================
-// 37. REDUCED MOTION
-// ============================================================
-
-function prefersReducedMotion() {
-
-  return Boolean(
-    window.matchMedia &&
-    window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches
-  );
+  return {};
 
 }
 
 
 // ============================================================
-// 38. PUBLIC APP API
+// 54. PUBLIC API
 //
-// Useful later if TheWing.ai or Webflow needs to communicate
-// with the standalone front-end app.
+// FUTURE AF FORM 716 / ASK AMY / DASHBOARD INTEGRATION
 // ============================================================
 
-window.TheWingOPB =
+window.PCSUnitedEPBStatement =
   Object.freeze({
 
     version:
       APP_VERSION,
 
 
-    generate:
-      async function ({
-        accomplishment = "",
-        mpa = "auto"
-      } = {}) {
-
-        const text =
-          normalizeInput(
-            accomplishment
-          );
+    characterLimit:
+      CHARACTER_LIMIT,
 
 
-        const validation =
-          validateInput(
-            text
-          );
+    getState() {
+
+      return {
+
+        source:
+          normalizeSource(
+            elements.accomplishment?.value
+          ),
+
+        section:
+          elements.section?.value ||
+          "",
+
+        rank:
+          elements.rank?.value ||
+          "",
+
+        variation:
+          elements.variation?.value ||
+          "balanced",
+
+        statements:
+          state.statements.map(
+            item => ({
+              ...item
+            })
+          ),
+
+        selectedIndex:
+          state.selectedIndex,
+
+        generating:
+          state.generating
+
+      };
+
+    },
 
 
-        if (!validation.ok) {
+    getSelectedStatement() {
 
-          return {
+      return (
+        buildSelectedStatementObject()
+      );
 
-            ok:
-              false,
-
-            error:
-              validation.message
-
-          };
-
-        }
+    },
 
 
-        try {
+    getStatements() {
 
-          const result =
-            await generateOPBStatement({
+      return (
+        state.statements.map(
+          item => ({
+            ...item
+          })
+        )
+      );
 
-              accomplishment:
-                text,
-
-              mpa,
-
-              variant:
-                0
-
-            });
+    },
 
 
-          const normalized =
-            normalizeGeneratorResult(
-              result,
-              text,
-              mpa
-            );
+    async generate() {
+
+      await handleGenerate();
 
 
-          const statementValidation =
-            validateOPBStatement({
+      return (
+        state.statements.map(
+          item => ({
+            ...item
+          })
+        )
+      );
 
-              statement:
-                normalized.statement,
-
-              sourceText:
-                text,
-
-              mpa:
-                normalized.mpa,
-
-              analysis:
-                normalized.analysis
-
-            });
+    },
 
 
-          return {
+    select(
+      index
+    ) {
 
-            ok:
-              true,
+      const normalizedIndex =
+        Number(
+          index
+        );
 
-            result:
-              normalized,
 
-            validation:
-              statementValidation
+      if (
+        !Number.isInteger(
+          normalizedIndex
+        ) ||
+        normalizedIndex < 0 ||
+        normalizedIndex >=
+          OPTION_COUNT
+      ) {
 
-          };
-
-        } catch (error) {
-
-          return {
-
-            ok:
-              false,
-
-            error:
-              safeString(
-                error?.message
-              ) ||
-              "Unable to generate Performance Statement."
-
-          };
-
-        }
+        return false;
 
       }
+
+
+      handleSelect(
+        normalizedIndex
+      );
+
+
+      return true;
+
+    },
+
+
+    clear() {
+
+      if (
+        elements.accomplishment
+      ) {
+
+        elements.accomplishment.value =
+          "";
+
+      }
+
+
+      if (
+        elements.section
+      ) {
+
+        elements.section.value =
+          "";
+
+      }
+
+
+      if (
+        elements.rank
+      ) {
+
+        elements.rank.value =
+          "";
+
+      }
+
+
+      if (
+        elements.variation
+      ) {
+
+        elements.variation.value =
+          "balanced";
+
+      }
+
+
+      resetStatements();
+
+      clearSavedDraft();
+
+      updateSourceCount();
+
+      updateChips();
+
+      renderAllOptions();
+
+      clearStatus();
+
+
+      return true;
+
+    }
 
   });
 
 
 // ============================================================
 // END
-// THEWING.AI • UNIVERSAL OPB GENERATOR
-// app.js v1.0.0
+// PCSUNITED • THEWING.AI
+// EPB BULLET STATEMENT GENERATOR
+// app.js v2.0.0
 // ============================================================
