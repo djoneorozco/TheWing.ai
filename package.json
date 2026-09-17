@@ -1,7 +1,6 @@
 {
   "name": "thewing-ai",
   "version": "1.0.0",
-  "type": "module",
   "main": "netlify/functions/health.js",
   "dependencies": {
     "@netlify/functions": "^2.7.0",
