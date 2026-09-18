@@ -51,7 +51,7 @@ import {
   generatePerformanceStatements,
   previewAccomplishment,
   DEFAULT_CHARACTER_LIMIT
-} from "../../public/opb-generator/js/opb-universal.js";
+} from "../../OPB-Generator/js/opb-universal.js";
 
 
 import {
