@@ -4615,7 +4615,7 @@ async function callOpenAI({
       },
       body: JSON.stringify({
         model,
-        temperature: 0.35,
+        reasoning_effort: "low",
         max_completion_tokens: maxTokens,
         messages: [
           { role: "system", content: systemPrompt },
