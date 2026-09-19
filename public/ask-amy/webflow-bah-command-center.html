@@ -1,0 +1,746 @@
+<!-- THEWING.AI • PUBLIC ASK AMY COMMAND CENTER v6.2 • Midnight AF Blue -->
+<!-- Paste into Webflow page custom code. Size ~36,100 / 50,000 characters. -->
+<style>
+#ask-amy-launcher{position:fixed;top:auto;right:1rem;bottom:max(1rem,env(safe-area-inset-bottom));z-index:2147480000;padding:.75rem 1rem;border-radius:1rem;cursor:pointer;background:radial-gradient(180px 80px at 15% 0%,rgba(108,166,203,.14),transparent 68%),linear-gradient(180deg,rgba(23,48,73,.94),rgba(12,31,49,.94));backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border:1px solid rgba(183,211,232,.18);color:#f2f7fb;font-family:Inter,system-ui,sans-serif;display:flex;align-items:center;gap:.75rem;opacity:1;pointer-events:auto;transform:translateY(0);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;box-shadow:inset 0 1px 0 rgba(220,237,247,.08),0 16px 38px rgba(2,12,24,.34)}
+#ask-amy-launcher img{width:42px;height:42px;border-radius:50%;object-fit:cover;border:1px solid rgba(159,227,212,.42);box-shadow:0 0 0 3px rgba(159,227,212,.05),0 8px 18px rgba(2,12,24,.30)}
+#ask-amy-launcher .aa-launch-copy{display:flex;flex-direction:column;line-height:1.15}
+#ask-amy-launcher .aa-launch-title{color:#f3f8fc;font-size:.8rem;font-weight:800}
+#ask-amy-launcher .aa-launch-sub{margin-top:2px;color:rgba(202,220,234,.76);font-size:.7rem;font-weight:500}
+#ask-amy-modal{position:fixed;inset:0;z-index:2147480001;display:none;align-items:flex-end;justify-content:flex-end;padding:18px;background:rgba(5,20,33,.32);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+#ask-amy-panel{position:relative;width:min(1280px,calc(100vw - 36px));max-width:min(1280px,calc(100vw - 36px));max-height:calc(100vh - 36px);border:1px solid rgba(183,211,232,.13);border-radius:24px;overflow:hidden;box-shadow:0 32px 82px rgba(2,12,24,.52),0 0 0 1px rgba(159,227,212,.025)}
+#ask-amy-modal-close{position:absolute;top:14px;right:14px;z-index:30;appearance:none;border:1px solid rgba(183,211,232,.22);background:rgba(10,30,48,.84);color:#f2f7fb;font:800 12px/1 Barlow,Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:10px 12px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(220,237,247,.07),0 14px 30px rgba(2,12,24,.32)}
+#ask-amy-shell,#ask-amy-shell *{box-sizing:border-box;font-family:Barlow,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+#ask-amy-shell{--aa-bg:#0a2235;--aa-bg2:#173954;--aa-bg3:#29465f;--aa-card:rgba(34,65,92,.78);--aa-card-dark:rgba(14,38,59,.88);--aa-ink:#f2f7fb;--aa-ink-soft:#dce9f2;--aa-muted:rgba(199,218,233,.72);--aa-line:rgba(183,211,232,.16);--aa-line2:rgba(159,227,212,.34);--aa-mint:#9fe3d4;--aa-teal:#7ccbd9;--aa-gold:#e4c071;--aa-gold2:#efd18a;--aa-cream:#f4f8fb;--aa-danger:#f1a0af;--aa-radius-lg:24px;--aa-shadow:0 22px 52px rgba(2,12,24,.35);--aa-shadow-soft:0 13px 28px rgba(2,12,24,.24);display:flex!important;justify-content:center!important;padding:40px 20px!important;background:radial-gradient(1050px 620px at 12% 6%,rgba(57,139,181,.22),transparent 56%),radial-gradient(850px 520px at 92% 10%,rgba(117,140,174,.20),transparent 56%),radial-gradient(780px 500px at 70% 100%,rgba(228,192,113,.07),transparent 62%),linear-gradient(135deg,#0b2c44 0%,#264965 52%,#555969 100%)!important;color:var(--aa-ink)!important}
+#aa-container{width:100%;max-width:1400px;display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;position:relative;align-items:stretch}
+#aa-left,#aa-right{position:relative;overflow:hidden;border-radius:var(--aa-radius-lg);border:1px solid var(--aa-line);box-shadow:var(--aa-shadow);backdrop-filter:blur(18px) saturate(145%);-webkit-backdrop-filter:blur(18px) saturate(145%)}
+#aa-left{padding:28px 24px;background:radial-gradient(500px 250px at 50% 0%,rgba(93,151,190,.16),transparent 58%),linear-gradient(180deg,rgba(36,65,89,.90),rgba(13,35,54,.94))}
+#aa-right{display:flex;flex-direction:column;height:760px;min-height:760px;max-height:760px;min-width:0;background:radial-gradient(850px 320px at 18% 0%,rgba(74,139,178,.15),transparent 62%),radial-gradient(650px 260px at 92% 0%,rgba(173,185,208,.10),transparent 64%),linear-gradient(180deg,rgba(43,72,99,.86),rgba(18,42,64,.92))}
+#aa-left::before,#aa-right::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(220,237,247,.045),rgba(220,237,247,0) 42%);opacity:.90}
+.aa-avatar-wrapper{width:168px;height:168px;margin:0 auto 18px;position:relative;border-radius:50%}
+.aa-avatar-wrapper::before{content:"";position:absolute;inset:-28px;border-radius:50%;background:radial-gradient(circle,rgba(159,227,212,.22),rgba(84,145,181,.18),transparent 72%);filter:blur(26px);z-index:0}
+.aa-avatar{position:relative;z-index:2;width:168px;height:168px;border-radius:50%;background-image:url("https://cdn.prod.website-files.com/6a6ff0545aa01c93602db711/6a83f5727b7ed3d82202a842_e20803fdfcd58c640adc94e272a6faa5_1%20About%20Number%20BG.jpg");background-size:cover;background-position:center;border:2px solid rgba(202,226,240,.24);box-shadow:0 0 0 8px rgba(220,237,247,.025),0 18px 34px rgba(2,12,24,.32)}
+.aa-name{position:relative;z-index:1;margin-top:10px;text-align:center;font-family:"Gilda Display",Georgia,serif;font-size:28px;line-height:1.05;letter-spacing:.02em;color:var(--aa-cream)}
+.aa-sub{position:relative;z-index:1;margin-top:6px;text-align:center;font-size:13px;color:var(--aa-muted);letter-spacing:.08em;text-transform:uppercase;font-weight:800}
+.aa-links{position:relative;z-index:1;margin-top:26px;display:flex;flex-direction:column;gap:10px}
+.aa-link-btn{display:block;padding:11px 14px;border:1px solid var(--aa-line);border-radius:999px;background:linear-gradient(180deg,rgba(102,137,165,.16),rgba(17,42,64,.24));color:var(--aa-ink);text-decoration:none;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;box-shadow:inset 0 1px 0 rgba(220,237,247,.04),0 10px 22px rgba(2,12,24,.18);transition:transform .20s ease,border-color .20s ease,background .20s ease}
+.aa-link-btn:hover{transform:translateY(-1px);border-color:var(--aa-line2);background:rgba(159,227,212,.08);color:#fff}
+.aa-badge{position:relative;z-index:1;margin-top:28px;text-align:center;font-size:11px;line-height:1.45;color:var(--aa-gold2);opacity:.94;letter-spacing:.08em;text-transform:uppercase;font-weight:800}
+.aa-topbar{position:relative;z-index:1;flex:0 0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 76px 14px 20px;border-bottom:1px solid rgba(183,211,232,.11);background:linear-gradient(180deg,rgba(135,169,194,.10),rgba(26,55,80,.06))}
+.aa-topbar-copy h2{margin:0;font-family:"Gilda Display",Georgia,serif;font-size:24px;line-height:1.05;color:var(--aa-cream);letter-spacing:.02em}
+.aa-topbar-copy p{max-width:600px;margin:6px 0 0;color:var(--aa-muted);font-size:13px;line-height:1.4;font-weight:700}
+.aa-status-pill{display:inline-flex;align-items:center;gap:7px;margin-top:10px;padding:7px 10px;border:1px solid rgba(159,227,212,.22);border-radius:999px;background:rgba(159,227,212,.07);color:var(--aa-mint);font-size:10px;line-height:1;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
+.aa-status-dot{width:7px;height:7px;border-radius:50%;background:var(--aa-mint);box-shadow:0 0 0 4px rgba(159,227,212,.06),0 0 12px rgba(159,227,212,.65)}
+.aa-quick-prompts{position:relative;z-index:1;flex:0 0 auto;padding:14px 18px 0;display:flex;flex-wrap:wrap;gap:8px}
+.aa-prompt-btn{appearance:none;padding:9px 12px;border:1px solid var(--aa-line);border-radius:999px;background:linear-gradient(180deg,rgba(113,151,181,.13),rgba(19,46,69,.18));color:var(--aa-ink-soft);font-size:11px;line-height:1.2;font-weight:800;cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.aa-prompt-btn:hover{transform:translateY(-1px);border-color:var(--aa-line2);background:rgba(159,227,212,.09);color:#fff}
+.aa-chat{position:relative;z-index:1;flex:1 1 auto;min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;padding:24px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;overscroll-behavior:contain}
+.aa-chat::-webkit-scrollbar{width:10px}
+.aa-chat::-webkit-scrollbar-track{background:rgba(8,27,43,.20)}
+.aa-chat::-webkit-scrollbar-thumb{border:3px solid transparent;border-radius:999px;background:rgba(159,196,220,.30);background-clip:padding-box}
+.aa-msg{flex:0 0 auto;max-width:82%;padding:13px 15px;border:1px solid rgba(183,211,232,.13);border-radius:16px;color:var(--aa-cream)!important;font-size:14px;line-height:1.55;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgba(220,237,247,.035),var(--aa-shadow-soft)}
+.aa-user{align-self:flex-end;background:radial-gradient(260px 130px at 18% 10%,rgba(159,227,212,.14),transparent 68%),rgba(45,89,105,.38);border-color:rgba(159,227,212,.22)}
+.aa-bot{align-self:flex-start;background:radial-gradient(270px 130px at 18% 8%,rgba(112,174,211,.16),transparent 68%),rgba(38,70,98,.48)}
+.aa-typing{opacity:.92;color:var(--aa-ink-soft)!important;font-size:12px!important}
+.aa-footer{position:relative;z-index:1;flex:0 0 auto;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:18px;border-top:1px solid rgba(183,211,232,.11);background:linear-gradient(180deg,rgba(12,36,55,.18),rgba(8,27,43,.32))}
+.aa-input{width:100%;min-width:0;padding:14px;border:1px solid rgba(183,211,232,.18);border-radius:14px;outline:none;background:rgba(9,31,49,.46);color:var(--aa-cream)!important;font-size:14px;font-weight:800;box-shadow:inset 0 12px 26px rgba(2,12,24,.20),inset 0 1px 0 rgba(220,237,247,.025);transition:border-color .16s ease,box-shadow .16s ease}
+.aa-input:focus{border-color:rgba(159,227,212,.52);box-shadow:inset 0 12px 26px rgba(2,12,24,.18),0 0 0 4px rgba(159,227,212,.10)}
+.aa-input::placeholder{color:rgba(195,214,229,.55)}
+.aa-btn{appearance:none;padding:14px 20px;border:none;border-radius:14px;background:linear-gradient(180deg,rgba(239,209,138,.99),rgba(196,155,79,.98));color:#172235;font-size:12px;font-weight:900;letter-spacing:.10em;text-transform:uppercase;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.52),0 15px 28px rgba(2,12,24,.28);transition:filter .20s ease,transform .20s ease}
+.aa-btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.aa-btn[disabled]{opacity:.60;cursor:not-allowed;transform:none}
+.aa-caret{display:inline-block;width:1px;height:1.2em;margin-left:2px;background:currentColor;animation:aa-blink 1s steps(1,end) infinite}
+@keyframes aa-blink{50%{opacity:0}}
+@media (max-width:980px){#aa-container{grid-template-columns:1fr}#aa-left{display:none}#aa-right{height:680px;min-height:680px;max-height:680px}}
+@media (max-width:767px){#ask-amy-shell{padding:12px!important}#aa-right{height:calc(100vh - 60px);height:calc(100dvh - 60px);min-height:calc(100vh - 60px);min-height:calc(100dvh - 60px);max-height:calc(100vh - 60px);max-height:calc(100dvh - 60px);border-radius:18px}.aa-topbar{padding:18px 66px 12px 16px}.aa-quick-prompts{padding:12px 14px 0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.aa-quick-prompts::-webkit-scrollbar{display:none}.aa-prompt-btn{flex:0 0 auto}.aa-chat{padding:18px 14px}.aa-msg{max-width:90%}.aa-footer{padding:12px}.aa-btn{padding:14px 15px}}
+</style>
+
+<div id="ask-amy-launcher" role="button" tabindex="0" aria-label="Open Ask Amy">
+  <img src="https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/6a524dfcbadbecf650bc173c_34bc5cfe7e876f9d6bee4af9c82536f4_CTA%20BG%20Image%201.jpg" alt="Amy, TheWing.ai AI Concierge">
+  <div class="aa-launch-copy">
+    <div class="aa-launch-title">Ask Amy</div>
+    <div class="aa-launch-sub">Air Force BAH Concierge</div>
+  </div>
+</div>
+
+<div id="ask-amy-modal" role="dialog" aria-modal="true" aria-label="Ask Amy">
+  <div id="ask-amy-panel">
+    <button id="ask-amy-modal-close" type="button" aria-label="Close Ask Amy">Close ✕</button>
+    <div id="ask-amy-shell" data-endpoint="https://thewing.netlify.app/.netlify/functions/agent-amy-public" style="all:initial;">
+      <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+      <div id="aa-container">
+        <aside id="aa-left">
+          <div class="aa-avatar-wrapper">
+            <div class="aa-avatar" role="img" aria-label="Amy, TheWing.ai AI Concierge"></div>
+          </div>
+          <div class="aa-name">Amy</div>
+          <div class="aa-sub">TheWing A.I. Concierge</div>
+          <div class="aa-links">
+            <a class="aa-link-btn" href="https://www.travel.dod.mil/Allowances/Basic-Allowance-for-Housing/Calculators/" target="_blank" rel="noopener noreferrer">Official BAH Rates</a>
+            <a class="aa-link-btn" href="https://www.travel.dod.mil/Allowances/Basic-Allowance-for-Housing/BAH-Data-Collection/" target="_blank" rel="noopener noreferrer">How BAH Is Calculated</a>
+            <a class="aa-link-btn" href="https://www.dfas.mil/MilitaryMembers/payentitlements/Pay-Tables/" target="_blank" rel="noopener noreferrer">2026 Military Pay Tables</a>
+            <a class="aa-link-btn" href="https://www.dfas.mil/MilitaryMembers/payentitlements/Pay-Tables/bas/" target="_blank" rel="noopener noreferrer">2026 BAS Rates</a>
+          </div>
+          <div class="aa-badge">2026 BAH • DTMO / DFAS</div>
+        </aside>
+        <section id="aa-right">
+          <div class="aa-topbar">
+            <div class="aa-topbar-copy">
+              <h2>Ask Amy</h2>
+              <p>Understand your Air Force BAH, Base Pay, BAS, how location and dependency status affect your rate, and how your housing allowance fits into your overall military compensation.</p>
+              <div class="aa-status-pill"><span class="aa-status-dot"></span> Public Session • No Account Required</div>
+            </div>
+          </div>
+          <div class="aa-quick-prompts" aria-label="Suggested questions">
+            <button type="button" class="aa-prompt-btn" data-question="Explain my current BAH Calculator result. Use my displayed BAH, Base Pay, BAS, total monthly compensation, pay grade, years of service, duty location, and dependent status as the source of truth. Do not recalculate or replace the displayed result.">Explain My BAH</button>
+            <button type="button" class="aa-prompt-btn" data-question="Using my current BAH Calculator result, explain my Base Pay, BAH, BAS, and Total Monthly Compensation and what each component means. Use the calculator's displayed values and do not independently change them.">Explain My Compensation</button>
+            <button type="button" class="aa-prompt-btn" data-question="Explain what normally happens to Basic Allowance for Housing when I PCS to a new duty station. Use my current BAH Calculator scenario as context, but do not change my current displayed BAH unless I explicitly ask you to calculate a different duty station.">BAH When I PCS</button>
+            <button type="button" class="aa-prompt-btn" data-question="Using my current BAH Calculator result as context, explain whether BAH is intended to cover all of my housing costs and how BAH relates to local rent, utilities, housing choices, and possible out-of-pocket housing expenses.">BAH vs Housing Costs</button>
+          </div>
+          <div class="aa-chat" id="aa-chat" aria-live="polite" aria-label="Ask Amy conversation"></div>
+          <div class="aa-footer">
+            <input id="aa-input" class="aa-input" type="text" maxlength="5000" autocomplete="off" placeholder="Ask about your BAH, Base Pay, BAS, compensation, duty station, dependents, or PCS…" aria-label="Ask Amy">
+            <button id="aa-send" class="aa-btn" type="button">Send</button>
+          </div>
+        </section>
+      </div>
+      <script>
+(() => {
+  "use strict";
+
+  const root = document.getElementById("ask-amy-shell");
+  if (!root || root.__askAmyMountedV62) return;
+  root.__askAmyMountedV62 = true;
+
+  const DEFAULT_ENDPOINT =
+    "https://thewing.netlify.app/.netlify/functions/agent-amy-public";
+  const ENDPOINT = String(root.getAttribute("data-endpoint") || DEFAULT_ENDPOINT).trim();
+  const BAH_CALCULATOR_ORIGIN = "https://thewing.netlify.app";
+  const BAH_MESSAGE_TYPE = "pcsunited-bah-compensation";
+  const BAH_REQUEST_TYPE = "pcsunited-bah-header-request";
+  const BAH_CALCULATOR_SOURCE = "pcsunited.bah.calculator";
+
+  const chatEl = document.getElementById("aa-chat");
+  const inputEl = document.getElementById("aa-input");
+  const sendBtn = document.getElementById("aa-send");
+  const promptButtons = Array.from(root.querySelectorAll(".aa-prompt-btn"));
+  if (!chatEl || !inputEl || !sendBtn) return;
+
+  const state = {
+    conversationId: createConversationId(),
+    thread: [],
+    memory: {},
+    sending: false,
+    bahSnapshot: null
+  };
+
+  function createConversationId() {
+    try {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return "thewing-bah-" + window.crypto.randomUUID();
+      }
+    } catch (_) {}
+    return "thewing-bah-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
+  }
+
+  function clean(value) {
+    return String(value == null ? "" : value).trim();
+  }
+
+  function isObject(value) {
+    return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+  }
+
+  function cloneSafe(value, fallback) {
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function firstValue(...values) {
+    for (const value of values) {
+      if (value !== undefined && value !== null && value !== "") return value;
+    }
+    return null;
+  }
+
+  function firstObject(...values) {
+    for (const value of values) {
+      if (isObject(value) && Object.keys(value).length) return cloneSafe(value, {});
+    }
+    return {};
+  }
+
+  function firstPacket(...values) {
+    for (const value of values) {
+      if (isObject(value) && Object.keys(value).length) return cloneSafe(value, null);
+    }
+    return null;
+  }
+
+  function stripEmptyObject(object) {
+    const output = {};
+    if (!isObject(object)) return output;
+    for (const [key, value] of Object.entries(object)) {
+      if (value === undefined || value === null || value === "") continue;
+      output[key] = value;
+    }
+    return output;
+  }
+
+  function prefersReducedMotion() {
+    return Boolean(
+      window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }
+
+  function numberFromMoney(value) {
+    if (value === null || value === undefined || value === "") return null;
+    if (typeof value === "number") return Number.isFinite(value) ? value : null;
+    const number = Number(String(value).replace(/[$,%\s,]/g, "").trim());
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function yearsFromValue(value) {
+    if (value === null || value === undefined || value === "") return null;
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    const match = String(value).match(/\d+(?:\.\d+)?/);
+    if (!match) return null;
+    const number = Number(match[0]);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function dependentsFromValue(value) {
+    if (value === true || value === false) return value;
+    if (value === null || value === undefined || value === "") return null;
+    const text = String(value).trim().toLowerCase();
+    if (text.includes("without") || text === "no" || text === "false" || text === "0") {
+      return false;
+    }
+    if (
+      text.includes("with") ||
+      text.includes("dependent") ||
+      text === "yes" ||
+      text === "true" ||
+      text === "1"
+    ) {
+      return true;
+    }
+    return null;
+  }
+
+  function normalizeBahSnapshot(raw) {
+    if (!isObject(raw)) return null;
+
+    const detail = isObject(raw.detail)
+      ? raw.detail
+      : isObject(raw.payload)
+        ? raw.payload
+        : raw;
+
+    const basePay = numberFromMoney(
+      firstValue(detail.basePay, detail.base_pay, detail.basicPay, detail.monthly?.basePay)
+    );
+    const bah = numberFromMoney(
+      firstValue(detail.bah, detail.BAH, detail.monthlyBAH, detail.monthly?.bah)
+    );
+    const bas = numberFromMoney(
+      firstValue(detail.bas, detail.BAS, detail.monthly?.bas)
+    );
+    const totalMonthly = numberFromMoney(
+      firstValue(
+        detail.totalMonthly,
+        detail.total_monthly,
+        detail.total,
+        detail.grossMonthlyComp,
+        detail.monthly?.total
+      )
+    );
+    const rank = clean(
+      firstValue(detail.rank, detail.rank_paygrade, detail.rankPaygrade, detail.paygrade)
+    );
+    const yos = yearsFromValue(
+      firstValue(detail.yos, detail.yearsOfService, detail.years_of_service)
+    );
+    const location = clean(firstValue(detail.location, detail.base));
+    let base = clean(firstValue(detail.base, detail.pcsBase));
+    let mhaName = clean(firstValue(detail.mhaName, detail.mha_name));
+
+    if (!base && location) base = location.split("•")[0].trim();
+    if (!mhaName && location.includes("•")) {
+      mhaName = location.split("•").slice(1).join("•").trim();
+    }
+
+    const zip = clean(
+      firstValue(detail.zip, detail.dutyZip, detail.bahZip, detail.bah_zip)
+    );
+    const withDependents = dependentsFromValue(
+      firstValue(
+        detail.withDependents,
+        detail.with_dependents,
+        detail.family,
+        detail.dependents
+      )
+    );
+    const dependentLabel = clean(detail.dependents);
+    const hasCompensation = [basePay, bah, bas, totalMonthly].some((value) =>
+      Number.isFinite(value)
+    );
+    if (!hasCompensation) return null;
+
+    return {
+      basePay,
+      bah,
+      bas,
+      totalMonthly,
+      rank,
+      yos,
+      base,
+      zip,
+      mhaName,
+      location,
+      withDependents,
+      dependentLabel,
+      updated_at:
+        clean(firstValue(detail.updated_at, detail.updatedAt)) ||
+        new Date().toISOString()
+    };
+  }
+
+  function setLatestBahSnapshot(value) {
+    const snapshot = normalizeBahSnapshot(value);
+    if (!snapshot) return null;
+    state.bahSnapshot = cloneSafe(snapshot, null);
+    window.PCSU_BAH_AMY_CURRENT = cloneSafe(snapshot, null);
+    return cloneSafe(state.bahSnapshot, null);
+  }
+
+  function readBahSnapshotFromHeader() {
+    try {
+      const headerApi = window.PCSU_BAH_HEADER;
+      if (headerApi && typeof headerApi.getSnapshot === "function") {
+        return normalizeBahSnapshot(headerApi.getSnapshot());
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  function hydrateBahSnapshot() {
+    const headerSnapshot = readBahSnapshotFromHeader();
+    if (headerSnapshot) return setLatestBahSnapshot(headerSnapshot);
+    if (state.bahSnapshot) return cloneSafe(state.bahSnapshot, null);
+    return null;
+  }
+
+  function requestBahSnapshotFromFrames() {
+    const request = {
+      type: BAH_REQUEST_TYPE,
+      source: "thewing.bah.ask-amy",
+      version: "6.2.0"
+    };
+    Array.from(document.querySelectorAll("iframe")).forEach((frame) => {
+      try {
+        if (!frame.contentWindow) return;
+        const src = frame.getAttribute("src") || "";
+        if (src) {
+          try {
+            const url = new URL(src, window.location.href);
+            if (url.origin !== BAH_CALCULATOR_ORIGIN) return;
+          } catch (_) {}
+        }
+        frame.contentWindow.postMessage(request, BAH_CALCULATOR_ORIGIN);
+      } catch (_) {}
+    });
+  }
+
+  function bindBahBridge() {
+    if (window.__THEWING_BAH_AMY_BRIDGE_BOUND) return;
+    window.__THEWING_BAH_AMY_BRIDGE_BOUND = true;
+
+    window.addEventListener("message", (event) => {
+      if (!event || event.origin !== BAH_CALCULATOR_ORIGIN) return;
+      const message = event.data;
+      if (!message || typeof message !== "object") return;
+      if (
+        message.type !== BAH_MESSAGE_TYPE &&
+        message.source !== BAH_CALCULATOR_SOURCE
+      ) {
+        return;
+      }
+      setLatestBahSnapshot(message);
+    });
+
+    const headerSnapshot = readBahSnapshotFromHeader();
+    if (headerSnapshot) setLatestBahSnapshot(headerSnapshot);
+
+    window.addEventListener("pcsunited:bah-header-ready", () => {
+      const snapshot = readBahSnapshotFromHeader();
+      if (snapshot) setLatestBahSnapshot(snapshot);
+      requestBahSnapshotFromFrames();
+    });
+
+    [0, 250, 750, 1500, 3000].forEach((delay) => {
+      setTimeout(requestBahSnapshotFromFrames, delay);
+    });
+
+    window.PCSU_BAH_AMY_BRIDGE = {
+      getSnapshot() {
+        return hydrateBahSnapshot();
+      },
+      refresh() {
+        requestBahSnapshotFromFrames();
+        return hydrateBahSnapshot();
+      }
+    };
+  }
+
+  bindBahBridge();
+
+  async function getBahSnapshotForAmy() {
+    let snapshot = hydrateBahSnapshot();
+    if (snapshot) return snapshot;
+    requestBahSnapshotFromFrames();
+    await new Promise((resolve) => {
+      setTimeout(resolve, 180);
+    });
+    return hydrateBahSnapshot();
+  }
+
+  function buildAmyCompensationPacket(snapshot) {
+    if (!snapshot) return null;
+    return stripEmptyObject({
+      basePay: snapshot.basePay,
+      bah: snapshot.bah,
+      bas: snapshot.bas,
+      totalMonthly: snapshot.totalMonthly,
+      rank: snapshot.rank,
+      yos: snapshot.yos,
+      base: snapshot.base,
+      zip: snapshot.zip,
+      withDependents: snapshot.withDependents,
+      mhaName: snapshot.mhaName,
+      source: "bah_calculator_displayed_result"
+    });
+  }
+
+  function buildAmyBahProfile(snapshot) {
+    if (!snapshot) return {};
+    return stripEmptyObject({
+      mode: "active",
+      rank_paygrade: snapshot.rank,
+      yos: snapshot.yos,
+      base: snapshot.base,
+      zip: snapshot.zip,
+      family: snapshot.withDependents
+    });
+  }
+
+  function collectPublicPageContext() {
+    const basicBrainCurrent = firstObject(
+      window.PCSU_BASICBRAIN_CURRENT,
+      window.PCSUnitedBasicBrain,
+      window.PCSUnitedBasicBrainCurrent
+    );
+    const profile = firstObject(
+      basicBrainCurrent.profile,
+      window.PCSUnitedPublicProfile,
+      window.PCSUnitedProfile
+    );
+    const bridge = firstObject(
+      basicBrainCurrent.bridge,
+      window.PCSU_BASICBRAIN_BRIDGE,
+      window.PCSUnitedBridge
+    );
+    const compensation = firstPacket(
+      basicBrainCurrent.compensation,
+      window.PCSU_COMPENSATION_CURRENT,
+      window.PCSUnitedCompensation
+    );
+    const mortgage = firstPacket(
+      window.PCSU_MORTGAGE_CURRENT,
+      window.PCSUnitedMortgage,
+      window.PCSUnitedMortgageResults
+    );
+    const housingPreferences = firstObject(
+      window.PCSUnitedHousingPreferences,
+      window.PCSU_HOUSING_PREFERENCES
+    );
+    const fad = firstObject(
+      window.PCSUnitedFAD,
+      window.PCSU_FAD_CURRENT,
+      housingPreferences ? { housing_preferences: housingPreferences } : {}
+    );
+    return { profile, bridge, compensation, mortgage, fad };
+  }
+
+  function mergeMemory(current, patch) {
+    const next = isObject(current) ? { ...current } : {};
+    if (!isObject(patch)) return next;
+    for (const [key, value] of Object.entries(patch)) {
+      if (value === undefined) continue;
+      if (value === null) {
+        delete next[key];
+        continue;
+      }
+      next[key] = value;
+    }
+    return next;
+  }
+
+  function scrollToBottom() {
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  function rememberThread(role, content) {
+    state.thread.push({ role, content: clean(content) });
+    state.thread = state.thread.slice(-12);
+  }
+
+  async function pushMessage(role, content, options = {}) {
+    const text = clean(content);
+    if (!text) return;
+    const typewriter = options.typewriter === true;
+    const speed = Number(options.speed || 18);
+    const delay = Number(options.delay || 80);
+    const remember = options.remember !== false;
+    const msg = document.createElement("div");
+    msg.className = "aa-msg " + (role === "user" ? "aa-user" : "aa-bot");
+    const textNode = document.createElement("span");
+    msg.appendChild(textNode);
+    chatEl.appendChild(msg);
+    scrollToBottom();
+    if (remember) rememberThread(role === "user" ? "user" : "assistant", text);
+    if (!typewriter || prefersReducedMotion() || role === "user") {
+      textNode.textContent = text;
+      scrollToBottom();
+      return;
+    }
+    await typewriterInto(textNode, text, speed, delay);
+    scrollToBottom();
+  }
+
+  function showTyping() {
+    hideTyping();
+    const typing = document.createElement("div");
+    typing.className = "aa-msg aa-bot aa-typing";
+    typing.id = "aa-typing";
+    typing.textContent = "Amy is reviewing your BAH and compensation context…";
+    chatEl.appendChild(typing);
+    scrollToBottom();
+  }
+
+  function hideTyping() {
+    const typing = document.getElementById("aa-typing");
+    if (typing) typing.remove();
+  }
+
+  function typewriterInto(element, text, speed, startDelay) {
+    return new Promise((resolve) => {
+      element.textContent = "";
+      const caret = document.createElement("span");
+      caret.className = "aa-caret";
+      element.appendChild(caret);
+      let index = 0;
+      function tick() {
+        if (index < text.length) {
+          caret.insertAdjacentText("beforebegin", text.charAt(index));
+          index += 1;
+          scrollToBottom();
+          setTimeout(tick, speed);
+          return;
+        }
+        caret.remove();
+        resolve();
+      }
+      setTimeout(tick, startDelay);
+    });
+  }
+
+  async function postToAmy(userText) {
+    const publicContext = collectPublicPageContext();
+    const historicalThread = state.thread.slice(0, -1);
+    const bahSnapshot = await getBahSnapshotForAmy();
+    const bahCompensation = buildAmyCompensationPacket(bahSnapshot);
+    const bahProfile = buildAmyBahProfile(bahSnapshot);
+    const mergedProfile = { ...publicContext.profile, ...bahProfile };
+    const compensation =
+      bahCompensation || publicContext.compensation || undefined;
+
+    const payload = {
+      message: userText,
+      profile: mergedProfile,
+      bridge: publicContext.bridge,
+      compensation,
+      mortgage: publicContext.mortgage || undefined,
+      fad: publicContext.fad,
+      context: {
+        conversation_id: state.conversationId,
+        thread: historicalThread,
+        memory: state.memory,
+        requested_mode: "education",
+        response_limits: {
+          max_chars: 900,
+          greeting_max_chars: 260,
+          max_follow_up_questions: 1
+        },
+        style_guide: {
+          tone: "clear, practical, conversational, military compensation and BAH focused",
+          format:
+            "short paragraphs; explain acronyms; when a current BAH Calculator compensation packet is supplied, treat its displayed BAH, Base Pay, BAS, Total Monthly Compensation, rank, years of service, location, ZIP, and dependent status as the current-session result; do not invent or independently replace displayed calculator values; only calculate a different scenario when the user explicitly asks for a hypothetical or changed scenario; clearly distinguish BAH from housing affordability and actual housing expenses"
+        },
+        page: "TheWing.ai Air Force BAH Calculator",
+        widget: "bah-calculator-ask-amy",
+        product: "TheWing.ai",
+        version: "6.2.0"
+      }
+    };
+
+    const response = await fetch(ENDPOINT, {
+      method: "POST",
+      mode: "cors",
+      credentials: "omit",
+      headers: {
+        "Content-Type": "application/json",
+        "X-PCSU-Client": "bah-calculator-ask-amy-v6.2"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const rawText = await response.text();
+    let data = {};
+    try {
+      data = rawText ? JSON.parse(rawText) : {};
+    } catch (_) {
+      data = {};
+    }
+
+    if (!response.ok || !data || data.ok !== true) {
+      const message = clean(data.error || data.message || "HTTP " + response.status);
+      throw new Error(message || "Request failed.");
+    }
+
+    if (clean(data.conversation_id)) {
+      state.conversationId = clean(data.conversation_id);
+    }
+    if (isObject(data.memory_patch)) {
+      state.memory = mergeMemory(state.memory, data.memory_patch);
+    }
+    return data;
+  }
+
+  async function callAmy(userText) {
+    if (state.sending) return;
+    state.sending = true;
+    sendBtn.disabled = true;
+    inputEl.disabled = true;
+    showTyping();
+    try {
+      const data = await postToAmy(userText);
+      hideTyping();
+      const reply = clean(
+        data.reply ||
+          data.answer?.summary ||
+          "I’m here. Ask me about your current BAH, Base Pay, BAS, total monthly military compensation, duty location, dependent status, or PCS changes."
+      );
+      const ui = isObject(data.ui) ? data.ui : {};
+      await pushMessage("assistant", reply, {
+        typewriter: true,
+        speed: Number(ui.speed || 18),
+        delay: Number(ui.startDelay || 80),
+        remember: true
+      });
+    } catch (error) {
+      hideTyping();
+      console.error("Ask Amy connection error:", error);
+      await pushMessage(
+        "assistant",
+        "I hit a connection snag while reaching TheWing.ai. Please try again in a moment.",
+        { typewriter: true, speed: 16, delay: 60, remember: false }
+      );
+    } finally {
+      state.sending = false;
+      sendBtn.disabled = false;
+      inputEl.disabled = false;
+      inputEl.focus();
+    }
+  }
+
+  async function trySend(textOverride) {
+    const text = clean(textOverride || inputEl.value);
+    if (!text || state.sending) return;
+    inputEl.value = "";
+    await pushMessage("user", text, { remember: true });
+    await callAmy(text);
+  }
+
+  sendBtn.addEventListener("click", () => {
+    trySend();
+  });
+
+  inputEl.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      trySend();
+    }
+  });
+
+  promptButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const question = clean(button.getAttribute("data-question"));
+      if (question) trySend(question);
+    });
+  });
+
+  pushMessage(
+    "assistant",
+    "Hey — I’m Amy, your Air Force BAH Concierge. I can use the BAH Calculator’s current BAH, Base Pay, BAS, rank, years of service, duty location, and dependent status to explain what your compensation means. TheWing calculates it; I explain it.",
+    { typewriter: true, speed: 18, delay: 220, remember: true }
+  );
+})();
+      </script>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const launcher=document.getElementById("ask-amy-launcher");
+  const modal=document.getElementById("ask-amy-modal");
+  const closeBtn=document.getElementById("ask-amy-modal-close");
+  const input=document.getElementById("aa-input");
+  if(!launcher||!modal||!closeBtn)return;
+  if(launcher.__askAmyModalMounted)return;
+  launcher.__askAmyModalMounted=true;
+  let previousHtmlOverflow="",previousBodyOverflow="";
+  function openAskAmy(){
+    previousHtmlOverflow=document.documentElement.style.overflow;
+    previousBodyOverflow=document.body.style.overflow;
+    modal.style.display="flex";
+    document.documentElement.style.overflow="hidden";
+    document.body.style.overflow="hidden";
+    try{
+      if(window.PCSU_BAH_AMY_BRIDGE&&typeof window.PCSU_BAH_AMY_BRIDGE.refresh==="function"){
+        window.PCSU_BAH_AMY_BRIDGE.refresh();
+      }
+    }catch(_){}
+    setTimeout(function(){if(input)input.focus();},80);
+  }
+  function closeAskAmy(){
+    modal.style.display="none";
+    document.documentElement.style.overflow=previousHtmlOverflow;
+    document.body.style.overflow=previousBodyOverflow;
+    launcher.focus();
+  }
+  launcher.addEventListener("click",openAskAmy);
+  launcher.addEventListener("keydown",function(event){
+    if(event.key==="Enter"||event.key===" "){event.preventDefault();openAskAmy();}
+  });
+  closeBtn.addEventListener("click",closeAskAmy);
+  modal.addEventListener("click",function(event){if(event.target===modal)closeAskAmy();});
+  window.addEventListener("keydown",function(event){
+    if(event.key==="Escape"&&modal.style.display==="flex")closeAskAmy();
+  });
+})();
+</script>
