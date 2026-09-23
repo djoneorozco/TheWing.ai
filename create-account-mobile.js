@@ -1,1526 +1,1580 @@
 /* ============================================================
    THEWING.AI — CREATE ACCOUNT MOBILE
-   CLEAN ISOLATED BUILD
-   File: /create-account-mobile.js
+   External Webflow Component
+   File: /public/create-account-mobile.js
 
-   Purpose:
-   - Render Create Account promo inside an isolated iframe
-   - Prevent Webflow CSS from interfering
-   - Optimized for real iPhone Safari
-   - Keep animated premium HUD
+   Webflow only needs:
+   <div id="thewing-create-account"></div>
+   <script src="https://thewing.netlify.app/create-account-mobile.js"></script>
 ============================================================ */
 
 (function () {
   "use strict";
 
-  const MOUNT_ID = "thewing-create-account";
+  /* ==========================================================
+     CONFIG
+  ========================================================== */
 
-  const IMAGE_URL =
-    "https://cdn.prod.website-files.com/6a6ff0545aa01c93602db711/6a8d915fa65ab682dafc84a3_e130fd7ed0166aa534b699ae2243f681_Create%20Account%20TheWing.ai.jpg";
+  const CONFIG = {
+    mountId: "thewing-create-account",
 
-  const ACCOUNT_URL =
-    "https://the-wing.webflow.io/military/new-user-account";
+    image:
+      "https://cdn.prod.website-files.com/6a6ff0545aa01c93602db711/6a8d915fa65ab682dafc84a3_e130fd7ed0166aa534b699ae2243f681_Create%20Account%20TheWing.ai.jpg",
+
+    accountUrl:
+      "https://the-wing.webflow.io/military/new-user-account"
+  };
 
 
-  /* ============================================================
-     FIND MOUNT
-  ============================================================ */
+  /* ==========================================================
+     INITIALIZE
+  ========================================================== */
 
-  function start() {
+  function initTheWingCreateAccount() {
 
-    const mount = document.getElementById(MOUNT_ID);
+    const mount = document.getElementById(CONFIG.mountId);
 
     if (!mount) {
-      console.warn("[TheWing.ai] Create Account mount not found.");
+      console.warn(
+        "[TheWing.ai] Create Account mount not found:",
+        CONFIG.mountId
+      );
       return;
     }
-
-    if (mount.dataset.twLoaded === "1") {
-      return;
-    }
-
-    mount.dataset.twLoaded = "1";
-
-
-    /* ==========================================================
-       RESET THE WEBFLOW MOUNT
-    ========================================================== */
-
-    mount.innerHTML = "";
-
-    mount.style.setProperty("display", "block", "important");
-    mount.style.setProperty("position", "relative", "important");
-    mount.style.setProperty("width", "100%", "important");
-    mount.style.setProperty("max-width", "100%", "important");
-    mount.style.setProperty("height", "auto", "important");
-    mount.style.setProperty("min-height", "0", "important");
-    mount.style.setProperty("margin", "0", "important");
-    mount.style.setProperty("padding", "0", "important");
-    mount.style.setProperty("border", "0", "important");
-    mount.style.setProperty("overflow", "hidden", "important");
-    mount.style.setProperty("background", "transparent", "important");
-
-
-    /* ==========================================================
-       CREATE ISOLATED IFRAME
-
-       This is intentional.
-
-       Webflow CSS cannot reach inside this document.
-    ========================================================== */
-
-    const frame = document.createElement("iframe");
-
-    frame.id = "tw-create-account-frame";
-
-    frame.title = "Create a TheWing.ai account";
-
-    frame.setAttribute(
-      "sandbox",
-      "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
-    );
-
-    frame.setAttribute("scrolling", "no");
-
-    frame.style.setProperty("display", "block", "important");
-    frame.style.setProperty("width", "100%", "important");
-    frame.style.setProperty("height", "540px", "important");
-    frame.style.setProperty("max-width", "100%", "important");
-    frame.style.setProperty("margin", "0", "important");
-    frame.style.setProperty("padding", "0", "important");
-    frame.style.setProperty("border", "0", "important");
-    frame.style.setProperty("overflow", "hidden", "important");
-    frame.style.setProperty("background", "transparent", "important");
-
-    mount.appendChild(frame);
-
-
-    /* ==========================================================
-       IFRAME DOCUMENT
-    ========================================================== */
-
-    const doc = frame.contentDocument || frame.contentWindow.document;
-
-    doc.open();
-
-    doc.write(`<!doctype html>
-
-<html lang="en">
-
-<head>
-
-<meta charset="utf-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
->
-
-<style>
-
-  /* ==========================================================
-     HARD RESET
-  ========================================================== */
-
-  html,
-  body {
-    width: 100%;
-    height: 100%;
-
-    margin: 0;
-    padding: 0;
-
-    overflow: hidden;
-
-    background: transparent;
-
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-
-
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
-
-
-  body {
-    font-family:
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      Arial,
-      Helvetica,
-      sans-serif;
-
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-
-  /* ==========================================================
-     COMPONENT
-  ========================================================== */
-
-  #tw-app {
-    --gold: #d8aa60;
-    --gold-bright: #f4cf88;
-    --navy: #081522;
-
-    position: relative;
-
-    width: 100%;
-    height: 520px;
-
-    overflow: hidden;
-
-    border-radius: 18px;
-
-    background: #08101a;
-
-    isolation: isolate;
-  }
-
-
-  /* ==========================================================
-     AMY IMAGE
-  ========================================================== */
-
-  .photo {
-    position: absolute;
-
-    z-index: 1;
-
-    inset: 0;
-
-    display: block;
-
-    width: 100%;
-    height: 100%;
-
-    max-width: none;
-
-    border: 0;
-
-    object-fit: cover;
 
     /*
-       Pushes image so Amy remains on right
-       while HUD occupies left.
+      Prevent duplicate rendering if Webflow somehow loads
+      this script more than once.
     */
 
-    object-position: 55% center;
-
-    user-select: none;
-
-    -webkit-user-drag: none;
-  }
-
-
-  /* ==========================================================
-     IMAGE GRADING
-  ========================================================== */
-
-  .shade {
-    position: absolute;
-
-    z-index: 2;
-
-    inset: 0;
-
-    pointer-events: none;
-
-    background:
-      linear-gradient(
-        90deg,
-        rgba(2, 7, 13, .42) 0%,
-        rgba(2, 7, 13, .26) 34%,
-        rgba(2, 7, 13, .08) 58%,
-        rgba(2, 7, 13, 0) 78%
-      ),
-      linear-gradient(
-        180deg,
-        rgba(0, 0, 0, .02) 0%,
-        rgba(0, 0, 0, 0) 70%,
-        rgba(0, 0, 0, .18) 100%
-      );
-  }
-
-
-  /* ==========================================================
-     LAYOUT
-  ========================================================== */
-
-  .layout {
-    position: absolute;
-
-    z-index: 5;
-
-    inset: 0;
-
-    display: flex;
-
-    align-items: center;
-
-    width: 100%;
-    height: 100%;
-
-    padding: 16px;
-  }
-
-
-  /* ==========================================================
-     HUD
-  ========================================================== */
-
-  .hud {
-    position: relative;
-
-    display: flex;
-
-    flex-direction: column;
-
-    width: 57%;
-    height: 486px;
-
-    min-width: 0;
-
-    padding:
-      21px
-      15px
-      17px;
-
-    overflow: hidden;
-
-    border:
-      1px solid
-      rgba(190, 204, 224, .35);
-
-    border-radius: 20px;
-
-    color: #fff;
-
-    background:
-      radial-gradient(
-        120% 85% at 0% 0%,
-        rgba(109, 126, 153, .32),
-        transparent 57%
-      ),
-      linear-gradient(
-        145deg,
-        rgba(39, 48, 63, .97) 0%,
-        rgba(17, 27, 42, .98) 48%,
-        rgba(6, 17, 31, .99) 100%
-      );
-
-    box-shadow:
-      0 22px 50px rgba(0, 0, 0, .38),
-      inset 0 1px 0 rgba(255, 255, 255, .20),
-      inset 1px 0 0 rgba(255, 255, 255, .06);
-
-    transform: translateZ(0);
-
-    -webkit-transform: translateZ(0);
-  }
-
-
-  /* ==========================================================
-     GOLD CORNERS
-  ========================================================== */
-
-  .corner-top {
-    position: absolute;
-
-    z-index: 1;
-
-    top: 18px;
-    left: 20px;
-
-    width: 116px;
-    height: 106px;
-
-    border-top:
-      3px solid var(--gold);
-
-    border-left:
-      3px solid var(--gold);
-
-    pointer-events: none;
-  }
-
-
-  .corner-bottom {
-    position: absolute;
-
-    z-index: 1;
-
-    right: 20px;
-    bottom: 18px;
-
-    width: 116px;
-    height: 106px;
-
-    border-right:
-      3px solid var(--gold);
-
-    border-bottom:
-      3px solid var(--gold);
-
-    pointer-events: none;
-  }
-
-
-  /* ==========================================================
-     CONTENT
-  ========================================================== */
-
-  .content {
-    position: relative;
-
-    z-index: 4;
-
-    display: flex;
-
-    flex: 1;
-
-    flex-direction: column;
-
-    width: 100%;
-    height: 100%;
-
-    min-width: 0;
-  }
-
-
-  /* ==========================================================
-     HEADER
-  ========================================================== */
-
-  .header {
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 7px;
-
-    width: 100%;
-
-    margin-bottom: 18px;
-
-    padding-bottom: 11px;
-
-    border-bottom:
-      1px solid
-      rgba(255, 255, 255, .13);
-  }
-
-
-  .brand {
-    color: #f4f5f7;
-
-    font-family:
-      Georgia,
-      "Times New Roman",
-      serif;
-
-    font-size: 8px;
-
-    line-height: 1;
-
-    font-weight: 700;
-
-    letter-spacing: .14em;
-
-    white-space: nowrap;
-  }
-
-
-  /* ==========================================================
-     SECURE
-  ========================================================== */
-
-  .secure {
-    display: flex;
-
-    align-items: center;
-
-    gap: 5px;
-
-    color: var(--gold-bright);
-
-    font-size: 8px;
-
-    line-height: 1;
-
-    font-weight: 800;
-
-    letter-spacing: .08em;
-
-    white-space: nowrap;
-  }
-
-
-  .secure-dot {
-    width: 6px;
-    height: 6px;
-
-    flex: 0 0 auto;
-
-    border-radius: 50%;
-
-    background: var(--gold-bright);
-
-    box-shadow:
-      0 0 8px
-      rgba(244, 207, 136, .55);
-
-    animation:
-      securePulse
-      2s
-      ease-in-out
-      infinite;
-  }
-
-
-  @keyframes securePulse {
-
-    0%,
-    100% {
-      opacity: .35;
-
-      box-shadow:
-        0 0 3px
-        rgba(244, 207, 136, .2);
+    if (mount.dataset.twcaLoaded === "true") {
+      return;
     }
 
-    50% {
-      opacity: 1;
+    mount.dataset.twcaLoaded = "true";
 
-      box-shadow:
-        0 0 10px
-        rgba(244, 207, 136, .8);
-    }
+    /* ========================================================
+       HTML
+    ======================================================== */
 
-  }
+    mount.innerHTML = `
 
-
-  /* ==========================================================
-     EYEBROW
-  ========================================================== */
-
-  .eyebrow {
-    margin-bottom: 5px;
-
-    color: var(--gold-bright);
-
-    font-size: 10px;
-
-    line-height: 1.1;
-
-    font-weight: 800;
-
-    letter-spacing: .07em;
-
-    text-transform: uppercase;
-  }
-
-
-  /* ==========================================================
-     TITLE
-  ========================================================== */
-
-  .title {
-    margin: 0;
-
-    padding: 0;
-
-    color: #fff;
-
-    font-family:
-      Impact,
-      "Arial Narrow",
-      Arial,
-      sans-serif;
-
-    font-size: 32px;
-
-    line-height: .91;
-
-    font-weight: 700;
-
-    letter-spacing: -.02em;
-
-    text-transform: uppercase;
-  }
-
-
-  .title span {
-    display: block;
-  }
-
-
-  /* ==========================================================
-     DESCRIPTION
-  ========================================================== */
-
-  .description {
-    margin-top: 13px;
-
-    color: rgba(241, 244, 248, .91);
-
-    font-size: 10px;
-
-    line-height: 1.45;
-
-    font-weight: 500;
-  }
-
-
-  /* ==========================================================
-     GET STARTED
-  ========================================================== */
-
-  .cta {
-    position: relative;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    width: 100%;
-    height: 46px;
-
-    margin-top: 19px;
-
-    padding:
-      0 14px;
-
-    overflow: hidden;
-
-    border:
-      1px solid
-      rgba(222, 175, 95, .76);
-
-    border-radius: 10px;
-
-    color: var(--gold-bright);
-
-    background:
-      linear-gradient(
-        180deg,
-        #172536 0%,
-        #091522 100%
-      );
-
-    box-shadow:
-      inset 0 1px 0
-      rgba(255, 255, 255, .10),
-
-      0 5px 15px
-      rgba(0, 0, 0, .27);
-
-    font-size: 11px;
-
-    line-height: 1;
-
-    font-weight: 800;
-
-    text-decoration: none;
-
-    -webkit-tap-highlight-color:
-      transparent;
-
-    touch-action: manipulation;
-
-    animation:
-      buttonBreath
-      4.4s
-      ease-in-out
-      infinite;
-  }
-
-
-  /* ==========================================================
-     ANIMATED SWEEP
-  ========================================================== */
-
-  .sweep {
-    position: absolute;
-
-    z-index: 1;
-
-    top: -20%;
-
-    bottom: -20%;
-
-    left: -45%;
-
-    width: 30%;
-
-    pointer-events: none;
-
-    transform:
-      skewX(-16deg);
-
-    background:
-      linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 228, 178, .04) 10%,
-        rgba(255, 228, 178, .18) 30%,
-        rgba(255, 230, 180, .70) 50%,
-        rgba(255, 228, 178, .18) 70%,
-        rgba(255, 228, 178, .04) 90%,
-        transparent 100%
-      );
-
-    filter:
-      blur(.2px);
-
-    animation:
-      sweepAcross
-      4.4s
-      ease-in-out
-      infinite;
-  }
-
-
-  @keyframes sweepAcross {
-
-    0% {
-      left: -45%;
-      opacity: 0;
-    }
-
-    14% {
-      left: -45%;
-      opacity: 0;
-    }
-
-    21% {
-      opacity: .95;
-    }
-
-    48% {
-      left: 120%;
-      opacity: .95;
-    }
-
-    57% {
-      left: 120%;
-      opacity: 0;
-    }
-
-    100% {
-      left: 120%;
-      opacity: 0;
-    }
-
-  }
-
-
-  /* ==========================================================
-     CTA GLOW
-  ========================================================== */
-
-  .cta-glow {
-    position: absolute;
-
-    z-index: 0;
-
-    inset: 0;
-
-    border-radius: inherit;
-
-    pointer-events: none;
-
-    animation:
-      glowPulse
-      4.4s
-      ease-in-out
-      infinite;
-  }
-
-
-  @keyframes glowPulse {
-
-    0%,
-    100% {
-      box-shadow:
-        inset 0 0 0
-        rgba(244, 207, 136, 0);
-    }
-
-    39% {
-      box-shadow:
-        inset 0 0 20px
-        rgba(244, 207, 136, .12);
-    }
-
-    58% {
-      box-shadow:
-        inset 0 0 0
-        rgba(244, 207, 136, 0);
-    }
-
-  }
-
-
-  @keyframes buttonBreath {
-
-    0%,
-    100% {
-      border-color:
-        rgba(222, 175, 95, .67);
-
-      box-shadow:
-        inset 0 1px 0
-        rgba(255, 255, 255, .10),
-
-        0 5px 15px
-        rgba(0, 0, 0, .27),
-
-        0 0 0
-        rgba(222, 175, 95, 0);
-    }
-
-    42% {
-      border-color:
-        rgba(244, 207, 136, .95);
-
-      box-shadow:
-        inset 0 1px 0
-        rgba(255, 255, 255, .13),
-
-        0 5px 15px
-        rgba(0, 0, 0, .27),
-
-        0 0 14px
-        rgba(222, 175, 95, .17);
-    }
-
-  }
-
-
-  .cta-text {
-    position: relative;
-
-    z-index: 5;
-  }
-
-
-  .arrow {
-    position: relative;
-
-    z-index: 5;
-
-    color: var(--gold-bright);
-
-    font-size: 20px;
-
-    line-height: 1;
-
-    animation:
-      arrowMove
-      4.4s
-      ease-in-out
-      infinite;
-  }
-
-
-  @keyframes arrowMove {
-
-    0%,
-    27%,
-    100% {
-      transform:
-        translateX(0);
-    }
-
-    40% {
-      transform:
-        translateX(5px);
-    }
-
-    51% {
-      transform:
-        translateX(0);
-    }
-
-  }
-
-
-  .cta:active {
-    transform:
-      scale(.985);
-
-    background:
-      linear-gradient(
-        180deg,
-        #21354b 0%,
-        #0c1c2d 100%
-      );
-  }
-
-
-  /* ==========================================================
-     FLEXIBLE EMPTY HUD AREA
-  ========================================================== */
-
-  .space {
-    flex: 1;
-
-    min-height: 16px;
-  }
-
-
-  /* ==========================================================
-     TRUST AREA
-  ========================================================== */
-
-  .trust {
-    display: grid;
-
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
-
-    width: 100%;
-
-    padding-top: 14px;
-
-    border-top:
-      1px solid
-      rgba(255, 255, 255, .11);
-  }
-
-
-  .trust-item {
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-    justify-content: center;
-
-    min-width: 0;
-    min-height: 47px;
-
-    gap: 5px;
-
-    text-align: center;
-  }
-
-
-  .trust-item + .trust-item {
-    border-left:
-      1px solid
-      rgba(255, 255, 255, .10);
-  }
-
-
-  .trust-icon {
-    color: var(--gold-bright);
-
-    font-size: 15px;
-
-    line-height: 1;
-  }
-
-
-  .trust-label {
-    color: #e2e5ea;
-
-    font-size: 6px;
-
-    line-height: 1.15;
-
-    font-weight: 800;
-
-    letter-spacing: .05em;
-
-    text-transform: uppercase;
-  }
-
-
-  /* ==========================================================
-     STANDARD iPHONE
-  ========================================================== */
-
-  @media (max-width: 600px) {
-
-    #tw-app {
-      height: 520px;
-    }
-
-
-    .layout {
-      padding: 16px;
-    }
-
-
-    .hud {
-      width: 57%;
-      height: 486px;
-    }
-
-
-    .photo {
-      object-position:
-        55% center;
-    }
-
-  }
-
-
-  /* ==========================================================
-     NARROW iPHONE
-  ========================================================== */
-
-  @media (max-width: 390px) {
-
-    #tw-app {
-      height: 500px;
-
-      border-radius: 16px;
-    }
-
-
-    .layout {
-      padding: 11px;
-    }
-
-
-    .hud {
-      width: 61%;
-      height: 476px;
-
-      padding:
-        18px
-        11px
-        15px;
-
-      border-radius: 17px;
-    }
-
-
-    .corner-top {
-      top: 15px;
-      left: 16px;
-
-      width: 98px;
-      height: 92px;
-    }
-
-
-    .corner-bottom {
-      right: 16px;
-      bottom: 15px;
-
-      width: 98px;
-      height: 92px;
-    }
-
-
-    .header {
-      margin-bottom: 16px;
-    }
-
-
-    .brand {
-      font-size: 7px;
-    }
-
-
-    .secure {
-      font-size: 7px;
-    }
-
-
-    .secure-dot {
-      width: 5px;
-      height: 5px;
-    }
-
-
-    .eyebrow {
-      font-size: 8.5px;
-    }
-
-
-    .title {
-      font-size: 27px;
-    }
-
-
-    .description {
-      margin-top: 10px;
-
-      font-size: 8.7px;
-
-      line-height: 1.4;
-    }
-
-
-    .cta {
-      height: 41px;
-
-      margin-top: 15px;
-
-      padding:
-        0 11px;
-
-      font-size: 10px;
-    }
-
-
-    .trust {
-      padding-top: 11px;
-    }
-
-
-    .trust-item {
-      min-height: 43px;
-    }
-
-
-    .trust-icon {
-      font-size: 13px;
-    }
-
-
-    .trust-label {
-      font-size: 5.3px;
-    }
-
-  }
-
-
-  /* ==========================================================
-     VERY NARROW PHONE
-  ========================================================== */
-
-  @media (max-width: 350px) {
-
-    .hud {
-      width: 63%;
-    }
-
-
-    .title {
-      font-size: 24px;
-    }
-
-
-    .description {
-      font-size: 8px;
-    }
-
-  }
-
-
-  /* ==========================================================
-     TABLET / DESKTOP
-  ========================================================== */
-
-  @media (min-width: 601px) {
-
-    .hud {
-      width: 48%;
-      max-width: 380px;
-
-      padding:
-        22px
-        20px
-        19px;
-    }
-
-
-    .brand,
-    .secure {
-      font-size: 10px;
-    }
-
-
-    .eyebrow {
-      font-size: 12px;
-    }
-
-
-    .title {
-      font-size: 40px;
-    }
-
-
-    .description {
-      font-size: 12px;
-    }
-
-
-    .cta {
-      height: 47px;
-
-      font-size: 13px;
-    }
-
-
-    .trust-label {
-      font-size: 7px;
-    }
-
-  }
-
-
-  /* ==========================================================
-     REDUCED MOTION
-  ========================================================== */
-
-  @media (prefers-reduced-motion: reduce) {
-
-    .secure-dot,
-    .cta,
-    .sweep,
-    .cta-glow,
-    .arrow {
-      animation: none !important;
-    }
-
-  }
-
-</style>
-
-</head>
-
-
-<body>
-
-<div id="tw-app">
-
-  <!-- ========================================================
-       REAL IMAGE
-  ========================================================= -->
-
-  <img
-    class="photo"
-    src="${IMAGE_URL}"
-    alt=""
-    loading="eager"
-    decoding="async"
-  >
-
-
-  <div
-    class="shade"
-    aria-hidden="true"
-  ></div>
-
-
-  <!-- ========================================================
-       HUD
-  ========================================================= -->
-
-  <div class="layout">
-
-    <section
-      class="hud"
-      aria-label="Create your TheWing.ai account"
-    >
-
-      <div
-        class="corner-top"
-        aria-hidden="true"
-      ></div>
-
-      <div
-        class="corner-bottom"
-        aria-hidden="true"
-      ></div>
-
-
-      <div class="content">
-
-
-        <!-- HEADER -->
-
-        <div class="header">
-
-          <div class="brand">
-            THEWING.AI
-          </div>
-
-
-          <div class="secure">
-
-            <span
-              class="secure-dot"
-              aria-hidden="true"
-            ></span>
-
-            <span>
-              SECURE
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <!-- PRIMARY MESSAGE -->
-
-        <div class="eyebrow">
-          PERSONALIZED INTELLIGENCE
-        </div>
-
+      <div class="twca-component">
 
         <div
-          class="title"
-          role="heading"
-          aria-level="2"
+          class="twca-stage"
+          role="region"
+          aria-label="Create a TheWing.ai account"
         >
 
-          <span>
-            CREATE AN
-          </span>
-
-          <span>
-            ACCOUNT
-          </span>
-
-        </div>
-
-
-        <div class="description">
-          Unlock personalized military decision intelligence built around you.
-        </div>
-
-
-        <!-- ==================================================
-             ANIMATED CTA
-        =================================================== -->
-
-        <a
-          class="cta"
-          href="${ACCOUNT_URL}"
-          target="_top"
-          aria-label="Create your TheWing.ai account"
-        >
-
-          <span
-            class="cta-glow"
-            aria-hidden="true"
-          ></span>
-
-          <span
-            class="sweep"
-            aria-hidden="true"
-          ></span>
-
-          <span class="cta-text">
-            Get Started
-          </span>
-
-          <span
-            class="arrow"
-            aria-hidden="true"
+          <!-- REAL IMAGE -->
+          <img
+            class="twca-image"
+            src="${CONFIG.image}"
+            alt=""
+            loading="eager"
+            decoding="async"
           >
-            →
-          </span>
 
-        </a>
+          <!-- STATIC IMAGE SHADE -->
+          <div
+            class="twca-stage-shade"
+            aria-hidden="true"
+          ></div>
+
+          <!-- HUD POSITIONING -->
+          <div class="twca-inner">
+
+            <div class="twca-panel">
+
+              <!-- GOLD HUD CORNERS -->
+
+              <div
+                class="twca-corner twca-corner-top"
+                aria-hidden="true"
+              ></div>
+
+              <div
+                class="twca-corner twca-corner-bottom"
+                aria-hidden="true"
+              ></div>
+
+              <!-- CONTENT -->
+
+              <div class="twca-content">
+
+                <!-- HEADER -->
+
+                <div class="twca-header">
+
+                  <div class="twca-brand">
+                    THEWING.AI
+                  </div>
+
+                  <div class="twca-status">
+
+                    <span
+                      class="twca-status-dot"
+                      aria-hidden="true"
+                    ></span>
+
+                    <span>
+                      SECURE
+                    </span>
+
+                  </div>
+
+                </div>
 
 
-        <div
-          class="space"
-          aria-hidden="true"
-        ></div>
+                <!-- INFORMATION -->
+
+                <div class="twca-information">
+
+                  <div class="twca-eyebrow">
+                    PERSONALIZED INTELLIGENCE
+                  </div>
+
+                  <div
+                    class="twca-title"
+                    role="heading"
+                    aria-level="2"
+                  >
+
+                    <span class="twca-title-line">
+                      CREATE AN
+                    </span>
+
+                    <span class="twca-title-line">
+                      ACCOUNT
+                    </span>
+
+                  </div>
+
+                  <div class="twca-description">
+                    Unlock personalized military decision intelligence built around you.
+                  </div>
 
 
-        <!-- TRUST -->
+                  <!-- CTA -->
 
-        <div class="trust">
+                  <a
+                    class="twca-cta"
+                    href="${CONFIG.accountUrl}"
+                    aria-label="Create your TheWing.ai account"
+                  >
+
+                    <!-- ANIMATED GOLD LIGHT -->
+                    <span
+                      class="twca-cta-light"
+                      aria-hidden="true"
+                    ></span>
+
+                    <!-- SUBTLE SECONDARY GLOW -->
+                    <span
+                      class="twca-cta-glow"
+                      aria-hidden="true"
+                    ></span>
+
+                    <span class="twca-cta-text">
+                      Get Started
+                    </span>
+
+                    <span
+                      class="twca-cta-arrow"
+                      aria-hidden="true"
+                    >
+                      →
+                    </span>
+
+                  </a>
+
+                </div>
 
 
-          <div class="trust-item">
+                <!-- FLEX SPACE -->
 
-            <div
-              class="trust-icon"
-              aria-hidden="true"
-            >
-              ◇
-            </div>
+                <div
+                  class="twca-flex-space"
+                  aria-hidden="true"
+                ></div>
 
-            <div class="trust-label">
-              PRIVATE
+
+                <!-- TRUST STRIP -->
+
+                <div
+                  class="twca-trust"
+                  aria-label="TheWing.ai account benefits"
+                >
+
+                  <div class="twca-trust-item">
+
+                    <div
+                      class="twca-trust-icon"
+                      aria-hidden="true"
+                    >
+                      ◇
+                    </div>
+
+                    <div class="twca-trust-label">
+                      PRIVATE
+                    </div>
+
+                  </div>
+
+
+                  <div class="twca-trust-item">
+
+                    <div
+                      class="twca-trust-icon"
+                      aria-hidden="true"
+                    >
+                      ◎
+                    </div>
+
+                    <div class="twca-trust-label">
+                      SECURE
+                    </div>
+
+                  </div>
+
+
+                  <div class="twca-trust-item">
+
+                    <div
+                      class="twca-trust-icon"
+                      aria-hidden="true"
+                    >
+                      ✦
+                    </div>
+
+                    <div class="twca-trust-label">
+                      MISSION<br>
+                      FOCUSED
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
             </div>
 
           </div>
-
-
-          <div class="trust-item">
-
-            <div
-              class="trust-icon"
-              aria-hidden="true"
-            >
-              ◎
-            </div>
-
-            <div class="trust-label">
-              SECURE
-            </div>
-
-          </div>
-
-
-          <div class="trust-item">
-
-            <div
-              class="trust-icon"
-              aria-hidden="true"
-            >
-              ✦
-            </div>
-
-            <div class="trust-label">
-              MISSION<br>
-              FOCUSED
-            </div>
-
-          </div>
-
 
         </div>
 
       </div>
-
-    </section>
-
-  </div>
-
-</div>
+    `;
 
 
-<script>
+    /* ========================================================
+       CSS
+    ======================================================== */
 
-  /*
-     Tell parent page the exact component height.
-     This avoids Webflow deciding iframe dimensions.
-  */
+    const style = document.createElement("style");
 
-  function reportHeight() {
+    style.id = "twca-external-styles";
 
-    try {
+    style.textContent = `
 
-      var width =
-        document.documentElement.clientWidth ||
-        window.innerWidth;
+      /* ======================================================
+         COMPONENT RESET
+      ====================================================== */
 
-      var height =
-        width <= 390
-          ? 500
-          : 520;
+      #${CONFIG.mountId} {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
 
-      window.parent.postMessage(
-        {
-          type: "THEWING_CREATE_ACCOUNT_HEIGHT",
-          height: height
-        },
-        "*"
-      );
+        margin: 0 !important;
+        padding: 0 !important;
 
-    } catch (e) {}
+        overflow: visible !important;
 
-  }
-
-
-  window.addEventListener(
-    "load",
-    reportHeight
-  );
-
-
-  window.addEventListener(
-    "resize",
-    reportHeight
-  );
-
-
-  reportHeight();
-
-</script>
-
-</body>
-
-</html>`);
-
-    doc.close();
-
-
-    /* ==========================================================
-       HEIGHT COMMUNICATION
-    ========================================================== */
-
-    function receiveMessage(event) {
-
-      if (
-        !event.data ||
-        event.data.type !==
-          "THEWING_CREATE_ACCOUNT_HEIGHT"
-      ) {
-        return;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
       }
 
-      const height =
-        Number(event.data.height);
 
-      if (
-        !Number.isFinite(height) ||
-        height < 300 ||
-        height > 800
-      ) {
-        return;
+      #${CONFIG.mountId},
+      #${CONFIG.mountId} *,
+      #${CONFIG.mountId} *::before,
+      #${CONFIG.mountId} *::after {
+        box-sizing: border-box;
       }
 
-      frame.style.setProperty(
-        "height",
-        height + "px",
-        "important"
-      );
 
-      mount.style.setProperty(
-        "height",
-        height + "px",
-        "important"
-      );
+      .twca-component {
+        --twca-gold: #d7a85e;
+        --twca-gold-bright: #f2cc86;
+
+        display: block;
+
+        width: 100%;
+        max-width: 100%;
+
+        margin: 0;
+        padding: 0;
+
+        color: #ffffff;
+
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Arial,
+          Helvetica,
+          sans-serif;
+
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+
+
+      /* ======================================================
+         STAGE
+      ====================================================== */
+
+      .twca-stage {
+        position: relative;
+
+        display: block;
+
+        width: 100%;
+        height: 520px;
+
+        margin: 0;
+        padding: 0;
+
+        overflow: hidden;
+
+        border-radius: 18px;
+
+        background: #07101c;
+
+        box-shadow:
+          0 22px 60px rgba(0, 0, 0, 0.32),
+          0 5px 18px rgba(0, 0, 0, 0.22);
+
+        isolation: isolate;
+      }
+
+
+      /* ======================================================
+         REAL IMAGE
+
+         Deliberately uses IMG instead of CSS background.
+         This is more predictable on physical iPhones.
+      ====================================================== */
+
+      .twca-image {
+        position: absolute;
+
+        z-index: 0;
+
+        top: 0;
+        left: 0;
+
+        display: block;
+
+        width: 100%;
+        height: 100%;
+
+        max-width: none;
+
+        margin: 0;
+        padding: 0;
+
+        border: 0;
+
+        object-fit: cover;
+        object-position: 57% center;
+
+        opacity: 1;
+      }
+
+
+      /* ======================================================
+         STATIC IMAGE SHADE
+      ====================================================== */
+
+      .twca-stage-shade {
+        position: absolute;
+
+        z-index: 1;
+
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        pointer-events: none;
+
+        background:
+
+          linear-gradient(
+            90deg,
+            rgba(3, 7, 13, 0.34) 0%,
+            rgba(3, 7, 13, 0.21) 43%,
+            rgba(3, 7, 13, 0.04) 73%,
+            rgba(3, 7, 13, 0) 100%
+          ),
+
+          linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.02) 0%,
+            rgba(0, 0, 0, 0) 70%,
+            rgba(0, 0, 0, 0.18) 100%
+          );
+      }
+
+
+      /* ======================================================
+         HUD POSITIONING
+      ====================================================== */
+
+      .twca-inner {
+        position: absolute;
+
+        z-index: 2;
+
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        display: flex;
+
+        align-items: center;
+
+        width: 100%;
+        height: 100%;
+
+        margin: 0;
+
+        padding: 18px;
+      }
+
+
+      /* ======================================================
+         HUD PANEL
+      ====================================================== */
+
+      .twca-panel {
+        position: relative;
+
+        display: flex;
+
+        flex-direction: column;
+
+        width: 58%;
+        height: 480px;
+
+        min-width: 0;
+
+        margin: 0;
+
+        padding:
+          20px
+          14px
+          18px;
+
+        overflow: hidden;
+
+        border:
+          1px solid
+          rgba(255, 255, 255, 0.25);
+
+        border-radius: 18px;
+
+        background:
+
+          radial-gradient(
+            120% 90% at 0% 0%,
+            rgba(110, 124, 148, 0.30) 0%,
+            rgba(66, 78, 98, 0.14) 34%,
+            transparent 62%
+          ),
+
+          radial-gradient(
+            100% 85% at 100% 100%,
+            rgba(36, 77, 126, 0.12) 0%,
+            transparent 68%
+          ),
+
+          linear-gradient(
+            145deg,
+            rgba(38, 45, 57, 0.96) 0%,
+            rgba(18, 27, 41, 0.97) 52%,
+            rgba(7, 17, 31, 0.98) 100%
+          );
+
+        box-shadow:
+          0 24px 55px rgba(0, 0, 0, 0.30),
+          0 7px 22px rgba(0, 0, 0, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.22),
+          inset 1px 0 0 rgba(255, 255, 255, 0.05),
+          inset -1px 0 0 rgba(255, 255, 255, 0.03),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+      }
+
+
+      /* ======================================================
+         GOLD HUD CORNERS
+      ====================================================== */
+
+      .twca-corner {
+        position: absolute;
+
+        z-index: 1;
+
+        pointer-events: none;
+      }
+
+
+      .twca-corner-top {
+        top: 18px;
+        left: 20px;
+
+        width: 115px;
+        height: 105px;
+
+        border-top:
+          2px solid
+          var(--twca-gold);
+
+        border-left:
+          2px solid
+          var(--twca-gold);
+      }
+
+
+      .twca-corner-bottom {
+        right: 20px;
+        bottom: 18px;
+
+        width: 115px;
+        height: 105px;
+
+        border-right:
+          2px solid
+          var(--twca-gold);
+
+        border-bottom:
+          2px solid
+          var(--twca-gold);
+      }
+
+
+      /* ======================================================
+         HUD CONTENT
+      ====================================================== */
+
+      .twca-content {
+        position: relative;
+
+        z-index: 5;
+
+        display: flex;
+
+        flex-direction: column;
+
+        flex: 1;
+
+        width: 100%;
+        height: 100%;
+
+        min-width: 0;
+
+        margin: 0;
+        padding: 0;
+      }
+
+
+      /* ======================================================
+         HEADER
+      ====================================================== */
+
+      .twca-header {
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
+
+        width: 100%;
+
+        min-width: 0;
+
+        gap: 8px;
+
+        margin:
+          0 0 20px;
+
+        padding:
+          0 0 11px;
+
+        border-bottom:
+          1px solid
+          rgba(255, 255, 255, 0.13);
+      }
+
+
+      .twca-brand {
+        display: block;
+
+        margin: 0;
+        padding: 0;
+
+        color: #edf0f5;
+
+        font-family:
+          Georgia,
+          "Times New Roman",
+          serif;
+
+        font-size: 8px;
+
+        line-height: 1;
+
+        font-style: normal;
+
+        font-weight: 700;
+
+        letter-spacing: 0.14em;
+
+        text-transform: uppercase;
+
+        white-space: nowrap;
+      }
+
+
+      /* ======================================================
+         SECURE STATUS
+      ====================================================== */
+
+      .twca-status {
+        display: flex;
+
+        align-items: center;
+
+        flex: 0 0 auto;
+
+        gap: 5px;
+
+        margin: 0;
+        padding: 0;
+
+        color:
+          var(--twca-gold-bright);
+
+        font-size: 8px;
+
+        line-height: 1;
+
+        font-style: normal;
+
+        font-weight: 800;
+
+        letter-spacing: 0.08em;
+
+        text-transform: uppercase;
+
+        white-space: nowrap;
+      }
+
+
+      .twca-status-dot {
+        display: block;
+
+        flex: 0 0 auto;
+
+        width: 5px;
+        height: 5px;
+
+        margin: 0;
+        padding: 0;
+
+        border-radius: 50%;
+
+        background:
+          var(--twca-gold-bright);
+
+        box-shadow:
+          0 0 8px rgba(242, 204, 134, 0.45);
+
+        animation:
+          twcaSecurePulse
+          2s
+          ease-in-out
+          infinite;
+      }
+
+
+      @keyframes twcaSecurePulse {
+
+        0%,
+        100% {
+          opacity: 0.38;
+        }
+
+        50% {
+          opacity: 1;
+        }
+
+      }
+
+
+      /* ======================================================
+         INFORMATION
+      ====================================================== */
+
+      .twca-information {
+        display: block;
+
+        width: 100%;
+
+        min-width: 0;
+
+        margin: 0;
+        padding: 0;
+      }
+
+
+      .twca-eyebrow {
+        display: block;
+
+        width: 100%;
+
+        margin:
+          0 0 6px;
+
+        padding: 0;
+
+        color:
+          var(--twca-gold-bright);
+
+        font-family:
+          Arial,
+          Helvetica,
+          sans-serif;
+
+        font-size: 11px;
+
+        line-height: 1.05;
+
+        font-style: normal;
+
+        font-weight: 800;
+
+        letter-spacing: 0.07em;
+
+        text-transform: uppercase;
+      }
+
+
+      /* ======================================================
+         TITLE
+      ====================================================== */
+
+      .twca-title {
+        display: block;
+
+        width: 100%;
+
+        margin: 0;
+        padding: 0;
+
+        color: #ffffff;
+
+        font-family:
+          Impact,
+          "Arial Narrow",
+          Arial,
+          Helvetica,
+          sans-serif;
+
+        font-size:
+          clamp(26px, 8vw, 35px);
+
+        line-height: 0.92;
+
+        font-style: normal;
+
+        font-weight: 700;
+
+        letter-spacing: -0.01em;
+
+        text-align: left;
+
+        text-transform: uppercase;
+
+        white-space: normal;
+      }
+
+
+      .twca-title-line {
+        display: block;
+
+        margin: 0;
+        padding: 0;
+      }
+
+
+      /* ======================================================
+         DESCRIPTION
+      ====================================================== */
+
+      .twca-description {
+        display: block;
+
+        width: 100%;
+
+        margin:
+          12px 0 0;
+
+        padding: 0;
+
+        color: #e0e4eb;
+
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Arial,
+          Helvetica,
+          sans-serif;
+
+        font-size: 10px;
+
+        line-height: 1.5;
+
+        font-style: normal;
+
+        font-weight: 500;
+
+        letter-spacing: normal;
+
+        text-align: left;
+
+        text-transform: none;
+
+        white-space: normal;
+      }
+
+
+      /* ======================================================
+         GET STARTED BUTTON
+      ====================================================== */
+
+      .twca-cta {
+        position: relative;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
+
+        width: 100%;
+
+        min-height: 44px;
+
+        margin:
+          20px 0 0;
+
+        padding:
+          0 13px;
+
+        overflow: hidden;
+
+        border:
+          1px solid
+          rgba(215, 168, 94, 0.70);
+
+        border-radius: 9px;
+
+        outline: none;
+
+        color:
+          var(--twca-gold-bright);
+
+        background:
+          linear-gradient(
+            180deg,
+            #172231 0%,
+            #091321 100%
+          );
+
+        box-shadow:
+          inset 0 1px 0
+          rgba(255, 255, 255, 0.10),
+
+          0 5px 14px
+          rgba(0, 0, 0, 0.27),
+
+          0 0 0
+          rgba(215, 168, 94, 0);
+
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Arial,
+          sans-serif;
+
+        font-size: 11px;
+
+        line-height: 1;
+
+        font-style: normal;
+
+        font-weight: 800;
+
+        letter-spacing: 0.02em;
+
+        text-align: left;
+
+        text-decoration: none;
+
+        -webkit-tap-highlight-color:
+          transparent;
+
+        touch-action:
+          manipulation;
+
+        animation:
+          twcaButtonBreath
+          4.2s
+          ease-in-out
+          infinite;
+      }
+
+
+      /* ======================================================
+         BUTTON GOLD SWEEP
+
+         THIS IS THE MAIN ANIMATION.
+      ====================================================== */
+
+      .twca-cta-light {
+        position: absolute;
+
+        z-index: 1;
+
+        top: 0;
+        bottom: 0;
+
+        left: -45%;
+
+        width: 28%;
+
+        pointer-events: none;
+
+        background:
+          linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 224, 165, 0.05) 15%,
+            rgba(255, 224, 165, 0.18) 32%,
+            rgba(255, 224, 165, 0.68) 50%,
+            rgba(255, 224, 165, 0.18) 68%,
+            rgba(255, 224, 165, 0.05) 85%,
+            transparent 100%
+          );
+
+        animation:
+          twcaButtonSweep
+          4.2s
+          ease-in-out
+          infinite;
+      }
+
+
+      @keyframes twcaButtonSweep {
+
+        0% {
+          left: -45%;
+          opacity: 0;
+        }
+
+        14% {
+          left: -45%;
+          opacity: 0;
+        }
+
+        23% {
+          opacity: 0.9;
+        }
+
+        48% {
+          left: 120%;
+          opacity: 0.9;
+        }
+
+        58% {
+          left: 120%;
+          opacity: 0;
+        }
+
+        100% {
+          left: 120%;
+          opacity: 0;
+        }
+
+      }
+
+
+      /* ======================================================
+         BUTTON AMBIENT GLOW
+      ====================================================== */
+
+      .twca-cta-glow {
+        position: absolute;
+
+        z-index: 0;
+
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        pointer-events: none;
+
+        border-radius: inherit;
+
+        box-shadow:
+          inset 0 0 15px
+          rgba(242, 204, 134, 0);
+
+        animation:
+          twcaInnerGlow
+          4.2s
+          ease-in-out
+          infinite;
+      }
+
+
+      @keyframes twcaInnerGlow {
+
+        0%,
+        100% {
+          box-shadow:
+            inset 0 0 15px
+            rgba(242, 204, 134, 0);
+        }
+
+        38% {
+          box-shadow:
+            inset 0 0 18px
+            rgba(242, 204, 134, 0.10);
+        }
+
+        55% {
+          box-shadow:
+            inset 0 0 15px
+            rgba(242, 204, 134, 0);
+        }
+
+      }
+
+
+      @keyframes twcaButtonBreath {
+
+        0%,
+        100% {
+          border-color:
+            rgba(215, 168, 94, 0.62);
+
+          box-shadow:
+            inset 0 1px 0
+            rgba(255, 255, 255, 0.10),
+
+            0 5px 14px
+            rgba(0, 0, 0, 0.27),
+
+            0 0 0
+            rgba(215, 168, 94, 0);
+        }
+
+        42% {
+          border-color:
+            rgba(242, 204, 134, 0.88);
+
+          box-shadow:
+            inset 0 1px 0
+            rgba(255, 255, 255, 0.13),
+
+            0 5px 14px
+            rgba(0, 0, 0, 0.27),
+
+            0 0 12px
+            rgba(215, 168, 94, 0.12);
+        }
+
+      }
+
+
+      .twca-cta-text {
+        position: relative;
+
+        z-index: 3;
+
+        display: block;
+
+        margin: 0;
+        padding: 0;
+
+        color:
+          var(--twca-gold-bright);
+      }
+
+
+      .twca-cta-arrow {
+        position: relative;
+
+        z-index: 3;
+
+        display: block;
+
+        margin: 0;
+        padding: 0;
+
+        color:
+          var(--twca-gold-bright);
+
+        font-size: 19px;
+
+        line-height: 1;
+
+        animation:
+          twcaArrowMove
+          4.2s
+          ease-in-out
+          infinite;
+      }
+
+
+      @keyframes twcaArrowMove {
+
+        0%,
+        28%,
+        100% {
+          transform: translateX(0);
+        }
+
+        42% {
+          transform: translateX(4px);
+        }
+
+        52% {
+          transform: translateX(0);
+        }
+
+      }
+
+
+      .twca-cta:active {
+        border-color:
+          var(--twca-gold-bright);
+
+        background:
+          linear-gradient(
+            180deg,
+            #223248 0%,
+            #0d1b2c 100%
+          );
+      }
+
+
+      /* ======================================================
+         FLEX SPACE
+      ====================================================== */
+
+      .twca-flex-space {
+        display: block;
+
+        flex: 1;
+
+        min-height: 20px;
+      }
+
+
+      /* ======================================================
+         TRUST STRIP
+      ====================================================== */
+
+      .twca-trust {
+        display: grid;
+
+        grid-template-columns:
+          repeat(3, minmax(0, 1fr));
+
+        width: 100%;
+
+        margin: 0;
+
+        padding:
+          14px 0 0;
+
+        border-top:
+          1px solid
+          rgba(255, 255, 255, 0.10);
+      }
+
+
+      .twca-trust-item {
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: center;
+        justify-content: center;
+
+        min-width: 0;
+
+        min-height: 46px;
+
+        gap: 5px;
+
+        margin: 0;
+        padding: 0;
+
+        color: #d5dae2;
+
+        text-align: center;
+      }
+
+
+      .twca-trust-item +
+      .twca-trust-item {
+        border-left:
+          1px solid
+          rgba(255, 255, 255, 0.10);
+      }
+
+
+      .twca-trust-icon {
+        display: block;
+
+        margin: 0;
+        padding: 0;
+
+        color:
+          var(--twca-gold-bright);
+
+        font-size: 15px;
+
+        line-height: 1;
+      }
+
+
+      .twca-trust-label {
+        display: block;
+
+        margin: 0;
+        padding: 0;
+
+        color: #d9dde4;
+
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Arial,
+          sans-serif;
+
+        font-size: 6px;
+
+        line-height: 1.2;
+
+        font-style: normal;
+
+        font-weight: 800;
+
+        letter-spacing: 0.04em;
+
+        text-align: center;
+
+        text-transform: uppercase;
+      }
+
+
+      /* ======================================================
+         PHYSICAL iPHONE / MOBILE
+      ====================================================== */
+
+      @media screen and (max-width: 600px) {
+
+        .twca-stage {
+          height: 520px;
+
+          border-radius: 17px;
+        }
+
+
+        .twca-image {
+          object-position:
+            57% center;
+        }
+
+
+        .twca-inner {
+          padding: 18px;
+        }
+
+
+        .twca-panel {
+          width: 58%;
+          height: 480px;
+
+          padding:
+            20px
+            14px
+            18px;
+
+          border-radius: 18px;
+        }
+
+
+        .twca-header {
+          margin-bottom: 20px;
+        }
+
+
+        .twca-brand {
+          font-size: 8px;
+        }
+
+
+        .twca-status {
+          font-size: 8px;
+        }
+
+
+        .twca-eyebrow {
+          font-size: 11px;
+        }
+
+
+        .twca-title {
+          font-size:
+            clamp(26px, 8vw, 35px);
+        }
+
+
+        .twca-description {
+          font-size: 10px;
+        }
+
+
+        .twca-cta {
+          min-height: 44px;
+
+          margin-top: 20px;
+
+          font-size: 11px;
+        }
+
+
+        .twca-trust-label {
+          font-size: 6px;
+        }
+
+      }
+
+
+      /* ======================================================
+         SMALL iPHONE
+      ====================================================== */
+
+      @media screen and (max-width: 390px) {
+
+        .twca-stage {
+          height: 500px;
+        }
+
+
+        .twca-image {
+          object-position:
+            57% center;
+        }
+
+
+        .twca-inner {
+          padding: 12px;
+        }
+
+
+        .twca-panel {
+          width: 62%;
+          height: 465px;
+
+          padding:
+            17px
+            11px
+            15px;
+
+          border-radius: 17px;
+        }
+
+
+        .twca-header {
+          margin-bottom: 17px;
+        }
+
+
+        .twca-brand {
+          font-size: 7px;
+        }
+
+
+        .twca-status {
+          font-size: 7px;
+        }
+
+
+        .twca-eyebrow {
+          font-size: 9px;
+        }
+
+
+        .twca-title {
+          font-size: 27px;
+        }
+
+
+        .twca-description {
+          font-size: 9px;
+        }
+
+
+        .twca-cta {
+          min-height: 40px;
+
+          margin-top: 16px;
+
+          font-size: 10px;
+        }
+
+
+        .twca-trust-label {
+          font-size: 5.5px;
+        }
+
+      }
+
+
+      /* ======================================================
+         TABLET / DESKTOP
+      ====================================================== */
+
+      @media screen and (min-width: 601px) {
+
+        .twca-panel {
+          width: 48%;
+
+          max-width: 380px;
+
+          height: 480px;
+
+          padding:
+            22px
+            20px
+            20px;
+        }
+
+
+        .twca-brand {
+          font-size: 10px;
+        }
+
+
+        .twca-status {
+          font-size: 10px;
+        }
+
+
+        .twca-eyebrow {
+          font-size: 13px;
+        }
+
+
+        .twca-title {
+          font-size: 40px;
+        }
+
+
+        .twca-description {
+          font-size: 12px;
+        }
+
+
+        .twca-cta {
+          min-height: 46px;
+
+          font-size: 13px;
+        }
+
+
+        .twca-trust-label {
+          font-size: 7px;
+        }
+
+      }
+
+
+      /* ======================================================
+         ACCESSIBILITY
+      ====================================================== */
+
+      @media (prefers-reduced-motion: reduce) {
+
+        .twca-status-dot,
+        .twca-cta,
+        .twca-cta-light,
+        .twca-cta-glow,
+        .twca-cta-arrow {
+          animation: none !important;
+        }
+
+      }
+
+    `;
+
+
+    /*
+      Only install CSS once.
+    */
+
+    if (!document.getElementById(style.id)) {
+      document.head.appendChild(style);
     }
 
-
-    window.addEventListener(
-      "message",
-      receiveMessage
-    );
-
   }
 
 
-  /* ============================================================
-     INITIALIZE
-  ============================================================ */
+  /* ==========================================================
+     RUN
+
+     Handles both normal page load and a script loaded after
+     the DOM is already available.
+  ========================================================== */
 
   if (document.readyState === "loading") {
 
     document.addEventListener(
       "DOMContentLoaded",
-      start,
+      initTheWingCreateAccount,
       { once: true }
     );
 
   } else {
 
-    start();
+    initTheWingCreateAccount();
 
   }
 
