@@ -15,6 +15,14 @@
 
   <title>Monthly Budget Builder | PCSUnited Financial</title>
 
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=PT+Serif:wght@400;700&display=swap"
+    rel="stylesheet"
+  >
+
   <!-- App stylesheet -->
   <link rel="stylesheet" href="style.css">
 
@@ -35,37 +43,6 @@
         LEFT WORKSPACE
       ==================================================== -->
       <section class="budget-workspace">
-
-        <!-- Header -->
-        <header class="budget-header">
-
-          <div class="budget-header__copy">
-
-            <h1 class="budget-header__title">
-              Monthly Budget Builder
-            </h1>
-
-            <p class="budget-header__subtitle">
-              Adjust each category to match your typical monthly spending.
-            </p>
-
-          </div>
-
-          <div
-            class="live-update-pill"
-            aria-label="All changes update in real time"
-          >
-            <span class="live-update-pill__icon">
-              <i data-lucide="sparkles" aria-hidden="true"></i>
-            </span>
-
-            <span class="live-update-pill__text">
-              All changes update in real time
-            </span>
-          </div>
-
-        </header>
-
 
         <!-- =================================================
           CATEGORY NAVIGATION
@@ -1005,7 +982,7 @@
             <div class="card-heading-with-info">
 
               <h2 id="cashFlowTitle">
-                Monthly Cash Flow
+                Financial Snapshot
               </h2>
 
               <button
@@ -1033,7 +1010,7 @@
               </strong>
 
               <span class="cash-flow-summary__label">
-                Left over this month
+                Monthly Cash Remaining
               </span>
 
               <span
@@ -1383,101 +1360,6 @@
       </aside>
 
     </main>
-
-
-    <!-- =====================================================
-      BOTTOM NAVIGATION
-    ====================================================== -->
-    <footer class="app-footer">
-
-      <div class="privacy-message">
-
-        <i data-lucide="shield-check" aria-hidden="true"></i>
-
-        <span>
-          Your data is private and secure.
-        </span>
-
-      </div>
-
-
-      <nav
-        class="step-navigation"
-        aria-label="Financial setup progress"
-      >
-
-        <button
-          class="step-item step-item--complete"
-          type="button"
-          data-step="income"
-        >
-          <span class="step-item__number">1</span>
-          <span class="step-item__label">Income</span>
-        </button>
-
-        <span class="step-connector" aria-hidden="true"></span>
-
-        <button
-          class="step-item step-item--active"
-          type="button"
-          data-step="expenses"
-          aria-current="step"
-        >
-          <span class="step-item__number">2</span>
-          <span class="step-item__label">Expenses</span>
-        </button>
-
-        <span class="step-connector" aria-hidden="true"></span>
-
-        <button
-          class="step-item"
-          type="button"
-          data-step="debt"
-        >
-          <span class="step-item__number">3</span>
-          <span class="step-item__label">Debt</span>
-        </button>
-
-        <span class="step-connector" aria-hidden="true"></span>
-
-        <button
-          class="step-item"
-          type="button"
-          data-step="savings"
-        >
-          <span class="step-item__number">4</span>
-          <span class="step-item__label">Savings</span>
-        </button>
-
-        <span class="step-connector" aria-hidden="true"></span>
-
-        <button
-          class="step-item"
-          type="button"
-          data-step="summary"
-        >
-          <span class="step-item__number">5</span>
-          <span class="step-item__label">Summary</span>
-        </button>
-
-      </nav>
-
-
-      <button
-        class="next-step-button"
-        id="nextStepButton"
-        type="button"
-      >
-
-        <span>
-          Next: Add Debt
-        </span>
-
-        <i data-lucide="arrow-right" aria-hidden="true"></i>
-
-      </button>
-
-    </footer>
 
   </div>
 
