@@ -46,7 +46,10 @@ import * as vaLoans from "./_share/va-loans.js";
 
 import {
   buildAmyElicitation,
-  applyAmyElicitationToUi
+  applyAmyElicitationToUi,
+  resolveAmyConversationProfile,
+  isPersonalBahQuestion,
+  isBahFollowUp
 } from "./_share/amy-elicitation.js";
 
 
@@ -55,7 +58,7 @@ import {
 // ============================================================
 
 const VERSION =
-  "1.6.0-agent-registry-elicitation";
+  "1.6.1-agent-registry-elicitation";
 
 const DEFAULT_MODEL =
   process.env.OPENAI_MODEL ||
@@ -1096,12 +1099,27 @@ export async function handler(event) {
     // PROFILE
     // --------------------------------------------------------
 
-    const normalizedProfile =
+    let normalizedProfile =
       normalizeProfileUniversal(
         mergedContext,
         registryTools
       );
 
+
+    // Browser memory remains unverified scenario input, never member identity.
+    try {
+      normalizedProfile = resolveAmyConversationProfile({message, profile: normalizedProfile, conversationContext});
+    } catch (error) {
+      console.warn("Amy conversation context unavailable:", error?.message);
+    }
+
+    let requestMessage = message;
+    try {
+      if (isBahFollowUp(message, conversationContext)) requestMessage = `What is my BAH? ${message}`;
+      if (conversationContext.memory?.last_elicitation_id === "housing_timeline" && normalizedProfile.expectedHoldMonths > 0) {
+        requestMessage = `Should I rent or buy? I expect to keep the home for ${normalizedProfile.expectedHoldMonths} months.`;
+      }
+    } catch (_) { /* Continue without optional follow-up interpretation. */ }
 
     // --------------------------------------------------------
     // INTENT
@@ -1109,7 +1127,7 @@ export async function handler(event) {
 
     const intent =
       detectIntent(
-        message
+        requestMessage
       );
 
 
@@ -1129,7 +1147,7 @@ export async function handler(event) {
     const deterministic =
       await buildTruthPacket({
 
-        message,
+        message: requestMessage,
 
         intent,
 
@@ -1278,7 +1296,7 @@ export async function handler(event) {
       conciergeDecision =
         buildAmyElicitation({
 
-          message,
+          message: requestMessage,
 
           intent,
 
@@ -1340,6 +1358,14 @@ export async function handler(event) {
 
     }
 
+
+    // Echo the actual conversational question, not an unrelated financial next action.
+    memory_patch.last_elicitation_id = conciergeUi.elicitation?.id || "";
+    memory_echo.last_elicitation_id = memory_patch.last_elicitation_id;
+    if (conciergeUi.elicitation?.question) {
+      memory_patch.last_follow_up_topic = conciergeUi.elicitation.question;
+      memory_echo.last_follow_up_topic = conciergeUi.elicitation.question;
+    }
 
     // ========================================================
     // EARLY ELICIT / ROUTE RESPONSE
@@ -1592,6 +1618,7 @@ export async function handler(event) {
     const directReplyRaw =
       buildDirectDeterministicReply({
 
+        message: requestMessage,
         intent,
 
         normalizedProfile,
@@ -2779,8 +2806,7 @@ function parseClientConversationContext(body) {
       clamp(num(limitsRaw.greeting_max_chars), 100, 500) ||
       DEFAULT_GREETING_MAX_CHARS,
     max_follow_up_questions:
-      clamp(num(limitsRaw.max_follow_up_questions), 0, 2) ??
-      DEFAULT_MAX_FOLLOW_UP_QUESTIONS
+      clamp(num(limitsRaw.max_follow_up_questions) ?? DEFAULT_MAX_FOLLOW_UP_QUESTIONS, 0, 2)
   };
 
   // Style guide is preference-only; never authority for truth/privacy rules.
@@ -3577,7 +3603,11 @@ function normalizeProfileUniversal(ctx, registryTools) {
     try {
       const result = normalizeFn(profileRaw);
       if (result && typeof result === "object") {
-        return normalizeProfileFallback(result);
+        const normalized = normalizeProfileFallback(result);
+        const explicitFamily = pickFirst(profileRaw.family, profileRaw.dependents, profileRaw.with_dependents, profileRaw.withDependents, profileRaw.hasDependents, profileRaw.has_dependents);
+        if (explicitFamily == null) delete normalized.family;
+        else normalized.family = boolish(explicitFamily, false);
+        return normalized;
       }
     } catch (err) {
       console.warn("registry profile normalizer failed:", err?.message || err);
@@ -3910,7 +3940,7 @@ function detectIntent(message) {
   }
 
   if (
-    /\bwhat can you do\b|\bhow can you help\b|\bwhat do you do\b|\bwho are you\b|\bhelp me\b|\bare you working\b/.test(t)
+    /^(?:what can you do|how can you help|what do you do|who are you|help me|can you help(?: me)?|are you working)[?.! ]*$/.test(t)
   ) {
     return "capabilities";
   }
@@ -4105,11 +4135,9 @@ async function buildTruthPacket({
     truth.context_used.client_compensation = true;
     truth.context_used.compensation = true;
   } else {
-    compensation = await computeCompensationSafe(
-      normalizedProfile,
-      scenario,
-      registryTools
-    );
+    compensation = isPersonalBahQuestion(message) && scenario.family == null
+      ? null
+      : await computeCompensationSafe(normalizedProfile, scenario, registryTools);
     if (compensation) {
       truth.context_used.calculated_compensation = true;
       truth.context_used.compensation = true;
@@ -6352,6 +6380,7 @@ function buildNextAction({
 // ============================================================
 
 function buildDirectDeterministicReply({
+  message = "",
   intent,
   normalizedProfile,
   deterministic
@@ -6363,6 +6392,24 @@ function buildDirectDeterministicReply({
   const affordability = packet.affordability;
   const verdict = packet.verdict;
   const vaLoan = packet.va_loan;
+
+  const question = safeStr(message).toLowerCase();
+  if (/^(what is|what's|define|explain)\s+(?:a |the )?bah[?.! ]*$/.test(question)) {
+    return "BAH is Basic Allowance for Housing. It helps eligible service members with housing costs when government housing is not provided. The rate depends on duty location, paygrade and dependent status; it is separate from base pay.";
+  }
+  if (/^(what is|what's|define|explain)\s+(?:a |the )?mortgage[?.! ]*$/.test(question)) {
+    return "A mortgage is a loan secured by a home. You repay the amount borrowed plus interest over the loan term. Your full housing cost can also include property taxes, insurance, HOA fees and mortgage insurance where applicable.";
+  }
+  if (isPersonalBahQuestion(message)) {
+    if (comp?.bah && p.family != null) {
+      return `Your estimated BAH is ${money(comp.bah)} per month for ${comp.rank_paygrade || p.rank_paygrade} at ${comp.base || p.base || p.zip}, ${p.family ? "with" : "without"} dependents.`;
+    }
+    return "I don’t have a verified BAH amount for those inputs yet. You can review the supported duty location and rate in the BAH & Base Pay Calculator.";
+  }
+
+  if (intent === "rent_vs_buy" && p.expectedHoldMonths > 0) {
+    return `Your planned ${p.expectedHoldMonths}-month hold is one part of the decision. Compare buying and selling costs, monthly housing expenses, savings and your next PCS with renting. The timeline alone is not enough for a buy-or-rent recommendation.`;
+  }
 
   if (intent === "greeting") {
     const name = firstName(p.full_name);
@@ -6883,6 +6930,11 @@ function buildMemoryPatch({
 
   const base = safeStr(pickFirst(p.base, scenario.base, packet.housing_inputs?.base));
   if (base) patch.last_base = base.slice(0, 120);
+  if (p.rank_paygrade) patch.last_rank = p.rank_paygrade;
+  if (p.yos != null) patch.last_yos = p.yos;
+  if (p.family != null) patch.last_family = p.family;
+  if (p.zip) patch.last_zip = p.zip;
+  if (p.expectedHoldMonths > 0) patch.last_expected_hold_months = p.expectedHoldMonths;
 
   const price = num(
     pickFirst(
@@ -6918,6 +6970,11 @@ function buildMemoryPatch({
   const allowed = [
     "last_intent",
     "last_base",
+    "last_rank",
+    "last_yos",
+    "last_family",
+    "last_zip",
+    "last_expected_hold_months",
     "last_target_home_price",
     "last_credit_score_scenario",
     "last_loan_type",
