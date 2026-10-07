@@ -44,24 +44,73 @@ import * as compensationContext from "./_share/compensation-context.js";
 import * as mortgageEngine from "./_share/mortgage-engine.js";
 import * as vaLoans from "./_share/va-loans.js";
 
+import {
+  buildAmyElicitation,
+  applyAmyElicitationToUi
+} from "./_share/amy-elicitation.js";
+
+
 // ============================================================
 // //#2 CONFIG
 // ============================================================
 
-const VERSION = "1.5.0-agent-registry";
-const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
-const DEFAULT_RESPONSE_MODE = "member_guidance";
-const MAX_MESSAGE_LENGTH = 5000;
+const VERSION =
+  "1.6.0-agent-registry-elicitation";
 
-const RESPONSE_CONTRACT_VERSION = "ask-amy-response-v1";
-const DEFAULT_MAX_REPLY_CHARS = 720;
-const DEFAULT_GREETING_MAX_CHARS = 220;
-const DEFAULT_MAX_FOLLOW_UP_QUESTIONS = 1;
-const MAX_THREAD_MESSAGES = 12;
-const MAX_THREAD_MESSAGE_LENGTH = 2000;
-const MAX_MEMORY_KEYS = 40;
-const MAX_MEMORY_STRING_LENGTH = 1000;
-const MAX_BODY_CHARS = 200000;
+const DEFAULT_MODEL =
+  process.env.OPENAI_MODEL ||
+  "gpt-4o-mini";
+
+const DEFAULT_RESPONSE_MODE =
+  "member_guidance";
+
+const MAX_MESSAGE_LENGTH =
+  5000;
+
+const RESPONSE_CONTRACT_VERSION =
+  "ask-amy-response-v1";
+
+const DEFAULT_MAX_REPLY_CHARS =
+  720;
+
+const DEFAULT_GREETING_MAX_CHARS =
+  220;
+
+const DEFAULT_MAX_FOLLOW_UP_QUESTIONS =
+  1;
+
+const MAX_THREAD_MESSAGES =
+  12;
+
+const MAX_THREAD_MESSAGE_LENGTH =
+  2000;
+
+const MAX_MEMORY_KEYS =
+  40;
+
+const MAX_MEMORY_STRING_LENGTH =
+  1000;
+
+const MAX_BODY_CHARS =
+  200000;
+
+
+/*
+  Base browser UI contract.
+
+  amy-elicitation.js may add:
+  - ui.mode
+  - ui.elicitation
+  - ui.action
+
+  while these animation values remain available
+  to existing HUD clients.
+*/
+const DEFAULT_UI = Object.freeze({
+  speed: 18,
+  startDelay: 80
+});
+
 
 const ALLOWED_RESPONSE_MODES = new Set([
   "member_guidance",
@@ -73,15 +122,36 @@ const ALLOWED_RESPONSE_MODES = new Set([
   "education"
 ]);
 
-const SUPABASE_URL = process.env.SUPABASE_URL || "";
+
+const SUPABASE_URL =
+  process.env.SUPABASE_URL ||
+  "";
+
+
 const SUPABASE_SERVICE_KEY =
   process.env.SUPABASE_SERVICE_KEY ||
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
   "";
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 
+const OPENAI_API_KEY =
+  process.env.OPENAI_API_KEY ||
+  "";
+
+
+/*
+  IMPORTANT:
+
+  Keep exact origins only.
+
+  If you test this function from a separate
+  TheWing Webflow staging domain, add that exact
+  https://xxxxx.webflow.io origin here.
+
+  Do NOT use "*".
+*/
 const ALLOW_ORIGINS = [
+
   "https://pcsunited.com",
   "https://www.pcsunited.com",
 
@@ -104,63 +174,161 @@ const ALLOW_ORIGINS = [
   "http://localhost:3000",
   "http://127.0.0.1:8888",
   "http://127.0.0.1:3000"
+
 ];
+
 
 // ============================================================
 // //#3 REGISTRY BOOTSTRAP
 // ============================================================
 
 async function loadRegistryTools() {
+
   const emptyTools = {
-    compensation: null,
-    mortgage: null,
-    vaLoans: null,
-    affordability: null,
-    decisionRules: null,
-    profileNormalizer: null,
-    raw: null,
-    loaded: false,
-    source: "fallback-empty"
+
+    compensation:
+      null,
+
+    mortgage:
+      null,
+
+    vaLoans:
+      null,
+
+    affordability:
+      null,
+
+    decisionRules:
+      null,
+
+    profileNormalizer:
+      null,
+
+    raw:
+      null,
+
+    loaded:
+      false,
+
+    source:
+      "fallback-empty"
+
   };
 
+
   try {
-    if (typeof agentRegistry.getAgentTools === "function") {
-      const tools = await agentRegistry.getAgentTools();
 
-      return normalizeRegistryTools(tools, "agentRegistry.getAgentTools");
+    if (
+      typeof agentRegistry.getAgentTools ===
+      "function"
+    ) {
+
+      const tools =
+        await agentRegistry.getAgentTools();
+
+
+      return normalizeRegistryTools(
+        tools,
+        "agentRegistry.getAgentTools"
+      );
+
     }
 
-    if (typeof agentRegistry.loadAgentTools === "function") {
-      const tools = await agentRegistry.loadAgentTools();
 
-      return normalizeRegistryTools(tools, "agentRegistry.loadAgentTools");
+    if (
+      typeof agentRegistry.loadAgentTools ===
+      "function"
+    ) {
+
+      const tools =
+        await agentRegistry.loadAgentTools();
+
+
+      return normalizeRegistryTools(
+        tools,
+        "agentRegistry.loadAgentTools"
+      );
+
     }
 
-    if (typeof agentRegistry.buildAgentRegistry === "function") {
-      const tools = await agentRegistry.buildAgentRegistry();
 
-      return normalizeRegistryTools(tools, "agentRegistry.buildAgentRegistry");
+    if (
+      typeof agentRegistry.buildAgentRegistry ===
+      "function"
+    ) {
+
+      const tools =
+        await agentRegistry.buildAgentRegistry();
+
+
+      return normalizeRegistryTools(
+        tools,
+        "agentRegistry.buildAgentRegistry"
+      );
+
     }
 
-    if (agentRegistry.agentTools && typeof agentRegistry.agentTools === "object") {
-      return normalizeRegistryTools(agentRegistry.agentTools, "agentRegistry.agentTools");
+
+    if (
+      agentRegistry.agentTools &&
+      typeof agentRegistry.agentTools ===
+        "object"
+    ) {
+
+      return normalizeRegistryTools(
+        agentRegistry.agentTools,
+        "agentRegistry.agentTools"
+      );
+
     }
 
-    if (agentRegistry.default && typeof agentRegistry.default === "object") {
-      return normalizeRegistryTools(agentRegistry.default, "agentRegistry.default");
+
+    if (
+      agentRegistry.default &&
+      typeof agentRegistry.default ===
+        "object"
+    ) {
+
+      return normalizeRegistryTools(
+        agentRegistry.default,
+        "agentRegistry.default"
+      );
+
     }
+
 
     return emptyTools;
+
   } catch (err) {
-    console.warn("agent-registry load failed:", err?.message || err);
+
+    console.warn(
+      "agent-registry load failed:",
+      err?.message ||
+      err
+    );
+
+
     return emptyTools;
+
   }
+
 }
 
-function normalizeRegistryTools(rawTools, source) {
-  const tools = rawTools && typeof rawTools === "object" ? rawTools : {};
+
+function normalizeRegistryTools(
+  rawTools,
+  source
+) {
+
+  const tools =
+    rawTools &&
+    typeof rawTools === "object"
+      ? rawTools
+      : {};
+
 
   const compensation =
+
     tools.compensation ||
     tools.compensationContext ||
     tools.compensation_context ||
@@ -169,13 +337,17 @@ function normalizeRegistryTools(rawTools, source) {
     tools.pay_engine ||
     null;
 
+
   const mortgage =
+
     tools.mortgage ||
     tools.mortgageEngine ||
     tools.mortgage_engine ||
     null;
 
+
   const va =
+
     tools.vaLoans ||
     tools.va_loans ||
     tools.vaLoan ||
@@ -183,590 +355,2078 @@ function normalizeRegistryTools(rawTools, source) {
     tools.va ||
     null;
 
+
   const affordability =
+
     tools.affordability ||
     tools.affordabilityEngine ||
     tools.affordability_engine ||
     null;
 
+
   const decisionRules =
+
     tools.decisionRules ||
     tools.decision_rules ||
     tools.decision ||
     null;
 
+
   const profileNormalizer =
+
     tools.profileNormalizer ||
     tools.profile_normalizer ||
     tools.profile ||
     null;
 
+
   return {
+
     compensation,
+
     mortgage,
-    vaLoans: va,
+
+    vaLoans:
+      va,
+
     affordability,
+
     decisionRules,
+
     profileNormalizer,
-    raw: tools,
-    loaded: true,
+
+    raw:
+      tools,
+
+    loaded:
+      true,
+
     source
+
   };
+
 }
 
-function getToolFunction(tool, names = []) {
-  if (!tool) return null;
 
-  for (const name of names) {
-    if (typeof tool[name] === "function") return tool[name];
+function getToolFunction(
+  tool,
+  names = []
+) {
+
+  if (!tool) {
+    return null;
+  }
+
+
+  for (
+    const name
+    of names
+  ) {
+
+    if (
+      typeof tool[name] ===
+      "function"
+    ) {
+
+      return tool[name];
+
+    }
+
 
     if (
       tool.default &&
-      typeof tool.default === "object" &&
-      typeof tool.default[name] === "function"
+      typeof tool.default ===
+        "object" &&
+      typeof tool.default[name] ===
+        "function"
     ) {
+
       return tool.default[name];
+
     }
+
 
     if (
       tool.module &&
-      typeof tool.module === "object" &&
-      typeof tool.module[name] === "function"
+      typeof tool.module ===
+        "object" &&
+      typeof tool.module[name] ===
+        "function"
     ) {
+
       return tool.module[name];
+
     }
+
 
     if (
       tool.exports &&
-      typeof tool.exports === "object" &&
-      typeof tool.exports[name] === "function"
+      typeof tool.exports ===
+        "object" &&
+      typeof tool.exports[name] ===
+        "function"
     ) {
+
       return tool.exports[name];
+
     }
+
   }
 
-  if (typeof tool === "function") return tool;
-  if (typeof tool.default === "function") return tool.default;
-  if (typeof tool.handler === "function") return tool.handler;
-  if (typeof tool.run === "function") return tool.run;
-  if (typeof tool.execute === "function") return tool.execute;
+
+  if (
+    typeof tool ===
+    "function"
+  ) {
+
+    return tool;
+
+  }
+
+
+  if (
+    typeof tool.default ===
+    "function"
+  ) {
+
+    return tool.default;
+
+  }
+
+
+  if (
+    typeof tool.handler ===
+    "function"
+  ) {
+
+    return tool.handler;
+
+  }
+
+
+  if (
+    typeof tool.run ===
+    "function"
+  ) {
+
+    return tool.run;
+
+  }
+
+
+  if (
+    typeof tool.execute ===
+    "function"
+  ) {
+
+    return tool.execute;
+
+  }
+
 
   return null;
+
 }
+
 
 // ============================================================
 // //#4 NETLIFY HANDLER — ES MODULE EXPORT
 // ============================================================
 
 export async function handler(event) {
-  const origin = getHeader(event, "origin");
-  const originAllowed = isAllowedOrigin(origin);
+
+  const origin =
+    getHeader(
+      event,
+      "origin"
+    );
+
+
+  const originAllowed =
+    isAllowedOrigin(
+      origin
+    );
+
+
+  // ----------------------------------------------------------
+  // ORIGIN / CORS CHECK
+  // ----------------------------------------------------------
 
   if (!originAllowed) {
+
     return respondError(
       403,
       {
-        error: "Origin not allowed.",
-        code: "INVALID_ORIGIN",
-        conversation_id: null
+
+        error:
+          "Origin not allowed.",
+
+        code:
+          "INVALID_ORIGIN",
+
+        conversation_id:
+          null
+
       },
       origin
     );
+
   }
 
-  if (event.httpMethod === "OPTIONS") {
+
+  // ----------------------------------------------------------
+  // OPTIONS
+  // ----------------------------------------------------------
+
+  if (
+    event.httpMethod ===
+    "OPTIONS"
+  ) {
+
     return respond(
       200,
       {
-        ok: true,
-        agent: "Amy",
-        endpoint: "agent-amy",
-        version: VERSION,
-        response_contract: RESPONSE_CONTRACT_VERSION
+
+        ok:
+          true,
+
+        agent:
+          "Amy",
+
+        endpoint:
+          "agent-amy",
+
+        version:
+          VERSION,
+
+        response_contract:
+          RESPONSE_CONTRACT_VERSION,
+
+        capabilities: {
+
+          elicitation:
+            true,
+
+          navigation_actions:
+            true,
+
+          truth_packet:
+            true,
+
+          memory_echo:
+            true
+
+        }
+
       },
       origin
     );
+
   }
 
-  if (event.httpMethod !== "POST") {
+
+  // ----------------------------------------------------------
+  // POST ONLY
+  // ----------------------------------------------------------
+
+  if (
+    event.httpMethod !==
+    "POST"
+  ) {
+
     return respondError(
       405,
       {
-        error: "Method not allowed. Use POST.",
-        code: "METHOD_NOT_ALLOWED",
-        conversation_id: null
+
+        error:
+          "Method not allowed. Use POST.",
+
+        code:
+          "METHOD_NOT_ALLOWED",
+
+        conversation_id:
+          null
+
       },
       origin
     );
+
   }
 
-  const startedAt = Date.now();
+
+  const startedAt =
+    Date.now();
+
+
   let conversationContext = {
-    conversation_id: null,
-    thread: [],
-    memory: {},
-    response_contract: RESPONSE_CONTRACT_VERSION,
+
+    conversation_id:
+      null,
+
+    thread:
+      [],
+
+    memory:
+      {},
+
+    response_contract:
+      RESPONSE_CONTRACT_VERSION,
+
     response_limits: {
-      max_chars: DEFAULT_MAX_REPLY_CHARS,
-      greeting_max_chars: DEFAULT_GREETING_MAX_CHARS,
-      max_follow_up_questions: DEFAULT_MAX_FOLLOW_UP_QUESTIONS
+
+      max_chars:
+        DEFAULT_MAX_REPLY_CHARS,
+
+      greeting_max_chars:
+        DEFAULT_GREETING_MAX_CHARS,
+
+      max_follow_up_questions:
+        DEFAULT_MAX_FOLLOW_UP_QUESTIONS
+
     },
-    requested_mode: DEFAULT_RESPONSE_MODE,
-    style_guide: null,
-    page: null,
-    widget: null,
-    product: null,
-    client_version: null
+
+    requested_mode:
+      DEFAULT_RESPONSE_MODE,
+
+    style_guide:
+      null,
+
+    page:
+      null,
+
+    widget:
+      null,
+
+    product:
+      null,
+
+    client_version:
+      null
+
   };
 
+
   try {
-    const rawBody = event?.body;
-    if (typeof rawBody === "string" && rawBody.length > MAX_BODY_CHARS) {
+
+    // --------------------------------------------------------
+    // BODY SIZE
+    // --------------------------------------------------------
+
+    const rawBody =
+      event?.body;
+
+
+    if (
+      typeof rawBody === "string" &&
+      rawBody.length >
+        MAX_BODY_CHARS
+    ) {
+
       return respondError(
         413,
         {
-          error: "Request payload is too large.",
-          code: "PAYLOAD_TOO_LARGE",
-          conversation_id: null
+
+          error:
+            "Request payload is too large.",
+
+          code:
+            "PAYLOAD_TOO_LARGE",
+
+          conversation_id:
+            null
+
         },
         origin
       );
+
     }
 
-    const parsed = parseRequestBody(rawBody);
+
+    // --------------------------------------------------------
+    // PARSE BODY
+    // --------------------------------------------------------
+
+    const parsed =
+      parseRequestBody(
+        rawBody
+      );
+
+
     if (!parsed.ok) {
+
       return respondError(
         400,
         {
-          error: "Invalid JSON body.",
-          code: "INVALID_JSON",
-          conversation_id: null
+
+          error:
+            "Invalid JSON body.",
+
+          code:
+            "INVALID_JSON",
+
+          conversation_id:
+            null
+
         },
         origin
       );
+
     }
 
-    const body = parsed.body || {};
-    conversationContext = parseClientConversationContext(body);
 
-    const debugRequested = body?.debug === true;
+    const body =
+      parsed.body ||
+      {};
+
+
+    conversationContext =
+      parseClientConversationContext(
+        body
+      );
+
+
+    // --------------------------------------------------------
+    // DEBUG
+    // --------------------------------------------------------
+
+    const debugRequested =
+      body?.debug === true;
+
+
     const debugAllowed =
-      process.env.NODE_ENV === "development" ||
-      process.env.ASK_AMY_DEBUG_ENABLED === "true";
-    const debug = debugRequested && debugAllowed;
 
-    const registryTools = await loadRegistryTools();
+      process.env.NODE_ENV ===
+        "development" ||
 
-    const message = safeStr(
-      body.message ||
+      process.env
+        .ASK_AMY_DEBUG_ENABLED ===
+        "true";
+
+
+    const debug =
+      debugRequested &&
+      debugAllowed;
+
+
+    // --------------------------------------------------------
+    // REGISTRY
+    // --------------------------------------------------------
+
+    const registryTools =
+      await loadRegistryTools();
+
+
+    // --------------------------------------------------------
+    // MESSAGE
+    // --------------------------------------------------------
+
+    const message =
+      safeStr(
+
+        body.message ||
         body.question ||
         body.prompt ||
         body.text ||
         ""
-    ).slice(0, MAX_MESSAGE_LENGTH);
+
+      ).slice(
+        0,
+        MAX_MESSAGE_LENGTH
+      );
+
 
     if (!message) {
+
       return respondError(
         400,
         {
-          error: "Missing message.",
-          code: "MISSING_MESSAGE",
-          conversation_id: conversationContext.conversation_id,
-          memory_echo: conversationContext.memory || {}
+
+          error:
+            "Missing message.",
+
+          code:
+            "MISSING_MESSAGE",
+
+          conversation_id:
+            conversationContext
+              .conversation_id,
+
+          memory_echo:
+            conversationContext
+              .memory ||
+            {}
+
         },
         origin
       );
+
     }
 
-    const clientContext = collectClientContext(body);
-    const verifiedIdentity = await resolveVerifiedMemberIdentity(
-      event,
-      body,
-      clientContext
-    );
+
+    // --------------------------------------------------------
+    // CLIENT CONTEXT
+    // --------------------------------------------------------
+
+    const clientContext =
+      collectClientContext(
+        body
+      );
+
+
+    // --------------------------------------------------------
+    // VERIFIED MEMBER IDENTITY
+    // --------------------------------------------------------
+
+    const verifiedIdentity =
+      await resolveVerifiedMemberIdentity(
+        event,
+        body,
+        clientContext
+      );
+
+
     const verifiedEmail =
-      verifiedIdentity.verified ? verifiedIdentity.email : "";
 
-    const supabaseContext = verifiedEmail
-      ? await loadSupabaseMemberContext(verifiedEmail)
-      : null;
+      verifiedIdentity.verified
+        ? verifiedIdentity.email
+        : "";
 
-    const memberEnrichmentSkipped = !verifiedIdentity.verified;
-    const memberEnrichmentSucceeded = Boolean(supabaseContext?.supabase_loaded);
 
+    // --------------------------------------------------------
+    // SUPABASE MEMBER CONTEXT
+    // --------------------------------------------------------
+
+    const supabaseContext =
+
+      verifiedEmail
+
+        ? await loadSupabaseMemberContext(
+            verifiedEmail
+          )
+
+        : null;
+
+
+    const memberEnrichmentSkipped =
+      !verifiedIdentity.verified;
+
+
+    const memberEnrichmentSucceeded =
+      Boolean(
+        supabaseContext
+          ?.supabase_loaded
+      );
+
+
+    // --------------------------------------------------------
+    // MERGED CONTEXT
+    //
     // Precedence:
-    // verified Supabase saved profile < current client profile/bridge
-    // client compensation/mortgage packets stay current
-    // FAD/KPI client values stay current
-    // user message hypotheticals win later in scenario building
-    const mergedContext = mergeDeep(
-      {},
-      {
-        profile: mergeDeep(
-          {},
-          supabaseContext?.profile || {},
-          clientContext?.profile || {}
-        ),
-        bridge: mergeDeep(
-          {},
-          supabaseContext?.bridge || {},
-          clientContext?.bridge || {}
-        ),
-        identity: mergeDeep(
-          {},
-          supabaseContext?.identity || {},
-          clientContext?.identity || {}
-        ),
-        session: clientContext?.session || {},
-        compensation: clientContext?.compensation || null,
-        mortgage: clientContext?.mortgage || null,
-        fad: mergeDeep(
-          {},
-          supabaseContext?.fad || {},
-          clientContext?.fad || {}
-        ),
-        financial_intake: mergeDeep(
-          {},
-          supabaseContext?.financial_intake || {},
-          clientContext?.financial_intake || {}
-        ),
-        kpi_overrides: mergeDeep(
-          {},
-          supabaseContext?.kpi_overrides || {},
-          clientContext?.kpi_overrides || {}
-        ),
-        user_financial_inputs: mergeDeep(
-          {},
-          supabaseContext?.user_financial_inputs || {},
-          clientContext?.user_financial_inputs || {}
-        ),
-        user_aiou_inputs: mergeDeep(
-          {},
-          supabaseContext?.user_aiou_inputs || {},
-          clientContext?.user_aiou_inputs || {}
-        ),
-        supabase_loaded: Boolean(supabaseContext?.supabase_loaded),
-        member_enrichment_skipped: memberEnrichmentSkipped,
-        member_enrichment_succeeded: memberEnrichmentSucceeded,
-        verified_identity_source: verifiedIdentity.source || "none"
-      }
-    );
+    //
+    // verified Supabase saved profile
+    // <
+    // current client profile / bridge
+    //
+    // Client compensation / mortgage packets stay current.
+    // Browser data is still not server-verified identity.
+    // --------------------------------------------------------
 
-    const normalizedProfile = normalizeProfileUniversal(mergedContext, registryTools);
-    const intent = detectIntent(message);
-    const requestedMode = conversationContext.requested_mode || DEFAULT_RESPONSE_MODE;
+    const mergedContext =
+      mergeDeep(
+        {},
+        {
 
-    const deterministic = await buildTruthPacket({
-      message,
-      intent,
-      mergedContext,
-      normalizedProfile,
-      registryTools,
-      debug
-    });
+          profile:
+            mergeDeep(
+              {},
 
-    const profileSummary = buildProfileSummary(normalizedProfile, deterministic);
+              supabaseContext
+                ?.profile ||
+                {},
 
-    const memoryBuilt = buildMemoryPatch({
-      message,
-      intent,
-      normalizedProfile,
-      deterministic,
+              clientContext
+                ?.profile ||
+                {}
+            ),
+
+
+          bridge:
+            mergeDeep(
+              {},
+
+              supabaseContext
+                ?.bridge ||
+                {},
+
+              clientContext
+                ?.bridge ||
+                {}
+            ),
+
+
+          identity:
+            mergeDeep(
+              {},
+
+              supabaseContext
+                ?.identity ||
+                {},
+
+              clientContext
+                ?.identity ||
+                {}
+            ),
+
+
+          session:
+            clientContext
+              ?.session ||
+            {},
+
+
+          compensation:
+            clientContext
+              ?.compensation ||
+            null,
+
+
+          mortgage:
+            clientContext
+              ?.mortgage ||
+            null,
+
+
+          fad:
+            mergeDeep(
+              {},
+
+              supabaseContext
+                ?.fad ||
+                {},
+
+              clientContext
+                ?.fad ||
+                {}
+            ),
+
+
+          financial_intake:
+            mergeDeep(
+              {},
+
+              supabaseContext
+                ?.financial_intake ||
+                {},
+
+              clientContext
+                ?.financial_intake ||
+                {}
+            ),
+
+
+          kpi_overrides:
+            mergeDeep(
+              {},
+
+              supabaseContext
+                ?.kpi_overrides ||
+                {},
+
+              clientContext
+                ?.kpi_overrides ||
+                {}
+            ),
+
+
+          user_financial_inputs:
+            mergeDeep(
+              {},
+
+              supabaseContext
+                ?.user_financial_inputs ||
+                {},
+
+              clientContext
+                ?.user_financial_inputs ||
+                {}
+            ),
+
+
+          user_aiou_inputs:
+            mergeDeep(
+              {},
+
+              supabaseContext
+                ?.user_aiou_inputs ||
+                {},
+
+              clientContext
+                ?.user_aiou_inputs ||
+                {}
+            ),
+
+
+          supabase_loaded:
+            Boolean(
+              supabaseContext
+                ?.supabase_loaded
+            ),
+
+
+          member_enrichment_skipped:
+            memberEnrichmentSkipped,
+
+
+          member_enrichment_succeeded:
+            memberEnrichmentSucceeded,
+
+
+          verified_identity_source:
+            verifiedIdentity.source ||
+            "none"
+
+        }
+      );
+
+
+    // --------------------------------------------------------
+    // PROFILE
+    // --------------------------------------------------------
+
+    const normalizedProfile =
+      normalizeProfileUniversal(
+        mergedContext,
+        registryTools
+      );
+
+
+    // --------------------------------------------------------
+    // INTENT
+    // --------------------------------------------------------
+
+    const intent =
+      detectIntent(
+        message
+      );
+
+
+    const requestedMode =
       conversationContext
-    });
-    const memory_patch = memoryBuilt.memory_patch || {};
-    const memory_echo = memoryBuilt.memory_echo || {};
+        .requested_mode ||
+      DEFAULT_RESPONSE_MODE;
 
-    const warnings = buildPublicWarnings({
-      intent,
-      normalizedProfile,
-      deterministic,
-      memberEnrichmentSkipped,
-      memberEnrichmentSucceeded,
-      openaiUsed: false,
-      openaiUnavailable: false
-    });
+
+    // --------------------------------------------------------
+    // THEWING DETERMINISTIC TRUTH PACKET
+    //
+    // TheWing calculates first.
+    // Amy explains / routes after.
+    // --------------------------------------------------------
+
+    const deterministic =
+      await buildTruthPacket({
+
+        message,
+
+        intent,
+
+        mergedContext,
+
+        normalizedProfile,
+
+        registryTools,
+
+        debug
+
+      });
+
+
+    // --------------------------------------------------------
+    // PROFILE SUMMARY
+    // --------------------------------------------------------
+
+    const profileSummary =
+      buildProfileSummary(
+        normalizedProfile,
+        deterministic
+      );
+
+
+    // --------------------------------------------------------
+    // MEMORY
+    // --------------------------------------------------------
+
+    const memoryBuilt =
+      buildMemoryPatch({
+
+        message,
+
+        intent,
+
+        normalizedProfile,
+
+        deterministic,
+
+        conversationContext
+
+      });
+
+
+    const memory_patch =
+      memoryBuilt
+        .memory_patch ||
+      {};
+
+
+    const memory_echo =
+      memoryBuilt
+        .memory_echo ||
+      {};
+
+
+    // --------------------------------------------------------
+    // WARNINGS — INITIAL
+    // --------------------------------------------------------
+
+    const warnings =
+      buildPublicWarnings({
+
+        intent,
+
+        normalizedProfile,
+
+        deterministic,
+
+        memberEnrichmentSkipped,
+
+        memberEnrichmentSucceeded,
+
+        openaiUsed:
+          false,
+
+        openaiUnavailable:
+          false
+
+      });
+
+
+    // --------------------------------------------------------
+    // RESPONSE LIMITS
+    // --------------------------------------------------------
 
     const responseLimits = {
+
       intent,
-      max_chars: conversationContext.response_limits.max_chars,
-      greeting_max_chars: conversationContext.response_limits.greeting_max_chars,
+
+      max_chars:
+        conversationContext
+          .response_limits
+          .max_chars,
+
+      greeting_max_chars:
+        conversationContext
+          .response_limits
+          .greeting_max_chars,
+
       max_follow_up_questions:
-        conversationContext.response_limits.max_follow_up_questions
+        conversationContext
+          .response_limits
+          .max_follow_up_questions
+
     };
 
-    const directReplyRaw = buildDirectDeterministicReply({
-      intent,
-      normalizedProfile,
-      deterministic
-    });
 
-    const safeDebug = debug
-      ? {
+    // ========================================================
+    // DETERMINISTIC AMY ELICITATION / CONCIERGE
+    //
+    // This module decides:
+    //
+    // answer
+    // elicit
+    // route
+    //
+    // It performs NO calculations and NO OpenAI call.
+    //
+    // Fail-open:
+    // if amy-elicitation fails, normal Agent Amy continues.
+    // ========================================================
+
+    let conciergeDecision = {
+
+      ok:
+        true,
+
+      mode:
+        "answer",
+
+      reason:
+        "elicitation fallback",
+
+      ui: {
+        mode:
+          "answer"
+      }
+
+    };
+
+
+    try {
+
+      conciergeDecision =
+        buildAmyElicitation({
+
+          message,
+
           intent,
-          registry_loaded: Boolean(registryTools?.loaded),
-          supabase_enrichment_attempted: Boolean(verifiedIdentity.verified),
-          supabase_enrichment_succeeded: memberEnrichmentSucceeded,
-          openai_used: false,
-          tool_paths: {
-            compensation: deterministic?.public?.compensation?.source || null,
-            mortgage: deterministic?.public?.mortgage?.source || null,
-            affordability: deterministic?.public?.affordability?.source || null,
-            verdict: deterministic?.public?.verdict?.source || null
-          },
-          latency_ms: Date.now() - startedAt,
-          warnings
-        }
-      : undefined;
 
-    if (directReplyRaw && !shouldUseOpenAI(message, intent, deterministic)) {
-      const directReply = enforceReplyLimits(directReplyRaw, responseLimits);
-      const answer = buildStructuredAnswerFromText({
-        reply: directReply,
-        deterministic,
-        normalizedProfile,
-        intent
-      });
+          normalizedProfile,
+
+          deterministic,
+
+          mergedContext,
+
+          conversationContext
+
+        }) ||
+        conciergeDecision;
+
+    } catch (elicitationError) {
+
+      console.warn(
+        "amy-elicitation decision failed:",
+        elicitationError?.message ||
+        elicitationError
+      );
+
+    }
+
+
+    const conciergeMode =
+      safeStr(
+        conciergeDecision
+          ?.mode
+      ) ||
+      "answer";
+
+
+    let conciergeUi = {
+
+      ...DEFAULT_UI,
+
+      mode:
+        "answer"
+
+    };
+
+
+    try {
+
+      conciergeUi =
+        applyAmyElicitationToUi(
+          DEFAULT_UI,
+          conciergeDecision
+        );
+
+    } catch (uiError) {
+
+      console.warn(
+        "amy-elicitation UI merge failed:",
+        uiError?.message ||
+        uiError
+      );
+
+    }
+
+
+    // ========================================================
+    // EARLY ELICIT / ROUTE RESPONSE
+    //
+    // Do not call OpenAI if we only need:
+    //
+    // - one clarification
+    // - navigation to an application
+    //
+    // The reply field is intentionally populated so the HUD
+    // can retain the turn in its in-memory conversation thread.
+    // ========================================================
+
+    if (
+      conciergeMode === "elicit" ||
+      conciergeMode === "route"
+    ) {
+
+      const elicitationQuestion =
+        safeStr(
+          conciergeUi
+            ?.elicitation
+            ?.question
+        );
+
+
+      const actionReason =
+        safeStr(
+          conciergeUi
+            ?.action
+            ?.reason
+        );
+
+
+      const actionLabel =
+        safeStr(
+          conciergeUi
+            ?.action
+            ?.label
+        );
+
+
+      const earlyReply =
+
+        conciergeMode === "elicit"
+
+          ? (
+              elicitationQuestion ||
+              "What would you like help with?"
+            )
+
+          : (
+              actionReason ||
+              (
+                actionLabel
+                  ? `I recommend ${actionLabel}.`
+                  : "I found the right next step."
+              )
+            );
+
+
+      const earlyAnswer =
+
+        conciergeMode === "route"
+
+          ? buildStructuredAnswerFromText({
+
+              reply:
+                earlyReply,
+
+              deterministic,
+
+              normalizedProfile,
+
+              intent
+
+            })
+
+          : null;
+
+
+      const earlyDebug =
+
+        debug
+
+          ? {
+
+              intent,
+
+              concierge_mode:
+                conciergeMode,
+
+              concierge_reason:
+                conciergeDecision
+                  ?.reason ||
+                null,
+
+              registry_loaded:
+                Boolean(
+                  registryTools
+                    ?.loaded
+                ),
+
+              supabase_enrichment_attempted:
+                Boolean(
+                  verifiedIdentity
+                    .verified
+                ),
+
+              supabase_enrichment_succeeded:
+                memberEnrichmentSucceeded,
+
+              openai_used:
+                false,
+
+              tool_paths: {
+
+                compensation:
+                  deterministic
+                    ?.public
+                    ?.compensation
+                    ?.source ||
+                  null,
+
+                mortgage:
+                  deterministic
+                    ?.public
+                    ?.mortgage
+                    ?.source ||
+                  null,
+
+                affordability:
+                  deterministic
+                    ?.public
+                    ?.affordability
+                    ?.source ||
+                  null,
+
+                verdict:
+                  deterministic
+                    ?.public
+                    ?.verdict
+                    ?.source ||
+                  null
+
+              },
+
+              latency_ms:
+                Date.now() -
+                startedAt,
+
+              warnings
+
+            }
+
+          : undefined;
+
 
       return respond(
         200,
         {
-          ok: true,
-          agent: "Amy",
-          display_name: "PCSUnited AI Concierge",
-          brand: "PCSUnited",
-          powered_by: "TheWing.ai",
-          endpoint: "agent-amy",
-          version: VERSION,
+
+          ok:
+            true,
+
+          agent:
+            "Amy",
+
+          display_name:
+            "PCSUnited AI Concierge",
+
+          brand:
+            "PCSUnited",
+
+          powered_by:
+            "TheWing.ai",
+
+          endpoint:
+            "agent-amy",
+
+          version:
+            VERSION,
+
           response_contract:
-            conversationContext.response_contract || RESPONSE_CONTRACT_VERSION,
-          mode: requestedMode,
+            conversationContext
+              .response_contract ||
+            RESPONSE_CONTRACT_VERSION,
+
+          mode:
+            requestedMode,
+
+          concierge_mode:
+            conciergeMode,
+
           intent,
-          reply: directReply,
-          answer,
-          profile_used: stripSensitiveProfile(normalizedProfile, intent),
-          truth_packet: deterministic.public,
-          context_used: deterministic.context_used,
-          conversation_id: conversationContext.conversation_id,
+
+          reply:
+            earlyReply,
+
+          answer:
+            earlyAnswer,
+
+          profile_used:
+            stripSensitiveProfile(
+              normalizedProfile,
+              intent
+            ),
+
+          truth_packet:
+            deterministic.public,
+
+          context_used:
+            deterministic.context_used,
+
+          conversation_id:
+            conversationContext
+              .conversation_id,
+
           memory_patch,
+
           memory_echo,
-          ui: {
-            speed: 18,
-            startDelay: 80
-          },
+
+          ui:
+            conciergeUi,
+
           warnings,
-          latency_ms: Date.now() - startedAt,
-          ...(safeDebug ? { debug: safeDebug } : {})
+
+          latency_ms:
+            Date.now() -
+            startedAt,
+
+          ...(earlyDebug
+            ? {
+                debug:
+                  earlyDebug
+              }
+            : {})
+
         },
         origin
       );
+
     }
 
-    let aiReply = "";
-    let openaiUsed = false;
-    let openaiUnavailable = !OPENAI_API_KEY;
 
-    if (OPENAI_API_KEY) {
-      const systemPrompt = buildSystemPrompt({
-        profileSummary,
-        deterministic,
-        styleGuide: conversationContext.style_guide,
-        requestedMode
+    // --------------------------------------------------------
+    // DIRECT DETERMINISTIC REPLY
+    // --------------------------------------------------------
+
+    const directReplyRaw =
+      buildDirectDeterministicReply({
+
+        intent,
+
+        normalizedProfile,
+
+        deterministic
+
       });
 
-      const userPayload = buildUserPayload({
+
+    // --------------------------------------------------------
+    // DEBUG — DIRECT PATH
+    // --------------------------------------------------------
+
+    const safeDebug =
+
+      debug
+
+        ? {
+
+            intent,
+
+            concierge_mode:
+              conciergeMode,
+
+            concierge_reason:
+              conciergeDecision
+                ?.reason ||
+              null,
+
+            registry_loaded:
+              Boolean(
+                registryTools
+                  ?.loaded
+              ),
+
+            supabase_enrichment_attempted:
+              Boolean(
+                verifiedIdentity
+                  .verified
+              ),
+
+            supabase_enrichment_succeeded:
+              memberEnrichmentSucceeded,
+
+            openai_used:
+              false,
+
+            tool_paths: {
+
+              compensation:
+                deterministic
+                  ?.public
+                  ?.compensation
+                  ?.source ||
+                null,
+
+              mortgage:
+                deterministic
+                  ?.public
+                  ?.mortgage
+                  ?.source ||
+                null,
+
+              affordability:
+                deterministic
+                  ?.public
+                  ?.affordability
+                  ?.source ||
+                null,
+
+              verdict:
+                deterministic
+                  ?.public
+                  ?.verdict
+                  ?.source ||
+                null
+
+            },
+
+            latency_ms:
+              Date.now() -
+              startedAt,
+
+            warnings
+
+          }
+
+        : undefined;
+
+
+    // ========================================================
+    // DIRECT / DETERMINISTIC RESPONSE
+    //
+    // No OpenAI call when TheWing already has the answer.
+    // ========================================================
+
+    if (
+      directReplyRaw &&
+      !shouldUseOpenAI(
         message,
         intent,
-        normalizedProfile,
-        deterministic,
-        mergedContext,
-        conversationContext,
-        requestedMode
-      });
+        deterministic
+      )
+    ) {
 
-      aiReply = await callOpenAI({
-        systemPrompt,
-        userPayload,
-        thread: conversationContext.thread,
-        model: DEFAULT_MODEL,
-        responseLimits
-      });
+      const directReply =
+        enforceReplyLimits(
+          directReplyRaw,
+          responseLimits
+        );
 
-      openaiUsed = Boolean(aiReply);
-      openaiUnavailable = !aiReply;
+
+      const answer =
+        buildStructuredAnswerFromText({
+
+          reply:
+            directReply,
+
+          deterministic,
+
+          normalizedProfile,
+
+          intent
+
+        });
+
+
+      return respond(
+        200,
+        {
+
+          ok:
+            true,
+
+          agent:
+            "Amy",
+
+          display_name:
+            "PCSUnited AI Concierge",
+
+          brand:
+            "PCSUnited",
+
+          powered_by:
+            "TheWing.ai",
+
+          endpoint:
+            "agent-amy",
+
+          version:
+            VERSION,
+
+          response_contract:
+            conversationContext
+              .response_contract ||
+            RESPONSE_CONTRACT_VERSION,
+
+          mode:
+            requestedMode,
+
+          concierge_mode:
+            conciergeMode,
+
+          intent,
+
+          reply:
+            directReply,
+
+          answer,
+
+          profile_used:
+            stripSensitiveProfile(
+              normalizedProfile,
+              intent
+            ),
+
+          truth_packet:
+            deterministic.public,
+
+          context_used:
+            deterministic.context_used,
+
+          conversation_id:
+            conversationContext
+              .conversation_id,
+
+          memory_patch,
+
+          memory_echo,
+
+          ui:
+            conciergeUi,
+
+          warnings,
+
+          latency_ms:
+            Date.now() -
+            startedAt,
+
+          ...(safeDebug
+            ? {
+                debug:
+                  safeDebug
+              }
+            : {})
+
+        },
+        origin
+      );
+
     }
+
+
+    // ========================================================
+    // OPENAI EXPLANATION LAYER
+    //
+    // TheWing has already calculated and assembled the
+    // Truth Packet before this point.
+    // ========================================================
+
+    let aiReply =
+      "";
+
+
+    let openaiUsed =
+      false;
+
+
+    let openaiUnavailable =
+      !OPENAI_API_KEY;
+
+
+    if (
+      OPENAI_API_KEY
+    ) {
+
+      const systemPrompt =
+        buildSystemPrompt({
+
+          profileSummary,
+
+          deterministic,
+
+          styleGuide:
+            conversationContext
+              .style_guide,
+
+          requestedMode
+
+        });
+
+
+      const userPayload =
+        buildUserPayload({
+
+          message,
+
+          intent,
+
+          normalizedProfile,
+
+          deterministic,
+
+          mergedContext,
+
+          conversationContext,
+
+          requestedMode
+
+        });
+
+
+      aiReply =
+        await callOpenAI({
+
+          systemPrompt,
+
+          userPayload,
+
+          thread:
+            conversationContext
+              .thread,
+
+          model:
+            DEFAULT_MODEL,
+
+          responseLimits
+
+        });
+
+
+      openaiUsed =
+        Boolean(
+          aiReply
+        );
+
+
+      openaiUnavailable =
+        !aiReply;
+
+    }
+
+
+    // --------------------------------------------------------
+    // OPENAI FALLBACK
+    // --------------------------------------------------------
 
     if (!aiReply) {
+
       aiReply =
+
         directReplyRaw ||
+
         buildFallbackReply({
+
           intent,
+
           normalizedProfile,
+
           deterministic
+
         });
+
     }
 
-    const finalReply = enforceReplyLimits(aiReply, responseLimits);
-    const answer = buildStructuredAnswerFromText({
-      reply: finalReply,
-      deterministic,
-      normalizedProfile,
-      intent
-    });
 
-    const finalWarnings = buildPublicWarnings({
-      intent,
-      normalizedProfile,
-      deterministic,
-      memberEnrichmentSkipped,
-      memberEnrichmentSucceeded,
-      openaiUsed,
-      openaiUnavailable
-    });
+    // --------------------------------------------------------
+    // FINAL REPLY
+    // --------------------------------------------------------
 
-    const finalDebug = debug
-      ? {
-          intent,
-          registry_loaded: Boolean(registryTools?.loaded),
-          supabase_enrichment_attempted: Boolean(verifiedIdentity.verified),
-          supabase_enrichment_succeeded: memberEnrichmentSucceeded,
-          openai_used: openaiUsed,
-          tool_paths: {
-            compensation: deterministic?.public?.compensation?.source || null,
-            mortgage: deterministic?.public?.mortgage?.source || null,
-            affordability: deterministic?.public?.affordability?.source || null,
-            verdict: deterministic?.public?.verdict?.source || null
-          },
-          latency_ms: Date.now() - startedAt,
-          warnings: finalWarnings
-        }
-      : undefined;
+    const finalReply =
+      enforceReplyLimits(
+        aiReply,
+        responseLimits
+      );
+
+
+    const answer =
+      buildStructuredAnswerFromText({
+
+        reply:
+          finalReply,
+
+        deterministic,
+
+        normalizedProfile,
+
+        intent
+
+      });
+
+
+    // --------------------------------------------------------
+    // FINAL WARNINGS
+    // --------------------------------------------------------
+
+    const finalWarnings =
+      buildPublicWarnings({
+
+        intent,
+
+        normalizedProfile,
+
+        deterministic,
+
+        memberEnrichmentSkipped,
+
+        memberEnrichmentSucceeded,
+
+        openaiUsed,
+
+        openaiUnavailable
+
+      });
+
+
+    // --------------------------------------------------------
+    // FINAL DEBUG
+    // --------------------------------------------------------
+
+    const finalDebug =
+
+      debug
+
+        ? {
+
+            intent,
+
+            concierge_mode:
+              conciergeMode,
+
+            concierge_reason:
+              conciergeDecision
+                ?.reason ||
+              null,
+
+            registry_loaded:
+              Boolean(
+                registryTools
+                  ?.loaded
+              ),
+
+            supabase_enrichment_attempted:
+              Boolean(
+                verifiedIdentity
+                  .verified
+              ),
+
+            supabase_enrichment_succeeded:
+              memberEnrichmentSucceeded,
+
+            openai_used:
+              openaiUsed,
+
+            tool_paths: {
+
+              compensation:
+                deterministic
+                  ?.public
+                  ?.compensation
+                  ?.source ||
+                null,
+
+              mortgage:
+                deterministic
+                  ?.public
+                  ?.mortgage
+                  ?.source ||
+                null,
+
+              affordability:
+                deterministic
+                  ?.public
+                  ?.affordability
+                  ?.source ||
+                null,
+
+              verdict:
+                deterministic
+                  ?.public
+                  ?.verdict
+                  ?.source ||
+                null
+
+            },
+
+            latency_ms:
+              Date.now() -
+              startedAt,
+
+            warnings:
+              finalWarnings
+
+          }
+
+        : undefined;
+
+
+    // --------------------------------------------------------
+    // FINAL RESPONSE
+    // --------------------------------------------------------
 
     return respond(
       200,
       {
-        ok: true,
-        agent: "Amy",
-        display_name: "PCSUnited AI Concierge",
-        brand: "PCSUnited",
-        powered_by: "TheWing.ai",
-        endpoint: "agent-amy",
-        version: VERSION,
+
+        ok:
+          true,
+
+        agent:
+          "Amy",
+
+        display_name:
+          "PCSUnited AI Concierge",
+
+        brand:
+          "PCSUnited",
+
+        powered_by:
+          "TheWing.ai",
+
+        endpoint:
+          "agent-amy",
+
+        version:
+          VERSION,
+
         response_contract:
-          conversationContext.response_contract || RESPONSE_CONTRACT_VERSION,
-        mode: requestedMode,
+          conversationContext
+            .response_contract ||
+          RESPONSE_CONTRACT_VERSION,
+
+        mode:
+          requestedMode,
+
+        concierge_mode:
+          conciergeMode,
+
         intent,
-        reply: finalReply,
+
+        reply:
+          finalReply,
+
         answer,
-        profile_used: stripSensitiveProfile(normalizedProfile, intent),
-        truth_packet: deterministic.public,
-        context_used: deterministic.context_used,
-        conversation_id: conversationContext.conversation_id,
+
+        profile_used:
+          stripSensitiveProfile(
+            normalizedProfile,
+            intent
+          ),
+
+        truth_packet:
+          deterministic.public,
+
+        context_used:
+          deterministic.context_used,
+
+        conversation_id:
+          conversationContext
+            .conversation_id,
+
         memory_patch,
+
         memory_echo,
-        ui: {
-          speed: 18,
-          startDelay: 80
-        },
-        warnings: finalWarnings,
-        latency_ms: Date.now() - startedAt,
-        ...(finalDebug ? { debug: finalDebug } : {})
+
+        ui:
+          conciergeUi,
+
+        warnings:
+          finalWarnings,
+
+        latency_ms:
+          Date.now() -
+          startedAt,
+
+        ...(finalDebug
+          ? {
+              debug:
+                finalDebug
+            }
+          : {})
+
       },
       origin
     );
+
+
   } catch (err) {
-    console.error("agent-amy error:", err);
+
+    console.error(
+      "agent-amy error:",
+      err
+    );
+
 
     return respondError(
       500,
       {
-        error: "Agent Amy could not complete the request.",
-        code: "INTERNAL_ERROR",
-        conversation_id: conversationContext?.conversation_id || null,
-        memory_echo: sanitizeMemoryObject(conversationContext?.memory || {}),
+
+        error:
+          "Agent Amy could not complete the request.",
+
+        code:
+          "INTERNAL_ERROR",
+
+        conversation_id:
+          conversationContext
+            ?.conversation_id ||
+          null,
+
+        memory_echo:
+          sanitizeMemoryObject(
+            conversationContext
+              ?.memory ||
+            {}
+          ),
+
         detail:
-          process.env.NODE_ENV === "development"
-            ? String(err?.message || err)
+
+          process.env.NODE_ENV ===
+            "development"
+
+            ? String(
+                err?.message ||
+                err
+              )
+
             : undefined
+
       },
       origin
     );
+
   }
+
 }
+
 
 // ============================================================
 // //#5 RESPONSE / CORS HELPERS
 // ============================================================
 
 function isAllowedOrigin(origin) {
-  const cleanOrigin = safeStr(origin);
-  if (!cleanOrigin) return true;
-  return ALLOW_ORIGINS.includes(cleanOrigin);
+
+  const cleanOrigin =
+    safeStr(
+      origin
+    );
+
+
+  /*
+    Server-side requests may not have an Origin header.
+    Preserve current behavior and allow those requests.
+  */
+  if (!cleanOrigin) {
+
+    return true;
+
+  }
+
+
+  return ALLOW_ORIGINS
+    .includes(
+      cleanOrigin
+    );
+
 }
+
 
 function corsHeaders(origin) {
-  const cleanOrigin = safeStr(origin);
+
+  const cleanOrigin =
+    safeStr(
+      origin
+    );
+
+
   const headers = {
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Max-Age": "86400",
-    "Content-Type": "application/json",
-    Vary: "Origin"
+
+    "Access-Control-Allow-Headers":
+      "Content-Type, Authorization",
+
+    "Access-Control-Allow-Methods":
+      "POST, OPTIONS",
+
+    "Access-Control-Max-Age":
+      "86400",
+
+    "Content-Type":
+      "application/json",
+
+    Vary:
+      "Origin"
+
   };
 
-  if (cleanOrigin && ALLOW_ORIGINS.includes(cleanOrigin)) {
-    headers["Access-Control-Allow-Origin"] = cleanOrigin;
-  }
-
-  return headers;
-}
-
-function respond(statusCode, payload, origin) {
-  return {
-    statusCode,
-    headers: corsHeaders(origin),
-    body: JSON.stringify(payload || {})
-  };
-}
-
-function respondError(statusCode, fields = {}, origin) {
-  const payload = {
-    ok: false,
-    agent: "Amy",
-    endpoint: "agent-amy",
-    version: VERSION,
-    response_contract: RESPONSE_CONTRACT_VERSION,
-    error: safeStr(fields.error) || "Request failed.",
-    code: safeStr(fields.code) || "INTERNAL_ERROR",
-    conversation_id:
-      fields.conversation_id === undefined ? null : fields.conversation_id,
-    memory_patch: {},
-    memory_echo: sanitizeMemoryObject(fields.memory_echo || {}),
-    ui: {
-      speed: 18,
-      startDelay: 80
-    }
-  };
 
   if (
-    process.env.NODE_ENV === "development" &&
-    fields.detail !== undefined
+    cleanOrigin &&
+    ALLOW_ORIGINS.includes(
+      cleanOrigin
+    )
   ) {
-    payload.detail = fields.detail;
+
+    headers[
+      "Access-Control-Allow-Origin"
+    ] =
+      cleanOrigin;
+
   }
 
-  return respond(statusCode, payload, origin);
+
+  return headers;
+
 }
 
-function getHeader(event, name) {
-  const headers = event?.headers || {};
-  const target = String(name || "").toLowerCase();
 
-  for (const [key, value] of Object.entries(headers)) {
-    if (String(key).toLowerCase() === target) return value;
+function respond(
+  statusCode,
+  payload,
+  origin
+) {
+
+  return {
+
+    statusCode,
+
+    headers:
+      corsHeaders(
+        origin
+      ),
+
+    body:
+      JSON.stringify(
+        payload ||
+        {}
+      )
+
+  };
+
+}
+
+
+function respondError(
+  statusCode,
+  fields = {},
+  origin
+) {
+
+  const payload = {
+
+    ok:
+      false,
+
+    agent:
+      "Amy",
+
+    display_name:
+      "PCSUnited AI Concierge",
+
+    brand:
+      "PCSUnited",
+
+    powered_by:
+      "TheWing.ai",
+
+    endpoint:
+      "agent-amy",
+
+    version:
+      VERSION,
+
+    response_contract:
+      RESPONSE_CONTRACT_VERSION,
+
+    error:
+      safeStr(
+        fields.error
+      ) ||
+      "Request failed.",
+
+    code:
+      safeStr(
+        fields.code
+      ) ||
+      "INTERNAL_ERROR",
+
+    conversation_id:
+
+      fields.conversation_id ===
+        undefined
+
+        ? null
+
+        : fields.conversation_id,
+
+    memory_patch:
+      {},
+
+    memory_echo:
+      sanitizeMemoryObject(
+        fields.memory_echo ||
+        {}
+      ),
+
+    ui: {
+
+      ...DEFAULT_UI,
+
+      mode:
+        "error"
+
+    }
+
+  };
+
+
+  if (
+    process.env.NODE_ENV ===
+      "development" &&
+    fields.detail !==
+      undefined
+  ) {
+
+    payload.detail =
+      fields.detail;
+
   }
 
+
+  return respond(
+    statusCode,
+    payload,
+    origin
+  );
+
+}
+
+
+function getHeader(
+  event,
+  name
+) {
+
+  const headers =
+    event?.headers ||
+    {};
+
+
+  const target =
+    String(
+      name ||
+      ""
+    ).toLowerCase();
+
+
+  for (
+    const [key,value]
+    of Object.entries(
+      headers
+    )
+  ) {
+
+    if (
+      String(key)
+        .toLowerCase() ===
+      target
+    ) {
+
+      return value;
+
+    }
+
+  }
+
+
   return "";
+
 }
 
 // ============================================================
