@@ -68,7 +68,9 @@
 // }
 // ============================================================
 
-export const VERSION = "1.0.0-amy-elicitation";
+import { BASE_ALIASES } from "./official-bah.js";
+
+export const VERSION = "1.0.1-amy-elicitation";
 
 
 // ============================================================
@@ -265,6 +267,11 @@ export function buildAmyElicitation({
   // 2. Factual / definition questions should usually be answered.
   // ----------------------------------------------------------
 
+  if (/^(something else|i have another (?:military pay or benefits|career or readiness|housing or financial) question)[.!? ]*$/.test(lower)) {
+    return elicitDecision({ id: "free_text", question: "What can I help you find?",
+      detail: "Tell me what you're trying to decide.", options: [] });
+  }
+
   if (looksLikeDefinitionQuestion(lower)) {
     return answerDecision(
       "specific factual or explanatory question"
@@ -290,8 +297,7 @@ export function buildAmyElicitation({
   // ----------------------------------------------------------
 
   if (
-    isGreeting(lower) &&
-    thread.length <= 2
+    isGreeting(lower)
   ) {
     return primaryElicitation(
       "What can I help you figure out today?",
@@ -749,6 +755,11 @@ function buildPcsDecision(ctx) {
 
   const { lower, intent } = ctx;
 
+  // A specific housing decision must not loop back to the PCS category menu.
+  if (/\b(should (?:i )?(?:buy|rent)|rent (?:vs\.?|or) buy|can i afford|mortgage payment)\b/.test(lower)) {
+    return buildHousingDecision(ctx);
+  }
+
   const hasPcs =
     intent === "pcs_housing_strategy" ||
     /\b(pcs|orders|duty station|reassignment|move|moving|new base)\b/
@@ -764,7 +775,7 @@ function buildPcsDecision(ctx) {
       .test(lower);
 
   const wantsArea =
-    /\b(neighborhood|commute|local area|surrounding area|area around|schools?|market|where to live|base demographics)\b/
+    /\b(neighborhoods?|commutes?|local area|surrounding area|area around|schools?|market|where to live|base demographics)\b/
       .test(lower);
 
   const wantsMap =
@@ -823,7 +834,7 @@ function buildPcsDecision(ctx) {
   if (wantsHousing) {
 
     return housingElicitation(
-      "What are you trying to decide about housing at your next duty station?"
+      `What are you trying to decide about housing${ctx.profile.base ? ` at ${ctx.profile.base}` : " at your next duty station"}?`
     );
   }
 
@@ -894,16 +905,23 @@ function buildHousingDecision(ctx) {
 
   const hasRentBuy =
     intent === "rent_vs_buy" ||
-    /\b(rent vs buy|rent or buy|should i rent|should i buy)\b/
+    /\b(rent vs buy|rent or buy|should (?:i )?rent|should (?:i )?buy)\b/
       .test(lower);
 
   const broadHousing =
-    /\b(housing|housing and finances|housing & finances|home buying|buy a home|buying a home)\b/
+    /\b(housing|housing and finances|housing & finances|home buying|buy(?:ing)? (?:a |my |the )?(?:home|house))\b/
       .test(lower) &&
     !hasMortgage &&
     !hasAffordability &&
     !hasRentBuy;
 
+
+  if (hasAffordability && ctx.publicPacket.affordability && ctx.publicPacket.mortgage) {
+    return answerDecision("explain the available affordability result");
+  }
+  if (hasMortgage && ctx.publicPacket.mortgage) {
+    return answerDecision("explain the available mortgage result");
+  }
 
   if (hasAffordability) {
 
@@ -940,9 +958,11 @@ function buildHousingDecision(ctx) {
 
     // This is a decision question. Let Agent Amy answer using the
     // available Truth Packet instead of forcing a redirect.
-    return answerDecision(
-      "rent-versus-buy decision should be explained with user context"
-    );
+    if (!hasValue(ctx.profile.expectedHoldMonths) && !hasValue(ctx.profile.pcsTimelineMonths)) {
+      return elicitDecision({id: "housing_timeline", question: "How long do you expect to keep the home?",
+        detail: "Your PCS timing matters when comparing buying with renting.", options: []});
+    }
+    return answerDecision("rent-versus-buy decision should be explained with user context");
   }
 
 
@@ -1191,10 +1211,7 @@ function buildMissingInputElicitation(ctx) {
   // always include this, so inspect the scenario directly.
   // ----------------------------------------------------------
 
-  const wantsOwnBah =
-    intent === "compensation" &&
-    /\b(my bah|calculate.*bah|bah.*calculate|what.*my.*bah|my military pay)\b/
-      .test(lower);
+  const wantsOwnBah = isPersonalBahQuestion(lower);
 
   const dependencyStatus =
     firstDefined(
@@ -1202,7 +1219,8 @@ function buildMissingInputElicitation(ctx) {
       profile?.family,
       profile?.with_dependents,
       profile?.withDependents,
-      profile?.hasDependents
+      profile?.hasDependents,
+      profile?.has_dependents
     );
 
   const hasRank =
@@ -1224,6 +1242,16 @@ function buildMissingInputElicitation(ctx) {
       )
     );
 
+
+  if (wantsOwnBah && !hasRank) {
+    return elicitDecision({id: "bah_rank", question: "What is your rank or paygrade?", options: []});
+  }
+  if (wantsOwnBah && !hasLocation) {
+    return elicitDecision({id: "bah_location", question: "Which duty station or BAH ZIP should I use?", options: []});
+  }
+  if (wantsOwnBah && dependencyStatus != null) {
+    return answerDecision("answer personal BAH from the compensation packet");
+  }
 
   if (
     wantsOwnBah &&
@@ -1464,6 +1492,8 @@ function detectExplicitNavigation(ctx) {
 
   const { lower } = ctx;
 
+  if (/\b(do not|don.t|never|without)\s+(?:automatically\s+)?(?:open|navigate|take|go|launch)\b/.test(lower)) return null;
+
   const isExplicit =
     /\b(open|take me to|go to|launch|send me to|show me the|bring me to)\b/
       .test(lower);
@@ -1620,7 +1650,7 @@ function detectExplicitNavigation(ctx) {
 
 function looksLikeDefinitionQuestion(text) {
 
-  if (!text) {
+  if (!text || isPersonalBahQuestion(text)) {
     return false;
   }
 
@@ -1682,7 +1712,8 @@ function looksLikeBroadHelp(
 ) {
 
   if (
-    intent === "capabilities"
+    intent === "capabilities" &&
+    !/\b(pay|bah|mortgage|house|housing|pcs|career|retirement|fitness|waps|opb)\b/.test(text)
   ) {
     return true;
   }
@@ -1695,7 +1726,7 @@ function looksLikeBroadHelp(
   }
 
   if (
-    /^(help|help me|can you help|what can you do|how can you help)[?.! ]*$/
+    /^(help|help me|can you help(?: me)?|what can you do|how can you help)[?.! ]*$/
       .test(text)
   ) {
     return true;
@@ -1925,3 +1956,68 @@ export function summarizeAmyElicitation(
 
 
 export default buildAmyElicitation;
+
+
+export function isPersonalBahQuestion(text = "") {
+  return /\bbah\b/.test(normalize(text)) &&
+    /\b(my|me|for|calculate|estimate|use|rate with|rate without)\b/.test(normalize(text));
+}
+
+export function resolveAmyConversationProfile({ message = "", profile = {}, conversationContext = {} } = {}) {
+  const memory = conversationContext.memory || {};
+  const remembered = {};
+  for (const [key, field] of Object.entries({last_base:"base",last_rank:"rank_paygrade",last_yos:"yos",last_family:"family",last_zip:"zip",last_expected_hold_months:"expectedHoldMonths"})) {
+    const value = memory[key];
+    if (field === "expectedHoldMonths" && typeof value === "number" && value > 0 && value <= 1200) remembered[field] = value;
+    else if (field === "family" && typeof value === "boolean") remembered[field] = value;
+    else if (field === "yos" && typeof value === "number" && value >= 0 && value <= 40) remembered[field] = value;
+    else if (field === "rank_paygrade" && /^[EOW]-\d{1,2}E?$/.test(safeStr(value))) remembered[field] = value;
+    else if (field === "zip" && /^\d{5}$/.test(safeStr(value))) remembered[field] = value;
+    else if (field === "base" && typeof value === "string" && value.length <= 120) remembered[field] = value;
+  }
+  // Only explicit user turns supply scenario inputs. Assistant prose is never parsed as facts.
+  for (const turn of (conversationContext.thread || []).slice(-12)) {
+    if (turn.role === "user") Object.assign(remembered, extractConversationInputs(turn.content));
+  }
+  const current = extractConversationInputs(message);
+  if (memory.last_elicitation_id === "bah_location" && /^\d{5}$/.test(message.trim())) current.zip = message.trim();
+  if (memory.last_elicitation_id === "housing_timeline") {
+    const duration = message.match(/^(?:about |around |for )?(\d{1,3}(?:\.\d+)?)\s*(years?|months?)[.! ]*$/i);
+    if (duration) current.expectedHoldMonths = Number(duration[1]) * (/year/i.test(duration[2]) ? 12 : 1);
+  }
+  return {...remembered, ...profile, ...current};
+}
+
+function extractConversationInputs(message = "") {
+  const text = normalize(message);
+  const result = {};
+  const rank = text.match(/\b([eow])-?(\d{1,2})(e)?\b/i);
+  if (rank && Number(rank[2]) >= 1 && Number(rank[2]) <= ({e:9,o:10,w:5})[rank[1]]) {
+    result.rank_paygrade = `${rank[1].toUpperCase()}-${rank[2]}${rank[3] ? "E" : ""}`;
+  }
+  const yos = text.match(/\b(\d{1,2}(?:\.\d+)?)\s*(?:yos|years? of service)\b/);
+  if (yos && Number(yos[1]) <= 40) result.yos = Number(yos[1]);
+  const zip = text.match(/\b(?:zip(?: code)?|bah zip)\s*(?:is|:)?\s*(\d{5})\b/);
+  if (zip) result.zip = zip[1];
+  if (/\b(?:without dependents|no dependents)\b/.test(text)) result.family = false;
+  else if (/\bwith dependents\b/.test(text)) result.family = true;
+  // Require a location statement, then match the existing canonical installation aliases.
+  const exactBase = Object.entries(BASE_ALIASES).find(([alias]) => text.replace(/[.!?]$/, "") === alias.toLowerCase());
+  if (exactBase) result.base = exactBase[1];
+  const location = text.match(/\b(?:orders to|pcs(?:ing)? to|moving to|stationed at|based at|base is|duty station is)\s+([^.!?]+)|^([a-z][a-z -]+(?:afb|base))$/);
+  if (location) {
+    const destination = (location[1] || location[2]).trim();
+    const aliases = Object.entries(BASE_ALIASES).sort((a,b)=>b[0].length-a[0].length);
+    const found = aliases.find(([alias]) => destination === alias.toLowerCase() || destination.startsWith(alias.toLowerCase() + ","));
+    if (found) result.base = found[1];
+  }
+  return result;
+}
+
+export function isBahFollowUp(message, conversationContext = {}) {
+  const id = conversationContext.memory?.last_elicitation_id;
+  const inputs = extractConversationInputs(message);
+  return (id === "bah_rank" && hasValue(inputs.rank_paygrade)) ||
+    (id === "bah_location" && (hasValue(inputs.base) || hasValue(inputs.zip) || /^\d{5}$/.test(message.trim()))) ||
+    (id === "bah_dependents" && hasValue(inputs.family));
+}
