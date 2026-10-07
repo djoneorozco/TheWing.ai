@@ -70,7 +70,7 @@
 
 import { BASE_ALIASES } from "./official-bah.js";
 
-export const VERSION = "1.0.1-amy-elicitation";
+export const VERSION = "1.0.2-amy-elicitation";
 
 
 // ============================================================
@@ -82,7 +82,7 @@ export const AMY_ROUTES = Object.freeze({
   bah: {
     app: "bah_base_pay",
     label: "Open BAH & Base Pay Calculator",
-    url: "/air-force/bah-base-pay-calculator.html"
+    url: "https://thewing.ai/air-force/bah-base-pay-calculator.html"
   },
 
   retirement: {
@@ -251,6 +251,12 @@ export function buildAmyElicitation({
   // ----------------------------------------------------------
   // 1. Explicit user navigation always wins.
   // ----------------------------------------------------------
+
+  // Preserve navigation for the value emitted by previously rendered pay menus.
+  // This exact menu selection must not enter the personal BAH input flow.
+  if (lower === "i want to calculate my base pay or bah.") {
+    return routeDecision("bah", "Opening the BAH & Base Pay Calculator.", true);
+  }
 
   const explicitRoute = detectExplicitNavigation(baseContext);
 
@@ -581,7 +587,7 @@ function buildPayDecision(ctx) {
           "base_pay_bah",
           "My Base Pay or BAH",
           "Estimate military compensation",
-          "I want to calculate my Base Pay or BAH."
+          "Open the BAH & Base Pay Calculator."
         ),
 
         option(
