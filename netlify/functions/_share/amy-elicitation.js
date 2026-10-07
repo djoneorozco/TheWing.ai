@@ -70,7 +70,7 @@
 
 import { BASE_ALIASES } from "./official-bah.js";
 
-export const VERSION = "1.0.2-amy-elicitation";
+export const VERSION = "1.0.3-amy-elicitation";
 
 
 // ============================================================
@@ -88,13 +88,13 @@ export const AMY_ROUTES = Object.freeze({
   retirement: {
     app: "retirement_calculator",
     label: "Open Retirement Calculator",
-    url: "/air-force/retirement-calculator.html"
+    url: "https://thewing.ai/air-force/retirement-calculator.html"
   },
 
   disability: {
     app: "va_disability_calculator",
     label: "Open VA Disability Calculator",
-    url: "/air-force/disability-calculator.html"
+    url: "https://thewing.ai/air-force/disability-calculator.html"
   },
 
   va: {
@@ -148,13 +148,13 @@ export const AMY_ROUTES = Object.freeze({
   pt: {
     app: "pt_calculator",
     label: "Open PT Calculator",
-    url: "/air-force/pt-calculator.html"
+    url: "https://thewing.ai/air-force/pt-calculator.html"
   },
 
   waps: {
     app: "waps_calculator",
     label: "Open WAPS Calculator",
-    url: "/waps.html"
+    url: "https://thewing.ai/waps.html"
   },
 
   opb: {
