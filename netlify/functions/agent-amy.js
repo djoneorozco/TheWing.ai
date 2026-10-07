@@ -170,6 +170,9 @@ const ALLOW_ORIGINS = [
   "https://thewing.netlify.app",
   "https://www.thewing.netlify.app",
 
+  /* TheWing Webflow staging / preview domain */
+  "https://the-wing.webflow.io",
+
   "http://localhost:8888",
   "http://localhost:3000",
   "http://127.0.0.1:8888",
