@@ -1,7 +1,7 @@
 // netlify/functions/agent-amy-public.js
 // ============================================================
 // TheWing.ai • PCSUnited Public Resources Concierge — Amy
-// v1.0.0-public-resources • ES MODULE + AGENT REGISTRY
+// v1.0.2-public-resources-professional • ES MODULE + AGENT REGISTRY
 //
 // PURPOSE
 // - Public Resources-page Ask Amy endpoint
@@ -39,14 +39,15 @@ import * as officialBah from "./_share/official-bah.js";
 import { buildAmyTruthPacket } from "./_share/amy-brain.js";
 import {
   buildAmyConciergeReply,
-  buildAmyConciergeStyleGuide
+  buildAmyConciergeStyleGuide,
+  shouldAmyConciergeHandle
 } from "./_share/amy-concierge.js";
 
 // ============================================================
 // //#1 CONFIG
 // ============================================================
 
-const VERSION = "1.0.0-public-resources";
+const VERSION = "1.0.2-public-resources-professional";
 const RESPONSE_CONTRACT_VERSION = "ask-amy-response-v1";
 const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-6-astra";
 const DEFAULT_RESPONSE_MODE = "member_guidance";
@@ -355,20 +356,6 @@ export async function handler(event) {
     const normalizedProfile = normalizePublicScenario(clientContext, registryTools);
     const intent = detectIntent(message);
 
-    let conciergeResult = null;
-    try {
-      conciergeResult = buildAmyConciergeReply({
-        message,
-        intent,
-        normalizedProfile
-      });
-    } catch (error) {
-      console.warn(
-        "[agent-amy-public] Amy Concierge unavailable:",
-        error?.message || error
-      );
-    }
-
     const requestedMode =
       conversationContext.requested_mode || DEFAULT_RESPONSE_MODE;
 
@@ -479,15 +466,21 @@ console.log("====================================");
         conversationContext.response_limits.max_follow_up_questions
     };
 
-    const conciergeReply = conciergeResult?.reply || "";
-
-    const directReplyRaw =
-      conciergeReply ||
-      buildDirectDeterministicReply({
-        intent,
-        normalizedProfile,
-        deterministic
-      });
+    // Build the substantive answer before considering social-only ownership.
+    const directReplyRaw = buildDirectDeterministicReply({
+      intent, normalizedProfile, deterministic
+    });
+    let conciergeReply = "";
+    const hasRelevantTruth = (amyTruth?.routing?.matched_modules || []).length > 0;
+    try {
+      if (!hasRelevantTruth && shouldAmyConciergeHandle({message, intent})) {
+        conciergeReply = buildAmyConciergeReply({
+          message, intent, normalizedProfile, deterministic, conversationContext
+        })?.reply || "";
+      }
+    } catch (error) {
+      console.warn("[agent-amy-public] Amy social reply unavailable:", error?.message);
+    }
 
     let openaiUsed = false;
     let openaiUnavailable = !OPENAI_API_KEY;
@@ -504,6 +497,7 @@ console.log("====================================");
       replyRaw = directReplyRaw;
     } else if (OPENAI_API_KEY) {
       const systemPrompt = buildSystemPrompt({
+        message, conversationContext,
         deterministic,
         styleGuide: conversationContext.style_guide,
         requestedMode,
@@ -2402,12 +2396,12 @@ function detectIntent(message) {
   const t = safeStr(message).toLowerCase();
   if (!t) return "general_guidance";
 
-  if (/^(hi|hello|hey|yo|good morning|good afternoon|good evening)\b/.test(t)) {
+  if (/^(hi|hello|hey|yo|good morning|good afternoon|good evening)(?:[, ]+amy)?[.!?]*$/.test(t)) {
     return "greeting";
   }
 
   if (
-    /\bwhat can you do\b|\bhow can you help\b|\bwhat do you do\b|\bwho are you\b|\bare you working\b/.test(
+    /^(?:what can you do|how can you help(?: me)?|what do you do|who are you|are you working)[.!?]*$/.test(
       t
     )
   ) {
@@ -4373,6 +4367,7 @@ function stripPublicProfile(profile, intent = "") {
 // ============================================================
 
 function buildSystemPrompt({
+  message = "", conversationContext = {},
   deterministic,
   styleGuide,
   requestedMode,
@@ -4388,7 +4383,7 @@ function buildSystemPrompt({
 
   let conciergeStyleGuide = "";
   try {
-    conciergeStyleGuide = buildAmyConciergeStyleGuide();
+    conciergeStyleGuide = buildAmyConciergeStyleGuide({message, deterministic, conversationContext});
   } catch (error) {
     console.warn(
       "[agent-amy-public] Amy Concierge style guide unavailable:",
@@ -4439,8 +4434,8 @@ function buildSystemPrompt({
     conciergeStyleGuide,
     "",
     "Style:",
-   "- Very Warm, conversational, engaging, flirty, confident, and military-aware.",
-   "- Usually respond in 3 to 5 natural sentences unless the user asks for a short answer or the answer is genuinely simple.",
+   "- Professional first, calm, warm and military-aware. Do not initiate flirtation.",
+   "- Usually use 1 to 3 sentences and at most one useful question; keep necessary detail for substantive answers.",
    "- For decision questions, prefer: answer → meaning → implication → next move.",
    "- Do not force BLUF formatting into greetings, small talk, feature discovery, or casual conversation.",
    "- When useful, naturally recommend one relevant TheWing.ai feature or calculator and explain why the user should try it.",
