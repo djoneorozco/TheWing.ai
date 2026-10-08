@@ -1525,18 +1525,24 @@
       0;
 
 
+    // The child-inclusive base covers an under-18 child in this UI.
+    // Qualifying school children receive their separate allowance below;
+    // they must not also trigger the child-inclusive base.
+    // VA school-child rule: https://www.benefits.va.gov/COMPENSATION/resources_comp01.asp
+    const hasBaseChild = childrenUnder18 > 0;
+
     const baseKey =
       pickBaseKey(
         spouse,
         dependentParents,
-        hasAnyChildren
+        hasBaseChild
       );
 
 
     const baseTable =
       getBaseRateTable(
         rating,
-        hasAnyChildren
+        hasBaseChild
       );
 
 
