@@ -397,8 +397,13 @@ export function getVACompensation(input = {}) {
   }
 
   const hasAnyChildren = childrenUnder18 + childrenInSchoolOver18 > 0;
-  const baseKey = pickBaseKey(spouse, dependentParents, hasAnyChildren);
-  const baseTable = getBaseRateTable(rating, hasAnyChildren);
+  // The child-inclusive base covers an under-18 child in this input contract.
+  // Qualifying school children receive their separate allowance below;
+  // they must not also trigger the child-inclusive base.
+  // VA school-child rule: https://www.benefits.va.gov/COMPENSATION/resources_comp01.asp
+  const hasBaseChild = childrenUnder18 > 0;
+  const baseKey = pickBaseKey(spouse, dependentParents, hasBaseChild);
+  const baseTable = getBaseRateTable(rating, hasBaseChild);
   const baseMonthlyVA = Number(baseTable[baseKey]?.[rating]);
 
   if (!Number.isFinite(baseMonthlyVA)) {
