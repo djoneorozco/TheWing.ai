@@ -1,7 +1,7 @@
 /* ============================================================
   PCSUnited • PT Score Header Strip
   Standalone Public JavaScript
-  v1.1.0 • MIDNIGHT AF BLUE
+  v1.2.0 • RESPONSIVE SCORE HEADER
 
   FILE
   PT-Calculator/pt-header-progression.js
@@ -10,7 +10,7 @@
   #pcsu-pt-header-progression-widget
 
   PURPOSE
-  - Injects a compact live PT score breakdown strip
+  - Injects a responsive live PT score breakdown strip
   - Consumes snapshots from ptcalculator.js only
   - Does not recalculate official PFRA scoring
   - No API requests, storage, navigation, or scrolling
@@ -19,12 +19,12 @@
 (() => {
   "use strict";
 
-  const VERSION = "1.1.0";
-  const SOURCE = "pcsunited.pt.header.v1.1.0";
+  const VERSION = "1.2.0";
+  const SOURCE = "pcsunited.pt.header.v1.2.0";
 
   const MOUNT_ID = "pcsu-pt-header-progression-widget";
   const ROOT_ID = "pcsu-pt-header-score-strip";
-  const STYLE_ID = "pcsu-pt-header-progression-styles-v110";
+  const STYLE_ID = "pcsu-pt-header-progression-styles-v120";
   const FONT_ID = "pcsu-pt-header-progression-font";
 
   const CAPS = {
@@ -110,500 +110,190 @@
       style.id = STYLE_ID;
 
       style.textContent = `
+        #${ROOT_ID} {
+          all:initial;
+          display:block;
+          width:100%;
+          min-width:0;
+          margin:16px 0 20px;
+          color:#f3f8fc;
+          background:transparent;
+        }
+
         #${ROOT_ID},
         #${ROOT_ID} * {
           box-sizing:border-box;
-
-          font-family:
-            Inter,
-            system-ui,
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            sans-serif;
+          font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont,
+            "Segoe UI", sans-serif;
         }
 
-        #${ROOT_ID} {
-          display:block;
+        #${ROOT_ID} .pcsu-pt-header-wrap {
           width:100%;
-
-          color:#f3f8fc;
-
-          background:
-            transparent !important;
-
-          margin:10px 0 14px;
+          container-type:inline-size;
+          container-name:pcsu-pt-header;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-wrap {
+        #${ROOT_ID} .pcsu-pt-header-inner {
           width:100%;
-
-          display:flex;
-          align-items:center;
-          justify-content:center;
-
-          background:
-            transparent !important;
+          min-width:0;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-inner {
-          width:100%;
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-grid {
+        #${ROOT_ID} .pcsu-pt-header-grid {
           display:grid;
-
-          grid-template-columns:
-            repeat(
-              5,
-              minmax(84px, 1fr)
-            );
-
-          gap:10px;
-
-          width:min(680px, 100%);
-
+          grid-template-columns:repeat(4, minmax(0, 1fr)) minmax(0, 1.5fr);
+          align-items:stretch;
+          gap:12px;
+          width:min(900px, 100%);
           margin:0 auto;
-
-          background:
-            transparent !important;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-tile {
-          position:relative;
-          overflow:hidden;
-
-          min-height:50px;
-
+        #${ROOT_ID} .pcsu-pt-header-tile {
+          min-width:0;
+          min-height:104px;
           display:flex;
           flex-direction:column;
           justify-content:center;
           align-items:center;
-
-          padding:
-            8px
-            12px
-            9px;
-
-          border:
-            1px solid
-            rgba(183,211,232,.18);
-
-          border-radius:999px;
-
-          background:
-            radial-gradient(
-              120px 58px
-              at 24% 0%,
-              rgba(116,177,216,.15),
-              transparent 70%
-            ),
-            linear-gradient(
-              180deg,
-              rgba(25,52,78,.94),
-              rgba(10,30,48,.92)
-            );
-
+          gap:6px;
+          padding:16px 12px;
+          border:1px solid rgba(200,224,241,.16);
+          border-radius:20px;
+          background:rgba(20,46,66,.32);
           color:#f3f8fc;
-
           text-align:center;
-
-          box-shadow:
-            inset 0 1px 0
-              rgba(221,237,247,.10),
-
-            0 10px 24px
-              rgba(2,12,24,.30);
-
-          backdrop-filter:
-            blur(12px)
-            saturate(145%);
-
-          -webkit-backdrop-filter:
-            blur(12px)
-            saturate(145%);
-
-          transition:
-            opacity .18s ease,
-            transform .18s ease,
-            filter .18s ease,
-            border-color .18s ease;
+          box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-tile::before {
-          content:"";
-
-          position:absolute;
-          inset:0 0 auto;
-
-          height:1px;
-
-          background:
-            linear-gradient(
-              90deg,
-              transparent,
-              rgba(228,192,113,.32),
-              rgba(124,203,217,.18),
-              transparent
-            );
-
-          pointer-events:none;
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-tile::after {
-          content:"";
-
-          position:absolute;
-          inset:0;
-
-          border-radius:inherit;
-
-          background:
-            linear-gradient(
-              180deg,
-              rgba(218,235,246,.035),
-              rgba(218,235,246,0)
-              46%
-            );
-
-          pointer-events:none;
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-accent {
-          position:absolute;
-
-          left:10px;
-          right:10px;
-          bottom:6px;
-
-          height:2px;
-
-          border-radius:999px;
-
-          opacity:.78;
-
-          pointer-events:none;
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-tile[
-          data-accent="body"
-        ]
-        .pcsu-pt-header-accent {
-          background:
-            linear-gradient(
-              90deg,
-              transparent,
-              #76d6d0,
-              transparent
-            );
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-tile[
-          data-accent="strength"
-        ]
-        .pcsu-pt-header-accent {
-          background:
-            linear-gradient(
-              90deg,
-              transparent,
-              #d8a58e,
-              transparent
-            );
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-tile[
-          data-accent="core"
-        ]
-        .pcsu-pt-header-accent {
-          background:
-            linear-gradient(
-              90deg,
-              transparent,
-              #aebfe8,
-              transparent
-            );
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-tile[
-          data-accent="cardio"
-        ]
-        .pcsu-pt-header-accent {
-          background:
-            linear-gradient(
-              90deg,
-              transparent,
-              #9fe3d4,
-              transparent
-            );
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-tile[
-          data-accent="total"
-        ]
-        .pcsu-pt-header-accent {
-          background:
-            linear-gradient(
-              90deg,
-              transparent,
-              #e4c071,
-              transparent
-            );
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-label {
-          position:relative;
-          z-index:2;
-
+        #${ROOT_ID} .pcsu-pt-header-label {
           display:block;
-
-          margin-bottom:2px;
-
-          color:
-            rgba(205,223,236,.66);
-
-          font-size:7.5px;
-          line-height:1;
-          font-weight:900;
-
-          text-transform:uppercase;
-
-          letter-spacing:.12em;
-
-          white-space:nowrap;
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-value {
-          position:relative;
-          z-index:2;
-
-          display:block;
-
-          color:#f4f8fb;
-
-          font-size:12.5px;
-          line-height:1.05;
-          font-weight:900;
-
-          letter-spacing:-.03em;
-
-          white-space:nowrap;
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-support {
-          position:relative;
-          z-index:2;
-
-          display:block;
-
           max-width:100%;
-
-          margin-top:2px;
-
-          overflow:hidden;
-
-          color:
-            rgba(190,210,225,.64);
-
-          font-size:8px;
-          line-height:1.1;
-          font-weight:600;
-
-          letter-spacing:.01em;
-
-          text-overflow:ellipsis;
-          white-space:nowrap;
+          color:#b9cddd;
+          font-size:10px;
+          line-height:1.35;
+          font-weight:700;
+          text-transform:uppercase;
+          letter-spacing:.1em;
+          overflow-wrap:anywhere;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-value.is-gold {
+        #${ROOT_ID} .pcsu-pt-header-value {
+          display:block;
+          max-width:100%;
+          color:#f4f8fb;
+          font-size:22px;
+          line-height:1.1;
+          font-weight:800;
+          font-variant-numeric:tabular-nums;
+          letter-spacing:-.035em;
+          overflow-wrap:anywhere;
+        }
+
+        #${ROOT_ID} .pcsu-pt-header-support {
+          display:block;
+          max-width:100%;
+          color:#b9cddd;
+          font-size:11px;
+          line-height:1.4;
+          font-weight:500;
+          overflow-wrap:anywhere;
+        }
+
+        #${ROOT_ID} .pcsu-pt-header-value.is-gold,
+        #${ROOT_ID} .pcsu-pt-header-support.is-gold {
           color:#f0cf83;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-value.is-green {
+        #${ROOT_ID} .pcsu-pt-header-value.is-green,
+        #${ROOT_ID} .pcsu-pt-header-support.is-green {
           color:#9fe3d4;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-value.is-danger {
+        #${ROOT_ID} .pcsu-pt-header-value.is-danger,
+        #${ROOT_ID} .pcsu-pt-header-support.is-danger {
           color:#ff9fb0;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-value.is-amber {
+        #${ROOT_ID} .pcsu-pt-header-value.is-amber,
+        #${ROOT_ID} .pcsu-pt-header-support.is-amber {
           color:#e4c071;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-value.is-aqua {
+        #${ROOT_ID} .pcsu-pt-header-value.is-aqua {
           color:#86dfe0;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-support.is-gold {
-          color:#f0cf83;
+        #${ROOT_ID} .pcsu-pt-header-tile.is-missing {
+          opacity:.7;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-support.is-green {
-          color:#9fe3d4;
+        #${ROOT_ID} .pcsu-pt-header-tile.is-total {
+          gap:5px;
+          border-color:rgba(240,207,131,.36);
+          background:linear-gradient(135deg,
+            rgba(240,207,131,.09), rgba(20,46,66,.38));
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-support.is-danger {
-          color:#ff9fb0;
+        #${ROOT_ID} .pcsu-pt-header-tile.is-total .pcsu-pt-header-label {
+          color:#e6e4d9;
+          font-size:11px;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-support.is-amber {
-          color:#e4c071;
+        #${ROOT_ID} .pcsu-pt-header-tile.is-total .pcsu-pt-header-value {
+          font-size:36px;
+          font-weight:800;
+          letter-spacing:-.045em;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-tile.is-missing {
-          opacity:.52;
+        #${ROOT_ID} .pcsu-pt-header-tile.is-total .pcsu-pt-header-support {
+          font-size:12px;
+          font-weight:600;
         }
 
-        #${ROOT_ID}
-        .pcsu-pt-header-tile.is-total {
-          min-height:50px;
-
-          border-color:
-            rgba(228,192,113,.28);
-
-          background:
-            radial-gradient(
-              130px 64px
-              at 30% 0%,
-              rgba(228,192,113,.14),
-              transparent 72%
-            ),
-            linear-gradient(
-              180deg,
-              rgba(33,52,71,.96),
-              rgba(14,30,45,.94)
-            );
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-tile:hover {
-          transform:
-            translateY(-1px);
-
-          border-color:
-            rgba(183,211,232,.28);
-
-          filter:
-            brightness(1.04);
-        }
-
-        #${ROOT_ID}
-        .pcsu-pt-header-tile.is-total:hover {
-          border-color:
-            rgba(228,192,113,.40);
-        }
-
-        @media (max-width:900px) {
-          #${ROOT_ID}
-          .pcsu-pt-header-grid {
-            width:min(620px, 100%);
-            gap:6px;
+        /* Fit narrow embeds as well as phone screens. */
+        @container pcsu-pt-header (max-width:700px) {
+          #${ROOT_ID} .pcsu-pt-header-grid {
+            grid-template-columns:repeat(2, minmax(0, 1fr));
+            gap:10px;
           }
 
-          #${ROOT_ID}
-          .pcsu-pt-header-label {
-            font-size:7px;
+          #${ROOT_ID} .pcsu-pt-header-tile {
+            min-height:96px;
+            padding:14px 10px;
+            border-radius:18px;
           }
 
-          #${ROOT_ID}
-          .pcsu-pt-header-value {
-            font-size:12px;
-          }
-
-          #${ROOT_ID}
-          .pcsu-pt-header-support {
-            font-size:7.5px;
-          }
-        }
-
-        @media (max-width:760px) {
-          #${ROOT_ID}
-          .pcsu-pt-header-grid {
-            grid-template-columns:
-              repeat(
-                2,
-                minmax(110px, 1fr)
-              );
-
-            width:100%;
-            gap:8px;
-          }
-
-          #${ROOT_ID}
-          .pcsu-pt-header-tile {
-            min-height:54px;
-
-            padding:
-              9px
-              11px
-              11px;
-
-            border-radius:14px;
-          }
-
-          #${ROOT_ID}
-          .pcsu-pt-header-tile.is-total {
+          #${ROOT_ID} .pcsu-pt-header-tile.is-total {
             grid-column:1 / -1;
+            grid-row:1;
+            min-height:116px;
           }
 
-          #${ROOT_ID}
-          .pcsu-pt-header-label {
-            font-size:9px;
-          }
-
-          #${ROOT_ID}
-          .pcsu-pt-header-value {
-            font-size:15px;
-          }
-
-          #${ROOT_ID}
-          .pcsu-pt-header-support {
-            font-size:9px;
+          #${ROOT_ID} .pcsu-pt-header-tile.is-total .pcsu-pt-header-value {
+            font-size:42px;
           }
         }
 
-        @media (
-          prefers-reduced-motion:
-          reduce
-        ) {
-          #${ROOT_ID},
-          #${ROOT_ID} * {
-            transition-duration:
-              .01ms !important;
+        /* Also covers browsers without container query support. */
+        @media (max-width:700px) {
+          #${ROOT_ID} .pcsu-pt-header-grid {
+            grid-template-columns:repeat(2, minmax(0, 1fr));
+            gap:10px;
+          }
 
-            animation-duration:
-              .01ms !important;
+          #${ROOT_ID} .pcsu-pt-header-tile {
+            min-height:96px;
+            padding:14px 10px;
+            border-radius:18px;
+          }
 
-            animation-iteration-count:
-              1 !important;
+          #${ROOT_ID} .pcsu-pt-header-tile.is-total {
+            grid-column:1 / -1;
+            grid-row:1;
+            min-height:116px;
+          }
 
-            scroll-behavior:
-              auto !important;
+          #${ROOT_ID} .pcsu-pt-header-tile.is-total .pcsu-pt-header-value {
+            font-size:42px;
           }
         }
       `;
@@ -619,7 +309,6 @@
       <div
         id="${ROOT_ID}"
         data-version="${VERSION}"
-        style="all:initial;"
         role="status"
         aria-live="polite"
         aria-atomic="true"
@@ -637,11 +326,6 @@
                 data-accent="body"
                 id="pcsu-pt-tile-body"
               >
-                <span
-                  class="pcsu-pt-header-accent"
-                  aria-hidden="true"
-                ></span>
-
                 <span
                   class="pcsu-pt-header-label"
                   id="pcsu-pt-label-body"
@@ -671,11 +355,6 @@
                 id="pcsu-pt-tile-strength"
               >
                 <span
-                  class="pcsu-pt-header-accent"
-                  aria-hidden="true"
-                ></span>
-
-                <span
                   class="pcsu-pt-header-label"
                   id="pcsu-pt-label-strength"
                 >
@@ -703,11 +382,6 @@
                 data-accent="core"
                 id="pcsu-pt-tile-core"
               >
-                <span
-                  class="pcsu-pt-header-accent"
-                  aria-hidden="true"
-                ></span>
-
                 <span
                   class="pcsu-pt-header-label"
                   id="pcsu-pt-label-core"
@@ -737,11 +411,6 @@
                 id="pcsu-pt-tile-cardio"
               >
                 <span
-                  class="pcsu-pt-header-accent"
-                  aria-hidden="true"
-                ></span>
-
-                <span
                   class="pcsu-pt-header-label"
                   id="pcsu-pt-label-cardio"
                 >
@@ -770,11 +439,6 @@
                 data-accent="total"
                 id="pcsu-pt-tile-total"
               >
-                <span
-                  class="pcsu-pt-header-accent"
-                  aria-hidden="true"
-                ></span>
-
                 <span
                   class="pcsu-pt-header-label"
                   id="pcsu-pt-label-total"
