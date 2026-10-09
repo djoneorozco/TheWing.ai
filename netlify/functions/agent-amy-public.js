@@ -37,6 +37,7 @@ import * as mortgageEngine from "./_share/mortgage-engine.js";
 import * as vaLoans from "./_share/va-loans.js";
 import * as officialBah from "./_share/official-bah.js";
 import { buildAmyTruthPacket } from "./_share/amy-brain.js";
+import { buildAfFitnessTruthPacket } from "./_share/af-fitness.js";
 import {
   buildAmyConciergeReply,
   buildAmyConciergeStyleGuide,
@@ -437,8 +438,6 @@ console.log("====================================");
         }
       });
 
-      amyTruth = enforceBrowserPtAuthority(amyTruth, clientContext?.pt);
-
       console.log(
         "[Amy Brain Routing]",
         JSON.stringify(amyTruth?.routing ?? {}, null, 2)
@@ -447,6 +446,11 @@ console.log("====================================");
       console.error("[Amy Brain Error]", error);
       amyTruth = null;
     }
+
+    // Keep PT interpretation available even if Amy Brain routing failed.
+    amyTruth = enforceBrowserPtAuthority(
+      amyTruth, clientContext?.pt, ptRoutingMessage, normalizedProfile
+    );
 
     const memoryBuilt = buildMemoryPatch({
       message,
@@ -544,7 +548,8 @@ console.log("====================================");
       deterministic,
       normalizedProfile,
       intent,
-      responseLimits
+      responseLimits,
+      amyTruth
     });
 
     const warnings = buildPublicWarnings({
@@ -593,7 +598,9 @@ console.log("====================================");
         reply,
         answer,
         profile_used: stripPublicProfile(normalizedProfile, intent),
-        truth_packet: deterministic.public,
+        truth_packet: amyTruth?.interpreted_pt_snapshot
+          ? { ...deterministic.public, pt_calculator: amyTruth.truth.pt_calculator }
+          : deterministic.public,
         context_used: deterministic.context_used,
         conversation_id: conversationContext.conversation_id,
         memory_patch,
@@ -904,7 +911,8 @@ function sanitizePublicPtContext(raw) {
   const redacted = redactSensitive(raw) || {};
   const asNum = (value) => {
     if (value === null || value === undefined || value === "") return null;
-    if (isPlainObject(value) || Array.isArray(value)) return null;
+    if (typeof value !== "number" && typeof value !== "string") return null;
+    if (typeof value === "string" && !value.trim()) return null;
     const n = Number(value);
     return Number.isFinite(n) ? n : null;
   };
@@ -1525,9 +1533,7 @@ function sanitizePublicPtContext(raw) {
 
   if (hadExplicitNullTotal) {
     cleaned.total = null;
-    if (cleaned.displayed_total_score === undefined) {
-      cleaned.displayed_total_score = null;
-    }
+    cleaned.displayed_total_score = null;
   }
 
   return cleaned;
@@ -1535,6 +1541,7 @@ function sanitizePublicPtContext(raw) {
 
 function hasAuthoritativeBrowserPtSnapshot(pt) {
   if (!isPlainObject(pt)) return false;
+  if (/walk/i.test(String(pt.cardioMode || pt.cardio_mode || pt.events?.cardio || pt.selections?.cardio || ""))) return true;
   if (
     Number.isFinite(num(pt.displayed_total_score)) ||
     Number.isFinite(num(pt.total))
@@ -1618,16 +1625,19 @@ function expandPtRoutingMessage(message, clientContext) {
 function buildPtAuthorityInstructions(pt) {
   if (!hasAuthoritativeBrowserPtSnapshot(pt)) return null;
   return {
-    authority: "browser_displayed_pt_snapshot",
+    authority: "deterministically_interpreted_pt_snapshot",
     rules: [
-      "The supplied PT snapshot is the displayed calculator result.",
-      "Repeat its values exactly.",
-      "Do not recalculate it.",
-      "Do not replace it with values from another PT calculation.",
-      "Use policy modules only to explain the result.",
+      "Use the interpreted PT packet for the member-facing result.",
+      "Browser scores are supplied estimates, not verified official results.",
+      "The shared fitness module interprets categories and pass flags; Amy does not calculate.",
+      "Null means unavailable. Never convert it to zero or infer a pass.",
+      "Medical walk has no cardio points and no adjusted composite calculated here.",
+      "Walk-Pass describes the walk event only, not an overall PFRA pass.",
+      "For PT questions, do not introduce housing grades, mortgage verdicts or unrelated financial follow-ups.",
+      "Do not restore stale browser labels or server calculations.",
       "Official results remain in myFitness."
     ],
-    displayed_pt_snapshot: pt
+    interpreted_pt_snapshot: pt
   };
 }
 
@@ -1688,325 +1698,106 @@ function buildPtFitnessFallbackReply(amyTruth) {
   return parts.filter(Boolean).join(" ");
 }
 
-function enforceBrowserPtAuthority(amyTruth, browserPt) {
-  if (!amyTruth || !hasAuthoritativeBrowserPtSnapshot(browserPt)) {
-    return amyTruth;
-  }
+function enforceBrowserPtAuthority(amyTruth, browserPt, message = "", profile = {}) {
+  if (!hasAuthoritativeBrowserPtSnapshot(browserPt)) return amyTruth;
 
-  const scores = isPlainObject(browserPt.displayed_component_scores)
-    ? browserPt.displayed_component_scores
-    : isPlainObject(browserPt.component_scores)
-      ? browserPt.component_scores
-      : {};
-  const total = num(pickFirst(browserPt.displayed_total_score, browserPt.total));
-  const rating = safeStr(
-    pickFirst(browserPt.displayed_rating, browserPt.category, browserPt.rating)
-  );
-  const minimums = pickFirst(browserPt.minimums_met, browserPt.minimumsMet);
-  const strengthPassed = pickFirst(
-    browserPt.strength_passed,
-    browserPt.strengthPassed
-  );
-  const corePassed = pickFirst(browserPt.core_passed, browserPt.corePassed);
-  const cardioPassed = pickFirst(
-    browserPt.cardio_passed,
-    browserPt.cardioPassed
-  );
-  const cardioMode = safeStr(
-    pickFirst(browserPt.cardio_mode, browserPt.cardioMode)
-  );
-  const walkPassed = pickFirst(browserPt.walk_passed, browserPt.walkPassed);
-  const whtr = num(pickFirst(browserPt.whtr, browserPt.ratio));
-  const whtrRisk = safeStr(
-    pickFirst(browserPt.whtr_risk, browserPt.riskLabel)
-  );
-  const selections = isPlainObject(browserPt.selections)
-    ? browserPt.selections
-    : isPlainObject(browserPt.events)
-      ? browserPt.events
-      : {};
-
-  const authoritativeScores = stripEmpty({
-    body_composition: num(
-      pickFirst(scores.body_composition, browserPt.bodyScore)
-    ),
-    strength: num(pickFirst(scores.strength, browserPt.strengthScore)),
-    core: num(pickFirst(scores.core, browserPt.coreScore)),
-    cardio: num(pickFirst(scores.cardio, browserPt.cardioScore))
+  // Rebuild PT interpretation instead of merging it into stale derived fields.
+  const fitness = buildAfFitnessTruthPacket({
+    message,
+    profile,
+    scoreSnapshot: browserPt
   });
+  const summary = fitness.pt_score?.summary;
+  if (!summary) return amyTruth;
+  const passes = summary.pass_summary || {};
+  const scores = {
+    body_composition: summary.components?.body_composition ?? null,
+    strength: summary.components?.strength ?? null,
+    core: summary.components?.core ?? null,
+    cardio: summary.components?.cardio ?? null
+  };
+  const canonicalPt = {
+    source: "shared_fitness_interpretation",
+    total: summary.composite ?? null,
+    displayed_total_score: summary.composite ?? null,
+    category: summary.category_interpreted ?? null,
+    displayed_rating: summary.category_interpreted ?? null,
+    component_scores: scores,
+    displayed_component_scores: scores,
+    minimumsMet: passes.component_minimums_met ?? null,
+    strengthPassed: passes.strength_pass ?? null,
+    corePassed: passes.core_pass ?? null,
+    cardioPassed: passes.cardio_pass ?? null,
+    overall_pass: passes.overall_pass ?? null,
+    cardioMode: summary.walk_mode ? "walk" : "standard",
+    walkPassed: passes.walk_pass ?? null,
+    whtr: summary.whtr ?? null,
+    events: summary.events || {}
+  };
+  const facts = [
+    summary.composite === null
+      ? "An overall PFRA composite is unavailable in this snapshot."
+      : `Supplied PFRA composite: ${summary.composite}.`,
+    `Component points — Body composition: ${formatPtScoreValue(scores.body_composition)}, Strength: ${formatPtScoreValue(scores.strength)}, Core: ${formatPtScoreValue(scores.core)}, Cardio: ${formatPtScoreValue(scores.cardio)}.`,
+    ...(fitness.guidance?.key_points || [])
+  ];
+  const guidance = {
+    bluf: fitness.bluf,
+    facts,
+    risks: fitness.guidance?.cautions || [],
+    next_steps: fitness.guidance?.next_steps || [],
+    disclaimers: fitness.guidance?.disclaimers || []
+  };
+  const ptPacket = {
+    version: fitness.version,
+    score_authority: "interpreted_browser_snapshot",
+    recalculated: false,
+    total_score: canonicalPt.total,
+    rating: canonicalPt.category,
+    overall_pass: canonicalPt.overall_pass,
+    component_minimums_met: canonicalPt.minimumsMet,
+    component_scores: scores,
+    component_pass: {
+      body_composition: null,
+      strength: canonicalPt.strengthPassed,
+      core: canonicalPt.corePassed,
+      cardio: canonicalPt.cardioPassed
+    },
+    walk_passed: canonicalPt.walkPassed,
+    adjusted_composite_available: false,
+    measurements: { whtr: canonicalPt.whtr },
+    selections: canonicalPt.events,
+    guidance,
+    warnings: fitness.warnings || []
+  };
 
-  let nextTruth = { ...amyTruth, truth: { ...(amyTruth.truth || {}) } };
-  const ptPacket = isPlainObject(amyTruth.truth?.pt_calculator)
-    ? { ...amyTruth.truth.pt_calculator }
-    : null;
-
-  if (ptPacket) {
-    const serverTotal = num(ptPacket.total_score);
-    const serverRating = safeStr(ptPacket.rating);
-    const rawWarnings = Array.isArray(ptPacket.warnings)
-      ? ptPacket.warnings.map((w) => safeStr(w)).filter(Boolean)
-      : [];
-    const disagree =
-      (Number.isFinite(total) &&
-        Number.isFinite(serverTotal) &&
-        Math.abs(total - serverTotal) >= 0.05) ||
-      (Boolean(rating) &&
-        Boolean(serverRating) &&
-        rating.toLowerCase() !== serverRating.toLowerCase());
-
-    const warnings = rawWarnings.map((w) => {
-      if (
-        /Browser\/server score discrepancy/i.test(w) ||
-        /Server score is authoritative/i.test(w)
-      ) {
-        return "BROWSER_PT_AUTHORITY: Browser displayed PT snapshot is authoritative; server recalculation is validation-only.";
-      }
-      return w;
-    });
-    if (disagree) {
-      warnings.push(
-        "BROWSER_PT_AUTHORITY: Server validation disagreed with the displayed browser PT snapshot. Browser displayed values are authoritative for the member-facing answer; server values are validation-only."
-      );
-    }
-
-    ptPacket.component_scores = {
-      ...(isPlainObject(ptPacket.component_scores)
-        ? ptPacket.component_scores
-        : {}),
-      ...authoritativeScores
-    };
-    if (Number.isFinite(total)) ptPacket.total_score = total;
-    if (rating) ptPacket.rating = rating;
-    if (minimums === true || minimums === false) {
-      ptPacket.component_minimums_met = minimums;
-    }
-    ptPacket.component_pass = {
-      ...(isPlainObject(ptPacket.component_pass)
-        ? ptPacket.component_pass
-        : {}),
-      ...(strengthPassed === true || strengthPassed === false
-        ? { strength: strengthPassed }
-        : {}),
-      ...(corePassed === true || corePassed === false
-        ? { core: corePassed }
-        : {}),
-      ...(cardioPassed === true || cardioPassed === false
-        ? { cardio: cardioPassed }
-        : {})
-    };
-    ptPacket.measurements = {
-      ...(isPlainObject(ptPacket.measurements) ? ptPacket.measurements : {}),
-      ...(Number.isFinite(whtr) ? { whtr } : {}),
-      ...(whtrRisk ? { whtr_risk: whtrRisk } : {})
-    };
-    ptPacket.selections = stripEmpty({
-      ...(isPlainObject(ptPacket.selections) ? ptPacket.selections : {}),
-      strength: safeStr(selections.strength) || ptPacket.selections?.strength,
-      core: safeStr(selections.core) || ptPacket.selections?.core,
-      cardio: safeStr(selections.cardio) || ptPacket.selections?.cardio
-    });
-    ptPacket.displayed_from_browser = stripEmpty({
-      displayed_component_scores: authoritativeScores,
-      displayed_total_score: total,
-      displayed_rating: rating || null,
-      minimums_met:
-        minimums === true || minimums === false ? minimums : null,
-      strength_passed:
-        strengthPassed === true || strengthPassed === false
-          ? strengthPassed
-          : null,
-      core_passed:
-        corePassed === true || corePassed === false ? corePassed : null,
-      cardio_passed:
-        cardioPassed === true || cardioPassed === false
-          ? cardioPassed
-          : null,
-      cardio_mode: cardioMode || null,
-      walk_passed:
-        walkPassed === true || walkPassed === false ? walkPassed : null,
-      whtr: Number.isFinite(whtr) ? whtr : null,
-      whtr_risk: whtrRisk || null,
-      selections: ptPacket.selections
-    });
-    ptPacket.score_authority = "browser_displayed_snapshot";
-    if (ptPacket.comparison || disagree) {
-      ptPacket.validation_only = stripEmpty({
-        server_total: serverTotal,
-        server_rating: serverRating || null,
-        browser_total: total,
-        browser_rating: rating || null,
-        matches: disagree ? false : ptPacket.comparison?.matches
-      });
-      ptPacket.comparison = stripEmpty({
-        ...(isPlainObject(ptPacket.comparison) ? ptPacket.comparison : {}),
-        authoritative: "browser",
-        browser_total: total,
-        server_total: serverTotal
-      });
-    }
-
-    if (isPlainObject(ptPacket.guidance)) {
-      const totalText = Number.isFinite(total) ? Number(total).toFixed(1) : null;
-      const ratingText = rating || safeStr(ptPacket.rating);
-      let bluf = safeStr(ptPacket.guidance.bluf);
-      if (totalText) {
-        bluf = `Your displayed 2026 PFRA score is ${totalText}${
-          ratingText ? ` (${ratingText})` : ""
-        }.`;
-      }
-      const priorFacts = Array.isArray(ptPacket.guidance.facts)
-        ? ptPacket.guidance.facts
-        : [];
-      const rebuiltFacts = [];
-      if (totalText) {
-        rebuiltFacts.push(
-          `Total PFRA score: ${totalText}${
-            ratingText ? ` (${ratingText})` : ""
-          }.`
-        );
-      }
-      if (Object.keys(authoritativeScores).length) {
-        rebuiltFacts.push(
-          `Component scores — Body composition: ${formatPtScoreValue(
-            authoritativeScores.body_composition
-          )}, Strength: ${formatPtScoreValue(
-            authoritativeScores.strength
-          )}, Core: ${formatPtScoreValue(
-            authoritativeScores.core
-          )}, Cardio: ${formatPtScoreValue(authoritativeScores.cardio)}.`
-        );
-      }
-      for (const fact of priorFacts) {
-        const f = safeStr(fact);
-        if (!f) continue;
-        if (
-          /Total PFRA score|Component scores —|USAF PFRA total score|PT components —|Browser\/server|discrepancy/i.test(
-            f
-          )
-        ) {
-          continue;
-        }
-        rebuiltFacts.push(f);
-      }
-      ptPacket.guidance = {
-        ...ptPacket.guidance,
-        bluf: bluf || ptPacket.guidance.bluf,
-        facts: [...new Set(rebuiltFacts)]
-      };
-    }
-
-    ptPacket.warnings = [...new Set(warnings)];
-    nextTruth.truth.pt_calculator = ptPacket;
-  }
-
-  if (isPlainObject(amyTruth.truth?.air_force_fitness)) {
-    const fitness = { ...amyTruth.truth.air_force_fitness };
-    if (isPlainObject(fitness.pt_score)) {
-      const summary = isPlainObject(fitness.pt_score.summary)
-        ? { ...fitness.pt_score.summary }
-        : {};
-      if (Number.isFinite(total)) summary.composite = total;
-      if (rating) {
-        summary.category_interpreted = rating;
-        summary.category = rating;
-      }
-      if (Object.keys(authoritativeScores).length) {
-        summary.components = {
-          ...(isPlainObject(summary.components) ? summary.components : {}),
-          ...authoritativeScores
-        };
-      }
-      fitness.pt_score = {
-        ...fitness.pt_score,
-        snapshot: browserPt,
-        summary
-      };
-    }
-    nextTruth.truth.air_force_fitness = fitness;
-  }
-
-  if (isPlainObject(amyTruth.combined)) {
-    const totalText = Number.isFinite(total) ? Number(total).toFixed(1) : null;
-    const ratingText = rating || "";
-    const bluf = Array.isArray(amyTruth.combined.bluf)
-      ? amyTruth.combined.bluf.map((line) => safeStr(line)).filter(Boolean)
-      : [];
-    const facts = Array.isArray(amyTruth.combined.facts)
-      ? amyTruth.combined.facts.map((line) => safeStr(line)).filter(Boolean)
-      : [];
-    const warnings = Array.isArray(amyTruth.combined.warnings)
-      ? amyTruth.combined.warnings.map((line) => safeStr(line)).filter(Boolean)
-      : [];
-
-    const newBluf = bluf.map((line) => {
-      if (
-        totalText &&
-        /calculated 2026 PFRA score is|USAF PFRA total score|displayed 2026 PFRA/i.test(
-          line
-        )
-      ) {
-        return `Your displayed 2026 PFRA score is ${totalText}${
-          ratingText ? ` (${ratingText})` : ""
-        }.`;
-      }
-      return line;
-    });
-
-    const filteredFacts = facts.filter(
-      (f) =>
-        !/USAF PFRA total score|PT components —|Total PFRA score:|Component scores —/i.test(
-          f
-        )
-    );
-    if (totalText) {
-      filteredFacts.unshift(
-        `USAF PFRA total score: ${totalText}${
-          ratingText ? ` (${ratingText})` : ""
-        }.`
-      );
-    }
-    if (Object.keys(authoritativeScores).length) {
-      filteredFacts.splice(
-        Math.min(1, filteredFacts.length),
-        0,
-        `PT components — Body composition: ${
-          authoritativeScores.body_composition ?? "n/a"
-        }, Strength: ${authoritativeScores.strength ?? "n/a"}, Core: ${
-          authoritativeScores.core ?? "n/a"
-        }, Cardio: ${authoritativeScores.cardio ?? "n/a"}.`
-      );
-    }
-
-    const filteredWarnings = warnings.map((w) => {
-      if (
-        /Server score is authoritative|Browser\/server score discrepancy/i.test(
-          w
-        )
-      ) {
-        return "BROWSER_PT_AUTHORITY: Browser displayed PT snapshot is authoritative; server recalculation is validation-only.";
-      }
-      return w;
-    });
-    if (
-      ptPacket?.validation_only &&
-      ptPacket.validation_only.matches === false &&
-      !filteredWarnings.some((w) => /BROWSER_PT_AUTHORITY/.test(w))
-    ) {
-      filteredWarnings.push(
-        "BROWSER_PT_AUTHORITY: Browser displayed PT snapshot is authoritative; server recalculation is validation-only."
-      );
-    }
-
-    nextTruth.combined = {
-      ...amyTruth.combined,
-      bluf: [...new Set(newBluf)],
-      facts: [...new Set(filteredFacts)],
-      warnings: [...new Set(filteredWarnings)]
-    };
-  }
-
-  nextTruth.browser_pt_authority = buildPtAuthorityInstructions(browserPt);
-  return nextTruth;
+  return {
+    ...(amyTruth || {}),
+    routing: {
+      ...(amyTruth?.routing || {}),
+      matched_modules: [...new Set([
+        ...(amyTruth?.routing?.matched_modules || []),
+        "pt_calculator",
+        "air_force_fitness"
+      ])]
+    },
+    truth: {
+      ...(amyTruth?.truth || {}),
+      pt_calculator: ptPacket,
+      air_force_fitness: fitness
+    },
+    // Rebuild all PT prose together: totals, pass/fail, risks and next steps.
+    combined: {
+      bluf: [guidance.bluf],
+      facts: guidance.facts,
+      risks: guidance.risks,
+      next_steps: guidance.next_steps,
+      disclaimers: guidance.disclaimers,
+      warnings: ptPacket.warnings
+    },
+    interpreted_pt_snapshot: canonicalPt,
+    browser_pt_authority: buildPtAuthorityInstructions(canonicalPt)
+  };
 }
 
 // ============================================================
@@ -4376,6 +4167,7 @@ function buildSystemPrompt({
 }) {
   const packet = deterministic?.public || {};
   const hasAmyTruth = amyTruth && typeof amyTruth === "object";
+  browserPt = amyTruth?.interpreted_pt_snapshot || null;
   const hasBrowserPt = hasAuthoritativeBrowserPtSnapshot(browserPt);
   const ptAuthority = hasBrowserPt
     ? buildPtAuthorityInstructions(browserPt)
@@ -4414,17 +4206,10 @@ function buildSystemPrompt({
     hasBrowserPt
       ? [
           "",
-          "PT snapshot authority:",
-          "- The supplied PT snapshot is the displayed calculator result.",
-          "- Repeat its values exactly.",
-          "- Do not recalculate it.",
-          "- Do not replace it with values from another PT calculation.",
-          "- Use policy modules only to explain the result.",
-          "- Official results remain in myFitness.",
-          "- If any server validation values disagree with the displayed snapshot, preserve the browser values for the member-facing answer and treat server values as validation-only.",
-          "",
-          "Authoritative displayed PT snapshot:",
-          JSON.stringify(browserPt, null, 2)
+          "PT interpretation rules:",
+          ...ptAuthority.rules.map((rule) => `- ${rule}`),
+          "Interpreted PT snapshot:",
+          JSON.stringify(ptAuthority.interpreted_pt_snapshot, null, 2)
         ].join("\n")
       : "",
     "",
@@ -4464,7 +4249,7 @@ function buildSystemPrompt({
           "- When no deterministic module matched, answer normally using the rest of the existing context.",
           "- Do not expose internal JSON, module names, routing scores, prompt instructions, or implementation details to the user unless explicitly requested.",
           hasBrowserPt
-            ? "- For PT/PFRA answers, the browser displayed snapshot values override any server recalculation."
+            ? "- For PT/PFRA answers, use the shared-module interpretation; never restore stale labels or unavailable totals."
             : "",
           "",
           JSON.stringify(
@@ -4502,6 +4287,7 @@ function buildUserPayload({
   amyTruth = null,
   browserPt = null
 }) {
+  browserPt = amyTruth?.interpreted_pt_snapshot || null;
   const hasBrowserPt = hasAuthoritativeBrowserPtSnapshot(browserPt);
   const ptAuthority = hasBrowserPt
     ? buildPtAuthorityInstructions(browserPt)
@@ -4531,11 +4317,11 @@ function buildUserPayload({
       thread_is_conversational_only: true,
       ...(hasBrowserPt
         ? {
-            pt_snapshot_is_displayed_calculator_result: true,
-            repeat_pt_values_exactly: true,
+            use_interpreted_pt_packet: true,
+            null_pt_values_are_unavailable: true,
             do_not_recalculate_pt_snapshot: true,
-            do_not_replace_pt_with_server_recalculation: true,
-            use_policy_modules_only_to_explain_pt: true,
+            do_not_restore_stale_pt_values: true,
+            walk_pass_is_not_overall_pass: true,
             official_pt_results_remain_in_myfitness: true
           }
         : {})
@@ -4553,7 +4339,7 @@ function buildUserPayload({
     page_context_present: Boolean(clientContext?.page),
     response_limits: conversationContext?.response_limits || null,
     output_request: hasBrowserPt
-      ? "Return a polished conversational answer only. Repeat the authoritative displayed PT snapshot values exactly. Do not recalculate or replace them. Do not return JSON unless the user explicitly asks for JSON."
+      ? "Explain the interpreted PT result. Keep unavailable totals unavailable; never infer an overall pass from a walk pass. Do not calculate. Do not return JSON unless requested."
       : "Return a polished conversational answer only. Do not return JSON unless the user explicitly asks for JSON."
   };
 }
@@ -4830,8 +4616,28 @@ function buildStructuredAnswerFromText({
   deterministic,
   normalizedProfile,
   intent,
-  responseLimits
+  responseLimits,
+  amyTruth = null
 }) {
+  if (amyTruthHasPtFitness(amyTruth)) {
+    const pt = amyTruth?.truth?.pt_calculator;
+    const combined = amyTruth?.combined || {};
+    const steps = Array.isArray(combined.next_steps) ? combined.next_steps : [];
+    return {
+      bluf: firstSentence(reply),
+      summary: reply,
+      status: pt?.rating ?? null,
+      grade: null,
+      numbers: Number.isFinite(pt?.total_score)
+        ? [{ label: "PFRA composite", value: String(pt.total_score), raw: pt.total_score }]
+        : [],
+      risks: combined.risks || [],
+      recommendations: steps.slice(0, 8),
+      next_steps: steps.slice(0, 3),
+      follow_up_question: "",
+      profile_used: stripPublicProfile(normalizedProfile, intent)
+    };
+  }
   const packet = deterministic?.public || {};
   const comp = packet.compensation || null;
   const mortgage = packet.mortgage || null;
