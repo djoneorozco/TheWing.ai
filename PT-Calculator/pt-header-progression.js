@@ -402,15 +402,46 @@
           }
         }
 
-        /* Show only Total Score on phones, including landscape. */
+        /* Keep all five scores in one row on phones. */
         @media (max-width: 767px),
           (max-width: 991px) and (max-height: 500px) and (pointer: coarse) {
-          #${ROOT_ID} .pcsu-pt-header-tile:not(.is-total) {
-            display: none;
+          [data-pcsu-pt-mobile-menu="true"] {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
           }
 
           #${ROOT_ID} .pcsu-pt-header-grid {
-            grid-template-columns: minmax(0, 1fr);
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            width: min(560px, 100%);
+            gap: 4px;
+          }
+
+          #${ROOT_ID} .pcsu-pt-header-tile {
+            display: flex;
+            min-width: 0;
+            min-height: 50px;
+            padding: 7px 2px 8px;
+            border-radius: 999px;
+          }
+
+          #${ROOT_ID} .pcsu-pt-header-tile.is-total {
+            grid-column: auto;
+          }
+
+          #${ROOT_ID} .pcsu-pt-header-label {
+            font-size: clamp(6px, 1.8vw, 7.5px);
+            letter-spacing: .06em;
+          }
+
+          #${ROOT_ID} .pcsu-pt-header-value {
+            font-size: clamp(10px, 3vw, 12.5px);
+          }
+
+          #${ROOT_ID} .pcsu-pt-header-support {
+            font-size: clamp(6px, 1.8vw, 8px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
         }
 
