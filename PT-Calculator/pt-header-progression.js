@@ -402,6 +402,18 @@
           }
         }
 
+        /* Show only Total Score on phones, including landscape. */
+        @media (max-width: 767px),
+          (max-width: 991px) and (max-height: 500px) and (pointer: coarse) {
+          #${ROOT_ID} .pcsu-pt-header-tile:not(.is-total) {
+            display: none;
+          }
+
+          #${ROOT_ID} .pcsu-pt-header-grid {
+            grid-template-columns: minmax(0, 1fr);
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           #${ROOT_ID},
           #${ROOT_ID} * {
