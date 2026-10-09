@@ -1,7 +1,3 @@
-<!-- PCSUnited PT Score Header -->
-<div id="pcsu-pt-header-progression-widget" aria-label="Estimated PT score breakdown"></div>
-
-<script>
 /* ============================================================
   PCSUnited • PT Score Header Strip
   Standalone Public JavaScript
@@ -1082,5 +1078,3 @@
     startPTHeaderProgression();
   }
 })();
-
-</script>
