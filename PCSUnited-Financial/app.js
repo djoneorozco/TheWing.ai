@@ -1131,12 +1131,12 @@ function updateCashFlowAppearance(metrics) {
 
   if (DOM.cashFlowPercentage) {
     DOM.cashFlowPercentage.style.color = positive
-      ? "#2c8b4d"
-      : "#c92d45";
+      ? "var(--pcsu-green)"
+      : "var(--pcsu-red)";
 
     DOM.cashFlowPercentage.style.background = positive
-      ? "#ecf8ef"
-      : "#fff0f3";
+      ? "var(--pcsu-green-soft)"
+      : "var(--pcsu-red-soft)";
   }
 }
 
@@ -1208,16 +1208,16 @@ function setStatus(element, text, type) {
 function applyStatusStyle(element, type) {
   const styles = {
     good: {
-      color: "#278744",
-      background: "rgba(230,247,233,.95)"
+      color: "var(--pcsu-green)",
+      background: "var(--pcsu-green-soft)"
     },
     warning: {
-      color: "#a66508",
-      background: "rgba(255,244,220,.98)"
+      color: "var(--pcsu-orange)",
+      background: "var(--pcsu-orange-soft)"
     },
     danger: {
-      color: "#c92d45",
-      background: "rgba(255,233,238,.98)"
+      color: "var(--pcsu-red)",
+      background: "var(--pcsu-red-soft)"
     }
   };
 
