@@ -1,3 +1,7 @@
+<!-- PCSUnited PT Score Header -->
+<div id="pcsu-pt-header-progression-widget" aria-label="Estimated PT score breakdown"></div>
+
+<script>
 /* ============================================================
   PCSUnited • PT Score Header Strip
   Standalone Public JavaScript
@@ -305,13 +309,37 @@
         }
 
         @media (max-width: 760px) {
+          /* Phone sizing only; desktop styles are unchanged. */
+          #${MOUNT_ID} {
+            display: block !important;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+          }
+
+          /* Override the root's inline reset on phone screens. */
+          #${ROOT_ID} {
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+          }
+
+          #${ROOT_ID} .pcsu-pt-header-wrap,
+          #${ROOT_ID} .pcsu-pt-header-inner {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+          }
+
           #${ROOT_ID} .pcsu-pt-header-grid {
-            grid-template-columns: repeat(2, minmax(110px, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             width: 100%;
             gap: 8px;
           }
 
           #${ROOT_ID} .pcsu-pt-header-tile {
+            min-width: 0;
             border-radius: 12px;
             min-height: 52px;
             padding: 8px 10px 10px;
@@ -331,6 +359,50 @@
 
           #${ROOT_ID} .pcsu-pt-header-support {
             font-size: 9px;
+            white-space: normal;
+            overflow-wrap: break-word;
+          }
+        }
+
+        /* Webflow hides this score-only nav menu below 992px. */
+        @media (max-width: 991px) {
+          [data-pcsu-pt-mobile-header="true"] {
+            background: rgba(29, 57, 79, 0.96);
+          }
+
+          [data-pcsu-pt-mobile-menu="true"] {
+            display: block !important;
+            position: absolute !important;
+            top: 100% !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            max-height: none !important;
+            margin: 0 !important;
+            padding: 10px 12px !important;
+            transform: none !important;
+            box-sizing: border-box;
+            background: rgba(29, 57, 79, 0.96);
+          }
+
+          [data-pcsu-pt-mobile-menu="true"] .pt-header-progressive {
+            display: block !important;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          #pcsu-pt-header-mobile-spacer {
+            display: block;
+          }
+        }
+
+        @media (min-width: 992px) {
+          #pcsu-pt-header-mobile-spacer {
+            display: none;
           }
         }
 
@@ -429,6 +501,44 @@
 
     const root = document.getElementById(ROOT_ID);
     if (!root) return;
+
+    /* Keep this Webflow score menu visible on phones and reserve
+       its height so the fixed header cannot cover the calculator. */
+    const webflowMenu = mount.closest(
+      ".pt-cal-navbar .nav-menu-wrapper-6.w-nav-menu"
+    );
+    const webflowNavbar = mount.closest(".pt-cal-navbar");
+
+    if (webflowMenu && webflowNavbar) {
+      webflowNavbar.setAttribute("data-pcsu-pt-mobile-header", "true");
+      webflowMenu.setAttribute("data-pcsu-pt-mobile-menu", "true");
+
+      let mobileSpacer = document.getElementById(
+        "pcsu-pt-header-mobile-spacer"
+      );
+
+      if (!mobileSpacer) {
+        mobileSpacer = document.createElement("div");
+        mobileSpacer.id = "pcsu-pt-header-mobile-spacer";
+        mobileSpacer.setAttribute("aria-hidden", "true");
+        webflowNavbar.insertAdjacentElement("afterend", mobileSpacer);
+      }
+
+      const mobileQuery = window.matchMedia("(max-width: 991px)");
+      const syncMobileSpacing = () => {
+        mobileSpacer.style.height = mobileQuery.matches
+          ? `${Math.ceil(webflowMenu.getBoundingClientRect().height)}px`
+          : "0px";
+      };
+
+      if ("ResizeObserver" in window) {
+        const mobileResizeObserver = new ResizeObserver(syncMobileSpacing);
+        mobileResizeObserver.observe(webflowMenu);
+      }
+
+      window.addEventListener("resize", syncMobileSpacing, { passive: true });
+      syncMobileSpacing();
+    }
 
     /* ============================================================
       4. ELEMENT REFERENCES
@@ -972,3 +1082,5 @@
     startPTHeaderProgression();
   }
 })();
+
+</script>
