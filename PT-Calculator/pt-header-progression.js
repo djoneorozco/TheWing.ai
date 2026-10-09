@@ -350,7 +350,7 @@
           }
 
           #${ROOT_ID} .pcsu-pt-header-value {
-            font-size: 20px;
+            font-size: 22px;
           }
 
           #${ROOT_ID} .pcsu-pt-header-support {
