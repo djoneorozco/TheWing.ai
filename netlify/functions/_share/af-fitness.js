@@ -1,38 +1,16 @@
 // netlify/functions/_share/af-fitness.js
 // ============================================================
 // TheWing.ai • Ask Amy Air Force Fitness Guidance Engine
-// af-fitness-2026.1 • ES MODULE
+// af-fitness-2026.2 • ES MODULE
 //
-// FILE
-// - netlify/functions/_share/af-fitness.js
+// Shared AFMAN 36-2905 education and snapshot interpretation.
+// TheWing calculates. Amy explains.
 //
-// PURPOSE
-// - Shared deterministic AFMAN 36-2905 (24 March 2026) education layer
-// - Gives Ask Amy precise PFRA / fitness policy guidance without scoring
-// - Does NOT replace myFitness, UFPM, MTF, commander, or legal advice
-//
-// DESIGN
-// - NO Netlify handler
-// - NO OpenAI / Supabase / fetch / DOM / localStorage
-// - NO PDF parsing and NO external packages
-// - NO duplicated full PFRA scoring tables (use pt-scoring-core / calculator)
-// - Plain JS, Object.freeze constants, stripEmpty outputs, BLUF phrasing
-//
-// PRIMARY USE
-// import {
-//   buildAfFitnessTruthPacket,
-//   getAfFitnessGuidance,
-//   analyzeAfFitnessQuestion,
-//   summarizePtScoreSnapshot,
-//   detectAfFitnessIntent
-// } from "./_share/af-fitness.js";
+// No handler, OpenAI, network, DOM, storage, or scoring tables.
+// This module does not replace myFitness, UFPM, FAC, or MTF.
 // ============================================================
 
-// ============================================================
-// //#1) VERSION + REFERENCE
-// ============================================================
-
-export const AF_FITNESS_VERSION = "af-fitness-2026.1";
+export const AF_FITNESS_VERSION = "af-fitness-2026.2";
 
 export const AF_FITNESS_REFERENCE = Object.freeze({
   title: "Air Force Physical Fitness Readiness Program",
@@ -41,6 +19,7 @@ export const AF_FITNESS_REFERENCE = Object.freeze({
   date: "24 March 2026",
   path: "/public/doc/dafman36-2905.pdf",
   short: "AFMAN 36-2905 (24 March 2026)",
+  url: "https://www.afpc.af.mil/Portals/70/documents/FITNESS/DAFMAN%2036-2905.pdf",
   appliesTo: Object.freeze([
     "Regular Air Force",
     "Air Force Reserve",
@@ -61,7 +40,7 @@ function cite(section, title) {
 }
 
 // ============================================================
-// //#2) RULES (policy facts only — no full scoring charts)
+// 1. POLICY RULES
 // ============================================================
 
 export const AF_FITNESS_RULES = Object.freeze({
@@ -107,8 +86,8 @@ export const AF_FITNESS_RULES = Object.freeze({
   categories: Object.freeze({
     excellent: Object.freeze({
       label: "Excellent",
-      rule: "composite > 90",
-      exclusive_lower_bound: 90,
+      rule: "composite ≥ 90",
+      inclusive_lower_bound: 90,
       section: "3.6.1"
     }),
     satisfactory: Object.freeze({
@@ -120,11 +99,11 @@ export const AF_FITNESS_RULES = Object.freeze({
     }),
     unsatisfactory: Object.freeze({
       label: "Unsatisfactory",
-      rule: "composite < 74.9 and/or any physical component minimum not met",
+      rule: "composite ≤ 74.9 and/or any physical component minimum not met",
       max: 74.9,
       section: "3.6.1"
     }),
-    exactNinetyRequiresOfficialVerification: true
+    exactNinetyRequiresOfficialVerification: false
   }),
 
   assessment_frequency: Object.freeze({
@@ -215,7 +194,7 @@ export const AF_FITNESS_RULES = Object.freeze({
   fitness_reconditioning_program: Object.freeze({
     triggers: Object.freeze([
       "Unsatisfactory PFRA",
-      "WHtR > 0.55 failing BFA"
+      "WHtR ≥ 0.55 failing BFA"
     ]),
     regaf_duty_days: 10,
     arc_calendar_days: 60,
@@ -261,7 +240,7 @@ export const AF_FITNESS_RULES = Object.freeze({
 });
 
 // ============================================================
-// //#3) GUIDANCE TOPICS (22)
+// 2. GUIDANCE TOPICS
 // ============================================================
 
 export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
@@ -273,12 +252,12 @@ export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
       "Applicability covers Regular Air Force, Air Force Reserve, and Air National Guard only (AFMAN 36-2905 applicability).",
       "Space Force members are covered by SPFMAN 36-2905; do not apply AFMAN 36-2905 scoring or timelines to USSF questions.",
       "Ready status requires meeting physical component minimums and a composite score of at least 75 (3.1, 3.7.1).",
-      "Categories are Excellent (composite > 90), Satisfactory (75–89.9), or Unsatisfactory (<74.9 and/or any component minimum not met) (3.6.1).",
+      "Categories are Excellent (composite ≥ 90), Satisfactory (75–89.9), or Unsatisfactory (≤74.9 and/or any component minimum not met) (3.6.1).",
       "Official scores live in myFitness; unofficial calculators are educational only (3.7.5)."
     ],
     cautions: [
       "This module is educational guidance, not a medical, command, or legal determination.",
-      "A composite of exactly 90.0 is a boundary case — do not auto-label it Excellent; confirm in myFitness (3.6.1).",
+      "A composite of exactly 90.0 is Excellent when required physical minimums are met; medical walk cannot support Excellent (3.6.1, 3.7.3).",
       "Do not diagnose illness/injury or override AF Form 469 / MTF decisions."
     ],
     next_steps: [
@@ -287,7 +266,10 @@ export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
       "Ask about exemptions, walk authorization, or upcoming assessment timing if relevant."
     ],
     references: [
-      cite("Applicability; 3.1; 3.6.1; 3.7.1; 3.7.5", "Program applicability, components, categories, myFitness")
+      cite(
+        "Applicability; 3.1; 3.6.1; 3.7.1; 3.7.5",
+        "Program applicability, components, categories, myFitness"
+      )
     ]
   },
 
@@ -321,23 +303,23 @@ export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
   scoring: {
     title: "PFRA Scoring & Categories",
     bluf:
-      "BLUF: Composite ≥ 75 with all physical component minimums met is Ready/Satisfactory territory; Excellent requires composite greater than 90. Exactly 90.0 needs official myFitness verification (3.6.1, 3.7.1).",
+      "BLUF: Composite ≥ 75 with all physical component minimums met is Ready/Satisfactory territory; Excellent requires composite 90 or higher. Exactly 90.0 is Excellent when required physical minimums are met (3.6.1, 3.7.1).",
     key_points: [
-      "Excellent: composite > 90 (3.6.1).",
+      "Excellent: composite ≥ 90 (3.6.1).",
       "Satisfactory: composite 75–89.9 when physical component minimums are met (3.6.1).",
-      "Unsatisfactory: composite < 74.9 and/or any physical component minimum not met (3.6.1).",
-      "A score of exactly 90.0 must not be auto-classified as Excellent without official confirmation (exactNinetyRequiresOfficialVerification).",
+      "Unsatisfactory: composite ≤ 74.9 and/or any physical component minimum not met (3.6.1).",
+      "A score of exactly 90.0 meets the Excellent threshold with all required physical minimums met (3.6.1).",
       "Unofficial planning scores are educational; myFitness is authoritative (3.7.5).",
       "This module does not recalculate charts — it interprets supplied snapshot pass/fail flags and scores."
     ],
     cautions: [
-      "Do not treat 90.0 as Excellent by default.",
+      "Excellent requires a composite of at least 90 and all required physical minimums; medical walk does not support Excellent.",
       "Meeting composite ≥ 75 without component minimums is still Unsatisfactory (3.6.1, 3.7.1).",
       "Walk passers cannot use walk results to claim Excellent (3.7.3)."
     ],
     next_steps: [
       "Compare each component score to its cap (20 / 15 / 15 / 50).",
-      "Confirm pass booleans for Strength, Core, Cardio, and body pathway.",
+      "Confirm pass booleans for Strength, Core, and Cardio; body composition has no separate point minimum.",
       "Verify the final category in myFitness before career or admin actions."
     ],
     references: [
@@ -349,13 +331,13 @@ export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
   body_composition: {
     title: "Body Composition (WHtR)",
     bluf:
-      "BLUF: Body composition uses age-agnostic WHtR truncated (not rounded) for up to 20 points. High-risk WHtR > 0.55 combined with Unsatisfactory triggers Tier 2 BFA (3.15.4.2, Table 3.2).",
+      "BLUF: Body composition uses age-agnostic WHtR truncated (not rounded) for up to 20 points. High-risk WHtR ≥ 0.55 combined with Unsatisfactory triggers Tier 2 BFA (3.15.4.2, Table 3.2).",
     key_points: [
       "WHtR is truncated, not rounded, when applied under 3.15.4.2.",
       "Body composition has a 20-point cap and no separate component point minimum (3.1, 3.7.1).",
-      "WHtR > 0.55 is high risk; with an Unsatisfactory outcome it leads to Tier 2 Body Fat Assessment (3.15.4.2).",
+      "WHtR ≥ 0.55 is high risk; with an Unsatisfactory outcome it leads to Tier 2 Body Fat Assessment (3.15.4.2).",
       "Tier 2 BFA uses InBody 770 or 2–3 site tape per Attachment 8 (3.15.4.2).",
-      "BFA standards are Male < 26% and Female < 36% (Table 3.2).",
+      "BFA standards are Male ≤ 26% and Female ≤ 36% (Table 3.2).",
       "BFA pass scores body as an exempt component; BFA fail yields Unsatisfactory PFRA (3.7.2)."
     ],
     cautions: [
@@ -365,7 +347,7 @@ export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
     ],
     next_steps: [
       "Confirm height and waist measurement process with unit fitness staff.",
-      "If WHtR > 0.55 and Unsatisfactory, prepare for Tier 2 BFA.",
+      "If WHtR ≥ 0.55 and Unsatisfactory, prepare for Tier 2 BFA.",
       "Review Table 3.2 standards before discussing body-fat outcomes."
     ],
     references: [
@@ -423,7 +405,9 @@ export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
       "Confirm the scheduled official assessment date before booking a diagnostic.",
       "Coordinate with the FAC / UFPM for scheduling."
     ],
-    references: [cite("3.8", "Diagnostic PFRA limits and rules")]
+    references: [
+      cite("3.8", "Diagnostic PFRA limits and rules")
+    ]
   },
 
   fsq: {
@@ -505,7 +489,10 @@ export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
       "Interpret any unofficial calculator walk results as planning-only."
     ],
     references: [
-      cite("3.7.3, 3.15.12.1, Table 3.1", "Walk authorization and scoring treatment")
+      cite(
+        "3.7.3, 3.15.12.1, Table 3.1",
+        "Walk authorization and scoring treatment"
+      )
     ]
   },
 
@@ -593,10 +580,10 @@ export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
   fitness_reconditioning: {
     title: "Fitness Reconditioning Program (FRP)",
     bluf:
-      "BLUF: Unsatisfactory PFRA or WHtR > 0.55 with failing BFA triggers FRP enrollment within 10 duty days (ARC: 60 calendar days) (5.6).",
+      "BLUF: Unsatisfactory PFRA or WHtR ≥ 0.55 with failing BFA triggers FRP enrollment within 10 duty days (ARC: 60 calendar days) (5.6).",
     key_points: [
       "FRP triggers include Unsatisfactory PFRA (5.6).",
-      "FRP also triggers when WHtR > 0.55 and BFA is failed (5.6, 3.15.4.2).",
+      "FRP also triggers when WHtR ≥ 0.55 and BFA is failed (5.6, 3.15.4.2).",
       "RegAF members enroll within 10 duty days (5.6).",
       "ARC members enroll within 60 calendar days (5.6).",
       "FRP supports return to Ready status before or alongside the shorter Unsatisfactory reassessment cycle (5.6; Table 3.3 / 3.4 / 3.10)."
@@ -621,11 +608,11 @@ export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
   body_fat_assessment: {
     title: "Tier 2 Body Fat Assessment (BFA)",
     bluf:
-      "BLUF: High-risk WHtR > 0.55 plus Unsatisfactory leads to Tier 2 BFA (InBody 770 or 2–3 site tape). Pass standards are Male < 26% and Female < 36%; pass treats body as exempt, fail is Unsatisfactory PFRA (3.15.4.2, Table 3.2, 3.7.2).",
+      "BLUF: High-risk WHtR ≥ 0.55 plus Unsatisfactory leads to Tier 2 BFA (InBody 770 or 2–3 site tape). Pass standards are Male ≤ 26% and Female ≤ 36%; pass treats body as exempt, fail is Unsatisfactory PFRA (3.15.4.2, Table 3.2, 3.7.2).",
     key_points: [
-      "Tier 2 BFA is triggered by WHtR > 0.55 with Unsatisfactory (3.15.4.2).",
+      "Tier 2 BFA is triggered by WHtR ≥ 0.55 with Unsatisfactory (3.15.4.2).",
       "Authorized methods include InBody 770 or 2–3 site tape per Attachment 8 (3.15.4.2).",
-      "Table 3.2 standards: Male < 26% body fat; Female < 36% body fat.",
+      "Table 3.2 standards: Male ≤ 26% body fat; Female ≤ 36% body fat.",
       "BFA pass → body composition scored as an exempt component (3.7.2).",
       "BFA fail → Unsatisfactory PFRA (3.7.2) and FRP enrollment pathway (5.6)."
     ],
@@ -830,7 +817,10 @@ export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
       "Meet AFP/FRP enrollment duties on time."
     ],
     references: [
-      cite("1.1.2, 3.3, 3.12, Chapter 4", "Member, admin, commander, and medical roles"),
+      cite(
+        "1.1.2, 3.3, 3.12, Chapter 4",
+        "Member, admin, commander, and medical roles"
+      ),
       cite("Table 3.3, 3.4, 3.10", "Installation Commander unit assessments")
     ]
   },
@@ -857,12 +847,17 @@ export const AF_FITNESS_GUIDANCE_TOPICS = Object.freeze({
       "Update 469/108 whenever medical status changes."
     ],
     references: [
-      cite("3.3, 3.7.3, Chapter 4, 5.5", "FSQ, walk authorization, profiles, AFP forms")
+      cite(
+        "3.3, 3.7.3, Chapter 4, 5.5",
+        "FSQ, walk authorization, profiles, AFP forms"
+      )
     ]
   }
 });
 
-const TOPIC_KEYS = Object.freeze(Object.keys(AF_FITNESS_GUIDANCE_TOPICS));
+const TOPIC_KEYS = Object.freeze(
+  Object.keys(AF_FITNESS_GUIDANCE_TOPICS)
+);
 
 const MEDICAL_DISCLAIMERS = Object.freeze([
   "Educational guidance only — not medical advice, diagnosis, clearance, or treatment.",
@@ -877,13 +872,11 @@ const GENERAL_DISCLAIMERS = Object.freeze([
 ]);
 
 // ============================================================
-// //#4) HELPERS
+// 3. HELPERS
 // ============================================================
 
 function lower(value) {
-  return String(value == null ? "" : value)
-    .trim()
-    .toLowerCase();
+  return String(value == null ? "" : value).trim().toLowerCase();
 }
 
 function clean(value) {
@@ -907,8 +900,17 @@ function pickFirst(...values) {
 
 function toNullableNumber(value) {
   if (value === undefined || value === null || value === "") return null;
-  if (typeof value === "number") return Number.isFinite(value) ? value : null;
-  const n = Number(String(value).replace(/[,%$]/g, "").trim());
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value !== "string" || !value.trim()) return null;
+
+  const text = value.trim().replace(/,/g, "");
+  if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(text)) return null;
+
+  const n = Number(text);
   return Number.isFinite(n) ? n : null;
 }
 
@@ -920,27 +922,50 @@ function toNumber(value, fallback = 0) {
 function boolish(value, fallback = false) {
   if (typeof value === "boolean") return value;
   const s = lower(value);
-  if (["true", "yes", "y", "1", "pass", "passed", "authorized"].includes(s)) return true;
-  if (["false", "no", "n", "0", "fail", "failed", "unauthorized"].includes(s)) return false;
+
+  if (
+    ["true", "yes", "y", "1", "pass", "passed", "authorized"].includes(s)
+  ) {
+    return true;
+  }
+
+  if (
+    ["false", "no", "n", "0", "fail", "failed", "unauthorized"].includes(s)
+  ) {
+    return false;
+  }
+
   return fallback;
 }
 
 function stripEmpty(obj) {
   if (!obj || typeof obj !== "object") return obj;
+
   const out = {};
+
   for (const [key, value] of Object.entries(obj)) {
-    if (value === undefined || value === null || value === "") continue;
+    if (value === undefined || value === "") continue;
+
+    // Preserve unknown/not-applicable values across nested packets.
+    if (value === null) {
+      out[key] = null;
+      continue;
+    }
+
     if (Array.isArray(value)) {
       if (value.length) out[key] = value;
       continue;
     }
+
     if (typeof value === "object") {
       const nested = stripEmpty(value);
       if (nested && Object.keys(nested).length) out[key] = nested;
       continue;
     }
+
     out[key] = value;
   }
+
   return out;
 }
 
@@ -959,18 +984,32 @@ function round1(value) {
 }
 
 // ============================================================
-// //#5) NORMALIZERS
+// 4. NORMALIZERS
 // ============================================================
 
 function normalizeBranch(value) {
   const s = lower(value).replace(/[\s-]+/g, "_");
-  if (["regaf", "reg_af", "regular_air_force", "active_duty", "ad", "usaf_regaf"].includes(s)) {
+
+  if (
+    ["regaf", "reg_af", "regular_air_force", "active_duty", "ad", "usaf_regaf"].includes(s)
+  ) {
     return "RegAF";
   }
-  if (["afr", "air_force_reserve", "reserve", "reserves"].includes(s)) return "AFR";
-  if (["ang", "air_national_guard", "guard", "national_guard"].includes(s)) return "ANG";
+
+  if (["afr", "air_force_reserve", "reserve", "reserves"].includes(s)) {
+    return "AFR";
+  }
+
+  if (["ang", "air_national_guard", "guard", "national_guard"].includes(s)) {
+    return "ANG";
+  }
+
   if (["arc", "air_reserve_component"].includes(s)) return "ARC";
-  if (["ussf", "space_force", "guardian", "us_space_force"].includes(s)) return "USSF";
+
+  if (["ussf", "space_force", "guardian", "us_space_force"].includes(s)) {
+    return "USSF";
+  }
+
   if (["usaf", "air_force", "af"].includes(s)) return "USAF";
   return clean(value) || "";
 }
@@ -985,14 +1024,15 @@ function normalizeSex(value) {
 function normalizeCategoryLabel(value) {
   const s = lower(value);
   if (!s) return "";
-  if (s.includes("excellent")) return "Excellent";
-  if (s.includes("satisfactory") && !s.includes("un")) return "Satisfactory";
-  if (s.includes("unsatisfactory") || s.includes("fail")) return "Unsatisfactory";
+  if (s === "excellent") return "Excellent";
+  if (s === "satisfactory") return "Satisfactory";
+  if (s === "unsatisfactory") return "Unsatisfactory";
   return clean(value);
 }
 
 export function normalizeAfFitnessProfile(profile = {}) {
   const safe = profile && typeof profile === "object" ? profile : {};
+
   const branch = normalizeBranch(
     pickFirst(
       safe.branch,
@@ -1015,13 +1055,17 @@ export function normalizeAfFitnessProfile(profile = {}) {
   return stripEmpty({
     email: clean(safe.email),
     full_name: clean(pickFirst(safe.full_name, safe.fullName, safe.name)),
+
     first_name: clean(
       pickFirst(
         safe.first_name,
         safe.firstName,
-        String(pickFirst(safe.full_name, safe.fullName, safe.name) || "").split(/\s+/)[0]
+        String(
+          pickFirst(safe.full_name, safe.fullName, safe.name) || ""
+        ).split(/\s+/)[0]
       )
     ),
+
     branch,
     is_arc: isArc,
     is_ussf: branch === "USSF",
@@ -1029,12 +1073,15 @@ export function normalizeAfFitnessProfile(profile = {}) {
     age: toNullableNumber(pickFirst(safe.age, safe.age_years, safe.ageYears)),
     age_band: clean(pickFirst(safe.age_band, safe.ageBand)),
     rank: clean(pickFirst(safe.rank, safe.rank_paygrade, safe.rankPaygrade)),
+
     base: clean(
       pickFirst(safe.base, safe.installation, safe.duty_station, safe.dutyStation)
     ),
+
     altitude_ft: toNullableNumber(
       pickFirst(safe.altitude_ft, safe.altitudeFt, safe.elevation_ft, safe.elevation)
     ),
+
     walk_authorized: (() => {
       const v = pickFirst(
         safe.walk_authorized,
@@ -1044,6 +1091,7 @@ export function normalizeAfFitnessProfile(profile = {}) {
       );
       return v === null ? null : boolish(v, false);
     })(),
+
     has_af_form_469: (() => {
       const v = pickFirst(
         safe.has_af_form_469,
@@ -1053,6 +1101,7 @@ export function normalizeAfFitnessProfile(profile = {}) {
       );
       return v === null ? null : boolish(v, false);
     })(),
+
     medical_exemption: (() => {
       const v = pickFirst(
         safe.medical_exemption,
@@ -1063,10 +1112,12 @@ export function normalizeAfFitnessProfile(profile = {}) {
       );
       return v === null ? null : boolish(v, false);
     })(),
+
     afp_enrolled: (() => {
       const v = pickFirst(safe.afp_enrolled, safe.afpEnrolled, safe.in_afp);
       return v === null ? null : boolish(v, false);
     })(),
+
     frp_enrolled: (() => {
       const v = pickFirst(safe.frp_enrolled, safe.frpEnrolled, safe.in_frp);
       return v === null ? null : boolish(v, false);
@@ -1076,34 +1127,69 @@ export function normalizeAfFitnessProfile(profile = {}) {
 
 export function normalizeAfFitnessContext(context = {}) {
   const safe = context && typeof context === "object" ? context : {};
-  const widget = safe.widget && typeof safe.widget === "object" ? safe.widget : {};
-  const page = safe.page && typeof safe.page === "object" ? safe.page : safe.page;
+
+  const widget =
+    safe.widget && typeof safe.widget === "object" ? safe.widget : {};
+
+  const page =
+    safe.page && typeof safe.page === "object" ? safe.page : safe.page;
+
   const calculator =
-    safe.calculator && typeof safe.calculator === "object" ? safe.calculator : {};
+    safe.calculator && typeof safe.calculator === "object"
+      ? safe.calculator
+      : {};
 
   const scoreSnapshot =
     (safe.ptScore && typeof safe.ptScore === "object" && safe.ptScore) ||
     (safe.pt_score && typeof safe.pt_score === "object" && safe.pt_score) ||
-    (safe.ptScoreSnapshot &&
+    (
+      safe.ptScoreSnapshot &&
       typeof safe.ptScoreSnapshot === "object" &&
-      safe.ptScoreSnapshot) ||
-    (safe.pt_score_snapshot &&
+      safe.ptScoreSnapshot
+    ) ||
+    (
+      safe.pt_score_snapshot &&
       typeof safe.pt_score_snapshot === "object" &&
-      safe.pt_score_snapshot) ||
+      safe.pt_score_snapshot
+    ) ||
     (safe.fitness && typeof safe.fitness === "object" && safe.fitness) ||
     (safe.pfra && typeof safe.pfra === "object" && safe.pfra) ||
-    (safe.score_snapshot && typeof safe.score_snapshot === "object" && safe.score_snapshot) ||
-    (safe.scoreSnapshot && typeof safe.scoreSnapshot === "object" && safe.scoreSnapshot) ||
-    (widget.ptScore && typeof widget.ptScore === "object" && widget.ptScore) ||
-    (widget.pt_score && typeof widget.pt_score === "object" && widget.pt_score) ||
-    (calculator.ptScore && typeof calculator.ptScore === "object" && calculator.ptScore) ||
+    (
+      safe.score_snapshot &&
+      typeof safe.score_snapshot === "object" &&
+      safe.score_snapshot
+    ) ||
+    (
+      safe.scoreSnapshot &&
+      typeof safe.scoreSnapshot === "object" &&
+      safe.scoreSnapshot
+    ) ||
+    (
+      widget.ptScore &&
+      typeof widget.ptScore === "object" &&
+      widget.ptScore
+    ) ||
+    (
+      widget.pt_score &&
+      typeof widget.pt_score === "object" &&
+      widget.pt_score
+    ) ||
+    (
+      calculator.ptScore &&
+      typeof calculator.ptScore === "object" &&
+      calculator.ptScore
+    ) ||
     null;
 
   return stripEmpty({
-    question_focus: clean(pickFirst(safe.question_focus, safe.questionFocus, safe.focus)),
+    question_focus: clean(
+      pickFirst(safe.question_focus, safe.questionFocus, safe.focus)
+    ),
+
     assessment_type: clean(
       pickFirst(safe.assessment_type, safe.assessmentType, safe.test_type)
     ),
+
     scheduled_assessment_date: clean(
       pickFirst(
         safe.scheduled_assessment_date,
@@ -1112,21 +1198,36 @@ export function normalizeAfFitnessContext(context = {}) {
         safe.nextDue
       )
     ),
+
     diagnostic: (() => {
-      const v = pickFirst(safe.diagnostic, safe.is_diagnostic, safe.isDiagnostic, safe.dpfra);
+      const v = pickFirst(
+        safe.diagnostic,
+        safe.is_diagnostic,
+        safe.isDiagnostic,
+        safe.dpfra
+      );
       return v === null ? null : boolish(v, false);
     })(),
+
     altitude_ft: toNullableNumber(
       pickFirst(safe.altitude_ft, safe.altitudeFt, safe.elevation_ft, safe.elevation)
     ),
+
     unit_directed: (() => {
       const v = pickFirst(safe.unit_directed, safe.unitDirected);
       return v === null ? null : boolish(v, false);
     })(),
+
     illness_injury: (() => {
-      const v = pickFirst(safe.illness_injury, safe.illnessInjury, safe.injured, safe.ill);
+      const v = pickFirst(
+        safe.illness_injury,
+        safe.illnessInjury,
+        safe.injured,
+        safe.ill
+      );
       return v === null ? null : boolish(v, false);
     })(),
+
     score_snapshot: scoreSnapshot,
     ptScore: scoreSnapshot,
     page: page || null,
@@ -1136,23 +1237,34 @@ export function normalizeAfFitnessContext(context = {}) {
 
 function normalizePassFlag(value) {
   if (value === undefined || value === null || value === "") return null;
-  return boolish(value, false);
+  return boolish(value, null);
 }
 
 export function normalizePtScoreSnapshot(snapshot = {}) {
   const safe = snapshot && typeof snapshot === "object" ? snapshot : {};
+
   const detail =
-    safe.detail && typeof safe.detail === "object" ? safe.detail : safe;
+    safe.detail && typeof safe.detail === "object"
+      ? safe.detail
+      : safe;
+
   const components =
     detail.components ||
     detail.component_scores ||
     detail.scores ||
     detail.breakdown ||
     {};
+
   const passes =
-    detail.component_pass || detail.componentPass || detail.passes || {};
+    detail.component_pass ||
+    detail.componentPass ||
+    detail.passes ||
+    {};
+
   const events =
-    detail.events && typeof detail.events === "object" ? detail.events : {};
+    detail.events && typeof detail.events === "object"
+      ? detail.events
+      : {};
 
   const body = toNullableNumber(
     pickFirst(
@@ -1164,6 +1276,7 @@ export function normalizePtScoreSnapshot(snapshot = {}) {
       detail.body
     )
   );
+
   const strength = toNullableNumber(
     pickFirst(
       components.strength,
@@ -1172,9 +1285,16 @@ export function normalizePtScoreSnapshot(snapshot = {}) {
       detail.strength
     )
   );
+
   const core = toNullableNumber(
-    pickFirst(components.core, detail.coreScore, detail.core_score, detail.core)
+    pickFirst(
+      components.core,
+      detail.coreScore,
+      detail.core_score,
+      detail.core
+    )
   );
+
   const cardio = toNullableNumber(
     pickFirst(
       components.cardio,
@@ -1197,15 +1317,24 @@ export function normalizePtScoreSnapshot(snapshot = {}) {
   const cardioMode = lower(
     pickFirst(detail.cardioMode, detail.cardio_mode, detail.mode, "")
   );
+
   const walkMode =
-    cardioMode === "walk" ||
+    ["walk", "two_kilometer_walk"].includes(cardioMode) ||
+    /walk/i.test(
+      String(
+        events.cardio ||
+        detail.selections?.cardio ||
+        detail.cardio?.event ||
+        ""
+      )
+    ) ||
+    detail.cardio_option === "two_kilometer_walk" ||
+    detail.cardioOption === "two_kilometer_walk" ||
     boolish(
       pickFirst(
         detail.walk_mode,
         detail.walkMode,
-        detail.walk,
-        detail.cardio_option === "two_kilometer_walk",
-        detail.cardioOption === "two_kilometer_walk"
+        detail.walk
       ),
       false
     );
@@ -1215,29 +1344,56 @@ export function normalizePtScoreSnapshot(snapshot = {}) {
   );
 
   return stripEmpty({
-    available: true,
+    available:
+      [composite, body, strength, core, cardio].some(Number.isFinite) ||
+      walkMode,
+
     source: pickFirst(detail.source, safe.source) || null,
     type: pickFirst(detail.type, safe.type) || null,
-    composite: composite === null ? null : round1(composite),
-    total: composite === null ? null : round1(composite),
+
+    composite:
+      walkMode ||
+      composite === null ||
+      composite < 0 ||
+      composite > 100
+        ? null
+        : composite,
+
+    total:
+      walkMode ||
+      composite === null ||
+      composite < 0 ||
+      composite > 100
+        ? null
+        : composite,
+
     category: categoryRaw,
     walk_mode: walkMode,
     cardio_mode: cardioMode || (walkMode ? "walk" : null),
+
     walk_pass: normalizePassFlag(
-      pickFirst(detail.walkPassed, detail.walk_pass, detail.walkPass, passes.walk)
+      pickFirst(
+        detail.walkPassed,
+        detail.walk_passed,
+        detail.walk_pass,
+        detail.walkPass,
+        passes.walk,
+        detail.cardio?.walkPassed,
+        walkMode ? passes.cardio : null
+      )
     ),
+
     body_composition: body === null ? null : round1(body),
     strength: strength === null ? null : round1(strength),
     core: core === null ? null : round1(core),
-    cardio: cardio === null ? null : round1(cardio),
-    body_pass: normalizePassFlag(
-      pickFirst(
-        passes.body_composition,
-        passes.body,
-        detail.body_pass,
-        detail.bodyPass
-      )
-    ),
+    cardio: walkMode ? 0 : cardio === null ? null : round1(cardio),
+
+    supplied_composite: composite,
+    supplied_cardio: cardio,
+
+    // Body composition has no independent component point minimum.
+    body_pass: null,
+
     strength_pass: normalizePassFlag(
       pickFirst(
         passes.strength,
@@ -1246,6 +1402,7 @@ export function normalizePtScoreSnapshot(snapshot = {}) {
         detail.strengthPass
       )
     ),
+
     core_pass: normalizePassFlag(
       pickFirst(
         passes.core,
@@ -1254,6 +1411,7 @@ export function normalizePtScoreSnapshot(snapshot = {}) {
         detail.corePass
       )
     ),
+
     cardio_pass: normalizePassFlag(
       pickFirst(
         passes.cardio,
@@ -1262,9 +1420,16 @@ export function normalizePtScoreSnapshot(snapshot = {}) {
         detail.cardioPass
       )
     ),
+
     overall_pass: normalizePassFlag(
-      pickFirst(detail.overall_pass, detail.overallPass, detail.passed, detail.pass)
+      pickFirst(
+        detail.overall_pass,
+        detail.overallPass,
+        detail.passed,
+        detail.pass
+      )
     ),
+
     component_minimums_met: normalizePassFlag(
       pickFirst(
         detail.minimumsMet,
@@ -1273,79 +1438,126 @@ export function normalizePtScoreSnapshot(snapshot = {}) {
         detail.minimums_met
       )
     ),
+
     whtr: toNullableNumber(
       pickFirst(
         detail.ratio,
         detail.whtr,
         detail.WHtR,
-        detail.measurements?.whtr
+        detail.measurements?.whtr,
+        detail.profile?.whtr
       )
     ),
-    risk_label: clean(pickFirst(detail.riskLabel, detail.risk_label, "")),
+
+    risk_label: clean(
+      pickFirst(
+        detail.riskLabel,
+        detail.risk_label,
+        detail.measurements?.whtr_risk,
+        detail.profile?.whtrRisk,
+        ""
+      )
+    ),
+
     events: stripEmpty({
-      strength: clean(events.strength || ""),
-      core: clean(events.core || ""),
-      cardio: clean(events.cardio || "")
+      strength: clean(
+        events.strength ||
+        detail.selections?.strength ||
+        detail.strength?.event ||
+        ""
+      ),
+      core: clean(
+        events.core ||
+        detail.selections?.core ||
+        detail.core?.event ||
+        ""
+      ),
+      cardio: clean(
+        events.cardio ||
+        detail.selections?.cardio ||
+        detail.cardio?.event ||
+        ""
+      )
     }),
+
     official_confirmation_required: true
   });
 }
 
 // ============================================================
-// //#6) SCORE SNAPSHOT SUMMARY (no recalculation)
+// 5. SNAPSHOT SUMMARY — NO TABLE RESCORING
 // ============================================================
 
 function classifyFromComposite(composite, minimumsMet) {
-  if (composite === null || composite === undefined) {
+  if (
+    !Number.isFinite(composite) ||
+    composite < 0 ||
+    composite > 100
+  ) {
     return { category: null, caution: null };
   }
 
-  const c = Number(composite);
-
-  if (minimumsMet === false) {
+  if (minimumsMet === false || composite < 75) {
     return {
       category: "Unsatisfactory",
-      caution: "Physical component minimum(s) not met → Unsatisfactory regardless of composite (3.6.1, 3.7.1)."
+      caution: minimumsMet === false
+        ? "Physical component minimum(s) not met — Unsatisfactory regardless of composite (3.6.1, 3.7.1)."
+        : null
     };
   }
 
-  if (Math.abs(c - 90) < 0.0001) {
+  if (minimumsMet !== true) {
     return {
-      category: "Boundary_90.0",
+      category: null,
       caution:
-        "Composite is exactly 90.0 — do not classify as Excellent without official myFitness verification (3.6.1)."
+        "Physical-component minimums are unknown; the composite alone cannot establish Satisfactory or Excellent."
     };
-  }
-
-  if (c > 90) {
-    return { category: "Excellent", caution: null };
-  }
-
-  if (c >= 75 && c <= 89.9) {
-    return { category: "Satisfactory", caution: null };
-  }
-
-  if (c < 74.9 || c < 75) {
-    return { category: "Unsatisfactory", caution: null };
   }
 
   return {
-    category: null,
-    caution: "Composite falls on a category boundary — confirm in myFitness (3.6.1)."
+    category: composite >= 90 ? "Excellent" : "Satisfactory",
+    caution: null
   };
 }
 
 function findWeakestComponent(snap) {
   const rows = [
-    { key: "body_composition", label: "Body Composition", score: snap.body_composition, cap: 20 },
-    { key: "strength", label: "Strength", score: snap.strength, cap: 15 },
-    { key: "core", label: "Core", score: snap.core, cap: 15 },
-    { key: "cardio", label: "Cardio", score: snap.cardio, cap: 50 }
-  ].filter((r) => r.score !== null && r.score !== undefined && Number.isFinite(Number(r.score)));
+    {
+      key: "body_composition",
+      label: "Body Composition",
+      score: snap.body_composition,
+      cap: 20
+    },
+    {
+      key: "strength",
+      label: "Strength",
+      score: snap.strength,
+      cap: 15
+    },
+    {
+      key: "core",
+      label: "Core",
+      score: snap.core,
+      cap: 15
+    },
+    {
+      key: "cardio",
+      label: "Cardio",
+      score: snap.cardio,
+      cap: 50
+    }
+  ].filter(
+    r =>
+      !(snap.walk_mode && r.key === "cardio") &&
+      Number.isFinite(r.score) &&
+      r.score >= 0 &&
+      r.score < r.cap
+  );
 
   if (!rows.length) return null;
 
   let weakest = null;
+
   for (const row of rows) {
     const ratio = Number(row.score) / row.cap;
     if (!weakest || ratio < weakest.ratio) {
@@ -1372,50 +1584,98 @@ export function summarizePtScoreSnapshot(snapshot = {}, profile = {}) {
   const cautions = [];
   const notes = [];
 
-  const minimumsMet =
-    snap.component_minimums_met !== null && snap.component_minimums_met !== undefined
-      ? snap.component_minimums_met
-      : null;
+  const flags = [
+    snap.strength_pass,
+    snap.core_pass,
+    snap.cardio_pass
+  ];
 
-  const classification = classifyFromComposite(snap.composite, minimumsMet);
-  if (classification.caution) cautions.push(classification.caution);
+  const minimumsMet = snap.walk_mode
+    ? null
+    : flags.includes(false) || snap.component_minimums_met === false
+      ? false
+      : flags.every(v => v === true) || snap.component_minimums_met === true
+        ? true
+        : null;
 
-  let interpretedCategory = snap.category || classification.category || null;
+  const classification = snap.walk_mode
+    ? { category: null, caution: null }
+    : classifyFromComposite(snap.composite, minimumsMet);
 
-  if (snap.composite !== null && Math.abs(Number(snap.composite) - 90) < 0.0001) {
-    interpretedCategory = snap.category || "Confirm in myFitness (90.0 boundary)";
-    if (!classification.caution) {
-      cautions.push(
-        "Exact 90.0 composite requires official verification — not auto-Excellent (3.6.1)."
-      );
-    }
+  if (classification.caution) {
+    cautions.push(classification.caution);
+  }
+
+  let interpretedCategory = snap.walk_mode
+    ? snap.walk_pass === true
+      ? "Walk-Pass"
+      : snap.walk_pass === false
+        ? "Walk-Fail"
+        : null
+    : classification.category;
+
+  if (snap.category && snap.category !== interpretedCategory) {
+    cautions.push(
+      `Supplied category "${snap.category}" is not confirmed by the score and physical-component flags. Use the interpreted result and verify in myFitness.`
+    );
+  }
+
+  if (snap.walk_mode && snap.supplied_composite !== null) {
+    cautions.push(
+      "A supplied walk composite is not interpreted here; confirm the official adjusted composite in myFitness."
+    );
+  }
+
+  if (snap.walk_mode && snap.supplied_cardio > 0) {
+    cautions.push(
+      "The supplied walk cardio points are inconsistent with medical-walk rules; walk awards no cardio points."
+    );
   }
 
   if (snap.walk_mode) {
     notes.push(
       "Walk mode: pass/fail, no cardio points; cannot apply toward Excellent; if passed, composite is treated like cardio-exempt (3.7.3). No invented adjusted formula is applied here."
     );
+
     if (snap.walk_pass === true) {
-      notes.push("Supplied walk_pass=true — interpret using provided overall/component pass flags only.");
+      notes.push(
+        "Supplied walk_pass=true — interpret using provided overall/component pass flags only."
+      );
     } else if (snap.walk_pass === false) {
-      notes.push("Supplied walk_pass=false — treat cardio walk attempt as not passed per snapshot flags.");
+      notes.push(
+        "Supplied walk_pass=false — treat cardio walk attempt as not passed per snapshot flags."
+      );
     }
-    if (interpretedCategory === "Excellent" || lower(interpretedCategory).includes("excellent")) {
+
+    if (
+      interpretedCategory === "Excellent" ||
+      lower(interpretedCategory).includes("excellent")
+    ) {
       cautions.push(
         "Walk results cannot apply to an Excellent category (3.7.3). Confirm official category in myFitness."
       );
     }
   }
 
-  // Use supplied pass booleans only — never recompute component passes from charts
   const passSummary = stripEmpty({
-    body_pass: snap.body_pass,
+    body_pass: null,
     strength_pass: snap.strength_pass,
     core_pass: snap.core_pass,
-    cardio_pass: snap.cardio_pass,
+    cardio_pass: snap.walk_mode ? snap.walk_pass : snap.cardio_pass,
     walk_pass: snap.walk_pass,
-    overall_pass: snap.overall_pass,
-    component_minimums_met: snap.component_minimums_met
+
+    overall_pass: snap.walk_mode
+      ? (
+          [snap.strength_pass, snap.core_pass, snap.walk_pass].includes(false)
+            ? false
+            : null
+        )
+      : interpretedCategory
+        ? interpretedCategory !== "Unsatisfactory"
+        : null,
+
+    overall_pass_supplied: snap.overall_pass,
+    component_minimums_met: minimumsMet
   });
 
   const weakest = findWeakestComponent(snap);
@@ -1426,18 +1686,37 @@ export function summarizePtScoreSnapshot(snapshot = {}, profile = {}) {
     );
   }
 
+  if (normalizedProfile.is_ussf) {
+    interpretedCategory = null;
+  }
+
   let bluf;
-  if (snap.composite === null && !interpretedCategory) {
+
+  if (normalizedProfile.is_ussf) {
+    bluf =
+      "BLUF: AFMAN 36-2905 does not apply to USSF. This snapshot is not classified under Air Force rules.";
+    passSummary.overall_pass = null;
+  } else if (
+    snap.composite === null &&
+    !interpretedCategory &&
+    !snap.walk_mode
+  ) {
     bluf =
       "BLUF: No composite was supplied. I can explain AFMAN 36-2905 rules, but I will not invent a recalculated score.";
   } else if (snap.walk_mode) {
-    bluf = `BLUF: Walk-mode snapshot${
-      snap.composite !== null ? ` shows composite ${snap.composite}` : ""
-    }${interpretedCategory ? ` (${interpretedCategory})` : ""}. Walk is pass/fail with no cardio points and cannot support Excellent (3.7.3). Confirm in myFitness.`;
+    bluf =
+      `BLUF: Walk-mode snapshot${
+        snap.composite !== null ? ` shows composite ${snap.composite}` : ""
+      }${
+        interpretedCategory ? ` (${interpretedCategory})` : ""
+      }. Walk is pass/fail with no cardio points and cannot support Excellent (3.7.3). Confirm in myFitness.`;
   } else {
-    bluf = `BLUF: Supplied snapshot${
-      snap.composite !== null ? ` composite ${snap.composite}` : ""
-    }${interpretedCategory ? ` → ${interpretedCategory}` : ""}. Pass flags are taken as provided; official confirmation is myFitness (3.7.5).`;
+    bluf =
+      `BLUF: Supplied snapshot${
+        snap.composite !== null ? ` composite ${snap.composite}` : ""
+      }${
+        interpretedCategory ? ` → ${interpretedCategory}` : ""
+      }. Pass flags are taken as provided; official confirmation is myFitness (3.7.5).`;
   }
 
   const hasAnyScore =
@@ -1449,11 +1728,19 @@ export function summarizePtScoreSnapshot(snapshot = {}, profile = {}) {
     snap.walk_mode === true;
 
   const failedComponents = [];
-  if (snap.strength_pass === false) failedComponents.push("strength");
-  if (snap.core_pass === false) failedComponents.push("core");
+
+  if (snap.strength_pass === false) {
+    failedComponents.push("strength");
+  }
+
+  if (snap.core_pass === false) {
+    failedComponents.push("core");
+  }
+
   if (snap.cardio_pass === false && !snap.walk_mode) {
     failedComponents.push("cardio");
   }
+
   if (snap.walk_mode && snap.walk_pass === false) {
     failedComponents.push("cardio_walk");
   }
@@ -1464,7 +1751,9 @@ export function summarizePtScoreSnapshot(snapshot = {}, profile = {}) {
       label: "Body Composition",
       score: snap.body_composition,
       maximum: 20,
-      support: snap.whtr != null ? `WHtR ${Number(snap.whtr).toFixed(2)}` : snap.risk_label || null
+      support: snap.whtr != null
+        ? `WHtR ${Number(snap.whtr).toFixed(2)}`
+        : snap.risk_label || null
     },
     {
       key: "strength",
@@ -1500,7 +1789,9 @@ export function summarizePtScoreSnapshot(snapshot = {}, profile = {}) {
 
   const observations = uniqueArray([
     ...notes,
-    snap.risk_label ? `Supplied WHtR risk label: ${snap.risk_label}.` : null,
+    snap.risk_label
+      ? `Supplied WHtR risk label: ${snap.risk_label}.`
+      : null,
     weakest
       ? `Weakest scored component relative to its cap: ${weakest.label} (${weakest.score} / ${weakest.maximum}).`
       : null
@@ -1521,13 +1812,20 @@ export function summarizePtScoreSnapshot(snapshot = {}, profile = {}) {
     pass_summary: passSummary,
     component_summary: componentSummary,
     failed_components: failedComponents,
+
     components: stripEmpty({
       body_composition: snap.body_composition,
       strength: snap.strength,
       core: snap.core,
       cardio: snap.cardio,
-      caps: { body_composition: 20, strength: 15, core: 15, cardio: 50 }
+      caps: {
+        body_composition: 20,
+        strength: 15,
+        core: 15,
+        cardio: 50
+      }
     }),
+
     weakest_component: weakest,
     whtr: snap.whtr,
     risk_label: snap.risk_label || null,
@@ -1535,8 +1833,10 @@ export function summarizePtScoreSnapshot(snapshot = {}, profile = {}) {
     observations,
     cautions: uniqueArray(cautions),
     notes: uniqueArray(notes),
+
     official_confirmation:
       "Confirm the official score and due date in myFitness.",
+
     recalculated: false,
     profile_used: normalizedProfile,
     source: "TheWing af-fitness.js"
@@ -1544,7 +1844,7 @@ export function summarizePtScoreSnapshot(snapshot = {}, profile = {}) {
 }
 
 // ============================================================
-// //#7) INTENT DETECTION (specific → general)
+// 6. INTENT DETECTION
 // ============================================================
 
 export function detectAfFitnessIntent(message = "") {
@@ -1552,15 +1852,12 @@ export function detectAfFitnessIntent(message = "") {
 
   if (!t) return "overview";
 
-  // Space Force / applicability often maps to overview with USSF caution
   if (/\b(space force|ussf|guardian|spfman)\b/.test(t)) {
     return "overview";
   }
 
   if (
-    /\b(admin(?:istrative)? correction|reps mismatch|double entry|assessed while pregnant|pregnant assessment)\b/.test(
-      t
-    )
+    /\b(admin(?:istrative)? correction|reps mismatch|double entry|assessed while pregnant|pregnant assessment)\b/.test(t)
   ) {
     return "administrative_correction";
   }
@@ -1588,9 +1885,7 @@ export function detectAfFitnessIntent(message = "") {
 
   if (
     /\b(af form 469|form 469|469)\b/.test(t) ||
-    /\b(medical (?:exemption|profile|waiver)|pfra hold|component exemption|composite exemption)\b/.test(
-      t
-    )
+    /\b(medical (?:exemption|profile|waiver)|pfra hold|component exemption|composite exemption)\b/.test(t)
   ) {
     return "medical_exemption";
   }
@@ -1612,9 +1907,7 @@ export function detectAfFitnessIntent(message = "") {
   }
 
   if (
-    /\b(2[\s-]?km walk|2[\s-]?kilometer walk|medical walk|walk (?:test|modality|authorized))\b/.test(
-      t
-    )
+    /\b(2[\s-]?km walk|2[\s-]?kilometer walk|medical walk|walk (?:test|modality|authorized))\b/.test(t)
   ) {
     return "walk";
   }
@@ -1626,43 +1919,31 @@ export function detectAfFitnessIntent(message = "") {
   }
 
   if (
-    /\b(whtr|waist[-\s]?to[-\s]?height|body composition|waist ratio|high[-\s]?risk waist)\b/.test(
-      t
-    )
+    /\b(whtr|waist[-\s]?to[-\s]?height|body composition|waist ratio|high[-\s]?risk waist)\b/.test(t)
   ) {
     return "body_composition";
   }
 
-  if (
-    /\b(altitude|elevation|5,?250|5250|high altitude)\b/.test(t)
-  ) {
+  if (/\b(altitude|elevation|5,?250|5250|high altitude)\b/.test(t)) {
     return "altitude";
   }
 
-  if (
-    /\b(afp|adaptive fitness|modified exercise plan)\b/.test(t)
-  ) {
+  if (/\b(afp|adaptive fitness|modified exercise plan)\b/.test(t)) {
     return "adaptive_fitness";
   }
 
-  if (
-    /\b(frp|reconditioning|fitness reconditioning)\b/.test(t)
-  ) {
+  if (/\b(frp|reconditioning|fitness reconditioning)\b/.test(t)) {
     return "fitness_reconditioning";
   }
 
   if (
-    /\b(how often|frequency|every (?:6|12|3) months|when (?:is|do) (?:my|the) (?:next )?(?:pt|pfra|test)|reassess|currency)\b/.test(
-      t
-    )
+    /\b(how often|frequency|every (?:6|12|3) months|when (?:is|do) (?:my|the) (?:next )?(?:pt|pfra|test)|reassess|currency)\b/.test(t)
   ) {
     return "assessment_frequency";
   }
 
   if (
-    /\b(pcp|physical conditioning|duty day workout|20[–-]?60 min|year[-\s]?round fitness)\b/.test(
-      t
-    )
+    /\b(pcp|physical conditioning|duty day workout|20[–-]?60 min|year[-\s]?round fitness)\b/.test(t)
   ) {
     return "physical_conditioning";
   }
@@ -1674,43 +1955,32 @@ export function detectAfFitnessIntent(message = "") {
   }
 
   if (
-    /\b(ufpm|fac\b|fitness assessment cell|commander(?:'s)? role|who (?:is )?responsible|roles?)\b/.test(
-      t
-    )
+    /\b(ufpm|fac\b|fitness assessment cell|commander(?:'s)? role|who (?:is )?responsible|roles?)\b/.test(t)
   ) {
     return "roles";
   }
 
   if (
-    /\b(procedure|how (?:does|do) (?:the )?(?:pfra|pt|test) work|assessment day|what happens (?:at|on) (?:the )?test)\b/.test(
-      t
-    )
+    /\b(procedure|how (?:does|do) (?:the )?(?:pfra|pt|test) work|assessment day|what happens (?:at|on) (?:the )?test)\b/.test(t)
   ) {
     return "assessment_procedures";
   }
 
   if (
-    /\b(component(?:s)?|strength|core|cardio|push[-\s]?ups|sit[-\s]?ups|plank|hamr|2[\s-]?mile|what is tested)\b/.test(
-      t
-    ) &&
+    /\b(component(?:s)?|strength|core|cardio|push[-\s]?ups|sit[-\s]?ups|plank|hamr|2[\s-]?mile|what is tested)\b/.test(t) &&
     !/\b(score|pass|fail|excellent|satisfactory|interpret)\b/.test(t)
   ) {
     return "components";
   }
 
-  // Score interpretation before generic scoring
   if (
-    /\b(interpret(?: my)? score|score interpretation|what does (?:my )?(?:\d+(?:\.\d+)?\s+)?(?:pt |pfra |fitness )?score mean|explain (?:my )?score|how did i do|did i pass|did i fail|why did i fail|am i ready|am i unsatisfactory|read my (?:pt|pfra) results?|my score is|pt score)\b/.test(
-      t
-    )
+    /\b(interpret(?: my)? score|score interpretation|what does (?:my )?(?:\d+(?:\.\d+)?\s+)?(?:pt |pfra |fitness )?score mean|explain (?:my )?score|how did i do|did i pass|did i fail|why did i fail|am i ready|am i unsatisfactory|read my (?:pt|pfra) results?|my score is|pt score)\b/.test(t)
   ) {
     return "score_interpretation";
   }
 
   if (
-    /\b(excellent|satisfactory|unsatisfactory|composite|categor(?:y|ies)|minimums?|pass(?:ing)? score|scoring|points?)\b/.test(
-      t
-    )
+    /\b(excellent|satisfactory|unsatisfactory|composite|categor(?:y|ies)|minimums?|pass(?:ing)? score|scoring|points?)\b/.test(t)
   ) {
     return "scoring";
   }
@@ -1733,7 +2003,7 @@ function resolveTopicKey(intent) {
 }
 
 // ============================================================
-// //#8) GUIDANCE BUILDER
+// 7. GUIDANCE BUILDER
 // ============================================================
 
 function buildPersonalizedGuidance({
@@ -1753,22 +2023,34 @@ function buildPersonalizedGuidance({
     cautions.unshift(
       "USSF detected — AFMAN 36-2905 does not apply; use SPFMAN 36-2905 (applicability)."
     );
-    if (topicKey === "overview") {
-      bluf =
-        "BLUF: United States Space Force members follow SPFMAN 36-2905, not AFMAN 36-2905. I can explain AF rules for awareness, but do not treat them as USSF requirements.";
-    }
+
+    bluf =
+      "BLUF: United States Space Force members follow SPFMAN 36-2905, not AFMAN 36-2905. I can explain AF rules for awareness, but do not treat them as USSF requirements.";
   }
 
-  if (profile.is_arc || profile.branch === "AFR" || profile.branch === "ANG") {
+  if (
+    profile.is_arc ||
+    profile.branch === "AFR" ||
+    profile.branch === "ANG"
+  ) {
     if (topicKey === "assessment_frequency") {
       bluf =
         "BLUF: As an ARC (AFR/ANG) member, Excellent/Satisfactory currency is generally every 12 months; Unsatisfactory remains a 3-month Total Force cycle (Table 3.3 / 3.4 / 3.10).";
     }
-    if (topicKey === "adaptive_fitness" || topicKey === "fitness_reconditioning") {
-      nextSteps.unshift("Use the ARC 60-calendar-day enrollment window (5.5 / 5.6).");
+
+    if (
+      topicKey === "adaptive_fitness" ||
+      topicKey === "fitness_reconditioning"
+    ) {
+      nextSteps.unshift(
+        "Use the ARC 60-calendar-day enrollment window (5.5 / 5.6)."
+      );
     }
+
     if (topicKey === "diagnostic_pfra") {
-      keyPoints.unshift("ARC diagnostic maximum is 1 per 365 days (3.8).");
+      keyPoints.unshift(
+        "ARC diagnostic maximum is 1 per 365 days (3.8)."
+      );
     }
   } else if (profile.branch === "RegAF") {
     if (topicKey === "assessment_frequency") {
@@ -1778,14 +2060,20 @@ function buildPersonalizedGuidance({
     }
   }
 
-  if (profile.walk_authorized === true && (topicKey === "walk" || topicKey === "scoring")) {
+  if (
+    profile.walk_authorized === true &&
+    (topicKey === "walk" || topicKey === "scoring")
+  ) {
     keyPoints.unshift(
       "Profile indicates walk authorization — still confirm current AF Form 469 before assessment day (3.7.3)."
     );
   }
 
   if (profile.medical_exemption === true) {
-    if (topicKey === "medical_exemption" || topicKey === "body_composition") {
+    if (
+      topicKey === "medical_exemption" ||
+      topicKey === "body_composition"
+    ) {
       keyPoints.unshift(
         "Profile flags a medical exemption — WHtR remains required even with exemptions (Chapter 4)."
       );
@@ -1795,39 +2083,56 @@ function buildPersonalizedGuidance({
   const altitude = toNullableNumber(
     pickFirst(context.altitude_ft, profile.altitude_ft)
   );
+
   if (altitude !== null && altitude >= 5250) {
-    if (topicKey === "altitude" || topicKey === "scoring" || topicKey === "components") {
+    if (
+      topicKey === "altitude" ||
+      topicKey === "scoring" ||
+      topicKey === "components"
+    ) {
       cautions.push(
         `Altitude about ${altitude} ft meets/exceeds the 5,250 ft policy threshold — use Attachment 3 / FAC guidance; no calculator adjustment is applied here (3.15.12.3).`
       );
     }
   }
 
-  if (context.illness_injury === true && topicKey === "illness_injury") {
+  if (
+    context.illness_injury === true &&
+    topicKey === "illness_injury"
+  ) {
     nextSteps.unshift(
       "Notify the fitness administrator now and seek MTF evaluation before any invalidation request (3.12)."
     );
   }
 
-  if (intent === "score_interpretation" || scoreSummary) {
+  if (
+    !profile.is_ussf &&
+    (intent === "score_interpretation" || scoreSummary)
+  ) {
     if (scoreSummary?.bluf) {
       bluf = scoreSummary.bluf;
     }
+
     if (scoreSummary?.weakest_component) {
       const w = scoreSummary.weakest_component;
       keyPoints.unshift(
         `Weakest supplied component vs cap: ${w.label} at ${w.score}/${w.cap} (${w.points_from_cap} points from cap).`
       );
     }
+
     if (scoreSummary?.cautions?.length) {
       cautions.unshift(...scoreSummary.cautions);
     }
+
     if (scoreSummary?.walk_mode) {
       nextSteps.unshift(
         "Because walk mode is active, do not chase Excellent from walk results (3.7.3)."
       );
     }
-    nextSteps.unshift("Confirm the official category and component passes in myFitness (3.7.5).");
+
+    nextSteps.unshift(
+      "Confirm the official category and component passes in myFitness (3.7.5)."
+    );
   }
 
   return {
@@ -1845,17 +2150,25 @@ export function getAfFitnessGuidance(
   scoreSnapshot = null
 ) {
   const intent =
-    AF_FITNESS_GUIDANCE_TOPICS[intentOrMessage] || intentOrMessage === "score_interpretation"
+    AF_FITNESS_GUIDANCE_TOPICS[intentOrMessage] ||
+    intentOrMessage === "score_interpretation"
       ? intentOrMessage
       : detectAfFitnessIntent(intentOrMessage);
 
   const topicKey = resolveTopicKey(intent);
-  const topic = AF_FITNESS_GUIDANCE_TOPICS[topicKey] || AF_FITNESS_GUIDANCE_TOPICS.overview;
+
+  const topic =
+    AF_FITNESS_GUIDANCE_TOPICS[topicKey] ||
+    AF_FITNESS_GUIDANCE_TOPICS.overview;
 
   const normalizedProfile = normalizeAfFitnessProfile(profile);
+
   const normalizedContext = normalizeAfFitnessContext({
     ...context,
-    score_snapshot: scoreSnapshot || context.score_snapshot || context.scoreSnapshot
+    score_snapshot:
+      scoreSnapshot ||
+      context.score_snapshot ||
+      context.scoreSnapshot
   });
 
   const snapshotSource =
@@ -1895,20 +2208,29 @@ export function getAfFitnessGuidance(
     score_summary: scoreSummary,
     profile_used: normalizedProfile,
     context_used: normalizedContext,
-    disclaimers: uniqueArray([...MEDICAL_DISCLAIMERS, ...GENERAL_DISCLAIMERS]),
+
+    disclaimers: uniqueArray([
+      ...MEDICAL_DISCLAIMERS,
+      ...GENERAL_DISCLAIMERS
+    ]),
+
     rules_touchpoints: stripEmpty({
-      ready_composite_minimum: AF_FITNESS_RULES.components.ready_composite_minimum,
-      excellent_rule: AF_FITNESS_RULES.categories.excellent.rule,
+      ready_composite_minimum:
+        AF_FITNESS_RULES.components.ready_composite_minimum,
+      excellent_rule:
+        AF_FITNESS_RULES.categories.excellent.rule,
       exactNinetyRequiresOfficialVerification:
         AF_FITNESS_RULES.categories.exactNinetyRequiresOfficialVerification,
-      applicability: AF_FITNESS_RULES.applicability
+      applicability:
+        AF_FITNESS_RULES.applicability
     }),
+
     source: "TheWing af-fitness.js"
   });
 }
 
 // ============================================================
-// //#9) QUESTION ANALYZER
+// 8. QUESTION ANALYZER
 // ============================================================
 
 function buildAfQuickAnswer({ intent, guidance }) {
@@ -1918,19 +2240,25 @@ function buildAfQuickAnswer({ intent, guidance }) {
   if (guidance.score_summary?.composite != null) {
     lines.push(
       `Score snapshot: composite ${guidance.score_summary.composite}` +
-        (guidance.score_summary.category_interpreted
+      (
+        guidance.score_summary.category_interpreted
           ? ` (${guidance.score_summary.category_interpreted})`
-          : "") +
-        "; official confirmation = myFitness."
+          : ""
+      ) +
+      "; official confirmation = myFitness."
     );
   }
 
   if (guidance.key_points?.length) {
-    lines.push("Why: " + guidance.key_points.slice(0, 3).join(" "));
+    lines.push(
+      "Why: " + guidance.key_points.slice(0, 3).join(" ")
+    );
   }
 
   if (guidance.cautions?.length) {
-    lines.push("Caution: " + guidance.cautions.slice(0, 2).join(" "));
+    lines.push(
+      "Caution: " + guidance.cautions.slice(0, 2).join(" ")
+    );
   }
 
   if (guidance.next_steps?.length) {
@@ -1953,7 +2281,14 @@ export function analyzeAfFitnessQuestion(
   scoreSnapshot = null
 ) {
   const intent = detectAfFitnessIntent(message);
-  const guidance = getAfFitnessGuidance(intent, profile, context, scoreSnapshot);
+
+  const guidance = getAfFitnessGuidance(
+    intent,
+    profile,
+    context,
+    scoreSnapshot
+  );
+
   const normalizedProfile = normalizeAfFitnessProfile(profile);
   const normalizedContext = normalizeAfFitnessContext(context);
 
@@ -1970,7 +2305,7 @@ export function analyzeAfFitnessQuestion(
 }
 
 // ============================================================
-// //#10) TRUTH PACKET FOR ASK AMY
+// 9. TRUTH PACKET
 // ============================================================
 
 export function buildAfFitnessTruthPacket({
@@ -1983,6 +2318,7 @@ export function buildAfFitnessTruthPacket({
   widget = {}
 } = {}) {
   const normalizedProfile = normalizeAfFitnessProfile(profile);
+
   const normalizedContext = normalizeAfFitnessContext({
     ...context,
     page: page || context.page,
@@ -1990,6 +2326,7 @@ export function buildAfFitnessTruthPacket({
     ptScore: ptScore || context.ptScore || context.pt_score,
     pt_score: ptScore || context.pt_score || context.ptScore
   });
+
   const snapshot =
     scoreSnapshot ||
     ptScore ||
@@ -1997,28 +2334,40 @@ export function buildAfFitnessTruthPacket({
     null;
 
   const intent = detectAfFitnessIntent(message);
+
   const guidance = getAfFitnessGuidance(
     intent,
     normalizedProfile,
     normalizedContext,
     snapshot
   );
+
   const scoreSummary = snapshot
     ? summarizePtScoreSnapshot(snapshot, normalizedProfile)
     : guidance.score_summary || null;
 
   const warnings = [];
+
   if (normalizedProfile.is_ussf) {
-    warnings.push("USSF profile — apply SPFMAN 36-2905, not AFMAN 36-2905.");
+    warnings.push(
+      "USSF profile — apply SPFMAN 36-2905, not AFMAN 36-2905."
+    );
   }
-  if (scoreSummary?.cautions?.length) warnings.push(...scoreSummary.cautions);
-  if (guidance.cautions?.length) warnings.push(...guidance.cautions.slice(0, 3));
+
+  if (scoreSummary?.cautions?.length) {
+    warnings.push(...scoreSummary.cautions);
+  }
+
+  if (guidance.cautions?.length) {
+    warnings.push(...guidance.cautions.slice(0, 3));
+  }
 
   const relevantRules = (() => {
     const rules = {
       applicability: AF_FITNESS_RULES.applicability,
       categories: AF_FITNESS_RULES.categories
     };
+
     if (
       intent === "components" ||
       intent === "scoring" ||
@@ -2026,29 +2375,53 @@ export function buildAfFitnessTruthPacket({
     ) {
       rules.components = AF_FITNESS_RULES.components;
     }
+
     if (intent === "assessment_frequency") {
       rules.assessment_frequency = AF_FITNESS_RULES.assessment_frequency;
     }
-    if (intent === "walk") rules.walk = AF_FITNESS_RULES.walk;
-    if (intent === "body_composition" || intent === "body_fat_assessment") {
+
+    if (intent === "walk") {
+      rules.walk = AF_FITNESS_RULES.walk;
+    }
+
+    if (
+      intent === "body_composition" ||
+      intent === "body_fat_assessment"
+    ) {
       rules.whtr = AF_FITNESS_RULES.whtr;
     }
-    if (intent === "medical_exemption" || intent === "adaptive_fitness") {
+
+    if (
+      intent === "medical_exemption" ||
+      intent === "adaptive_fitness"
+    ) {
       rules.medical = AF_FITNESS_RULES.medical;
-      rules.adaptive_fitness_program = AF_FITNESS_RULES.adaptive_fitness_program;
+      rules.adaptive_fitness_program =
+        AF_FITNESS_RULES.adaptive_fitness_program;
     }
+
     if (intent === "diagnostic_pfra") {
       rules.diagnostic_pfra = AF_FITNESS_RULES.diagnostic_pfra;
     }
+
     if (intent === "fsq" || intent === "forms") {
       rules.forms = AF_FITNESS_RULES.forms;
       rules.fsq = AF_FITNESS_RULES.fsq;
     }
-    if (intent === "appeals") rules.appeals = AF_FITNESS_RULES.appeals;
-    if (intent === "administrative_correction") {
-      rules.administrative_correction = AF_FITNESS_RULES.administrative_correction;
+
+    if (intent === "appeals") {
+      rules.appeals = AF_FITNESS_RULES.appeals;
     }
-    if (intent === "altitude") rules.altitude = AF_FITNESS_RULES.altitude;
+
+    if (intent === "administrative_correction") {
+      rules.administrative_correction =
+        AF_FITNESS_RULES.administrative_correction;
+    }
+
+    if (intent === "altitude") {
+      rules.altitude = AF_FITNESS_RULES.altitude;
+    }
+
     return rules;
   })();
 
@@ -2061,6 +2434,7 @@ export function buildAfFitnessTruthPacket({
     topic_key: guidance.topic_key,
     bluf: guidance.bluf,
     profile: normalizedProfile,
+
     context: {
       component: normalizedProfile.component || null,
       status: normalizedProfile.status || null,
@@ -2068,16 +2442,19 @@ export function buildAfFitnessTruthPacket({
       assessment_type: normalizedContext.assessment_type || null,
       ...normalizedContext
     },
+
     pt_score: {
       snapshot: snapshot ? normalizePtScoreSnapshot(snapshot) : null,
       summary: scoreSummary
     },
+
     guidance: {
       key_points: guidance.key_points,
       cautions: guidance.cautions,
       next_steps: guidance.next_steps,
       disclaimers: guidance.disclaimers
     },
+
     rules: relevantRules,
     references: guidance.references,
     warnings: uniqueArray(warnings),
@@ -2086,7 +2463,7 @@ export function buildAfFitnessTruthPacket({
 }
 
 // ============================================================
-// //#11) DEFAULT EXPORT
+// 10. DEFAULT EXPORT
 // ============================================================
 
 export default Object.freeze({
