@@ -12,7 +12,7 @@ export const REGULATION = Object.freeze({
   publicationDate: "2026-03-24", pages: 116,
   officialUrl: "https://static.e-publishing.af.mil/production/1/af_a1/publication/afman36-2905/dafman36-2905.pdf"
 });
-const STOP = new Set("a about an and are as at be by can could do does explain for from how i in is it me my of on or our please say tell the their there this to under what when where which who why will with you your amy air force afman dafman 36 2905 paragraph para section regulation instruction manual policy mean means apply applies".split(" "));
+const STOP = new Set("a about an and are as at be by can could do does explain for from how i in is it me my of on or our please say says tell tells talk talks take takes get find know the their there this to under what when where which who why will with you your amy air force afman dafman 36 2905 paragraph para section regulation instruction manual policy mean means apply applies need needs needed state states mention mentions discuss discusses".split(" "));
 const text = value => typeof value === "string" ? value.trim() : "";
 const object = value => value && typeof value === "object" && !Array.isArray(value);
 const list = value => Array.isArray(value) ? value : object(value) ? Object.values(value) : [];
@@ -53,6 +53,7 @@ function makeDocument(raw) {
       kind, id, title: text(item.title ?? item.heading), text: body,
       page: start, pageEnd: end, sectionId: text(item.section_id),
       verified: reviewed(item), references: list(item.references).filter(v => typeof v === "string"),
+      searchTerms: text(item.search_terms),
       numericUseAllowed: item.numeric_use_allowed === true && reviewed(item)
     });
   };
@@ -163,12 +164,20 @@ export function lookupRegulationParagraph(reference, options = {}) {
 
 function words(value) {
   const normalized = String(value).toLowerCase()
-    .replace(/\b(?:pt test|fitness test|physical fitness assessment)\b/g, "pfra")
+    .replace(/\b(?:pt test|fitness test|fitness assessment|physical fitness assessment)\b/g, "pfra")
     .replace(/waist[- ]to[- ]height(?: ratio)?/g, "whtr")
     .replace(/body fat assessment/g, "bfa").replace(/working out/g, "physical conditioning")
     .replace(/how often|when.*next test/g, "frequency assessment")
     .replace(/\b(?:exemptions?|exempted)\b/g, "exempt")
-    .replace(/\bretakes?\b/g, "retest");
+    .replace(/\bretakes?\b/g, "retest")
+    .replace(/\b(?:retests|retesting)\b/g, "retest")
+    .replace(/\b(?:passing|passed)\b/g, "pass")
+    .replace(/\b(?:minimums|min)\b/g, "minimum")
+    .replace(/\b(?:scoring|scores)\b/g, "score")
+    .replace(/\b(?:calculate|calculated|calculating|calculation)\b/g, "calculation")
+    .replace(/\b(?:tests|testing|assessments)\b/g, "assessment")
+    .replace(/\b(?:fails|failed|failing|failure|failures)\b/g, "fail")
+    .replace(/\b(?:appeals|appealing)\b/g, "appeal");
   return [...new Set((normalized.match(/[a-z][a-z0-9]+/g) ?? []).filter(w => !STOP.has(w)))];
 }
 
@@ -177,16 +186,31 @@ export function searchRegulation(question, options = {}) {
   if (!document) return { ok: false, status: "data_unavailable", results: [], error };
   const terms = words(question);
   if (!terms.length) return { ok: false, status: "no_search_terms", results: [] };
-  const rows = document.entries.map(row => {
-    const body = new Set(words(row.text)), title = new Set(words(row.title || row.text.split(/[.!?]/)[0]));
-    const matches = terms.filter(term => body.has(term));
-    return { row, score: matches.length + terms.filter(term => title.has(term)).length * 3,
-      coverage: matches.length / terms.length };
-  }).filter(r => r.score > 0 && r.coverage >= (terms.length > 2 ? 0.35 : 0.5))
+  // Reviewed search aliases improve discovery; they are never source text or policy.
+  // Rank rare terms above common words such as "score" and "assessment".
+  const corpus = document.entries.map(row => ({ row,
+    body: words(`${row.text} ${row.searchTerms}`),
+    aliases: new Set(words(row.searchTerms)),
+    title: new Set(words(`${row.title || row.text.split(/[.!?]/)[0]} ${row.searchTerms}`)) }));
+  const averageLength = corpus.reduce((sum, item) => sum + item.body.length, 0) / corpus.length || 1;
+  const frequency = new Map(terms.map(term => [term, corpus.filter(item => item.body.includes(term)).length]));
+  const rows = corpus.map(({ row, body, title, aliases }) => {
+    const matches = terms.filter(term => body.includes(term));
+    const score = matches.reduce((sum, term) => {
+      const df = frequency.get(term);
+      const weight = Math.log(1 + (corpus.length - df + 0.5) / (df + 0.5));
+      const lengthWeight = 2.2 / (1 + 1.2 * (0.25 + 0.75 * body.length / averageLength));
+      return sum + weight * lengthWeight + (title.has(term) ? weight : 0)
+        + (aliases.has(term) ? 2 * weight : 0);
+    }, 0);
+    return { row, score, coverage: matches.length / terms.length };
+  }).filter(r => r.score > 0 && r.coverage >= 0.5)
     .sort((a, b) => b.score - a.score || a.row.page - b.row.page);
   const limit = Math.min(10, Math.max(1, Number(options.limit) || 5));
   return { ok: rows.length > 0, status: rows.length ? "found" : "no_topic_match", hasMore: rows.length > limit,
-    results: rows.slice(0, limit).map(({ row, score }) => ({ ...toResult(document, row), score })) };
+    // Weak incidental matches should not crowd the answer with unrelated passages.
+    results: rows.filter(item => item.score >= (rows[0]?.score ?? 0) * 0.65).slice(0, limit)
+      .map(({ row, score }) => ({ ...toResult(document, row), score })) };
 }
 
 export function buildRegulationContext(question, options = {}) {
