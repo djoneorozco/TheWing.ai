@@ -135,191 +135,6 @@
 
 
       <!-- =====================================================
-        RESULT OVERVIEW
-      ====================================================== -->
-
-      <section
-        class="dc-panel dc-overview-panel"
-        aria-labelledby="dc-overview-title"
-      >
-
-        <div class="dc-panel-topline">
-
-          <div>
-            <div class="dc-section-eyebrow">
-              YOUR ESTIMATE
-            </div>
-
-            <h2
-              id="dc-overview-title"
-              class="dc-section-title"
-            >
-              VA Rating Overview
-            </h2>
-          </div>
-
-          <div
-            class="dc-live-pill"
-            aria-label="Live calculator result"
-          >
-            LIVE
-          </div>
-
-        </div>
-
-
-        <div class="dc-overview-main">
-
-          <!-- SCORE RING -->
-
-          <div class="dc-score-ring-wrap">
-
-            <div
-              id="dcScoreRing"
-              class="dc-score-ring"
-              style="--rating-percent:80;"
-            >
-
-              <div class="dc-score-ring-inner">
-
-                <div
-                  id="dcOfficialRating"
-                  class="dc-score-number"
-                  aria-live="polite"
-                >
-                  80%
-                </div>
-
-                <div class="dc-score-label">
-                  Estimated VA Rating
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <!-- HERO COPY -->
-
-          <div class="dc-overview-copy">
-
-            <div class="dc-overview-metrics">
-
-              <div class="dc-overview-metric">
-
-                <span
-                  class="dc-overview-metric-icon dc-icon-combined"
-                  aria-hidden="true"
-                >
-                  ★
-                </span>
-
-                <div>
-                  <strong
-                    id="dcCombinedValue"
-                    class="dc-overview-metric-value"
-                  >
-                    81%
-                  </strong>
-
-                  <span class="dc-overview-metric-label">
-                    Combined Value
-                  </span>
-                </div>
-
-              </div>
-
-
-              <div class="dc-overview-metric">
-
-                <span
-                  class="dc-overview-metric-icon dc-icon-money"
-                  aria-hidden="true"
-                >
-                  $
-                </span>
-
-                <div>
-                  <strong
-                    id="dcMonthlyCompensation"
-                    class="dc-overview-metric-value"
-                  >
-                    $2,102.15
-                  </strong>
-
-                  <span class="dc-overview-metric-label">
-                    Estimated Compensation
-                  </span>
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <!-- HERO BREAKDOWN -->
-
-        <div class="dc-overview-breakdown">
-
-          <div class="dc-overview-stat">
-
-            <div class="dc-stat-label">
-              Highest Rating
-            </div>
-
-            <div
-              id="dcHighestRating"
-              class="dc-stat-value"
-            >
-              60%
-            </div>
-
-          </div>
-
-
-          <div class="dc-overview-stat">
-
-            <div class="dc-stat-label">
-              Combined Value
-            </div>
-
-            <div
-              id="dcCombinedValueSummary"
-              class="dc-stat-value"
-            >
-              81%
-            </div>
-
-          </div>
-
-
-          <div class="dc-overview-stat">
-
-            <div class="dc-stat-label">
-              Official VA Rating
-            </div>
-
-            <div
-              id="dcOfficialRatingSummary"
-              class="dc-stat-value"
-            >
-              80%
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- =====================================================
         1. YOUR DISABILITIES
       ====================================================== -->
 
@@ -535,6 +350,174 @@
         <div class="dc-input-note">
           Ratings are combined from highest to lowest.
           Zero-percent conditions do not change the combined value.
+        </div>
+
+        <div
+          class="dc-dependent-profile-group"
+          style="margin-top:24px;"
+        >
+
+          <!-- DEPENDENT PROFILE -->
+
+          <label
+            class="dc-dependent-card"
+            for="dcDependentProfile"
+          >
+
+            <span class="dc-dependent-label">
+              Dependent Profile
+            </span>
+
+            <span class="dc-select-shell">
+
+              <select
+                id="dcDependentProfile"
+                name="dependentProfile"
+                class="dc-dependent-select"
+                aria-label="Dependent profile"
+              >
+
+                <option value="veteran-only">
+                  Veteran Only
+                </option>
+
+                <option
+                  value="veteran-spouse"
+                  selected
+                >
+                  Veteran + Spouse
+                </option>
+
+                <option value="veteran-child">
+                  Veteran + Child
+                </option>
+
+                <option value="veteran-spouse-child">
+                  Veteran + Spouse + Child
+                </option>
+
+                <option value="custom">
+                  Custom Dependents
+                </option>
+
+              </select>
+
+              <span
+                class="dc-chevron"
+                aria-hidden="true"
+              ></span>
+
+            </span>
+
+          </label>
+
+          <!-- ===================================================
+            CUSTOM DEPENDENTS
+            Hidden unless Custom Dependents is selected.
+          ==================================================== -->
+
+          <div
+            id="dcCustomDependents"
+            class="dc-custom-dependents"
+            hidden
+          >
+
+
+            <!-- SPOUSE -->
+
+            <label class="dc-dependent-input-card">
+
+              <span>
+                Spouse
+              </span>
+
+              <input
+                id="dcHasSpouse"
+                name="hasSpouse"
+                type="checkbox"
+              >
+
+            </label>
+
+
+            <!-- CHILDREN UNDER 18 -->
+
+            <label class="dc-dependent-input-card">
+
+              <span>
+                Children Under 18
+              </span>
+
+              <input
+                id="dcChildrenUnder18"
+                name="childrenUnder18"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                max="20"
+                step="1"
+                value="0"
+              >
+
+            </label>
+
+
+            <!-- CHILDREN 18+ IN SCHOOL -->
+
+            <label class="dc-dependent-input-card">
+
+              <span>
+                Children 18+ in School
+              </span>
+
+              <input
+                id="dcChildrenSchool"
+                name="childrenSchool"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                max="20"
+                step="1"
+                value="0"
+              >
+
+            </label>
+
+
+            <!-- DEPENDENT PARENTS -->
+
+            <label class="dc-dependent-input-card">
+
+              <span>
+                Dependent Parents
+              </span>
+
+              <select
+                id="dcDependentParents"
+                name="dependentParents"
+              >
+
+                <option
+                  value="0"
+                  selected
+                >
+                  0
+                </option>
+
+                <option value="1">
+                  1
+                </option>
+
+                <option value="2">
+                  2
+                </option>
+
+              </select>
+
+            </label>
+
+          </div>
+
         </div>
 
       </section>
@@ -887,11 +870,196 @@
         </div>
 
 
+        <div
+          class="dc-overview-panel"
+          role="group"
+          aria-labelledby="dc-overview-title"
+        >
+
+          <div class="dc-panel-topline">
+
+            <div>
+              <div class="dc-section-eyebrow">
+                YOUR ESTIMATE
+              </div>
+
+              <h3
+                id="dc-overview-title"
+                class="dc-section-title"
+              >
+                VA Rating Overview
+              </h3>
+            </div>
+
+            <div
+              class="dc-live-pill"
+              aria-label="Live calculator result"
+            >
+              LIVE
+            </div>
+
+          </div>
+
+
+          <div class="dc-overview-main">
+
+            <!-- SCORE RING -->
+
+            <div class="dc-score-ring-wrap">
+
+              <div
+                id="dcScoreRing"
+                class="dc-score-ring"
+                style="--rating-percent:80;"
+              >
+
+                <div class="dc-score-ring-inner">
+
+                  <div
+                    id="dcOfficialRating"
+                    class="dc-score-number"
+                    aria-live="polite"
+                  >
+                    80%
+                  </div>
+
+                  <div class="dc-score-label">
+                    Estimated VA Rating
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- HERO COPY -->
+
+            <div class="dc-overview-copy">
+
+              <div class="dc-overview-metrics">
+
+                <div class="dc-overview-metric">
+
+                  <span
+                    class="dc-overview-metric-icon dc-icon-combined"
+                    aria-hidden="true"
+                  >
+                    ★
+                  </span>
+
+                  <div>
+                    <strong
+                      id="dcCombinedValue"
+                      class="dc-overview-metric-value"
+                    >
+                      81%
+                    </strong>
+
+                    <span class="dc-overview-metric-label">
+                      Combined Value
+                    </span>
+                  </div>
+
+                </div>
+
+
+                <div class="dc-overview-metric">
+
+                  <span
+                    class="dc-overview-metric-icon dc-icon-money"
+                    aria-hidden="true"
+                  >
+                    $
+                  </span>
+
+                  <div>
+                    <strong
+                      id="dcMonthlyCompensation"
+                      class="dc-overview-metric-value"
+                    >
+                      $2,102.15
+                    </strong>
+
+                    <span class="dc-overview-metric-label">
+                      Estimated Compensation
+                    </span>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- HERO BREAKDOWN -->
+
+          <div class="dc-overview-breakdown">
+
+            <div class="dc-overview-stat">
+
+              <div class="dc-stat-label">
+                Highest Rating
+              </div>
+
+              <div
+                id="dcHighestRating"
+                class="dc-stat-value"
+              >
+                60%
+              </div>
+
+            </div>
+
+
+            <div class="dc-overview-stat">
+
+              <div class="dc-stat-label">
+                Combined Value
+              </div>
+
+              <div
+                id="dcCombinedValueSummary"
+                class="dc-stat-value"
+              >
+                81%
+              </div>
+
+            </div>
+
+
+            <div class="dc-overview-stat">
+
+              <div class="dc-stat-label">
+                Official VA Rating
+              </div>
+
+              <div
+                id="dcOfficialRatingSummary"
+                class="dc-stat-value"
+              >
+                80%
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
         <!-- ===================================================
           COMPENSATION RESULT
         ==================================================== -->
 
-        <div class="dc-compensation-card">
+        <div
+          class="dc-compensation-card"
+          style="margin-top:24px;grid-template-columns:minmax(0,1fr);"
+        >
 
 
           <!-- MONTHLY AMOUNT -->
@@ -921,169 +1089,6 @@
             </div>
 
           </div>
-
-
-          <!-- DEPENDENT PROFILE -->
-
-          <label
-            class="dc-dependent-card"
-            for="dcDependentProfile"
-          >
-
-            <span class="dc-dependent-label">
-              Dependent Profile
-            </span>
-
-            <span class="dc-select-shell">
-
-              <select
-                id="dcDependentProfile"
-                name="dependentProfile"
-                class="dc-dependent-select"
-                aria-label="Dependent profile"
-              >
-
-                <option value="veteran-only">
-                  Veteran Only
-                </option>
-
-                <option
-                  value="veteran-spouse"
-                  selected
-                >
-                  Veteran + Spouse
-                </option>
-
-                <option value="veteran-child">
-                  Veteran + Child
-                </option>
-
-                <option value="veteran-spouse-child">
-                  Veteran + Spouse + Child
-                </option>
-
-                <option value="custom">
-                  Custom Dependents
-                </option>
-
-              </select>
-
-              <span
-                class="dc-chevron"
-                aria-hidden="true"
-              ></span>
-
-            </span>
-
-          </label>
-
-        </div>
-
-
-        <!-- ===================================================
-          CUSTOM DEPENDENTS
-          Hidden unless Custom Dependents is selected.
-        ==================================================== -->
-
-        <div
-          id="dcCustomDependents"
-          class="dc-custom-dependents"
-          hidden
-        >
-
-
-          <!-- SPOUSE -->
-
-          <label class="dc-dependent-input-card">
-
-            <span>
-              Spouse
-            </span>
-
-            <input
-              id="dcHasSpouse"
-              name="hasSpouse"
-              type="checkbox"
-            >
-
-          </label>
-
-
-          <!-- CHILDREN UNDER 18 -->
-
-          <label class="dc-dependent-input-card">
-
-            <span>
-              Children Under 18
-            </span>
-
-            <input
-              id="dcChildrenUnder18"
-              name="childrenUnder18"
-              type="number"
-              inputmode="numeric"
-              min="0"
-              max="20"
-              step="1"
-              value="0"
-            >
-
-          </label>
-
-
-          <!-- CHILDREN 18+ IN SCHOOL -->
-
-          <label class="dc-dependent-input-card">
-
-            <span>
-              Children 18+ in School
-            </span>
-
-            <input
-              id="dcChildrenSchool"
-              name="childrenSchool"
-              type="number"
-              inputmode="numeric"
-              min="0"
-              max="20"
-              step="1"
-              value="0"
-            >
-
-          </label>
-
-
-          <!-- DEPENDENT PARENTS -->
-
-          <label class="dc-dependent-input-card">
-
-            <span>
-              Dependent Parents
-            </span>
-
-            <select
-              id="dcDependentParents"
-              name="dependentParents"
-            >
-
-              <option
-                value="0"
-                selected
-              >
-                0
-              </option>
-
-              <option value="1">
-                1
-              </option>
-
-              <option value="2">
-                2
-              </option>
-
-            </select>
-
-          </label>
 
         </div>
 
