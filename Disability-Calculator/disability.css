@@ -1988,6 +1988,9 @@ select {
 
 .dc-dependent-card {
 
+  display: block;
+  width: 100%;
+
   min-width:
     0;
 
@@ -3436,4 +3439,37 @@ select {
 
   transition:
     width .35s ease;
+}
+
+/* Annual compensation explanation. */
+.dc-annual-note {
+  margin-top: 16px;
+  text-align: center;
+  color: var(--dc-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.dc-annual-note-title {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--dc-mint);
+  font-size: 16px;
+  font-weight: 700;
+}
+.dc-annual-note p { margin: 0; }
+
+/* Keep the sole monthly result fully readable on narrow phones. */
+@media (max-width: 480px) {
+  .dc-compensation-section .dc-overview-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dc-compensation-section .dc-score-ring-wrap {
+    justify-self: center;
+  }
+}
+
+@media (max-width: 1199px) {
+  .dc-compensation-section .dc-overview-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
