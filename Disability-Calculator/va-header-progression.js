@@ -1,19 +1,19 @@
 /* ============================================================
-   THEWING.AI • VA Rating Header • v1.0.0
+   THEWING.AI • VA Rating Header • v1.0.1
    Save as va-header-progression.js (JavaScript only).
    Required mount: #pcsu-va-header-progression-widget
 
    Reads disability.js results without recalculating VA ratings.
    Annual estimate = the current monthly amount multiplied by 12.
-   Desktop: five cards. Phones: VA Rating only.
+   Desktop: five cards. Phones: Monthly Pay and VA Rating.
 ============================================================ */
 (() => {
   "use strict";
 
-  const VERSION = "1.0.0";
+  const VERSION = "1.0.1";
   const MOUNT_ID = "pcsu-va-header-progression-widget";
   const ROOT_ID = "pcsu-va-header-score-strip";
-  const STYLE_ID = "pcsu-va-header-styles-v100";
+  const STYLE_ID = "pcsu-va-header-styles-v101";
   const CALCULATOR_ORIGIN = "https://thewing.netlify.app";
   const UPDATE_TYPE = "thewing:disability-updated";
   const UPDATE_SOURCE = "thewing-disability-calculator";
@@ -124,25 +124,27 @@
           color:#84642c;
         }
 
+        #${ROOT_ID} .vah-phone-label { display:none; }
+
         @media (max-width:767px),
           (max-width:991px) and (max-height:500px) and (pointer:coarse) {
 
-          #${ROOT_ID} .vah-card:not(.vah-total) {
+          #${ROOT_ID} .vah-card:not(.vah-total):not([data-va-card="monthly"]) {
             display:none;
           }
 
           #${ROOT_ID} .vah-grid {
-            grid-template-columns:minmax(0,1fr);
+            grid-template-columns:repeat(2,minmax(0,1fr));
             width:100%;
             max-width:360px;
           }
 
-          #${ROOT_ID} .vah-total {
+          #${ROOT_ID} .vah-card {
             min-height:64px;
             border-radius:16px;
           }
 
-          #${ROOT_ID} .vah-total .vah-label {
+          #${ROOT_ID} .vah-card .vah-label {
             font-size:10px;
           }
 
@@ -150,7 +152,14 @@
             font-size:26px;
           }
 
-          #${ROOT_ID} .vah-total .vah-support {
+          #${ROOT_ID} [data-va-card="monthly"] .vah-value {
+            font-size:clamp(16px,5vw,20px);
+          }
+
+          #${ROOT_ID} .vah-desktop-label { display:none; }
+          #${ROOT_ID} .vah-phone-label { display:inline; }
+
+          #${ROOT_ID} .vah-card .vah-support {
             font-size:10px;
           }
         }
@@ -183,7 +192,7 @@
               data-va-card="${key}"
             >
               <span class="vah-label">
-                ${label}
+                ${key === "monthly" ? '<span class="vah-desktop-label">Monthly</span><span class="vah-phone-label">Monthly Pay</span>' : label}
               </span>
 
               <span
