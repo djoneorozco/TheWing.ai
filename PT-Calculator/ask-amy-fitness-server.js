@@ -111,7 +111,8 @@ function parseBody(event) {
   return parsed;
 }
 
-/* Preserve displayed values. Do not derive any scoring or policy result. */
+/* Preserve displayed values; map the existing calculator packet to the
+ * server contract without recalculating scores or applying scoring charts. */
 function sanitizeFitness(raw) {
   if (!plain(raw)) return null;
   const r = pickObject(raw.results, raw.result, raw.score, raw);
@@ -120,54 +121,94 @@ function sanitizeFitness(raw) {
   const scores = pickObject(r.component_scores, r.componentScores, raw.component_scores,
     raw.displayed_component_scores, r.scores, raw.scores);
   const passes = pickObject(r.component_pass, raw.component_pass);
+  const strength = obj(raw.strength), core = obj(raw.core), cardio = obj(raw.cardio);
+  const events = obj(raw.events), caps = obj(first(r.component_maximums, raw.caps));
+  const coreEvent = clean(first(i.core_option, i.coreOption, raw.core_option,
+    core.event, events.core, i.core), 80);
+  const cardioEvent = clean(first(i.cardio_option, i.cardioOption, raw.cardio_option,
+    cardio.event, events.cardio, i.cardio), 80);
+  const cardioMode = clean(first(r.cardio_mode, raw.cardioMode, raw.cardio_mode), 30).toLowerCase();
+  const isPlank = clean(core.unit, 30).toLowerCase() === "seconds" || /plank/i.test(coreEvent);
+  const isHamr = cardioMode === "hamr" || /hamr/i.test(cardioEvent);
+  const isWalk = cardioMode === "walk" || /walk/i.test(cardioEvent);
+  const isRun = !isHamr && !isWalk && (cardioMode === "run" || /run/i.test(cardioEvent));
   const hints = first(r.improvement_hints, r.improvementHints, raw.improvement_hints, raw.targets);
   const componentScores = {}, componentPass = {};
   const aliases = { body_composition: ["body_composition", "bodyComposition", "bodyScore", "body"],
     strength: ["strength", "strengthScore"], core: ["core", "coreScore"], cardio: ["cardio", "cardioScore"] };
   for (const component of COMPONENTS) {
-    componentScores[component] = number(first(...aliases[component].map(key => scores[key])), 0, 100);
-    componentPass[component] = bool(passes[component]);
+    componentScores[component] = number(first(...aliases[component].map(key => scores[key]),
+      ...aliases[component].filter(key => key.endsWith("Score")).map(key => raw[key])), 0, 100);
+    const legacyPass = { strength: first(raw.strengthPassed, raw.strength_passed, strength.minimumMet),
+      core: first(raw.corePassed, raw.core_passed, core.minimumMet),
+      cardio: first(raw.cardioPassed, raw.cardio_passed, cardio.minimumMet) };
+    componentPass[component] = bool(first(passes[component], legacyPass[component]));
   }
   const ratingRaw = clean(first(r.rating, r.category, r.displayed_rating, r.displayedRating, scores.category), 60);
   const rating = ["Excellent", "Satisfactory", "Unsatisfactory", "Ready", "Not Ready", "PFRA Hold", "Incomplete"]
     .find(value => value.toLowerCase() === ratingRaw.toLowerCase()) ?? null;
+  const minimumsMet = bool(first(r.component_minimums_met, r.componentMinimumsMet,
+    r.minimumsMet, r.minimums_met, raw.minimumsMet, raw.minimums_met));
+  const explicitPass = bool(first(r.overall_pass, r.overallPass, r.passed,
+    raw.overall_pass, raw.overallPass, raw.passed));
+  // Read the calculator's category and minimums, never compute a new score.
+  const overallPass = explicitPass !== null ? explicitPass
+    : rating === "Unsatisfactory" ? false
+    : ["Excellent", "Satisfactory"].includes(rating) && minimumsMet === true ? true : null;
+  const totalScore = number(first(r.total_score, r.totalScore, r.displayed_total_score,
+    r.displayedTotalScore, r.total, raw.displayed_total_score, raw.total, scores.total), 0, 100);
+  const completeResult = totalScore !== null && rating !== null && overallPass !== null
+    && COMPONENTS.every(key => componentScores[key] !== null);
   return {
-    ok: raw.ok === true || r.ok === true,
+    ok: raw.ok !== false && r.ok !== false
+      && (raw.ok === true || r.ok === true || completeResult),
     partial: raw.partial === true || r.partial === true || raw.complete === false || r.complete === false,
     stale: raw.stale === true || r.stale === true,
     runtime_version: clean(first(raw.runtimeVersion, raw.version, raw.source_version), 100),
-    generated_at: clean(first(raw.generatedAt, raw.generated_at), 50),
+    generated_at: clean(first(raw.generatedAt, raw.generated_at, raw.updated_at), 50),
     source_version: clean(first(raw.sourceVersion, raw.source_version, r.source_version), 100),
     effective_date: clean(first(raw.effective_date, raw.source?.scoring_effective_date), 50),
     inputs: {
       sex: clean(first(i.sex, i.gender, raw.sex), 30),
       age: number(first(i.age, raw.age), 0, 120),
-      age_band: clean(first(i.age_band, i.ageBand, raw.age_band), 40),
+      age_band: clean(first(i.age_band, i.ageBand, i.ageGroup, i.age_group,
+        raw.age_band, raw.ageGroup, raw.age_group), 40),
       service_component: clean(first(i.service_component, i.component, raw.service_component), 60),
       height_inches: number(first(i.height_inches, i.heightInches, raw.height_inches), 1, 120),
       waist_inches: number(first(i.waist_inches, i.waistInches, raw.waist_inches), 1, 120),
-      strength_option: clean(first(i.strength_option, i.strengthOption, i.strength), 80),
-      strength_reps: number(first(i.strength_reps, i.strengthReps)),
-      core_option: clean(first(i.core_option, i.coreOption, i.core), 80),
-      core_reps: number(first(i.core_reps, i.coreReps)),
-      plank_seconds: number(first(i.plank_seconds, i.plankSeconds)),
-      cardio_option: clean(first(i.cardio_option, i.cardioOption, i.cardio), 80),
-      run_seconds: number(first(i.run_seconds, i.runSeconds)),
-      hamr_shuttles: number(first(i.hamr_shuttles, i.hamrShuttles)),
-      walk_seconds: number(first(i.walk_seconds, i.walkSeconds)),
+      strength_option: clean(first(i.strength_option, i.strengthOption, raw.strength_option,
+        strength.event, events.strength, i.strength), 80),
+      strength_reps: number(first(i.strength_reps, i.strengthReps, raw.strength_reps, strength.performance)),
+      core_option: coreEvent,
+      core_reps: number(first(i.core_reps, i.coreReps, raw.core_reps, !isPlank ? core.performance : undefined)),
+      plank_seconds: number(first(i.plank_seconds, i.plankSeconds, raw.plank_seconds,
+        isPlank ? core.performance : undefined)),
+      cardio_option: cardioEvent,
+      run_seconds: number(first(i.run_seconds, i.runSeconds, raw.run_seconds,
+        isRun ? cardio.performance : undefined)),
+      hamr_shuttles: number(first(i.hamr_shuttles, i.hamrShuttles, raw.hamr_shuttles,
+        isHamr ? cardio.performance : undefined)),
+      walk_seconds: number(first(i.walk_seconds, i.walkSeconds, raw.walk_seconds,
+        isWalk ? cardio.performance : undefined)),
       walk_authorized: bool(first(i.walk_authorized, raw.walk_authorized)),
       cardio_exempt: bool(first(i.cardio_exempt, raw.cardio_exempt)),
       altitude_feet: number(first(i.altitude_feet, raw.altitude_feet))
     },
     results: {
-      total_score: number(first(r.total_score, r.totalScore, r.displayed_total_score,
-        r.displayedTotalScore, r.total, scores.total), 0, 100),
+      total_score: totalScore,
       rating,
-      overall_pass: bool(first(r.overall_pass, r.overallPass, r.passed)),
-      component_minimums_met: bool(first(r.component_minimums_met, r.componentMinimumsMet)),
+      overall_pass: overallPass,
+      component_minimums_met: minimumsMet,
       component_scores: componentScores, component_pass: componentPass,
-      whtr: number(first(r.whtr, r.measurements?.whtr, raw.measurements?.whtr, i.whtr), 0, 2),
-      whtr_risk: clean(first(r.whtr_risk, r.measurements?.whtr_risk, raw.measurements?.whtr_risk), 80),
+      component_maximums: {
+        body_composition: number(first(caps.body_composition, caps.body), 0, 100),
+        strength: number(caps.strength, 0, 100), core: number(caps.core, 0, 100),
+        cardio: number(caps.cardio, 0, 100), total: number(caps.total, 0, 100)
+      },
+      whtr: number(first(r.whtr, r.ratio, r.measurements?.whtr,
+        raw.measurements?.whtr, i.whtr, raw.ratio), 0, 2),
+      whtr_risk: clean(first(r.whtr_risk, r.riskLabel, r.measurements?.whtr_risk,
+        raw.measurements?.whtr_risk, i.whtrRisk, i.whtr_risk), 80),
       fail_reasons: texts(first(r.fail_reasons, r.failReasons, raw.fail_reasons)),
       points_to_excellent: number(first(r.points_to_excellent, r.pointsToExcellent), 0, 100),
       points_to_satisfactory: number(first(r.points_to_satisfactory, r.pointsToSatisfactory), 0, 100),
@@ -323,6 +364,7 @@ function systemPrompt(intent, ctx) {
     "If context is insufficient, say what is missing and ask at most the allowed number of follow-up questions.",
     "Return JSON matching the requested schema. reply must contain prose only, without source URLs or invented citations.",
     "Put supporting source IDs in source_ids; the server adds the actual citations.",
+    "When no verified regulation excerpts are supplied, return source_ids as an empty array []. Do not return a placeholder such as none.",
     `Intent: ${intent}. Prose limit: ${Math.max(100, ctx.response_limits.max_chars - 260)} characters.`,
     `Maximum follow-up questions: ${ctx.response_limits.max_follow_up_questions}.`
   ].join("\n");
@@ -353,7 +395,9 @@ async function callOpenAI({ message, intent, fitness, sources, ctx }) {
           schema: { type: "object", additionalProperties: false,
             properties: {
               reply: { type: "string" },
-              source_ids: { type: "array", items: { type: "string", enum: sourceIds.length ? sourceIds : ["none"] } },
+              source_ids: sourceIds.length
+                ? { type: "array", items: { type: "string", enum: sourceIds } }
+                : { type: "array", items: { type: "string" }, maxItems: 0 },
               missing_inputs: { type: "array", items: { type: "string", enum: [
                 "current_fitness_result", "performance_targets", "verified_regulation_text", "more_specific_question"
               ] } }
