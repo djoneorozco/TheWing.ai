@@ -2464,10 +2464,13 @@
         : 0;
 
 
+    // Project 12 months at the current estimate, using whole cents.
+    const annual = Math.round(monthly * 100) * 12 / 100;
+
     setText(
       els.compensationAmount,
       money2(
-        monthly
+        annual
       )
     );
 
