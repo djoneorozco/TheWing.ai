@@ -8,6 +8,12 @@
     "netlify/functions/cities/**"
   ]
 
+[functions."ask-amy-fitness"]
+  node_bundler = "esbuild"
+  included_files = [
+    "PT-Calculator/afman36-2905.json"
+  ]
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
