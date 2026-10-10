@@ -37,7 +37,8 @@ const DEFAULT_REPLY_CHARS = 1100;
 const DEFAULT_GREETING_CHARS = 320;
 const COMPONENTS = ["body_composition", "strength", "core", "cardio"];
 const DEFAULT_ORIGINS = [
-  "https://thewing.ai", "https://www.thewing.ai", "https://thewing.netlify.app"
+  "https://thewing.ai", "https://www.thewing.ai", "https://thewing.netlify.app",
+  "https://the-wing.webflow.io"
 ];
 const clean = (v, max = 500) => typeof v === "string" ? v.trim().slice(0, max) : "";
 const plain = v => Boolean(v && typeof v === "object" && !Array.isArray(v));
@@ -84,7 +85,7 @@ function headers(event) {
   const cors = allowedOrigin(event);
   return {
     ...(cors.allowed && cors.origin ? { "Access-Control-Allow-Origin": cors.origin } : {}),
-    "Access-Control-Allow-Headers": "Content-Type, X-TheWing-Client",
+    "Access-Control-Allow-Headers": "Content-Type, X-TheWing-Client, X-PCSU-Client",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Max-Age": "86400",
     "Content-Type": "application/json; charset=utf-8",
