@@ -602,12 +602,16 @@
     }
 
     function formatOneDecimal(value) {
-      const n = Number(value);
-      if (!Number.isFinite(n)) return null;
+      const n = asFiniteNumber(value);
+      if (n === null) return null;
       return n.toFixed(1);
     }
 
     function asFiniteNumber(value) {
+      if (
+        (typeof value !== "number" && typeof value !== "string") ||
+        String(value).trim() === ""
+      ) return null;
       const n = Number(value);
       return Number.isFinite(n) ? n : null;
     }
@@ -675,6 +679,8 @@
           : CAPS;
 
       return {
+        // Keep the full calculator packet available to Ask Amy.
+        ...detail,
         source: source || "pcsunited.pt.calculator",
         version: asString(detail.version) || "1.0.0",
         type: "pcsunited-pt-score",
@@ -804,9 +810,10 @@
         events: snapshot.events
       });
 
+      // Inputs can change within a scoring band without changing points.
+      latestSnapshot = snapshot;
       if (paintKey === lastPaintKey) return;
       lastPaintKey = paintKey;
-      latestSnapshot = snapshot;
 
       [
         els.tileBody,
