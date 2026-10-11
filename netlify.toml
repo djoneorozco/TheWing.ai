@@ -14,6 +14,12 @@
     "PT-Calculator/afman36-2905.json"
   ]
 
+[functions."ask-amy-disability"]
+  node_bundler = "esbuild"
+  included_files = [
+    "Disability-Calculator/38-CFR.json"
+  ]
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
