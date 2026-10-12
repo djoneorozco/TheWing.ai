@@ -17,6 +17,7 @@
     heightValue: root.querySelector("#heightValue"),
 
     cardioEvent: root.querySelector("#cardioEvent"),
+    cardioChoiceButtons: root.querySelectorAll(".cardio-choice"),
     strengthEvent: root.querySelector("#strengthEvent"),
     enduranceEvent: root.querySelector("#enduranceEvent"),
 
@@ -1238,6 +1239,14 @@
       els.cardioEvent?.value || ""
     );
 
+    // Visible cardio choices mirror the existing authoritative event selector.
+    const currentCardioMode = getCardioModeKey();
+    els.cardioChoiceButtons.forEach(button => {
+      const selected = button.dataset.cardioMode === currentCardioMode;
+      button.classList.toggle("is-active", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
+
     safeText(
       els.strengthValue,
       `${els.strengthSlider?.value || 0} reps`
@@ -1592,6 +1601,17 @@
       updateUI({ announce: true });
     });
   }
+
+  // Button clicks reuse the existing select/change pathway; scoring is untouched.
+  els.cardioChoiceButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      if (!els.cardioEvent) return;
+      const targetLabel = button.dataset.cardioMode === "hamr" ? "20m HAMR" : "2.0 Mile Run";
+      if (els.cardioEvent.value === targetLabel) return;
+      els.cardioEvent.value = targetLabel;
+      els.cardioEvent.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  });
 
   //#11) INIT
   activeStrengthMode = getStrengthModeKey();
