@@ -4477,3 +4477,30 @@ body::after {
   }
 
 }
+
+/* Cardio choice visibility enhancement — all other UI styles unchanged. */
+#af-pt-shell .cardio-event-selector { display: block; padding-left: 48px; }
+#af-pt-shell .cardio-choice-group { display: flex; flex-wrap: wrap; gap: 7px; min-width: 0; }
+#af-pt-shell .cardio-choice {
+  appearance: none; -webkit-appearance: none; flex: 1 1 112px;
+  min-height: 42px; padding: 9px 11px; border-radius: 11px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(13,41,65,.54); color: #eef5ff;
+  font: 700 12px/1.2 Inter,system-ui,sans-serif; cursor: pointer;
+  transition: border-color .15s, background-color .15s, box-shadow .15s;
+}
+#af-pt-shell .cardio-choice.is-active {
+  border-color: #8cc6ff; background: rgba(43,126,218,.49);
+  box-shadow: inset 0 0 0 1px rgba(170,213,255,.35), 0 0 12px rgba(80,156,255,.24);
+}
+#af-pt-shell .cardio-choice:focus-visible { outline: 2px solid #a8e7d6; outline-offset: 3px; }
+#af-pt-shell .cardio-medical-option { margin-top: 7px; font-size: 10px; color: rgba(233,241,255,.72); }
+#af-pt-shell .cardio-medical-option summary { cursor: pointer; width: fit-content; }
+#af-pt-shell .cardio-medical-option[open] .select-wrap { margin-top: 4px; max-width: 265px; }
+#af-pt-shell .cardio-medical-option select { min-height: 34px; padding: 4px 24px 4px 7px; font-size: 12px; background: rgba(17,43,65,.65); border-radius: 7px; }
+@media (max-width: 339px) { #af-pt-shell .cardio-event-selector { padding-left: 0; } }
+@media (min-width: 1000px) {
+  #af-pt-shell .event-cardio { grid-template-columns: minmax(185px,.75fr) minmax(270px,1.08fr) minmax(285px,1.35fr); }
+  #af-pt-shell .cardio-event-selector { padding: 0; margin: 0; }
+}
+@media (prefers-reduced-motion: reduce) { #af-pt-shell .cardio-choice { transition: none; } }
