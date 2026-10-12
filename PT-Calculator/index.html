@@ -713,34 +713,24 @@
             </div>
 
 
-            <div class="event-selector">
+            <div class="event-selector cardio-event-selector">
 
-              <label
-                class="event-selector-label"
-                for="cardioEvent"
-              >
-                Cardio Event
-              </label>
-
-              <div class="select-wrap">
-
-                <select id="cardioEvent">
-
-                  <option selected>
-                    2.0 Mile Run
-                  </option>
-
-                  <option>
-                    20m HAMR
-                  </option>
-
-                  <option>
-                    2 km Walk (medical only)
-                  </option>
-
-                </select>
-
+              <div class="cardio-choice-group" role="group" aria-label="Choose cardio assessment">
+                <button type="button" class="cardio-choice is-active" data-cardio-mode="run" aria-pressed="true">2-Mile Run</button>
+                <button type="button" class="cardio-choice" data-cardio-mode="hamr" aria-pressed="false">20m HAMR</button>
               </div>
+
+              <details class="cardio-medical-option" id="cardioMedicalOption">
+                <summary>Medical-only cardio option</summary>
+                <label class="sr-only" for="cardioEvent">Cardio Event</label>
+                <div class="select-wrap">
+                  <select id="cardioEvent" aria-label="Cardio event, including medical walk">
+                    <option selected>2.0 Mile Run</option>
+                    <option>20m HAMR</option>
+                    <option>2 km Walk (medical only)</option>
+                  </select>
+                </div>
+              </details>
 
             </div>
 
