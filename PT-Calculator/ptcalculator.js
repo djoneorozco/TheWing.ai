@@ -17,7 +17,8 @@
     heightValue: root.querySelector("#heightValue"),
 
     cardioEvent: root.querySelector("#cardioEvent"),
-    cardioChoiceButtons: root.querySelectorAll(".cardio-choice"),
+    cardioChoiceButtons: root.querySelectorAll?.(".cardio-choice") || [],
+    eventChoiceButtons: root.querySelectorAll?.(".event-choice") || [],
     strengthEvent: root.querySelector("#strengthEvent"),
     enduranceEvent: root.querySelector("#enduranceEvent"),
 
@@ -1205,7 +1206,19 @@
   }
 
   //#9) UI RENDER
+  function syncEventChoices() {
+    els.eventChoiceButtons.forEach(button => {
+      const target = button.closest(".strength-event-selector")
+        ? els.strengthEvent
+        : els.enduranceEvent;
+      const selected = target?.value === button.dataset.eventValue;
+      button.classList.toggle("is-active", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
+  }
+
   function updateUI(options = {}) {
+    syncEventChoices();
     const announce = options.announce === true;
 
     setSliderFill(els.heightSlider);
@@ -1601,6 +1614,18 @@
       updateUI({ announce: true });
     });
   }
+
+  // Existing strength/core selection handlers are reused, without modifying scores.
+  els.eventChoiceButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      const selector = button.closest(".strength-event-selector")
+        ? els.strengthEvent
+        : els.enduranceEvent;
+      if (!selector || selector.value === button.dataset.eventValue) return;
+      selector.value = button.dataset.eventValue;
+      selector.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  });
 
   // Button clicks reuse the existing select/change pathway; scoring is untouched.
   els.cardioChoiceButtons.forEach(button => {
