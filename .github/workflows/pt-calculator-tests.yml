@@ -1,0 +1,27 @@
+name: PT-Calculator Accuracy Tests
+
+on:
+  push:
+    paths:
+      - 'PT-Calculator/**'
+      - '.github/workflows/pt-calculator-tests.yml'
+  pull_request:
+    paths:
+      - 'PT-Calculator/**'
+  workflow_dispatch:
+
+jobs:
+  scoring-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run PT-Calculator scoring tests
+        run: node --test PT-Calculator/tests/scoring-regression.test.cjs
