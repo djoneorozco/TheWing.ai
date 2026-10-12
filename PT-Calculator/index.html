@@ -122,6 +122,80 @@
       #af-pt-shell .cardio-event-selector { padding-left: 0; }
       #af-pt-shell .cardio-event-selector .cardio-choice { padding-inline: 6px; font-size: 10px; }
     }
+
+    /* Compact event selectors: same column width and aligned sliders in all three rows. */
+    #af-pt-shell .event-button-selector {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 4px;
+      min-width: 0;
+    }
+    #af-pt-shell .event-button-selector .event-selector-label {
+      display: block;
+      margin: 0;
+      font-size: 9px;
+    }
+    #af-pt-shell .event-choice-group,
+    #af-pt-shell .cardio-event-selector .cardio-choice-group {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 3px;
+      width: max-content;
+      max-width: 100%;
+      border: 0;
+      padding: 0;
+      background: none;
+    }
+    #af-pt-shell .event-choice,
+    #af-pt-shell .cardio-event-selector .cardio-choice {
+      appearance: none;
+      -webkit-appearance: none;
+      min-width: 0;
+      min-height: 32px;
+      padding: 5px 6px;
+      flex: 0 1 auto;
+      font: 700 10px/1.12 Inter,system-ui,sans-serif;
+      color: #eef5ff;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 9px;
+      background: rgba(9,32,53,.52);
+      white-space: normal;
+      cursor: pointer;
+      text-align: center;
+    }
+    #af-pt-shell .event-choice.is-active,
+    #af-pt-shell .cardio-event-selector .cardio-choice.is-active {
+      color: #fff;
+      border-color: rgba(150,199,255,.75);
+      background: rgba(60,126,201,.70);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+    }
+    #af-pt-shell .event-choice:focus-visible {
+      outline: 2px solid #a8e7d6;
+      outline-offset: 2px;
+    }
+    #af-pt-shell .event-button-selector select[hidden] { display: none !important; }
+    @media (min-width: 1000px) {
+      #af-pt-shell .event-card,
+      #af-pt-shell .event-cardio {
+        grid-template-columns: minmax(190px,.75fr) minmax(210px,.83fr) minmax(300px,1.5fr);
+      }
+      #af-pt-shell .event-button-selector {
+        margin: 0;
+        padding: 0;
+        min-width: 0;
+      }
+    }
+    @media (max-width: 999px) {
+      #af-pt-shell .event-button-selector { padding-left: 48px; }
+    }
+    @media (max-width: 339px) {
+      #af-pt-shell .event-button-selector { padding-left: 0; }
+      #af-pt-shell .event-choice { font-size: 9px; padding-inline: 4px; }
+    }
   </style>
 </head>
 
@@ -522,32 +596,18 @@
             </div>
 
 
-            <div class="event-selector">
-
-              <label
-                class="event-selector-label"
-                for="strengthEvent"
-              >
-                Strength Event
-              </label>
-
-              <div class="select-wrap">
-
-                <select id="strengthEvent">
-
-                  <option selected>
-                    Push-Ups
-                  </option>
-
-                  <option>
-                    Hand-Release Push-Ups
-                  </option>
-
-                </select>
-
+            <div class="event-selector event-button-selector strength-event-selector">
+              <div class="event-selector-label">Strength Event</div>
+              <div class="event-choice-group" role="group" aria-label="Choose strength event">
+                <button type="button" class="event-choice is-active" data-event-value="Push-Ups" aria-pressed="true">Push-Ups</button>
+                <button type="button" class="event-choice" data-event-value="Hand-Release Push-Ups" aria-pressed="false">Hand-Release Push-Ups</button>
               </div>
-
+              <select id="strengthEvent" aria-label="Strength event" hidden>
+                <option selected>Push-Ups</option>
+                <option>Hand-Release Push-Ups</option>
+              </select>
             </div>
+
 
 
             <div class="event-slider-wrap">
@@ -636,36 +696,20 @@
             </div>
 
 
-            <div class="event-selector">
-
-              <label
-                class="event-selector-label"
-                for="enduranceEvent"
-              >
-                Core Event
-              </label>
-
-              <div class="select-wrap">
-
-                <select id="enduranceEvent">
-
-                  <option selected>
-                    Sit-Ups
-                  </option>
-
-                  <option>
-                    Cross-Legged Reverse Crunch
-                  </option>
-
-                  <option>
-                    Forearm Plank
-                  </option>
-
-                </select>
-
+            <div class="event-selector event-button-selector core-event-selector">
+              <div class="event-selector-label">Core Event</div>
+              <div class="event-choice-group" role="group" aria-label="Choose core event">
+                <button type="button" class="event-choice is-active" data-event-value="Sit-Ups" aria-pressed="true">Sit-Ups</button>
+                <button type="button" class="event-choice" data-event-value="Cross-Legged Reverse Crunch" aria-pressed="false">Reverse Crunch</button>
+                <button type="button" class="event-choice" data-event-value="Forearm Plank" aria-pressed="false">Forearm Plank</button>
               </div>
-
+              <select id="enduranceEvent" aria-label="Core event" hidden>
+                <option selected>Sit-Ups</option>
+                <option>Cross-Legged Reverse Crunch</option>
+                <option>Forearm Plank</option>
+              </select>
             </div>
+
 
 
             <div class="event-slider-wrap">
@@ -754,7 +798,7 @@
             </div>
 
 
-            <div class="event-selector cardio-event-selector">
+            <div class="event-selector event-button-selector cardio-event-selector">
 
               <div class="event-selector-label">Cardio Event</div>
               <div class="cardio-choice-group" role="group" aria-label="Choose cardio assessment">
