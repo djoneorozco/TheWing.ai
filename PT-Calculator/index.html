@@ -82,6 +82,47 @@
     rel="stylesheet"
     href="./ptcalculator.css"
   >
+
+  <!-- Compact cardio selector: HTML-only presentation adjustment. -->
+  <style>
+    #af-pt-shell .cardio-event-selector {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 5px;
+      min-width: 0;
+    }
+    #af-pt-shell .cardio-event-selector .event-selector-label {
+      display: block;
+      margin: 0;
+    }
+    #af-pt-shell .cardio-event-selector .cardio-choice-group {
+      display: inline-flex;
+      gap: 3px;
+      max-width: 100%;
+      padding: 2px;
+    }
+    #af-pt-shell .cardio-event-selector .cardio-choice {
+      flex: 0 1 auto;
+      min-width: 0;
+      min-height: 32px;
+      padding: 6px 8px;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+    #af-pt-shell .cardio-event-selector #cardioEvent[hidden] { display: none !important; }
+    @media (min-width: 1000px) {
+      #af-pt-shell .event-cardio .cardio-event-selector {
+        padding: 0;
+        margin: 0;
+      }
+    }
+    @media (max-width: 339px) {
+      #af-pt-shell .cardio-event-selector { padding-left: 0; }
+      #af-pt-shell .cardio-event-selector .cardio-choice { padding-inline: 6px; font-size: 10px; }
+    }
+  </style>
 </head>
 
 <body>
@@ -715,22 +756,18 @@
 
             <div class="event-selector cardio-event-selector">
 
+              <div class="event-selector-label">Cardio Event</div>
               <div class="cardio-choice-group" role="group" aria-label="Choose cardio assessment">
                 <button type="button" class="cardio-choice is-active" data-cardio-mode="run" aria-pressed="true">2-Mile Run</button>
                 <button type="button" class="cardio-choice" data-cardio-mode="hamr" aria-pressed="false">20m HAMR</button>
               </div>
 
-              <details class="cardio-medical-option" id="cardioMedicalOption">
-                <summary>Medical-only cardio option</summary>
-                <label class="sr-only" for="cardioEvent">Cardio Event</label>
-                <div class="select-wrap">
-                  <select id="cardioEvent" aria-label="Cardio event, including medical walk">
-                    <option selected>2.0 Mile Run</option>
-                    <option>20m HAMR</option>
-                    <option>2 km Walk (medical only)</option>
-                  </select>
-                </div>
-              </details>
+              <!-- Retain the existing selector for the unchanged scoring engine. -->
+              <select id="cardioEvent" aria-label="Cardio event" hidden>
+                <option selected>2.0 Mile Run</option>
+                <option>20m HAMR</option>
+                <option>2 km Walk (medical only)</option>
+              </select>
 
             </div>
 
