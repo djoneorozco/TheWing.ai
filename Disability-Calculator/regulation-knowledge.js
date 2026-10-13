@@ -46,14 +46,32 @@ const keyOf = (kind, id) => `${kind}:${normalize(id)}`;
 let cache = null;
 
 function candidateFiles() {
-  return [...new Set([
-    process.env.DISABILITY_REGULATION_FILE,
-    process.env.DISABILITY_REGULATIONS_DIR && path.join(process.env.DISABILITY_REGULATIONS_DIR, REGULATION.filename),
-    process.env.REGULATIONS_DIR && path.join(process.env.REGULATIONS_DIR, REGULATION.filename),
-    fileURLToPath(new URL("./38-CFR.json", import.meta.url)),
-    path.resolve(process.cwd(), "Disability-Calculator", REGULATION.filename),
-    process.env.LAMBDA_TASK_ROOT && path.resolve(process.env.LAMBDA_TASK_ROOT, "Disability-Calculator", REGULATION.filename)
-  ].filter(Boolean))];
+  // Every configured override is authoritative. Precedence: explicit file,
+  // disability-specific directory, generic directory. Never substitute an
+  // adjacent/default edition when a configured source is broken.
+  for (const [name, directory] of [["DISABILITY_REGULATION_FILE", false],
+    ["DISABILITY_REGULATIONS_DIR", true], ["REGULATIONS_DIR", true]]) {
+    const configured = process.env[name];
+    if (configured !== undefined) return [{ location: name,
+      file: configured.trim() ? path.resolve(directory ? path.join(configured, REGULATION.filename) : configured) : null }];
+  }
+  const candidates = [];
+  try {
+    candidates.push({location: "module-adjacent", file: fileURLToPath(new URL("./38-CFR.json", import.meta.url))});
+  } catch { /* esbuild's CommonJS output may have no usable import.meta.url. */ }
+  candidates.push({location: "working-directory", file: path.resolve(process.cwd(), "Disability-Calculator", REGULATION.filename)});
+  if (process.env.LAMBDA_TASK_ROOT) candidates.push({location: "lambda-task-root",
+    file: path.resolve(process.env.LAMBDA_TASK_ROOT, "Disability-Calculator", REGULATION.filename)});
+  // Native CommonJS bundles can run with a working directory outside /var/task.
+  if (typeof __dirname !== "undefined") {
+    candidates.push({location: "bundle-directory",
+      file: path.resolve(__dirname, "Disability-Calculator", REGULATION.filename)});
+    // Netlify's ZIP preserves the entry at netlify/functions/*.js while
+    // included_files paths are rooted at the ZIP root, two levels above.
+    candidates.push({location: "netlify-bundle-root",
+      file: path.resolve(__dirname, "..", "..", "Disability-Calculator", REGULATION.filename)});
+  }
+  return candidates;
 }
 
 function makeDocument(raw) {
@@ -97,6 +115,7 @@ function makeDocument(raw) {
     ["tables", "table"], ["section_contexts", "section_context"],
     ["appendices", "appendix"], ["diagnostic_index", "diagnostic_index"], ["figures", "figure"]
   ]) for (const item of array(raw[field])) add(item, kind);
+  if (!entries.length) throw new Error("Empty regulation index");
   if (array(raw.pages).length !== REGULATION.pages) throw new Error("Incomplete page corpus");
   const pages = new Map();
   for (const page of raw.pages) {
@@ -115,22 +134,44 @@ function makeDocument(raw) {
 }
 
 function loadDocument() {
+  let location = "default-locations", stage = "resolve";
+  const failure = (error, reason) => ({document: null, error, diagnostics: {location, stage, reason}});
   try {
-    // An explicit override is authoritative. A bad override must not silently
-    // fall back to a different file or edition.
-    const file = process.env.DISABILITY_REGULATION_FILE || candidateFiles().find(value => fs.existsSync(value));
-    if (!file || !fs.existsSync(file)) return { document: null, error: "REGULATION_DATA_MISSING" };
+    const candidates = candidateFiles();
+    // First existing default wins; malformed existing data must fail closed.
+    const selected = candidates.find(candidate => candidate.file && fs.existsSync(candidate.file));
+    if (!selected) {
+      location = candidates.length === 1 ? candidates[0].location : location;
+      return failure("REGULATION_DATA_MISSING", "No regulation file exists at the selected source location(s).");
+    }
+    const {file} = selected;
+    location = selected.location;
+    stage = "read";
     const stat = fs.statSync(file);
-    if (cache?.file === file && cache.mtime === stat.mtimeMs && cache.size === stat.size) return cache;
-    const document = makeDocument(JSON.parse(fs.readFileSync(file, "utf8")));
-    cache = { file, mtime: stat.mtimeMs, size: stat.size, document, error: null };
+    if (!stat.isFile()) return failure("REGULATION_DATA_INVALID", "Configured source is not a regular file.");
+    const diagnostics = {location, stage: "ready", reason: null};
+    if (cache?.file === file && cache.mtime === stat.mtimeMs && cache.size === stat.size) return {...cache, diagnostics};
+    const json = fs.readFileSync(file, "utf8");
+    stage = "parse";
+    let raw;
+    try { raw = JSON.parse(json); }
+    catch { return failure("REGULATION_DATA_INVALID", "Regulation file is not valid JSON."); }
+    stage = "validate";
+    let document;
+    try { document = makeDocument(raw); }
+    catch (error) { return failure("REGULATION_DATA_INVALID", error.message); }
+    cache = {file, mtime: stat.mtimeMs, size: stat.size, document, error: null, diagnostics};
     return cache;
-  } catch { return { document: null, error: "REGULATION_DATA_INVALID" }; }
+  } catch {
+    // Do not return absolute paths or source text in the public API.
+    return failure("REGULATION_DATA_INVALID", "Regulation file could not be resolved or read.");
+  }
 }
 
 export function getRegulationStatus() {
-  const { document, error } = loadDocument();
+  const { document, error, diagnostics } = loadDocument();
   return {
+    diagnostics,
     available: Boolean(document?.entries.length), error,
     indexedEntries: document?.entries.length ?? 0,
     verifiedEntries: document?.entries.filter(r => r.verified).length ?? 0,
