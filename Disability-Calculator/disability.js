@@ -47,7 +47,7 @@
   ============================================================ */
 
   const DISABILITY_RUNTIME_VERSION =
-    "disability-2026.2";
+    "disability-2026.4";
 
   const COMBINED_RATING_RULE_VERSION =
     "38-cfr-4.25";
@@ -678,6 +678,11 @@
     inputRatings
   ) {
 
+    if (!Array.isArray(inputRatings) || inputRatings.length > MAX_DISABILITIES ||
+      inputRatings.some(value => typeof value !== "number" || !VALID_RATINGS.includes(value))) {
+      throw new RangeError("Ratings must be numeric percentages in increments of 10, with at most 20 entries.");
+    }
+
     const ratingEntries =
       (
         Array.isArray(
@@ -916,26 +921,35 @@
   }
 
 
-  function readRatings() {
-
-    return getRatingSelects()
-      .map(
-        select => {
-
-          const rating =
-            Number(
-              select.value
-            );
-
-          return isValidRating(
-            rating
-          )
-            ? rating
-            : 0;
-        }
-      );
+  function inputFailure(element, message, status = "invalid") {
+    const error = new Error(message);
+    error.element = element;
+    error.inputStatus = status;
+    throw error;
   }
 
+  function readCount(element, label, max) {
+    const raw = element?.value;
+    const value = Number(raw);
+    if (typeof raw !== "string" || !raw.trim() || element.validity?.badInput
+      || !Number.isFinite(value) || !Number.isInteger(value) || value < 0 || value > max) {
+      inputFailure(element, `${label}: enter a whole number from 0 to ${max}.`);
+    }
+    return value;
+  }
+
+  function readRatings() {
+    const selects = getRatingSelects();
+    if (!selects.length) inputFailure(null, "Enter at least one rating. An empty list is not a 0% rating.", "empty");
+    if (selects.length > MAX_DISABILITIES) inputFailure(null, `Enter at most ${MAX_DISABILITIES} ratings.`);
+    return selects.map(select => {
+      const value = Number(select.value);
+      if (!select.value.trim() || !VALID_RATINGS.includes(value)) {
+        inputFailure(select, "Select a rating from 0% to 100% in increments of 10.");
+      }
+      return value;
+    });
+  }
 
   /* ============================================================
     9. DEPENDENT PROFILE
@@ -980,6 +994,10 @@
           : "veteran-only"
       );
 
+
+    if (!["veteran-only", "veteran-spouse", "veteran-child", "veteran-spouse-child", "custom"].includes(profile)) {
+      inputFailure(els.dependentProfile, "Choose a supported dependent profile.");
+    }
 
     const profileLabel =
       getDependentProfileLabel(
@@ -1073,43 +1091,14 @@
       "custom"
     ) {
 
+      if (!els.hasSpouse || typeof els.hasSpouse.checked !== "boolean" || els.hasSpouse.indeterminate) {
+        inputFailure(els.hasSpouse, "Choose whether a spouse is included.");
+      }
       return {
-
-        profile,
-
-        profileLabel,
-
-        spouse:
-          Boolean(
-            els.hasSpouse &&
-            els.hasSpouse.checked
-          ),
-
-        childrenUnder18:
-          toNonNegativeInt(
-            els.childrenUnder18
-              ? els.childrenUnder18.value
-              : 0
-          ),
-
-        childrenInSchoolOver18:
-          toNonNegativeInt(
-            els.childrenSchool
-              ? els.childrenSchool.value
-              : 0
-          ),
-
-        dependentParents:
-          clamp(
-            toNonNegativeInt(
-              els.dependentParents
-                ? els.dependentParents.value
-                : 0
-            ),
-            0,
-            2
-          )
-
+        profile, profileLabel, spouse: els.hasSpouse.checked,
+        childrenUnder18: readCount(els.childrenUnder18, "Children under 18", 20),
+        childrenInSchoolOver18: readCount(els.childrenSchool, "Children in school", 20),
+        dependentParents: readCount(els.dependentParents, "Dependent parents", 2)
       };
     }
 
@@ -1376,6 +1365,16 @@
   function getVACompensation(
     input = {}
   ) {
+
+    if (typeof input.spouse !== "boolean" ||
+      [["childrenUnder18",20],["childrenInSchoolOver18",20],["dependentParents",2]]
+        .some(([key,max]) => !Number.isInteger(input[key]) || input[key] < 0 || input[key] > max)) {
+      return {ok:false, error:"Dependent selections must be explicit and counts must be whole numbers within supported limits.", monthlyVA:null, rateVersion:VA_RATE_VERSION};
+    }
+
+    if (typeof input.rating !== "number" || !VALID_RATINGS.includes(input.rating)) {
+      return {ok:false, error:"Choose a supported numeric rating.", monthlyVA:null, rateVersion:VA_RATE_VERSION};
+    }
 
     const rating =
       Number(
@@ -2628,202 +2627,51 @@
   }
 
 
-  function postDisabilityStateToParent(
-    state
-  ) {
+  // Verified actual Webflow parent. www redirects here; Netlify is the
+  // calculator host, not an observed parent. No suffix/wildcard matching.
+  const APPROVED_PARENT_ORIGINS = new Set(["https://thewing.ai"]);
+  let verifiedParentOrigin = null;
 
-    const snapshot =
-      cloneDisabilityState(
-        state
-      );
-
-
-    if (
-      !snapshot
-    ) {
-
-      return;
-    }
-
-
-    try {
-
-      if (
-        window.parent &&
-        window.parent !==
-          window
-      ) {
-
-        window.parent.postMessage(
-          {
-
-            type:
-              "thewing:disability-updated",
-
-            source:
-              "thewing-disability-calculator",
-
-            disability:
-              snapshot
-
-          },
-          "*"
-        );
-
-      }
-
-    } catch (_) {
-
-      /* Fail open */
-
-    }
+  function currentMessage(state) {
+    return state ? {
+      type: "thewing:disability-updated", source: "thewing-disability-calculator",
+      status: "valid", disability: cloneDisabilityState(state)
+    } : {
+      // The deployed Amy bridge already clears its cached estimate on this type.
+      type: "thewing:disability-cleared", source: "thewing-disability-calculator",
+      status: currentInputStatus, disability: null
+    };
   }
 
-
-  function emitDisabilityEvent(
-    state
-  ) {
-
-    const snapshot =
-      cloneDisabilityState(
-        state
-      );
-
-
-    if (
-      !snapshot
-    ) {
-
-      return;
-    }
-
-
-    /*
-      Same-document listeners.
-    */
-
-    try {
-
-      window.dispatchEvent(
-        new CustomEvent(
-          "thewing:disability-updated",
-          {
-            detail:
-              snapshot
-          }
-        )
-      );
-
-    } catch (_) {
-
-      /* Fail open */
-
-    }
-
-
-    /*
-      Parent Webflow page / Ask Amy.
-    */
-
-    postDisabilityStateToParent(
-      snapshot
-    );
+  function postDisabilityStateToParent(state) {
+    if (!verifiedParentOrigin || window.parent === window) return;
+    try { window.parent.postMessage(currentMessage(state), verifiedParentOrigin); }
+    catch (_) { /* Calculator remains usable without an embedding page. */ }
   }
 
-
-  function respondToDisabilityStateRequest(
-    event
-  ) {
-
-    const message =
-      event &&
-      event.data;
-
-
-    if (
-      !message ||
-      typeof message !==
-        "object"
-    ) {
-
-      return;
-    }
-
-
-    if (
-      message.type !==
-        "thewing:disability-request-state" ||
-      message.source !==
-        "ask-amy-disability"
-    ) {
-
-      return;
-    }
-
-
-    const snapshot =
-      cloneDisabilityState(
-        currentState
-      );
-
-
-    if (
-      !snapshot
-    ) {
-
-      return;
-    }
-
-
-    /*
-      Reply directly to the requesting window.
-      In the Webflow configuration this will normally
-      be the parent page hosting Ask Amy.
-    */
-
+  function emitDisabilityEvent(state) {
+    const message = currentMessage(state);
     try {
-
-      if (
-        event.source &&
-        typeof event.source.postMessage ===
-          "function"
-      ) {
-
-        event.source.postMessage(
-          {
-
-            type:
-              "thewing:disability-updated",
-
-            source:
-              "thewing-disability-calculator",
-
-            disability:
-              snapshot
-
-          },
-          "*"
-        );
-
-        return;
-      }
-
-    } catch (_) {
-
-      /* Continue to parent fallback */
-
-    }
-
-
-    /*
-      Fallback if event.source is unavailable.
-    */
-
-    postDisabilityStateToParent(
-      snapshot
-    );
+      window.dispatchEvent(new CustomEvent(message.type, {
+        detail: state ? message.disability : {status: currentInputStatus, disability: null}
+      }));
+    } catch (_) { /* Calculator remains usable without same-page listeners. */ }
+    postDisabilityStateToParent(state);
   }
 
+  function respondToDisabilityStateRequest(event) {
+    const message = event?.data;
+    if (window.parent === window || event?.source !== window.parent || event.isTrusted !== true) return;
+    if (!APPROVED_PARENT_ORIGINS.has(event.origin)) {
+      verifiedParentOrigin = null;
+      return;
+    }
+    if (!message || message.type !== "thewing:disability-request-state" || message.source !== "ask-amy-disability") return;
+    // Browser-authenticated event.origin + exact parent WindowProxy is the
+    // handshake. Referrers, message fields and URL parameters are never authority.
+    verifiedParentOrigin = event.origin;
+    postDisabilityStateToParent(currentState);
+  }
 
   window.addEventListener(
     "message",
@@ -3322,18 +3170,51 @@
     23. MAIN RUN
   ============================================================ */
 
+  let currentInputStatus = "empty";
+  let currentInputError = null;
+  const validationMessage = $("#dcInputError");
+  const resultSections = $$(".dc-rating-build-section, .dc-compensation-section");
+
+  function showInputStatus(status, error = null) {
+    currentInputStatus = status;
+    currentInputError = error?.message || null;
+    ROOT.dataset.inputStatus = status;
+    ROOT.dataset.inputValid = String(status === "valid");
+    for (const element of $$('[aria-invalid="true"]')) {
+      element.removeAttribute("aria-invalid");
+      const descriptions = (element.getAttribute("aria-describedby") || "").split(/\s+/).filter(id => id && id !== "dcInputError");
+      if (descriptions.length) element.setAttribute("aria-describedby", descriptions.join(" "));
+      else element.removeAttribute("aria-describedby");
+    }
+    if (error?.element) {
+      error.element.setAttribute("aria-invalid", "true");
+      const ids = new Set((error.element.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean));
+      ids.add("dcInputError");
+      error.element.setAttribute("aria-describedby", [...ids].join(" "));
+    }
+    if (validationMessage) {
+      validationMessage.textContent = currentInputError || "";
+      validationMessage.hidden = status === "valid";
+    }
+    for (const section of resultSections) section.hidden = status !== "valid";
+  }
+
   function run() {
-
     updateCustomDependentVisibility();
-
-
-    const state =
-      buildState();
-
-
-    currentState =
-      state;
-
+    let state;
+    try { state = buildState(); }
+    catch (error) {
+      // Clear authority before notifying any listener; never send the last good estimate.
+      currentState = null;
+      showInputStatus(error.inputStatus || "invalid", error);
+      ROOT.dataset.ready = "false";
+      for (const key of ["combinedValue", "officialRating", "highestRating"]) delete ROOT.dataset[key];
+      if (els.liveRegion) els.liveRegion.textContent = "Estimate unavailable. " + (currentInputError || "Correct the inputs.");
+      emitDisabilityEvent(null);
+      return null;
+    }
+    currentState = state;
+    showInputStatus("valid");
 
     const result = {
 
@@ -3557,6 +3438,10 @@
 
       readDependents,
 
+
+      getStatus() {
+        return {status: currentInputStatus, error: currentInputError};
+      },
 
       getState() {
 
