@@ -1,4 +1,4 @@
-/* TheWing.ai • Ask Amy Disability Server • v1.1.0
+/* TheWing.ai • Ask Amy Disability Server • v1.1.2
  * Save in Disability-Calculator beside regulation-knowledge.js and 38-CFR.json.
  * TheWing calculates. Amy explains. ESM / Node.js 20+.
  * Source: supplied 38 CFR Part 4 PDF snapshot dated October 7, 2026.
@@ -10,7 +10,11 @@ import {
   getRegulationStatus
 } from "./regulation-knowledge.js";
 
-const VERSION = "ask-amy-disability-server-1.1.0";
+import { calculateCombinedRating, DISABILITY_RATING_VERSION, DISABILITY_RATING_RULE_VERSION,
+  VALID_INDIVIDUAL_RATINGS } from "../netlify/functions/_share/disability-rating.js";
+import { getVACompensation, RATE_VERSION } from "../netlify/functions/_share/official-va.js";
+
+const VERSION = "ask-amy-disability-server-1.1.2";
 const RESPONSE_CONTRACT_VERSION = "ask-amy-disability-response-v1";
 const SCOPE = "disability_calculator";
 const DISPLAY_NAME = "Amy — Disability Concierge";
@@ -22,7 +26,6 @@ const MAX_THREAD_MESSAGE_LENGTH = 5000;
 const MAX_MEMORY_KEYS = 20;
 const MAX_MEMORY_STRING_LENGTH = 500;
 const MAX_RATINGS = 20;
-const MAX_STEPS = 20;
 const DEFAULT_MAX_REPLY_CHARS = 1100;
 const DEFAULT_GREETING_MAX_CHARS = 320;
 const MIN_REPLY_CHARS = 240;
@@ -53,7 +56,6 @@ const finiteNumber = value => {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 };
-const boolOrNull = value => typeof value === "boolean" ? value : null;
 const clamp = (value, min, max) => {
   const number = finiteNumber(value);
   return number === null ? null : Math.max(min, Math.min(max, number));
@@ -72,18 +74,6 @@ const money2 = value => {
   });
 };
 const numericPercent = value => finiteNumber(value) === null ? "" : `${Number(value)}%`;
-
-function stripEmpty(value) {
-  if (Array.isArray(value)) return value.map(stripEmpty).filter(item => item != null);
-  if (!isPlainObject(value)) return value;
-  const output = {};
-  for (const [key, nested] of Object.entries(value)) {
-    if (["__proto__", "constructor", "prototype"].includes(key)) continue;
-    if (nested === undefined || nested === null || nested === "") continue;
-    output[key] = stripEmpty(nested);
-  }
-  return output;
-}
 
 function resolveAllowedOrigin(event) {
   const origin = clean(event?.headers?.origin || event?.headers?.Origin);
@@ -130,75 +120,75 @@ function parseRequestBody(event) {
   return isPlainObject(parsed) ? parsed : {};
 }
 
-function sanitizeRatingArray(raw) {
-  return Array.isArray(raw) ? raw.slice(0, MAX_RATINGS).map(validRating).filter(v => v !== null) : [];
-}
-
-function sanitizeRatingEntry(raw) {
-  return isPlainObject(raw) ? stripEmpty({
-    sourceIndex: finiteNumber(raw.sourceIndex), rating: validRating(raw.rating)
-  }) : null;
-}
-
-function sanitizeStep(raw) {
-  if (!isPlainObject(raw)) return null;
-  const output = { rating: validRating(raw.rating) };
-  for (const key of ["index", "sourceIndex", "previousCombined", "remainingBefore",
-    "rawContribution", "contribution", "rawCombined", "combined", "remainingAfter"]) {
-    output[key] = finiteNumber(raw[key]);
+// Frontend buildState sends numeric ratings and explicit boolean/count inputs.
+// Validate before calling shared modules: their convenience normalizers coerce
+// values and omit invalid ratings, which is inappropriate at this trust boundary.
+function validateDisabilitySnapshot(raw) {
+  const errors = [];
+  const invalid = () => ({ status: "invalid", errors, snapshot: null });
+  if (raw === null || raw === undefined) return { status: "missing", errors, snapshot: null };
+  if (!isPlainObject(raw)) {
+    errors.push("Calculator context must be an object.");
+    return invalid();
   }
-  return stripEmpty(output);
-}
-
-function sanitizeDependents(raw) {
-  if (!isPlainObject(raw)) return {};
-  return stripEmpty({
-    profile: clean(raw.profile).slice(0, 100),
-    profileLabel: clean(raw.profileLabel).slice(0, 160),
-    spouse: boolOrNull(raw.spouse),
-    childrenUnder18: finiteNumber(raw.childrenUnder18),
-    childrenInSchoolOver18: finiteNumber(raw.childrenInSchoolOver18),
-    dependentParents: finiteNumber(raw.dependentParents)
-  });
-}
-
-function sanitizeCompensation(raw) {
-  if (!isPlainObject(raw)) return {};
-  return stripEmpty({
-    ok: raw.ok === true,
-    error: clean(raw.error).slice(0, 200),
-    rating: validRating(raw.rating),
-    spouse: boolOrNull(raw.spouse),
-    dependentParents: finiteNumber(raw.dependentParents),
-    childrenUnder18: finiteNumber(raw.childrenUnder18),
-    childrenInSchoolOver18: finiteNumber(raw.childrenInSchoolOver18),
-    monthlyVA: finiteNumber(raw.monthlyVA),
-    baseMonthlyVA: finiteNumber(raw.baseMonthlyVA),
-    addedChildrenUnder18: finiteNumber(raw.addedChildrenUnder18),
-    addedChildrenInSchoolOver18: finiteNumber(raw.addedChildrenInSchoolOver18),
-    dependentStatusKey: clean(raw.dependentStatusKey).slice(0, 100),
-    rateVersion: clean(raw.rateVersion).slice(0, 100)
-  });
-}
-
-function sanitizeDisabilitySnapshot(raw) {
-  if (!isPlainObject(raw)) return null;
-  return stripEmpty({
-    runtimeVersion: clean(raw.runtimeVersion).slice(0, 100),
-    ruleVersion: clean(raw.ruleVersion).slice(0, 100),
-    rateVersion: clean(raw.rateVersion).slice(0, 100),
-    ratingsEntered: sanitizeRatingArray(raw.ratingsEntered),
-    ratingsSorted: sanitizeRatingArray(raw.ratingsSorted),
-    ratingEntries: Array.isArray(raw.ratingEntries)
-      ? raw.ratingEntries.slice(0, MAX_RATINGS).map(sanitizeRatingEntry).filter(Boolean) : [],
-    highestRating: validRating(raw.highestRating),
-    combinedValue: validRating(raw.combinedValue),
-    officialRating: validRating(raw.officialRating),
-    remainingEfficiency: validRating(raw.remainingEfficiency),
-    steps: Array.isArray(raw.steps) ? raw.steps.slice(0, MAX_STEPS).map(sanitizeStep).filter(Boolean) : [],
-    dependents: sanitizeDependents(raw.dependents),
-    compensation: sanitizeCompensation(raw.compensation)
-  });
+  if (!Array.isArray(raw.ratingsEntered)) {
+    errors.push("Ratings must be an array of numeric percentages.");
+    return invalid();
+  }
+  if (raw.ratingsEntered.length > MAX_RATINGS) errors.push(`Enter at most ${MAX_RATINGS} ratings.`);
+  if (raw.ratingsEntered.some(v => typeof v !== "number" || !VALID_INDIVIDUAL_RATINGS.includes(v))) {
+    errors.push("Each rating must be a number from 0 to 100 in increments of 10; blanks are not ratings.");
+  }
+  // An empty list is no estimate; [0] is a valid noncompensable rating.
+  const d = raw.dependents;
+  if (!raw.ratingsEntered.length && d === undefined) return { status: "empty", errors: [], snapshot: null };
+  if (!isPlainObject(d)) errors.push("Provide the spouse selection and all dependent counts.");
+  else {
+    if (typeof d.spouse !== "boolean") errors.push("Spouse must be explicitly true or false.");
+    for (const [key, label, max] of [["childrenUnder18", "Children under 18", 20],
+      ["childrenInSchoolOver18", "School children", 20], ["dependentParents", "Dependent parents", 2]]) {
+      if (!Number.isInteger(d[key]) || d[key] < 0 || d[key] > max) errors.push(`${label} must be a whole number from 0 to ${max}.`);
+    }
+  }
+  if (errors.length) return invalid();
+  if (!raw.ratingsEntered.length) return { status: "empty", errors: [], snapshot: null };
+  const result = calculateCombinedRating(raw.ratingsEntered);
+  // Preserve the frontend's preset names, but derive them from validated
+  // selections rather than trusting a contradictory browser label.
+  const preset = d.dependentParents === 0 && d.childrenInSchoolOver18 === 0 && d.childrenUnder18 <= 1;
+  const profile = preset ? (d.childrenUnder18 === 1
+    ? (d.spouse ? "veteran-spouse-child" : "veteran-child")
+    : (d.spouse ? "veteran-spouse" : "veteran-only")) : "custom";
+  const profileLabels = { "veteran-only": "Veteran Only", "veteran-spouse": "Veteran + Spouse",
+    "veteran-child": "Veteran + Child", "veteran-spouse-child": "Veteran + Spouse + Child",
+    custom: "Custom Dependents" };
+  const dependents = {
+    profile, profileLabel: profileLabels[profile],
+    spouse: d.spouse, childrenUnder18: d.childrenUnder18,
+    childrenInSchoolOver18: d.childrenInSchoolOver18, dependentParents: d.dependentParents
+  };
+  // The shared payment module supports 10–100 only. A 0% schedular estimate
+  // has no standard monthly payment; this does not determine other benefits.
+  const compensation = result.officialRating === 0
+    ? { rating: 0, ...dependents, monthlyVA: 0, baseMonthlyVA: 0,
+        addedChildrenUnder18: 0, addedChildrenInSchoolOver18: 0,
+        dependentStatusKey: "zero_rating", rateVersion: RATE_VERSION }
+    : getVACompensation({ rating: result.officialRating, ...dependents });
+  const ratingEntries = raw.ratingsEntered.map((rating, i) => ({rating, sourceIndex: i + 1}))
+    .filter(entry => entry.rating > 0).sort((a, b) => b.rating - a.rating);
+  const snapshot = {
+    runtimeVersion: `disability-server-${DISABILITY_RATING_VERSION}`,
+    ruleVersion: DISABILITY_RATING_RULE_VERSION, rateVersion: RATE_VERSION,
+    ratingsEntered: result.ratingsEntered, ratingsSorted: result.ratingsSorted,
+    ratingEntries, highestRating: result.highestRating,
+    combinedValue: result.combinedValue, officialRating: result.officialRating,
+    remainingEfficiency: result.remainingEfficiency,
+    // Shared engine calls this field 'step'; the existing Amy contract uses 'index'.
+    steps: result.steps.map(step => ({...step, index: step.step,
+      sourceIndex: ratingEntries[step.step - 1]?.sourceIndex})),
+    dependents, compensation: { ...compensation, ok: true }
+  };
+  return { status: "valid", errors: [], snapshot };
 }
 
 function hasAuthoritativeDisabilitySnapshot(snapshot) {
@@ -352,12 +342,12 @@ function buildDisabilityAuthority(snapshot) {
 
   return {
     authority: present
-      ? "browser_displayed_disability_calculator_snapshot"
+      ? "server_verified_disability_calculator_snapshot"
       : "no_current_authoritative_disability_result",
 
     rules: [
       "TheWing calculates. Amy explains.",
-      "Only the supplied current calculator snapshot owns the user's calculated numbers.",
+      "Only the server-recalculated current calculator snapshot owns the user's calculated numbers.",
       "Never independently combine percentages, round the result, calculate compensation, or apply a bilateral factor.",
       "Use ratingsEntered, ratingsSorted, steps, combinedValue, officialRating, remainingEfficiency, dependents, and compensation exactly as supplied.",
       "A field named officialRating is an educational calculator estimate, not an official VA determination.",
@@ -741,7 +731,7 @@ function buildCalculatorFallback(
     }
 
     parts.push(
-      `Your calculator shows a ${numericPercent(snapshot.combinedValue)} combined value and an estimated ${numericPercent(snapshot.officialRating)} final rating.`
+      `Your verified estimate has a ${numericPercent(snapshot.combinedValue)} combined value and an estimated ${numericPercent(snapshot.officialRating)} final rating.`
     );
 
     if (intent === INTENTS.WHOLE_PERSON) {
@@ -759,12 +749,12 @@ function buildCalculatorFallback(
     ].includes(intent)
   ) {
     parts.push(
-      `The displayed standard monthly compensation estimate is ${money2(snapshot.compensation.monthlyVA)}.`
+      `The verified standard monthly compensation estimate is ${money2(snapshot.compensation.monthlyVA)}.`
     );
   }
 
   parts.push(
-    "These are calculator estimates, not an official VA decision."
+    "These are calculator estimates, not an official VA decision. The bilateral factor and special benefits are not included."
   );
 
   return parts.join(" ");
@@ -987,17 +977,11 @@ export async function handler(event) {
     conversationId =
       context.conversation_id;
 
-    const raw =
-      isPlainObject(body.disability)
-        ? body.disability
-
-        : isPlainObject(body.context?.disability)
-          ? body.context.disability
-
-          : null;
-
-    const disability =
-      sanitizeDisabilitySnapshot(raw);
+    // An explicitly supplied malformed top-level value cannot be masked by
+    // a second, valid-looking snapshot in context.disability.
+    const raw = Object.hasOwn(body, "disability") ? body.disability : body.context?.disability;
+    const calculatorContext = validateDisabilitySnapshot(raw);
+    const disability = calculatorContext.snapshot;
 
     const hasResult =
       hasAuthoritativeDisabilitySnapshot(disability);
@@ -1050,7 +1034,23 @@ export async function handler(event) {
       );
     }
 
-    if (intent === INTENTS.GREETING) {
+    if (calculatorContext.status === "invalid") warnings.push("INVALID_CALCULATOR_CONTEXT");
+    if (calculatorContext.status === "empty") warnings.push("EMPTY_CALCULATOR_INPUT");
+
+    if (personal && !hasResult) {
+      replyRaw = calculatorContext.status === "invalid"
+        ? "Please correct the calculator inputs: " + calculatorContext.errors.join(" ")
+        : calculatorContext.status === "empty"
+          ? "Enter at least one service-connected rating, including 0% if applicable, before asking about your estimate. An empty list is not a 0% rating."
+          : buildCalculatorFallback(null, intent);
+    } else if (personal && hasResult) {
+      // Personal numeric answers must remain deterministic even if browser
+      // history, a prompt injection, or a model response supplies other figures.
+      replyRaw = buildCalculatorFallback(disability, intent);
+      if (!usable && lookup.error) replyRaw += " " + buildRegulationProblemReply(lookup);
+    } else if (intent === INTENTS.BILATERAL_FACTOR && /calculate|apply|include|support/i.test(message)) {
+      replyRaw = "This calculator does not apply the bilateral factor under 38 CFR § 4.26. Its ordinary combined-rating estimate may differ from VA's result for eligible paired extremities; I cannot calculate a bilateral-adjusted estimate here.";
+    } else if (intent === INTENTS.GREETING) {
       replyRaw =
         "Hey — I’m Amy, your Disability Concierge. " +
         "I can explain your calculator’s results and the rating criteria in your 38 CFR Part 4 source. " +
@@ -1066,16 +1066,6 @@ export async function handler(event) {
       replyRaw =
         "I’m dedicated to VA disability ratings and the Disability Calculator. " +
         "Use the appropriate TheWing.ai tool for that other topic.";
-
-    } else if (
-      personal &&
-      !hasResult &&
-      !usable
-    ) {
-      replyRaw = buildCalculatorFallback(
-        disability,
-        intent
-      );
 
     } else if (
       !usable &&
@@ -1257,6 +1247,8 @@ export async function handler(event) {
 
         intent,
         reply,
+        // Additive status preserves ok/reply and the v1 envelope for existing UIs.
+        calculator_context: { status: calculatorContext.status, errors: calculatorContext.errors },
 
         conversation_id:
           context.conversation_id,
@@ -1273,7 +1265,7 @@ export async function handler(event) {
 
           calculator_authority:
             hasResult
-              ? "browser_displayed_disability_calculator_snapshot"
+              ? "server_verified_disability_calculator_snapshot"
               : "none",
 
           openai:
@@ -1304,6 +1296,7 @@ export async function handler(event) {
 
           available:
             regulationStatus.available,
+          diagnostics: regulationStatus.diagnostics,
 
           status:
             lookup.status,
