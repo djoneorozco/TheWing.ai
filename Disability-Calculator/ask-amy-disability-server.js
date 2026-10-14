@@ -1,4 +1,4 @@
-/* TheWing.ai • Ask Amy Disability Server • v1.1.2
+/* TheWing.ai • Ask Amy Disability Server • v1.2.0
  * Save in Disability-Calculator beside regulation-knowledge.js and 38-CFR.json.
  * TheWing calculates. Amy explains. ESM / Node.js 20+.
  * Source: supplied 38 CFR Part 4 PDF snapshot dated October 7, 2026.
@@ -14,7 +14,8 @@ import { calculateCombinedRating, DISABILITY_RATING_VERSION, DISABILITY_RATING_R
   VALID_INDIVIDUAL_RATINGS } from "../netlify/functions/_share/disability-rating.js";
 import { getVACompensation, RATE_VERSION } from "../netlify/functions/_share/official-va.js";
 
-const VERSION = "ask-amy-disability-server-1.1.2";
+const VERSION = "ask-amy-disability-server-1.2.0";
+const UI_VERSION = "amy-disability-intelligent-ui-v1";
 const RESPONSE_CONTRACT_VERSION = "ask-amy-disability-response-v1";
 const SCOPE = "disability_calculator";
 const DISPLAY_NAME = "Amy — Disability Concierge";
@@ -45,6 +46,7 @@ const INTENTS = Object.freeze({
   BILATERAL_FACTOR: "bilateral_factor",
   DISABILITY_CONCEPT: "disability_concept",
   REGULATION_QUESTION: "regulation_question",
+  SCENARIO_COMPARISON: "scenario_comparison",
   OUT_OF_SCOPE: "out_of_scope"
 });
 
@@ -174,6 +176,11 @@ function validateDisabilitySnapshot(raw) {
         addedChildrenUnder18: 0, addedChildrenInSchoolOver18: 0,
         dependentStatusKey: "zero_rating", rateVersion: RATE_VERSION }
     : getVACompensation({ rating: result.officialRating, ...dependents });
+  // A missing or failed payment table must not become a verified estimate.
+  if (!Number.isFinite(compensation?.monthlyVA) || compensation.monthlyVA < 0 || compensation.ok === false) {
+    errors.push("Current standard compensation rate data is unavailable.");
+    return invalid();
+  }
   const ratingEntries = raw.ratingsEntered.map((rating, i) => ({rating, sourceIndex: i + 1}))
     .filter(entry => entry.rating > 0).sort((a, b) => b.rating - a.rating);
   const snapshot = {
@@ -256,6 +263,11 @@ function detectIntent(message) {
   if (/^(hi|hello|hey|yo|good morning|good afternoon|good evening)[\s!.]*$/.test(text)) return INTENTS.GREETING;
   if (/^(what can you do|how can you help(?: me)?|what do you do|who are you)[\s?!.]*$/.test(text)) return INTENTS.CAPABILITIES;
   if (/\bbilateral\b|\b4\.26\b|paired extremit|paired limbs|both arms|both legs|left and right/.test(text)) return INTENTS.BILATERAL_FACTOR;
+  // A hypothetical ADDITIONAL rating is the only supported what-if operation.
+  // Never interpret this as a VA entitlement or a request to apply § 4.26.
+  if (/(?:\bwhat if\b|\bhypothetical\b|\bsimulat\w*\b|\bscenario\b|\bsuppos\w*\b|\bif i add\b)/.test(text)
+    && /\b(?:add|added|additional|another|extra|new|rating|disability)\b/.test(text))
+    return INTENTS.SCENARIO_COMPARISON;
   if (/\bdependents?\b|\bspouse\b|\bchildren\b|\bchild\b|\bparent\b/.test(text)) return INTENTS.DEPENDENTS;
   if (/monthly compensation|va compensation|compensation amount|monthly va|monthly payment|how much.*month|payment rate|pay rate|what will i get paid|what will i receive|compensation rate|base monthly/.test(text)) return INTENTS.COMPENSATION;
   if (/final rounding|rounding|rounded|nearest (?:10|ten)|official rating|combined.*official/.test(text)) return INTENTS.FINAL_ROUNDING;
@@ -269,7 +281,7 @@ function detectIntent(message) {
 }
 
 function isPersonalResultQuestion(message, intent) {
-  if (intent === INTENTS.EXPLAIN_ESTIMATE) return true;
+  if ([INTENTS.EXPLAIN_ESTIMATE, INTENTS.SCENARIO_COMPARISON].includes(intent)) return true;
   return /\b(?:my|mine|our)\b|what will i (?:get paid|receive)|how much (?:will|do) i|calculator.*(?:shows?|result)|displayed.*(?:rating|amount|value)/i.test(message)
     && [INTENTS.COMBINED_RATING, INTENTS.WHOLE_PERSON, INTENTS.RATING_STEPS,
       INTENTS.FINAL_ROUNDING, INTENTS.COMPENSATION, INTENTS.DEPENDENTS].includes(intent);
@@ -285,7 +297,8 @@ function retrieveRegulation(message, intent, thread) {
   const specific = /\b(?:ptsd|migraine|tinnitus|cpap|tdiu|ibs|gerd|tbi|bilateral|pyramiding)\b|sleep apnea|hearing loss|diagnostic code|rating criteria|criteria for/i.test(message);
 
   if (!specific && [INTENTS.EXPLAIN_ESTIMATE, INTENTS.COMBINED_RATING,
-    INTENTS.WHOLE_PERSON, INTENTS.RATING_STEPS, INTENTS.FINAL_ROUNDING].includes(intent))
+    INTENTS.WHOLE_PERSON, INTENTS.RATING_STEPS, INTENTS.FINAL_ROUNDING,
+    INTENTS.SCENARIO_COMPARISON].includes(intent))
     return buildRegulationContext("Explain section 4.25", { maxChars: 64000 });
 
   if (!specific && [INTENTS.COMPENSATION, INTENTS.DEPENDENTS].includes(intent)) {
@@ -663,6 +676,75 @@ function enforceReplyLimits(
   ) + "...";
 }
 
+/** Only the shared rating and compensation engines produce scenario values. */
+function buildAdditionalRatingScenario(question, snapshot) {
+  if (!hasAuthoritativeDisabilitySnapshot(snapshot)) return { ok: false, reason: "NO_CURRENT_DISABILITY_RESULT" };
+  if (snapshot.ratingsEntered.length >= MAX_RATINGS) return { ok: false, reason: "MAXIMUM_RATINGS" };
+  const matches = [...question.matchAll(/\b(\d{1,3})\s*(?:%|percent\b)/gi)];
+  if (matches.length !== 1) return { ok: false, reason: "SINGLE_ADDITIONAL_RATING_REQUIRED" };
+  const addedRating = Number(matches[0][1]);
+  if (!VALID_INDIVIDUAL_RATINGS.includes(addedRating)) return { ok: false, reason: "INVALID_ADDITIONAL_RATING" };
+  const nextRatings = [...snapshot.ratingsEntered, addedRating];
+  const result = calculateCombinedRating(nextRatings);
+  const compensation = result.officialRating === 0
+    ? { ok: true, monthlyVA: 0, rateVersion: RATE_VERSION }
+    : getVACompensation({ rating: result.officialRating,
+      spouse: snapshot.dependents.spouse,
+      childrenUnder18: snapshot.dependents.childrenUnder18,
+      childrenInSchoolOver18: snapshot.dependents.childrenInSchoolOver18,
+      dependentParents: snapshot.dependents.dependentParents });
+  if (compensation?.ok !== true || finiteNumber(compensation.monthlyVA) === null)
+    return { ok: false, reason: "COMPENSATION_DATA_UNAVAILABLE" };
+  const monthlyDelta = Math.round((compensation.monthlyVA - snapshot.compensation.monthlyVA) * 100) / 100;
+  return {
+    ok: true,
+    kind: "additional_rating_only",
+    added_rating: addedRating,
+    baseline: { combined_value: snapshot.combinedValue,
+      estimated_rating: snapshot.officialRating,
+      monthly_va: snapshot.compensation.monthlyVA },
+    hypothetical: { combined_value: result.combinedValue,
+      estimated_rating: result.officialRating,
+      monthly_va: compensation.monthlyVA },
+    monthly_delta: monthlyDelta,
+    rate_version: RATE_VERSION,
+    warning: "Hypothetical educational comparison only. No new rating, eligibility, or approval is determined. Bilateral factor and special benefits are not included."
+  };
+}
+
+function buildIntelligentUI({ intent, disability, scenario, regulationUsable }) {
+  const hasResult = hasAuthoritativeDisabilitySnapshot(disability);
+  const widgets = [];
+  if (hasResult) {
+    const byIntent = {
+      [INTENTS.EXPLAIN_ESTIMATE]: "disability_journey",
+      [INTENTS.COMBINED_RATING]: "rating_animation",
+      [INTENTS.RATING_STEPS]: "rating_animation",
+      [INTENTS.WHOLE_PERSON]: "whole_person",
+      [INTENTS.FINAL_ROUNDING]: "final_rounding",
+      [INTENTS.COMPENSATION]: "compensation",
+      [INTENTS.DEPENDENTS]: "dependents",
+      [INTENTS.SCENARIO_COMPARISON]: scenario?.ok ? "scenario_comparison" : null
+    };
+    if (byIntent[intent]) widgets.push("rating_summary", byIntent[intent]);
+  }
+  if (regulationUsable && [INTENTS.REGULATION_QUESTION, INTENTS.DISABILITY_CONCEPT,
+    INTENTS.BILATERAL_FACTOR, INTENTS.EXPLAIN_ESTIMATE, INTENTS.COMBINED_RATING,
+    INTENTS.RATING_STEPS, INTENTS.WHOLE_PERSON, INTENTS.FINAL_ROUNDING,
+    INTENTS.SCENARIO_COMPARISON].includes(intent)) widgets.push("regulation_sources");
+  return {
+    speed: 18,
+    startDelay: 80,
+    version: UI_VERSION,
+    authority: hasResult ? "server_verified_disability_calculator_snapshot" : "none",
+    widgets,
+    // The payload is reconstructed from validated inputs on the server.
+    // Never use browser-supplied calculated fields as authority.
+    disability: hasResult ? disability : null,
+    scenario: scenario?.ok ? scenario : null
+  };
+}
+
 function buildCalculatorFallback(
   snapshot,
   intent
@@ -1008,6 +1090,9 @@ export async function handler(event) {
     const regulationStatus =
       getRegulationStatus();
 
+    const scenario = intent === INTENTS.SCENARIO_COMPARISON && hasResult
+      ? buildAdditionalRatingScenario(message, disability) : null;
+
     const special = [
       INTENTS.GREETING,
       INTENTS.CAPABILITIES,
@@ -1043,6 +1128,22 @@ export async function handler(event) {
         : calculatorContext.status === "empty"
           ? "Enter at least one service-connected rating, including 0% if applicable, before asking about your estimate. An empty list is not a 0% rating."
           : buildCalculatorFallback(null, intent);
+    } else if (intent === INTENTS.SCENARIO_COMPARISON && hasResult) {
+      if (scenario?.ok) {
+        replyRaw = `If an additional ${numericPercent(scenario.added_rating)} rating were hypothetically added, ` +
+          `this calculator's combined value would change from ${numericPercent(scenario.baseline.combined_value)} to ${numericPercent(scenario.hypothetical.combined_value)}, ` +
+          `and its estimated final rating from ${numericPercent(scenario.baseline.estimated_rating)} to ${numericPercent(scenario.hypothetical.estimated_rating)}. ` +
+          `The standard monthly estimate would change from ${money2(scenario.baseline.monthly_va)} to ${money2(scenario.hypothetical.monthly_va)}. ` +
+          "This is a hypothetical calculation, not a VA decision or entitlement determination; the bilateral factor is not included.";
+      } else {
+        replyRaw = scenario?.reason === "MAXIMUM_RATINGS"
+          ? "This calculator already has the maximum of 20 ratings, so I cannot add another hypothetical rating."
+          : scenario?.reason === "INVALID_ADDITIONAL_RATING"
+            ? "Choose one hypothetical additional rating from 0% to 100% in increments of 10."
+            : scenario?.reason === "COMPENSATION_DATA_UNAVAILABLE"
+              ? "The compensation table could not calculate this scenario, so I cannot show an estimated comparison."
+              : "Ask about one additional rating, such as: What if I add another 20% rating?";
+      }
     } else if (personal && hasResult) {
       // Personal numeric answers must remain deterministic even if browser
       // history, a prompt injection, or a model response supplies other figures.
@@ -1178,6 +1279,11 @@ export async function handler(event) {
       warnings.push(
         "REGULATION_REFERENCE_NOT_VERIFIED"
       );
+    }
+
+    if (intent === INTENTS.SCENARIO_COMPARISON) {
+      warnings.push("HYPOTHETICAL_ADDITIONAL_RATING_NOT_VA_DECISION");
+      if (scenario && !scenario.ok) warnings.push(scenario.reason);
     }
 
     if (intent === INTENTS.BILATERAL_FACTOR) {
@@ -1366,10 +1472,9 @@ export async function handler(event) {
             })
           ),
 
-        ui: {
-          speed: 18,
-          startDelay: 80
-        },
+        ui: buildIntelligentUI({
+          intent, disability, scenario, regulationUsable: usable
+        }),
 
         warnings:
           [...new Set(warnings)],
