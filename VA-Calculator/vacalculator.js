@@ -665,9 +665,14 @@
       return data;
     }
 
+    const usage = window.TheWingCalculatorUsage?.create({
+      id: "va", root: ROOT, asyncResults: true,
+      controls: "#rv-retirement-system, #rv-rank, #rv-yos, #rv-va-rating, #rv-dependent-profile"
+    });
     let runSeq = 0;
 
     async function run() {
+      const usageInputs = usage?.calculationStarted();
       const seq = ++runSeq;
       const raw = readInputs();
       paintLoading(raw);
@@ -720,8 +725,10 @@
         if (seq !== runSeq) return;
 
         paintSuccess(raw, data);
+        usage?.rendered(true, usageInputs);
       } catch (err) {
         if (seq !== runSeq) return;
+        usage?.rendered(false, usageInputs);
 
         console.error("PCSU Retire+VA calculator error:", err);
         console.error("Request body sent to TheWing opensource-brain:", requestBody);
