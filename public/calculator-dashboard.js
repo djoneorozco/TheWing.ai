@@ -21,7 +21,7 @@
     el('status').dataset.tone = tone;
   }
   function busy(value) {
-    ['refresh', 'period', 'traffic'].forEach(name => { el(name).disabled = value; });
+    ['refresh', 'period'].forEach(name => { el(name).disabled = value; });
     root.setAttribute('aria-busy', String(value));
   }
   function node(tag, className, text) {
@@ -35,47 +35,36 @@
     box.append(node('strong', '', value), node('span', '', label));
     return box;
   }
-  function validate(data) {
-    const fields = ['pageUsers', 'pageViews', 'startedUsers', 'resultUsers', 'starts', 'results', 'adjustments', 'activeSeconds', 'validationEvents'];
-    if (!data || !Array.isArray(data.calculators) || data.calculators.length !== 2 ||
-        !Array.isArray(data.warnings) || data.warnings.some(x => typeof x !== 'string') ||
-        !Number.isFinite(Date.parse(data.fetchedAt))) throw new Error('The report format was unexpected. No totals are being shown.');
-    data.calculators.forEach((c, i) => {
-      if (c.id !== ['pt', 'disability'][i] || !fields.every(f => typeof c[f] === 'number' && Number.isFinite(c[f]) && c[f] >= 0) ||
-          (c.averageActiveSeconds !== null && !(Number.isFinite(c.averageActiveSeconds) && c.averageActiveSeconds >= 0)) ||
-          typeof c.hasTimeEvents !== 'boolean' || !['recorded', 'no_recorded_usage'].includes(c.status)) {
-        throw new Error('The report format was unexpected. No totals are being shown.');
+  function render(data) {
+    const fields=['sessions','results','adjustments','activeSeconds'];
+    if(data?.source!=='thewing'||data.storageConnected!==true||!Array.isArray(data.calculators)||data.calculators.length!==2||
+       !Number.isFinite(Date.parse(data.fetchedAt))) throw new Error('The usage report was unexpected. No totals are being shown.');
+    data.calculators.forEach((c,i)=>{
+      if(c.id!==['pt','disability'][i]||!fields.every(f=>typeof c[f]==='number'&&Number.isFinite(c[f])&&c[f]>=0)||
+        !(c.averageActiveSeconds===null||(Number.isFinite(c.averageActiveSeconds)&&c.averageActiveSeconds>=0))) {
+        throw new Error('The usage report was unexpected. No totals are being shown.');
       }
     });
-  }
-  function render(data) {
-    validate(data);
     el('cards').replaceChildren();
-    data.calculators.forEach(c => {
-      const recorded = c.status === 'recorded';
-      const card = node('article', 'tw-card');
-      const head = node('div', 'tw-card-header');
-      const badge = node('span', 'tw-badge', recorded ? 'Usage recorded' : 'Not yet confirmed');
-      badge.dataset.recorded = String(recorded);
-      head.append(node('h2', '', c.id === 'pt' ? 'PT Calculator' : 'Disability Rating'), badge);
-      const primary = node('div', 'tw-primary-metric');
-      primary.append(node('div', 'tw-big', recorded ? number(c.startedUsers) : '—'),
-        node('div', 'tw-label', 'People who changed an input'),
-        node('p', 'tw-muted', `${number(c.pageUsers)} page visitors recorded`));
-      const metrics = node('div', 'tw-metrics');
-      metrics.append(metric(recorded ? number(c.resultUsers) : '—', 'People with an updated result'),
-        metric(c.hasTimeEvents ? number(c.adjustments) : '—', 'Input adjustments'),
-        metric(c.hasTimeEvents ? duration(c.averageActiveSeconds) : '—', 'Active time per starter · estimate'),
-        metric(c.hasTimeEvents ? duration(c.activeSeconds) : '—', 'Total estimated active time'));
-      const note = recorded
-        ? `${number(c.starts)} starts · ${number(c.results)} result events · ${number(c.validationEvents)} validation events. Reloading can produce another start or result for the same person.`
-        : 'No usage events returned for this selection. Check tracking, filters, consent, and processing before treating this as non-use.';
-      card.append(head, primary, metrics, node('p', 'tw-card-note', note));
+    data.calculators.forEach(c=>{
+      const recorded=c.sessions>0,card=node('article','tw-card'),head=node('div','tw-card-header');
+      const badge=node('span','tw-badge',recorded?'Usage recorded':'No use recorded yet');
+      badge.dataset.recorded=String(recorded);
+      head.append(node('h2','',c.id==='pt'?'PT Calculator':'Disability Rating'),badge);
+      const primary=node('div','tw-primary-metric');
+      primary.append(node('div','tw-big',number(c.sessions)),node('div','tw-label','Usage sessions'),
+        node('p','tw-muted','Started by an intentional input change'));
+      const metrics=node('div','tw-metrics');
+      metrics.append(metric(number(c.adjustments),'Input changes'),metric(number(c.results),'Sessions with an updated result'),
+        metric(duration(c.averageActiveSeconds),'Average estimated active time'),metric(duration(c.activeSeconds),'Total estimated active time'));
+      card.append(head,primary,metrics,node('p','tw-card-note',recorded?
+        'A reload starts a new session. These are usage sessions, not unique people.':
+        'No saved usage in this date range. Test a calculator once to confirm that recording works.'));
       el('cards').append(card);
     });
-    el('meta').textContent = `Report fetched ${new Date(data.fetchedAt).toLocaleString()} · GA4 reporting time zone: ${data.timeZone || 'not supplied'} · Fetch time is not a data-completeness timestamp.`;
-    el('results').hidden = false;
-    status(data.warnings.join(' '));
+    el('meta').textContent=`Sessions started ${data.startDate} to ${data.endDate} (UTC) · Updated ${new Date(data.fetchedAt).toLocaleString()}`;
+    el('results').hidden=false;
+    status('Connected to TheWing usage storage. Refresh to see new activity.');
   }
   async function load() {
     activeRequest?.abort();
@@ -83,9 +72,9 @@
     const timeout = setTimeout(() => controller.abort(), 45000);
     el('results').hidden = true;
     el('cards').replaceChildren();
-    status('Loading the selected GA4 report…'); busy(true);
+    status('Loading TheWing usage…'); busy(true);
     try {
-      const query = new URLSearchParams({ period: el('period').value, traffic: el('traffic').value });
+      const query = new URLSearchParams({ period: el('period').value });
       const response = await fetch(`${endpoint}?${query}`, { method: 'GET',
         cache: 'no-store', credentials: 'omit', signal: controller.signal });
       const data = await response.json();
@@ -105,6 +94,6 @@
     }
   }
   el('refresh').addEventListener('click', load);
-  ['period', 'traffic'].forEach(name => el(name).addEventListener('change', load));
+  el('period').addEventListener('change', load);
   load();
 })();
