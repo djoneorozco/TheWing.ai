@@ -42,3 +42,6 @@
 #tw-usage-dashboard dd{margin:0;color:var(--muted)}
 #tw-usage-dashboard .tw-footer{font-size:12px;color:var(--muted);margin-top:18px}
 @media(max-width:720px){#tw-usage-dashboard{padding:24px 16px;margin:12px auto;border-radius:12px}#tw-usage-dashboard .tw-cards{grid-template-columns:1fr}#tw-usage-dashboard .tw-access-row{flex-direction:column}#tw-usage-dashboard .tw-card{padding:22px}#tw-usage-dashboard .tw-definitions dl{grid-template-columns:1fr;gap:3px}#tw-usage-dashboard dd{margin-bottom:12px}#tw-usage-dashboard .tw-toolbar{gap:12px;padding:18px}#tw-usage-dashboard .tw-toolbar .tw-filter{min-width:100%}}
+
+#tw-usage-dashboard .tw-definitions summary{cursor:pointer;font-weight:650;font-size:15px}
+#tw-usage-dashboard .tw-definitions[open] summary{margin-bottom:15px}
