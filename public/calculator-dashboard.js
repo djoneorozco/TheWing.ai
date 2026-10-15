@@ -3,9 +3,9 @@
   const root = document.getElementById('tw-usage-dashboard');
   if (!root || root.dataset.initialized) return;
   root.dataset.initialized = 'true';
-  // Fixed endpoint: never take an access-key destination from a URL parameter.
+  // Fixed, read-only aggregate reporting endpoint.
   const endpoint = 'https://thewing.netlify.app/.netlify/functions/calculator-analytics';
-  let accessKey = '', activeRequest = null;
+  let activeRequest = null;
   const el = name => root.querySelector(`[data-ui="${name}"]`);
   const number = n => new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(n);
   function duration(seconds) {
@@ -21,7 +21,7 @@
     el('status').dataset.tone = tone;
   }
   function busy(value) {
-    ['unlock', 'refresh', 'period', 'traffic'].forEach(name => { el(name).disabled = value; });
+    ['refresh', 'period', 'traffic'].forEach(name => { el(name).disabled = value; });
     root.setAttribute('aria-busy', String(value));
   }
   function node(tag, className, text) {
@@ -78,9 +78,6 @@
     status(data.warnings.join(' '));
   }
   async function load() {
-    const entered = el('key').value.trim();
-    if (entered) { accessKey = entered; el('key').value = ''; }
-    if (!accessKey) { status('Enter your owner access key to connect. No analytics have been loaded.'); return; }
     activeRequest?.abort();
     const controller = new AbortController(); activeRequest = controller;
     const timeout = setTimeout(() => controller.abort(), 45000);
@@ -89,17 +86,14 @@
     status('Loading the selected GA4 report…'); busy(true);
     try {
       const query = new URLSearchParams({ period: el('period').value, traffic: el('traffic').value });
-      const response = await fetch(`${endpoint}?${query}`, { method: 'GET', headers: { Authorization: `Bearer ${accessKey}` },
+      const response = await fetch(`${endpoint}?${query}`, { method: 'GET',
         cache: 'no-store', credentials: 'omit', signal: controller.signal });
       const data = await response.json();
       if (activeRequest !== controller) return;
       if (!response.ok) {
-        if (response.status === 401) { accessKey = ''; el('access').hidden = false; }
         throw new Error(typeof data.message === 'string' ? data.message : 'The report is unavailable. No totals are being shown.');
       }
       render(data);
-      el('access').hidden = true;
-      el('lock').hidden = false;
     } catch (error) {
       if (activeRequest !== controller) return;
       el('results').hidden = true;
@@ -110,13 +104,7 @@
       if (activeRequest === controller) { busy(false); activeRequest = null; }
     }
   }
-  el('unlock').addEventListener('click', load);
-  el('key').addEventListener('keydown', event => { if (event.key === 'Enter' && !activeRequest) load(); });
   el('refresh').addEventListener('click', load);
-  ['period', 'traffic'].forEach(name => el(name).addEventListener('change', () => { if (accessKey) load(); }));
-  el('lock').addEventListener('click', () => {
-    activeRequest?.abort(); activeRequest = null; accessKey = ''; el('key').value = '';
-    el('cards').replaceChildren(); el('results').hidden = true; el('access').hidden = false;
-    el('lock').hidden = true; busy(false); status('Dashboard locked. The access key and report have been cleared.'); el('key').focus();
-  });
+  ['period', 'traffic'].forEach(name => el(name).addEventListener('change', load));
+  load();
 })();
