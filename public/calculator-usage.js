@@ -1,4 +1,4 @@
-/* TheWing calculator usage v1. No Google tag, cookies, storage, or input payloads.
+/* TheWing calculator usage v2. No Google tag, cookies, storage, or input payloads.
  * Loaded before each calculator. The approved parent saves usage to Netlify.
  */
 (() => {
@@ -8,19 +8,19 @@
   const TYPE = 'thewing:usage:v1';
   const IDLE_MS = 30000;
   window.TheWingCalculatorUsage = Object.freeze({
-    create({id, root, controls, buttons = ''}) {
-      const noop = Object.freeze({rendered() {}});
-      if (!['pt', 'disability'].includes(id) || !root || window.parent === window) return noop;
+    create({id, root, controls, buttons = '', asyncResults = false}) {
+      const noop = Object.freeze({rendered() {}, calculationStarted() {}});
+      if (!['pt', 'disability', 'va'].includes(id) || !root || window.parent === window) return noop;
       let parentOrigin;
       try { parentOrigin = new URL(document.referrer).origin; } catch (_) { return noop; }
       if (!PARENTS.has(parentOrigin)) return noop;
 
       const visit = crypto.randomUUID(); // Anonymous per-document ID for usage deduplication; no cross-visit identity.
-      let revision = 0, acknowledged = -1;
+      let revision = 1, acknowledged = -1;
       let started = false, result = false, activities = 0, activeMs = 0;
       let reportedMs = 0, lastActivity = -Infinity, lastTick = performance.now();
       let parentVisible = false, parentSeen = -Infinity;
-      let valid = false, renderRevision = 0, pendingIntent = false;
+      let valid = false, renderRevision = 0, pendingIntent = false, lastIntentSignature = null;
       let burst = false, commitTimer = null;
       const errors = new Set();
 
@@ -84,8 +84,10 @@
           pendingIntent = false;
           const next = signature();
           // A trusted click alone is insufficient: calculation inputs must change.
-          if (next !== previous && renderRevision > beforeRender) {
+          if (next !== previous) {
+            if (!asyncResults && renderRevision === beforeRender) valid = false;
             previous = next;
+            lastIntentSignature = next;
             clock();
             lastActivity = performance.now();
             burst = true;
@@ -139,9 +141,19 @@
       }, 1000);
       send('hello');
       return Object.freeze({
-        rendered(isValid) {
-          valid = isValid === true;
+        calculationStarted() {
+          valid = false;
+          // Local-only token ties an async response to its inputs, never transmitted.
+          return signature();
+        },
+        rendered(isValid, inputSignature) {
+          if (asyncResults && inputSignature !== signature()) return;
           renderRevision++;
+          valid = isValid === true;
+          if (asyncResults && started && valid && inputSignature === lastIntentSignature && !result) {
+            result = true;
+            publish();
+          }
           // Programmatic initialization/recalculation never establishes user intent.
           if (!pendingIntent) previous = signature();
         }
