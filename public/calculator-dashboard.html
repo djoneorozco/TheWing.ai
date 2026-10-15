@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Calculator usage · TheWing</title>
+  <link rel="stylesheet" href="calculator-dashboard.css">
+  <script defer src="calculator-dashboard.js"></script>
+</head>
+<body style="margin:0;background:#edf2f5;padding:12px">
+<!-- WEBFLOW CONTENT START -->
+<section id="tw-usage-dashboard" aria-label="Calculator usage dashboard">
+  <header>
+    <p class="tw-eyebrow">TheWing · Owner dashboard</p>
+    <h1>Are people using the calculators?</h1>
+    <p class="tw-lede">See intentional input changes, updated results, and estimated active time. Understand what happens after an ad click.</p>
+  </header>
+  <div class="tw-access" data-ui="access">
+    <label for="tw-usage-key">Owner access key</label>
+    <div class="tw-access-row">
+      <input id="tw-usage-key" data-ui="key" type="password" autocomplete="off" spellcheck="false" maxlength="128" placeholder="Enter your private access key">
+      <button type="button" data-ui="unlock">Connect dashboard</button>
+    </div>
+    <p class="tw-muted">The key stays in this tab’s memory. Refreshing or locking the page clears it.</p>
+  </div>
+  <div class="tw-toolbar">
+    <div class="tw-filter">
+      <label for="tw-usage-period">Date range</label>
+      <select id="tw-usage-period" data-ui="period">
+        <option value="last7">Last 7 complete calendar days</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="today">Today · preliminary</option>
+        <option value="last30">Last 30 complete calendar days</option>
+      </select>
+    </div>
+    <div class="tw-filter">
+      <label for="tw-usage-traffic">Traffic</label>
+      <select id="tw-usage-traffic" data-ui="traffic">
+        <option value="google-paid">Google paid · google / cpc</option>
+        <option value="all">All recorded traffic</option>
+      </select>
+    </div>
+    <button type="button" data-ui="refresh">Refresh report</button>
+    <button type="button" class="tw-secondary" data-ui="lock" hidden>Lock</button>
+  </div>
+  <p class="tw-notice" data-ui="status" role="status" aria-live="polite">Not connected. Enter your owner access key to load a report. No usage totals have been loaded.</p>
+  <div data-ui="results" hidden>
+    <p class="tw-meta" data-ui="meta"></p>
+    <div class="tw-cards" data-ui="cards"></div>
+  </div>
+  <aside class="tw-definitions">
+    <h3>What counts as use?</h3>
+    <dl>
+      <dt>Changed an input</dt><dd>A visitor deliberately changed a calculator value. Simply opening the page does not count.</dd>
+      <dt>Updated result</dt><dd>A valid scenario appeared after an input change. This does not confirm the person entered every detail or completed a personal estimate.</dd>
+      <dt>Active time</dt><dd>Estimated time after starting, while the calculator is visible and the page has focus. Timing pauses after 30 seconds without interaction. This is separate from GA4’s average engagement time.</dd>
+      <dt>Time per starter</dt><dd>Total active time divided by people with a start event in the selected period. Visits crossing the date boundary can affect this estimate.</dd>
+      <dt>People</dt><dd>GA4’s reported users for the selected period, not identified individuals. Consent, browser restrictions, and repeat devices can affect counts.</dd>
+      <dt>Google paid</dt><dd>Sessions attributed to google / cpc. This helps isolate ad traffic, but does not include every possible paid visit or prove the ads are profitable.</dd>
+    </dl>
+  </aside>
+  <p class="tw-footer">PT and standalone Disability Rating only. The combined VA/retirement page is outside this report. Exclude your own testing before evaluating ads. This report cannot recover activity that was never recorded.</p>
+</section>
+<!-- WEBFLOW CONTENT END -->
+</body>
+</html>
