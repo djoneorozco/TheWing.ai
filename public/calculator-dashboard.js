@@ -36,36 +36,42 @@
     return box;
   }
   function render(data) {
-    const fields=['sessions','results','adjustments','activeSeconds'];
-    if(data?.source!=='thewing'||data.storageConnected!==true||!Array.isArray(data.calculators)||data.calculators.length!==2||
-       !Number.isFinite(Date.parse(data.fetchedAt))) throw new Error('The usage report was unexpected. No totals are being shown.');
+    const fields=['loads','trackedSessions','trackedResults','trackedAdjustments','trackedActiveSeconds','legacySessions','legacyActiveSeconds'];
+    const apps={pt:'PT Calculator',disability:'Disability Rating',va:'VA & Retirement'};
+    if(data?.source!=='thewing'||data.schemaVersion!==2||data.storageConnected!==true||!Array.isArray(data.calculators)||data.calculators.length!==3||
+       !Number.isFinite(Date.parse(data.fetchedAt))) throw new Error('The reporting service needs the updated files. No totals are being shown.');
     data.calculators.forEach((c,i)=>{
-      if(c.id!==['pt','disability'][i]||!fields.every(f=>typeof c[f]==='number'&&Number.isFinite(c[f])&&c[f]>=0)||
-        !(c.averageActiveSeconds===null||(Number.isFinite(c.averageActiveSeconds)&&c.averageActiveSeconds>=0))) {
+      if(c.id!==['pt','disability','va'][i]||!fields.every(f=>typeof c[f]==='number'&&Number.isFinite(c[f])&&c[f]>=0)||
+        !(c.trackedAverageActiveSeconds===null||(Number.isFinite(c.trackedAverageActiveSeconds)&&c.trackedAverageActiveSeconds>=0))||
+        !(c.usageRate===null||(Number.isFinite(c.usageRate)&&c.usageRate>=0&&c.usageRate<=1))) {
         throw new Error('The usage report was unexpected. No totals are being shown.');
       }
     });
     el('cards').replaceChildren();
     data.calculators.forEach(c=>{
-      const recorded=c.sessions>0,card=node('article','tw-card'),head=node('div','tw-card-header');
-      const badge=node('span','tw-badge',recorded?'Usage recorded':'No use recorded yet');
+      const recorded=c.trackedSessions>0,card=node('article','tw-card'),head=node('div','tw-card-header');
+      card.dataset.calculator=c.id;
+      const badge=node('span','tw-badge',recorded?'Usage recorded':c.loads?'Loaded · no input changes':'No loads recorded');
       badge.dataset.recorded=String(recorded);
-      head.append(node('h2','',c.id==='pt'?'PT Calculator':'Disability Rating'),badge);
+      head.append(node('h2','',apps[c.id]),badge);
       const primary=node('div','tw-primary-metric');
-      primary.append(node('div','tw-big',number(c.sessions)),node('div','tw-label','Usage sessions'),
-        node('p','tw-muted','Started by an intentional input change'));
+      primary.append(node('div','tw-big',number(c.loads)),node('div','tw-label','Calculator loads'),
+        node('p','tw-muted','Recorded when calculator tracking connects'));
       const metrics=node('div','tw-metrics');
-      metrics.append(metric(number(c.adjustments),'Input changes'),metric(number(c.results),'Sessions with an updated result'),
-        metric(duration(c.averageActiveSeconds),'Average estimated active time'),metric(duration(c.activeSeconds),'Total estimated active time'));
-      card.append(head,primary,metrics,node('p','tw-card-note',recorded?
-        'A reload starts a new session. These are usage sessions, not unique people.':
-        'No saved usage in this date range. Test a calculator once to confirm that recording works.'));
+      metrics.append(metric(number(c.trackedSessions),'Visits with an input change'),metric(number(c.trackedResults),'Visits with an updated result'),
+        metric(number(c.trackedAdjustments),'Input changes'),metric(c.usageRate===null?'—':number(c.usageRate*100)+'%','Loads that led to input changes'),
+        metric(duration(c.trackedAverageActiveSeconds),'Average active time · used visits'),metric(duration(c.trackedActiveSeconds),'Total estimated active time'));
+      const note=c.legacySessions?
+        `Earlier tracking: ${number(c.legacySessions)} usage sessions and ${duration(c.legacyActiveSeconds)} active time. Their loads were not recorded, so they are excluded from the numbers above.`:
+        'Reloads count as new visits. Your own testing is included. These are visits, not unique people.';
+      card.append(head,primary,metrics,node('p','tw-card-note',note));
       el('cards').append(card);
     });
-    el('meta').textContent=`Sessions started ${data.startDate} to ${data.endDate} (UTC) · Updated ${new Date(data.fetchedAt).toLocaleString()}`;
+    el('meta').textContent=`Visits started ${data.startDate} to ${data.endDate} (UTC) · Updated ${new Date(data.fetchedAt).toLocaleString()}`;
     el('results').hidden=false;
     status('Connected to TheWing usage storage. Refresh to see new activity.');
   }
+
   async function load() {
     activeRequest?.abort();
     const controller = new AbortController(); activeRequest = controller;
