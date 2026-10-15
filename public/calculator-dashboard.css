@@ -23,7 +23,7 @@
 #tw-usage-dashboard .tw-notice{padding:14px 17px;background:#eaf0f5;border-left:3px solid #8baabc;border-radius:4px;margin:14px 0;color:#294452;font-size:14px}
 #tw-usage-dashboard .tw-notice[data-tone="error"]{background:#fff1e9;border-color:#b65420;color:#783b18}
 #tw-usage-dashboard .tw-meta{margin:14px 0;font-size:12px;color:var(--muted)}
-#tw-usage-dashboard .tw-cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+#tw-usage-dashboard .tw-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:18px}
 #tw-usage-dashboard .tw-card{padding:25px}
 #tw-usage-dashboard .tw-card-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:24px}
 #tw-usage-dashboard .tw-badge{padding:5px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#eff3f5;color:#53636d;white-space:nowrap}
