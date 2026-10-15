@@ -3199,6 +3199,13 @@
     for (const section of resultSections) section.hidden = status !== "valid";
   }
 
+  // Analytics uses only coarse counters; input values stay inside this app.
+  const usage = window.TheWingCalculatorUsage?.create({
+    id: "disability", root: ROOT,
+    controls: "[data-disability-rating], #dcDependentProfile, #dcHasSpouse, #dcChildrenUnder18, #dcChildrenSchool, #dcDependentParents",
+    buttons: "#dcAddDisabilityButton, [data-remove-disability]"
+  });
+
   function run() {
     updateCustomDependentVisibility();
     let state;
@@ -3211,6 +3218,7 @@
       for (const key of ["combinedValue", "officialRating", "highestRating"]) delete ROOT.dataset[key];
       if (els.liveRegion) els.liveRegion.textContent = "Estimate unavailable. " + (currentInputError || "Correct the inputs.");
       emitDisabilityEvent(null);
+      usage?.rendered(false);
       return null;
     }
     currentState = state;
@@ -3293,6 +3301,7 @@
     );
 
 
+    usage?.rendered(true);
     return state;
   }
 
