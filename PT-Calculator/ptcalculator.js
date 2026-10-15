@@ -1381,6 +1381,8 @@
     }
 
     emitPTScoreSnapshot(scores);
+    usage?.rendered(Number.isFinite(scores.total) ||
+      (scores.cardioMode === "walk" && typeof scores.walkPassed === "boolean"));
   }
 
   //#9b) PUBLIC SCORE SNAPSHOT — display consumers only; no rescoring
@@ -1540,6 +1542,13 @@
       }
     }
   );
+
+  // Analytics observes intent/results; it never changes scoring or existing messages.
+  const usage = window.TheWingCalculatorUsage?.create({
+    id: "pt", root,
+    controls: "#gender, #ageGroup, #heightSlider, #waistSlider, #strengthSlider, #coreSlider, #cardioSlider, #strengthEvent, #enduranceEvent, #cardioEvent",
+    buttons: ".event-choice, .cardio-choice"
+  });
 
   //#10) EVENTS
   function bindSlider(slider, getModeKey) {
