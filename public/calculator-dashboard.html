@@ -6,8 +6,8 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="referrer" content="no-referrer">
   <title>Calculator usage · TheWing</title>
-  <link rel="stylesheet" href="calculator-dashboard.css">
-  <script defer src="calculator-dashboard.js"></script>
+  <link rel="stylesheet" href="calculator-dashboard.css?v=own-usage-2">
+  <script defer src="calculator-dashboard.js?v=own-usage-2"></script>
 </head>
 <body style="margin:0;background:#edf2f5;padding:12px">
 <!-- WEBFLOW CONTENT START -->
@@ -15,7 +15,7 @@
   <header>
     <p class="tw-eyebrow">TheWing · App usage</p>
     <h1>Calculator usage</h1>
-    <p class="tw-lede">See whether the PT and Disability calculators are being used, and for how long.</p>
+    <p class="tw-lede">See which calculators load, whether visitors change inputs, and how long they stay active.</p>
   </header>
   <div class="tw-toolbar">
     <div class="tw-filter">
@@ -37,14 +37,15 @@
   <details class="tw-definitions">
     <summary>What do these numbers mean?</summary>
     <dl>
-      <dt>Usage session</dt><dd>A visit in which someone deliberately changes a calculator input. Opening the page alone does not count. Reloading starts a new session.</dd>
+      <dt>Calculator loads</dt><dd>A calculator connected to our tracker. Opening it counts even without an input change. Reloading counts again; this is not a unique-person count.</dd>
+      <dt>Visits with an input change</dt><dd>Loaded visits with at least one deliberate change. The percentage uses only visits captured by this updated tracker.</dd>
       <dt>Input changes</dt><dd>Committed edits, with a continuous slider movement grouped into one change.</dd>
       <dt>Active time</dt><dd>Estimated time after starting, while the calculator is visible and the page has focus. Timing pauses after 30 seconds without interaction. Updates are sent in small batches.</dd>
-      <dt>Updated result</dt><dd>A valid scenario appeared after an input change. Some default values may still be present.</dd>
-      <dt>Dates</dt><dd>Sessions are grouped by their start date in UTC. A session continuing past midnight remains with its start date.</dd>
+      <dt>Updated result</dt><dd>The calculator reported a successful result after an input change. Some default values may still be present.</dd>
+      <dt>Dates</dt><dd>Visits are grouped by their load date in UTC. A visit continuing past midnight remains with its load date.</dd>
     </dl>
   </details>
-  <p class="tw-footer">PT and standalone Disability Rating only. Your own testing is included. Recording starts after this version is installed; earlier use cannot be recovered. Browser blocking or failed delivery can miss activity.</p>
+  <p class="tw-footer">Covers PT, standalone Disability Rating, and combined VA & Retirement. Your own testing is included. Recording starts after this version is installed; earlier use cannot be recovered. Browser blocking or failed delivery can miss activity.</p>
 </section>
 <!-- WEBFLOW CONTENT END -->
 </body>
