@@ -6,7 +6,8 @@
   if(!['https://thewing.ai','https://www.thewing.ai'].includes(location.origin)||window.__thewingCalculatorUsageParent) return;
   const route={
     '/air-force/pt-calculator.html':['pt','/pt-calculator'],
-    '/air-force/disability-calculator.html':['disability','/disability-calculator']
+    '/air-force/disability-calculator.html':['disability','/disability-calculator'],
+    '/air-force/va-calculator.html':['va','/va-calculator']
   }[location.pathname];
   if(!route) return;
   window.__thewingCalculatorUsageParent=true;
@@ -76,11 +77,10 @@
     if(d.revision<=r.acknowledged){ack(frame,r,r.acknowledged);return;}
     if(d.revision<r.seen||d.activities<r.activities||d.active_ms<r.activeMs||
       (r.started&&!d.started)||(r.result&&!d.result)) return;
-    if(!d.started){r.acknowledged=d.revision;ack(frame,r,d.revision);return;}
     if(!r.startDay) r.startDay=new Date().toISOString().slice(0,10);
-    Object.assign(r,{seen:d.revision,activities:d.activities,activeMs:d.active_ms,started:true,result:d.result});
+    Object.assign(r,{seen:d.revision,activities:d.activities,activeMs:d.active_ms,started:d.started,result:d.result});
     r.pending={calculator:id,visit:r.visit,startDay:r.startDay,revision:d.revision,
-      activities:d.activities,activeMs:d.active_ms,result:d.result};
+      activities:d.activities,activeMs:d.active_ms,result:d.result,started:d.started};
     deliver(frame,r);
   });
   function broadcast(){
