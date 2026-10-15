@@ -1,5 +1,5 @@
 /* TheWing calculator usage v1. No Google tag, cookies, storage, or input payloads.
- * Loaded before each calculator. Only the approved embedding parent sends GA4.
+ * Loaded before each calculator. The approved parent saves usage to Netlify.
  */
 (() => {
   'use strict';
@@ -15,7 +15,7 @@
       try { parentOrigin = new URL(document.referrer).origin; } catch (_) { return noop; }
       if (!PARENTS.has(parentOrigin)) return noop;
 
-      const visit = crypto.randomUUID(); // Transport deduplication only; never sent to GA.
+      const visit = crypto.randomUUID(); // Anonymous per-document ID for usage deduplication; no cross-visit identity.
       let revision = 0, acknowledged = -1;
       let started = false, result = false, activities = 0, activeMs = 0;
       let reportedMs = 0, lastActivity = -Infinity, lastTick = performance.now();
