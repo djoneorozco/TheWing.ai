@@ -15,23 +15,16 @@
   <header>
     <p class="tw-eyebrow">TheWing · App usage</p>
     <h1>Calculator usage</h1>
-    <p class="tw-lede">See intentional input changes, updated results, and estimated active time. Understand what happens after an ad click.</p>
+    <p class="tw-lede">See whether the PT and Disability calculators are being used, and for how long.</p>
   </header>
   <div class="tw-toolbar">
     <div class="tw-filter">
       <label for="tw-usage-period">Date range</label>
       <select id="tw-usage-period" data-ui="period">
-        <option value="last7">Last 7 complete calendar days</option>
+        <option value="last7">Last 7 days · including today</option>
         <option value="yesterday">Yesterday</option>
-        <option value="today" selected>Today · preliminary</option>
-        <option value="last30">Last 30 complete calendar days</option>
-      </select>
-    </div>
-    <div class="tw-filter">
-      <label for="tw-usage-traffic">Traffic</label>
-      <select id="tw-usage-traffic" data-ui="traffic">
-        <option value="google-paid">Google paid · google / cpc</option>
-        <option value="all" selected>All recorded traffic</option>
+        <option value="today" selected>Today</option>
+        <option value="last30">Last 30 days · including today</option>
       </select>
     </div>
     <button type="button" data-ui="refresh">Refresh report</button>
@@ -44,15 +37,14 @@
   <details class="tw-definitions">
     <summary>What do these numbers mean?</summary>
     <dl>
-      <dt>Changed an input</dt><dd>A visitor deliberately changed a calculator value. Simply opening the page does not count.</dd>
-      <dt>Updated result</dt><dd>A valid scenario appeared after an input change. This does not confirm the person entered every detail or completed a personal estimate.</dd>
-      <dt>Active time</dt><dd>Estimated time after starting, while the calculator is visible and the page has focus. Timing pauses after 30 seconds without interaction. This is separate from GA4’s average engagement time.</dd>
-      <dt>Time per starter</dt><dd>Total active time divided by people with a start event in the selected period. Visits crossing the date boundary can affect this estimate.</dd>
-      <dt>People</dt><dd>GA4’s reported users for the selected period, not identified individuals. Consent, browser restrictions, and repeat devices can affect counts.</dd>
-      <dt>Google paid</dt><dd>Sessions attributed to google / cpc. This helps isolate ad traffic, but does not include every possible paid visit or prove the ads are profitable.</dd>
+      <dt>Usage session</dt><dd>A visit in which someone deliberately changes a calculator input. Opening the page alone does not count. Reloading starts a new session.</dd>
+      <dt>Input changes</dt><dd>Committed edits, with a continuous slider movement grouped into one change.</dd>
+      <dt>Active time</dt><dd>Estimated time after starting, while the calculator is visible and the page has focus. Timing pauses after 30 seconds without interaction. Updates are sent in small batches.</dd>
+      <dt>Updated result</dt><dd>A valid scenario appeared after an input change. Some default values may still be present.</dd>
+      <dt>Dates</dt><dd>Sessions are grouped by their start date in UTC. A session continuing past midnight remains with its start date.</dd>
     </dl>
   </details>
-  <p class="tw-footer">PT and standalone Disability Rating only. The combined VA/retirement page is outside this report. Exclude your own testing before evaluating ads. This report cannot recover activity that was never recorded.</p>
+  <p class="tw-footer">PT and standalone Disability Rating only. Your own testing is included. Recording starts after this version is installed; earlier use cannot be recovered. Browser blocking or failed delivery can miss activity.</p>
 </section>
 <!-- WEBFLOW CONTENT END -->
 </body>
