@@ -1,0 +1,706 @@
+<!-- PCSUNITED • FINANCIAL ANALYSIS INPUT PANEL v1.2.0 -->
+<div id="pcsu-financial-input-panel" style="all:initial;">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+
+<style>
+#pcsu-financial-input-panel,#pcsu-financial-input-panel *{box-sizing:border-box;font-family:"Barlow",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+#pcsu-financial-input-panel{
+  --bg:#071018;--stroke:rgba(216,184,122,.16);--ink:#f3efe7;--muted:#b8b0a4;--gold:#d8b87a;--gold2:#f6d06d;
+  --sapphire:#6aa7ff;--mint:#8ef3c5;--green:#8ef3a6;--danger:#ff8aa6;--warn:#f6d06d;
+  --shadow:0 34px 90px rgba(0,0,0,.38);
+  display:block;width:min(1120px,100%);margin:0 auto;color:var(--ink);
+}
+#pcsu-financial-input-panel .fi-panel{
+  position:relative;overflow:hidden;width:100%;border-radius:30px;
+  background:radial-gradient(circle at 8% 0%,rgba(216,184,122,.08),transparent 30%),radial-gradient(circle at 92% 4%,rgba(111,143,183,.10),transparent 30%),linear-gradient(180deg,rgba(7,16,24,.22),rgba(11,22,33,.22) 58%,rgba(5,9,18,.22));
+  border:1px solid rgba(216,184,122,.13);box-shadow:var(--shadow);
+  backdrop-filter:blur(22px) saturate(145%);-webkit-backdrop-filter:blur(22px) saturate(145%);isolation:isolate;
+}
+#pcsu-financial-input-panel .fi-inner{position:relative;z-index:2;padding:24px;}
+#pcsu-financial-input-panel .fi-topbar{display:grid;grid-template-columns:minmax(0,1fr) 190px;align-items:start;gap:18px;padding-bottom:18px;margin-bottom:14px;position:relative;}
+#pcsu-financial-input-panel .fi-topbar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,rgba(216,184,122,.28),rgba(111,143,183,.16),transparent);}
+#pcsu-financial-input-panel .fi-title{margin:0 0 8px;font-family:"Gilda Display",serif;font-weight:400;color:#fbf4e7;font-size:clamp(2rem,4vw,3rem);line-height:.98;}
+#pcsu-financial-input-panel .fi-subtitle{margin:0;max-width:740px;font-size:1rem;line-height:1.55;font-weight:500;color:#dcd4c8;}
+#pcsu-financial-input-panel .fi-income-chip{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:8px 12px;border-radius:999px;border:1px solid rgba(142,243,197,.28);background:rgba(142,243,197,.08);color:#d8ffe9;font-size:.82rem;font-weight:800;line-height:1;}
+#pcsu-financial-input-panel .fi-income-chip.is-loading{color:#dcd4c8;border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.04);}
+#pcsu-financial-input-panel .fi-income-dot{width:7px;height:7px;border-radius:999px;background:var(--mint);box-shadow:0 0 10px rgba(142,243,197,.45);}
+#pcsu-financial-input-panel .fi-scenario-top{display:grid;gap:8px;}
+#pcsu-financial-input-panel .fi-loan-label{color:#f8f1e6;font-size:.82rem;line-height:1;font-weight:900;}
+#pcsu-financial-input-panel .fi-status-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:16px;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(8,13,20,.42);}
+#pcsu-financial-input-panel .fi-status-text{flex:1;min-width:200px;margin:0;font-size:.9rem;line-height:1.45;font-weight:600;color:#e8e2d8;}
+#pcsu-financial-input-panel .fi-badge{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;font-size:.72rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;}
+#pcsu-financial-input-panel .fi-badge.comfortable{color:#0d2a1c;background:rgba(142,243,166,.18);border:1px solid rgba(142,243,166,.35);}
+#pcsu-financial-input-panel .fi-badge.tight{color:#3a2d0d;background:rgba(246,208,109,.16);border:1px solid rgba(246,208,109,.35);}
+#pcsu-financial-input-panel .fi-badge.risk{color:#3a1220;background:rgba(255,138,166,.14);border:1px solid rgba(255,138,166,.35);}
+#pcsu-financial-input-panel .fi-badge.neutral{color:#dcd4c8;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);}
+#pcsu-financial-input-panel .fi-select-wrap,#pcsu-financial-input-panel .fi-money-wrap{position:relative;}
+#pcsu-financial-input-panel .fi-select-wrap::after{content:"⌄";position:absolute;right:14px;top:50%;transform:translateY(-56%);color:var(--gold2);font-size:18px;font-weight:900;pointer-events:none;}
+#pcsu-financial-input-panel .fi-control{width:100%;height:46px;appearance:none;-webkit-appearance:none;border-radius:15px;border:1px solid rgba(216,184,122,.13);background:linear-gradient(180deg,rgba(17,24,34,.72),rgba(8,13,20,.64));color:#f8f1e6;font-size:.95rem;line-height:1;font-weight:800;outline:none;transition:border-color .16s ease,box-shadow .16s ease;}
+#pcsu-financial-input-panel select.fi-control{padding:0 40px 0 13px;}
+#pcsu-financial-input-panel input.fi-control{padding:0 13px;}
+#pcsu-financial-input-panel .fi-control:hover{border-color:rgba(216,184,122,.28);}
+#pcsu-financial-input-panel .fi-control:focus{border-color:rgba(216,184,122,.42);box-shadow:0 0 0 4px rgba(216,184,122,.10);}
+#pcsu-financial-input-panel .fi-control option{color:#172033;background:#fff;}
+#pcsu-financial-input-panel .fi-prefix{position:absolute;left:0;top:0;width:48px;height:46px;display:grid;place-items:center;border-right:1px solid rgba(216,184,122,.12);color:var(--muted);font-size:1rem;font-weight:900;}
+#pcsu-financial-input-panel .fi-money-wrap .fi-control{padding-left:62px;}
+#pcsu-financial-input-panel .fi-score-wrap .fi-control{padding-left:13px;}
+#pcsu-financial-input-panel .fi-slider-wrap{margin-top:10px;}
+#pcsu-financial-input-panel .fi-slider-track{position:relative;height:10px;border-radius:999px;background:rgba(255,255,255,.13);box-shadow:inset 0 1px 2px rgba(0,0,0,.24);}
+#pcsu-financial-input-panel .fi-slider-fill{position:absolute;left:0;top:0;height:100%;width:50%;border-radius:999px;background:linear-gradient(90deg,rgba(142,243,197,1),rgba(226,255,236,.94));pointer-events:none;}
+#pcsu-financial-input-panel .fi-range{position:absolute;inset:-7px 0;width:100%;height:24px;opacity:0;cursor:pointer;z-index:4;}
+#pcsu-financial-input-panel .fi-slider-knob{position:absolute;top:50%;left:50%;width:18px;height:10px;transform:translate(-50%,-50%);border-radius:999px;background:#dbe3ff;box-shadow:0 4px 12px rgba(0,0,0,.35);pointer-events:none;z-index:3;}
+#pcsu-financial-input-panel .fi-slider-scale{display:flex;justify-content:space-between;margin-top:8px;color:#b8c2ec;font-size:.76rem;font-weight:900;}
+#pcsu-financial-input-panel .fi-section{border-radius:22px;background:linear-gradient(180deg,rgba(12,18,28,.34),rgba(7,12,19,.28));border:1px solid rgba(255,255,255,.075);padding:20px;margin-bottom:14px;}
+#pcsu-financial-input-panel .fi-section-title{margin:0 0 5px;color:var(--gold2);text-transform:uppercase;letter-spacing:.15em;font-size:.78rem;font-weight:900;}
+#pcsu-financial-input-panel .fi-section-sub{margin:0 0 16px;color:#dcd4c8;line-height:1.5;font-size:.94rem;font-weight:500;}
+#pcsu-financial-input-panel .fi-input-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 14px;}
+#pcsu-financial-input-panel .fi-field{min-width:0;}
+#pcsu-financial-input-panel .fi-label{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:0 0 8px;color:#fbf2e2;font-size:.86rem;font-weight:800;}
+#pcsu-financial-input-panel .fi-label-meta{margin-left:auto;color:var(--sapphire);font-size:.76rem;font-weight:800;}
+#pcsu-financial-input-panel .fi-info{width:16px;height:16px;border-radius:999px;display:inline-grid;place-items:center;color:rgba(243,239,231,.72);border:1px solid rgba(243,239,231,.36);background:transparent;font-size:.70rem;font-weight:900;cursor:help;padding:0;}
+#pcsu-financial-input-panel .fi-hint{margin-top:7px;color:var(--muted);font-size:.78rem;line-height:1.35;font-weight:600;}
+#pcsu-financial-input-panel .fi-hint.warn{color:var(--warn);}
+#pcsu-financial-input-panel .fi-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:18px;}
+#pcsu-financial-input-panel .fi-save-note{color:#dcd4c8;font-size:.84rem;line-height:1.45;font-weight:800;}
+#pcsu-financial-input-panel .fi-cta{min-height:48px;border:none;border-radius:15px;cursor:pointer;padding:0 24px;color:#fff8ea;font-family:"Gilda Display",serif;font-size:1rem;text-transform:uppercase;background:linear-gradient(180deg,rgba(246,208,109,1),rgba(184,120,35,1));box-shadow:inset 0 1px 0 rgba(255,255,255,.50),0 16px 34px rgba(0,0,0,.34);transition:transform .18s ease,filter .18s ease;}
+#pcsu-financial-input-panel .fi-cta:hover{transform:translateY(-1px);filter:saturate(1.06) brightness(1.04);}
+@media(max-width:1040px){#pcsu-financial-input-panel .fi-input-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:760px){
+  #pcsu-financial-input-panel .fi-inner{padding:18px;}
+  #pcsu-financial-input-panel .fi-topbar{grid-template-columns:1fr;}
+  #pcsu-financial-input-panel .fi-input-grid{grid-template-columns:1fr;}
+  #pcsu-financial-input-panel .fi-actions{flex-direction:column;align-items:stretch;}
+  #pcsu-financial-input-panel .fi-cta{width:100%;}
+}
+@media(prefers-reduced-motion:reduce){#pcsu-financial-input-panel .fi-cta{transition:none;}}
+</style>
+
+<div class="fi-panel"><div class="fi-inner">
+
+  <div class="fi-topbar">
+    <div>
+      <h3 class="fi-title">How Much House Can You Afford?</h3>
+      <p class="fi-subtitle" id="fi-subtitle">Enter your homebuying scenario below. Your military pay loads automatically from BasicBrain.</p>
+      <div class="fi-income-chip is-loading" id="fi-income-chip" aria-live="polite">
+        <span class="fi-income-dot" id="fi-income-dot"></span>
+        <span id="fi-income-chip-text">Loading military pay...</span>
+      </div>
+    </div>
+    <div class="fi-scenario-top">
+      <label class="fi-loan-label" for="fi-loan-type">Loan Type</label>
+      <div class="fi-select-wrap">
+        <select id="fi-loan-type" class="fi-control">
+          <option value="VA" selected>VA Loan</option>
+          <option value="CONVENTIONAL">Conventional</option>
+          <option value="FHA">FHA</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="fi-status-bar" aria-live="polite">
+    <p class="fi-status-text" id="fi-scenario-status">Adjust inputs to preview estimated payment and budget comfort.</p>
+    <span class="fi-badge neutral" id="fi-comfort-badge">Preview</span>
+  </div>
+
+  <section class="fi-section">
+    <div class="fi-section-title">Your Homebuying Scenario</div>
+    <p class="fi-section-sub">Core inputs for affordability, payment comfort, and cash-flow readiness.</p>
+
+    <div class="fi-input-grid">
+
+      <div class="fi-field">
+        <label class="fi-label" for="fi-home-price">Target Home Price
+          <button type="button" class="fi-info" title="Use the price you want to test in this market." aria-label="Use the price you want to test in this market.">i</button>
+        </label>
+        <div class="fi-money-wrap"><span class="fi-prefix">$</span>
+          <input id="fi-home-price" class="fi-control" type="number" min="100000" max="1000000" step="5000" value="250000">
+        </div>
+        <div class="fi-slider-wrap">
+          <div class="fi-slider-track">
+            <div id="fi-home-price-fill" class="fi-slider-fill"></div>
+            <div id="fi-home-price-knob" class="fi-slider-knob"></div>
+            <input id="fi-home-price-slider" class="fi-range" type="range" min="100000" max="1000000" step="5000" value="250000" aria-valuetext="$250,000">
+          </div>
+          <div class="fi-slider-scale"><span>$100k</span><span>$550k</span><span>$1M</span></div>
+        </div>
+      </div>
+
+      <div class="fi-field">
+        <label class="fi-label" for="fi-down-payment">Down Payment
+          <span class="fi-label-meta" id="fi-down-pct">0%</span>
+          <button type="button" class="fi-info" title="VA buyers can leave this at $0. Use the input for down payments above 20%." aria-label="VA buyers can leave this at zero dollars.">i</button>
+        </label>
+        <div class="fi-money-wrap"><span class="fi-prefix">$</span>
+          <input id="fi-down-payment" class="fi-control" type="number" min="0" step="1000" value="0">
+        </div>
+        <div class="fi-slider-wrap">
+          <div class="fi-slider-track">
+            <div id="fi-down-payment-fill" class="fi-slider-fill"></div>
+            <div id="fi-down-payment-knob" class="fi-slider-knob"></div>
+            <input id="fi-down-payment-slider" class="fi-range" type="range" min="0" max="20" step="1" value="0" aria-valuetext="0%">
+          </div>
+          <div class="fi-slider-scale"><span>0%</span><span>10%</span><span>20%</span></div>
+        </div>
+        <div class="fi-hint" id="fi-down-hint">VA buyers can leave this at $0, or test cash down.</div>
+      </div>
+
+      <div class="fi-field">
+        <label class="fi-label" for="fi-credit-score">Credit Score
+          <button type="button" class="fi-info" title="Your credit score affects your estimated interest rate." aria-label="Your credit score affects your estimated interest rate.">i</button>
+        </label>
+        <div class="fi-score-wrap">
+          <input id="fi-credit-score" class="fi-control" type="number" min="580" max="850" step="1" value="720">
+        </div>
+        <div class="fi-slider-wrap">
+          <div class="fi-slider-track">
+            <div id="fi-credit-score-fill" class="fi-slider-fill"></div>
+            <div id="fi-credit-score-knob" class="fi-slider-knob"></div>
+            <input id="fi-credit-score-slider" class="fi-range" type="range" min="580" max="850" step="1" value="720" aria-valuetext="720">
+          </div>
+          <div class="fi-slider-scale"><span>580</span><span>720</span><span>850</span></div>
+        </div>
+        <div class="fi-hint" id="fi-credit-hint">Est. rate ~6.2% based on score and loan type.</div>
+      </div>
+
+      <div class="fi-field">
+        <label class="fi-label" for="fi-other-income">Additional Monthly Income
+          <button type="button" class="fi-info" title="Spouse income, rental income, bonuses, or side income. Not including military pay." aria-label="Spouse income, rental income, bonuses, or side income. Not including military pay.">i</button>
+        </label>
+        <div class="fi-money-wrap"><span class="fi-prefix">$</span>
+          <input id="fi-other-income" class="fi-control" type="number" min="0" max="20000" step="100" value="0">
+        </div>
+        <div class="fi-slider-wrap">
+          <div class="fi-slider-track">
+            <div id="fi-other-income-fill" class="fi-slider-fill"></div>
+            <div id="fi-other-income-knob" class="fi-slider-knob"></div>
+            <input id="fi-other-income-slider" class="fi-range" type="range" min="0" max="20000" step="100" value="0" aria-valuetext="$0">
+          </div>
+          <div class="fi-slider-scale"><span>$0</span><span>$10k</span><span>$20k</span></div>
+        </div>
+      </div>
+
+      <div class="fi-field">
+        <label class="fi-label" for="fi-monthly-debt">Monthly Debt Payments
+          <button type="button" class="fi-info" title="Car loans, credit cards, student loans, and personal loans." aria-label="Car loans, credit cards, student loans, and personal loans.">i</button>
+        </label>
+        <div class="fi-money-wrap"><span class="fi-prefix">$</span>
+          <input id="fi-monthly-debt" class="fi-control" type="number" min="0" max="5000" step="50" value="700">
+        </div>
+        <div class="fi-slider-wrap">
+          <div class="fi-slider-track">
+            <div id="fi-monthly-debt-fill" class="fi-slider-fill"></div>
+            <div id="fi-monthly-debt-knob" class="fi-slider-knob"></div>
+            <input id="fi-monthly-debt-slider" class="fi-range" type="range" min="0" max="5000" step="50" value="700" aria-valuetext="$700">
+          </div>
+          <div class="fi-slider-scale"><span>$0</span><span>$2.5k</span><span>$5k</span></div>
+        </div>
+      </div>
+
+      <div class="fi-field">
+        <label class="fi-label" for="fi-emergency-fund">Emergency Fund
+          <button type="button" class="fi-info" title="Cash available after PCS, closing costs, and move-in expenses." aria-label="Cash available after PCS, closing costs, and move-in expenses.">i</button>
+        </label>
+        <div class="fi-money-wrap"><span class="fi-prefix">$</span>
+          <input id="fi-emergency-fund" class="fi-control" type="number" min="0" max="50000" step="500" value="8500">
+        </div>
+        <div class="fi-slider-wrap">
+          <div class="fi-slider-track">
+            <div id="fi-emergency-fund-fill" class="fi-slider-fill"></div>
+            <div id="fi-emergency-fund-knob" class="fi-slider-knob"></div>
+            <input id="fi-emergency-fund-slider" class="fi-range" type="range" min="0" max="50000" step="500" value="8500" aria-valuetext="$8,500">
+          </div>
+          <div class="fi-slider-scale"><span>$0</span><span>$25k</span><span>$50k</span></div>
+        </div>
+        <div class="fi-hint" id="fi-fund-hint">Helps gauge post-close cash cushion.</div>
+      </div>
+
+    </div>
+
+    <div class="fi-actions">
+      <div class="fi-save-note" id="fi-save-note">Review your scenario, then continue for the full payment breakdown.</div>
+      <button id="fi-run-analysis" class="fi-cta" type="button">See Full Payment &amp; Affordability Analysis ›</button>
+    </div>
+  </section>
+
+</div></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const VERSION = "1.2.0-affordability-feedback-handoff";
+  const HANDOFF_KEY = "pcsunited.basicbrain.handoff.v1";
+  const FINANCIAL_KEY = "pcsunited.financial.analysis.input.v1";
+  const MARKET_INTENT_KEY = "pcsunited.marketPanel.mortgageIntent.v1";
+  const MORTGAGE_HANDOFF_KEY = "pcsunited.mortgage.calculator.handoff.v1";
+
+  const root = document.getElementById("pcsu-financial-input-panel");
+  if(!root || root.dataset.mounted === "true") return;
+  root.dataset.mounted = "true";
+
+  const MORTGAGE_CALCULATOR_URL = root.dataset.mortgageUrl || (
+    /pcsunited\.com/i.test(location.hostname)
+      ? "https://www.pcsunited.com/air-force/mortgage-calculator"
+      : "https://pcsunited-com-28346d.webflow.io/air-force/mortgage-calculator"
+  );
+
+  const $ = (sel) => root.querySelector(sel);
+
+  const els = {
+    loanType:$("#fi-loan-type"),
+    subtitle:$("#fi-subtitle"),
+    incomeChip:$("#fi-income-chip"),
+    incomeChipText:$("#fi-income-chip-text"),
+    scenarioStatus:$("#fi-scenario-status"),
+    comfortBadge:$("#fi-comfort-badge"),
+    homePrice:$("#fi-home-price"), homePriceSlider:$("#fi-home-price-slider"),
+    homePriceFill:$("#fi-home-price-fill"), homePriceKnob:$("#fi-home-price-knob"),
+    downPayment:$("#fi-down-payment"), downPaymentSlider:$("#fi-down-payment-slider"),
+    downPaymentFill:$("#fi-down-payment-fill"), downPaymentKnob:$("#fi-down-payment-knob"),
+    downPct:$("#fi-down-pct"), downHint:$("#fi-down-hint"),
+    creditScore:$("#fi-credit-score"), creditScoreSlider:$("#fi-credit-score-slider"),
+    creditScoreFill:$("#fi-credit-score-fill"), creditScoreKnob:$("#fi-credit-score-knob"),
+    creditHint:$("#fi-credit-hint"),
+    otherIncome:$("#fi-other-income"), otherIncomeSlider:$("#fi-other-income-slider"),
+    otherIncomeFill:$("#fi-other-income-fill"), otherIncomeKnob:$("#fi-other-income-knob"),
+    monthlyDebt:$("#fi-monthly-debt"), monthlyDebtSlider:$("#fi-monthly-debt-slider"),
+    monthlyDebtFill:$("#fi-monthly-debt-fill"), monthlyDebtKnob:$("#fi-monthly-debt-knob"),
+    emergencyFund:$("#fi-emergency-fund"), emergencyFundSlider:$("#fi-emergency-fund-slider"),
+    emergencyFundFill:$("#fi-emergency-fund-fill"), emergencyFundKnob:$("#fi-emergency-fund-knob"),
+    fundHint:$("#fi-fund-hint"),
+    saveNote:$("#fi-save-note"), runBtn:$("#fi-run-analysis")
+  };
+
+  const SLIDER_PAIRS = [
+    {input:els.homePrice, slider:els.homePriceSlider, fill:els.homePriceFill, knob:els.homePriceKnob, format:(v)=>money(v)},
+    {input:els.creditScore, slider:els.creditScoreSlider, fill:els.creditScoreFill, knob:els.creditScoreKnob, format:(v)=>String(v)},
+    {input:els.otherIncome, slider:els.otherIncomeSlider, fill:els.otherIncomeFill, knob:els.otherIncomeKnob, format:(v)=>money(v)},
+    {input:els.monthlyDebt, slider:els.monthlyDebtSlider, fill:els.monthlyDebtFill, knob:els.monthlyDebtKnob, format:(v)=>money(v)},
+    {input:els.emergencyFund, slider:els.emergencyFundSlider, fill:els.emergencyFundFill, knob:els.emergencyFundKnob, format:(v)=>money(v)}
+  ];
+
+  let BASICBRAIN = null, COMP = null, MARKET_INTENT = null, USER_HAS_INTERACTED = false, renderTimer = null;
+
+  function clean(v){ return v == null ? "" : String(v).trim(); }
+  function num(v,f){ const n = Number(String(v ?? "").replace(/[$,%]/g,"").replace(/,/g,"")); return Number.isFinite(n) ? n : (f ?? 0); }
+  function money(v){ return Number(v||0).toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}); }
+  function pct(v){ return Math.round(Number(v)||0) + "%"; }
+  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+  function dispatchSafe(n,d){ try{ window.dispatchEvent(new CustomEvent(n,{detail:d||{}})); }catch(_){} }
+  function readJSON(k){ try{ const r = localStorage.getItem(k) || sessionStorage.getItem(k); return r ? JSON.parse(r) : null; }catch(_){ return null; } }
+  function writeJSON(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); sessionStorage.setItem(k,JSON.stringify(v)); }catch(_){} }
+  function firstValue(){ for(const v of arguments){ if(v != null && String(v).trim() !== "") return v; } return ""; }
+
+  function getBasicBrainFromHandoff(){ return readJSON(HANDOFF_KEY); }
+  function getMarketIntent(){ return readJSON(MARKET_INTENT_KEY); }
+  function getBasicBrainFromGlobals(){
+    for(const item of [window.PCSU_BASICBRAIN_CURRENT, window.PCSU_BASICBRAIN_TEMP, window.PCSU_BASICBRAIN?.getLastGood?.()]){
+      if(item) return item;
+    }
+    return null;
+  }
+
+  function extractComp(source){
+    if(!source || typeof source !== "object") return null;
+    const item = source.compensation || source.calculated_comp || source.comp || source.bridge || source.state || source.profile || source;
+    const profile = source.profile || source.bridge || source.state || source.basicbrain || item || {};
+    const basePay = num(item.basePay ?? item.base_pay ?? profile.basePay ?? profile.base_pay, 0);
+    const bah = num(item.bah ?? item.BAH ?? profile.bah ?? profile.BAH, 0);
+    const bas = num(item.bas ?? item.BAS ?? profile.bas ?? profile.BAS, 0);
+    const retirementPay = num(item.retirementPay ?? item.retirement_pay ?? profile.retirementPay ?? profile.retirement_pay, 0);
+    const disabilityPay = num(item.disabilityPay ?? item.disability_pay ?? profile.disabilityPay ?? profile.disability_pay, 0);
+    const otherPay = num(item.otherPay ?? item.other_pay ?? profile.otherPay ?? profile.other_pay, 0);
+    const total = num(item.total ?? item.totalMonthly ?? item.total_monthly ?? item.totalMonthlyCompensation ?? profile.totalMonthlyCompensation, 0)
+      || (basePay + bah + bas) || (retirementPay + disabilityPay + otherPay);
+    return { mode:source.mode || profile.mode || item.mode || "active_duty", total, basePay, bah, bas, retirementPay, disabilityPay, otherPay, profile };
+  }
+
+  function estimateApr(loanType, creditScore){
+    const loan = clean(loanType).toUpperCase();
+    const score = num(creditScore, 720);
+    let apr = 7.35;
+    if(score >= 760) apr = 5.95; else if(score >= 740) apr = 6.05; else if(score >= 720) apr = 6.20;
+    else if(score >= 700) apr = 6.35; else if(score >= 680) apr = 6.55; else if(score >= 660) apr = 6.85; else if(score >= 640) apr = 7.10;
+    if(loan === "VA") apr -= 0.10;
+    if(loan === "FHA") apr += 0.05;
+    return Math.max(4.5, apr);
+  }
+
+  function estimateMonthlyPayment(homePrice, downPayment, loanType, creditScore){
+    const price = num(homePrice, 0), down = Math.min(num(downPayment, 0), price), principal = Math.max(price - down, 0);
+    if(!principal) return 0;
+    const apr = estimateApr(loanType, creditScore), monthlyRate = (apr / 100) / 12, termMonths = 360;
+    const pi = monthlyRate > 0
+      ? principal * (monthlyRate * Math.pow(1 + monthlyRate, termMonths)) / (Math.pow(1 + monthlyRate, termMonths) - 1)
+      : principal / termMonths;
+    const tax = (price * 0.0125) / 12, ins = (price * 0.0045) / 12;
+    const loan = clean(loanType).toUpperCase();
+    let mi = 0;
+    if(loan === "FHA") mi = principal * 0.0055 / 12;
+    else if(loan === "CONVENTIONAL" && price && down / price < 0.20) mi = principal * 0.0045 / 12;
+    return Math.round(pi + tax + ins + mi);
+  }
+
+  function comfortLevel(housingRatio, emergencyFund, estimatedPayment){
+    const ratio = num(housingRatio, 0);
+    const thinReserves = estimatedPayment > 0 && num(emergencyFund, 0) < estimatedPayment * 3;
+    if(ratio <= 0 || !estimatedPayment) return { key:"neutral", label:"Preview" };
+    if(ratio > 35 || thinReserves) return { key:"risk", label: thinReserves && ratio <= 35 ? "High Risk · Thin Reserves" : "High Risk" };
+    if(ratio > 28) return { key:"tight", label:"Tight" };
+    return { key:"comfortable", label:"Comfortable" };
+  }
+
+  function updateSliderVisual(slider, fill, knob){
+    if(!slider || !fill || !knob) return;
+    const min = num(slider.min, 0), max = num(slider.max, 100), value = clamp(num(slider.value, 0), min, max);
+    const percent = max > min ? ((value - min) / (max - min)) * 100 : 0;
+    fill.style.width = percent + "%";
+    knob.style.left = percent + "%";
+  }
+
+  function updateAllSliderVisuals(){
+    SLIDER_PAIRS.forEach((p) => updateSliderVisual(p.slider, p.fill, p.knob));
+    updateSliderVisual(els.downPaymentSlider, els.downPaymentFill, els.downPaymentKnob);
+  }
+
+  function downPctValue(){
+    const price = num(els.homePrice?.value, 0), down = num(els.downPayment?.value, 0);
+    return price ? Math.round((down / price) * 100) : 0;
+  }
+
+  function syncDownPaymentSliderFromAmount(){
+    if(!els.downPaymentSlider || !els.downPayment) return;
+    const pctValue = clamp(downPctValue(), 0, 20);
+    els.downPaymentSlider.value = String(pctValue);
+    if(els.downPct) els.downPct.textContent = downPctValue() + "%";
+    if(els.downHint){
+      const over = downPctValue() > 20;
+      els.downHint.textContent = over
+        ? "Down payment is above 20%. Slider shows up to 20%; dollar input keeps your exact amount."
+        : "VA buyers can leave this at $0, or test cash down.";
+      els.downHint.classList.toggle("warn", over);
+    }
+  }
+
+  function syncDownPaymentAmountFromSlider(){
+    if(!els.downPaymentSlider || !els.downPayment || !els.homePrice) return;
+    const price = num(els.homePrice.value, 0), pctValue = num(els.downPaymentSlider.value, 0);
+    els.downPayment.value = String(Math.round(price * (pctValue / 100)));
+    syncDownPaymentSliderFromAmount();
+  }
+
+  function syncInputToSlider(input, slider, format){
+    if(!input || !slider) return;
+    const min = num(slider.min, 0), max = num(slider.max, 100);
+    slider.value = String(clamp(num(input.value, 0), min, max));
+    if(format) slider.setAttribute("aria-valuetext", format(num(slider.value, 0)));
+  }
+
+  function syncSliderToInput(slider, input, format){
+    if(!input || !slider) return;
+    input.value = String(num(slider.value, 0));
+    if(format) slider.setAttribute("aria-valuetext", format(num(slider.value, 0)));
+  }
+
+  function renderIncomeChip(){
+    const total = num(COMP?.total, 0);
+    const profile = COMP?.profile || {};
+    const rank = firstValue(profile.rank, profile.rank_paygrade, profile.paygrade, BASICBRAIN?.rank);
+    const deps = (profile.has_dependents ?? profile.hasDependents ?? BASICBRAIN?.has_dependents) ? "with dependents" : "without dependents";
+
+    if(els.incomeChip) els.incomeChip.classList.toggle("is-loading", !total);
+    if(!total){
+      if(els.incomeChipText) els.incomeChipText.textContent = "Military pay not loaded yet — continue with manual inputs";
+      if(els.subtitle) els.subtitle.textContent = "Enter your homebuying scenario below. Military pay will load automatically when available.";
+      return;
+    }
+
+    const parts = [money(total) + "/mo loaded"];
+    if(rank) parts.push(rank);
+    if(deps) parts.push(deps);
+    if(els.incomeChipText) els.incomeChipText.textContent = parts.join(" · ");
+    if(els.subtitle) els.subtitle.textContent = "Your military pay is loaded. Adjust the scenario below to test affordability and payment comfort.";
+  }
+
+  function renderScenarioUI(data){
+    const payment = num(data.estimatedPayment, 0), limit = num(data.suggestedLimit, 0);
+    const ratio = num(data.housingRatio, 0), comfort = comfortLevel(ratio, data.emergencyFund, payment);
+    const apr = estimateApr(data.loanType, data.creditScore);
+
+    if(els.creditHint) els.creditHint.textContent = "Est. rate ~" + apr.toFixed(2) + "% based on score and loan type.";
+    syncDownPaymentSliderFromAmount();
+
+    if(els.scenarioStatus){
+      if(!payment || !num(data.totalIncome, 0)){
+        els.scenarioStatus.textContent = "Adjust inputs to preview estimated payment and budget comfort.";
+      }else if(limit && payment > limit){
+        els.scenarioStatus.textContent = "Current scenario: " + money(payment) + "/mo is above your suggested max of " + money(limit) + " (" + pct(ratio) + " of income).";
+      }else{
+        els.scenarioStatus.textContent = "Current scenario: " + money(payment) + "/mo · Suggested max " + money(limit) + " · " + pct(ratio) + " of income.";
+      }
+    }
+
+    if(els.comfortBadge){
+      els.comfortBadge.textContent = comfort.label;
+      els.comfortBadge.className = "fi-badge " + comfort.key;
+    }
+
+    if(els.fundHint){
+      const months = payment > 0 ? (num(data.emergencyFund, 0) / payment).toFixed(1) : "0";
+      els.fundHint.textContent = payment > 0
+        ? "Covers about " + months + " months of housing payment after close."
+        : "Helps gauge post-close cash cushion.";
+      els.fundHint.classList.toggle("warn", payment > 0 && num(data.emergencyFund, 0) < payment * 3);
+    }
+  }
+
+  function hydrateBasicBrain(options){
+    const emit = options?.emit === true;
+    BASICBRAIN = getBasicBrainFromGlobals() || getBasicBrainFromHandoff();
+    COMP = extractComp(BASICBRAIN);
+    MARKET_INTENT = getMarketIntent();
+
+    if(MARKET_INTENT){
+      const suggested = num(MARKET_INTENT.suggested_home_price ?? MARKET_INTENT.homePrice ?? MARKET_INTENT.targetHomePrice, 0);
+      if(suggested && els.homePrice && !num(els.homePrice.dataset.userEdited, 0)){
+        els.homePrice.value = suggested;
+        syncInputToSlider(els.homePrice, els.homePriceSlider, money);
+        syncDownPaymentSliderFromAmount();
+      }
+    }
+
+    if(!COMP || !COMP.total){
+      COMP = { mode:"active_duty", total:0, basePay:0, bah:0, bas:0, profile:{} };
+    }
+
+    renderIncomeChip();
+    renderSummary({ emit, userInitiated:false, reason:"hydrate-basicbrain" });
+  }
+
+  function normalizeLoanTypeForMortgage(v){
+    const loan = clean(v).toUpperCase();
+    if(loan === "VA") return "va";
+    if(loan === "CONVENTIONAL") return "conventional";
+    if(loan === "FHA") return "fha";
+    return "va";
+  }
+
+  function getInputs(){
+    const loanType = clean(els.loanType?.value || "VA");
+    const homePrice = num(els.homePrice?.value, 0);
+    const downPayment = num(els.downPayment?.value, 0);
+    const creditScore = clean(els.creditScore?.value || "720");
+    const otherIncome = num(els.otherIncome?.value, 0);
+    const monthlyDebt = num(els.monthlyDebt?.value, 0);
+    const emergencyFund = num(els.emergencyFund?.value, 0);
+    const basicIncome = num(COMP?.total, 0);
+    const totalIncome = basicIncome + otherIncome;
+    const estimatedPayment = estimateMonthlyPayment(homePrice, downPayment, loanType, creditScore);
+    const dti = totalIncome ? (monthlyDebt / totalIncome) * 100 : 0;
+    const housingRatio = totalIncome ? (estimatedPayment / totalIncome) * 100 : 0;
+    const suggestedLimit = totalIncome ? Math.round(totalIncome * 0.25) : 0;
+    const profile = COMP?.profile || BASICBRAIN?.profile || BASICBRAIN?.bridge || BASICBRAIN?.state || BASICBRAIN || {};
+    const rank = firstValue(profile.rank, profile.rank_paygrade, profile.paygrade, BASICBRAIN?.rank, BASICBRAIN?.rank_paygrade);
+    const yos = firstValue(profile.yos, profile.yearsOfService, profile.years_of_service, BASICBRAIN?.yos, BASICBRAIN?.yearsOfService);
+    const base = firstValue(profile.base, profile.selected_base, profile.selectedBase, profile.pcs_base, BASICBRAIN?.base, BASICBRAIN?.selected_base);
+    const dependentsCount = num(profile.dependents_count ?? profile.dependentsCount ?? BASICBRAIN?.dependents_count ?? BASICBRAIN?.dependentsCount, 0);
+    const familyCount = num(profile.family ?? profile.familySize ?? profile.family_size ?? BASICBRAIN?.family ?? BASICBRAIN?.familySize, 0);
+    const hasDependents = Boolean(profile.has_dependents ?? profile.hasDependents ?? BASICBRAIN?.has_dependents ?? BASICBRAIN?.hasDependents) || dependentsCount > 0 || familyCount > 1;
+
+    return {
+      source:"pcsunited.financial.input.panel.v1.2.0", version:VERSION,
+      loanType, mortgageLoanType:normalizeLoanTypeForMortgage(loanType),
+      homePrice, targetHomePrice:homePrice, projectedHomePrice:homePrice, projected_home_price:homePrice,
+      downPayment, downpayment:downPayment, down_payment:downPayment, downPaymentPct:downPctValue(),
+      creditScore, credit_score:creditScore, estimatedApr:estimateApr(loanType, creditScore),
+      monthlyDebt, monthlyObligations:monthlyDebt, monthly_obligations:monthlyDebt, monthly_expenses:monthlyDebt, obligations:monthlyDebt,
+      otherIncome, additionalIncome:otherIncome, additional_income:otherIncome,
+      emergencyFund, emergency_fund:emergencyFund,
+      basicIncome, totalIncome, income:basicIncome, total_monthly_income:totalIncome,
+      estimatedPayment, targetPayment:estimatedPayment,
+      projected_mortgage_amount:estimatedPayment, projectedMortgageAmount:estimatedPayment, projectedMortgageMonthly:estimatedPayment,
+      dti, housingRatio, housing_ratio:housingRatio, suggestedLimit, suggested_max_payment:suggestedLimit,
+      afterPayment:totalIncome - estimatedPayment,
+      rank, yos, yearsOfService:yos, years_of_service:yos,
+      base, selected_base:base, selectedBase:base,
+      dependents:hasDependents ? "with" : "without",
+      dependents_count:dependentsCount || (hasDependents ? 1 : 0),
+      has_dependents:hasDependents, hasDependents,
+      family:familyCount || (hasDependents ? 2 : 1),
+      comfortLevel:comfortLevel(housingRatio, emergencyFund, estimatedPayment).label,
+      compensation:COMP, basicbrain:BASICBRAIN, marketIntent:MARKET_INTENT,
+      userInitiated:USER_HAS_INTERACTED, updated_at:new Date().toISOString()
+    };
+  }
+
+  function renderSummary(options){
+    const shouldEmit = options?.emit === true;
+    const data = { ...getInputs(), userInitiated:options?.userInitiated === true, reason:options?.reason || "" };
+    renderIncomeChip();
+    renderScenarioUI(data);
+    writeJSON(FINANCIAL_KEY, data);
+    dispatchSafe(shouldEmit ? "pcsunited:financial-input-updated" : "pcsunited:financial-input-preloaded", data);
+    updateAllSliderVisuals();
+    return data;
+  }
+
+  function scheduleRender(options){
+    clearTimeout(renderTimer);
+    renderTimer = setTimeout(() => renderSummary(options), 120);
+  }
+
+  function markUserInteraction(){
+    USER_HAS_INTERACTED = true;
+    try{ root.dataset.userInteracted = "true"; }catch(_){}
+  }
+
+  function saveMortgageHandoff(data){
+    const compact = {
+      rank:data.rank || "", yos:data.yos || "", yearsOfService:data.yos || "", years_of_service:data.yos || "",
+      base:data.base || "", selected_base:data.base || "", selectedBase:data.base || "", pcs_base:data.base || "", pcsBase:data.base || "",
+      dependents:data.dependents || "without", dependents_count:data.dependents_count || 0,
+      has_dependents:data.has_dependents || false, hasDependents:data.hasDependents || false, family:data.family || 1,
+      additionalIncome:data.otherIncome || 0, additional_income:data.otherIncome || 0, otherIncome:data.otherIncome || 0,
+      monthlyObligations:data.monthlyDebt || 0, monthly_obligations:data.monthlyDebt || 0, monthly_expenses:data.monthlyDebt || 0,
+      monthlyDebt:data.monthlyDebt || 0, obligations:data.monthlyDebt || 0,
+      homePrice:data.homePrice || 0, targetHomePrice:data.homePrice || 0, projectedHomePrice:data.homePrice || 0, projected_home_price:data.homePrice || 0,
+      downPayment:data.downPayment || 0, downpayment:data.downPayment || 0, down_payment:data.downPayment || 0,
+      creditScore:data.creditScore || "720", credit_score:data.creditScore || "720",
+      loanType:data.mortgageLoanType || "va", loan_type:data.mortgageLoanType || "va", mortgageLoanType:data.mortgageLoanType || "va",
+      emergencyFund:data.emergencyFund || 0, emergency_fund:data.emergencyFund || 0,
+      projected_mortgage_amount:data.estimatedPayment || 0, projectedMortgageAmount:data.estimatedPayment || 0,
+      estimatedPayment:data.estimatedPayment || 0, totalIncome:data.totalIncome || 0, basicIncome:data.basicIncome || 0,
+      housingRatio:data.housingRatio || 0, suggestedLimit:data.suggestedLimit || 0
+    };
+    const payload = { source:"pcsunited.financial.input.panel.to.mortgage", version:VERSION, saved_at:new Date().toISOString(), inputs:compact };
+    writeJSON(MORTGAGE_HANDOFF_KEY, payload);
+    writeJSON("pcsunited.financial.intake.v1", { ...compact, source:"pcsunited.financial.input.panel.compat", updated_at:new Date().toISOString() });
+    writeJSON("pcsunited.financial_intake.v1", { ...compact, source:"pcsunited.financial.input.panel.compat_legacy", updated_at:new Date().toISOString() });
+    return payload;
+  }
+
+  function openMortgageCalculator(data){
+    saveMortgageHandoff(data);
+    const url = new URL(MORTGAGE_CALCULATOR_URL);
+    url.searchParams.set("source", "financial-input-panel");
+    url.searchParams.set("homePrice", String(data.homePrice || 0));
+    url.searchParams.set("downPayment", String(data.downPayment || 0));
+    url.searchParams.set("creditScore", String(data.creditScore || "720"));
+    url.searchParams.set("loanType", String(data.mortgageLoanType || "va"));
+    url.searchParams.set("monthlyObligations", String(data.monthlyDebt || 0));
+    url.searchParams.set("additionalIncome", String(data.otherIncome || 0));
+    url.searchParams.set("emergencyFund", String(data.emergencyFund || 0));
+    if(data.rank) url.searchParams.set("rank", String(data.rank));
+    if(data.yos) url.searchParams.set("yos", String(data.yos));
+    if(data.base) url.searchParams.set("base", String(data.base));
+    if(data.dependents) url.searchParams.set("dependents", String(data.dependents));
+    window.open(url.toString(), "_blank", "noopener,noreferrer");
+  }
+
+  function handleInputChange(el){
+    markUserInteraction();
+    if(el === els.homePrice){
+      el.dataset.userEdited = "1";
+      syncInputToSlider(el, els.homePriceSlider, money);
+      syncDownPaymentSliderFromAmount();
+    } else if(el === els.downPayment){
+      syncDownPaymentSliderFromAmount();
+    } else if(el === els.loanType){
+      /* loan type affects APR only */
+    } else {
+      const pair = SLIDER_PAIRS.find((p) => p.input === el);
+      if(pair) syncInputToSlider(pair.input, pair.slider, pair.format);
+    }
+    scheduleRender({ emit:true, userInitiated:true, reason:"user-input" });
+  }
+
+  function handleSliderChange(slider){
+    markUserInteraction();
+    if(slider === els.homePriceSlider){
+      syncSliderToInput(slider, els.homePrice, money);
+      els.homePrice.dataset.userEdited = "1";
+      syncDownPaymentAmountFromSlider();
+    } else if(slider === els.downPaymentSlider){
+      syncDownPaymentAmountFromSlider();
+    } else {
+      const pair = SLIDER_PAIRS.find((p) => p.slider === slider);
+      if(pair) syncSliderToInput(pair.slider, pair.input, pair.format);
+    }
+    scheduleRender({ emit:true, userInitiated:true, reason:"user-slider" });
+  }
+
+  function bindInputs(){
+    [els.homePrice, els.downPayment, els.creditScore, els.otherIncome, els.monthlyDebt, els.emergencyFund].forEach((el) => {
+      if(!el) return;
+      el.addEventListener("input", () => handleInputChange(el));
+    });
+    if(els.loanType) els.loanType.addEventListener("change", () => handleInputChange(els.loanType));
+
+    [els.homePriceSlider, els.downPaymentSlider, els.creditScoreSlider, els.otherIncomeSlider, els.monthlyDebtSlider, els.emergencyFundSlider].forEach((slider) => {
+      if(!slider) return;
+      slider.addEventListener("input", () => handleSliderChange(slider));
+    });
+
+    if(els.runBtn){
+      els.runBtn.addEventListener("click", () => {
+        markUserInteraction();
+        const data = renderSummary({ emit:true, userInitiated:true, reason:"run-analysis-click" });
+        dispatchSafe("pcsunited:run-financial-analysis", { ...data, userInitiated:true, reason:"run-analysis-click" });
+        if(els.saveNote) els.saveNote.textContent = "Opening Mortgage Calculator with your saved financial inputs...";
+        openMortgageCalculator(data);
+      });
+    }
+  }
+
+  function handleBasicBrainEvent(event){
+    BASICBRAIN = event?.detail?.basicbrain || event?.detail?.profile || event?.detail?.bridge || event?.detail || BASICBRAIN;
+    COMP = extractComp(event?.detail) || extractComp(BASICBRAIN) || COMP;
+    renderIncomeChip();
+    renderSummary({ emit:false, userInitiated:false, reason:"basicbrain-event" });
+  }
+
+  function handleMarketPanelReady(event){
+    MARKET_INTENT = event?.detail || MARKET_INTENT;
+    const suggested = num(event?.detail?.market?.typicalBuy ?? event?.detail?.market?.medianList ?? event?.detail?.suggested_home_price, 0);
+    if(suggested && els.homePrice && !num(els.homePrice.dataset.userEdited, 0)){
+      els.homePrice.value = suggested;
+      syncInputToSlider(els.homePrice, els.homePriceSlider, money);
+      syncDownPaymentSliderFromAmount();
+    }
+    renderSummary({ emit:false, userInitiated:false, reason:"market-panel-ready" });
+  }
+
+  ["pcsunited:basicbrain-updated","pcsunited:compensation-ready","pcsunited:compensation-preview-ready","pcsunited:profile-ready","pcsunited:bridge-ready"].forEach((ev) => {
+    window.addEventListener(ev, handleBasicBrainEvent);
+  });
+  window.addEventListener("pcsunited:market-panel-ready", handleMarketPanelReady);
+  window.addEventListener("storage", (event) => {
+    if(event.key === HANDOFF_KEY || event.key === MARKET_INTENT_KEY) hydrateBasicBrain({ emit:false });
+  });
+
+  window.PCSU_FINANCIAL_INPUT_PANEL = {
+    version:VERSION,
+    refresh:() => hydrateBasicBrain({ emit:false }),
+    refreshAndEmit:() => { USER_HAS_INTERACTED = true; hydrateBasicBrain({ emit:true }); },
+    getInputs, getComp:() => COMP, getBasicBrain:() => BASICBRAIN, getMarketIntent:() => MARKET_INTENT,
+    hasUserInteracted:() => USER_HAS_INTERACTED,
+    markUserInteraction:() => { markUserInteraction(); return renderSummary({ emit:true, userInitiated:true, reason:"manual-mark-user-interaction" }); },
+    openMortgageCalculator:() => openMortgageCalculator(renderSummary({ emit:true, userInitiated:true, reason:"manual-open-mortgage-calculator" }))
+  };
+
+  bindInputs();
+  syncInputToSlider(els.homePrice, els.homePriceSlider, money);
+  syncDownPaymentSliderFromAmount();
+  SLIDER_PAIRS.forEach((p) => { if(p.input && p.slider) syncInputToSlider(p.input, p.slider, p.format); });
+  updateAllSliderVisuals();
+  hydrateBasicBrain({ emit:false });
+  setTimeout(() => hydrateBasicBrain({ emit:false }), 350);
+  setTimeout(() => hydrateBasicBrain({ emit:false }), 1200);
+})();
+</script>
+
+</div>
