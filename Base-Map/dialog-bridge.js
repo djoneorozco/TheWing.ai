@@ -30,8 +30,18 @@
     reply('pcsunited:map-dialog-status', { ready });
   });
   document.addEventListener('keydown', event => {
-    if (event.key !== 'Escape' || event.defaultPrevented || !host?.open) return;
-    event.preventDefault();
-    reply('pcsunited:map-dialog-close');
+    if (event.defaultPrevented || !host?.open) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      reply('pcsunited:map-dialog-close');
+    } else if (event.key === 'Tab') {
+      const controls = Array.from(document.querySelectorAll('a[href],button,input,select,textarea,[tabindex]'))
+        .filter(el => !el.disabled && el.tabIndex >= 0 && el.getClientRects().length);
+      const edge = event.shiftKey ? controls[0] : controls[controls.length - 1];
+      if (edge && document.activeElement === edge) {
+        event.preventDefault();
+        reply('pcsunited:map-dialog-focus-close');
+      }
+    }
   });
 })();

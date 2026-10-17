@@ -16,7 +16,7 @@ function setup(standalone = false) {
   const connect = (extra = {}) => emit('message', { source: parent, origin: 'https://pcs-united-com.webflow.io', data: {
     source: 'pcsunited-base-map-dialog', type: 'pcsunited:map-dialog-state', open: true,
     channel: '12345678-1234-1234-1234-123456789012' }, ...extra });
-  return { handlers, sent, parent, context, emit, connect };
+  return { handlers, sent, parent, document, context, emit, connect };
 }
 test('only a validated parent can enable Escape; readiness requires the map ready event', () => {
   const x = setup();
@@ -55,4 +55,18 @@ test('duplicate script initialization adds no duplicate listeners', () => {
   vm.runInContext(source, x.context);
   assert.equal(x.handlers.message.length, 1);
   assert.equal(x.handlers.keydown.length, 1);
+});
+
+test('Tab at either iframe edge returns focus to the parent Close button', () => {
+  const x = setup(); x.connect();
+  const a = { tabIndex: 0, getClientRects: () => [1] };
+  const b = { tabIndex: 0, getClientRects: () => [1] };
+  x.document.querySelectorAll = () => [a, b];
+  x.document.activeElement = b;
+  let prevented = 0;
+  x.emit('keydown', { key: 'Tab', preventDefault() { prevented++; } });
+  assert.equal(x.sent.at(-1).data.type, 'pcsunited:map-dialog-focus-close');
+  x.document.activeElement = a;
+  x.emit('keydown', { key: 'Tab', shiftKey: true, preventDefault() { prevented++; } });
+  assert.equal(prevented, 2);
 });
