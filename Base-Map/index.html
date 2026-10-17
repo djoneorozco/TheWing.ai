@@ -18,43 +18,144 @@
   <link
     rel="stylesheet"
     href="./base-map.css">
+<style id="pcsu-dialog-layout">
+/* Layout-only overrides. Keep base-map.css and base-map.js beside this file. */
+:root { color-scheme: dark; --map-surface: #171b28; --rail-width: clamp(248px, 24vw, 320px); }
+html, body { width: 100%; height: 100%; min-height: 0; margin: 0; padding: 0; overflow: hidden; background: var(--map-surface); }
+body { overscroll-behavior: none; }
+#pcsu-real-us-map, #pcsu-map-card { width: 100%; height: 100%; min-height: 0; }
+#pcsu-map-card { padding: 0; border: 0; border-radius: 0; background: var(--map-surface); box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+#pcsu-map-card::before, #pcsu-map-stage::before, #pcsu-base-panel::before { display: none; }
+/* The Webflow dialog already supplies its own visible title and Close button. */
+#pcsu-map-title, #pcsu-map-copy, .pcsu-map-sr {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+#pcsu-map-layout {
+  display: grid; grid-template-columns: minmax(0, 1fr) var(--rail-width);
+  gap: 0; width: 100%; height: 100%; min-height: 0; align-items: stretch;
+}
+#pcsu-map-stage {
+  display: flex; flex-direction: column; justify-content: center; gap: 0;
+  width: 100%; height: 100%; min-width: 0; min-height: 0; padding: 6px;
+  overflow: hidden; border: 0; border-radius: 0; background: var(--map-surface);
+  box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+#pcsu-us-svg { display: block; flex: 1 1 auto; width: 100%; height: 100%; min-width: 0; min-height: 0; max-height: 100%; }
+#pcsu-mobile-base-slot { display: none; }
+#pcsu-map-rail {
+  min-width: 0; min-height: 0; height: 100%; padding: 8px;
+  border-left: 1px solid #ffffff0d; background: #0f1420; overflow: hidden;
+}
+#pcsu-base-picker, #pcsu-base-panel {
+  display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; max-height: none;
+  padding: 0; overflow: hidden; border: 1px solid #ffffff16; border-radius: 20px;
+  background: linear-gradient(160deg, #282f3b, #151c29); box-shadow: none;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+#pcsu-map-rail[data-view="choose"] #pcsu-base-panel,
+#pcsu-map-rail[data-view="details"] #pcsu-base-picker { display: none; }
+.pcsu-picker-heading { flex: 0 0 auto; padding: 18px 16px 14px; border-bottom: 1px solid #ffffff10; }
+.pcsu-picker-eyebrow { margin: 0 0 6px; color: #91bfff; font-size: 10px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+#pcsu-picker-title { margin: 0; color: #f2f5ff; font-size: 22px; line-height: 1.15; letter-spacing: -.035em; }
+#pcsu-picker-summary { margin: 8px 0 0; color: #bac4d7; font-size: 12px; line-height: 1.5; }
+#pcsu-base-list {
+  display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;
+  flex: 1 1 auto; flex-wrap: nowrap; width: 100%; min-width: 0; min-height: 0;
+  gap: 10px; margin: 0; padding: 12px; overflow-x: hidden; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: #5f6d81 transparent; overscroll-behavior: contain;
+}
+#pcsu-base-list::-webkit-scrollbar { display: block; width: 5px; height: 5px; }
+#pcsu-base-list::-webkit-scrollbar-thumb { background: #5f6d81; border-radius: 9px; }
+#pcsu-base-list .pcsu-base-btn {
+  flex: 0 0 auto; width: 100%; min-width: 0; max-width: none; min-height: 76px;
+  padding: 14px 12px; border-radius: 15px; box-shadow: inset 0 1px 0 #ffffff09;
+}
+#pcsu-base-list .pcsu-base-name { white-space: normal; overflow-wrap: anywhere; font-size: 14px; font-weight: 750; line-height: 1.3; }
+#pcsu-base-list .pcsu-base-meta { white-space: normal; font-size: 11px; font-weight: 500; line-height: 1.4; color: #bac4d7; }
+#pcsu-picker-empty { margin: 0; padding: 18px 16px; color: #bac4d7; font-size: 13px; line-height: 1.6; }
+#pcsu-map-rail [hidden], #pcsu-mobile-empty[hidden] { display: none !important; }
+#pcsu-selected-base-header { flex-shrink: 0; padding: 12px 14px 14px; cursor: default; }
+#pcsu-selected-base-header::after { display: none; }
+#pcsu-selected-base-header:hover { background: linear-gradient(180deg, #ffffff0e, #ffffff04); box-shadow: none; }
+#pcsu-selected-state { font-size: 21px; line-height: 1.12; letter-spacing: -.035em; animation: none !important; overflow-wrap: anywhere; }
+#pcsu-base-demographics-link { display: inline-block; text-decoration: none; }
+#pcsu-panel-kicker { padding: 6px 8px; margin: 10px 0 9px; font-size: 8px; letter-spacing: .13em; }
+.pcsu-choose-again {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 36px;
+  padding: 7px 10px; border: 1px solid #ffffff24; border-radius: 9px;
+  background: #ffffff07; color: #dce8fa; font: 600 11px/1.3 system-ui, sans-serif; cursor: pointer;
+}
+.pcsu-choose-again:hover { background: #ffffff12; }
+#pcsu-map-sidebar-slot { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
+#pcsu-base-essentials-module { padding: 12px; min-height: 0; }
+#pcsu-be-status { min-height: 160px; padding: 8px; font-weight: 500; }
+.pcsu-be-section { padding: 12px; border-radius: 14px; }
+.pcsu-be-section-title { font-size: 9px; letter-spacing: .07em; }
+.pcsu-be-primary { font-size: 13px; line-height: 1.4; }
+.pcsu-be-secondary, .pcsu-be-detail-value, .pcsu-be-mission-copy { font-size: 11px; line-height: 1.55; }
+.pcsu-be-section-link { min-height: 32px; font-size: 9px; }
+#pcsu-be-overview-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.pcsu-be-overview-label { margin-bottom: 3px; color: #aab4ca; font-size: 11px; line-height: 1.4; }
+.pcsu-be-overview-value { color: #f2f5ff; font-size: 14px; font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; }
+#pcsu-real-us-map :is(button, a, [tabindex]):focus-visible { outline: 2px solid #9bf3d0; outline-offset: -3px; }
+#pcsu-map-load-message {
+  position: absolute; inset: 0; display: grid; align-content: center; justify-items: center;
+  gap: 12px; margin: 0; padding: 24px; color: #c7d4e8; font-size: 14px; line-height: 1.5;
+  text-align: center; background: var(--map-surface); z-index: 4;
+}
+#pcsu-map-load-message[hidden] { display: none; }
+#pcsu-map-retry { min-height: 44px; padding: 10px 18px; border: 1px solid #8ef3c5; border-radius: 10px; color: #dffff0; background: #8ef3c514; cursor: pointer; }
+#pcsu-map-retry[hidden] { display: none; }
+@media (max-width: 720px) {
+  html { height: 100%; min-height: 0; overflow: hidden; }
+  body { height: 100%; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior-y: contain; }
+  #pcsu-real-us-map, #pcsu-map-card { height: auto; min-height: 100svh; overflow: visible; }
+  #pcsu-map-layout { display: flex; flex-direction: column; height: auto; min-height: 100svh; gap: 0; }
+  #pcsu-map-stage { display: flex; flex: 0 0 auto; height: auto; min-height: 0; padding: 0; overflow: hidden; }
+  #pcsu-mobile-base-slot { display: block; flex: 0 0 auto; width: 100%; padding: 10px 0 4px; }
+  #pcsu-base-list {
+    flex-direction: row; align-items: stretch; justify-content: flex-start; flex-wrap: nowrap;
+    flex: 0 0 auto; gap: 8px; padding: 0 10px 8px;
+    overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; scroll-padding: 10px;
+  }
+  #pcsu-base-list .pcsu-base-btn { width: 148px; min-width: 148px; max-width: 148px; min-height: 76px; padding: 11px 10px; scroll-snap-align: start; }
+  #pcsu-base-list .pcsu-base-name { font-size: 11px; line-height: 1.3; }
+  #pcsu-base-list .pcsu-base-meta { font-size: 9px; line-height: 1.4; }
+  #pcsu-mobile-empty { margin: 0; padding: 10px 16px; color: #bac4d7; font-size: 12px; line-height: 1.5; }
+  #pcsu-us-svg { flex: 0 0 auto; width: 100%; height: auto; min-height: 0; max-height: none; aspect-ratio: 8 / 5; }
+  #pcsu-map-rail { flex: 0 0 auto; width: 100%; height: auto; padding: 10px; border: 0; background: var(--map-surface); overflow: visible; }
+  #pcsu-map-rail[data-has-selection="false"] { display: none; }
+  #pcsu-map-rail #pcsu-base-picker { display: none; }
+  #pcsu-map-rail[data-has-selection="true"] #pcsu-base-panel { display: flex; }
+  #pcsu-base-panel { height: auto; min-height: 0; max-height: none; overflow: hidden; border-radius: 18px; }
+  #pcsu-selected-base-header { padding: 16px; }
+  #pcsu-selected-state { font-size: 24px; }
+  #pcsu-map-sidebar-slot { flex: 0 0 auto; overflow: visible; }
+  #pcsu-base-essentials-module { padding: 12px; }
+  .pcsu-be-primary { font-size: 14px; }
+  .pcsu-be-secondary, .pcsu-be-detail-value, .pcsu-be-mission-copy { font-size: 12px; }
+  #pcsu-be-overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #pcsu-real-us-map *, #pcsu-real-us-map *::before, #pcsu-real-us-map *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+</style>
 </head>
 
 <body>
+  <!-- Complete replacement for Base-Map/index.html.
+       Keep the existing base-map.css and base-map.js in the same directory.
+       The parent Webflow dialog continues to own its title, size and Close button. -->
 
-  <!-- =========================================================
-    PCSUnited • Interactive U.S. Air Force Base Map
-
-    Shell v4.0.0
-
-    User Flow:
-    1. Select State
-    2. Select USAF Base
-    3. Show exact base marker on map
-    4. Load Base Essentials from selected base JSON
-    5. User may optionally open full Base Demographics
-
-    IMPORTANT:
-    Selecting a base DOES NOT automatically navigate away.
-    Navigation occurs only through:
-    #pcsu-base-demographics-link
-  ========================================================== -->
-
-
-  <div id="pcsu-real-us-map">
-
+  <div id="pcsu-real-us-map" aria-busy="true">
 
     <div id="pcsu-map-card">
-
-
-      <!-- =====================================================
-           PAGE HEADER
-      ====================================================== -->
 
       <h2 id="pcsu-map-title">
         Interactive U.S. Air Force Base Map
       </h2>
-
 
       <div id="pcsu-map-copy">
         Select a state to view Air Force installations located
@@ -63,41 +164,13 @@
         population.
       </div>
 
-
-
-      <!-- =====================================================
-           MAP + BASE INFORMATION LAYOUT
-      ====================================================== -->
-
       <div id="pcsu-map-layout">
-
-
-        <!-- ===================================================
-             LEFT COLUMN
-             STATE MAP + BASE CARDS
-        ==================================================== -->
 
         <div id="pcsu-map-stage">
 
-
-          <!-- =================================================
-               BASES IN SELECTED STATE
-
-               Populated dynamically by base-map.js.
-          ================================================== -->
-
-          <div
-            id="pcsu-base-list"
-            aria-label="Air Force bases in selected state">
+          <div id="pcsu-mobile-base-slot">
+            <p id="pcsu-mobile-empty" hidden>No bases are listed for this state. Choose another state on the map.</p>
           </div>
-
-
-
-          <!-- =================================================
-               INTERACTIVE UNITED STATES MAP
-
-               Existing D3 / TopoJSON map mounts here.
-          ================================================== -->
 
           <svg
             id="pcsu-us-svg"
@@ -106,38 +179,32 @@
             role="img"
             aria-label="Interactive map of United States Air Force bases">
           </svg>
-
+          <div id="pcsu-map-load-message" role="status">
+            <span id="pcsu-map-load-text">Loading the U.S. base map…</span>
+            <button id="pcsu-map-retry" type="button" hidden>Try again</button>
+          </div>
 
         </div>
 
-
-
-        <!-- ===================================================
-             RIGHT COLUMN
-             SELECTED BASE INFORMATION
-        ==================================================== -->
-
-        <aside
+        <div id="pcsu-map-rail" data-view="choose" data-has-selection="false">
+          <section id="pcsu-base-picker" aria-labelledby="pcsu-picker-title">
+            <header class="pcsu-picker-heading">
+              <p class="pcsu-picker-eyebrow">Explore a location</p>
+              <h2 id="pcsu-picker-title" tabindex="-1">Choose a base</h2>
+              <p id="pcsu-picker-summary">Select a state on the map, then choose a base.</p>
+            </header>
+            <div
+            id="pcsu-base-list"
+            aria-label="Air Force bases in selected state">
+          </div>
+            <p id="pcsu-picker-empty" hidden>No Air Force bases are listed for this state. Choose another state on the map.</p>
+          </section>
+          <aside
           id="pcsu-base-panel"
           aria-label="Selected Air Force base information">
 
-
-          <!-- =================================================
-               SELECTED BASE HEADER
-          ================================================== -->
-
           <div id="pcsu-selected-base-header">
-
-
-            <!-- ===============================================
-                 BASE DEMOGRAPHICS CTA
-
-                 This is the ONLY control that should navigate
-                 to the Base Demographics page.
-
-                 base-map.js will populate href after a base
-                 has been selected.
-            ================================================ -->
+            <button id="pcsu-choose-another" class="pcsu-choose-again" type="button" aria-controls="pcsu-base-list">← Choose another base</button>
 
             <a
               id="pcsu-base-demographics-link"
@@ -153,25 +220,14 @@
 
             </a>
 
-
-
-            <!-- ===============================================
-                 SELECTED BASE NAME
-            ================================================ -->
-
             <div
               id="pcsu-selected-state"
+              tabindex="-1"
               aria-live="polite">
 
               Choose a base
 
             </div>
-
-
-
-            <!-- ===============================================
-                 SMALL LOCATION / STATUS LINE
-            ================================================ -->
 
             <div id="pcsu-panel-copy">
 
@@ -179,37 +235,17 @@
 
             </div>
 
-
           </div>
-
-
-
-          <!-- =================================================
-               BASE INFORMATION MOUNT AREA
-          ================================================== -->
 
           <div id="pcsu-map-sidebar-slot">
 
-
-            <!-- ===============================================
-                 BASE INFORMATION MODULE
-            ================================================ -->
-
             <div id="pcsu-base-essentials-module">
-
-
-              <!-- =============================================
-                   EMPTY / LOADING STATE
-              ============================================== -->
 
               <div id="pcsu-be-status">
 
-
                 <div class="pcsu-be-status-card">
 
-
                   <div class="pcsu-be-status-dot"></div>
-
 
                   <div id="pcsu-be-status-text">
 
@@ -218,140 +254,85 @@
 
                   </div>
 
-
                 </div>
 
-
               </div>
-
-
-
-              <!-- =============================================
-                   LOADED BASE CONTENT
-              ============================================== -->
 
               <div
                 id="pcsu-be-content"
                 hidden>
 
-
-
-                <!-- ===========================================
-                     BASE OVERVIEW
-                ============================================ -->
-
                 <section
                   id="pcsu-be-overview-section"
                   class="pcsu-be-section">
 
-
                   <div class="pcsu-be-section-heading">
 
-
                     <h4 class="pcsu-be-section-title">
-
 
                       <span class="pcsu-be-section-icon">
                         📍
                       </span>
 
-
                       Base Overview
-
 
                     </h4>
 
-
                   </div>
 
-
-
                   <div id="pcsu-be-overview-grid">
-
-
-                    <!-- =======================================
-                         LOCATION
-                    ======================================== -->
 
                     <div
                       id="pcsu-be-location-card"
                       class="pcsu-be-overview-item">
 
-
                       <div class="pcsu-be-overview-label">
                         Location
                       </div>
-
 
                       <div
                         id="pcsu-be-location"
                         class="pcsu-be-overview-value">
                       </div>
 
-
                     </div>
-
-
-
-                    <!-- =======================================
-                         BRANCH
-                    ======================================== -->
 
                     <div
                       id="pcsu-be-branch-card"
                       class="pcsu-be-overview-item">
 
-
                       <div class="pcsu-be-overview-label">
                         Branch
                       </div>
-
 
                       <div
                         id="pcsu-be-branch"
                         class="pcsu-be-overview-value">
                       </div>
 
-
                     </div>
-
 
                   </div>
 
-
                 </section>
-
-
-
-                <!-- ===========================================
-                     OPERATOR PHONE
-                ============================================ -->
 
                 <section
                   id="pcsu-be-operator-section"
                   class="pcsu-be-section">
 
-
                   <div class="pcsu-be-section-heading">
 
-
                     <h4 class="pcsu-be-section-title">
-
 
                       <span class="pcsu-be-section-icon">
                         ☎
                       </span>
 
-
                       Base Operator
-
 
                     </h4>
 
-
                   </div>
-
-
 
                   <div
                     id="pcsu-be-operator-name"
@@ -361,12 +342,9 @@
 
                   </div>
 
-
-
                   <div
                     id="pcsu-be-operator-details"
                     class="pcsu-be-secondary">
-
 
                     <a
                       id="pcsu-be-operator-call"
@@ -378,127 +356,80 @@
 
                     </a>
 
-
                   </div>
 
-
                 </section>
-
-
-
-                <!-- ===========================================
-                     BASE POPULATION
-                ============================================ -->
 
                 <section
                   id="pcsu-be-population-section"
                   class="pcsu-be-section">
 
-
                   <div class="pcsu-be-section-heading">
 
-
                     <h4 class="pcsu-be-section-title">
-
 
                       <span class="pcsu-be-section-icon">
                         👥
                       </span>
 
-
                       Base Population
-
 
                     </h4>
 
-
                   </div>
-
-
 
                   <div
                     id="pcsu-be-population-total"
                     class="pcsu-be-primary">
                   </div>
 
-
-
                   <div
                     id="pcsu-be-population-details"
                     class="pcsu-be-secondary">
                   </div>
 
-
                 </section>
-
-
-
-                <!-- ===========================================
-                     MISSION
-                ============================================ -->
 
                 <section
                   id="pcsu-be-mission-section"
                   class="pcsu-be-section">
 
-
                   <div class="pcsu-be-section-heading">
 
-
                     <h4 class="pcsu-be-section-title">
-
 
                       <span class="pcsu-be-section-icon">
                         ✈
                       </span>
 
-
                       Mission
-
 
                     </h4>
 
-
                   </div>
-
-
 
                   <div
                     id="pcsu-be-mission"
                     class="pcsu-be-mission-copy">
                   </div>
 
-
                 </section>
-
-
-
-                <!-- ===========================================
-                     GATE HOURS
-                ============================================ -->
 
                 <section
                   id="pcsu-be-gates-section"
                   class="pcsu-be-section">
 
-
                   <div class="pcsu-be-section-heading">
 
-
                     <h4 class="pcsu-be-section-title">
-
 
                       <span class="pcsu-be-section-icon">
                         🚧
                       </span>
 
-
                       Gate Hours
 
-
                     </h4>
-
-
 
                     <button
                       id="pcsu-be-gate-toggle"
@@ -510,26 +441,11 @@
 
                     </button>
 
-
                   </div>
-
-
-
-                  <!-- =========================================
-                       PRIMARY / FIRST GATES
-                  ========================================== -->
 
                   <div id="pcsu-be-gate-list"></div>
 
-
-
-                  <!-- =========================================
-                       REMAINING GATES
-                  ========================================== -->
-
                   <div id="pcsu-be-extra-gates"></div>
-
-
 
                   <div id="pcsu-be-gate-warning">
 
@@ -539,38 +455,23 @@
 
                   </div>
 
-
                 </section>
-
-
-
-                <!-- ===========================================
-                     VISITOR CONTROL CENTER
-                     OPTIONAL / SUPPORTING INFORMATION
-                ============================================ -->
 
                 <section
                   id="pcsu-be-visitor-section"
                   class="pcsu-be-section">
 
-
                   <div class="pcsu-be-section-heading">
 
-
                     <h4 class="pcsu-be-section-title">
-
 
                       <span class="pcsu-be-section-icon">
                         🪪
                       </span>
 
-
                       Visitor Control Center
 
-
                     </h4>
-
-
 
                     <a
                       id="pcsu-be-visitor-link"
@@ -584,34 +485,20 @@
 
                     </a>
 
-
                   </div>
-
-
 
                   <div
                     id="pcsu-be-visitor-name"
                     class="pcsu-be-primary">
                   </div>
 
-
-
                   <div id="pcsu-be-visitor-details"></div>
-
 
                 </section>
 
-
-
-                <!-- ===========================================
-                     DATA NOTICE
-                ============================================ -->
-
                 <div id="pcsu-be-footer">
 
-
                   <span id="pcsu-be-footer-dot"></span>
-
 
                   <span>
 
@@ -623,48 +510,134 @@
 
                   </span>
 
-
                 </div>
-
 
               </div>
 
-
             </div>
-
 
           </div>
 
-
         </aside>
-
+        </div>
+        <p id="pcsu-map-layout-status" class="pcsu-map-sr" role="status" aria-live="polite"></p>
 
       </div>
 
-
     </div>
 
-
   </div>
-
-
-
-  <!-- =========================================================
-       MAP LIBRARIES
-  ========================================================== -->
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 
+  <script>
+/* Presentation adapter: the existing engine still owns selection, data and messages. */
+(() => {
+  "use strict";
+  const root = document.getElementById("pcsu-real-us-map");
+  const rail = document.getElementById("pcsu-map-rail");
+  const list = document.getElementById("pcsu-base-list");
+  const picker = document.getElementById("pcsu-base-picker");
+  const mobileSlot = document.getElementById("pcsu-mobile-base-slot");
+  const mobileEmpty = document.getElementById("pcsu-mobile-empty");
+  const pickerTitle = document.getElementById("pcsu-picker-title");
+  const pickerSummary = document.getElementById("pcsu-picker-summary");
+  const pickerEmpty = document.getElementById("pcsu-picker-empty");
+  const selectedTitle = document.getElementById("pcsu-selected-state");
+  const back = document.getElementById("pcsu-choose-another");
+  const status = document.getElementById("pcsu-map-layout-status");
+  const loader = document.getElementById("pcsu-map-load-message");
+  const loadText = document.getElementById("pcsu-map-load-text");
+  const retry = document.getElementById("pcsu-map-retry");
+  const small = window.matchMedia("(max-width: 720px)");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let hasSelection = false;
+  let selectedId = "";
+  let keyboardSelection = false;
 
+  function positionList() {
+    if (small.matches) mobileSlot.insertBefore(list, mobileEmpty);
+    else picker.insertBefore(list, pickerEmpty);
+    rail.dataset.view = hasSelection ? "details" : "choose";
+    if (small.matches && hasSelection) {
+      requestAnimationFrame(() => {
+        const chosen = list.querySelector(".is-selected");
+        if (chosen) list.scrollLeft = chosen.offsetLeft - (list.clientWidth - chosen.offsetWidth) / 2;
+      });
+    }
+  }
 
-  <!-- =========================================================
-       PCSUNITED MAP ENGINE
-  ========================================================== -->
+  function updateLayout(event) {
+    const detail = event.detail || {};
+    hasSelection = Boolean(detail.selectedBase);
+    selectedId = detail.selectedBase?.id || "";
+    rail.dataset.hasSelection = String(hasSelection);
+    rail.dataset.view = hasSelection ? "details" : "choose";
+    const count = list.querySelectorAll(".pcsu-base-btn").length;
+    const stateName = detail.stateName || detail.stateCode || detail.state || "Selected state";
+    pickerTitle.textContent = stateName + " bases";
+    pickerSummary.textContent = count
+      ? `${count} ${count === 1 ? "base" : "bases"} · Choose one to see its details.`
+      : "Select another state on the map.";
+    pickerEmpty.hidden = count > 0;
+    mobileEmpty.hidden = count > 0;
+    list.setAttribute("aria-label", `Air Force bases in ${stateName}`);
+    document.getElementById("pcsu-map-sidebar-slot").scrollTop = 0;
+    status.textContent = hasSelection
+      ? `${detail.selectedBase.base}. ${small.matches ? "Base details are below the map." : "Base details are in the right panel."}`
+      : `${stateName}: ${count} ${count === 1 ? "base" : "bases"} available.`;
+    if (keyboardSelection && hasSelection && !small.matches) {
+      requestAnimationFrame(() => selectedTitle.focus({ preventScroll: true }));
+    }
+    keyboardSelection = false;
+  }
 
+  list.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") keyboardSelection = true;
+  }, true);
+  list.addEventListener("pointerdown", () => { keyboardSelection = false; }, true);
+
+  back.addEventListener("click", () => {
+    const selected = Array.from(list.querySelectorAll(".pcsu-base-btn"))
+      .find(button => button.dataset.baseId === selectedId);
+    if (small.matches) {
+      mobileSlot.scrollIntoView({ behavior: reduceMotion.matches ? "instant" : "smooth", block: "start" });
+      (selected || list.querySelector("button"))?.focus({ preventScroll: true });
+    } else {
+      rail.dataset.view = "choose";
+      (selected || pickerTitle).focus({ preventScroll: true });
+    }
+    status.textContent = "Choose another base. Your current map selection is preserved.";
+  });
+
+  // Subscribe before loading base-map.js so its first render is captured.
+  window.addEventListener("pcsunited:base-map-updated", updateLayout);
+  small.addEventListener("change", positionList);
+  positionList();
+
+  let ready = false;
+  let mapTimer;
+  window.addEventListener("pcsunited:base-map-ready", () => {
+    ready = true;
+    clearTimeout(mapTimer);
+    loader.hidden = true;
+    root.setAttribute("aria-busy", "false");
+  }, { once: true });
+  // Leave the source engine's own errors intact; make a slow/failed map actionable.
+  mapTimer = setTimeout(() => {
+    if (ready) return;
+    loadText.textContent = "The map has not finished loading. Check your connection and try again.";
+    retry.hidden = false;
+    root.setAttribute("aria-busy", "false");
+  }, 20000);
+  retry.addEventListener("click", () => window.location.reload());
+})();
+
+</script>
   <script src="./base-map.js"></script>
-
 
 </body>
 </html>
+
