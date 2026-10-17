@@ -19,6 +19,7 @@
     reply('pcsunited:map-dialog-status', { ready });
   });
   window.addEventListener('message', event => {
+    if(event.data?.source==='pcsunited-base-map-dialog') document.documentElement.dataset.pcsuBridgeProbe=JSON.stringify({origin:event.origin,parent:event.source===window.parent,top:event.source===window.top,channel:event.data.channel,open:event.data.open});
     if (event.source !== window.parent || !allowedParents.has(event.origin)) return;
     const data = event.data;
     if (!data || typeof data !== 'object' || Array.isArray(data) ||
@@ -30,6 +31,7 @@
     reply('pcsunited:map-dialog-status', { ready });
   });
   document.addEventListener('keydown', event => {
+    if(event.key==='Escape') document.documentElement.dataset.pcsuKeyProbe=JSON.stringify({host:!!host,open:host?.open,prevented:event.defaultPrevented});
     if (event.key !== 'Escape' || event.defaultPrevented || !host?.open) return;
     event.preventDefault();
     reply('pcsunited:map-dialog-close');
