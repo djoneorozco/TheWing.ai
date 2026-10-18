@@ -1688,3 +1688,30 @@ p {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Integrated financial utility: existing cards and palette retained. */
+[hidden]{display:none!important}
+.finance-context{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--pcsu-surface,#1b1e21);padding:18px 20px;border:1px solid #45443c;border-radius:16px;margin-bottom:16px}
+.finance-context p,.finance-settings p,.finance-review p,.finance-result p{font-size:12px;line-height:1.6;color:#b9bdc3;margin:5px 0}
+.finance-context button,.finance-result button,.finance-review button{border:1px solid #b39a57;background:#2e2e2b;color:#f5ead2;border-radius:99px;padding:10px 16px;font:600 12px Inter,sans-serif;cursor:pointer}
+.finance-settings,.finance-review{border:1px solid #45443c;border-radius:14px;background:#1b1e21;padding:14px 18px;font-size:12px;color:#d2d1cc}
+.finance-settings summary,.finance-result summary{cursor:pointer;min-height:24px;font-weight:600}
+.finance-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 0;color:#d2d1cc;font-size:12px}
+.finance-inputs label{display:grid;gap:6px}
+.finance-inputs input,.finance-row-options input[type=number]{width:100%;border:1px solid #53555b;border-radius:8px;background:#15171a;color:#f1f0e8;padding:9px;font-size:16px}
+.finance-review label{display:flex;align-items:flex-start;gap:10px;line-height:1.5}
+.finance-review input{flex:none;margin-top:2px;accent-color:#c7a64c}
+.finance-review small{color:#8d939c;font-size:10px}
+.finance-result{padding:18px 16px;background:#1b1e21;border-top:1px solid #383b3e;display:grid;gap:7px}
+.finance-result>span{font-size:11px;color:#b9bdc3}
+.finance-result>strong{color:#86cdb1;font-size:21px;line-height:1.3;margin-bottom:8px;font-variant-numeric:tabular-nums}
+.finance-result details{font-size:11px;margin-top:10px}
+.finance-result button:disabled{opacity:.4;cursor:not-allowed}
+.finance-eyebrow{letter-spacing:.12em;text-transform:uppercase;font-size:10px!important;color:#c7a64c!important}
+.finance-row-options{grid-column:1/-1;padding:14px;background:#15171a;border-radius:10px;font-size:12px;display:grid;gap:12px}
+.finance-row-options label{display:flex;gap:8px;align-items:center}
+.finance-row-options input[type=number]{max-width:120px}
+.finance-row-options input[type=checkbox]{accent-color:#c7a64c}
+.finance-row-options button{justify-self:start;color:#e7a4a4;background:transparent;border:1px solid #704848;border-radius:8px;padding:8px;cursor:pointer}
+.expense-row__slider{min-width:0}.slider-value-bubble{max-width:105px;min-width:48px}
+@media(max-width:600px){.finance-inputs{grid-template-columns:1fr}.finance-context{align-items:flex-start;padding:14px}.finance-context strong{font-size:14px}.finance-context button{flex-shrink:0}.finance-row-options{grid-area:auto}.expense-row:has(.finance-row-options:not([hidden])){grid-template-areas:'identity expand' 'slider amount' 'options options'}.finance-row-options:not([hidden]){grid-area:options}.finance-result>strong{font-size:24px}}
