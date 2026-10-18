@@ -22,7 +22,7 @@ import { RATE_VERSION as DLA_RATE_VERSION, getDlaAmount, normalizeRank as normal
 import { RATE_VERSION as HHG_RATE_VERSION, calculateHhgStatus, normalizeRank as normalizeHhgRank } from "./official-hhg.js";
 import { RATE_VERSION as PER_DIEM_RATE_VERSION, calculatePcsPerDiem } from "./official-pcs-per-diem.js";
 
-export const PCS_MOVE_ENGINE_VERSION = "pcs-move-engine-2026.2";
+export const PCS_MOVE_ENGINE_VERSION = "pcs-move-engine-2026.3";
 
 const PPM_WARNING = "PPM/GCC reimbursement estimate is not supported yet.";
 
@@ -157,6 +157,10 @@ export function normalizePcsMoveInput(input = {}) {
 
   const povs = pickFirstNumber(input.povs, input.povCount, input.pov_count) ?? 1;
   const year = pickFirstNumber(input.year, input.rateYear, input.rate_year) ?? 2026;
+  // Optional date selects the applicable MALT period within the rate year.
+  // Leave absent for older clients; official-malt returns the legacy rate and
+  // an explicit assumption warning for years containing a midyear change.
+  const travelDate = input.travelDate ?? input.travel_date;
 
   const estimatedWeightLbs = pickFirstNumber(
     input.estimatedWeightLbs,
@@ -183,6 +187,7 @@ export function normalizePcsMoveInput(input = {}) {
     distanceMiles,
     povs,
     year,
+    travelDate,
     estimatedWeightLbs,
     estimatedExpenses: Math.max(0, estimatedExpenses)
   };
@@ -195,10 +200,11 @@ export function calculatePcsMoveEstimate(input = {}) {
   const malt = calculateMalt({
     distanceMiles: normalized.distanceMiles,
     povs: normalized.povs,
-    year: normalized.year
+    year: normalized.year,
+    travelDate: normalized.travelDate
   });
 
-  if (!malt.ok) {
+  if (malt.warning) {
     pushWarning(warnings, malt.warning);
   }
 
@@ -321,6 +327,7 @@ export function calculatePcsMoveEstimate(input = {}) {
       distanceMiles: normalized.distanceMiles,
       povs: normalized.povs,
       year: normalized.year,
+      travelDate: normalized.travelDate ?? null,
       estimatedWeightLbs: normalized.estimatedWeightLbs
     },
     malt,
