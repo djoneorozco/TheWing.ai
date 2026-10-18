@@ -875,6 +875,20 @@
     };
   }
 
+  // Explicit iframe URL inputs take precedence over standalone defaults.
+  function sharedPcsMoveInput(distanceMiles, povs) {
+    var rawDate = getParam("travelDate", "");
+    var validDate = /^2026-\d{2}-\d{2}$/.test(rawDate) && !isNaN(Date.parse(rawDate)) && new Date(rawDate).toISOString().slice(0, 10) === rawDate;
+    return {
+      rank: prettyRank(STATE.rank), yos: STATE.yos, familySize: STATE.family,
+      hasDependents: STATE.family >= 2, dependents: dependentsLabel(),
+      currentBase: STATE.currentBase, gainingBase: STATE.newBase,
+      distanceMiles: distanceMiles,
+      distanceSource: getParam("distanceSource", "") === "manual" ? "manual" : "estimated_base_to_base",
+      povs: povs, year: 2026, travelDate: validDate ? rawDate : null
+    };
+  }
+
   async function loadPcsMoveEstimate() {
     var distanceMiles = resolvePcsDistanceMiles();
     var povs = resolvePcsPovs();
@@ -903,19 +917,7 @@
         body: JSON.stringify({
           source: "PCS Snapshot",
           poweredBy: "TheWing.ai",
-          input: {
-            rank: prettyRank(STATE.rank),
-            yos: STATE.yos,
-            familySize: STATE.family,
-            hasDependents: STATE.family >= 2,
-            dependents: dependentsLabel(),
-            currentBase: STATE.currentBase,
-            gainingBase: STATE.newBase,
-            distanceMiles: distanceMiles,
-            distanceSource: "estimated_base_to_base",
-            povs: povs,
-            year: 2026
-          }
+          input: sharedPcsMoveInput(distanceMiles, povs)
         })
       });
 
@@ -1519,7 +1521,7 @@
       );
       text(
         "pts-market-meta",
-        "Estimated Miles = " + Math.round(PCS_MOVE.distanceMiles || 0).toLocaleString() + " mi • " + (PCS_MOVE.povs || 1) + " POV"
+        (getParam("distanceSource", "") === "manual" ? "Entered Miles = " : "Estimated Miles = ") + Math.round(PCS_MOVE.distanceMiles || 0).toLocaleString() + " mi • " + (PCS_MOVE.povs || 1) + " POV"
       );
     } else {
       text("pts-market-signal", "$0");
