@@ -1,5 +1,5 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-const s=fs.readFileSync(require('node:path').join(__dirname,'../pcs-snapshot/snapshot.js'),'utf8');
+const s=fs.readFileSync(require('node:path').join(__dirname,'../PCS-Snapshot/snapshot.js'),'utf8');
 const fn=s.match(/  function sharedPcsMoveInput\([^]*?\n  }/)[0];
 const query=new Map(),context={getParam:(k,d)=>query.get(k)??d,prettyRank:()=> 'E-6',dependentsLabel:()=> 'with',STATE:{rank:'E6',yos:8,family:4,currentBase:'Lackland AFB',newBase:'Travis AFB'}};
 vm.createContext(context);vm.runInContext(fn,context);
