@@ -36,7 +36,7 @@
 // //#1) VERSION
 // ============================================================
 
-export const ENGINE_VERSION = "thewing-mortgage-engine-shared-1.1.0";
+export const ENGINE_VERSION = "thewing-mortgage-engine-shared-1.2.0";
 
 // ============================================================
 // //#2) BASIC HELPERS
@@ -115,6 +115,127 @@ export function normalizeRateToFraction(rate) {
   return r;
 }
 
+
+// Missing and zero are deliberately different in public financial inputs.
+export function optionalNumber(...values) {
+  for (const value of values) {
+    if (value === undefined || value === null || value === "") continue;
+    if (typeof value === "boolean" || (typeof value !== "number" && typeof value !== "string")) continue;
+    if (typeof value === "string" && !value.trim()) continue;
+    const n = Number(value);
+    if (Number.isFinite(n)) return n;
+  }
+  return null;
+}
+
+export function projectedPmiMonths(loan, rate, years, originalValue, monthlyPmi) {
+  if (!(loan > 0) || !(monthlyPmi > 0)) return 0;
+  const months = years * 12;
+  const payment = monthlyPrincipalInterest(loan, rate, years);
+  let balance = loan;
+  for (let month = 1; month <= months; month++) {
+    balance = Math.max(0, balance * (1 + rate / 1200) - payment);
+    if (balance <= originalValue * 0.78 + 0.000001) return month - 1;
+    if (month >= months / 2) return month;
+  }
+  return months;
+}
+
+// Run after the VA fee overlay so every total uses the final financed principal.
+export function reconcileMortgageTotals(result) {
+  const m = result.mortgage, v = result.monthly, input = result.inputs;
+  const amort = amortizationTotals(m.loanAmount, m.apr, m.termYears);
+  const pmiMonths = projectedPmiMonths(m.loanAmount, m.apr, m.termYears, m.price, v.pmi);
+  const tax = input.propertyTaxAnnual / 12 * amort.months;
+  const insurance = input.insuranceAnnual / 12 * amort.months;
+  const hoa = v.hoa * amort.months, pmi = v.pmi * pmiMonths;
+  const total = round2(amort.totalPaymentsPI + tax + insurance + hoa + pmi);
+  Object.assign(result.totals, {
+    months:amort.months, pmiMonths,
+    principalInterestTotal:amort.totalPaymentsPI, principal_interest_total:amort.totalPaymentsPI,
+    totalInterest:amort.totalInterest, total_interest:amort.totalInterest,
+    propertyTaxTotal:round2(tax), property_tax_total:round2(tax),
+    insuranceTotal:round2(insurance), insurance_total:round2(insurance),
+    hoaTotal:round2(hoa), hoa_total:round2(hoa), pmiTotal:round2(pmi), pmi_total:round2(pmi),
+    outOfPocketTotal:total, out_of_pocket_total:total, scheduledHousingPayments:total
+  });
+  result.upfrontKnown = {
+    downPayment:m.downPayment,
+    fundingFeePaidAtClosing:round2(Math.max(0, (result.vaFundingFee || 0) - (result.financedFundingFee || 0))),
+    excludes:"Closing costs, prepaid expenses and escrow deposits are not included."
+  };
+  result.upfrontKnown.total = round2(result.upfrontKnown.downPayment + result.upfrontKnown.fundingFeePaidAtClosing);
+  return result;
+}
+
+export function calculateBudget(body, monthlyHousing) {
+  const income = optionalNumber(body.takeHomeMonthly);
+  const expenses = optionalNumber(body.otherExpensesMonthly);
+  const missing = [];
+  if (income === null) missing.push("takeHomeMonthly");
+  if (expenses === null) missing.push("otherExpensesMonthly");
+  if (missing.length) return {complete:false, missing, income, expenses, remainder:null, remainderPct:null};
+  const remainder = round2(income - monthlyHousing - expenses);
+  return {complete:true, missing:[], income, expenses, housing:monthlyHousing,
+    totalOutflow:round2(monthlyHousing + expenses), remainder,
+    remainderPct:income > 0 ? round2(remainder / income * 100) : null,
+    note:"Projected cash flow after this housing payment and your entered other expenses. No buying range or lending qualification is inferred."};
+}
+
+export function validateMortgageRequest(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return "Send a JSON object.";
+  const groups = [
+    ["price","homePrice","home_price","purchasePrice","purchase_price","projectedHomePrice","projected_home_price"],
+    ["downPayment","downpayment","down_payment","dpAmt","dpAmount"],
+    ["interestRate","interest_rate","apr","aprOverride","apr_override"],
+    ["creditScore","credit_score","score","fico"], ["termYears","term_years","term"],
+    ["propertyTaxAnnual","property_tax_annual","taxAnnual","tax_annual","propertyTaxPercent","propertyTaxRate","property_tax_rate","taxRate","tax_rate"],
+    ["insuranceAnnual","insurance_annual","insuranceMonthly","insurance_monthly","insurancePercent","insAnnual","ins_annual","insuranceRate","insurance_rate","insRate","ins_rate","pmiRate","pmi_rate"],
+    ["hoaMonthly","hoa_monthly","hoa","pmiMonthly","pmi_monthly","pmi","pmiMonthlyOverride","pmi_monthly_override"],
+    ["takeHomeMonthly","otherExpensesMonthly","monthlyDebts","maintenanceUtilitiesMonthly","estimatedTaxesMonthly"]
+  ];
+  for (const keys of groups) for (const key of keys) {
+    const v = body[key];
+    if (v === null || v === undefined || v === "") continue;
+    const n = optionalNumber(v);
+    if (n === null || n < 0 || n > 100000000) return `Invalid ${key}: enter a non-negative number.`;
+  }
+  for (const name of ["cityDefaults","city_defaults"]) {
+    const defaults = body[name];
+    if (defaults === undefined || defaults === null) continue;
+    if (typeof defaults !== "object" || Array.isArray(defaults)) return "City defaults must be an object.";
+    for (const keys of groups.slice(5,8)) for (const key of keys) {
+      const v = defaults[key];
+      if (v === undefined || v === null || v === "") continue;
+      const n = optionalNumber(v);
+      if (n === null || n < 0 || n > 100000000) return `Invalid city default: ${key}.`;
+    }
+  }
+  for (const key of ["down","down_raw","downRaw"]) {
+    const v = body[key];
+    if (v !== undefined && v !== null && v !== "" && (optionalNumber(v) === null || Number(v) < 0)) return "Invalid down payment.";
+  }
+  const price = optionalNumber(...groups[0].map(k=>body[k]));
+  if (!(price > 0)) return "Home price must be greater than zero.";
+  for (const key of ["downPct","down_pct","down_payment_pct","downPaymentPct"]) {
+    if (body[key] !== undefined && body[key] !== null && body[key] !== "") {
+      const pct = optionalNumber(body[key]);
+      if (pct === null || pct < 0 || pct > 100) return "Down payment percentage must be between 0 and 100.";
+    }
+  }
+  const down = optionalNumber(...groups[1].map(k=>body[k]));
+  if (down !== null && down > price) return "Down payment cannot exceed home price.";
+  const rate = optionalNumber(...groups[2].map(k=>body[k]));
+  if (rate !== null && rate > 30) return "Interest rate must be between 0 and 30 percent.";
+  const credit = optionalNumber(...groups[3].map(k=>body[k]));
+  if (credit !== null && (!Number.isInteger(credit) || credit < 300 || credit > 850)) return "Credit score must be an integer from 300 to 850.";
+  const term = optionalNumber(...groups[4].map(k=>body[k]));
+  if (term !== null && (!Number.isInteger(term) || term < 1 || term > 40)) return "Term must be 1 to 40 whole years.";
+  const lt = String(body.loanType || body.loan_type || "conventional").toLowerCase();
+  if (!["va","conventional"].includes(lt)) return "FHA and other loan programs are not supported. Use VA or conventional.";
+  return null;
+}
+
 // ============================================================
 // //#3) APR MODEL
 // ============================================================
@@ -137,11 +258,11 @@ export function aprFromCreditScore(score) {
 }
 
 export function resolveApr({ creditScore, aprOverride } = {}) {
-  const forced = n0(aprOverride);
+  const forced = optionalNumber(aprOverride);
 
-  if (forced > 0) {
+  if (forced !== null && forced >= 0) {
     return {
-      apr: round2(forced),
+      apr: Number(forced.toFixed(4)),
       aprSource: "override"
     };
   }
@@ -179,7 +300,7 @@ export function normalizeDownPayment({
   const flexibleDown = n0(downRaw);
 
   // 1) Explicit dollar amount wins
-  if (explicitAmount > 0) {
+  if (optionalNumber(downAmountRaw) !== null) {
     const downPayment = clamp(explicitAmount, 0, p);
 
     return {
@@ -190,7 +311,7 @@ export function normalizeDownPayment({
   }
 
   // 2) Explicit percent next
-  if (explicitPct > 0) {
+  if (optionalNumber(downPctRaw) !== null) {
     const pct = clamp(explicitPct, 0, 100);
     const downPayment = amountFromPct(p, pct);
 
@@ -257,31 +378,17 @@ export function monthlyPmiEstimate({
   pmiMonthlyOverride
 } = {}) {
   const warnings = [];
-  const override = n0(pmiMonthlyOverride);
-
-  if (override > 0) {
-    return {
-      pmiMonthly: round2(override),
-      pmiApplied: override > 0,
-      pmiSource: "monthlyOverride",
-      warnings
-    };
-  }
-
   const lt = String(loanType || "conventional").trim().toLowerCase();
+  if (!["va", "conventional"].includes(lt)) throw new Error("FHA and other loan programs are not supported by this mortgage model.");
   const dp = clamp(n0(downPercent), 0, 100);
   const loan = Math.max(0, n0(loanAmount));
   const score = clamp(round0(creditScore || 720), 300, 850);
-
-  // VA monthly PMI is zero in this simplified public model.
-  // VA funding fee is separate and intentionally not modeled here yet.
-  if (lt === "va") {
-    return {
-      pmiMonthly: 0,
-      pmiApplied: false,
-      pmiSource: "va_no_monthly_pmi",
-      warnings
-    };
+  if (lt === "va" || loan === 0) {
+    return {pmiMonthly:0, pmiApplied:false, pmiSource:lt === "va" ? "va_no_monthly_pmi" : "no_loan", warnings};
+  }
+  const override = optionalNumber(pmiMonthlyOverride);
+  if (override !== null) {
+    return {pmiMonthly:round2(override), pmiApplied:override > 0, pmiSource:"monthlyOverride", warnings};
   }
 
   if (dp >= 20) {
@@ -306,7 +413,7 @@ export function monthlyPmiEstimate({
 
   const explicitRate = n0(pmiRate);
 
-  if (explicitRate > 0) {
+  if (optionalNumber(pmiRate) !== null) {
     const annualFraction = normalizeRateToFraction(explicitRate);
     const pmiMonthly = (loan * annualFraction) / 12;
 
@@ -447,7 +554,7 @@ export function normalizeMortgageInput(body = {}) {
     body.downRaw
   );
 
-  const downAmountRaw = firstNumber(
+  const downAmountRaw = optionalNumber(
     body.downpayment,
     body.downPayment,
     body.down_payment,
@@ -455,7 +562,7 @@ export function normalizeMortgageInput(body = {}) {
     body.dpAmount
   );
 
-  const downPctRaw = firstNumber(
+  const downPctRaw = optionalNumber(
     body.downPct,
     body.down_pct,
     body.down_payment_pct,
@@ -502,90 +609,58 @@ export function normalizeMortgageInput(body = {}) {
     "conventional"
   ).toLowerCase();
 
-  const aprOverride = Math.max(
-    0,
-    firstNumber(
-      body.apr_override,
-      body.aprOverride,
-      body.apr
-    )
-  );
-
-  const pmiRate = Math.max(
-    0,
-    firstNumber(
-      body.pmi_rate,
-      body.pmiRate
-    )
-  );
-
-  const pmiMonthlyOverride = Math.max(
-    0,
-    firstNumber(
-      body.pmi_monthly,
-      body.pmiMonthly,
-      body.pmi,
-      body.pmiMonthlyOverride,
-      body.pmi_monthly_override
-    )
-  );
+  const aprOverride = optionalNumber(body.interestRate, body.interest_rate, body.apr_override, body.aprOverride, body.apr);
+  const pmiRate = optionalNumber(body.pmi_rate, body.pmiRate);
+  const pmiMonthlyOverride = optionalNumber(body.pmi_monthly, body.pmiMonthly, body.pmi,
+    body.pmiMonthlyOverride, body.pmi_monthly_override);
 
   // ------------------------------------------------------------
   // Property Tax
   // ------------------------------------------------------------
-  const propertyTaxAnnualInput = Math.max(
-    0,
-    firstNumber(
+  const propertyTaxAnnualInput = optionalNumber(
       body.property_tax_annual,
       body.propertyTaxAnnual,
       body.taxAnnual,
       body.tax_annual
-    )
   );
 
-  const propertyTaxRateInput = Math.max(
-    0,
-    firstNumber(
+  const propertyTaxRateInput = optionalNumber(
       body.property_tax_rate,
       body.propertyTaxRate,
       body.taxRate,
       body.tax_rate
-    )
   );
 
-  const cityTaxAnnual = Math.max(
-    0,
-    firstNumber(
+  const cityTaxAnnual = optionalNumber(
       cityDefaults.property_tax_annual,
       cityDefaults.propertyTaxAnnual,
       cityDefaults.taxAnnual,
       cityDefaults.tax_annual
-    )
   );
 
-  const cityTaxRate = Math.max(
-    0,
-    firstNumber(
+  const cityTaxRate = optionalNumber(
       cityDefaults.property_tax_rate,
       cityDefaults.propertyTaxRate,
       cityDefaults.taxRate,
       cityDefaults.tax_rate
-    )
   );
 
   let propertyTaxAnnual = 0;
   let propertyTaxSource = "none";
 
-  if (propertyTaxAnnualInput > 0) {
+  if (optionalNumber(body.propertyTaxPercent) !== null) {
+    propertyTaxAnnual = price * Number(body.propertyTaxPercent) / 100;
+    propertyTaxSource = "inputPercent";
+  } else if (propertyTaxAnnualInput !== null) {
     propertyTaxAnnual = propertyTaxAnnualInput;
     propertyTaxSource = "inputAnnual";
-  } else if (propertyTaxRateInput > 0 && price > 0) {
+  } else if (propertyTaxRateInput !== null && price > 0) {
     propertyTaxAnnual = price * normalizeRateToFraction(propertyTaxRateInput);
     propertyTaxSource = "inputRate";
-  } else if (cityTaxAnnual > 0) {
+  } else if (cityTaxAnnual !== null) {
     propertyTaxAnnual = cityTaxAnnual;
     propertyTaxSource = "cityDefaultAnnual";
-  } else if (cityTaxRate > 0 && price > 0) {
+  } else if (cityTaxRate !== null && price > 0) {
     propertyTaxAnnual = price * normalizeRateToFraction(cityTaxRate);
     propertyTaxSource = "cityDefaultRate";
   } else if (price > 0) {
@@ -596,72 +671,60 @@ export function normalizeMortgageInput(body = {}) {
   // ------------------------------------------------------------
   // Insurance
   // ------------------------------------------------------------
-  const insuranceMonthlyInput = Math.max(
-    0,
-    firstNumber(
+  const insuranceMonthlyInput = optionalNumber(
       body.insurance_monthly,
       body.insuranceMonthly,
       body.home_insurance_monthly,
       body.homeInsuranceMonthly
-    )
   );
 
-  const insuranceAnnualInput = Math.max(
-    0,
-    firstNumber(
+  const insuranceAnnualInput = optionalNumber(
       body.insurance_annual,
       body.insuranceAnnual,
       body.insAnnual,
       body.ins_annual
-    )
   );
 
-  const insuranceRateInput = Math.max(
-    0,
-    firstNumber(
+  const insuranceRateInput = optionalNumber(
       body.insurance_rate,
       body.insuranceRate,
       body.insRate,
       body.ins_rate
-    )
   );
 
-  const cityInsuranceAnnual = Math.max(
-    0,
-    firstNumber(
+  const cityInsuranceAnnual = optionalNumber(
       cityDefaults.insurance_annual,
       cityDefaults.insuranceAnnual,
       cityDefaults.insAnnual,
       cityDefaults.ins_annual
-    )
   );
 
-  const cityInsuranceRate = Math.max(
-    0,
-    firstNumber(
+  const cityInsuranceRate = optionalNumber(
       cityDefaults.insurance_rate,
       cityDefaults.insuranceRate,
       cityDefaults.insRate,
       cityDefaults.ins_rate
-    )
   );
 
   let insuranceAnnual = 0;
   let insuranceSource = "none";
 
-  if (insuranceMonthlyInput > 0) {
+  if (optionalNumber(body.insurancePercent) !== null) {
+    insuranceAnnual = price * Number(body.insurancePercent) / 100;
+    insuranceSource = "inputPercent";
+  } else if (insuranceMonthlyInput !== null) {
     insuranceAnnual = insuranceMonthlyInput * 12;
     insuranceSource = "inputMonthly";
-  } else if (insuranceAnnualInput > 0) {
+  } else if (insuranceAnnualInput !== null) {
     insuranceAnnual = insuranceAnnualInput;
     insuranceSource = "inputAnnual";
-  } else if (insuranceRateInput > 0 && price > 0) {
+  } else if (insuranceRateInput !== null && price > 0) {
     insuranceAnnual = price * normalizeRateToFraction(insuranceRateInput);
     insuranceSource = "inputRate";
-  } else if (cityInsuranceAnnual > 0) {
+  } else if (cityInsuranceAnnual !== null) {
     insuranceAnnual = cityInsuranceAnnual;
     insuranceSource = "cityDefaultAnnual";
-  } else if (cityInsuranceRate > 0 && price > 0) {
+  } else if (cityInsuranceRate !== null && price > 0) {
     insuranceAnnual = price * normalizeRateToFraction(cityInsuranceRate);
     insuranceSource = "cityDefaultRate";
   } else if (price > 0) {
@@ -672,35 +735,29 @@ export function normalizeMortgageInput(body = {}) {
   // ------------------------------------------------------------
   // HOA
   // ------------------------------------------------------------
-  const hoaMonthlyInput = Math.max(
-    0,
-    firstNumber(
+  const hoaMonthlyInput = optionalNumber(
       body.hoa_monthly,
       body.hoaMonthly,
       body.hoa
-    )
   );
 
-  const cityHoaMonthly = Math.max(
-    0,
-    firstNumber(
+  const cityHoaMonthly = optionalNumber(
       cityDefaults.hoa_monthly,
       cityDefaults.hoaMonthly,
       cityDefaults.hoa
-    )
   );
 
   const hoaMonthly =
-    hoaMonthlyInput > 0
+    hoaMonthlyInput !== null
       ? hoaMonthlyInput
-      : cityHoaMonthly > 0
+      : cityHoaMonthly !== null
         ? cityHoaMonthly
         : 0;
 
   const hoaSource =
-    hoaMonthlyInput > 0
+    hoaMonthlyInput !== null
       ? "input"
-      : cityHoaMonthly > 0
+      : cityHoaMonthly !== null
         ? "cityDefault"
         : "none";
 
@@ -723,8 +780,8 @@ export function normalizeMortgageInput(body = {}) {
     loan_type: loanType,
     loanType,
 
-    apr_override: round2(aprOverride),
-    aprOverride: round2(aprOverride),
+    apr_override: aprOverride,
+    aprOverride,
 
     property_tax_annual: round2(propertyTaxAnnual),
     propertyTaxAnnual: round2(propertyTaxAnnual),
@@ -741,8 +798,8 @@ export function normalizeMortgageInput(body = {}) {
     pmi_rate: pmiRate,
     pmiRate,
 
-    pmi_monthly_override: round2(pmiMonthlyOverride),
-    pmiMonthlyOverride: round2(pmiMonthlyOverride),
+    pmi_monthly_override: pmiMonthlyOverride,
+    pmiMonthlyOverride,
 
     city_defaults: cityDefaults
   };
@@ -761,6 +818,7 @@ export function calculateMortgage(inputOrBody = {}) {
       : normalizeMortgageInput(inputOrBody);
 
   const warnings = [];
+  if (!["va", "conventional"].includes(input.loanType)) throw new Error("Unsupported loan type. Use VA or conventional.");
 
   const price = Math.max(0, input.price);
   const downPayment = clamp(Math.max(0, input.downPayment), 0, price);
@@ -795,6 +853,7 @@ export function calculateMortgage(inputOrBody = {}) {
   });
 
   warnings.push(...pmiResult.warnings);
+  if (pmiResult.pmiSource === "planningEstimate") warnings.push("PMI is a planning estimate, not a lender quote. Enter your quoted monthly PMI when available.");
 
   if (input.propertyTaxSource && input.propertyTaxSource.startsWith("fallback")) {
     warnings.push("Tax: no tax input/default provided; used fallback planning rate.");
@@ -806,12 +865,7 @@ export function calculateMortgage(inputOrBody = {}) {
 
   const pmi = pmiResult.pmiMonthly;
 
-  const allIn =
-    principalInterest +
-    propertyTax +
-    insurance +
-    hoa +
-    pmi;
+  const allIn = round2(principalInterest) + round2(propertyTax) + round2(insurance) + round2(hoa) + round2(pmi);
 
   const amort = amortizationTotals(
     loanAmount,
@@ -822,7 +876,8 @@ export function calculateMortgage(inputOrBody = {}) {
   const totalTaxPaid = propertyTax * amort.months;
   const totalInsurancePaid = insurance * amort.months;
   const totalHoaPaid = hoa * amort.months;
-  const totalPmiPaid = pmi * amort.months;
+  const pmiMonths = projectedPmiMonths(loanAmount, apr, input.termYears, price, pmi);
+  const totalPmiPaid = pmi * pmiMonths;
 
   const totalOutOfPocket =
     amort.total_payments_pi +
@@ -843,7 +898,8 @@ export function calculateMortgage(inputOrBody = {}) {
     credit_score: input.creditScore,
     loanType: input.loanType,
     loan_type: input.loanType,
-    apr: round2(apr),
+    apr: Number(apr.toFixed(4)),
+    interestRate: Number(apr.toFixed(4)),
     termYears: input.termYears,
     term_years: input.termYears
   };
@@ -873,6 +929,8 @@ export function calculateMortgage(inputOrBody = {}) {
 
   const totals = {
     months: amort.months,
+    pmiMonths,
+    assumptions: "Fixed interest rate; unchanged tax, insurance and HOA; PMI projection assumes current payments and original value equal to price. Excludes upfront cash, repairs and utilities.",
 
     principalInterestTotal: round2(amort.total_payments_pi),
     principal_interest_total: round2(amort.total_payments_pi),
@@ -907,6 +965,7 @@ export function calculateMortgage(inputOrBody = {}) {
 
     // Compact dashboard / brain compatibility.
     apr: mortgage.apr,
+    interestRate: mortgage.apr,
     aprSource,
     termYears: mortgage.termYears,
     price: mortgage.price,
@@ -933,6 +992,8 @@ export function calculateMortgage(inputOrBody = {}) {
     },
 
     meta: {
+      calculationContract: "mortgage-v2",
+      rateMeaning: "interest-rate-not-apr",
       engineVersion: ENGINE_VERSION,
       generatedAt: new Date().toISOString(),
       aprSource,
@@ -998,3 +1059,4 @@ export default Object.freeze({
   calculateMortgage,
   safeCalculateMortgage
 });
+
