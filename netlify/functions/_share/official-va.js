@@ -36,7 +36,7 @@
 // ============================================================
 
 export const RATE_VERSION = "official-va-2026.2";
-export const VA_HOME_LOAN_RULES_VERSION = "va-home-loan-rules-2026.1";
+export const VA_HOME_LOAN_RULES_VERSION = "va-home-loan-rules-2026.2";
 
 export const VA_DTI_BENCHMARK = 0.41;
 export const VA_DTI_BENCHMARK_PCT = 41;
@@ -945,11 +945,10 @@ export function calculateVaHomeLoan(input = {}) {
     notes.push("Funding fee is calculated but assumed paid at closing (not financed).");
   }
 
-  const aprOverride = toNullableMoney(
-    pickFirst(input.apr, input.aprOverride, input.apr_override, input.interestRate)
-  );
+  const rawInterestRate = pickFirst(input.apr, input.aprOverride, input.apr_override, input.interestRate);
+  const aprOverride = rawInterestRate === null ? null : Number(rawInterestRate);
   const apr =
-    aprOverride && aprOverride > 0
+    aprOverride !== null && Number.isFinite(aprOverride) && aprOverride >= 0
       ? aprOverride
       : aprFromCreditScore(
           pickFirst(input.creditScore, input.credit_score, input.fico, 720)
@@ -1143,7 +1142,7 @@ export function calculateVaHomeLoan(input = {}) {
     downPaymentPct: round2(downPaymentPct),
     baseLoanAmount,
     fundingFee,
-    fundingFeePct: fundingFeeExempt ? 0 : round2(feePct),
+    fundingFeePct: fundingFeeExempt ? 0 : feePct,
     financedFundingFee,
     totalLoanAmount,
 
@@ -1154,7 +1153,7 @@ export function calculateVaHomeLoan(input = {}) {
     pmiMonthly,
     totalMonthlyPayment,
 
-    apr: round2(apr),
+    apr: Number(apr.toFixed(4)),
     termYears,
 
     grossMonthlyIncome,
@@ -1240,3 +1239,4 @@ export default Object.freeze({
   calculateVaHomeLoan,
   safeCalculateVaHomeLoan
 });
+
