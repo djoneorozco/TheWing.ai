@@ -1,38 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- =========================================================
-    PCSUNITED • LIGHTWEIGHT FAD / MORTGAGE HEALTH DASHBOARD
-    index.html
-    v1.2.2 • BUYER COMFORT RANGE SHELL + A11Y FIXES
-
-    UPDATE
-    - Replaced health bar comment panel with Buyer Comfort Range
-    - Removed selected defaults from rank, yos, base, dependents
-    - Added aria-live on errorBox
-    - Added progressbar semantics on Buyer Comfort Range track
-    - Kept mortgage input defaults and FAQ section
-  ========================================================== -->
+  
   <meta charset="UTF-8" />
+  <meta name="thewing-api-base" content="https://thewing.netlify.app/api" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>PCSUnited Financial Health Snapshot | Mortgage Calculator</title>
+  <title>PCSUnited Mortgage & Budget Snapshot | Mortgage Calculator</title>
   <meta
     name="description"
     content="Estimate your mortgage payment, military income, residual income, and lightweight financial health using PCSUnited and TheWing.ai."
   />
-  <link rel="canonical" href="https://www.pcsunited.com/mortgage-calculator" />
+  <link rel="canonical" href="https://thewing.netlify.app/mortgage-calculator/" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="PCSUnited Financial Health Snapshot" />
+  <meta property="og:title" content="PCSUnited Mortgage & Budget Snapshot" />
   <meta
     property="og:description"
     content="A lightweight mortgage and financial health dashboard for military families powered by TheWing.ai."
   />
-  <meta property="og:url" content="https://www.pcsunited.com/mortgage-calculator" />
+  <meta property="og:url" content="https://thewing.netlify.app/mortgage-calculator/" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="PCSUnited Financial Health Snapshot" />
+  <meta name="twitter:title" content="PCSUnited Mortgage & Budget Snapshot" />
   <meta
     name="twitter:description"
     content="Estimate mortgage payment, military compensation, residual income, and financial readiness."
@@ -53,30 +43,27 @@
   <div class="pcsu-stage">
     <main class="app">
 
-      <!-- =====================================================
-        TOPBAR / HEALTH-FIRST HERO
-      ====================================================== -->
       <header class="topbar">
         <div class="title-wrap">
           <div class="brand-kicker">AF Mortgage Calculator</div>
 
-          <h1 class="title">Financial Health Snapshot</h1>
+          <h1 class="title">Mortgage & Budget Snapshot</h1>
 
           <div class="subtitle">
-            A lightweight FAD that turns mortgage inputs, military compensation, and monthly obligations into a clear residual-income readiness signal.
+            Estimate a fixed-rate VA or conventional purchase payment, then compare it with your take-home household budget.
           </div>
         </div>
 
-        <section class="hero-card glass health-hero-card" aria-label="Financial health summary">
+        <section class="hero-card glass health-hero-card" aria-label="Projected budget summary">
           <div class="health-hero-copy">
-            <div class="mini-label">Financial Health</div>
+            <div class="mini-label">Projected Cash Flow</div>
 
             <div class="hero-value" id="hero-health">
               Needs Inputs
             </div>
 
             <div class="hero-sub" id="hero-health-note">
-              Calculate mortgage health to generate your snapshot.
+              Enter your mortgage scenario and optional budget inputs.
             </div>
           </div>
 
@@ -84,7 +71,7 @@
             <div id="healthRing" class="score-ring hero-score-ring" style="--pct:0;--ring-color:var(--mint);">
               <div class="score-center">
                 <div id="residualPercent" class="score-number">—</div>
-                <div class="score-label">Residual %</div>
+                <div class="score-label">Remainder %</div>
               </div>
             </div>
           </div>
@@ -93,94 +80,22 @@
 
       <div class="divider"></div>
 
-      <!-- =====================================================
-        ABOUT / BUYER COMFORT RANGE
-      ====================================================== -->
-      <section class="seo-copy glass" aria-label="About this mortgage dashboard">
-        <div class="about-layout">
-          <div class="about-copy">
-            <h2 class="panel-title">About the PCSUnited Financial Health Snapshot</h2>
-
-            <div class="panel-rule"></div>
-
-            <p>
-              PCSUnited’s Financial Health Snapshot helps military users estimate mortgage payment pressure before moving into a deeper financial dashboard. It reads Financial Intake data when available, estimates monthly mortgage cost, and optionally uses TheWing.ai to calculate military compensation.
-            </p>
-
-            <p>
-              The core output is simple: total income minus mortgage payment and monthly obligations equals residual income. That residual margin becomes a lightweight financial health signal designed for fast PCS and home-buying decisions.
-            </p>
-          </div>
-
-          <div class="about-health-comment">
-
-            <!-- =================================================
-              BUYER COMFORT RANGE / HOUSING RANGE
-
-              JS target IDs:
-              - buyerRangeTarget
-              - buyerRangeMin
-              - buyerRangeMax
-              - buyerRangeFill
-              - buyerRangeNote
-              - buyerRangeProgress
-            ================================================== -->
-            <div class="housing-range-card" aria-label="Buyer comfort range">
-              <div class="housing-range-top">
-                <div>
-                  <span class="housing-range-label">Buyer Comfort Range</span>
-                  <span class="housing-range-title">Recommended Shopping Lane</span>
-                </div>
-              </div>
-
-              <div class="housing-range-target-center">
-                <small>Preferred Target</small>
-                <b id="buyerRangeTarget">$—</b>
-              </div>
-
-              <div class="housing-range-track-wrap">
-                <div class="housing-range-scale">
-                  <span id="buyerRangeMin">$—</span>
-                  <span id="buyerRangeMax">$—</span>
-                </div>
-
-                <div
-                  id="buyerRangeProgress"
-                  class="housing-range-track"
-                  role="progressbar"
-                  aria-label="Buyer comfort range"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  aria-valuenow="0"
-                  aria-valuetext="Enter income, obligations, and home price to generate a purchase range."
-                >
-                  <div id="buyerRangeFill" class="housing-range-fill"></div>
-                </div>
-              </div>
-
-              <div id="buyerRangeNote" class="housing-range-note">
-                Enter your income, obligations, and home price to generate a smarter purchase range.
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- =====================================================
-        PRIMARY METRICS
-      ====================================================== -->
-      <section class="summary-grid hero-metrics" aria-label="Snapshot metrics">
+      <section class="seo-copy glass" aria-label="Calculation assumptions">
+  <h2 class="panel-title">A clear mortgage scenario</h2>
+  <p>Enter a quoted interest rate, or use the backend’s labeled credit-tier planning assumption. Taxes, insurance and HOA are editable. This tool supports fixed-rate VA and conventional purchase scenarios.</p>
+  <p>Monthly payment and budget remainder are planning estimates. They do not determine a buying range or loan approval. Detailed financial entries stay in this page’s memory.</p>
+</section>
+<section class="summary-grid hero-metrics" aria-label="Snapshot metrics">
         <div class="mini-card glass">
-          <div class="mini-label">Total Income</div>
+          <div class="mini-label">Take-home Household Income</div>
           <div class="metric-value" id="hero-income">$—</div>
-          <div class="metric-caption">Military compensation + additional income</div>
+          <div class="metric-caption">Your entered income after payroll deductions</div>
         </div>
 
         <div class="mini-card glass">
-          <div class="mini-label">Total Monthly Obligations</div>
+          <div class="mini-label">Other Monthly Expenses</div>
           <div class="metric-value" id="healthObligations">$—</div>
-          <div class="metric-caption">Utilities, debts, credit cards, car payments</div>
+          <div class="metric-caption">Living costs, debt payments, utilities and reserves</div>
         </div>
 
         <div class="mini-card glass">
@@ -190,72 +105,39 @@
         </div>
 
         <div class="mini-card glass">
-          <div class="mini-label">Residual Income</div>
+          <div class="mini-label">Monthly Remainder</div>
           <div class="metric-value" id="hero-residual">$—</div>
-          <div class="metric-caption">Income left after mortgage and obligations</div>
+          <div class="metric-caption">Take-home income minus housing and other expenses</div>
         </div>
 
         <div class="mini-card glass metric-hidden-compat">
-          <div class="mini-label">Residual Margin</div>
+          <div class="mini-label">Remainder Share</div>
           <div class="metric-value" id="hero-residual-pct">—</div>
-          <div class="metric-caption">Residual income ÷ total income</div>
+          <div class="metric-caption">Monthly remainder ÷ take-home income</div>
         </div>
       </section>
 
-      <!-- =====================================================
-        MAIN GRID
-      ====================================================== -->
       <section class="main-grid">
 
-        <!-- ===================================================
-          LEFT PANEL: OPTIONAL MILITARY INPUTS
-        ==================================================== -->
         <aside class="panel glass">
           <div class="panel-head">
             <div>
-              <h2 class="panel-title">(Optional) Military Pay</h2>
-              <div class="panel-subtitle">Use TheWing.ai to estimate compensation.</div>
+              <h2 class="panel-title">PCS Details & Budget</h2>
+              <div class="panel-subtitle">Reuse your shared PCS details; military pay is an optional reference.</div>
             </div>
 
             <button id="btn-clear" class="small-ghost-btn" type="button">
-              Clear
+              Reset scenario
             </button>
           </div>
 
           <div class="panel-rule"></div>
 
-          <div class="input-group">
+<p id="profileSyncStatus" class="range-meta" role="status"></p><div class="input-group"><label class="row-label" for="baseRole">Pay Reference Location</label><div class="select-wrap"><select id="baseRole"><option value="destination">New / destination base</option><option value="current">Current base</option></select></div><div class="range-meta">Choose which shared base to use for the optional pay reference.</div></div>          <div class="input-group">
             <label class="row-label" for="rank">Rank</label>
 
             <div class="select-wrap">
-              <select id="rank">
-                <option value="">Select rank</option>
-
-                <optgroup label="Enlisted">
-                  <option value="E-1">E-1 • Airman Basic</option>
-                  <option value="E-2">E-2 • Airman</option>
-                  <option value="E-3">E-3 • Airman First Class</option>
-                  <option value="E-4">E-4 • Senior Airman</option>
-                  <option value="E-5">E-5 • Staff Sergeant</option>
-                  <option value="E-6">E-6 • Technical Sergeant</option>
-                  <option value="E-7">E-7 • Master Sergeant</option>
-                  <option value="E-8">E-8 • Senior Master Sergeant</option>
-                  <option value="E-9">E-9 • Chief Master Sergeant</option>
-                </optgroup>
-
-                <optgroup label="Officer">
-                  <option value="O-1">O-1 • Second Lieutenant</option>
-                  <option value="O-2">O-2 • First Lieutenant</option>
-                  <option value="O-3">O-3 • Captain</option>
-                  <option value="O-4">O-4 • Major</option>
-                  <option value="O-5">O-5 • Lieutenant Colonel</option>
-                  <option value="O-6">O-6 • Colonel</option>
-                  <option value="O-7">O-7 • Brigadier General</option>
-                  <option value="O-8">O-8 • Major General</option>
-                  <option value="O-9">O-9 • Lieutenant General</option>
-                  <option value="O-10">O-10 • General</option>
-                </optgroup>
-              </select>
+              <select id="rank"><option value="">Please select</option></select>
             </div>
           </div>
 
@@ -263,80 +145,15 @@
             <label class="row-label" for="yos">Years of Service</label>
 
             <div class="select-wrap">
-              <select id="yos">
-                <option value="">Select years</option>
-                <option value="2">2 Years</option>
-                <option value="4">4 Years</option>
-                <option value="6">6 Years</option>
-                <option value="8">8 Years</option>
-                <option value="10">10 Years</option>
-                <option value="12">12 Years</option>
-                <option value="14">14 Years</option>
-                <option value="16">16 Years</option>
-                <option value="18">18 Years</option>
-                <option value="20">20 Years</option>
-                <option value="22">22 Years</option>
-                <option value="24">24 Years</option>
-                <option value="26">26 Years</option>
-                <option value="28">28 Years</option>
-                <option value="30">30 Years</option>
-              </select>
+              <select id="yos"><option value="">Please select</option></select>
             </div>
           </div>
 
           <div class="input-group">
-            <label class="row-label" for="base">Base</label>
+            <label class="row-label" for="base">Selected Base</label>
 
             <div class="select-wrap">
-              <select id="base">
-                <option value="">Select base</option>
-                <option value="Andrews AFB">Andrews AFB</option>
-                <option value="Barksdale AFB">Barksdale AFB</option>
-                <option value="Beale AFB">Beale AFB</option>
-                <option value="Cannon AFB">Cannon AFB</option>
-                <option value="Charleston AFB">Charleston AFB</option>
-                <option value="Davis-Monthan AFB">Davis-Monthan AFB</option>
-                <option value="Dover AFB">Dover AFB</option>
-                <option value="Dyess AFB">Dyess AFB</option>
-                <option value="Eglin AFB">Eglin AFB</option>
-                <option value="Fairchild AFB">Fairchild AFB</option>
-                <option value="FE Warren AFB">FE Warren AFB</option>
-                <option value="Holloman AFB">Holloman AFB</option>
-                <option value="Hurlburt Field">Hurlburt Field</option>
-                <option value="JBSA Fort Sam Houston">JBSA Fort Sam Houston</option>
-                <option value="JBSA Lackland">JBSA Lackland</option>
-                <option value="JBSA Randolph">JBSA Randolph</option>
-                <option value="Keesler AFB">Keesler AFB</option>
-                <option value="Kirtland AFB">Kirtland AFB</option>
-                <option value="Langley AFB">Langley AFB</option>
-                <option value="Laughlin AFB">Laughlin AFB</option>
-                <option value="Little Rock AFB">Little Rock AFB</option>
-                <option value="Luke AFB">Luke AFB</option>
-                <option value="MacDill AFB">MacDill AFB</option>
-                <option value="Malmstrom AFB">Malmstrom AFB</option>
-                <option value="Maxwell AFB">Maxwell AFB</option>
-                <option value="McConnell AFB">McConnell AFB</option>
-                <option value="McGuire AFB">McGuire AFB</option>
-                <option value="Minot AFB">Minot AFB</option>
-                <option value="Moody AFB">Moody AFB</option>
-                <option value="Mountain Home AFB">Mountain Home AFB</option>
-                <option value="Nellis AFB">Nellis AFB</option>
-                <option value="Offutt AFB">Offutt AFB</option>
-                <option value="Patrick SFB">Patrick SFB</option>
-                <option value="Peterson SFB">Peterson SFB</option>
-                <option value="Robins AFB">Robins AFB</option>
-                <option value="Scott AFB">Scott AFB</option>
-                <option value="Seymour Johnson AFB">Seymour Johnson AFB</option>
-                <option value="Shaw AFB">Shaw AFB</option>
-                <option value="Sheppard AFB">Sheppard AFB</option>
-                <option value="Tinker AFB">Tinker AFB</option>
-                <option value="Travis AFB">Travis AFB</option>
-                <option value="Tyndall AFB">Tyndall AFB</option>
-                <option value="Vance AFB">Vance AFB</option>
-                <option value="Vandenberg SFB">Vandenberg SFB</option>
-                <option value="Whiteman AFB">Whiteman AFB</option>
-                <option value="Wright-Patterson AFB">Wright-Patterson AFB</option>
-              </select>
+              <select id="base"><option value="">Please select</option></select>
             </div>
           </div>
 
@@ -344,41 +161,41 @@
             <label class="row-label" for="dependents">Dependents</label>
 
             <div class="select-wrap">
-              <select id="dependents">
+              <select id="dependents"><option value="">Please select</option>
                 <option value="without">Without Dependents</option>
                 <option value="with">With Dependents</option>
               </select>
             </div>
           </div>
 
-          <div class="input-group">
-            <label class="row-label" for="additionalIncome">Additional Income / Month</label>
+<div class="input-group"><label class="row-label" for="familySize">Household Size</label><div class="select-wrap"><select id="familySize"></select></div></div><div class="input-group"><label class="row-label" for="takeHomeMonthly">Take-home Household Income / Month</label><input class="field-input" id="takeHomeMonthly" type="number" min="0" step="0.01" max="1000000" placeholder="Enter actual take-home income"/><div class="range-meta">Include all spendable household income once. If BAH is already in your paycheck, do not add it again.</div></div>          <div class="input-group">
+            <label class="row-label" for="additionalIncome">Additional Gross Income / Month (optional)</label>
 
             <input
               id="additionalIncome"
               class="field-input"
               type="number"
               min="0"
-              step="100"
-              value="0"
+              step="0.01"
+             
               placeholder="e.g., 500"
             />
           </div>
 
           <div class="input-group">
-            <label class="row-label" for="monthlyObligations">Monthly Obligations</label>
+            <label class="row-label" for="monthlyObligations">All Other Monthly Expenses</label>
 
             <input
               id="monthlyObligations"
               class="field-input"
               type="number"
               min="0"
-              step="1"
+              step="0.01"
               placeholder="e.g., 1200"
             />
 
             <div class="range-meta">
-              Use this for utilities, debts, credit cards, car payments, or recurring obligations not included in the mortgage.
+              Include debt payments, living expenses, utilities, maintenance reserves and savings commitments. Exclude the mortgage, taxes, insurance and HOA already shown in the payment. Enter 0 only if none apply.
             </div>
           </div>
 
@@ -389,18 +206,14 @@
           <div id="profilePills" class="pill-row"></div>
 
           <div class="note-box">
-            Military inputs are optional, but they turn the mortgage estimate into a true lightweight financial health snapshot.
+            Military pay is a gross compensation reference. It is not automatically substituted for your take-home household income.
           </div>
 
           <div id="errorBox" class="error-box" role="alert" aria-live="polite"></div>
         </aside>
 
-        <!-- ===================================================
-          RIGHT SIDE
-        ==================================================== -->
         <section class="dashboard-stack">
 
-          <!-- MORTGAGE INPUTS -->
           <section class="panel glass">
             <div class="panel-head">
               <div>
@@ -410,7 +223,7 @@
 
               <div id="statusPill" class="status-pill">
                 <span class="dot"></span>
-                <span id="statusText">Ready</span>
+                <span id="statusText" role="status" aria-live="polite">Ready</span>
               </div>
             </div>
 
@@ -424,10 +237,10 @@
                   id="homePrice"
                   class="field-input"
                   type="number"
-                  min="0"
-                  step="100"
-                  value="450000"
-                />
+                  min="0.01"
+                  step="0.01"
+                 
+                required max="100000000" />
               </div>
 
               <div class="input-group">
@@ -438,9 +251,9 @@
                   class="field-input"
                   type="number"
                   min="0"
-                  step="100"
-                  value="22500"
-                />
+                  step="0.01"
+                 
+                required />
               </div>
 
               <div class="input-group">
@@ -453,7 +266,7 @@
                   min="300"
                   max="850"
                   step="1"
-                  value="720"
+                 
                 />
               </div>
 
@@ -477,8 +290,8 @@
                   type="number"
                   min="0"
                   step="0.01"
-                  value="2.10"
-                />
+                 
+                required max="30" />
               </div>
 
               <div class="input-group">
@@ -489,9 +302,9 @@
                   class="field-input"
                   type="number"
                   min="0"
-                  step="1"
-                  value="180"
-                />
+                  step="0.01"
+                 
+                required />
               </div>
 
               <div class="input-group">
@@ -502,9 +315,9 @@
                   class="field-input"
                   type="number"
                   min="0"
-                  step="1"
-                  value="0"
-                />
+                  step="0.01"
+                 
+                required />
               </div>
 
               <div class="input-group">
@@ -515,26 +328,24 @@
                   class="field-input"
                   type="number"
                   min="0"
-                  step="1"
-                  value="0"
-                />
+                  step="0.01"
+                 
+                placeholder="Blank = planning estimate" />
               </div>
-            </div>
+            <div class="input-group"><label class="row-label" for="interestRate">Interest Rate % (optional)</label><input class="field-input" id="interestRate" type="number" min="0" step="0.0001" max="30" placeholder="Example: 6.125"/><div class="range-meta">Enter a quoted note rate. Blank uses a credit-tier planning assumption; this is not APR.</div></div><div class="input-group"><label class="row-label" for="termYears">Loan Term</label><div class="select-wrap"><select id="termYears"><option value="30">30 years</option><option value="20">20 years</option><option value="15">15 years</option><option value="10">10 years</option></select></div></div></div>
 
-            <button id="btn-calc" class="primary-btn wide-action" type="button">
-              Calculate Mortgage Health
+<div id="vaOptions" class="form-grid"><div class="input-group"><label class="row-label" for="fundingFeeExempt">VA Funding Fee Exemption</label><div class="select-wrap"><select id="fundingFeeExempt"><option value="">Please select</option><option value="no">Not exempt / model fee</option><option value="yes">Exempt — confirm eligibility</option></select></div></div><div class="input-group"><label class="row-label" for="priorUse">VA Loan Use</label><div class="select-wrap"><select id="priorUse"><option value="">Please select</option><option value="first_use">First use</option><option value="subsequent_use">Subsequent use</option></select></div></div><div class="input-group"><label class="row-label" for="financeFundingFee">VA Funding Fee Payment</label><div class="select-wrap"><select id="financeFundingFee"><option value="">Please select</option><option value="financed">Finance into loan</option><option value="upfront">Pay at closing</option></select></div></div></div>            <button id="btn-calc" class="primary-btn wide-action" type="button">
+              Calculate Mortgage
             </button>
 
             <div class="note-box">
-              Financial Health uses this formula:
-              <strong>Total Income - Mortgage Payment - Monthly Obligations = Residual Income.</strong>
+              Projected budget uses this formula:
+              <strong>Take-home Income − Housing Payment − Other Expenses = Monthly Remainder.</strong>
             </div>
           </section>
 
-          <!-- PAYMENT + INCOME -->
           <section class="split-grid">
 
-            <!-- PAYMENT BREAKDOWN -->
             <section class="panel glass">
               <h2 class="panel-title">Payment Breakdown</h2>
 
@@ -543,7 +354,7 @@
               <div class="calc-card">
                 <div class="calc-left">
                   <div class="calc-title">All-In Payment / Month</div>
-                  <div class="calc-sub">Estimated mortgage carrying cost</div>
+                  <div class="calc-sub">P&I + tax + insurance + HOA + PMI; excludes repairs and utilities</div>
                 </div>
 
                 <div class="calc-right">
@@ -581,9 +392,9 @@
 
               <div id="vaReadinessPanel" class="va-readiness-panel" hidden>
                 <div class="panel-rule"></div>
-                <h3 class="va-readiness-title">VA Readiness</h3>
+                <h3 class="va-readiness-title">VA Funding Fee</h3>
                 <p class="va-readiness-sub">
-                  Official VA overlay from TheWing.ai when income and debt fields are available.
+                  Purchase funding fee calculated by TheWing.ai’s VA rules module.
                 </p>
 
                 <div class="kv-table">
@@ -597,52 +408,32 @@
                     <div class="kv-val" id="vaTotalLoanOut">$—</div>
                   </div>
 
-                  <div class="kv-row">
-                    <div class="kv-key">DTI</div>
-                    <div class="kv-val" id="vaDtiOut">—</div>
-                  </div>
-
-                  <div class="kv-row">
-                    <div class="kv-key">Residual Income</div>
-                    <div class="kv-val" id="vaResidualIncomeOut">$—</div>
-                  </div>
-
-                  <div class="kv-row">
-                    <div class="kv-key">Residual Required</div>
-                    <div class="kv-val" id="vaResidualRequiredOut">$—</div>
-                  </div>
-
-                  <div class="kv-row">
-                    <div class="kv-key">Residual Status</div>
-                    <div class="kv-val" id="vaResidualPassOut">—</div>
-                  </div>
                 </div>
 
                 <div class="range-meta" id="vaReadinessNote">
-                  Run Calculate Mortgage Health with VA loan selected to load VA readiness fields.
+                  Select fee treatment to calculate a VA purchase scenario.
                 </div>
               </div>
 
-              <div class="range-meta" id="mortgageSource">
-                Mortgage math will use TheWing.ai when available, with local fallback.
+<details class="cost-details"><summary>View term totals and known upfront cash</summary><div class="kv-table"><div class="kv-row"><div class="kv-key">VA Fee Paid at Closing</div><div class="kv-val" id="fundingFeeUpfrontOut">—</div></div><div class="kv-row"><div class="kv-key">Known Upfront Cash (down payment + upfront VA fee)</div><div class="kv-val" id="upfrontKnownOut">—</div></div><div class="kv-row"><div class="kv-key">Interest Over the Loan Term</div><div class="kv-val" id="totalInterestOut">—</div></div><div class="kv-row"><div class="kv-key">Scheduled Housing Payments Over the Term</div><div class="kv-val" id="scheduledPaymentsOut">—</div></div><div class="kv-row"><div class="kv-key">PMI Duration (planning assumption)</div><div class="kv-val" id="pmiDurationOut">—</div></div></div><p class="range-meta">Term totals assume unchanged taxes, insurance and HOA. Scheduled payments exclude upfront cash, closing costs, maintenance and utilities. Conventional PMI projection assumes payments remain current and original value equals the purchase price; confirm timing with your lender.</p></details><p id="mortgageWarnings" class="range-meta"></p>              <div class="range-meta" id="mortgageSource">
+                TheWing.ai calculates the payment; unavailable results are marked clearly.
               </div>
             </section>
 
-            <!-- INCOME BREAKDOWN -->
             <section class="panel glass">
-              <h2 class="panel-title">Income Breakdown</h2>
+              <h2 class="panel-title">Military Pay Reference</h2>
 
               <div class="panel-rule"></div>
 
               <div class="calc-card">
                 <div class="calc-left">
-                  <div class="calc-title">Total Income / Month</div>
-                  <div class="calc-sub">Military compensation + extra income</div>
+                  <div class="calc-title">Gross Compensation / Month</div>
+                  <div class="calc-sub">Gross military pay + optional additional gross income</div>
                 </div>
 
                 <div class="calc-right">
                   <div class="calc-main" id="totalIncome">$—</div>
-                  <div class="calc-mini" id="housingRatio">— housing ratio</div>
+                  <div class="calc-mini" id="housingRatio">Before payroll deductions</div>
                 </div>
               </div>
 
@@ -679,7 +470,6 @@
             </section>
           </section>
 
-          <!-- Hidden compatibility nodes for mortgage.js -->
           <div class="compat-hidden" aria-hidden="true">
             <span id="healthIncome">$—</span>
             <span id="healthMortgage">$—</span>
@@ -690,30 +480,14 @@
         </section>
       </section>
 
-        <!-- =====================================================
-          FAQ
-        ====================================================== -->
         <section class="seo-faq glass" aria-label="Frequently asked questions">
-          <h2 class="panel-title">Financial Health Snapshot FAQ</h2>
-          <div class="panel-rule"></div>
-
-          <h3>What does this dashboard calculate?</h3>
-          <p>
-            It estimates your all-in mortgage payment, total monthly income, residual income, and residual income percentage after monthly obligations.
-          </p>
-
-          <h3>How is the financial health score calculated?</h3>
-          <p>
-            The snapshot uses residual margin: residual income divided by total monthly income. Higher residual margin generally means more breathing room after the mortgage and obligations.
-          </p>
-
-          <h3>Does this replace a lender approval?</h3>
-          <p>
-            No. This is a planning estimate, not underwriting, lending advice, or a formal loan approval decision.
-          </p>
-        </section>
-
-        <div class="footer-note">
+<h2 class="panel-title">Mortgage & Budget Questions</h2><div class="panel-rule"></div>
+<h3>What is included in the monthly payment?</h3><p>Principal and interest, property taxes, homeowners insurance, HOA and applicable mortgage insurance. Maintenance, utilities and closing costs are separate.</p>
+<h3>Is the monthly remainder a financial-health score?</h3><p>No. It is your entered take-home income minus the proposed housing payment and your other entered expenses. It does not assess all your assets, liabilities or emergency reserves.</p>
+<h3>Are the interest rate and PMI lender quotes?</h3><p>No. Enter a quoted interest rate and PMI amount when available. Blank rate or PMI fields use labeled planning assumptions from TheWing. FHA estimates are not supported in this release.</p>
+<h3>Does this replace lender approval?</h3><p>No. Confirm loan terms, VA fee exemption and eligibility with your lender. Your budget inputs are optional and remain in memory on this page.</p>
+</section>
+<div class="footer-note">
         Powered by PCSUnited and TheWing.ai. Planning estimate only.
       </div>
 
@@ -721,6 +495,7 @@
   </div>
 </div>
 
-  <script src="./mortgage.js"></script>
+  <script src="./mortgage.js" defer></script>
 </body>
 </html>
+
