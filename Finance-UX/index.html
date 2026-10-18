@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="style.css">
 
   <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
 
 <body>
@@ -37,7 +37,9 @@
     <!-- =====================================================
       APP CONTENT
     ====================================================== -->
-    <main class="budget-app__main">
+    <div class="finance-context"><div><strong>Your monthly picture</strong><p id="fu-income-summary">Add income to personalize your budget.</p></div><button id="fu-edit-income" type="button">Edit income</button></div>
+<div id="fu-income-fields" class="finance-inputs" hidden><label>Gross household income / month<input id="fu-gross" type="number" min="0" max="1000000" step="0.01"></label><label>Total take-home household income / month<input id="fu-net" type="number" min="0" max="1000000" step="0.01"></label></div>
+<main class="budget-app__main">
 
       <!-- ===================================================
         LEFT WORKSPACE
@@ -92,7 +94,7 @@
             <span>Other</span>
           </button>
 
-        </nav>
+        </nav><details class="finance-settings"><summary>Savings &amp; future housing assumptions</summary><div class="finance-inputs"><label>Monthly savings contribution<input id="fu-savings" type="number" min="0" max="1000000" step="0.01" value="0"></label><label>Emergency fund balance<input id="fu-emergency" type="number" min="0" max="1000000" step="0.01" placeholder="Add your balance"></label><label>Minimum cash left each month<input id="fu-buffer" type="number" min="0" max="1000000" step="0.01" value="500"></label><label>Extra cushion at comfortable end<input id="fu-extra-buffer" type="number" min="0" max="1000000" step="0.01" value="500"></label></div><p>The $500 cushions are adjustable planning assumptions. Do not repeat savings already withheld from take-home pay. Keep expected utilities, repairs and maintenance in your budget.</p></details><div class="finance-review"><label><input id="fu-reviewed" type="checkbox"> I reviewed all four categories, including housing, debts and savings. Zero amounts do not apply to me.</label><p id="fu-status" role="status" aria-live="polite">Enter your amounts. This starts with an unconfirmed budget.</p><button id="fu-retry" type="button" hidden>Retry budget calculation</button><small>Financial amounts remain in memory while this page is open.</small></div>
 
 
         <!-- =================================================
@@ -945,9 +947,8 @@
           class="location-selector"
           id="locationSelector"
           type="button"
-          aria-haspopup="listbox"
-          aria-expanded="false"
-        >
+          aria-label="Edit income and base details"
+          >
 
           <span class="location-selector__content">
 
@@ -957,7 +958,7 @@
 
             <span class="location-selector__value">
               <i data-lucide="map-pin" aria-hidden="true"></i>
-              <span id="selectedLocation">Lackland AFB, TX</span>
+              <span id="selectedLocation">No base selected</span>
             </span>
 
           </span>
@@ -971,7 +972,8 @@
         </button>
 
 
-        <!-- Cash flow card -->
+
+<!-- Cash flow card -->
         <section
           class="cash-flow-card"
           aria-labelledby="cashFlowTitle"
@@ -1005,20 +1007,16 @@
               <strong
                 class="cash-flow-summary__amount"
                 id="cashFlowAmount"
-              >
-                $1,720
-              </strong>
+              >—</strong>
 
               <span class="cash-flow-summary__label">
-                Monthly Cash Remaining
+                Cash after spending &amp; savings
               </span>
 
               <span
                 class="cash-flow-summary__percentage"
                 id="cashFlowPercentage"
-              >
-                21.7% of income
-              </span>
+              >—</span>
 
             </div>
 
@@ -1043,7 +1041,8 @@
                   r="64"
                 ></circle>
 
-                <circle
+                <circle class="income-donut__segment income-donut__segment--savings" cx="80" cy="80" r="64" pathLength="100" fill="none" stroke="#c7a64c" stroke-width="8" stroke-dasharray="0 100"></circle>
+<circle
                   class="income-donut__segment income-donut__segment--income"
                   cx="80"
                   cy="80"
@@ -1077,9 +1076,7 @@
 
               <div class="income-donut__center">
 
-                <strong id="monthlyIncomeDonut">
-                  $7,910
-                </strong>
+                <strong id="monthlyIncomeDonut">—</strong>
 
                 <span>
                   Income
@@ -1103,15 +1100,13 @@
                   aria-hidden="true"
                 ></span>
 
-                Monthly Income
+                Take-home Income
               </span>
 
               <strong
                 class="cash-flow-breakdown__value cash-flow-breakdown__value--positive"
                 id="monthlyIncomeValue"
-              >
-                $7,910
-              </strong>
+              >—</strong>
 
             </div>
 
@@ -1131,9 +1126,7 @@
               <strong
                 class="cash-flow-breakdown__value cash-flow-breakdown__value--negative"
                 id="totalExpensesValue"
-              >
-                -$4,870
-              </strong>
+              >—</strong>
 
             </div>
 
@@ -1147,15 +1140,13 @@
                   aria-hidden="true"
                 ></span>
 
-                Total Debt
+                Monthly Debt Payments
               </span>
 
               <strong
                 class="cash-flow-breakdown__value cash-flow-breakdown__value--negative"
                 id="totalDebtValue"
-              >
-                -$1,320
-              </strong>
+              >—</strong>
 
             </div>
 
@@ -1169,15 +1160,13 @@
                   aria-hidden="true"
                 ></span>
 
-                Total Savings
+                Monthly Savings
               </span>
 
               <strong
                 class="cash-flow-breakdown__value cash-flow-breakdown__value--savings"
                 id="totalSavingsValue"
-              >
-                -$0
-              </strong>
+              >—</strong>
 
             </div>
 
@@ -1190,16 +1179,15 @@
               Monthly Cash Flow
             </span>
 
-            <strong id="cashFlowFooterAmount">
-              $1,720
-            </strong>
+            <strong id="cashFlowFooterAmount">—</strong>
 
           </footer>
 
         </section>
 
 
-        <!-- Expenses percentage card -->
+        <section class="finance-result"><p class="finance-eyebrow">Your housing range</p><span>Suggested total monthly housing</span><strong id="fu-payment">Review your budget</strong><span>Estimated home purchase price</span><strong id="fu-price">—</strong><span>Cash remaining after buying / month</span><strong id="fu-remaining">—</strong><button id="fu-explore" type="button" disabled>Explore this home scenario ↗</button><details><summary>How this range works</summary><p>Uses the lower of the 28/36 income guideline and your cash-flow budget. The comfortable end preserves your additional cushion. Existing rent or mortgage is replaced unless you mark it as continuing. Total housing includes principal, interest, taxes, insurance, HOA and applicable mortgage insurance.</p><p id="fu-assumption-copy"></p><p>Planning guidance, not loan approval or a VA qualification test. Utilities, maintenance, cash to close and reserves need separate consideration.</p></details></section>
+<!-- Expenses percentage card -->
         <section
           class="health-metric-card health-metric-card--expenses"
           aria-labelledby="expensesRatioTitle"
@@ -1234,12 +1222,10 @@
             <strong
               class="health-metric-card__value"
               id="expensesIncomeRatio"
-            >
-              61.5%
-            </strong>
+            >—</strong>
 
             <span class="health-metric-card__recommendation">
-              Recommended: Below 70%
+              Living expenses only; debt is separate
             </span>
 
           </div>
@@ -1286,9 +1272,7 @@
             <strong
               class="health-metric-card__value"
               id="emergencyFundAmount"
-            >
-              $6,000
-            </strong>
+            >—</strong>
 
             <span class="health-metric-card__recommendation">
               Recommended: 3–6 months
@@ -1299,9 +1283,7 @@
           <span
             class="health-status health-status--months"
             id="emergencyFundMonths"
-          >
-            3.2 months
-          </span>
+          >—</span>
 
         </section>
 
@@ -1323,7 +1305,7 @@
               <div class="card-heading-with-info">
 
                 <h2 id="debtRatioTitle">
-                  Debt to Income Ratio
+                  Current Debt / Gross Income
                 </h2>
 
                 <button
@@ -1341,12 +1323,10 @@
             <strong
               class="health-metric-card__value"
               id="debtIncomeRatio"
-            >
-              16.7%
-            </strong>
+            >—</strong>
 
             <span class="health-metric-card__recommendation">
-              Recommended: Below 36%
+              Housing recommendation applies the 28/36 guideline
             </span>
 
           </div>
@@ -1434,11 +1414,11 @@
             <span>$</span>
 
             <input
-              id="customExpenseAmount"
+              id="customExpenseAmount" max="1000000"
               name="customExpenseAmount"
               type="number"
               min="0"
-              step="1"
+              step="0.01"
               placeholder="0"
               inputmode="decimal"
               required
