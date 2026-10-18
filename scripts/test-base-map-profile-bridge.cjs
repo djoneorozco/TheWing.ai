@@ -1,0 +1,20 @@
+const vm = require('node:vm');
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const source = fs.readFileSync(require('node:path').join(__dirname, '../Base-Map/profile-bridge.js'), 'utf8');
+const listeners = {}, messages = [], selections = [];
+const base = { id: 'lackland', fileName: 'Lackland.json', base: 'JBSA-Lackland', state: 'TX' };
+let selected = null;
+const parent = { postMessage: (data, origin) => messages.push({ data, origin }) };
+const api = { getStateBases: state => state === 'TX' ? [base] : [], getCurrentState: () => 'TX', getSelectedBase: () => selected, selectBase: item => { selected = item; selections.push(item); }, renderState: () => { selected = null; } };
+vm.runInNewContext(source, { window: { parent, PCSU_US_BASE_MAP: api, addEventListener: (name, fn) => { listeners[name] = fn; } }, document: { referrer: 'https://pcs-united-com.webflow.io/stage-1-explore-your-base' }, URL });
+function send(overrides = {}, eventOverrides = {}) { listeners.message({ source: parent, origin: 'https://pcs-united-com.webflow.io', data: { source: 'pcsu-shared-profile', type: 'pcsunited:base-map-select', fileName: 'Lackland.json', requestId: 'test-1', ...overrides }, ...eventOverrides }); }
+send({}, { origin: 'https://example.com' }); send({}, { source: {} }); send({ fileName: '../Lackland.json' }); send({ requestId: 123 });
+assert.equal(selections.length, 0, 'Untrusted or malformed messages must not change selection');
+send(); assert.equal(selected, base); assert.equal(messages.at(-1).data.status, 'selected');
+send(); assert.equal(selections.length, 1, 'Same selection should not trigger repeated map work');
+send({ fileName: 'Missing.json' }); assert.equal(selected, null); assert.equal(messages.at(-1).data.status, 'unsupported');
+send({ fileName: null }); assert.equal(messages.at(-1).data.status, 'cleared');
+send(); listeners['pcsunited:base-map-ready'](); assert.equal(selected, base); assert.equal(selections.length, 2);
+assert.equal(messages.at(-1).origin, 'https://pcs-united-com.webflow.io');
+console.log('Base map profile bridge: origin, source, validation, selection, clearing, readiness and idempotence passed.');
