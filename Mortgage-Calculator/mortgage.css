@@ -1189,3 +1189,23 @@ select{
     min-height:auto;
   }
 }
+
+
+/* v2.0 functional additions; the established calculator theme is retained. */
+#pcsu-mortgage-shell [hidden]{display:none!important}
+#pcsu-mortgage-shell input,#pcsu-mortgage-shell select{min-width:0;max-width:100%}
+#pcsu-mortgage-shell input:focus-visible,#pcsu-mortgage-shell select:focus-visible,#pcsu-mortgage-shell button:focus-visible,#pcsu-mortgage-shell summary:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+#pcsu-mortgage-shell input:disabled,#pcsu-mortgage-shell select:disabled{opacity:.55}
+#pcsu-mortgage-shell .cost-details{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
+#pcsu-mortgage-shell .cost-details summary{cursor:pointer;font-weight:700;min-height:44px}
+#pcsu-mortgage-shell .range-meta,#pcsu-mortgage-shell .info-pill{overflow-wrap:anywhere}
+#pcsu-mortgage-shell .kv-row{gap:16px}
+#pcsu-mortgage-shell .kv-val{white-space:nowrap;max-width:none}
+#pcsu-mortgage-shell #compSource{white-space:normal;max-width:200px;overflow-wrap:break-word}
+#pcsu-mortgage-shell .calc-right{flex-shrink:0}
+#pcsu-mortgage-shell .calc-left{min-width:0}
+#pcsu-mortgage-shell .metric-value{font-size:clamp(22px,3vw,34px)}
+#pcsu-mortgage-shell #profileSyncStatus{margin:0 0 18px}
+#pcsu-mortgage-shell #vaOptions{margin-top:18px}
+@media(max-width:600px){#pcsu-mortgage-shell .pcsu-stage{padding:16px 10px 32px}#pcsu-mortgage-shell .panel{padding:18px}#pcsu-mortgage-shell .kv-row{flex-wrap:wrap}#pcsu-mortgage-shell .kv-val{max-width:100%}}
+@media(prefers-reduced-motion:reduce){#pcsu-mortgage-shell *,#pcsu-mortgage-shell *::before,#pcsu-mortgage-shell *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
