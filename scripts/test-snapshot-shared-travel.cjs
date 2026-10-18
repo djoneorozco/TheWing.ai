@@ -1,0 +1,10 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const s=fs.readFileSync(require('node:path').join(__dirname,'../pcs-snapshot/snapshot.js'),'utf8');
+const fn=s.match(/  function sharedPcsMoveInput\([^]*?\n  }/)[0];
+const query=new Map(),context={getParam:(k,d)=>query.get(k)??d,prettyRank:()=> 'E-6',dependentsLabel:()=> 'with',STATE:{rank:'E6',yos:8,family:4,currentBase:'Lackland AFB',newBase:'Travis AFB'}};
+vm.createContext(context);vm.runInContext(fn,context);
+query.set('travelDate','2026-07-01');query.set('distanceSource','manual');
+let v=context.sharedPcsMoveInput(1500,2);assert.equal(v.travelDate,'2026-07-01');assert.equal(v.distanceMiles,1500);assert.equal(v.povs,2);assert.equal(v.familySize,4);assert.equal(v.hasDependents,true);assert.equal(v.distanceSource,'manual');assert.equal(v.rank,'E-6');
+query.set('travelDate','2026-02-30');assert.equal(context.sharedPcsMoveInput(1,1).travelDate,null);
+query.clear();v=context.sharedPcsMoveInput(891,1);assert.equal(v.travelDate,null);assert.equal(v.distanceSource,'estimated_base_to_base');
+console.log('Snapshot payload: shared household, grade, route, manual miles, vehicles, dated rate and standalone fallback passed.');
