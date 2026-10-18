@@ -15,7 +15,10 @@
 import {
   ENGINE_VERSION,
   calculateMortgage,
-  normalizeMortgageInput
+  normalizeMortgageInput,
+  validateMortgageRequest,
+  reconcileMortgageTotals,
+  calculateBudget
 } from "./_share/mortgage-engine.js";
 
 import {
@@ -24,7 +27,7 @@ import {
 } from "./_share/official-va.js";
 
 const APP_NAME = "TheWing.ai";
-const HANDLER_VERSION = "thewing-mortgage-handler-1.3.0";
+const HANDLER_VERSION = "thewing-mortgage-handler-1.4.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -147,6 +150,8 @@ function buildVaHomeLoanInput(body, input, mortgageResult) {
       body.disabilityPending
     ),
     purpleHeart: pickFirst(body.purpleHeart, body.purple_heart),
+    maintenanceUtilitiesMonthly: pickFirst(body.maintenanceUtilitiesMonthly, body.maintenance_utilities_monthly),
+    estimatedTaxesMonthly: pickFirst(body.estimatedTaxesMonthly, body.estimated_taxes_monthly),
     survivingSpouse: pickFirst(body.survivingSpouse, body.surviving_spouse)
   };
 }
@@ -200,6 +205,7 @@ function applyVaHomeLoanOverlay(result, vaResult) {
     monthly_payment: vaResult.totalMonthlyPayment
   };
 
+  result.financedFundingFee = vaResult.financedFundingFee;
   result.vaFundingFee = vaResult.fundingFee;
   result.vaFundingFeeRate = vaResult.fundingFeePct;
   result.baseLoanAmount = vaResult.baseLoanAmount;
@@ -332,6 +338,8 @@ export async function handler(event) {
   }
 
   try {
+    const validation = validateMortgageRequest(body);
+    if (validation) return json(400, {ok:false, error:validation, engineVersion:ENGINE_VERSION});
     const input = normalizeMortgageInput(body);
 
     if (input.price <= 0) {
@@ -345,6 +353,21 @@ export async function handler(event) {
 
     const result = calculateMortgage(input);
     const enriched = enrichWithVaHomeLoan(body, input, result);
+    if (input.loanType === "va" && enriched.meta.vaOverlayApplied !== true) {
+      return json(503, {ok:false, error:"VA funding fee calculation is unavailable. Please try again.", engineVersion:ENGINE_VERSION});
+    }
+    reconcileMortgageTotals(enriched);
+    enriched.budget = calculateBudget(body, enriched.monthly.allIn);
+    enriched.meta.calculationContract = "mortgage-v2";
+    // Do not present incomplete VA underwriting figures as a pass or approval.
+    const required = ["basePay", "bah", "bas", "monthlyDebts", "maintenanceUtilitiesMonthly", "estimatedTaxesMonthly", "familySize", "state"];
+    const residualComplete = required.every(k=>body[k] !== null && body[k] !== undefined && body[k] !== "") && Number(body.basePay) + Number(body.bah) + Number(body.bas) > 0;
+    if (input.loanType === "va" && !residualComplete) {
+      enriched.residualIncome = null;
+      enriched.requiredResidualIncome = null;
+      enriched.residualPass = null;
+      enriched.dti = null;
+    }
 
     return json(200, {
       app: APP_NAME,
@@ -360,3 +383,4 @@ export async function handler(event) {
     });
   }
 }
+
