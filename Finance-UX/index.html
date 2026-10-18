@@ -1000,6 +1000,26 @@
           </header>
 
 
+          <section class="finance-income-received" aria-label="Income received from your PCS details">
+            <span>Total monthly income</span>
+            <strong id="fu-total-income">—</strong>
+            <small>Before payroll deductions · includes additional income</small>
+            <div id="fu-income-breakdown" hidden>
+              <div><span>Military pay &amp; allowances</span><b id="fu-military-income">—</b></div>
+              <div><span>Additional income</span><b id="fu-additional-income">—</b></div>
+              <details><summary>Military income breakdown</summary>
+                <div><span>Base pay</span><b id="fu-base-pay">—</b></div>
+                <div><span>BAH</span><b id="fu-bah">—</b></div>
+                <div><span>BAS</span><b id="fu-bas">—</b></div>
+              </details>
+            </div>
+          </section>
+          <div class="finance-income-needed" id="fu-income-needed">
+            <strong>Your income is connected.</strong>
+            <p id="fu-income-help">Add the amount your household receives after deductions to calculate available cash and your housing range. Include additional income once.</p>
+            <button id="fu-add-take-home" type="button">Add take-home pay ↗</button>
+          </div>
+
           <div class="cash-flow-card__hero">
 
             <div class="cash-flow-summary">
@@ -1025,7 +1045,7 @@
             <div
               class="income-donut"
               role="img"
-              aria-label="$7,910 monthly income represented as a financial distribution chart"
+              aria-label="Monthly take-home income distribution"
             >
 
               <svg
