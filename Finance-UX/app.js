@@ -6,9 +6,11 @@
  const labels={'monthly-expenses':'monthly expenses',debt:'monthly debt payments',lifestyle:'lifestyle spending',other:'other monthly expenses'};
  const state={categories:{},activeCategory:'monthly-expenses',sortMode:'high-low',grossMonthly:null,netMonthly:null,incomeBreakdown:null,savingsMonthly:0,emergencyFund:null,bufferMonthly:500,extraBufferMonthly:500,reviewed:false,location:'No base selected',scenario:{loanType:'va',termYears:30,creditScore:720,interestRate:null,downPayment:0,propertyTaxPercent:1.25,insurancePercent:.45,hoaMonthly:0,pmiMonthly:null,fundingFeeExempt:false,priorUse:'first_use',financeFundingFee:true}};
  let result=null,seq=0,controller,timer,parentOrigin=null,parentRevision=-1,loaded=false;
+ // Explicit standalone embedding keeps income entry inside the tool; no parent financial transport.
+ const inlineIncome=new URLSearchParams(location.search).get('income')==='inline';
  const embedded=window.parent!==window, rows=()=>Object.values(state.categories).flat();
  const allowed=o=>['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com'].includes(o)||(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o)&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname));
- const post=(type,detail={})=>{if(parentOrigin)parent.postMessage({source:'pcsu-finance',version:1,type,...detail},parentOrigin);};
+ const post=(type,detail={})=>{if(parentOrigin&&!inlineIncome)parent.postMessage({source:'pcsu-finance',version:1,type,...detail},parentOrigin);};
  const icons=()=>window.lucide?.createIcons({attrs:{'stroke-width':2}});
  const rangeText=(a,b)=>a==null||a===b?'Up to '+money(b):money(a)+' – '+money(b);
  function incomeView(){
@@ -21,7 +23,7 @@
   $('fu-income-needed').querySelector('strong').textContent=state.grossMonthly==null?'Complete your income details.':'Your income is connected.';
   document.querySelector('.cash-flow-card__hero').hidden=missing;
  }
- function editIncome(focus){if(embedded)post('pcsu:finance-edit-income',{focus});else{$('fu-income-fields').hidden=false;$(focus==='net'?'fu-net':'fu-gross').focus();}}
+ function editIncome(focus){if(embedded&&!inlineIncome)post('pcsu:finance-edit-income',{focus});else{$('fu-income-fields').hidden=false;$(focus==='net'?'fu-net':'fu-gross').focus();}}
  function render(){
   $('expenseEditorTitle').textContent='Adjust your '+labels[state.activeCategory];
   document.querySelectorAll('.category-tab').forEach(b=>{const active=b.dataset.category===state.activeCategory;b.classList.toggle('category-tab--active',active);b.setAttribute('aria-pressed',String(active));});
@@ -63,15 +65,15 @@
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!modal.hidden){e.preventDefault();close();}else post('pcsu:finance-close');}if(e.key==='Tab'&&!modal.hidden){const fields=[...modal.querySelectorAll('button,input')].filter(x=>!x.disabled),first=fields[0],last=fields[fields.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
   $('customExpenseForm').onsubmit=e=>{e.preventDefault();const label=$('customExpenseName').value.trim(),value=Number($('customExpenseAmount').value);if(!label||!Number.isFinite(value)||value<0||value>1000000)return;state.categories[state.activeCategory].push({id:'custom-'+crypto.randomUUID(),label,category:state.activeCategory,value,min:0,max:Math.max(1000,value*2),step:5,icon:'circle-dollar-sign',color:'slate',custom:true,essential:false,housing:false,continues:false,minimumPayment:null});close();render();schedule();};
   for(const [id,key]of Object.entries({'fu-savings':'savingsMonthly','fu-emergency':'emergencyFund','fu-buffer':'bufferMonthly','fu-extra-buffer':'extraBufferMonthly','fu-gross':'grossMonthly','fu-net':'netMonthly'}))$(id).oninput=()=>{state[key]=$(id).value.trim()===''?null:Number($(id).value);schedule();};
-  $('fu-reviewed').onchange=e=>{state.reviewed=e.target.checked;schedule();};$('fu-retry').onclick=calculate;$('fu-edit-income').onclick=()=>editIncome();$('fu-add-take-home').onclick=()=>editIncome('net');$('locationSelector').onclick=()=>{if(embedded)post('pcsu:finance-edit-income');};
+  $('fu-reviewed').onchange=e=>{state.reviewed=e.target.checked;schedule();};$('fu-retry').onclick=calculate;$('fu-edit-income').onclick=()=>editIncome();$('fu-add-take-home').onclick=()=>editIncome('net');$('locationSelector').onclick=()=>editIncome();
   $('fu-explore').onclick=()=>{const a=result?.affordability;if(a?.homeRange)post('pcsu:finance-explore',{price:a.homeRange.comfortable||a.homeRange.upper,scenario:state.scenario});};
  }
  async function boot(){
   try{const r=await fetch('items.json');if(!r.ok)throw Error();state.categories=await r.json();}catch{$('expenseList').textContent='Budget categories could not load. Reload to try again.';return;}
-  loaded=true;bind();render();clear();if(!embedded)$('fu-income-fields').hidden=false;$('selectedLocation').textContent=state.location;icons();schedule();
+  loaded=true;bind();render();clear();if(!embedded||inlineIncome)$('fu-income-fields').hidden=false;if(inlineIncome){state.location='Your household';$('fu-explore').hidden=true;}$('selectedLocation').textContent=state.location;icons();schedule();
   try{const o=new URL(document.referrer).origin;if(allowed(o))parentOrigin=o;}catch{}post('pcsu:finance-ready');window.dispatchEvent(new CustomEvent('pcsunited:financial-ready',{detail:{state,metrics:null}}));
  }
- window.addEventListener('message',e=>{const d=e.data;if(e.source!==parent||!allowed(e.origin)||!d||d.source!=='pcsu-finance-host'||d.version!==1)return;parentOrigin=e.origin;if(d.type!=='pcsu:finance-context'||!Number.isInteger(d.revision)||d.revision<parentRevision)return;parentRevision=d.revision;
+ window.addEventListener('message',e=>{const d=e.data;if(inlineIncome||e.source!==parent||!allowed(e.origin)||!d||d.source!=='pcsu-finance-host'||d.version!==1)return;parentOrigin=e.origin;if(d.type!=='pcsu:finance-context'||!Number.isInteger(d.revision)||d.revision<parentRevision)return;parentRevision=d.revision;
   const b=d.incomeBreakdown;state.incomeBreakdown=b&&typeof b==='object'?Object.fromEntries(['militaryMonthly','additionalMonthly','basePay','bah','bas'].map(key=>[key,typeof b[key]==='number'&&Number.isFinite(b[key])&&b[key]>=0&&b[key]<=1000000?b[key]:null])):null;for(const key of ['grossMonthly','netMonthly'])state[key]=typeof d[key]==='number'&&Number.isFinite(d[key])&&d[key]>=0?d[key]:null;if(typeof d.location==='string')state.location=d.location.slice(0,160);if(d.scenario&&typeof d.scenario==='object')state.scenario={...d.scenario};$('selectedLocation').textContent=state.location;$('fu-gross').value=state.grossMonthly??'';$('fu-net').value=state.netMonthly??'';schedule();});
  window.PCSUnitedFinancial={getState:()=>structuredClone(state),getMetrics:()=>result?.metrics??null,updateIncome:v=>{state.netMonthly=Number(v);schedule();},updateSavings:v=>{state.savingsMonthly=Number(v);$('fu-savings').value=v;schedule();},updateEmergencyFund:v=>{state.emergencyFund=Number(v);$('fu-emergency').value=v;schedule();},reset:()=>location.reload()};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
