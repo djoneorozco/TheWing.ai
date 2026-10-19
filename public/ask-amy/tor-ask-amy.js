@@ -63,7 +63,7 @@
       launcher.setAttribute('aria-expanded','true');input.focus();
     }
     launcher.addEventListener('click',()=>open(launcher));
-    document.addEventListener('click',e=>{const b=e.target.closest('[data-tor-open-amy]');if(b){e.preventDefault();open(b);}});
+    document.querySelectorAll('[data-tor-open-amy]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();open(b);}));
     $('tor-amy-close').addEventListener('click',()=>dialog.close());
     dialog.addEventListener('close',()=>{launcher.setAttribute('aria-expanded','false');if(oldOverflow!==null){document.documentElement.style.overflow=oldOverflow;oldOverflow=null;}if(opener?.isConnected)opener.focus({preventScroll:true});});
     dialog.addEventListener('keydown',e=>{if(e.key==='Escape')e.stopPropagation();});
