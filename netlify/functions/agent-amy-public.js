@@ -1,3 +1,4 @@
+import { TOR_ORIGIN, buildTorTruth, TOR_SYSTEM_PROMPT, torFallback } from './_share/tor-amy.js';
 // netlify/functions/agent-amy-public.js
 // ============================================================
 // TheWing.ai • PCSUnited Public Resources Concierge — Amy
@@ -76,6 +77,7 @@ const ALLOWED_RESPONSE_MODES = new Set([
 ]);
 
 const ALLOW_ORIGINS = [
+  TOR_ORIGIN,
   "https://pcsunited.com",
   "https://www.pcsunited.com",
   "https://pcsunited.netlify.app",
@@ -334,7 +336,6 @@ export async function handler(event) {
       process.env.ASK_AMY_DEBUG_ENABLED === "true";
     const debug = debugRequested && debugAllowed;
 
-    const registryTools = await loadRegistryTools();
 
     const message = safeStr(
       body.message || body.question || body.prompt || body.text || ""
@@ -353,6 +354,25 @@ export async function handler(event) {
       );
     }
 
+    // TOR uses the same public gateway and model adapter, with its own grounded context.
+    if (origin === TOR_ORIGIN && body.context?.product === 'tor') {
+      const truth = buildTorTruth(body.context);
+      const limits = {max_chars:1600,greeting_max_chars:1600,max_follow_up_questions:1};
+      const generated = OPENAI_API_KEY ? await callOpenAI({
+        systemPrompt:TOR_SYSTEM_PROMPT,
+        userPayload:{user_message:message,truth_packet:truth},
+        thread:conversationContext.thread,model:DEFAULT_MODEL,responseLimits:limits
+      }) : '';
+      return respond(200, {
+        ok:true,agent:'Amy',brand:'The Orozco Realty',powered_by:'TheWing.ai',
+        endpoint:'agent-amy-public',version:VERSION,response_contract:RESPONSE_CONTRACT_VERSION,
+        scope:'tor_homeownership_session',reply:enforceReplyLimits(generated || torFallback(message,truth),limits),
+        truth_packet:truth,conversation_id:conversationContext.conversation_id,
+        warnings:[...truth.warnings,...(generated?[]:['AI explanation unavailable; showing guided fallback.'])],
+        explanation_mode:generated?'ai':'guided_fallback'
+      },origin);
+    }
+    const registryTools = await loadRegistryTools();
     const clientContext = collectPublicClientContext(body);
     const normalizedProfile = normalizePublicScenario(clientContext, registryTools);
     const intent = detectIntent(message);
