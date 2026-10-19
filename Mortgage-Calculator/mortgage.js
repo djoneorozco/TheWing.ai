@@ -130,6 +130,7 @@
       mortgageAbort?.abort(); mortgageAbort = new AbortController();
       const seq = ++mortgageSeq, payload = buildMortgageInput(), signature = JSON.stringify(payload);
       state.mortgage = null; renderMortgage(); renderBudget(); error('');
+      emit('pcsunited:mortgage-invalidated', {mortgage:null});
       status('Calculating mortgage…'); $('btn-calc').disabled = true;
       try {
         const data = await post('/mortgage', payload, mortgageAbort);
@@ -137,7 +138,7 @@
         state.mortgage = normalizeMortgageResult(data);
         renderMortgage(); renderBudget(); status('Estimate ready', 'ok');
         emit('pcsunited:mortgage-ready', {source:'pcsunited.mortgage.health', engine:'TheWing.ai', mortgage:state.mortgage, raw:data});
-        emit('pcsunited:mortgage-health-ready', {source:'pcsunited.mortgage.health', version:VERSION, inputs:collectInputs(), mortgage:state.mortgage, budget:state.mortgage.budget, income:state.income, residual:state.mortgage.budget?.remainder ?? null, residual_pct:state.mortgage.budget?.remainderPct ?? null, health:state.mortgage.budget?.complete ? 'Projected cash flow' : 'Needs budget inputs', buyer_range:{available:false}});
+        emit('pcsunited:mortgage-health-ready', {source:'pcsunited.mortgage.health', version:VERSION, inputs:collectInputs(), calculationInputs:buildMortgageInput(), mortgage:state.mortgage, budget:state.mortgage.budget, income:state.income, residual:state.mortgage.budget?.remainder ?? null, residual_pct:state.mortgage.budget?.remainderPct ?? null, health:state.mortgage.budget?.complete ? 'Projected cash flow' : 'Needs budget inputs', buyer_range:{available:false}});
         return state.mortgage;
       } catch (e) {
         if (seq !== mortgageSeq) return null;

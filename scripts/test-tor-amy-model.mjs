@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+process.env.OPENAI_API_KEY='unit-test-placeholder';
+const {handler}=await import('../netlify/functions/agent-amy-public.js');
+const event={httpMethod:'POST',headers:{origin:'https://orozcorealty.webflow.io'},body:JSON.stringify({message:'What happens during inspection?',context:{product:'tor',stage:'buying',calculators:{},thread:[]}})};
+test('TOR model receives grounded stage context, not military defaults',async()=>{const original=global.fetch;let request;global.fetch=async(url,options)=>{request=JSON.parse(options.body);return {ok:true,text:async()=>JSON.stringify({choices:[{message:{content:'An inspection helps you understand the home’s condition. Review concerns with your inspector and agent.'}}]})};};try{const r=JSON.parse((await handler(event)).body);assert.equal(r.explanation_mode,'ai');assert.match(request.messages[0].content,/The Orozco Realty/);const sent=JSON.parse(request.messages.at(-1).content);assert.equal(sent.truth_packet.stage,'buying');assert.equal(sent.truth_packet.mortgage,null);assert.equal(sent.truth_packet.finance,null);}finally{global.fetch=original;}});
+test('model failure preserves a truthful educational fallback',async()=>{const original=global.fetch;global.fetch=async()=>({ok:false,status:503,text:async()=>'{}'});try{const r=JSON.parse((await handler(event)).body);assert.equal(r.ok,true);assert.equal(r.explanation_mode,'guided_fallback');assert.match(r.reply,/inspection/);assert.ok(r.warnings.length);}finally{global.fetch=original;}});

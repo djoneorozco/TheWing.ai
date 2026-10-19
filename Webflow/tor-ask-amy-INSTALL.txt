@@ -1,0 +1,28 @@
+TOR Ask Amy v1
+
+1. Add tor-ask-amy.html once, after the editable lifecycle layout/modal shell.
+2. Mortgage iframe URL: https://thewing.netlify.app/Mortgage-Calculator/?amy=tor
+3. Financial iframe URL: https://thewing.netlify.app/Finance-UX/?income=inline&amy=tor
+4. Three stage triggers retain .tl-stage-card, aria-expanded, and hrefs
+   #tl-discovery, #tl-buying, #tl-ownership.
+5. Existing modal IDs #tl-tool-dialog, #tl-tool-body, #tl-tool-close are reused.
+
+The shared gateway accepts the exact staging origin https://orozcorealty.webflow.io.
+Add a verified production domain explicitly in both gateway and bridge when needed.
+Do not add wildcard origins or put API keys in Webflow.
+
+Public financial inputs and chat remain in page memory. Clicking Send shares current
+calculator inputs with TheWing, which recalculates with canonical engines before
+requesting an AI explanation. No automatic model calls or persistent browser storage.
+The calculator iframe bridge activates only with ?amy=tor and a trusted parent.
+Origins AND the registered iframe contentWindow are checked. Input changes invalidate
+previous results, including an in-flight explanation. Existing PCSU embedding is unchanged.
+
+Backend route: agent-amy-public (context.product = tor and approved TOR origin).
+Finance and mortgage computations reuse finance-budget.js and mortgage-scenario.js.
+Model failures yield labeled guided fallbacks. Missing inputs remain unknown.
+Tax forecasting, equity tracking and refinance alerts are explicitly planned features.
+
+Validation:
+node --test scripts/test-tor-amy.mjs scripts/test-tor-amy-model.mjs scripts/test-finance-utility.mjs
+node scripts/test-pt-amy-integration.mjs
