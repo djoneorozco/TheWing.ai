@@ -135,9 +135,6 @@ function startBrief() {
     $('pay-notes').append($('sources'));
     $('sources').open = true;
     $('city-source').hidden = true; $('city-data').hidden = true;
-    const standalone = new URL(location.href);
-    standalone.searchParams.delete('parentOrigin'); standalone.searchParams.delete('requestId');
-    $('brief-open').href = standalone.href;
   }
   $('pay-info').addEventListener('click', () => $('pay-notes').showModal());
   $('city-info').addEventListener('click', () => $('city-notes').showModal());
@@ -145,19 +142,6 @@ function startBrief() {
   if (overview) {
     $('housing-notes').append($('housing-details')); $('housing-details').open = true;
     $('housing-info').hidden = false;
-  }
-  // The deferred shared script can initialize before or after this module.
-  // A cached API response must still wait until its real widget is mounted.
-  function headerReady(signal) {
-    if (window.PCSU_BAH_HEADER) return Promise.resolve(window.PCSU_BAH_HEADER);
-    return new Promise((resolve, reject) => {
-      const cleanup = () => { window.removeEventListener('pcsunited:bah-header-ready', done); signal.removeEventListener('abort', abort); };
-      const done = () => { cleanup(); resolve(window.PCSU_BAH_HEADER); };
-      const abort = () => { cleanup(); reject(new Error('The pay header could not load. Please retry shortly.')); };
-      window.addEventListener('pcsunited:bah-header-ready', done, {once:true});
-      signal.addEventListener('abort', abort, {once:true});
-      if (signal.aborted) abort();
-    });
   }
   const parentOrigin = validatedParentOrigin(params.get('parentOrigin'), document.referrer, location.origin);
   const requestId = params.get('requestId') || '';
@@ -177,6 +161,15 @@ function startBrief() {
   }
   function renderPay() {
     const m = compensation.monthly;
+    text('brief-profile', `${selection.base} · ${selection.rank.replace(/^([EOW])/, '$1-')} · ${selection.yos} years · ${selection.family} ${selection.family === 1 ? 'person' : 'people'}`);
+    // Only hand off the user's supplied destination/profile to the existing app.
+    // Never forward Brief credentials, view mode, or invent a current duty station.
+    const snapshot = new URL('/PCS-Snapshot/index.html', location.origin);
+    const handoff = {rank:selection.rank,yos:selection.yos,family:selection.family,
+      hasDependents:selection.hasDependents,newBase:selection.base,newCityKey:selection.cityKey,
+      newFileKey:selection.cityKey,newZip:selection.newZip,type:'ad'};
+    Object.entries(handoff).forEach(([key,value]) => snapshot.searchParams.set(key,String(value)));
+    $('brief-open').href = snapshot.href;
     text('base-name', selection.base);
     text('profile', `${selection.rank.replace(/^([EOW])/, '$1-')} · ${selection.yos} years of service · Family of ${selection.family}`);
     text('total-pay', money(m.grossMonthlyComp, true));
@@ -300,15 +293,6 @@ function startBrief() {
       if (current !== run || signal.aborted) return;
       compensation = readCompensation(pay, selection);
       renderPay();
-      if (payView) {
-        const header = await headerReady(signal);
-        if (current !== run || signal.aborted) return;
-        const m = compensation.monthly;
-        const painted = header.setSnapshot({basePay:m.basicPay, bah:m.bah, bas:m.bas, total:m.grossMonthlyComp,
-          rank:selection.rank.replace(/^([EOW])/, '$1-'), yos:`${selection.yos} years`,
-          location:selection.base, dependents:selection.hasDependents ? 'With dependents' : 'Without dependents'});
-        if (!painted) throw new Error('The pay header could not be displayed. Please retry.');
-      }
       if (withDetails) {
         if (!destination || typeof destination !== 'object' || Array.isArray(destination) || (!destination.city && !destination.place)) throw new Error('Destination data could not be verified. Please retry.');
         city = destination; renderDestination();

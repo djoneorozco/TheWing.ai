@@ -1,4 +1,4 @@
-// Exact Webflow embeds and shared BAH header. Local deterministic handlers by
+// Exact Webflow embeds, Brief title and input-section BAH header. Local deterministic handlers by
 // default; BRIEF_DEPLOYED=1 tests the real deployed child and compensation API.
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
@@ -7,7 +7,7 @@ const deployed=process.env.BRIEF_DEPLOYED==='1',out=process.env.BRIEF_OUTPUT;
 const strip=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCS-Snapshot-input-strip.txt'),'utf8');
 const embed=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCSUnited-PCS-Snapshot-Brief-iframe.txt'),'utf8').replace('data-state="idle" data-view="brief"','data-state="idle" data-view="pay"').replace('data-app-url="https://thewing.netlify.app/',`data-app-url="${app}/`);
 const header=fs.readFileSync(path.join(root,'BAH-Calculator/bah-header.js'),'utf8');
-const head='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;background:#f7f9fb;font-family:Arial;color:#17334b}main{max-width:1460px;padding:20px;margin:auto}h1{font-size:40px}p{line-height:1.6}</style></head><body><main>';
+const head='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;background:#f7f9fb;font-family:Arial;color:#17334b}main{max-width:1460px;padding:20px;margin:auto}h1{font-size:40px}p{line-height:1.6}</style></head><body><main>';
 const layout='<div id="pcs1-map-layout"><div class="pcs1-map-copy"><h1>Select your PCS Location</h1><p>Choose your base, rank, years of service and family size. Then select Analyze.</p>'+strip+'</div><div id="pcs1-map-host"></div></div>';
 const harness=head+layout+embed+'</main></body></html>';
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -60,19 +60,19 @@ async function until(fn,label){for(let i=0;i<250;i++){if(await fn())return;await
   const cover=await page.locator('#pcsu-brief-cover img').getAttribute('src');assert.match(cover,/Air%20Force%20Base%20Demographics.jpg$/);
   check('fresh page retains original cover and loads no base or compensation');
   await choose();await page.click('#sass-analyze-btn');await ready();let f=child();
-  assert.equal(await f.locator('#total-pay').innerText(),'$8,622.85');assert.equal(await f.locator('#pcsu-bah-header-value-total').innerText(),'$8,622.85');
-  assert.equal(await f.locator('#pcsu-bah-header-value-basepay').innerText(),'$6,000.90');assert.equal(await f.locator('#pcsu-bah-header-value-bah').innerText(),'$2,145');assert.equal(await f.locator('#pcsu-bah-header-value-bas').innerText(),'$476.95');
+  assert.equal(await f.locator('#total-pay').innerText(),'$8,622.85');assert.equal(await f.locator('#pay-toolbar h1').innerText(),'PCS Snapshot Brief');
+  assert.equal(await f.locator('[id^=pcsu-bah-header]').count(),0);assert.match(await f.locator('#brief-profile').innerText(),/Davis-Monthan AFB · E-7 · 16 years · 4 people/);
   assert.equal(await f.locator('#base-pay').innerText(),'$6,000.90');assert.equal(await f.locator('#bah').innerText(),'$2,145.00');assert.equal(await f.locator('#bas').innerText(),'$476.95');
   assert.equal(await f.locator('.destination').isVisible(),false);assert.equal(await f.locator('.housing').isVisible(),false);assert.equal(await f.locator('.intro').isVisible(),false);assert.equal(await page.locator('.brief-head').isVisible(),false);
   assert.deepEqual(payCalls.at(-1),{tool:'PCS_SNAPSHOT',input:{rank:'E7',yos:16,base:'Davis-Monthan AFB',hasDependents:true}});
   assert.deepEqual(otherCalls,[]);assert.ok(Math.abs((await box()).height-original.height)<1);assert.equal((await box()).width,original.width);
-  check('reference example matches in shared header, total and donut; original card dimensions are unchanged');
+  check('reference pay and donut match; title replaces duplicate header without changing card dimensions');
   await f.locator('#pay-info').click();assert.equal(await f.locator('#pay-notes').isVisible(),true);assert.match(await f.locator('#pay-notes').innerText(),/Total includes Base Pay \+ BAH \+ BAS/);assert.match(await f.locator('#pay-notes').innerText(),/2 or more = with dependents/);await f.locator('#pay-notes button').click();
-  const large=new URL(await f.locator('#brief-open').getAttribute('href'));assert.equal(large.searchParams.has('requestId'),false);assert.equal(large.searchParams.has('parentOrigin'),false);assert.equal(large.searchParams.get('rank'),'E7');
+  const large=new URL(await f.locator('#brief-open').getAttribute('href'));assert.equal(large.searchParams.has('requestId'),false);assert.equal(large.searchParams.has('parentOrigin'),false);assert.equal(large.searchParams.get('rank'),'E7');assert.equal(large.pathname,'/PCS-Snapshot/index.html');assert.equal(large.searchParams.get('newBase'),'Davis-Monthan AFB');assert.equal(large.href,await page.locator('#pcsu-brief-open').getAttribute('href'));
   check('pay source details are accessible; Open larger preserves selection without embed credentials');
   await f.evaluate(()=>window.dispatchEvent(new MessageEvent('message',{origin:'https://thewing.netlify.app',data:{type:'pcsunited-bah-compensation',payload:{basePay:1,bah:2,bas:3,total:6}}})));
-  assert.equal(await f.locator('#pcsu-bah-header-value-total').innerText(),'$8,622.85');
-  check('manual shared header ignores unrelated calculator broadcasts');
+  assert.equal(await f.locator('#total-pay').innerText(),'$8,622.85');
+  check('Brief compensation ignores unrelated calculator broadcasts');
   if(out){fs.mkdirSync(out,{recursive:true});await page.locator('#pcsu-brief-card').screenshot({path:path.join(out,'pcs-brief-total-pay-desktop.png')});}
   for(const width of [390,320,768]){
    await page.setViewportSize({width,height:950});await sleep(200);
@@ -84,9 +84,9 @@ async function until(fn,label){for(let i=0;i<250;i++){if(await fn())return;await
   }
   check('390px, 320px and 768px retain cover height with no horizontal or vertical iframe overflow');
   await page.setViewportSize({width:1460,height:950});await choose('Travis AFB','E6','14','3');assert.equal(await state(),'idle');assert.equal(await page.locator('#pcsu-brief-cover').isVisible(),true);await page.click('#sass-analyze-btn');await ready();f=child();
-  assert.notEqual(await f.locator('#bah').innerText(),'$2,145.00');assert.equal(await f.locator('#base-pay').innerText(),'$5,130.30');assert.equal(await f.locator('#total-pay').innerText(),await f.locator('#pcsu-bah-header-value-total').innerText());assert.match(await f.locator('#pcsu-bah-header-support-bah').innerText(),/Travis/);
-  await choose('Davis-Monthan AFB','E6','14','1');await page.click('#sass-analyze-btn');await ready();assert.equal(payCalls.at(-1).input.hasDependents,false);assert.match(await child().locator('#pcsu-bah-header-support-bah').innerText(),/Without dependents/);
-  check('new rank, service, destination and dependent selections update both pay presentations together');
+  assert.notEqual(await f.locator('#bah').innerText(),'$2,145.00');assert.equal(await f.locator('#base-pay').innerText(),'$5,130.30');assert.match(await f.locator('#brief-profile').innerText(),/Travis AFB · E-6 · 14 years · 3 people/);assert.equal(new URL(await f.locator('#brief-open').getAttribute('href')).searchParams.get('newBase'),'Travis AFB');
+  await choose('Davis-Monthan AFB','E6','14','1');await page.click('#sass-analyze-btn');await ready();assert.equal(payCalls.at(-1).input.hasDependents,false);assert.match(await child().locator('#brief-profile').innerText(),/1 person/);assert.equal(new URL(await child().locator('#brief-open').getAttribute('href')).searchParams.get('hasDependents'),'false');
+  check('new rank, service, destination and family update the title, pay and full Snapshot link');
   failPay=true;await page.click('#sass-analyze-btn');await until(async()=>await state()==='error','pay failure');assert.equal(await page.locator('#pcsu-brief-cover').isVisible(),true);
   const failedId=new URL(await page.locator('#pcsu-brief-frame').getAttribute('src')).searchParams.get('requestId');
   failPay=false;await page.click('#pcsu-brief-retry');await ready();assert.notEqual(new URL(child().url()).searchParams.get('requestId'),failedId);
@@ -102,15 +102,15 @@ async function until(fn,label){for(let i=0;i<250;i++){if(await fn())return;await
     window.dispatchEvent(new MessageEvent('message',{origin:'https://evil.example',source:document.querySelector('#pcsu-brief-frame').contentWindow,data}));
     window.dispatchEvent(new MessageEvent('message',{origin,source:window,data}));
    },{id:newId,origin:app});await sleep(100);assert.equal(await state(),'loading');
-   holdPay=false;held.splice(0).forEach(release=>release());await ready();assert.match(await child().locator('#pcsu-bah-header-support-bah').innerText(),/Travis/);
+   holdPay=false;held.splice(0).forEach(release=>release());await ready();assert.match(await child().locator('#brief-profile').innerText(),/Travis/);
    check('loaded document, stale results, wrong origin and wrong source cannot reveal earlier pay');
    // Exercise both script orders: genuine Analyze before embed exists, then
-   // cached data while the external shared header is deliberately delayed.
+   // the optional input header is delayed without blocking Brief readiness.
    await page.goto(parent+'/strip-only',{waitUntil:'domcontentloaded'});await choose();const callsBefore=payCalls.length;await page.click('#sass-analyze-btn');holdHeader=true;
    await page.evaluate(html=>{const el=document.createElement('div');el.innerHTML=html;document.body.append(el);for(const old of el.querySelectorAll('script')){const s=document.createElement('script');s.textContent=old.textContent;old.replaceWith(s);}},embed);
-   await until(()=>heldHeaders.length>0,'delayed shared header');await sleep(150);assert.equal(await state(),'loading');holdHeader=false;heldHeaders.splice(0).forEach(release=>release());await ready();assert.equal(payCalls.length,callsBefore+1);
-   assert.equal(await child().locator('#pcsu-bah-header-value-total').innerText(),'$8,622.85');
-   check('Analyze is replayed once before parent mount; delayed header must initialize before ready');
+   await until(()=>heldHeaders.length>0,'delayed shared header');await ready();assert.equal(await page.locator('#sass-input-switch').getAttribute('data-mode'),'edit');holdHeader=false;heldHeaders.splice(0).forEach(release=>release());await ready();assert.equal(payCalls.length,callsBefore+1);
+   assert.equal(await child().locator('#total-pay').innerText(),'$8,622.85');
+   check('Analyze is replayed once before parent mount; input header delay does not block Brief readiness');
    await context.route('**/PCS-Snapshot-Brief/brief.js',route=>route.fulfill({contentType:'application/javascript',body:'// stalled child'}));
    await page.clock.install();await page.click('#sass-analyze-btn');await until(async()=>child()?.url().includes('requestId='),'stalled child');const timedId=new URL(await page.locator('#pcsu-brief-frame').getAttribute('src')).searchParams.get('requestId');
    await page.clock.fastForward(31000);assert.equal(await state(),'error');await child().evaluate(({id,target})=>parent.postMessage({source:'pcsu-snapshot-brief',type:'pcsu:brief-status',requestId:id,state:'ready'},target),{id:timedId,target:parent});await sleep(100);assert.equal(await state(),'error');

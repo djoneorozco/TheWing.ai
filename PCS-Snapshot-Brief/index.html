@@ -7,7 +7,6 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>PCS Snapshot Brief · PCSUnited</title>
   <link rel="stylesheet" href="./brief.css">
-  <script defer src="/BAH-Calculator/bah-header.js"></script>
   <script type="module" src="./brief.js"></script>
 </head>
 <body>
@@ -16,8 +15,8 @@
   <button id="retry" type="button" hidden>Retry brief</button>
   <article id="result" hidden>
     <header id="pay-toolbar" class="pay-toolbar" hidden>
-      <div id="pcsu-bah-header-progression-widget" data-transport="manual"></div>
-      <a id="brief-open" target="_blank" rel="noopener noreferrer">Open larger ↗</a>
+      <div class="brief-title"><h1>PCS Snapshot Brief</h1><p id="brief-profile"></p></div>
+      <a id="brief-open" target="_blank" rel="noopener noreferrer" aria-label="Open full PCS Snapshot in a new tab">Open larger ↗</a>
     </header>
     <header class="intro"><p class="eyebrow">Your PCS, in focus</p><h1 id="base-name"></h1><p id="profile" class="muted"></p></header>
     <section class="panel compensation" aria-labelledby="pay-heading">

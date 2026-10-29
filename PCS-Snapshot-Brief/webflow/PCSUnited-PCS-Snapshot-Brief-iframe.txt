@@ -51,7 +51,7 @@ An iframe load event alone is NOT proof that data is ready.
  data-app-url="https://thewing.netlify.app/PCS-Snapshot-Brief/index.html">
  <header class="brief-head">
   <div><h3 id="pcsu-brief-heading">PCS Snapshot Brief</h3><p class="brief-selection" id="pcsu-brief-selection">Your next base, at a glance</p></div>
-  <a id="pcsu-brief-open" hidden target="_blank" rel="noopener noreferrer">Open larger ↗</a>
+  <a id="pcsu-brief-open" hidden target="_blank" rel="noopener noreferrer" aria-label="Open full PCS Snapshot in a new tab">Open larger ↗</a>
  </header>
  <div class="brief-stage">
   <div class="brief-cover" id="pcsu-brief-cover">
@@ -131,7 +131,10 @@ An iframe load event alone is NOT proof that data is ready.
    const values={...lastInput,hasDependents:family>=2,baseFile:key+'.json',
     newBase:base,newCityKey:key,newFileKey:key,type:'ad',view:card.dataset.view || 'brief'};
    Object.entries(values).forEach(([key,value])=>url.searchParams.set(key,String(value)));
-   open.href=url.href;
+   const snapshot=new URL('/PCS-Snapshot/index.html',appURL.origin);
+   const handoff={rank,yos,family,hasDependents:family>=2,newBase:base,newCityKey:key,newFileKey:key,newZip:lastInput.newZip,type:'ad'};
+   Object.entries(handoff).forEach(([key,value])=>snapshot.searchParams.set(key,String(value)));
+   open.href=snapshot.href;
    url.searchParams.set('parentOrigin',location.origin);
    url.searchParams.set('requestId',requestId);
    selection.textContent=base+' · '+rank.replace(/^([EO])/,'$1-')+' · '+yos+' years · '+family+(family===1?' person':' people');
