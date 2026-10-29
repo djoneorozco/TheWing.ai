@@ -61,6 +61,7 @@ async function until(fn,label){for(let i=0;i<150;i++){if(await fn())return;await
     const ready=()=>until(async()=>await state()==='ready','brief ready');
     const child=()=>page.frames().find(f=>f.url().toLowerCase().startsWith(app.toLowerCase()+'/pcs-snapshot-brief/'));
     const choose=async(base='Davis-Monthan AFB',family=compact?'4':'3')=>{
+      if(await page.locator('#sass-input-switch').getAttribute('data-mode')==='summary'){await page.locator('#sass-edit-btn').focus();await page.keyboard.press('Enter');}
       await page.selectOption('#sass-rank',compact?'E7':'E6');await page.selectOption('#sass-yos',compact?'16':'14');await page.selectOption('#sass-family',family);await page.selectOption('#sass-base',base);
     };
     await page.goto(parent+'/brief-test',{waitUntil:'domcontentloaded'});

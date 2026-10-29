@@ -47,7 +47,7 @@
       color: #e9ecff;
       font-size: 14px;
       outline: none;
-      transition: 0.15s ease;
+      transition: border-color .15s ease, box-shadow .15s ease;
     }
 
     #sass-front-strip .sass-select:focus {
@@ -95,9 +95,37 @@
     @media(max-width:768px){#sass-front-strip #sass-input-row{grid-template-columns:repeat(2,minmax(0,1fr));}}
     @media(max-width:380px){#sass-front-strip #sass-input-row{grid-template-columns:minmax(0,1fr);}}
     @media(prefers-reduced-motion:reduce){#sass-front-strip *{transition:none!important;transform:none!important;}}
+
+    /* Keep the controls' footprint when the verified pay summary replaces them. */
+    #sass-input-switch{display:grid;position:relative;min-width:0;container-type:inline-size;isolation:isolate}
+    #sass-input-switch>#sass-input-row,#sass-input-switch>#sass-pay-summary{grid-area:1/1;align-self:center;min-width:0}
+    #sass-input-switch[data-mode="summary"]>#sass-input-row,#sass-input-switch[data-mode="summary"]>#sass-input-row *{visibility:hidden!important;pointer-events:none}
+    #sass-input-switch[data-mode="edit"]>#sass-pay-summary,#sass-input-switch[data-mode="edit"]>#sass-pay-summary *{visibility:hidden!important;pointer-events:none}
+    #sass-pay-summary{position:relative;border-radius:16px}
+    #sass-front-strip #sass-edit-btn{position:absolute;inset:0;width:100%;height:100%;min-height:44px;padding:0;margin:0;border:0;border-radius:16px;background:transparent;cursor:pointer;color:transparent}
+    #sass-front-strip #sass-edit-btn:focus-visible{outline:3px solid #173953;outline-offset:4px}
+    #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-card{padding:9px 10px;border-radius:16px;background:linear-gradient(110deg,#31556d,#354a61 65%,#6b727f);box-shadow:inset 0 1px 0 #ffffff40,0 1px 2px #17334b22}
+    #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-grid{grid-template-columns:minmax(0,1fr) 10px minmax(0,1.2fr) 10px minmax(0,.8fr) 10px minmax(0,1.2fr);gap:4px}
+    #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-metric{padding:2px 3px}
+    #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-label{font-size:8px;margin:0 0 3px;color:#e9f1ffcc}
+    #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-value{font-size:14px;display:block}
+    #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-support{font-size:7px;margin-top:3px;color:#e9f1ffb3}
+    #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-operator{display:flex;font-size:13px}
+    #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-metric.is-total{grid-column:auto;margin:0;padding:2px 3px 2px 8px;border-top:0;border-left:1px solid #ffffff26}
+    #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-metric.is-total::before{content:none}
+    #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-metric.is-total .pcsu-bah-header-label{display:block;margin-right:0}
+    @container(max-width:560px){
+      #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-grid{grid-template-columns:minmax(0,1fr) 10px minmax(0,1fr) 10px minmax(0,1fr)}
+      #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-value{font-size:13px}
+      #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-equals{display:none}
+      #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-metric.is-total{grid-column:1/-1;margin-top:5px;padding:7px 3px 1px;border-left:0;border-top:1px solid #ffffff26}
+      #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-metric.is-total .pcsu-bah-header-label,#sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-metric.is-total .pcsu-bah-header-value{display:inline}
+      #sass-front-strip #pcsu-snapshot-input-pay-widget-strip .pcsu-bah-header-metric.is-total .pcsu-bah-header-label{margin-right:7px}
+    }
   </style>
 
   <div id="sass-shell">
+    <div id="sass-input-switch" data-mode="edit">
     <div id="sass-input-row">
       <div id="wrap-rank">
         <label class="sass-field-label" for="sass-rank">Rank</label>
@@ -167,6 +195,11 @@
       </div>
     </div>
 
+    <div id="sass-pay-summary" hidden>
+      <div id="pcsu-snapshot-input-pay-widget" data-transport="manual"></div>
+      <button id="sass-edit-btn" type="button" aria-label="Edit rank, years of service, family size and destination" aria-controls="sass-input-row" title="Hover, tap or press Enter to edit your selections"></button>
+    </div>
+    </div>
     <p class="sass-note">Snapshot uses 1 person as without dependents and 2 or more as with dependents for its BAH estimate.</p>
     <button id="sass-analyze-btn" type="button" aria-controls="pcsu-brief-card">Analyze</button>
     <p id="sass-status" role="status" aria-live="polite">Choose your new base, then select Analyze.</p>
@@ -231,6 +264,88 @@
     BASES.forEach(base => destination.add(new Option(base.value, base.value)));
     const button = field('analyze-btn');
     button.setAttribute('aria-controls', 'pcsu-brief-card');
+    const switcher = field('input-switch'), row = field('input-row');
+    const summary = field('pay-summary'), editButton = field('edit-btn');
+    const mount = root.querySelector('#pcsu-snapshot-input-pay-widget');
+    let confirmed = null, widgetLoading = null, hovering = false;
+    const currentSelection = () => ({rank:field('rank').value, yos:Number(field('yos').value),
+      family:Number(field('family').value), base:destination.value});
+    function sameSelection(profile) {
+      const value = currentSelection();
+      return profile && Object.keys(value).every(key => profile[key] === value[key]) &&
+        profile.hasDependents === (value.family >= 2) &&
+        BASES.some(base => base.value === profile.base && base.fileKey === profile.cityKey);
+    }
+    function edit(focus = false) {
+      switcher.dataset.mode = 'edit'; row.inert = false; row.removeAttribute('aria-hidden');
+      summary.inert = true; summary.setAttribute('aria-hidden', 'true');
+      if (focus) field('rank').focus({preventScroll:true});
+    }
+    function showSummary() {
+      if (!confirmed?.painted || !sameSelection(confirmed.selection) || hovering || row.contains(document.activeElement)) return;
+      const card = document.getElementById('pcsu-brief-card'), frame = document.getElementById('pcsu-brief-frame');
+      if (card?.dataset.state !== 'ready' || !frame?.getAttribute('src') ||
+          new URL(frame.src).searchParams.get('requestId') !== confirmed.requestId) return;
+      summary.hidden = false; summary.inert = false; summary.removeAttribute('aria-hidden');
+      row.inert = true; row.setAttribute('aria-hidden', 'true'); switcher.dataset.mode = 'summary';
+    }
+    function invalidateSummary() {
+      confirmed = null; edit(); summary.hidden = true; mount.pcsuBahHeader?.clear();
+    }
+    function loadWidget(origin) {
+      if (mount.pcsuBahHeader) return Promise.resolve(mount.pcsuBahHeader);
+      if (widgetLoading) return widgetLoading;
+      widgetLoading = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = new URL('/BAH-Calculator/bah-header.js', origin).href;
+        script.dataset.mountId = mount.id; script.async = true; script.charset = 'utf-8';
+        const timeout = setTimeout(failed, 10000);
+        function failed() {clearTimeout(timeout);script.remove();widgetLoading=null;reject(new Error('Pay summary unavailable'));}
+        script.onerror = failed;
+        script.onload = () => {clearTimeout(timeout);if(mount.pcsuBahHeader)resolve(mount.pcsuBahHeader);else failed();};
+        document.head.appendChild(script);
+      });
+      return widgetLoading;
+    }
+    // This additive ready payload comes from the Brief's verified calculation.
+    // Recheck the same origin/window/request ID as the card before showing it.
+    window.addEventListener('message', event => {
+      const card = document.getElementById('pcsu-brief-card'), frame = document.getElementById('pcsu-brief-frame');
+      const data = event.data;
+      if (!card || !frame?.getAttribute('src') || event.source !== frame.contentWindow ||
+          !data || data.source !== 'pcsu-snapshot-brief' || data.type !== 'pcsu:brief-status' || data.state !== 'ready') return;
+      let url, origin;
+      try {url=new URL(frame.src);origin=new URL(card.dataset.appUrl).origin;} catch {return;}
+      if (event.origin !== origin || url.origin !== origin || !data.requestId ||
+          data.requestId !== url.searchParams.get('requestId') || !sameSelection(data.selection)) return;
+      const m = data.monthly;
+      if (!m || ![m.basicPay,m.bah,m.bas,m.grossMonthlyComp].every(value => typeof value === 'number' && Number.isFinite(value) && value >= 0) ||
+          m.grossMonthlyComp <= 0 || Math.abs(m.basicPay+m.bah+m.bas-m.grossMonthlyComp)>0.02) return;
+      // The card listener may run after this one. A new task (not a microtask)
+      // lets every message listener finish before checking its accepted state.
+      setTimeout(async () => {
+        if (card.dataset.state !== 'ready' || frame.src !== url.href || !sameSelection(data.selection)) return;
+        const candidate = {requestId:data.requestId,selection:{...data.selection},painted:false};
+        confirmed = candidate;
+        try {
+          const api = await loadWidget(origin);
+          if (confirmed !== candidate || frame.src !== url.href || !sameSelection(candidate.selection) || card.dataset.state !== 'ready') return;
+          candidate.painted = api.setSnapshot({basePay:m.basicPay,bah:m.bah,bas:m.bas,total:m.grossMonthlyComp,
+            rank:candidate.selection.rank.replace(/^([EO])/, '$1-'),yos:candidate.selection.yos+' years',
+            location:candidate.selection.base,dependents:candidate.selection.hasDependents?'With dependents':'Without dependents'});
+          showSummary();
+        } catch {
+          if (confirmed === candidate) {invalidateSummary();status.textContent='Your brief is ready. Pay summary unavailable; the fields remain available for editing.';}
+        }
+      });
+    });
+    switcher.addEventListener('pointerenter', event => {
+      if (event.pointerType === 'mouse' && matchMedia('(hover:hover)').matches) {hovering=true;if(confirmed)edit();}
+    });
+    switcher.addEventListener('pointerleave', () => {hovering=false;showSummary();});
+    switcher.addEventListener('focusout', () => setTimeout(showSummary, 0));
+    editButton.addEventListener('click', () => edit(true));
+    edit();
     function analyze() {
       const base = BASES.find(item => item.value === destination.value);
       const rank = field('rank').value;
@@ -243,6 +358,8 @@
       }
       const detail = {rank, yos, family, hasDependents: family >= 2,
         base: base.value, cityKey: base.fileKey, newZip: base.zip};
+      invalidateSummary();
+      if (row.contains(document.activeElement)) button.focus({preventScroll:true});
       // Memory-only handoff; retained only for embed initialization order.
       window.PCSU_SNAPSHOT_BRIEF_REQUEST = detail;
       window.dispatchEvent(new CustomEvent('pcsu:snapshot-brief-request', {detail}));
@@ -256,6 +373,7 @@
       }
     });
     root.addEventListener('change', () => {
+      invalidateSummary();
       window.PCSU_SNAPSHOT_BRIEF_REQUEST = null;
       window.dispatchEvent(new CustomEvent('pcsu:snapshot-brief-reset'));
       status.textContent = 'Select Analyze to view your updated brief.';

@@ -165,6 +165,9 @@ function startBrief() {
   function send(type, state) {
     if (window.parent === window || !parentOrigin || !/^[\w-]{1,160}$/.test(requestId)) return;
     window.parent.postMessage({source:'pcsu-snapshot-brief', type, requestId, ...(state ? {state} : {}),
+      ...(state === 'ready' ? {selection, monthly:{basicPay:compensation.monthly.basicPay,
+        bah:compensation.monthly.bah, bas:compensation.monthly.bas,
+        grossMonthlyComp:compensation.monthly.grossMonthlyComp}} : {}),
       height:Math.ceil($('brief').getBoundingClientRect().height)}, parentOrigin);
   }
   function resize() {

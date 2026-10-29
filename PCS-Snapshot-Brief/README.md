@@ -10,11 +10,15 @@ Housing adapts the original cost-list/donut layout with a 2–5 bedroom selector
 
 The shared header is mounted at `pcsu-bah-header-progression-widget` with the new opt-in `data-transport="manual"`. The Brief waits for its public API, then calls `PCSU_BAH_HEADER.setSnapshot()` with the same validated values shown in the compensation card. Manual mode ignores legacy calculator broadcasts and does not request snapshots from other iframes. The default BAH Calculator transport is unchanged. Styling overrides are scoped to this Brief only. Pay source versions and the family-size assumption remain available through the information button.
 
+The input strip also replaces its four fields with the shared pay header after the parent card accepts a successful Analyze. Hover reveals the existing selections; tap or keyboard activation of the header focuses the first field. Fields remain open while focused or changed, until another Analyze succeeds. Leaving unchanged fields restores the summary without another API request. The original field footprint and disclosed family-size assumption are preserved.
+
+This second header loads the same `BAH-Calculator/bah-header.js` from the configured iframe origin. Its optional script `data-mount-id` creates independent DOM IDs and a `mount.pcsuBahHeader` API, so it can coexist with the original global header. It uses manual transport and the Brief's verified ready payload rather than recalculating pay. A failed header load leaves the fields usable and the completed Brief visible; the next Analyze can retry.
+
 ## Install
 
 1. Review and merge this branch, then let Netlify deploy the repository. Production deployment requires human approval under the repository's `AGENTS.md`.
 2. Verify `https://thewing.netlify.app/PCS-Snapshot-Brief/index.html` returns the Brief (not Netlify's 404 page).
-3. Replace the Webflow card with the **entire** `webflow/PCSUnited-PCS-Snapshot-Brief-iframe.txt`. If the companion `PCS-Snapshot-input-strip.txt` from this PR is already installed, it needs no further change. Otherwise replace it too. Do not leave older copies of their scripts on the page. The card retains the exact cover image, mounting location and original height.
+3. Install the **entire** `webflow/PCSUnited-PCS-Snapshot-Brief-iframe.txt` and `webflow/PCS-Snapshot-input-strip.txt`. If the compact Brief card from the preceding revision is already installed, keep it and replace only the input strip for this interaction update. Deploy the matching child and shared-header assets first. Do not leave older copies of their scripts on the page. The card retains the exact cover image, mounting location and original height.
 4. Publish the Webflow staging page and repeat the acceptance flow below before production publication. A local harness or Netlify preview is not proof of a Webflow publication.
 
 The application has no build step, new package dependency, account, persistent browser storage, analytics collector, or database write. Netlify's existing root publish directory exposes the app files, shared header script and city JSON. The copy supplied for immediate Webflow testing points to the PR's Netlify preview; the repository template points to production for use after merge/deployment.
@@ -37,6 +41,7 @@ The recovered latest embeds use these full names (not the shortened `pcsu` text)
 - Input edits: `pcsu:snapshot-brief-reset` clears the cover/request state until another Analyze.
 - URL: `view=brief`, the seven selection fields plus `baseFile`, legacy `newBase/newCityKey/newFileKey/type`, `parentOrigin`, `requestId`. The child uses the selected destination only and rejects mismatched `baseFile`/dependent status.
 - Child message: `{source:"pcsu-snapshot-brief",type:"pcsu:brief-status",requestId,state:"ready"|"error",height}`. Responsive heights use `type:"pcsu:brief-resize"`. The compact-view parent keeps its measured card height and lets the child respond within that space; full view still follows child height.
+- Ready messages additionally contain `selection` and `monthly:{basicPay,bah,bas,grossMonthlyComp}`. The input strip checks the origin, iframe window, request ID, current field values, finite amounts and component sum, then waits until the existing card listener has accepted ready. It rechecks these conditions after loading the shared header; a late response or header load cannot replace newer edits. Error and resize messages do not contain pay values.
 - Parent checks exact child origin, `event.source === iframe.contentWindow`, source marker and current request ID. Only a loading request can become ready. Load events never reveal the iframe. A timeout/error invalidates its ID; retry generates a new one.
 - Child accepts exact HTTPS origins for `pcsunited.com`, `www.pcsunited.com`, `pcs-united-com.webflow.io`, and its own origin. When present, the referrer must agree. Localhost origins are permitted only when the child is also local. No wildcard `postMessage` target is used. Add any future PCSUnited staging domain explicitly to `validatedParentOrigin` and its tests.
 - Analyze is retained in **page memory only** for a late-mounted embed. Input changes clear that pending handoff. Child fetches are aborted and versioned; old bedroom responses cannot replace new selections.
@@ -47,6 +52,8 @@ Node 22+ (matching repository ESM autodetection):
 
 ```sh
 node --test scripts/test-pcs-snapshot-brief.mjs scripts/test-finance-utility.mjs
+node scripts/test-pcs-input-summary-browser.cjs
+BRIEF_DEPLOYED=1 BRIEF_APP_ORIGIN=https://deploy-preview-51--thewing.netlify.app node scripts/test-pcs-input-summary-browser.cjs
 BRIEF_COMPACT=1 node scripts/test-pcs-snapshot-brief-browser.cjs
 BRIEF_COMPACT=1 BRIEF_DEPLOYED=1 BRIEF_APP_ORIGIN=https://deploy-preview-51--thewing.netlify.app node scripts/test-pcs-snapshot-brief-browser.cjs
 node scripts/test-pcs-snapshot-pay-browser.cjs
@@ -63,5 +70,7 @@ The default browser test serves the actual two embeds and child files across sep
 The pay browser test also checks the E-7/16/family-4 reference ($8,622.85), identical original/ready card dimensions, shared-header/card consistency, pay-only network requests, accessible source details, mobile layout, header startup order, and compatibility with the original calculator transport. The full browser test opts into `view=full` to retain destination/housing coverage.
 
 Compact browser mode verifies the E-7/16/family-4 Davis-Monthan scenario: pay $8,622.85; mortgage $2,599.26 + utilities $335 = housing $2,934.26; BAH $2,145 leaves $789.26/month beyond BAH (73% coverage). It checks snapshot values, dialogs, unchanged card dimensions, desktop fit, mobile scrolling and bedroom controls, destination changes, API failures/retries and message security. Unit tests reconcile all 174 supported bedroom scenarios including utilities across 44 destinations.
+
+The input-summary browser test checks Analyze-only replacement, identical left/right totals without duplicate API requests, hover/focus/tab behavior, keyboard and touch editing, changed fields, failed requests and retries, forged/stale messages, delayed or failed header loading, independent shared-header instances, mobile overflow and absence of storage/cookies. Its screenshots use a local parent harness, not a published Webflow page.
 
 After deployment, confirm the exact path/redirect and query preservation, repeat Analyze on Webflow staging, verify the cover is retained until the child is ready, and verify the larger link, pay details and original card size at desktop and phone widths.

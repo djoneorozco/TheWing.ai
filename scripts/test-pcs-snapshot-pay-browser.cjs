@@ -51,7 +51,8 @@ async function until(fn,label){for(let i=0;i<250;i++){if(await fn())return;await
   const ready=()=>until(async()=>await state()==='ready','pay brief ready');
   const child=()=>page.frames().find(f=>f.url().toLowerCase().startsWith(app.toLowerCase()+'/pcs-snapshot-brief/'));
   const choose=async(base='Davis-Monthan AFB',rank='E7',yos='16',family='4')=>{
-   await page.selectOption('#sass-rank',rank);await page.selectOption('#sass-yos',yos);await page.selectOption('#sass-family',family);await page.selectOption('#sass-base',base);
+   if(await page.locator('#sass-input-switch').getAttribute('data-mode')==='summary'){await page.locator('#sass-edit-btn').focus();await page.keyboard.press('Enter');}
+      await page.selectOption('#sass-rank',rank);await page.selectOption('#sass-yos',yos);await page.selectOption('#sass-family',family);await page.selectOption('#sass-base',base);
   };
   const box=()=>page.locator('#pcsu-brief-card').boundingBox();
   await page.goto(parent+'/brief-pay-test',{waitUntil:'domcontentloaded'});
