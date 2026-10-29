@@ -2,10 +2,10 @@
 // BRIEF_LIVE=1 exercises the unchanged deployed APIs and city JSON with the local app.
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict'), fs=require('node:fs'), path=require('node:path');
-const root=path.resolve(__dirname,'..'), app='https://thewing.netlify.app', parent='https://pcs-united-com.webflow.io';
-const live=process.env.BRIEF_LIVE==='1', out=process.env.BRIEF_OUTPUT;
+const root=path.resolve(__dirname,'..'), app=process.env.BRIEF_APP_ORIGIN||'https://thewing.netlify.app', parent='https://pcs-united-com.webflow.io';
+const deployed=process.env.BRIEF_DEPLOYED==='1', live=process.env.BRIEF_LIVE==='1'||deployed, out=process.env.BRIEF_OUTPUT;
 const strip=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCS-Snapshot-input-strip.txt'),'utf8');
-const embed=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCSUnited-PCS-Snapshot-Brief-iframe.txt'),'utf8');
+const embed=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCSUnited-PCS-Snapshot-Brief-iframe.txt'),'utf8').replace('data-app-url="https://thewing.netlify.app/',`data-app-url="${app}/`);
 const head='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#f7f9fb;font-family:Arial;color:#17334b}main{max-width:1200px;padding:20px;margin:auto}h1{font-size:34px}#controls{margin-bottom:28px}</style></head><body><main>';
 const layout='<div id="pcs1-map-layout"><div class="pcs1-map-copy"><h1>Plan your next move</h1><p>Parent-to-iframe integration test using the complete Webflow replacement embeds.</p></div><div id="pcs1-map-host"></div></div>';
 const harness=head+'<div id="controls">'+strip+'</div>'+layout+embed+'</main></body></html>';
@@ -41,6 +41,7 @@ async function until(fn,label){for(let i=0;i<150;i++){if(await fn())return;await
         return route.fulfill({status:result.statusCode,headers:result.headers,body:result.body}).catch(()=>{});
       }
       if(u.origin===app){
+        if(deployed)return route.continue();
         if(live&&u.pathname.startsWith('/netlify/functions/cities/'))return route.continue();
         let name=u.pathname.slice(1);if(name.endsWith('/'))name+='index.html';
         const file=path.resolve(root,name);
@@ -72,7 +73,7 @@ async function until(fn,label){for(let i=0;i<150;i++){if(await fn())return;await
     await f.selectOption('#bedrooms','2');await until(async()=>await f.locator('#housing-result').isVisible(),'2 bedrooms');assert.equal(housingCalls.at(-1).price,265000);
     await f.selectOption('#bedrooms','3');await until(async()=>await f.locator('#housing-result').isVisible(),'3 bedrooms');
     check('2–5 bedroom changes recalculate through the mortgage API');
-    await f.locator('#housing-details summary').click();const expanded=await page.locator('#pcsu-brief-frame').evaluate(el=>el.clientHeight);await until(async()=>Number.parseInt(await page.locator('#pcsu-brief-frame').evaluate(el=>el.clientHeight))>expanded,'expanded iframe');
+    const expanded=await page.locator('#pcsu-brief-frame').evaluate(el=>el.clientHeight);await f.locator('#housing-details summary').click();await until(async()=>Number.parseInt(await page.locator('#pcsu-brief-frame').evaluate(el=>el.clientHeight))>expanded,'expanded iframe');
     await f.locator('#housing-details summary').click();
     check('iframe height tracks expanded assumptions');
     if(out){fs.mkdirSync(out,{recursive:true});await page.locator('#pcsu-brief-card').screenshot({path:path.join(out,'pcs-brief-desktop.png')});}
@@ -141,7 +142,7 @@ async function until(fn,label){for(let i=0;i<150;i++){if(await fn())return;await
     assert.equal(payCalls.length,beforeBare);await bare.close();
     check('bare Brief URL remains idle without loading a default base');
     assert.deepEqual(errors,[]);assert.equal(await context.cookies().then(x=>x.length),0);check('no JavaScript exceptions, browser storage access or cookies');
-    if(out)fs.writeFileSync(path.join(out,live?'browser-live-results.json':'browser-results.json'),JSON.stringify({mode:live?'local app + live APIs/city JSON':'local app + repository API handlers',browser:await browser.version(),checks:report},null,2));
+    if(out)fs.writeFileSync(path.join(out,deployed?'browser-deployed-results.json':live?'browser-live-results.json':'browser-results.json'),JSON.stringify({mode:deployed?'deployed app/APIs/city JSON + local parent embeds':live?'local app + live APIs/city JSON':'local app + repository API handlers',appOrigin:app,browser:await browser.version(),checks:report},null,2));
     await context.close();
   } catch(error) {
     for(const context of browser.contexts())for(const page of context.pages()){

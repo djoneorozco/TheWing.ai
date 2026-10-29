@@ -41,10 +41,11 @@ Node 22+ (matching repository ESM autodetection):
 node --test scripts/test-pcs-snapshot-brief.mjs scripts/test-finance-utility.mjs
 node scripts/test-pcs-snapshot-brief-browser.cjs
 BRIEF_LIVE=1 node scripts/test-pcs-snapshot-brief-browser.cjs
+BRIEF_DEPLOYED=1 BRIEF_APP_ORIGIN=https://deploy-preview-51--thewing.netlify.app node scripts/test-pcs-snapshot-brief-browser.cjs
 ```
 
 The browser test needs Playwright available in Node's module path and a Chromium installation. `BRIEF_BROWSER` optionally specifies a browser executable; `BRIEF_OUTPUT` optionally saves screenshots and JSON results. This follows the repository's existing standalone Playwright-test convention and adds no production dependency.
 
-The default browser test serves the actual two embeds and child files across separate HTTPS origins with the real repository API handlers. It tests fresh cover/no requests, E-6/14/family 3/Davis-Monthan, dependent status, destination changes, bedrooms, errors/retries, missing data, delayed stale responses, forged messages, timeout, script initialization order, responsive height, 320/390/768px overflow and absence of storage access/cookies. The live mode serves the same app/embeds locally through browser routing but uses the **deployed** APIs and city files; it does not mean the new app has been deployed.
+The default browser test serves the actual two embeds and child files across separate HTTPS origins with the real repository API handlers. It tests fresh cover/no requests, E-6/14/family 3/Davis-Monthan, dependent status, destination changes, bedrooms, errors/retries, missing data, delayed stale responses, forged messages, timeout, script initialization order, responsive height, 320/390/768px overflow and absence of storage access/cookies. The live mode serves the same app/embeds locally through browser routing but uses the **deployed** APIs and city files; it does not mean the new app has been deployed. Deployed mode uses the actual deployed child assets, APIs and city JSON with the local parent harness pointing to the specified preview origin; this still does not publish or verify a Webflow page.
 
 After deployment, confirm the exact path/casing, repeat Analyze on Webflow staging, verify the cover is retained until the child is ready, and verify the larger link and bedroom selector at desktop and phone widths.
