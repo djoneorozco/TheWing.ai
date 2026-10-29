@@ -1,21 +1,4 @@
-/* =========================================================
-  PCS SNAPSHOT v5.1.5
-  FILE: snapshot.js
-
-  FIX:
-  - URL params win over sessionStorage for all handoff fields.
-  - sessionStorage fallbacks added for rank/yos/family/fileKey keys.
-  - Official compensation via /api/opensource-brain (rank, YOS, dependents).
-  - Absolute TheWing city JSON fetch paths for Webflow embed hosting.
-  - Labeled fallback + console errors when base JSON is unavailable.
-
-  UPDATE:
-  - Replaces Market Signal runtime values with Travel Expenses / DLA + MALT.
-  - Calls /api/pcs-move for DLA and MALT.
-  - Keeps original image rendering and 1-year / 3-year trend chart behavior.
-  - Fixes HOA fallback bug that could stop paintAll() before charts/images render.
-========================================================= */
-
+/* PCS Snapshot: official API compensation and mortgage results; recorded market data. */
 (function () {
   "use strict";
 
@@ -37,20 +20,25 @@
     if (el) el.innerHTML = value;
   }
 
-  function money(value) {
-    var n = Number(value || 0);
-    return "$" + Math.round(n).toLocaleString();
+  function money(value, cents) {
+    if (!Number.isFinite(value)) return "Unavailable";
+    return value.toLocaleString("en-US", {
+      style: "currency", currency: "USD",
+      minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0
+    });
   }
 
   function moneyK(value) {
-    var n = Number(value || 0);
+    var n = safeNum(value, null);
+    if (n === null) return "Unavailable";
     if (n >= 1000000) return "$" + (n / 1000000).toFixed(1) + "M";
     if (n >= 1000) return "$" + Math.round(n / 1000) + "K";
     return money(n);
   }
 
   function pct(value) {
-    var n = Number(value || 0);
+    var n = safeNum(value, null);
+    if (n === null) return "Unavailable";
     return (n > 0 ? "+" : "") + n.toFixed(1) + "%";
   }
 
@@ -59,8 +47,38 @@
   }
 
   function safeNum(value, fallback) {
+    if (value === null || value === undefined || typeof value === "boolean" ||
+        (typeof value !== "number" && typeof value !== "string") ||
+        (typeof value === "string" && !value.trim())) return fallback;
     var n = Number(value);
     return Number.isFinite(n) ? n : fallback;
+  }
+
+  function amount(value) {
+    var n = safeNum(value, null);
+    return n !== null && n >= 0 ? n : null;
+  }
+
+  function sumKnown(values) {
+    return values.every(Number.isFinite)
+      ? Math.round(values.reduce(function (sum, value) { return sum + value; }, 0) * 100) / 100
+      : null;
+  }
+
+  function grossIncome() {
+    return sumKnown([getBasePay(), getBah(STATE.newCityKey, "new"), getBasAmount()]);
+  }
+
+  async function fetchWithTimeout(url, options) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, 15000);
+    try {
+      var response = await fetch(url, Object.assign({}, options, { signal: controller.signal }));
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return await response.json();
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   function getParam(name, fallback) {
@@ -106,16 +124,16 @@
   }
 
   function normalizeRank(raw) {
-    return String(raw || "E7").toUpperCase().replace("-", "");
+    return String(raw || "").toUpperCase().replace("-", "");
   }
 
   function prettyRank(raw) {
     var r = normalizeRank(raw);
-    return r.replace(/^([EO])(\d+)$/, "$1-$2");
+    return r.replace(/^([EOW])(\d+E?)$/, "$1-$2");
   }
 
   function normalizeBaseKey(raw) {
-    return String(raw || "Lackland")
+    return String(raw || "")
       .replace(/\+/g, " ")
       .replace(/\s+AFB$/i, "")
       .replace(/\s+SFB$/i, "")
@@ -124,8 +142,8 @@
   }
 
   function baseDisplayName(raw) {
-    var s = String(raw || "Lackland AFB").replace(/\+/g, " ").trim();
-    if (!s) return "Lackland AFB";
+    var s = String(raw || "").replace(/\+/g, " ").trim();
+    if (!s) return "";
     return s;
   }
 
@@ -189,7 +207,7 @@
             "destinationBase",
             getParam(
               "newLocation",
-              getStorageItem("pcs_new_base") || (hasExplicitHandoff() ? "" : "Lackland AFB")
+              getStorageItem("pcs_new_base") || ""
             )
           )
         )
@@ -206,6 +224,8 @@
       if (fromParam) return normalizeBaseKey(fromParam);
     }
 
+    if (hasExplicitHandoff() && baseLabel) return normalizeBaseKey(baseLabel);
+
     for (i = 0; i < storageKeys.length; i++) {
       fromParam = getStorageItem(storageKeys[i]) || "";
       if (fromParam) return normalizeBaseKey(fromParam);
@@ -220,9 +240,9 @@
 
   var STATE = {
     type: getParam("type", "ad"),
-    rank: normalizeRank(getParam("rank", getStorageItem("pcs_rank") || "E7")),
-    yos: safeNum(getParam("yos", getStorageItem("pcs_yos") || "16"), 16),
-    family: safeNum(getParam("family", getStorageItem("pcs_family") || "4"), 4),
+    rank: normalizeRank(getParam("rank", getStorageItem("pcs_rank") || "")),
+    yos: safeNum(getParam("yos", getStorageItem("pcs_yos")), null),
+    family: safeNum(getParam("family", getStorageItem("pcs_family")), null),
 
     currentBase: CURRENT_BASE_LABEL,
     newBase: NEW_BASE_LABEL,
@@ -238,18 +258,20 @@
       ["newCityKey", "cityKey", "newFileKey"],
       ["pcs_new_cityKey", "pcs_new_fileKey"],
       NEW_BASE_LABEL,
-      "Lackland"
+      ""
     ),
 
     currentZip: CURRENT_BASE_LABEL ? getParam("curZip", "") : "",
-    newZip: getParam("newZip", getStorageItem("pcs_new_zip") || "78236"),
+    newZip: getParam("newZip", getStorageItem("pcs_new_zip") || ""),
 
-    bedroom: 3
+    bedroom: 3,
+    livingMode: "buy",
+    trendYears: 1
   };
 
   var COMP = {
     loaded: false,
-    source: "static",
+    source: "unavailable",
     basePay: null,
     bas: null,
     bahNew: null,
@@ -267,352 +289,70 @@
     warnings: []
   };
 
-  /* =========================================================
-    #3) FALLBACK DATA
-  ========================================================= */
+  // Unknown data stays unknown; official rates remain in the backend modules.
+  var HOUSING = {};
 
-  var SAN_ANTONIO_FALLBACK_IMAGE = "https://cdn.prod.website-files.com/69b6b526f23748df9f189b16/69c0dc6d478fad1e706ff1f4_dc56ce56878bed382d61aab987ab76eb_San_Antonio.png";
-
-  var FALLBACK_CITY = {
-    city: "San Antonio",
-    place: "San Antonio",
-    state: "TX",
-    market_label: "Military Metropolis with Affordable Expansion",
-    image_url: SAN_ANTONIO_FALLBACK_IMAGE,
-    base_image_url: "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f75f2d5218031764a79775_Lackland.png",
-
-    population: {
-      city: 1500000,
-      metro: 2600000
-    },
-
-    income: {
-      median_household_income: 69906
-    },
-
-    housing: {
-      market: {
-        median_home_price: 288700,
-        yoy_change: -3.2,
-        days_on_market: 83,
-        inventory_signal: "Buyer-Friendly"
-      }
-    },
-
-    market_bluf: {
-      headline: "Buyer-Leaning Market",
-      summary: "Softening prices and extended inventory create strong opportunity for negotiation below asking."
-    },
-
-    financial_brief: {
-      headline: "Strategic Buy Window",
-      summary: "Favorable pricing and elevated inventory create opportunity for below-market acquisition."
-    },
-
-    scorecard: {
-      traffic: "Moderate",
-      employment: "Stable"
-    },
-
-    lifestyle: [
-      "Hot summers, mild winters, low snow risk",
-      "Strong military presence and family-heavy suburbs",
-      "Moderate congestion with typical 20–35 min commute"
-    ],
-
-    by_bedroom: {
-      "2": {
-        home_price: 255000,
-        mortgage_monthly: 1650,
-        rent: 1550,
-        utilities: 210
-      },
-      "3": {
-        home_price: 302500,
-        mortgage_monthly: 1912,
-        rent: 1850,
-        utilities: 235
-      },
-      "4": {
-        home_price: 365000,
-        mortgage_monthly: 2325,
-        rent: 2250,
-        utilities: 275
-      },
-      "5": {
-        home_price: 430000,
-        mortgage_monthly: 2740,
-        rent: 2650,
-        utilities: 325
-      }
-    }
-  };
-
-  var FALLBACK_CURRENT_CITY = {
-    city: "Previous Duty Station",
-    place: "Previous Duty Station",
-    state: "",
-    market_label: "Previous duty station comparison baseline",
-    image_url: SAN_ANTONIO_FALLBACK_IMAGE,
-
-    population: {
-      city: 1000000,
-      metro: 1500000
-    },
-
-    income: {
-      median_household_income: 65000
-    },
-
-    housing: {
-      market: {
-        median_home_price: 315000,
-        yoy_change: 1.5,
-        days_on_market: 55,
-        inventory_signal: "Balanced"
-      }
-    },
-
-    market_bluf: {
-      headline: "Comparison Market",
-      summary: "Used as a baseline to compare BAH, home prices, and housing pressure."
-    },
-
-    financial_brief: {
-      headline: "Previous Market Baseline",
-      summary: "This location is used to compare PCS affordability against the new duty station."
-    },
-
-    scorecard: {
-      traffic: "Moderate",
-      employment: "Stable"
-    },
-
-    lifestyle: [
-      "Previous location comparison baseline",
-      "Used to compare housing allowance and market pressure",
-      "Actual city data loads when a matching JSON file is available"
-    ],
-
-    by_bedroom: {
-      "2": {
-        home_price: 280000,
-        mortgage_monthly: 1800,
-        rent: 1700,
-        utilities: 220
-      },
-      "3": {
-        home_price: 330000,
-        mortgage_monthly: 2100,
-        rent: 2000,
-        utilities: 250
-      },
-      "4": {
-        home_price: 390000,
-        mortgage_monthly: 2500,
-        rent: 2400,
-        utilities: 290
-      },
-      "5": {
-        home_price: 455000,
-        mortgage_monthly: 2920,
-        rent: 2800,
-        utilities: 340
-      }
-    }
-  };
-
-  /* =========================================================
-    #4) PAY TABLE FALLBACK
-  ========================================================= */
-
-  var BASE_PAY = {
-    E1: 2017,
-    E2: 2261,
-    E3: 2378,
-    E4: 2633,
-    E5: 3214,
-    E6: 3987,
-    E7: 5621,
-    E8: 6440,
-    E9: 7360,
-    O1: 3826,
-    O2: 4419,
-    O3: 5127,
-    O4: 6064,
-    O5: 7030,
-    O6: 8430,
-    O7: 10700,
-    O8: 12800
-  };
-
-  var BAS = 466;
-
-  var BAH_BY_KEY = {
-    Andrews: 3096,
-    Barksdale: 1599,
-    Beale: 2550,
-    Cannon: 1320,
-    Charleston: 2445,
-    "Davis-Monthan": 1869,
-    Dover: 2142,
-    Dyess: 1551,
-    Eglin: 2424,
-    Elmendorf: 2718,
-    "F.E-Warren": 1785,
-    Fairchild: 2070,
-    "Fort-Sam-Houston": 2172,
-    Holloman: 1410,
-    Hurlburt: 2424,
-    Keesler: 1815,
-    Kirtland: 1989,
-    Lackland: 2172,
-    Langley: 2355,
-    Laughlin: 1530,
-    "Little-Rock": 1665,
-    Luke: 2442,
-    MacDill: 2748,
-    Malmstrom: 1590,
-    Maxwell: 1665,
-    McConnell: 1659,
-    McGuire: 2862,
-    Minot: 1620,
-    Moody: 1560,
-    "Mountain-Home": 1740,
-    Nellis: 2391,
-    Offutt: 1890,
-    Peterson: 2520,
-    Randolph: 2172,
-    Robins: 1650,
-    Scott: 1860,
-    "Seymour-Johnson": 1710,
-    Shaw: 1590,
-    Sheppard: 1425,
-    Tinker: 1704,
-    Travis: 3270,
-    Tyndall: 2160,
-    Whiteman: 1425,
-    "Wright-Patterson": 1740
-  };
-
-  function getBasePay(rank) {
-    if (COMP.basePay !== null && COMP.basePay !== undefined) return COMP.basePay;
-    return BASE_PAY[normalizeRank(rank)] || BASE_PAY.E7;
-  }
-
-  function getBasAmount() {
-    if (COMP.bas !== null && COMP.bas !== undefined) return COMP.bas;
-    return BAS;
-  }
-
-  function dependentsLabel() {
-    return STATE.family >= 2 ? "with" : "without";
-  }
-
+  function getBasePay() { return amount(COMP.basePay); }
+  function getBasAmount() { return amount(COMP.bas); }
+  function dependentsLabel() { return STATE.family >= 2 ? "with" : "without"; }
   function getBah(cityKey, role) {
-    if (role === "current") {
-      return STATE.currentBase && Number.isFinite(COMP.bahCurrent) ? COMP.bahCurrent : null;
-    }
-
-    if (role !== "current" && COMP.bahNew !== null && COMP.bahNew !== undefined) {
-      return COMP.bahNew;
-    }
-
-    var staticVal = BAH_BY_KEY[cityKey] || BAH_BY_KEY[normalizeBaseKey(cityKey)];
-
-    if (staticVal !== undefined) return staticVal;
-
-    console.warn(
-      "[PCS Snapshot] Static BAH fallback used for",
-      cityKey || "(empty)",
-      role === "current" ? "(current base)" : "(destination base)"
-    );
-
-    return 2172;
+    return role === "current" ? amount(COMP.bahCurrent) : amount(COMP.bahNew);
   }
 
-  function extractCompensationMonthly(data) {
-    var source = (data && data.payload) || (data && data.data) || data || {};
-    var compensation = source.compensation || source.pay || source.income || {};
-    return compensation.monthly || source.monthly || source.paySummary || {};
+  function baseIdentity(value) {
+    return String(value || "").replace(/\s+(AFB|SFB|Field)$/i, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+
+  function compensationInputAvailable() {
+    return /^(E[1-9]|O(?:[1-9]|10)|O[1-3]E|W[1-5])$/.test(STATE.rank) &&
+      Number.isInteger(STATE.yos) && STATE.yos >= 0 && STATE.yos <= 40 &&
+      Number.isInteger(STATE.family) && STATE.family >= 1 &&
+      ["ad", "active", "active_duty"].indexOf(String(STATE.type).toLowerCase()) !== -1;
+  }
+
+  function extractCompensationMonthly(data, baseName) {
+    var source = (data && data.payload) || (data && data.data) || {};
+    var comp = source.compensation || {};
+    var profile = source.profile || {};
+    if (!data || data.ok !== true || comp.ok !== true || source.tool !== "PCS_SNAPSHOT" ||
+        normalizeRank(profile.rank) !== STATE.rank || profile.yos !== STATE.yos ||
+        profile.hasDependents !== (STATE.family >= 2) ||
+        baseIdentity(profile.base) !== baseIdentity(baseName)) return {};
+    return comp.monthly || {};
   }
 
   async function fetchCompensationForBase(baseName) {
-    if (!baseName) return null;
-
-    var endpoint = getApiOrigin() + "/api/opensource-brain";
-
+    if (!baseName || !compensationInputAvailable()) return null;
     try {
-      var res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tool: "PCS_SNAPSHOT",
-          input: {
-            rank: prettyRank(STATE.rank),
-            yos: STATE.yos,
-            base: baseName,
-            family: STATE.family,
-            dependents: dependentsLabel()
-          }
-        })
+      var data = await fetchWithTimeout(getApiOrigin() + "/api/opensource-brain", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tool: "PCS_SNAPSHOT", input: {
+          rank: prettyRank(STATE.rank), yos: STATE.yos, base: baseName,
+          family: STATE.family, dependents: dependentsLabel()
+        } })
       });
-
-      if (!res.ok) {
-        throw new Error("HTTP " + res.status);
-      }
-
-      var data = await res.json();
-      var monthly = extractCompensationMonthly(data);
-
+      var monthly = extractCompensationMonthly(data, baseName);
       return {
-        basePay: safeNum(monthly.basicPay || monthly.basePay, null),
-        bah: safeNum(monthly.bah, null),
-        bas: safeNum(monthly.bas, null)
+        basePay: amount(monthly.basicPay !== undefined ? monthly.basicPay : monthly.basePay),
+        bah: amount(monthly.bah), bas: amount(monthly.bas)
       };
     } catch (err) {
-      console.warn("[PCS Snapshot] Official compensation fetch failed for", baseName + ":", err);
+      console.warn("[PCS Snapshot] Compensation unavailable for", baseName, err);
       return null;
     }
   }
 
   async function loadCompensation() {
     var results = await Promise.all([
-      fetchCompensationForBase(STATE.newBase),
-      fetchCompensationForBase(STATE.currentBase)
+      fetchCompensationForBase(STATE.newBase), fetchCompensationForBase(STATE.currentBase)
     ]);
-
-    var newComp = results[0];
-    var curComp = results[1];
-
-    if (newComp && newComp.bah !== null) {
-      COMP.bahNew = newComp.bah;
-      COMP.basePay = newComp.basePay;
-      COMP.bas = newComp.bas;
-      COMP.source = "official";
-    }
-
-    if (curComp && curComp.bah !== null) {
-      COMP.bahCurrent = curComp.bah;
-    }
-
+    var destination = results[0] || {};
+    COMP.basePay = amount(destination.basePay);
+    COMP.bas = amount(destination.bas);
+    COMP.bahNew = amount(destination.bah);
+    COMP.bahCurrent = amount(results[1] && results[1].bah);
+    COMP.source = grossIncome() !== null ? "official" : "unavailable";
     COMP.loaded = true;
-
-    if (COMP.source === "official") {
-      console.info(
-        "[PCS Snapshot] Official compensation loaded:",
-        prettyRank(STATE.rank),
-        STATE.yos + " YOS",
-        dependentsLabel() + " dependents",
-        "destination BAH " + money(COMP.bahNew || 0)
-      );
-    } else {
-      console.warn(
-        "[PCS Snapshot] Using static compensation tables for",
-        prettyRank(STATE.rank),
-        dependentsLabel() + " dependents"
-      );
-    }
   }
 
   /* =========================================================
@@ -898,7 +638,7 @@
     var endpoint = getApiOrigin() + "/api/pcs-move";
 
     try {
-      var res = await fetch(endpoint, {
+      var data = await fetchWithTimeout(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -907,12 +647,6 @@
           input: sharedPcsMoveInput(distanceMiles, povs)
         })
       });
-
-      if (!res.ok) {
-        throw new Error("HTTP " + res.status);
-      }
-
-      var data = await res.json();
 
       PCS_MOVE = extractPcsMoveResult(data);
 
@@ -949,62 +683,25 @@
   ========================================================= */
 
   async function fetchJsonSafe(url) {
-    try {
-      var res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) return null;
-      return await res.json();
-    } catch (e) {
-      return null;
-    }
+    try { return await fetchWithTimeout(url, { cache: "no-store" }); }
+    catch (e) { return null; }
   }
 
   async function loadCityData(cityKey, fallback, label) {
-    label = label || "destination";
     var key = normalizeBaseKey(cityKey);
-
-    if (!key) {
-      console.error("[PCS Snapshot] Missing base file key for " + label + " load.");
-      return markFallbackData(fallback, key, label);
+    if (!/^[A-Za-z][A-Za-z0-9.-]*$/.test(key) || key.indexOf("..") !== -1) {
+      return markFallbackData(null, key, label);
     }
-
     var encoded = encodeURIComponent(key) + ".json";
-    var origin = getApiOrigin();
-    var host = String(window.location.origin || "").replace(/\/+$/, "");
-
-    var urls = [
-      "./cities/" + encoded,
-      "/cities/" + encoded,
-      host + "/netlify/functions/cities/" + encoded,
-      host + "/.netlify/functions/cities/" + encoded,
-      origin + "/netlify/functions/cities/" + encoded,
-      origin + "/.netlify/functions/cities/" + encoded,
-      origin + "/api/cities/" + encodeURIComponent(key),
-      "/api/city?cityKey=" + encodeURIComponent(key)
-    ];
-
-    for (var i = 0; i < urls.length; i++) {
-      var data = await fetchJsonSafe(urls[i]);
-      if (data) {
-        console.info("[PCS Snapshot] Loaded " + label + " data for", key, "from", urls[i]);
-        return data;
-      }
-    }
-
-    console.error(
-      "[PCS Snapshot] Failed to load " + label + " JSON for key '" + key + "'.",
-      "Tried:",
-      urls
-    );
-
-    return markFallbackData(fallback, key, label);
+    // The supported API also works from PCSUnited's cross-origin embeds.
+    var packet = await fetchJsonSafe(getApiOrigin() + "/api/base-data?file=" + encoded);
+    if (packet && packet.ok === true && packet.file === key + ".json" && packet.data) return packet.data;
+    var data = await fetchJsonSafe(getApiOrigin() + "/netlify/functions/cities/" + encoded);
+    return data && data.by_bedroom ? data : markFallbackData(null, key, label);
   }
 
   function markFallbackData(fallback, requestedKey, label) {
-    var copy = Object.assign({}, fallback);
-    copy.__pcs_fallback = true;
-    copy.__pcs_requested_key = requestedKey || "";
-    copy.__pcs_fallback_label = label;
-    return copy;
+    return { __pcs_fallback: true, __pcs_requested_key: requestedKey || "", __pcs_fallback_label: label };
   }
 
   /* =========================================================
@@ -1022,8 +719,8 @@
       return String(submarket) + ", " + String(stateCode).toUpperCase();
     }
 
-    var city = getByPath(data, ["city", "place", "name"], "San Antonio");
-    var state = getByPath(data, ["state_code", "state"], "TX");
+    var city = getByPath(data, ["city", "place", "name"], STATE.newBase || "Destination unavailable");
+    var state = getByPath(data, ["state_code", "state"], "");
 
     if (String(city).toUpperCase().indexOf(String(state).toUpperCase()) > -1) {
       return String(city);
@@ -1051,7 +748,7 @@
       return baseImg;
     }
 
-    return SAN_ANTONIO_FALLBACK_IMAGE;
+    return "";
   }
 
   function medianHome(data) {
@@ -1069,8 +766,8 @@
         "average_home_value",
         "avgHome",
         "city_avg_home"
-      ], 288700),
-      288700
+      ], null),
+      null
     );
   }
 
@@ -1084,8 +781,8 @@
         "snapshot.yoy_change",
         "snapshot.market_trend_yoy",
         "scorecard.home_price_yoy"
-      ], -3.2),
-      -3.2
+      ], null),
+      null
     );
   }
 
@@ -1098,8 +795,8 @@
         "market_metrics.dom",
         "metrics.days_on_market",
         "snapshot.days_on_market"
-      ], 83),
-      83
+      ], null),
+      null
     );
   }
 
@@ -1111,8 +808,8 @@
         "households.median_income",
         "snapshot.median_income",
         "snapshot.median_household_income"
-      ], 69906),
-      69906
+      ], null),
+      null
     );
   }
 
@@ -1120,14 +817,20 @@
     return safeNum(
       getByPath(data, [
         "population.city",
-        "population.estimate",
         "demographics.population.city",
-        "population.total",
+        "snapshot.population_city",
         "snapshot.population",
-        "snapshot.population_city"
-      ], 1500000),
-      1500000
+        "population.estimate",
+        "population.total"
+      ], null),
+      null
     );
+  }
+
+  function populationLabel(value) {
+    return Number.isFinite(value)
+      ? value.toLocaleString("en-US", { notation: "compact", maximumFractionDigits: 1 })
+      : "Unavailable";
   }
 
   function populationMetro(data) {
@@ -1137,8 +840,8 @@
         "demographics.population.metro",
         "snapshot.metro_population",
         "snapshot.population_metro"
-      ], 2600000),
-      2600000
+      ], null),
+      null
     );
   }
 
@@ -1148,7 +851,7 @@
       "market_bluf.signal",
       "market_bluf.status",
       "scorecard.market_signal"
-    ], "Buyer-Friendly");
+    ], "Unavailable");
   }
 
   function trafficLevel(data) {
@@ -1157,7 +860,7 @@
       "snapshot.traffic_level",
       "lifestyle.traffic",
       "commute_intelligence.traffic"
-    ], "Moderate");
+    ], "Unavailable");
   }
 
   function employmentStatus(data) {
@@ -1166,7 +869,7 @@
       "snapshot.employment_status",
       "labor.employment_status",
       "snapshot.employment"
-    ], "Stable");
+    ], "Unavailable");
   }
 
   function marketHeadline(data) {
@@ -1175,7 +878,7 @@
       "market_bluf.bluf_headline",
       "financial_brief.market_headline",
       "snapshot.market_headline"
-    ], "Buyer-Leaning Market");
+    ], "Unavailable");
   }
 
   function marketSummary(data) {
@@ -1185,7 +888,7 @@
       "market_bluf.bluf",
       "financial_brief.market_summary",
       "snapshot.market_summary"
-    ], "Softening prices and extended inventory create strong opportunity for negotiation below asking.");
+    ], "Unavailable");
   }
 
   function financialHeadline(data) {
@@ -1194,7 +897,7 @@
       "financial_brief.title",
       "financial_brief.bah_vs_buy_position",
       "market_bluf.financial_headline"
-    ], "Strategic Buy Window");
+    ], "Unavailable");
   }
 
   function financialSummary(data) {
@@ -1203,7 +906,7 @@
       "financial_brief.affordability_summary",
       "financial_brief.bluf",
       "market_bluf.financial_summary"
-    ], "Favorable pricing and elevated inventory create opportunity for below-market acquisition.");
+    ], "Unavailable");
   }
 
   function lifestyleList(data) {
@@ -1219,75 +922,108 @@
   }
 
   function avgFromRange(value, fallback) {
-    if (typeof value === "number") return value;
-
+    if (typeof value === "number") return amount(value) === null ? fallback : value;
     if (value && typeof value === "object") {
-      if (Number.isFinite(Number(value.avg))) return Number(value.avg);
-
-      var low = Number(value.low);
-      var high = Number(value.high);
-
-      if (Number.isFinite(low) && Number.isFinite(high)) {
-        return (low + high) / 2;
-      }
+      var avg = amount(value.avg), low = amount(value.low), high = amount(value.high);
+      if (avg !== null) return avg;
+      if (low !== null && high !== null && high >= low) return (low + high) / 2;
     }
-
     return fallback;
   }
 
   function bedroomData(data, bedroom) {
-    var b = String(bedroom);
-    var node = getByPath(data, ["by_bedroom." + b], null);
-
-    if (!node) {
-      node = getByPath(FALLBACK_CITY, ["by_bedroom." + b], FALLBACK_CITY.by_bedroom["3"]);
-    }
-
-    var homeRaw = getByPath(node, ["home_price", "price", "average_home_price"], medianHome(data));
-    var home = safeNum(avgFromRange(homeRaw, medianHome(data)), medianHome(data));
-
-    var mortgageRaw = getByPath(node, ["mortgage_monthly", "avg_home_mortgage_monthly", "monthly_mortgage"], home * 0.00635);
-    var mortgage = safeNum(avgFromRange(mortgageRaw, home * 0.00635), home * 0.00635);
-
-    var rentRaw = getByPath(node, ["rent", "rent_monthly", "average_rent"], mortgage * 0.92);
-    var rent = safeNum(avgFromRange(rentRaw, mortgage * 0.92), mortgage * 0.92);
-
-    var utilitiesRaw = getByPath(node, ["utilities.total", "utilities", "utilities_monthly", "average_utilities"], 235);
-    var utilities = safeNum(avgFromRange(utilitiesRaw, 235), 235);
-
-    var taxes = safeNum(
-      getByPath(node, ["taxes", "tax_monthly", "property_tax_monthly"], 0),
-      0
-    );
-
-    var insurance = safeNum(
-      getByPath(node, ["insurance", "insurance_monthly"], 0),
-      0
-    );
-
-    var hoa = safeNum(
-      getByPath(
-        node,
-        ["hoa", "hoa_monthly"],
-        getByPath(
-          data,
-          ["hoa_monthly", "ownership_costs.hoa_monthly_default", "costs.hoa_monthly_default"],
-          0
-        )
-      ),
-      0
-    );
-
+    var node = getByPath(data, ["by_bedroom." + bedroom], {});
+    var mortgage = HOUSING[String(bedroom)] || {};
+    var homeRaw = getByPath(node, ["home_price", "price", "average_home_price"], null);
+    var rent = avgFromRange(getByPath(node, ["rent", "rent_monthly", "average_rent"], null), null);
+    var utilities = avgFromRange(getByPath(node, ["utilities.total", "utilities", "utilities_monthly", "average_utilities"], null), null);
     return {
-      home: home,
-      mortgage: mortgage,
-      rent: rent,
-      utilities: utilities,
-      taxes: taxes,
-      insurance: insurance,
-      hoa: hoa,
-      totalHousing: mortgage + taxes + insurance + hoa + utilities
+      home: avgFromRange(homeRaw, null), low: amount(homeRaw && homeRaw.low), high: amount(homeRaw && homeRaw.high),
+      mortgage: amount(mortgage.principalInterest), taxes: amount(mortgage.propertyTax),
+      insurance: amount(mortgage.insurance), hoa: amount(mortgage.hoa), rent: rent, utilities: utilities,
+      totalHousing: sumKnown([amount(mortgage.allIn), utilities]),
+      totalRent: sumKnown([rent, utilities]),
+      asOf: getByPath(node, ["home_price.as_of", "utilities.as_of"], "date unavailable")
     };
+  }
+
+  // Only adapt city inputs here. Amortization, tax, insurance and VA fee math
+  // come from the existing mortgage API and shared mortgage-scenario module.
+  function mortgageRequest(data, bedroom) {
+    var node = getByPath(data, ["by_bedroom." + bedroom], null);
+    if (!node || data.__pcs_fallback) return null;
+    var assumptions = data.mortgage_assumptions || {};
+    var price = avgFromRange(node.home_price, null);
+    var rate = amount(assumptions.apr_percent), term = amount(assumptions.term_years);
+    var down = amount(assumptions.down_payment_percent);
+    var taxPercent = amount(getByPath(data, ["property_tax_rate_percent", "ownership_costs.property_tax_rate_percent"], null));
+    var insurancePercent = amount(getByPath(data, ["insurance_rate_percent", "ownership_costs.insurance_rate_percent"], null));
+    var taxRate = amount(getByPath(data, ["property_tax_rate", "ownership_costs.property_tax_rate"], null));
+    var insuranceRate = amount(getByPath(data, ["insurance_rate", "ownership_costs.insurance_rate_estimate"], null));
+    var hoa = amount(getByPath(node, ["hoa", "hoa_monthly"], getByPath(data, ["hoa_monthly", "ownership_costs.hoa_monthly_default", "costs.hoa_monthly_default"], null)));
+    if (!(price > 0) || rate === null || !(term >= 1 && term <= 40) || down === null || down > 100 ||
+        hoa === null || (taxPercent === null && taxRate === null) || (insurancePercent === null && insuranceRate === null)) return null;
+    var request = {
+      price: price, interestRate: rate, termYears: term, downPct: down, hoaMonthly: hoa,
+      loanType: "va", priorUse: "first_use", fundingFeeExempt: false, financeFundingFee: true
+    };
+    if (taxPercent !== null) request.propertyTaxPercent = taxPercent;
+    else request.propertyTaxRate = taxRate;
+    if (insurancePercent !== null) request.insurancePercent = insurancePercent;
+    else request.insuranceRate = insuranceRate;
+    return request;
+  }
+
+  function readMortgage(data) {
+    var m = data && data.monthly;
+    if (!data || data.ok !== true || !data.meta || data.meta.vaOverlayApplied !== true || !m ||
+        ![m.principalInterest, m.propertyTax, m.insurance, m.hoa, m.pmi, m.allIn].every(function (n) { return typeof n === "number" && amount(n) !== null; }) ||
+        m.allIn <= 0 || m.pmi !== 0 ||
+        Math.abs(sumKnown([m.principalInterest, m.propertyTax, m.insurance, m.hoa, m.pmi]) - m.allIn) > 0.03) return null;
+    return m;
+  }
+
+  async function loadHousingCosts(data) {
+    HOUSING = {};
+    await Promise.all([2, 3, 4, 5].map(async function (bedroom) {
+      var request = mortgageRequest(data, bedroom);
+      if (!request) return;
+      try {
+        var result = await fetchWithTimeout(getApiOrigin() + "/api/mortgage", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(request)
+        });
+        HOUSING[String(bedroom)] = readMortgage(result);
+      } catch (err) {
+        console.warn("[PCS Snapshot] Housing estimate unavailable:", bedroom, err);
+      }
+    }));
+  }
+
+  function housingComparison(bed) {
+    var gap = Number.isFinite(bed.totalHousing) && Number.isFinite(bed.totalRent)
+      ? Math.round((bed.totalHousing - bed.totalRent) * 100) / 100 : null;
+    return { monthlyGap: gap, annualGap: gap === null ? null : Math.round(gap * 12 * 100) / 100 };
+  }
+
+  function recordedHistory(data, years) {
+    var rows = getByPath(data, ["housing.market.sale_history_36_months"], []);
+    var byMonth = {};
+    if (!data || !Array.isArray(rows) || data.__pcs_fallback) return [];
+    rows.forEach(function (row) {
+      if (row && /^\d{4}-(0[1-9]|1[0-2])$/.test(row.month) && amount(row.median_sale_price) > 0) {
+        var date = Date.parse(row.month + "-01T00:00:00Z");
+        if (date <= Date.now()) byMonth[row.month] = { x: date, y: amount(row.median_sale_price) };
+      }
+    });
+    var points = Object.keys(byMonth).sort().map(function (month) { return byMonth[month]; });
+    if (!points.length) return [];
+    var start = new Date(points[points.length - 1].x);
+    start.setUTCMonth(start.getUTCMonth() - (years === 3 ? 36 : 12));
+    return points.filter(function (point) { return point.x >= start.getTime(); });
+  }
+
+  function monthLabel(timestamp) {
+    return new Date(timestamp).toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
   }
 
   /* =========================================================
@@ -1311,27 +1047,16 @@
 
   function renderTrendChart(data, years) {
     var el = $("pcs-trend-chart-apex");
+    var points = recordedHistory(data, years);
+    text("pcs-trend-title", (years === 3 ? "3-Year" : "12-Month") + " Housing History");
+    text("pcs-trend-subtitle", "Recorded median sale prices • sparse observations");
+    text("pcs-trend-summary", points.length
+      ? points.length + " recorded observations • " + monthLabel(points[0].x) + " – " + monthLabel(points[points.length - 1].x) + ". Lines connect records; missing months are not estimated."
+      : "No dated sale-price history is available for this destination.");
+
     if (!el || typeof ApexCharts === "undefined") return;
-
-    if (trendChart) {
-      try { trendChart.destroy(); } catch (e) {}
-      trendChart = null;
-    }
-
-    var base = medianHome(data);
-    var months = years === 3 ? 36 : 12;
-    var yoy = yoyChange(data);
-    var points = [];
-    var labels = [];
-
-    for (var i = months - 1; i >= 0; i--) {
-      var progress = (months - i) / months;
-      var seasonal = Math.sin(progress * Math.PI * 2) * 0.015;
-      var drift = (yoy / 100) * progress;
-      var value = base * (1 - drift + seasonal);
-      points.push(Math.round(value));
-      labels.push(i === 0 ? "Now" : "-" + i + "m");
-    }
+    destroyChart(trendChart);
+    trendChart = null;
 
     trendChart = new ApexCharts(el, {
       chart: {
@@ -1348,10 +1073,8 @@
         }
       ],
       xaxis: {
-        categories: labels,
-        labels: {
-          show: false
-        },
+        type: "datetime",
+        labels: { datetimeUTC: true, format: "MMM yy" },
         axisBorder: { show: false },
         axisTicks: { show: false }
       },
@@ -1363,8 +1086,10 @@
         }
       },
       dataLabels: { enabled: false },
+      markers: { size: 4 },
+      noData: { text: "History unavailable", style: { color: "#cbd5e1" } },
       stroke: {
-        curve: "smooth",
+        curve: "straight",
         width: 3
       },
       fill: {
@@ -1381,6 +1106,7 @@
         strokeDashArray: 4
       },
       tooltip: {
+        x: { format: "MMM yyyy" },
         y: {
           formatter: function (val) {
             return money(val);
@@ -1489,13 +1215,21 @@
     var basePay = getBasePay(STATE.rank);
     var newBah = getBah(STATE.newCityKey, "new");
     var currentBah = getBah(STATE.currentCityKey, "current");
-    var totalIncome = basePay + newBah + getBasAmount();
-    var comparisonAvailable = Number.isFinite(currentBah);
+    var totalIncome = grossIncome();
+    var comparisonAvailable = Number.isFinite(currentBah) && Number.isFinite(newBah);
     var bahDelta = comparisonAvailable ? newBah - currentBah : null;
 
-    text("pcs-income-main", money(totalIncome));
-    html("pcs-income-breakdown", "Base Pay: " + money(basePay) + ", BAH " + money(newBah) + ",<br />BAS " + money(getBasAmount()));
-    text("pts-income-meta", "True disposable baseline before housing");
+    text("pcs-income-main", money(totalIncome, true));
+    var incomeNode = $("pcs-income-main");
+    if (incomeNode) {
+      incomeNode.style.fontSize = totalIncome === null ? "18px" : "";
+      var incomeUnit = incomeNode.parentElement.querySelector(".pts-unit");
+      if (incomeUnit) incomeUnit.hidden = totalIncome === null;
+    }
+    html("pcs-income-breakdown", "Base Pay: " + money(basePay, true) + ", BAH " + money(newBah) + ",<br />BAS " + money(getBasAmount(), true));
+    text("pts-income-meta", totalIncome === null
+      ? "Complete, verified compensation is unavailable. Check inputs and retry."
+      : "Gross base pay + BAH + BAS; before deductions");
 
     text("pts-bah-delta", comparisonAvailable ? (bahDelta >= 0 ? "+" : "-") + money(Math.abs(bahDelta)) : "Unavailable");
     var deltaNode = $("pts-bah-delta");
@@ -1504,7 +1238,7 @@
       var deltaUnit = deltaNode.parentElement.querySelector(".pts-unit");
       if (deltaUnit) deltaUnit.hidden = !comparisonAvailable;
     }
-    text("pts-bah-copy", comparisonAvailable ? "Compared with your previous duty station housing allowance." : STATE.currentBase ? "Current-base BAH could not be verified." : "No current duty station was provided.");
+    text("pts-bah-copy", comparisonAvailable ? "Compared with your previous duty station housing allowance." : STATE.currentBase ? "Both duty stations need verified BAH for comparison." : "No current duty station was provided.");
     text("pts-bah-meta", comparisonAvailable ? "vs. Previous Duty Station" : "Comparison unavailable");
 
     if (PCS_MOVE && PCS_MOVE.loaded && PCS_MOVE.total > 0) {
@@ -1524,13 +1258,11 @@
     }
 
     var bed = bedroomData(newData, STATE.bedroom);
-    var housingRatio = bed.totalHousing / Math.max(totalIncome, 1);
-    var score = clamp(5 - Math.max(0, housingRatio - 0.25) * 10, 1, 5);
-
-    text("pts-power-score", score.toFixed(1));
-    text("pts-power-stars", "★★★★★");
-    text("pts-power-copy", "Based on total income & housing market");
-    text("pts-power-meta", "Overall affordability signal");
+    var housingRatio = Number.isFinite(bed.totalHousing) && totalIncome > 0 ? bed.totalHousing / totalIncome : null;
+    text("pts-power-score", housingRatio === null ? "—" : (housingRatio * 100).toFixed(1) + "%");
+    text("pts-power-stars", "");
+    text("pts-power-copy", "Estimated housing as a share of gross base pay, BAH and BAS.");
+    text("pts-power-meta", "Excludes debts and other living expenses");
   }
 
   function paintCityBrief(newData) {
@@ -1538,11 +1270,11 @@
       console.warn(
         "[PCS Snapshot] Destination base JSON unavailable for",
         newData.__pcs_requested_key || STATE.newCityKey,
-        "- showing labeled preview data"
+        "- showing unavailable fields"
       );
       text(
         "pcs-city-line",
-        (STATE.newBase || "Selected Base") + " • Data preview (base file unavailable)"
+        (STATE.newBase || "Selected Base") + " • Base data unavailable"
       );
     } else {
       text("pcs-city-line", cityLabel(newData) + " • Quick PCS Snapshot");
@@ -1556,8 +1288,8 @@
     text("pcs-current-bluf-headline", marketHeadline(newData));
     text("pcs-current-bluf-summary", marketSummary(newData));
 
-    text("pcs-cur-population-city", (populationCity(newData) / 1000000).toFixed(1) + "M");
-    text("pcs-cur-population-metro", "Metro: " + (populationMetro(newData) / 1000000).toFixed(1) + "M");
+    text("pcs-cur-population-city", populationLabel(populationCity(newData)));
+    text("pcs-cur-population-metro", "Metro: " + populationLabel(populationMetro(newData)));
 
     text("pcs-cur-median-income", money(medianIncome(newData)));
     text("pcs-cur-market-trend", pct(yoyChange(newData)) + " YoY");
@@ -1585,100 +1317,76 @@
   function paintAffordability(newData) {
     var bed = bedroomData(newData, STATE.bedroom);
     var bah = getBah(STATE.newCityKey, "new");
-    var buffer = bah - bed.totalHousing;
-    var covered = Math.round((bah / Math.max(bed.totalHousing, 1)) * 100);
+    var costAvailable = Number.isFinite(bed.totalHousing);
+    var comparable = costAvailable && Number.isFinite(bah);
+    var buffer = comparable ? Math.round((bah - bed.totalHousing) * 100) / 100 : null;
+    var covered = comparable && bed.totalHousing > 0 ? Math.round(bah / bed.totalHousing * 100) : null;
 
     text("pcs-bedroom-value", STATE.bedroom);
-
-    html(
-      "pcs-afford-headline",
-      (buffer >= 0 ? money(buffer) : "-" + money(Math.abs(buffer))) + " <span>Monthly Buffer</span>"
-    );
-
-    html(
-      "pcs-afford-subline",
-      "BAH covers <strong>" + covered + "%</strong> of a typical mortgage stack"
-    );
-
-    text("pcs-afford-home-price", money(bed.home));
-    text("pcs-afford-mortgage", money(bed.mortgage));
-    text("pcs-afford-taxes", money(bed.taxes));
-    text("pcs-afford-insurance", money(bed.insurance));
-    text("pcs-afford-hoa", money(bed.hoa));
-    text("pcs-afford-utilities", money(bed.utilities));
-
-    text("pcs-donut-buffer", covered + "%");
+    html("pcs-afford-headline", money(buffer) + " <span>BAH Balance</span>");
+    html("pcs-afford-subline", covered === null ? "Verified BAH and a complete housing estimate are required."
+      : "BAH covers <strong>" + covered + "%</strong> of estimated housing costs");
+    ["home", "mortgage", "taxes", "insurance", "hoa", "utilities"].forEach(function (key) {
+      text(key === "home" ? "pcs-afford-home-price" : "pcs-afford-" + key, money(bed[key]));
+      if (key !== "home") text("pcs-amt-" + key, Number.isFinite(bed[key]) ? money(bed[key]) : "—");
+    });
+    text("pcs-donut-buffer", covered === null ? "—" : covered + "%");
     text("pcs-donut-buffer-label", "BAH Covered");
-
-    text("pcs-amt-mortgage", money(bed.mortgage));
-    text("pcs-amt-taxes", money(bed.taxes));
-    text("pcs-amt-insurance", money(bed.insurance));
-    text("pcs-amt-hoa", money(bed.hoa));
-    text("pcs-amt-utilities", money(bed.utilities));
-
-    text(
-      "pcs-afford-footer",
-      buffer >= 0
-        ? "BAH is currently covering the estimated housing stack for this bedroom profile."
-        : "BAH does not fully cover the estimated housing stack for this bedroom profile."
-    );
+    var request = mortgageRequest(newData, STATE.bedroom);
+    text("pcs-afford-footer", costAvailable && request
+      ? "Estimate: " + money(bed.totalHousing, true) + "/mo including HOA + utilities. VA " + request.termYears + " years, " + request.interestRate + "% interest, " + request.downPct + "% down; first use, non-exempt, fee financed. Data: " + bed.asOf + ". Excludes repairs and closing costs."
+      : "Housing estimate unavailable for this bedroom profile. Missing data or an unavailable service is not a zero cost.");
 
     var donut = $("pcs-afford-donut");
     if (donut) {
-      var total = Math.max(bed.totalHousing, 1);
-      var mortgageDeg = Math.round((bed.mortgage / total) * 360);
-      var taxDeg = Math.round(((bed.mortgage + bed.taxes) / total) * 360);
-      var insDeg = Math.round(((bed.mortgage + bed.taxes + bed.insurance) / total) * 360);
-      var hoaDeg = Math.round(((bed.mortgage + bed.taxes + bed.insurance + bed.hoa) / total) * 360);
-
-      donut.style.background =
-        "conic-gradient("
+      if (!costAvailable || bed.totalHousing <= 0) {
+        donut.style.background = "rgba(255,255,255,.08)";
+        return;
+      }
+      var total = bed.totalHousing;
+      var mortgageDeg = bed.mortgage / total * 360;
+      var taxDeg = (bed.mortgage + bed.taxes) / total * 360;
+      var insDeg = (bed.mortgage + bed.taxes + bed.insurance) / total * 360;
+      var hoaDeg = (bed.mortgage + bed.taxes + bed.insurance + bed.hoa) / total * 360;
+      donut.style.background = "conic-gradient("
         + "rgba(157,232,255,.95) 0deg " + mortgageDeg + "deg,"
         + "rgba(80,229,191,.92) " + mortgageDeg + "deg " + taxDeg + "deg,"
         + "rgba(255,181,107,.92) " + taxDeg + "deg " + insDeg + "deg,"
         + "rgba(142,136,255,.92) " + insDeg + "deg " + hoaDeg + "deg,"
-        + "rgba(255,255,255,.35) " + hoaDeg + "deg 360deg"
-        + ")";
+        + "rgba(255,255,255,.35) " + hoaDeg + "deg 360deg)";
     }
   }
 
   function paintLivingStrategy(newData) {
     var bed = bedroomData(newData, STATE.bedroom);
-    var income = getBasePay(STATE.rank) + getBah(STATE.newCityKey, "new") + getBasAmount();
-    var residualBuy = income - bed.totalHousing;
-    var residualRent = income - bed.rent - bed.utilities;
-
-    var buyWins = residualBuy >= residualRent - 150;
-
-    text("pcs-ls-status", buyWins ? "WEALTH BUILDING • HIGHER COST" : "RENT FLEXIBILITY • LOWER RISK");
-    text("pcs-ls-main", buyWins ? "Buy" : "Rent");
-
-    text(
-      "pcs-ls-sub",
-      buyWins
-        ? "Buying can work if you want stability and can tolerate ownership costs."
-        : "Renting may protect flexibility if the PCS timeline is short."
-    );
-
-    text("pcs-ls-equity", money(Math.max(0, bed.home * 0.035)) + " estimated first-year equity movement");
-    text("pcs-ls-bluf", buyWins ? "Buy is viable with disciplined price control." : "Rent is safer unless the purchase price is below market.");
-    text("pcs-ls-annual", money(Math.abs((bed.totalHousing - bed.rent) * 12)));
-    text("pcs-ls-vs", "Buy vs Rent Annual Cost Gap");
-    text("pcs-ls-gap", money(Math.abs(residualBuy - residualRent)) + " monthly residual difference");
+    var comparison = housingComparison(bed);
+    var mode = STATE.livingMode;
+    var base = mode === "base", rent = mode === "rent";
+    var cost = base ? null : rent ? bed.totalRent : bed.totalHousing;
+    var monthlyGap = base ? null : comparison.monthlyGap;
+    text("pcs-ls-status", base ? "BASE HOUSING • QUOTE REQUIRED" : "MONTHLY COST COMPARISON");
+    text("pcs-ls-main", base ? "Base Housing" : rent ? "Rent" : "Buy");
+    text("pcs-ls-sub", base ? "Actual rent and utility terms depend on the housing provider."
+      : cost === null ? "Housing cost unavailable" : "Estimated housing: " + money(cost, true) + "/month");
+    text("pcs-ls-equity", "Equity is not projected");
+    text("pcs-ls-bluf", base ? "BAH alone does not establish the cost of base housing."
+      : monthlyGap === null ? "Complete buy and rent costs are needed to compare."
+      : "Buying costs " + money(Math.abs(monthlyGap), true) + (monthlyGap < 0 ? " less" : " more")
+        + " per month than renting. Both include the same utility estimate; repairs, transaction costs and rent changes are excluded.");
+    text("pcs-ls-annual", money(base ? null : comparison.annualGap, true));
+    text("pcs-ls-vs", base ? "Quote required" : "Buy − rent");
+    text("pcs-ls-gap", money(monthlyGap, true));
 
     destroyChart(livingChart);
-    livingChart = renderDoughnut("pcs-ls-chart", ["Buy Stack", "Rent Stack", "Residual"], [
-      bed.totalHousing,
-      bed.rent + bed.utilities,
-      Math.max(0, residualBuy)
-    ]);
+    livingChart = cost === null ? null : renderDoughnut("pcs-ls-chart",
+      rent ? ["Rent", "Utilities"] : ["Principal & interest", "Taxes", "Insurance", "HOA", "Utilities"],
+      rent ? [bed.rent, bed.utilities] : [bed.mortgage, bed.taxes, bed.insurance, bed.hoa, bed.utilities]);
   }
 
   function paintComparison(currentData, newData) {
     var currentBah = getBah(STATE.currentCityKey, "current");
     var newBah = getBah(STATE.newCityKey, "new");
-    var currentHome = currentData && !currentData.__pcs_fallback ? medianHome(currentData) : null;
-    var comparisonAvailable = Number.isFinite(currentBah);
+    var comparisonAvailable = Number.isFinite(currentBah) && Number.isFinite(newBah);
     var newHome = medianHome(newData);
 
     setImage("img-upcoming", cityImage(newData), cityLabel(newData));
@@ -1690,7 +1398,7 @@
     text("bah-upcoming", money(newBah));
     text("price-upcoming", moneyK(newHome));
     text("yoy-upcoming", pct(yoyChange(newData)));
-    text("dom-upcoming", String(daysOnMarket(newData)));
+    text("dom-upcoming", daysOnMarket(newData) === null ? "Unavailable" : String(daysOnMarket(newData)));
 
     text(
       "pcsc-status",
@@ -1702,26 +1410,25 @@
     html(
       "facts-upcoming",
       "<li>Median home: " + moneyK(newHome) + "</li>"
-      + "<li>Days on market: " + daysOnMarket(newData) + "</li>"
+      + "<li>Days on market: " + (daysOnMarket(newData) === null ? "Unavailable" : daysOnMarket(newData)) + "</li>"
       + "<li>Market signal: " + marketSignal(newData) + "</li>"
     );
 
-    text("rating-current", comparisonAvailable && currentHome > 0 ? (currentBah / Math.max(currentHome * 0.00635, 1) * 5).toFixed(1) : "Unavailable");
-    text("rating-upcoming", (newBah / Math.max(newHome * 0.00635, 1) * 5).toFixed(1));
-    text("stars-current", comparisonAvailable && currentHome > 0 ? "★★★★★" : "");
-    text("stars-upcoming", "★★★★★");
-
+    // These legacy targets remain available without unsupported star ratings.
+    text("rating-current", "Unavailable");
+    text("rating-upcoming", "Unavailable");
+    text("stars-current", "");
+    text("stars-upcoming", "");
     destroyChart(chartCurrent);
     destroyChart(chartUpcoming);
-
-    chartCurrent = comparisonAvailable && currentHome > 0 ? renderSimpleCanvasChart("chart-current", ["BAH", "Home"], [currentBah, currentHome / 100]) : null;
-    chartUpcoming = renderSimpleCanvasChart("chart-upcoming", ["BAH", "Home"], [newBah, newHome / 100]);
+    chartCurrent = Number.isFinite(currentBah) ? renderSimpleCanvasChart("chart-current", ["BAH"], [currentBah]) : null;
+    chartUpcoming = Number.isFinite(newBah) ? renderSimpleCanvasChart("chart-upcoming", ["BAH"], [newBah]) : null;
   }
 
   function paintQuickFacts(newData) {
-    text("pcs-qf-poverty", getByPath(newData, ["income.poverty_rate_percent", "income.poverty_rate", "demographics.poverty_rate"], "14.4%"));
+    text("pcs-qf-poverty", getByPath(newData, ["income.poverty_rate_percent", "income.poverty_rate", "demographics.poverty_rate"], "Unavailable"));
     text("pcs-qf-home", moneyK(medianHome(newData)));
-    text("pcs-qf-dom", String(daysOnMarket(newData)));
+    text("pcs-qf-dom", daysOnMarket(newData) === null ? "Unavailable" : String(daysOnMarket(newData)));
 
     var basePay = getBasePay(STATE.rank);
     var bah = getBah(STATE.newCityKey, "new");
@@ -1729,27 +1436,28 @@
     destroyChart(incomeChart);
     destroyChart(bahChart);
 
-    incomeChart = renderSimpleCanvasChart("pcs-income-chart", ["Base Pay", "BAH", "BAS"], [basePay, bah, getBasAmount()]);
+    incomeChart = grossIncome() === null ? null : renderSimpleCanvasChart("pcs-income-chart", ["Base Pay", "BAH", "BAS"], [basePay, bah, getBasAmount()]);
     var currentBah = getBah(STATE.currentCityKey, "current");
-    bahChart = Number.isFinite(currentBah) ? renderSimpleCanvasChart("pcs-bah-chart", ["Current", "New"], [currentBah, bah]) : null;
+    bahChart = Number.isFinite(currentBah) && Number.isFinite(bah) ? renderSimpleCanvasChart("pcs-bah-chart", ["Current", "New"], [currentBah, bah]) : null;
 
-    text("pcs-income-summary", "Total monthly compensation estimate: " + money(basePay + bah + getBasAmount()));
+    text("pcs-income-summary", "Gross base pay + BAH + BAS before deductions: " + money(grossIncome(), true));
     text("pcs-bah-summary", "New duty station BAH estimate: " + money(bah));
   }
 
   function paintOwnershipRange(newData) {
     var bed = bedroomData(newData, STATE.bedroom);
-    var low = bed.home * 0.85;
-    var high = bed.home * 1.15;
+    var low = bed.low;
+    var high = bed.high;
     var median = medianHome(newData);
 
     text("pcs-own-gap-note", "Typical entry range around " + cityLabel(newData));
     text("pcs-own-right-text", "Comparing low vs high market entry");
 
-    text("pcs-own-y1", "$450K");
-    text("pcs-own-y2", "$350K");
-    text("pcs-own-y3", "$250K");
-    text("pcs-own-y4", "$150K");
+    var ceiling = high > 0 ? high : null;
+    text("pcs-own-y1", moneyK(ceiling));
+    text("pcs-own-y2", moneyK(ceiling === null ? null : ceiling * 0.75));
+    text("pcs-own-y3", moneyK(ceiling === null ? null : ceiling * 0.5));
+    text("pcs-own-y4", moneyK(ceiling === null ? null : ceiling * 0.25));
 
     text("pcs-own-low-value", moneyK(low));
     text("pcs-own-high-value", moneyK(high));
@@ -1761,22 +1469,22 @@
     var lowBar = $("pcs-own-bar-low");
     var highBar = $("pcs-own-bar-high");
 
-    if (lowBar) lowBar.style.height = clamp((low / 450000) * 100, 8, 100) + "%";
-    if (highBar) highBar.style.height = clamp((high / 450000) * 100, 8, 100) + "%";
+    if (lowBar) lowBar.style.height = (ceiling && low !== null ? clamp(low / ceiling * 100, 0, 100) : 0) + "%";
+    if (highBar) highBar.style.height = (ceiling ? 100 : 0) + "%";
 
     destroyChart(affordChart);
     destroyChart(priceBreakChart);
 
-    affordChart = renderDoughnut("pcs-afford-chart", ["Mortgage", "Utilities", "Buffer"], [
+    affordChart = Number.isFinite(bed.totalHousing) && Number.isFinite(getBah(STATE.newCityKey, "new")) ? renderDoughnut("pcs-afford-chart", ["Mortgage", "Utilities", "Buffer"], [
       bed.mortgage,
       bed.utilities,
       Math.max(0, getBah(STATE.newCityKey, "new") - bed.totalHousing)
-    ]);
+    ]) : null;
 
-    priceBreakChart = renderSimpleCanvasChart("pcs-pricebreak-chart", ["Low", "Median", "High"], [low, median, high]);
+    priceBreakChart = [low, median, high].every(Number.isFinite) ? renderSimpleCanvasChart("pcs-pricebreak-chart", ["Low", "Median", "High"], [low, median, high]) : null;
 
     text("pcs-afford-summary", "Affordability is based on BAH compared against mortgage, utilities, taxes, insurance, and HOA.");
-    text("pcs-pricebreak-note", "Price range is estimated from the selected bedroom profile and local market baseline.");
+    text("pcs-pricebreak-note", "Price range uses the selected bedroom record; no range is invented for missing data.");
   }
 
   function paintLegend(newData) {
@@ -1798,7 +1506,7 @@
     paintQuickFacts(newData);
     paintOwnershipRange(newData);
     paintLegend(newData);
-    renderTrendChart(newData, 1);
+    renderTrendChart(newData, STATE.trendYears);
   }
 
   /* =========================================================
@@ -1830,7 +1538,8 @@
       btn1.addEventListener("click", function () {
         btn1.classList.add("active");
         if (btn3) btn3.classList.remove("active");
-        renderTrendChart(newData, 1);
+        STATE.trendYears = 1;
+        renderTrendChart(newData, STATE.trendYears);
       });
     }
 
@@ -1838,7 +1547,8 @@
       btn3.addEventListener("click", function () {
         btn3.classList.add("active");
         if (btn1) btn1.classList.remove("active");
-        renderTrendChart(newData, 3);
+        STATE.trendYears = 3;
+        renderTrendChart(newData, STATE.trendYears);
       });
     }
 
@@ -1852,24 +1562,8 @@
 
         tab.classList.add("active");
 
-        var mode = tab.getAttribute("data-mode") || "buy";
-        var bed = bedroomData(newData, STATE.bedroom);
-
-        if (mode === "rent") {
-          text("pcs-ls-main", "Rent");
-          text("pcs-ls-sub", "Renting protects flexibility and lowers maintenance exposure.");
-          text("pcs-ls-bluf", "Rent is the safer short-PCS strategy.");
-          text("pcs-ls-status", "FLEXIBILITY • LOWER COMMITMENT");
-          text("pcs-ls-annual", money((bed.rent + bed.utilities) * 12));
-        } else if (mode === "base") {
-          text("pcs-ls-main", "Base Housing");
-          text("pcs-ls-sub", "Base housing can simplify commute and reduce market exposure.");
-          text("pcs-ls-bluf", "Base housing is best when certainty beats wealth building.");
-          text("pcs-ls-status", "STABILITY • COMMUTE CONTROL");
-          text("pcs-ls-annual", money(getBah(STATE.newCityKey, "new") * 12));
-        } else {
-          paintLivingStrategy(newData);
-        }
+        STATE.livingMode = tab.getAttribute("data-mode") || "buy";
+        paintLivingStrategy(newData);
       });
     });
   }
@@ -1885,14 +1579,15 @@
       }
 
       var results = await Promise.all([
-        STATE.currentBase ? loadCityData(STATE.currentCityKey, FALLBACK_CURRENT_CITY, "current") : Promise.resolve(null),
-        loadCityData(STATE.newCityKey, FALLBACK_CITY, "destination"),
+        STATE.currentBase ? loadCityData(STATE.currentCityKey, null, "current") : Promise.resolve(null),
+        loadCityData(STATE.newCityKey, null, "destination"),
         loadCompensation(),
         loadPcsMoveEstimate()
       ]);
 
       var currentData = results[0];
       var newData = results[1];
+      await loadHousingCosts(newData);
 
       paintAll(currentData, newData);
       wireEvents(currentData, newData);
@@ -1900,6 +1595,7 @@
       window.PCS_SNAPSHOT_STATE = {
         input: STATE,
         compensation: COMP,
+        housing: HOUSING,
         pcsMove: PCS_MOVE,
         currentData: currentData,
         newData: newData
@@ -1909,8 +1605,9 @@
     } catch (err) {
       console.error("PCS Snapshot failed to load:", err);
 
-      paintAll(FALLBACK_CURRENT_CITY, FALLBACK_CITY);
-      wireEvents(FALLBACK_CURRENT_CITY, FALLBACK_CITY);
+      var unavailable = markFallbackData(null, STATE.newCityKey, "destination");
+      paintAll(null, unavailable);
+      wireEvents(null, unavailable);
     }
   }
 

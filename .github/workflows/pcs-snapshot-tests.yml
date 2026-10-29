@@ -1,0 +1,35 @@
+name: PCS Snapshot Accuracy
+
+on:
+  pull_request:
+    paths:
+      - 'PCS-Snapshot/**'
+      - 'netlify/functions/cities/**'
+      - 'netlify/functions/_share/**'
+      - 'netlify/functions/opensource-brain.js'
+      - 'netlify/functions/mortgage.js'
+      - 'scripts/test-snapshot-*.cjs'
+      - '.github/workflows/pcs-snapshot-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'PCS-Snapshot/**'
+      - 'netlify/functions/cities/**'
+      - 'netlify/functions/_share/**'
+      - 'netlify/functions/opensource-brain.js'
+      - 'netlify/functions/mortgage.js'
+      - 'scripts/test-snapshot-*.cjs'
+      - '.github/workflows/pcs-snapshot-tests.yml'
+  workflow_dispatch:
+
+jobs:
+  snapshot-accuracy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check PCS-Snapshot/snapshot.js
+      - run: node --test scripts/test-snapshot-accuracy.cjs
+      - run: node scripts/test-snapshot-shared-travel.cjs
