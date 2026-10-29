@@ -1083,7 +1083,7 @@
         animations: { enabled: false },
         fontFamily: "Inter, system-ui, sans-serif"
       },
-      colors: ["#447f72"],
+      colors: ["#2c83cb"],
       series: [
         {
           name: "Median Home Price",
@@ -1340,6 +1340,25 @@
     text("pcs-cur-financial-summary", financialSummary(newData));
   }
 
+  // Visualize the share of buy-scenario costs covered by BAH. The graphic
+  // stops at 100%; the accompanying text still reports a larger allowance.
+  function paintBahCoverage(percent) {
+    var known = Number.isFinite(percent) && percent >= 0;
+    var covered = known ? clamp(percent, 0, 100) : 0;
+    var label = Math.round(covered);
+    if ($("pcs-bah-covered-segment")) $("pcs-bah-covered-segment").style.width = covered + "%";
+    if ($("pcs-bah-uncovered-segment")) $("pcs-bah-uncovered-segment").style.width = (known ? 100 - covered : 0) + "%";
+    text("pcs-bah-covered-label", known ? label + "% covered by BAH" : "Coverage unavailable");
+    text("pcs-bah-uncovered-label", known ? (100 - label) + "% remaining" : "Complete costs and BAH needed");
+    var bar = $("pcs-bah-coverage");
+    if (bar) {
+      bar.setAttribute("data-state", known ? "known" : "unavailable");
+      bar.setAttribute("aria-label", !known ? "BAH coverage unavailable. Verified BAH and a complete housing estimate are required."
+        : percent > 100 ? "BAH covers all estimated buy housing costs. The allowance equals " + Math.round(percent) + "% of those costs."
+        : "BAH covers " + label + "% of estimated buy housing costs; " + (100 - label) + "% remains.");
+    }
+  }
+
   function paintAffordability(newData) {
     var bed = bedroomData(newData, STATE.bedroom);
     var bah = getBah(STATE.newCityKey, "new");
@@ -1347,6 +1366,7 @@
     var comparable = costAvailable && Number.isFinite(bah);
     var buffer = comparable ? Math.round((bah - bed.totalHousing) * 100) / 100 : null;
     var covered = comparable && bed.totalHousing > 0 ? Math.round(bah / bed.totalHousing * 100) : null;
+    paintBahCoverage(covered);
 
     text("pcs-bedroom-value", STATE.bedroom);
     if ($("pcs-bedroom-up")) $("pcs-bedroom-up").disabled = STATE.bedroom >= 5;
@@ -1360,7 +1380,7 @@
     text("pcs-housing-gap-label", buffer !== null && buffer >= 0 ? "BAH remaining" : "Remaining housing cost");
     text("pcs-housing-gap", money(buffer === null ? null : Math.abs(buffer), true) + (buffer === null ? "" : " / mo"));
     html("pcs-afford-subline", covered === null ? "Verified BAH and a complete housing estimate are required."
-      : "BAH covers <strong>" + covered + "%</strong> of estimated housing costs");
+      : (covered > 100 ? "BAH equals <strong>" : "BAH covers <strong>") + covered + "%</strong> of estimated housing costs");
     ["home", "mortgage", "taxes", "insurance", "hoa", "utilities"].forEach(function (key) {
       text(key === "home" ? "pcs-afford-home-price" : "pcs-afford-" + key, money(bed[key], key !== "home"));
       if (key !== "home") text("pcs-amt-" + key, Number.isFinite(bed[key]) ? money(bed[key]) : "—");
