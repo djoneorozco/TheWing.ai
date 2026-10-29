@@ -3,107 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PCS Snapshot — Compare &amp; Decide | PCSUnited</title>
-  <meta name="description" content="Compare estimated buying, renting and base housing costs for your next duty station with PCSUnited." />
+  <title>PCS Snapshot — The Clear Brief | PCSUnited</title>
+  <meta name="description" content="Your pay, housing costs and destination in one clear PCS brief. Explore buying, renting and base housing with PCSUnited." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-  <link rel="stylesheet" href="./snapshot.css?v=compare-decide-1" />
+  <link rel="stylesheet" href="./snapshot.css?v=clear-brief-1" />
 </head>
 <body>
   <main id="pcs-snapshot-shell">
     <div id="pcs-snapshot-wrap">
       <img id="pcs-scene" alt="" aria-hidden="true" decoding="async" hidden />
-      <header class="pcs-top">
-        <span class="pcs-brand">PCSUnited<span>.</span></span>
-        <span class="pcs-brand-note">Explore. Understand. Prepare.</span>
-      </header>
+      <header class="pcs-top"><span class="pcs-brand">PCSUnited<span>.</span></span><span class="pcs-brand-note">Explore. Understand. Prepare.</span></header>
       <div class="pcs-page-content">
         <div class="pcs-page-heading">
-          <div><p class="pcs-eyebrow">Your next duty station</p><h1>PCS Snapshot</h1><p id="pcs-city-line">Preparing your destination brief…</p></div>
-          <span class="pcs-view-label">Compare &amp; Decide</span>
+          <div class="pcs-title-block"><p class="pcs-eyebrow">The Clear Brief</p><h1>PCS Snapshot</h1><p id="pcs-city-line">Your housing and cost-of-living snapshot for your next duty station.</p></div>
+          <div class="pcs-context">
+            <div class="pcs-context-field"><span class="pcs-field-label">Destination</span><div class="pcs-destination-badge"><span class="pcs-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span id="pcs-destination-name">Your destination</span></div></div>
+            <div class="pcs-context-field"><span class="pcs-field-label">Housing size</span><div class="pcs-bedroom-control" role="group" aria-label="Housing size"><button id="pcs-bedroom-down" type="button" aria-label="Decrease bedrooms">−</button><span><strong id="pcs-bedroom-value">3</strong> bedrooms</span><button id="pcs-bedroom-up" type="button" aria-label="Increase bedrooms">+</button></div></div>
+          </div>
         </div>
+        <section class="pts-grid" aria-label="Monthly overview">
+          <article class="pts-card"><span class="pts-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 8H10.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H9m3-10v12"/></svg></span><div class="pts-copy"><p class="pts-kicker">Gross monthly pay</p><div class="pts-bigline"><p class="pts-value" id="pcs-income-main">—</p><span class="pts-unit">/ mo</span></div><p class="pts-meta" id="pts-income-meta">Before deductions</p><details class="pts-pay-detail"><summary>Pay breakdown</summary><p id="pcs-income-breakdown">Compensation loading…</p></details></div></article>
+          <article class="pts-card"><span class="pts-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v5c0 4 16 4 16 0V6M4 11v5c0 4 16 4 16 0v-5"/></svg></span><div class="pts-copy"><p class="pts-kicker">Destination BAH</p><p class="pts-value" id="pcs-bah-main">—</p><p class="pts-meta">Monthly housing allowance</p></div></article>
+          <article class="pts-card"><span class="pts-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-8 9 8M5 9v12h14V9M9 21v-8h6v8"/></svg></span><div class="pts-copy"><p class="pts-kicker">Estimated housing cost</p><p class="pts-value" id="pcs-housing-main">—</p><p class="pts-meta">Buy scenario · includes utilities</p></div></article>
+          <article class="pts-card"><span class="pts-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9h9A9 9 0 1 1 12 3Z"/><path d="M15 3.5V9h5.5A9 9 0 0 0 15 3.5Z"/></svg></span><div class="pts-copy"><p class="pts-kicker">Housing / gross pay</p><p class="pts-value" id="pts-power-score">—</p><p class="pts-meta">Buy scenario · before deductions</p><p class="pts-meta" id="pts-power-meta">Excludes other living expenses</p></div></article>
+        </section>
 
-        <div class="pcs-dashboard">
-          <aside class="pcs-rail" aria-label="Your destination and monthly pay">
-            <section class="pcs-destination-card" aria-labelledby="pcs-destination-name">
-              <div class="pcs-base-photo-wrap"><img id="pcs-base-photo" alt="" aria-hidden="true" decoding="async" hidden /><span class="pcs-photo-label">Your destination</span></div>
-              <div class="pcs-destination-body">
-                <div class="pcs-destination-heading"><span class="pcs-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><h2 id="pcs-destination-name">Your destination</h2></div>
-                <p id="pcs-current-city">Destination loading…</p>
-                <div class="pcs-bedroom-control" role="group" aria-label="Housing size">
-                  <button id="pcs-bedroom-down" type="button" aria-label="Decrease bedrooms">−</button>
-                  <span><strong id="pcs-bedroom-value">3</strong> bedrooms</span>
-                  <button id="pcs-bedroom-up" type="button" aria-label="Increase bedrooms">+</button>
-                </div>
-                <p class="pcs-bedroom-hint">Adjust to compare home sizes</p>
-              </div>
-            </section>
-            <section class="pts-grid" aria-label="Your monthly pay">
-              <article class="pts-card"><p class="pts-kicker"><span class="pts-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 8H10.5a2 2 0 0 0 0 4h3a2 2 0 0 1 0 4H9m3-10v12"/></svg></span>Gross monthly pay</p><div class="pts-bigline"><p class="pts-value" id="pcs-income-main">—</p><span class="pts-unit">/ mo</span></div><p class="pts-meta" id="pts-income-meta">Before deductions</p><details class="pts-pay-detail"><summary>Pay breakdown</summary><p id="pcs-income-breakdown">Compensation loading…</p></details></article>
-              <article class="pts-card"><p class="pts-kicker"><span class="pts-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v5c0 4 16 4 16 0V6M4 11v5c0 4 16 4 16 0v-5"/></svg></span>Destination BAH</p><p class="pts-value" id="pcs-bah-main">—</p><p class="pts-meta">Monthly housing allowance</p></article>
-            </section>
-            <section class="pcs-area-context" aria-label="Destination context">
-              <p class="pcs-section-kicker">Get to know the area</p><p id="pcs-current-tagline">Market context</p>
-                        <details class="pcs-breakdown"><summary>View city details <span aria-hidden="true">+</span></summary><div class="pcs-details-content">
-            <p id="pcs-current-bluf-summary">Destination information will appear here.</p><h3 id="pcs-current-bluf-headline">Market brief</h3>
+        <div class="pcs-main">
+          <section class="pcs-card pcs-afford-panel" aria-labelledby="pcs-afford-title">
+            <div class="pcs-section-head"><h2 id="pcs-afford-title">Housing costs &amp; BAH coverage</h2><span class="pcs-small-badge">Buy scenario</span></div>
+            <div id="pcs-afford-headline" aria-live="polite">— <span>Housing estimate loading…</span></div>
+            <p id="pcs-afford-subline">Preparing your housing comparison…</p>
+            <div class="pcs-coverage" id="pcs-bah-coverage" role="img" aria-label="BAH coverage unavailable" data-state="unavailable">
+              <div class="pcs-coverage-track" aria-hidden="true"><span id="pcs-bah-covered-segment"></span><span id="pcs-bah-uncovered-segment"></span></div>
+              <div class="pcs-coverage-labels" aria-hidden="true"><span id="pcs-bah-covered-label">— covered by BAH</span><span id="pcs-bah-uncovered-label">— remaining</span></div>
+            </div>
+            <dl class="pcs-cost-summary"><div><dt>Estimated housing cost</dt><dd id="pcs-housing-total">—</dd></div><div><dt>Destination BAH</dt><dd id="pcs-housing-bah">—</dd></div><div class="pcs-cost-total"><dt id="pcs-housing-gap-label">Remaining housing cost</dt><dd id="pcs-housing-gap">—</dd></div></dl>
+            <details class="pcs-breakdown"><summary>View cost breakdown &amp; assumptions <span aria-hidden="true">+</span></summary><div class="pcs-details-content"><dl class="pcs-itemized"><div><dt>Average home price</dt><dd id="pcs-afford-home-price">—</dd></div><div><dt>Mortgage principal &amp; interest</dt><dd id="pcs-afford-mortgage">—</dd></div><div><dt>Property taxes</dt><dd id="pcs-afford-taxes">—</dd></div><div><dt>Homeowners insurance</dt><dd id="pcs-afford-insurance">—</dd></div><div><dt>HOA</dt><dd id="pcs-afford-hoa">—</dd></div><div><dt>Utilities</dt><dd id="pcs-afford-utilities">—</dd></div></dl><p class="pcs-assumption-copy" id="pcs-afford-footer">Planning assumptions will appear here.</p></div></details>
+          </section>
+
+          <section class="pcs-card pcs-current-panel" aria-labelledby="pcs-destination-title">
+            <div class="pcs-base-photo-wrap"><img id="pcs-base-photo" alt="" aria-hidden="true" decoding="async" hidden /></div>
+            <div class="pcs-destination-body"><p class="pcs-section-kicker">Your next chapter</p><h2 id="pcs-destination-title">Your destination</h2><p id="pcs-current-city">Destination loading…</p><p class="pcs-city-summary" id="pcs-current-bluf-summary">Destination information will appear here.</p><details class="pcs-breakdown"><summary>View city details <span aria-hidden="true">+</span></summary><div class="pcs-details-content">
+            <h3 id="pcs-current-bluf-headline">Market brief</h3>
             <div class="pcs-mini-grid"><div><span>Population</span><strong id="pcs-cur-population-city">—</strong><small id="pcs-cur-population-metro">—</small></div><div><span>Median income</span><strong id="pcs-cur-median-income">—</strong></div><div><span>Price trend</span><strong id="pcs-cur-market-trend">—</strong></div><div><span>Median home</span><strong id="pcs-cur-median-home">—</strong></div><div><span>Traffic</span><strong id="pcs-cur-traffic-level">—</strong></div><div><span>Employment</span><strong id="pcs-cur-employment-status">—</strong></div></div>
             <h3>Lifestyle</h3><ul id="pcs-cur-lifestyle-list"></ul><h3 id="pcs-cur-financial-headline">Financial context</h3><p id="pcs-cur-financial-summary">—</p>
-          </div></details>
-            </section>
-          </aside>
+          </div></details></div>
+          </section>
 
-          <div class="pcs-workspace">
-            <section class="pcs-options-section" aria-labelledby="pcs-options-title">
-              <div class="pcs-section-head"><div><h2 id="pcs-options-title">Your housing options</h2><p class="pcs-section-sub">Compare estimated monthly costs. Choose an option to see what’s included.</p></div></div>
-              <div class="pcs-ls-tabs" role="group" aria-label="Compare living options">
+          <section class="pcs-card pcs-options-panel" aria-labelledby="pcs-options-title">
+            <div class="pcs-section-head"><h2 id="pcs-options-title">Your living options</h2><span class="pcs-small-badge">Monthly estimates</span></div>
+            <div class="pcs-ls-tabs" role="group" aria-label="Compare living options">
                 <button class="pcs-ls-tab" type="button" data-mode="buy" aria-pressed="false" aria-controls="pcs-option-detail"><span class="pcs-option-top"><span class="pcs-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-8 9 8M5 9v12h14V9M9 21v-8h6v8"/></svg></span><span class="pcs-option-name">Buy</span><span class="pcs-chevron" aria-hidden="true">›</span></span><span class="pcs-option-cost"><strong id="pcs-option-buy">—</strong><small id="pcs-option-buy-unit">/ mo</small></span><span class="pcs-option-caption">Mortgage, taxes, insurance,<br /> HOA &amp; utilities</span></button>
                 <button class="pcs-ls-tab" type="button" data-mode="rent" aria-pressed="false" aria-controls="pcs-option-detail"><span class="pcs-option-top"><span class="pcs-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V3h14v18M9 7h1m4 0h1M9 11h1m4 0h1M9 15h1m4 0h1M10 21v-3h4v3"/></svg></span><span class="pcs-option-name">Rent</span><span class="pcs-chevron" aria-hidden="true">›</span></span><span class="pcs-option-cost"><strong id="pcs-option-rent">—</strong><small id="pcs-option-rent-unit">/ mo</small></span><span class="pcs-option-caption">Estimated rent<br /> &amp; utilities</span></button>
                 <button class="pcs-ls-tab" type="button" data-mode="base" aria-pressed="false" aria-controls="pcs-option-detail"><span class="pcs-option-top"><span class="pcs-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-8 9 8M5 9v12h14V9M9 21v-8h6v8"/></svg></span><span class="pcs-option-name">Base housing</span><span class="pcs-chevron" aria-hidden="true">›</span></span><span class="pcs-option-cost"><strong class="pcs-quote">Quote needed</strong></span><span class="pcs-option-caption">Confirm pricing &amp; utility terms<br /> with the housing provider</span></button>
               </div>
               <div class="pcs-ls-selection" id="pcs-option-detail" aria-live="polite" aria-atomic="true"><strong id="pcs-ls-main">Compare your options</strong><p id="pcs-ls-sub">Estimates are for planning.</p></div>
-            </section>
-
-            <div class="pcs-main">
-              <div class="pcs-main-column">
-                <section class="pcs-card pcs-comparison-panel" aria-labelledby="pcs-comparison-title">
-                  <div class="pcs-section-head"><h2 id="pcs-comparison-title">Monthly cost comparison</h2><span class="pcs-small-badge">Includes utilities</span></div>
-                  <dl class="pcs-cost-bars">
+            <details class="pcs-breakdown pcs-comparison-details"><summary>Compare monthly costs <span aria-hidden="true">+</span></summary><div class="pcs-details-content"><h3 id="pcs-comparison-title">Buy &amp; rent, side by side</h3><dl class="pcs-cost-bars">
                     <div class="pcs-bar-row"><dt>Buy</dt><dd><span class="pcs-bar-track" aria-hidden="true"><span id="pcs-bar-buy" class="pcs-bar-fill pcs-buy-fill"></span></span><strong id="pcs-bar-buy-value">—</strong></dd></div>
                     <div class="pcs-bar-row"><dt>Rent</dt><dd><span class="pcs-bar-track" aria-hidden="true"><span id="pcs-bar-rent" class="pcs-bar-fill pcs-rent-fill"></span></span><strong id="pcs-bar-rent-value">—</strong></dd></div>
                     <div class="pcs-bar-row pcs-difference-row"><dt>Difference</dt><dd><span class="pcs-bar-track" aria-hidden="true"><span id="pcs-bar-difference" class="pcs-bar-fill pcs-difference-fill"></span></span><strong id="pcs-bar-difference-value">—</strong></dd></div>
                   </dl>
                   <div class="pcs-gap-callout" aria-live="polite" aria-atomic="true"><p id="pcs-cost-verdict">Preparing your cost comparison…</p><p id="pcs-cost-annual">Both estimates use the same utility allowance.</p></div>
-                  <p class="pcs-comparison-note">Base housing needs a provider quote before it can be compared.</p>
-                  <details class="pcs-breakdown"><summary>What this comparison includes <span aria-hidden="true">+</span></summary><div class="pcs-details-content"><p>Buy includes mortgage principal and interest, property taxes, homeowners insurance, HOA and estimated utilities. Rent includes estimated rent and the same utilities. The 12-month difference assumes unchanged monthly costs.</p><p>Repairs, transaction costs, rent changes, investment returns and tax effects are excluded. This is a comparison of estimated cash costs, not a recommendation.</p><p id="pcs-ls-equity">Equity is not projected.</p></div></details>
-                </section>
-                        <section class="pcs-card pcs-trend-panel" aria-labelledby="pcs-trend-title">
+                  <p class="pcs-comparison-note">Base housing needs a provider quote before it can be compared.</p><p>Buy includes mortgage principal and interest, property taxes, homeowners insurance, HOA and estimated utilities. Rent includes estimated rent and the same utilities. The 12-month difference assumes unchanged monthly costs.</p><p>Repairs, transaction costs, rent changes, investment returns and tax effects are excluded. This is a comparison of estimated cash costs, not a recommendation.</p><p id="pcs-ls-equity">Equity is not projected.</p></div></details>
+          </section>
+          <section class="pcs-card pcs-trend-panel" aria-labelledby="pcs-trend-title">
           <div class="pcs-section-head"><div><p class="pcs-section-kicker">The recorded picture</p><h2 id="pcs-trend-title">12-Month Housing History</h2></div><div class="trend-toggle" role="group" aria-label="Housing history period"><button class="trend-btn active" id="btn-1yr" type="button" aria-pressed="true">1 year</button><button class="trend-btn" id="btn-3yr" type="button" aria-pressed="false">3 years</button></div></div>
           <p class="pcs-trend-sub" id="pcs-trend-subtitle">Recorded median sale prices</p><div id="pcs-trend-chart-apex" role="img" aria-label="Recorded median sale-price history" aria-describedby="pcs-trend-summary"></div><p id="pcs-trend-summary">Loading recorded price history…</p>
         </section>
-              </div>
-              <div class="pcs-side-column">
-                <section class="pcs-card pcs-afford-panel" aria-labelledby="pcs-afford-title">
-                  <div class="pcs-section-head"><h2 id="pcs-afford-title">BAH coverage</h2><span class="pcs-small-badge">Buy scenario</span></div>
-                  <div class="pcs-coverage-visual"><div class="pcs-donut-wrap"><div class="pcs-donut" id="pcs-afford-donut" aria-hidden="true"></div><div class="pcs-donut-center"><strong id="pcs-donut-buffer">—</strong><span id="pcs-donut-buffer-label">BAH covered</span></div></div><p id="pcs-afford-subline">Housing estimate loading…</p></div>
-                  <dl class="pcs-cost-summary"><div><dt>Estimated housing</dt><dd id="pcs-housing-total">—</dd></div><div><dt>Destination BAH</dt><dd id="pcs-housing-bah">—</dd></div><div class="pcs-cost-total"><dt id="pcs-housing-gap-label">Remaining housing cost</dt><dd id="pcs-housing-gap">—</dd></div></dl>
-                            <details class="pcs-breakdown"><summary>View cost breakdown &amp; assumptions <span aria-hidden="true">+</span></summary><div class="pcs-details-content"><dl class="pcs-itemized"><div><dt>Average home price</dt><dd id="pcs-afford-home-price">—</dd></div><div><dt>Mortgage principal &amp; interest</dt><dd id="pcs-afford-mortgage">—</dd></div><div><dt>Property taxes</dt><dd id="pcs-afford-taxes">—</dd></div><div><dt>Homeowners insurance</dt><dd id="pcs-afford-insurance">—</dd></div><div><dt>HOA</dt><dd id="pcs-afford-hoa">—</dd></div><div><dt>Utilities</dt><dd id="pcs-afford-utilities">—</dd></div></dl><p class="pcs-assumption-copy" id="pcs-afford-footer">Planning assumptions will appear here.</p></div></details>
-                </section>
-                <section class="pcs-card pcs-ratio-panel" aria-label="Housing as a share of gross pay"><div class="pcs-ratio-heading"><span class="pcs-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9h9A9 9 0 1 1 12 3Z"/><path d="M15 3.5V9h5.5A9 9 0 0 0 15 3.5Z"/></svg></span><div><p>Housing / gross pay</p><strong id="pts-power-score">—</strong></div></div><p class="pcs-ratio-context">Buy scenario · before deductions</p><p id="pts-power-meta">Excludes other living expenses</p></section>
-              </div>
-            </div>
-          </div>
         </div>
-              <section class="pcs-move-strip" aria-label="Base comparison and moving estimates">
+        <section class="pcs-move-strip" aria-label="Base comparison and moving estimates">
         <article class="pcs-move-card"><div class="pcs-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v5c0 4 16 4 16 0V6M4 11v5c0 4 16 4 16 0v-5"/></svg></div><div><h2>BAH comparison</h2><div class="pts-bigline"><strong id="pts-bah-delta">—</strong><span class="pts-unit" hidden>/ month</span></div><p id="pts-bah-copy">Checking current base…</p><small id="pts-bah-meta">Comparison pending</small></div></article>
         <article class="pcs-move-card"><div class="pcs-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="14" rx="3"/><path d="M8 7V3h8v4M8 11v6m8-6v6"/></svg></div><div><h2>Travel allotments</h2><strong id="pts-market-signal">—</strong><p id="pts-market-copy">DLA + MALT estimate loading…</p><small id="pts-market-meta">PCS move cash estimate</small></div></article>
       </section>
       <footer class="pcs-footer"><details><summary>Sources &amp; assumptions</summary><p>Pay and housing allowances come from TheWing's compensation service. Housing uses the selected base record and the mortgage service; open the cost breakdown for the loan assumptions and data date. Market context and images come from that base's data file. Estimates are for planning; confirm benefits with your finance office and housing costs with the provider. Gross pay is before deductions. Debts, other living expenses, repairs and closing costs are excluded.</p></details><span>Powered by TheWing.ai</span></footer>
-
       </div>
-      <div class="pcs-hidden-runtime" aria-hidden="true"><div id="pcs-housing-main"></div><div id="pts-power-stars"></div><div id="pts-power-copy"></div><div id="pcs-afford-headline"></div><div id="pcs-ls-gap"></div><div id="pcs-ls-annual"></div><div id="pcs-ls-vs"></div><div id="pcs-ls-bluf"></div><div id="pcs-ls-status"></div><div id="pcs-destination-title"></div><img id="img-current" alt="" /><div id="pcs-amt-mortgage"></div><div id="pcs-amt-taxes"></div><div id="pcs-amt-insurance"></div><div id="pcs-amt-hoa"></div><div id="pcs-amt-utilities"></div><canvas id="pcs-ls-chart"></canvas>
+      <div class="pcs-hidden-runtime" aria-hidden="true"><div id="pcs-current-tagline"></div><div id="pcs-afford-donut"></div><div id="pcs-donut-buffer"></div><div id="pcs-donut-buffer-label"></div><div id="pts-power-stars"></div><div id="pts-power-copy"></div><div id="pcs-ls-gap"></div><div id="pcs-ls-annual"></div><div id="pcs-ls-vs"></div><div id="pcs-ls-bluf"></div><div id="pcs-ls-status"></div><img id="img-current" alt="" /><div id="pcs-amt-mortgage"></div><div id="pcs-amt-taxes"></div><div id="pcs-amt-insurance"></div><div id="pcs-amt-hoa"></div><div id="pcs-amt-utilities"></div><canvas id="pcs-ls-chart"></canvas>
         <div id="pcs-compare-block"></div>
         <div id="pcsc-frame"></div>
         <div id="pcsc-grid"></div>
@@ -165,6 +143,6 @@
 
     </div>
   </main>
-  <script src="./snapshot.js?v=compare-decide-1"></script>
+  <script src="./snapshot.js?v=clear-brief-1"></script>
 </body>
 </html>
