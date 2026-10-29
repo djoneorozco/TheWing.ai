@@ -17,9 +17,10 @@ import {
   PCS_MOVE_ENGINE_VERSION,
   calculatePcsMoveEstimate
 } from "./_share/pcs-move-engine.js";
+import { calculateRelocationBrief, RelocationInputError } from "./_share/pcs-relocation-brief.js";
 
 const APP_NAME = "TheWing.ai";
-const HANDLER_VERSION = "thewing-pcs-move-handler-1.1.0";
+const HANDLER_VERSION = "thewing-pcs-move-handler-1.2.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -79,7 +80,9 @@ export async function handler(event) {
 
   try {
     const input = body?.input && typeof body.input === "object" ? body.input : body;
-    const result = calculatePcsMoveEstimate(input);
+    const result = input?.estimateMode === 'relocation-brief'
+      ? calculateRelocationBrief(input)
+      : calculatePcsMoveEstimate(input);
     const warnings = Array.isArray(result?.warnings) ? result.warnings : [];
 
     return json(200, {
@@ -91,7 +94,7 @@ export async function handler(event) {
       warnings
     });
   } catch (error) {
-    return json(500, {
+    return json(error instanceof RelocationInputError ? 400 : 500, {
       ok: false,
       error: error?.message || "PCS move calculation failed.",
       result: null,
