@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>PCS Snapshot Brief · PCSUnited</title>
+  <link rel="stylesheet" href="./brief.css">
+  <script type="module" src="./brief.js"></script>
+</head>
+<body>
+<main id="brief" aria-label="PCS Snapshot Brief">
+  <div id="app-status" role="status" aria-live="polite">Choose your destination in the PCSUnited input strip, then select Analyze.</div>
+  <button id="retry" type="button" hidden>Retry brief</button>
+  <article id="result" hidden>
+    <header id="pay-toolbar" class="pay-toolbar" hidden>
+      <div class="brief-title"><h1>PCS Snapshot Brief</h1><p id="brief-profile"></p></div>
+      <a id="brief-open" target="_blank" rel="noopener noreferrer" aria-label="Open full PCS Snapshot in a new tab">Open larger ↗</a>
+    </header>
+    <header class="intro"><p class="eyebrow">Your PCS, in focus</p><h1 id="base-name"></h1><p id="profile" class="muted"></p></header>
+    <section class="panel compensation" aria-labelledby="pay-heading">
+      <div class="pay-top"><div><div class="pay-title"><h2 id="pay-heading">Your monthly compensation</h2><button id="pay-info" type="button" aria-label="Pay sources and assumptions" title="Pay sources and assumptions">ⓘ</button></div><strong id="total-pay" class="total" aria-label="Total monthly compensation, including BAH"></strong><p class="fine">Before taxes and deductions</p></div><div id="pay-donut" class="donut" role="img"><span>Monthly<br>pay</span></div></div>
+      <dl class="pay-parts"><div><dt><i class="dot base"></i>Base Pay</dt><dd id="base-pay"></dd></div><div class="bah-part"><dt><i class="dot bah"></i>BAH</dt><dd id="bah"></dd></div><div><dt><i class="dot bas"></i>BAS</dt><dd id="bas"></dd></div></dl>
+    </section>
+    <div class="intelligence-grid">
+    <section class="panel destination" aria-labelledby="city-panel-heading">
+      <h2 id="city-panel-heading" class="section-heading">PCS City Intelligence Brief</h2>
+      <div class="destination-top">
+        <img id="destination-image" alt="" hidden>
+        <div class="destination-caption"><h3 id="destination-heading"></h3><p id="destination-base"></p></div>
+      </div>
+      <p id="image-note" class="fine" hidden>Destination image unavailable.</p>
+      <div class="city-insight"><h3 id="market-headline"></h3><p id="market-brief" class="market-copy"></p></div>
+      <dl class="city-stats">
+        <div><dt>Population</dt><dd id="city-population"></dd><small id="metro-population"></small></div>
+        <div><dt>Household income</dt><dd id="city-income"></dd><small>Median / year</small></div>
+        <div><dt>Home value trend</dt><dd id="city-trend"></dd><small id="trend-label"></small></div>
+        <div><dt>Median home</dt><dd id="median-price"></dd><small>Market snapshot</small></div>
+        <div><dt>Traffic</dt><dd id="city-traffic"></dd></div>
+        <div><dt>Employment</dt><dd id="city-employment"></dd></div>
+      </dl>
+      <div class="city-foot"><p id="market-date" class="fine"></p><button id="city-info" type="button">Local details ↗</button></div>
+    </section>
+    <section id="housing-panel" class="panel housing" aria-labelledby="housing-heading">
+      <div class="housing-head"><h2 id="housing-heading" class="section-heading">Housing Affordability Breakdown</h2><label>Bedrooms<select id="bedrooms"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select></label></div>
+      <p id="housing-status" role="status" aria-live="polite"></p>
+      <button id="housing-retry" type="button" hidden>Retry housing estimate</button>
+      <div id="housing-result" hidden>
+        <p id="balance" class="balance"></p>
+        <div class="housing-cost"><div><p class="label">Estimated housing cost</p><strong id="housing-cost"></strong><span class="fine"> /month</span></div><strong id="coverage"></strong></div>
+        <div class="housing-visual">
+          <div class="housing-facts"><p class="home-price-label">Average home price<strong id="housing-price"></strong></p><dl id="housing-components"></dl></div>
+          <div id="housing-donut" role="img"><div><strong id="housing-percent"></strong><span>BAH covered</span></div></div>
+        </div>
+        <div class="coverage-track" aria-hidden="true"><div id="coverage-bar"></div></div>
+        <p id="housing-scope" class="fine">Includes principal &amp; interest, property tax, insurance and HOA. Excludes utilities, maintenance and closing costs.</p>
+        <button id="housing-info" class="details-link" type="button" hidden>Calculation assumptions ↗</button>
+        <details id="housing-details"><summary>Calculation assumptions &amp; breakdown</summary><p id="housing-assumptions" class="fine"></p><dl id="housing-breakdown" class="breakdown"></dl><p class="fine">Planning estimate, not a lender quote or loan approval. Actual taxes, insurance, fees and eligibility vary. BAH coverage compares this estimate with BAH only; other household spending is not assessed.</p></details>
+      </div>
+    </section>
+    </div>
+    <details id="sources" class="sources"><summary>Data sources &amp; pay assumptions</summary><p id="pay-source"></p><p id="family-assumption"></p><p id="city-source"></p><a id="city-data" target="_blank" rel="noopener noreferrer">View destination data</a><p>Total includes Base Pay + BAH + BAS only. Special pays, bonuses, deductions and individual entitlement adjustments are not included. Confirm entitlements with your finance office.</p></details>
+    <footer><span class="footer-brand">PCSUnited</span><span>Powered by TheWing.ai</span></footer>
+  </article>
+  <dialog id="city-notes" aria-labelledby="city-notes-heading"><form method="dialog"><button aria-label="Close city details">Close</button></form><h2 id="city-notes-heading">Destination details</h2><p id="market-full"></p><h3>Local highlights</h3><ul id="highlights" class="highlights"></ul><p id="city-notes-source"></p><a id="city-notes-data" target="_blank" rel="noopener noreferrer">View destination data</a></dialog>
+  <dialog id="housing-notes" aria-labelledby="housing-notes-heading"><form method="dialog"><button aria-label="Close housing details">Close</button></form><h2 id="housing-notes-heading">Housing assumptions</h2></dialog>
+  <dialog id="pay-notes" aria-labelledby="pay-notes-heading"><form method="dialog"><button aria-label="Close pay details">Close</button></form><h2 id="pay-notes-heading">Pay details</h2></dialog>
+  <noscript>Enable JavaScript to load this brief.</noscript>
+</main>
+</body>
+</html>

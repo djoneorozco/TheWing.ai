@@ -24,9 +24,13 @@
   const VERSION = "1.2.0";
   const SOURCE = "pcsunited.bah.header.v1.2.0";
 
-  const MOUNT_ID = "pcsu-bah-header-progression-widget";
-  const ROOT_ID = "pcsu-bah-header-compensation-strip";
-  const STYLE_ID = "pcsu-bah-header-styles-v120";
+  // Optional independent instance for a second header on the same parent page.
+  // Existing embeds keep their IDs, global API and calculator message channel.
+  const requestedMount = document.currentScript?.dataset.mountId || "";
+  const customMount = /^[A-Za-z][A-Za-z0-9_-]{0,79}$/.test(requestedMount);
+  const MOUNT_ID = customMount ? requestedMount : "pcsu-bah-header-progression-widget";
+  const ROOT_ID = customMount ? MOUNT_ID + "-strip" : "pcsu-bah-header-compensation-strip";
+  const STYLE_ID = customMount ? MOUNT_ID + "-styles-v120" : "pcsu-bah-header-styles-v120";
   const FONT_ID = "pcsu-bah-header-font";
 
   const MESSAGE_TYPE = "pcsunited-bah-compensation";
@@ -986,6 +990,10 @@
     mount.dataset.mounted =
       "true";
 
+    // Embedded Briefs feed verified results through setSnapshot(). Keep their
+    // isolated header out of the legacy calculator broadcast/request channel.
+    const manualTransport = mount.dataset.transport === "manual";
+
 
     ensureFont();
 
@@ -1199,6 +1207,12 @@
     `;
 
 
+    if (customMount) {
+      mount.querySelectorAll('[id^="pcsu-bah-header-"]').forEach(node => {
+        node.id = node.id.replace("pcsu-bah-header-", MOUNT_ID + "-");
+      });
+    }
+
     const root =
       document.getElementById(
         ROOT_ID
@@ -1215,67 +1229,70 @@
       ELEMENT REFERENCES
     ============================================================ */
 
+    const withinRoot = selector => root.querySelector(customMount
+      ? selector.replace("#pcsu-bah-header-", "#" + MOUNT_ID + "-") : selector);
+
     const els = {
 
       tileBasePay:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-tile-basepay"
         ),
 
       tileBah:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-tile-bah"
         ),
 
       tileBas:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-tile-bas"
         ),
 
       tileTotal:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-tile-total"
         ),
 
 
       valueBasePay:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-value-basepay"
         ),
 
       valueBah:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-value-bah"
         ),
 
       valueBas:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-value-bas"
         ),
 
       valueTotal:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-value-total"
         ),
 
 
       supportBasePay:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-support-basepay"
         ),
 
       supportBah:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-support-bah"
         ),
 
       supportBas:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-support-bas"
         ),
 
       supportTotal:
-        root.querySelector(
+        withinRoot(
           "#pcsu-bah-header-support-total"
         )
     };
@@ -1576,7 +1593,7 @@
     }
 
 
-    window.addEventListener(
+    if (!manualTransport) window.addEventListener(
       "message",
       receiveMessage
     );
@@ -1587,6 +1604,8 @@
     ============================================================ */
 
     function requestSnapshotFromFrames() {
+
+      if (manualTransport) return;
 
       const request = {
 
@@ -1664,10 +1683,10 @@
         : {};
 
 
-    window.PCSU_BAH_HEADER =
+    const headerApi =
       Object.assign(
         {},
-        existingApi,
+        customMount ? {} : existingApi,
         {
 
           version:
@@ -1759,6 +1778,9 @@
           }
         }
       );
+
+    mount.pcsuBahHeader = headerApi;
+    if (!customMount) window.PCSU_BAH_HEADER = headerApi;
 
 
     /* ============================================================
