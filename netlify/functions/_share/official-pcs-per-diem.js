@@ -30,7 +30,7 @@
 // - ES Module exports for Netlify Functions with "type": "module"
 // ============================================================
 
-export const RATE_VERSION = "official-pcs-per-diem-2026.1";
+export const RATE_VERSION = "official-pcs-per-diem-2027.1";
 
 export const PCS_PER_DIEM_SOURCE =
   "JTR Chapter 5, 050301; Appendix D Current CONUS Rates effective 10/01/2025";
@@ -52,7 +52,21 @@ export const PCS_PER_DIEM_RATES = Object.freeze({
       age12OrOlder: 0.75,
       under12: 0.50
     })
+  }),
+  // GSA FTR Bulletin 27-01, effective October 1, 2026 through September 30, 2027.
+  // Standard CONUS: $113 lodging + $68 M&IE. Dependent shares are unchanged.
+  2027: Object.freeze({
+    conusStandard: Object.freeze({
+      lodging: 113, localMealRate: 63, localIncidental: 5,
+      maximumPerDiem: 181, effectiveDate: "2026-10-01"
+    }),
+    dependentPercentages: Object.freeze({ age12OrOlder: 0.75, under12: 0.50 })
   })
+});
+
+export const PCS_PER_DIEM_SOURCE_URLS = Object.freeze({
+  2026: "https://www.gsa.gov/travel/plan-book/per-diem-rates",
+  2027: "https://www.gsa.gov/policy-regulations/regulations/federal-travel-regulation/ftr-and-related-files/gsa-per-diem-bulletin-ftr-2701"
 });
 
 const DEFAULT_YEAR = 2026;
@@ -169,7 +183,9 @@ export function getPcsPerDiemRate({ year } = {}) {
       table.conusStandard.maximumPerDiem * table.dependentPercentages.under12
     ),
     sourceVersion: RATE_VERSION,
-    source: PCS_PER_DIEM_SOURCE
+    source: resolvedYear === 2027 ? "GSA FTR Bulletin 27-01; JTR 050301" : PCS_PER_DIEM_SOURCE,
+    sourceUrl: PCS_PER_DIEM_SOURCE_URLS[resolvedYear] || null,
+    effectiveDate: table.conusStandard.effectiveDate
   };
 }
 
@@ -186,7 +202,8 @@ export function calculatePcsPerDiem({
   year,
   memberRate,
   dependentRateAdult,
-  dependentRateChild
+  dependentRateChild,
+  assumeDependentsFromFamily = true
 } = {}) {
   const days = toFiniteNumber(travelDays, null);
   const family = toFiniteNumber(familySize, null);
@@ -242,7 +259,7 @@ export function calculatePcsPerDiem({
   // Backward-compatible fallback:
   // Existing calculator sends familySize but not dependent age split.
   // If "With Dependents" and no split is provided, assume one 12+ dependent.
-  if (withDependents && adultDependents === 0 && childDependents === 0) {
+  if (assumeDependentsFromFamily && withDependents && adultDependents === 0 && childDependents === 0) {
     if (Number.isFinite(family) && family > 1) {
       adultDependents = Math.max(1, Math.floor(family) - 1);
     } else {
@@ -270,7 +287,8 @@ export function calculatePcsPerDiem({
     hasDependents: withDependents,
     year: resolvedYear,
     sourceVersion: RATE_VERSION,
-    source: PCS_PER_DIEM_SOURCE,
+    source: rateInfo.source,
+    sourceUrl: rateInfo.sourceUrl,
     rates: {
       memberDailyRate,
       dependent12PlusDailyRate: adultDependentDailyRate,
