@@ -187,16 +187,17 @@
 
   // The selected base owns its artwork. Never substitute another destination.
   function paintDestinationScene(data) {
-    var scene = $("pcs-scene");
-    if (!scene) return;
     var src = data && !data.__pcs_fallback && typeof data.image_url === "string"
       && /^https?:\/\//i.test(data.image_url.trim()) ? data.image_url.trim() : "";
-    if (src && scene.getAttribute("src") === src) return;
-    scene.hidden = true;
-    scene.onload = function () { scene.hidden = false; };
-    scene.onerror = function () { scene.hidden = true; };
-    if (src) scene.src = src;
-    else scene.removeAttribute("src");
+    ["pcs-scene", "pcs-base-photo"].forEach(function (id) {
+      var scene = $(id);
+      if (!scene || (src && scene.getAttribute("src") === src)) return;
+      scene.hidden = true;
+      scene.onload = function () { scene.hidden = false; };
+      scene.onerror = function () { scene.hidden = true; };
+      if (src) scene.src = src;
+      else scene.removeAttribute("src");
+    });
   }
 
   /* =========================================================
@@ -279,7 +280,7 @@
     newZip: getParam("newZip", getStorageItem("pcs_new_zip") || ""),
 
     bedroom: 3,
-    livingMode: "buy",
+    livingMode: "compare",
     trendYears: 1
   };
 
@@ -1384,22 +1385,57 @@
     }
   }
 
+  // A common scale and explicit direction make the cash-cost comparison legible.
+  // Selecting an option changes its details, never the independent buy/rent totals.
+  function paintCostComparison(bed) {
+    var comparison = housingComparison(bed);
+    var gap = comparison.monthlyGap;
+    var buy = amount(bed.totalHousing), rent = amount(bed.totalRent);
+    var difference = gap === null ? null : Math.abs(gap);
+    var scale = Math.max(buy === null ? 0 : buy, rent === null ? 0 : rent);
+    [["buy", buy], ["rent", rent], ["difference", difference]].forEach(function (entry) {
+      var key = entry[0], value = entry[1], bar = $("pcs-bar-" + key);
+      text("pcs-bar-" + key + "-value", money(value, true));
+      if (bar) {
+        bar.hidden = value === null || value === 0;
+        bar.style.width = value !== null && scale > 0 ? clamp(value / scale * 100, 0, 100) + "%" : "0%";
+      }
+    });
+    if (gap === null) {
+      text("pcs-cost-verdict", "Cost comparison unavailable");
+      text("pcs-cost-annual", "Complete buy and rent estimates are needed to calculate the difference.");
+    } else if (gap === 0) {
+      text("pcs-cost-verdict", "Same estimated monthly cost");
+      text("pcs-cost-annual", "$0.00 difference over 12 months at these estimates.");
+    } else {
+      var direction = gap < 0 ? "less" : "more";
+      html("pcs-cost-verdict", "<strong>" + money(difference, true) + "</strong> " + direction + " per month to buy");
+      text("pcs-cost-annual", money(Math.abs(comparison.annualGap), true) + " " + direction + " over 12 months at these estimates.");
+    }
+  }
+
   function paintLivingStrategy(newData) {
     var bed = bedroomData(newData, STATE.bedroom);
     var comparison = housingComparison(bed);
     var mode = STATE.livingMode;
-    var base = mode === "base", rent = mode === "rent";
-    var cost = base ? null : rent ? bed.totalRent : bed.totalHousing;
+    var base = mode === "base", rent = mode === "rent", overview = mode === "compare";
+    var cost = base || overview ? null : rent ? bed.totalRent : bed.totalHousing;
     var monthlyGap = base ? null : comparison.monthlyGap;
     text("pcs-option-buy", money(bed.totalHousing, true));
     text("pcs-option-rent", money(bed.totalRent, true));
+    if ($("pcs-option-buy-unit")) $("pcs-option-buy-unit").hidden = bed.totalHousing === null;
+    if ($("pcs-option-rent-unit")) $("pcs-option-rent-unit").hidden = bed.totalRent === null;
     text("pcs-ls-status", base ? "BASE HOUSING • QUOTE REQUIRED" : "MONTHLY COST COMPARISON");
-    text("pcs-ls-main", base ? "Base Housing" : rent ? "Rent" : "Buy");
-    text("pcs-ls-sub", base ? "Actual rent and utility terms depend on the housing provider."
-      : cost === null ? "Housing cost unavailable" : "Estimated housing: " + money(cost, true) + "/month");
+    text("pcs-ls-main", overview ? "Compare your options." : base ? "Base Housing" : rent ? "Rent" : "Buy");
+    text("pcs-ls-sub", overview ? "Consider lease terms, availability and your household’s needs alongside these estimates."
+      : base ? "BAH alone does not establish the cost. Request actual rent, utility terms and availability from the housing provider."
+      : cost === null ? "Housing cost unavailable for this bedroom profile."
+      : rent ? "Estimated housing: " + money(cost, true) + "/month. Includes " + money(bed.rent, true) + " rent + " + money(bed.utilities, true) + " utilities."
+      : "Estimated housing: " + money(cost, true) + "/month. Includes principal & interest, taxes, insurance, HOA and utilities. Open the BAH cost breakdown for loan assumptions.");
     text("pcs-ls-equity", "Equity is not projected");
     text("pcs-ls-bluf", base ? "BAH alone does not establish the cost of base housing."
       : monthlyGap === null ? "Complete buy and rent costs are needed to compare."
+      : monthlyGap === 0 ? "Buying and renting have the same estimated monthly cost. Repairs, transaction costs and rent changes are excluded."
       : "Buying costs " + money(Math.abs(monthlyGap), true) + (monthlyGap < 0 ? " less" : " more")
         + " per month than renting. Both include the same utility estimate; repairs, transaction costs and rent changes are excluded.");
     text("pcs-ls-annual", money(base ? null : comparison.annualGap, true));
@@ -1530,6 +1566,7 @@
     paintTopStrip(currentData, newData);
     paintCityBrief(newData);
     paintAffordability(newData);
+    paintCostComparison(bedroomData(newData, STATE.bedroom));
     paintLivingStrategy(newData);
     paintComparison(currentData, newData);
     paintQuickFacts(newData);
