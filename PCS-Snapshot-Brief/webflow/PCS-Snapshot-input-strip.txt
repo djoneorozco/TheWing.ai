@@ -1,0 +1,269 @@
+<!-- PCSUnited PCS Snapshot Brief input strip. Replace the entire previous input-strip embed. -->
+<div id="sass-front-strip" >
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+
+  <style>
+    #sass-front-strip, #sass-front-strip * {
+      box-sizing: border-box;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    #sass-shell {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 10px 0 10px;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    #sass-input-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      #sass-input-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    #sass-front-strip .sass-field-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #a8b0d6;
+      letter-spacing: .1em;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    #sass-front-strip .sass-select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(12,14,25,0.65);
+      backdrop-filter: blur(4px);
+      color: #e9ecff;
+      font-size: 14px;
+      outline: none;
+      transition: 0.15s ease;
+    }
+
+    #sass-front-strip .sass-select:focus {
+      border-color: #8ef3c5;
+      box-shadow: 0 0 0 1px rgba(142,243,197,.25);
+    }
+
+    #sass-analyze-btn {
+      margin: 22px auto 0;
+      display: block;
+      padding: 10px 26px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      border: none;
+      border-radius: 999px;
+      background: radial-gradient(circle at top left, #8ef3c5, #6aa7ff);
+      color: #050712;
+      cursor: pointer;
+      box-shadow: 0 14px 30px rgba(0,0,0,.80);
+      transition: 0.15s ease;
+    }
+
+    #sass-analyze-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+    }
+
+    #sass-front-strip .sass-hidden { display: none !important; }
+
+    #sass-front-strip {display:block;width:100%;color:#17334b;}
+    #sass-front-strip [hidden] {display:none!important;}
+    #sass-front-strip #sass-input-row {grid-template-columns:repeat(4,minmax(0,1fr));}
+    #sass-front-strip #sass-input-row>div {min-width:0;}
+    #sass-front-strip .sass-field-label {color:#51677d;}
+    #sass-front-strip .sass-select {min-height:44px;font-size:16px;}
+    #sass-front-strip .sass-select option, #sass-front-strip .sass-select optgroup {background:#252a39;color:#fff;}
+    #sass-front-strip #sass-analyze-btn {min-height:44px;}
+    #sass-front-strip #sass-analyze-btn:focus-visible {outline:3px solid #173953;outline-offset:4px;}
+    #sass-front-strip .sass-note {max-width:760px;margin:18px auto 8px;text-align:center;font:12px/1.65 Inter,Arial,sans-serif;color:#51677d;}
+    #sass-front-strip #sass-status {min-height:22px;margin:10px auto 0;text-align:center;font:13px/1.65 Inter,Arial,sans-serif;color:#17334b;}
+    #sass-front-strip #sass-status[data-tone="error"] {color:#963f18;}
+    #pcs1-snapshot-open:not([data-snapshot-ready="true"]) {display:none!important;}
+    @media(max-width:768px){#sass-front-strip #sass-input-row{grid-template-columns:repeat(2,minmax(0,1fr));}}
+    @media(max-width:380px){#sass-front-strip #sass-input-row{grid-template-columns:minmax(0,1fr);}}
+    @media(prefers-reduced-motion:reduce){#sass-front-strip *{transition:none!important;transform:none!important;}}
+  </style>
+
+  <div id="sass-shell">
+    <div id="sass-input-row">
+      <div id="wrap-rank">
+        <label class="sass-field-label" for="sass-rank">Rank</label>
+        <select id="sass-rank" class="sass-select">
+          <optgroup label="Enlisted">
+            <option value="E1">E-1</option>
+            <option value="E2">E-2</option>
+            <option value="E3">E-3</option>
+            <option value="E4">E-4</option>
+            <option value="E5">E-5</option>
+            <option value="E6">E-6</option>
+            <option value="E7" selected>E-7</option>
+            <option value="E8">E-8</option>
+            <option value="E9">E-9</option>
+          </optgroup>
+          <optgroup label="Officers">
+            <option value="O1">O-1</option>
+            <option value="O2">O-2</option>
+            <option value="O3">O-3</option>
+            <option value="O4">O-4</option>
+            <option value="O5">O-5</option>
+            <option value="O6">O-6</option>
+            <option value="O7">O-7</option>
+            <option value="O8">O-8</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div>
+        <label class="sass-field-label" for="sass-yos">Years of Service</label>
+        <select id="sass-yos" class="sass-select">
+          <option value="2">2 Years</option>
+          <option value="4">4 Years</option>
+          <option value="6">6 Years</option>
+          <option value="8">8 Years</option>
+          <option value="10">10 Years</option>
+          <option value="12">12 Years</option>
+          <option value="14">14 Years</option>
+          <option value="16" selected>16 Years</option>
+          <option value="18">18 Years</option>
+          <option value="20">20 Years</option>
+          <option value="22">22 Years</option>
+          <option value="24">24 Years</option>
+          <option value="26">26 Years</option>
+          <option value="28">28 Years</option>
+          <option value="30">30 Years</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="sass-field-label" for="sass-family">Family Size</label>
+        <select id="sass-family" class="sass-select">
+          <option value="1">1 Person</option>
+          <option value="2">2 People</option>
+          <option value="3">3 People</option>
+          <option value="4" selected>4 People</option>
+          <option value="5">5 People</option>
+          <option value="6">6 People</option>
+          <option value="7">7 People</option>
+          <option value="8">8 People</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="sass-field-label" for="sass-base">New Base Location</label>
+        <select id="sass-base" class="sass-select"></select>
+      </div>
+    </div>
+
+    <p class="sass-note">Snapshot uses 1 person as without dependents and 2 or more as with dependents for its BAH estimate.</p>
+    <button id="sass-analyze-btn" type="button" aria-controls="pcsu-brief-card">Analyze</button>
+    <p id="sass-status" role="status" aria-live="polite">Choose your new base, then select Analyze.</p>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+  function init() {
+    const root = document.getElementById('sass-front-strip');
+    if (!root || root.dataset.briefBound) return;
+    root.dataset.briefBound = 'true';
+    const BASES = [
+        { value: "Andrews AFB",          fileKey: "Andrews",          zip: "20762" },
+        { value: "Barksdale AFB",        fileKey: "Barksdale",        zip: "71110" },
+        { value: "Beale AFB",            fileKey: "Beale",            zip: "95903" },
+        { value: "Cannon AFB",           fileKey: "Cannon",           zip: "88103" },
+        { value: "Charleston AFB",       fileKey: "Charleston",       zip: "29404" },
+        { value: "Davis-Monthan AFB",    fileKey: "Davis-Monthan",    zip: "85707" },
+        { value: "Dover AFB",            fileKey: "Dover",            zip: "19902" },
+        { value: "Dyess AFB",            fileKey: "Dyess",            zip: "79607" },
+        { value: "Eglin AFB",            fileKey: "Eglin",            zip: "32542" },
+        { value: "Elmendorf AFB",        fileKey: "Elmendorf",        zip: "99506" },
+        { value: "F.E-Warren AFB",       fileKey: "F.E-Warren",       zip: "82005" },
+        { value: "Fairchild AFB",        fileKey: "Fairchild",        zip: "99011" },
+        { value: "Fort-Sam-Houston AFB", fileKey: "Fort-Sam-Houston", zip: "78234" },
+        { value: "Holloman AFB",         fileKey: "Holloman",         zip: "88330" },
+        { value: "Hurlburt AFB",         fileKey: "Hurlburt",         zip: "32544" },
+        { value: "Keesler AFB",          fileKey: "Keesler",          zip: "39534" },
+        { value: "Kirtland AFB",         fileKey: "Kirtland",         zip: "87117" },
+        { value: "Lackland AFB",         fileKey: "Lackland",         zip: "78236" },
+        { value: "Langley AFB",          fileKey: "Langley",          zip: "23665" },
+        { value: "Laughlin AFB",         fileKey: "Laughlin",         zip: "78843" },
+        { value: "Little-Rock AFB",      fileKey: "Little-Rock",      zip: "72099" },
+        { value: "Luke AFB",             fileKey: "Luke",             zip: "85309" },
+        { value: "MacDill AFB",          fileKey: "MacDill",          zip: "33621" },
+        { value: "Malmstrom AFB",        fileKey: "Malmstrom",        zip: "59402" },
+        { value: "Maxwell AFB",          fileKey: "Maxwell",          zip: "36112" },
+        { value: "McConnell AFB",        fileKey: "McConnell",        zip: "67221" },
+        { value: "McGuire AFB",          fileKey: "McGuire",          zip: "08641" },
+        { value: "Minot AFB",            fileKey: "Minot",            zip: "58705" },
+        { value: "Moody AFB",            fileKey: "Moody",            zip: "31699" },
+        { value: "Mountain-Home AFB",    fileKey: "Mountain-Home",    zip: "83648" },
+        { value: "Nellis AFB",           fileKey: "Nellis",           zip: "89191" },
+        { value: "Offutt AFB",           fileKey: "Offutt",           zip: "68113" },
+        { value: "Peterson AFB",         fileKey: "Peterson",         zip: "80914" },
+        { value: "Randolph AFB",         fileKey: "Randolph",         zip: "78150" },
+        { value: "Robins AFB",           fileKey: "Robins",           zip: "31098" },
+        { value: "Scott AFB",            fileKey: "Scott",            zip: "62225" },
+        { value: "Seymour-Johnson AFB",  fileKey: "Seymour-Johnson",  zip: "27531" },
+        { value: "Shaw AFB",             fileKey: "Shaw",             zip: "29152" },
+        { value: "Sheppard AFB",         fileKey: "Sheppard",         zip: "76311" },
+        { value: "Tinker AFB",           fileKey: "Tinker",           zip: "73145" },
+        { value: "Travis AFB",           fileKey: "Travis",           zip: "94535" },
+        { value: "Tyndall AFB",          fileKey: "Tyndall",          zip: "32403" },
+        { value: "Whiteman AFB",         fileKey: "Whiteman",         zip: "65305" },
+        { value: "Wright-Patterson AFB", fileKey: "Wright-Patterson", zip: "45433" }
+      ];
+    const field = name => root.querySelector('#sass-' + name);
+    const destination = field('base'), status = field('status');
+    destination.replaceChildren(new Option('Please Select Base', ''));
+    BASES.forEach(base => destination.add(new Option(base.value, base.value)));
+    const button = field('analyze-btn');
+    button.setAttribute('aria-controls', 'pcsu-brief-card');
+    function analyze() {
+      const base = BASES.find(item => item.value === destination.value);
+      const rank = field('rank').value;
+      const yos = Number(field('yos').value), family = Number(field('family').value);
+      if (!rank || !field('yos').value || !Number.isFinite(yos) || yos < 0 || !Number.isInteger(family) || family < 1 || !base) {
+        status.textContent = 'Complete all four fields, then select Analyze.';
+        status.dataset.tone = 'error';
+        if (!base) destination.focus();
+        return;
+      }
+      const detail = {rank, yos, family, hasDependents: family >= 2,
+        base: base.value, cityKey: base.fileKey, newZip: base.zip};
+      // Memory-only handoff; retained only for embed initialization order.
+      window.PCSU_SNAPSHOT_BRIEF_REQUEST = detail;
+      window.dispatchEvent(new CustomEvent('pcsu:snapshot-brief-request', {detail}));
+      status.textContent = 'Brief requested for ' + base.value + '.';
+      status.dataset.tone = '';
+    }
+    button.addEventListener('click', analyze);
+    root.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && event.target.matches('select')) {
+        event.preventDefault(); analyze();
+      }
+    });
+    root.addEventListener('change', () => {
+      window.PCSU_SNAPSHOT_BRIEF_REQUEST = null;
+      window.dispatchEvent(new CustomEvent('pcsu:snapshot-brief-reset'));
+      status.textContent = 'Select Analyze to view your updated brief.';
+      status.dataset.tone = '';
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
+  else init();
+})();
+</script>
+</div>

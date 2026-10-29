@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>PCS Snapshot Brief · PCSUnited</title>
+  <link rel="stylesheet" href="./brief.css">
+  <script type="module" src="./brief.js"></script>
+</head>
+<body>
+<main id="brief" aria-label="PCS Snapshot Brief">
+  <div id="app-status" role="status" aria-live="polite">Choose your destination in the PCSUnited input strip, then select Analyze.</div>
+  <button id="retry" type="button" hidden>Retry brief</button>
+  <article id="result" hidden>
+    <header class="intro"><p class="eyebrow">Your PCS, in focus</p><h1 id="base-name"></h1><p id="profile" class="muted"></p></header>
+    <section class="panel compensation" aria-labelledby="pay-heading">
+      <h2 id="pay-heading">Your monthly compensation</h2>
+      <div class="pay-top"><div><p class="label">Total, including BAH</p><strong id="total-pay" class="total"></strong><p class="fine">Before taxes and deductions</p></div><div id="pay-donut" class="donut" role="img"><span>Monthly<br>pay</span></div></div>
+      <dl class="pay-parts"><div><dt><i class="dot base"></i>Base Pay</dt><dd id="base-pay"></dd></div><div class="bah-part"><dt><i class="dot bah"></i>BAH</dt><dd id="bah"></dd></div><div><dt><i class="dot bas"></i>BAS</dt><dd id="bas"></dd></div></dl>
+    </section>
+    <section class="panel destination" aria-labelledby="destination-heading">
+      <div class="destination-top"><img id="destination-image" alt="" hidden><div><p class="eyebrow">Your destination</p><h2 id="destination-heading"></h2><p id="market-date" class="fine"></p></div></div>
+      <p id="image-note" class="fine" hidden>Destination image unavailable.</p>
+      <p id="market-brief" class="market-copy"></p>
+      <div class="median"><span>Median home price</span><strong id="median-price"></strong></div>
+      <ul id="highlights" class="highlights"></ul>
+    </section>
+    <section id="housing-panel" class="panel housing" aria-labelledby="housing-heading">
+      <div class="housing-head"><h2 id="housing-heading">Housing outlook</h2><label>Bedrooms<select id="bedrooms"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select></label></div>
+      <p id="housing-status" role="status" aria-live="polite"></p>
+      <button id="housing-retry" type="button" hidden>Retry housing estimate</button>
+      <div id="housing-result" hidden>
+        <div class="housing-cost"><div><p class="label">Estimated housing cost</p><strong id="housing-cost"></strong><span class="fine"> /month</span></div><strong id="coverage"></strong></div>
+        <div class="coverage-track" aria-hidden="true"><div id="coverage-bar"></div></div>
+        <p id="balance" class="balance"></p>
+        <p class="fine">Includes principal &amp; interest, property tax, insurance and HOA. Excludes utilities, maintenance and closing costs.</p>
+        <details id="housing-details"><summary>Calculation assumptions &amp; breakdown</summary><p id="housing-assumptions" class="fine"></p><dl id="housing-breakdown" class="breakdown"></dl><p class="fine">Planning estimate, not a lender quote or loan approval. Actual taxes, insurance, fees and eligibility vary. BAH coverage compares this estimate with BAH only; other household spending is not assessed.</p></details>
+      </div>
+    </section>
+    <details class="sources"><summary>Data sources &amp; pay assumptions</summary><p id="pay-source"></p><p id="family-assumption"></p><p id="city-source"></p><a id="city-data" target="_blank" rel="noopener noreferrer">View destination data</a><p>Base Pay + BAH + BAS only. Special pays, bonuses, deductions and individual entitlement adjustments are not included. Confirm entitlements with your finance office.</p></details>
+    <footer>PCSUnited <span>Powered by TheWing.ai</span></footer>
+  </article>
+  <noscript>Enable JavaScript to load this brief.</noscript>
+</main>
+</body>
+</html>

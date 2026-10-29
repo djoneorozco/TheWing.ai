@@ -1,0 +1,155 @@
+<!-- PCSUnited PCS Snapshot Brief iframe - image before selection
+REPLACE the old Base Demographics iframe embed with this entire block.
+Use the companion PCS-Snapshot-input-strip.txt (Brief event version).
+Deploy the Brief app at the exact case-sensitive URL in data-app-url below.
+No default base, storage, or automatic analysis on page load.
+
+BRIEF APP CONTRACT (implemented in PCS-Snapshot-Brief/brief.js):
+Read rank, yos, family, hasDependents, base, cityKey, baseFile, newZip,
+requestId, and parentOrigin from the URL. Load real data, then send:
+window.parent.postMessage({
+  source: 'pcsu-snapshot-brief', type: 'pcsu:brief-status',
+  requestId: params.get('requestId'), state: 'ready',
+  height: document.documentElement.scrollHeight
+}, params.get('parentOrigin'));
+Use state:'error' on failure; type:'pcsu:brief-resize' for height changes.
+Only send to a validated parentOrigin. Do not use '*' as target origin.
+An iframe load event alone is NOT proof that data is ready.
+-->
+<style>
+#pcs1-map-layout.pcsu-brief-layout{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:clamp(24px,4vw,56px);align-items:start}
+#pcs1-map-layout.pcsu-brief-layout>.pcs1-map-copy{max-width:none;min-width:0;padding-right:0}
+#pcs1-map-layout.pcsu-brief-layout>#pcs1-map-host{display:block!important;min-width:0;width:100%}
+#pcsu-brief-card,#pcsu-brief-card *{box-sizing:border-box}
+#pcsu-brief-card{--brief-height:680px;width:100%;min-width:0;margin:0;border:1px solid #dce3e8;border-radius:20px;overflow:hidden;background:#071018;color:#17334d;box-shadow:0 14px 40px #17334d0d;font:14px/1.5 Arial,sans-serif;text-align:left}
+#pcsu-brief-card [hidden]{display:none!important}
+#pcsu-brief-card .brief-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px 20px;background:#f7f9fb;border-bottom:1px solid #e2e7eb}
+#pcsu-brief-card h3{margin:0;font:700 17px/1.25 Arial,sans-serif;letter-spacing:-.02em;color:#17334d}
+#pcsu-brief-card .brief-selection{margin:4px 0 0;font:12px/1.4 Arial,sans-serif;color:#566b7c}
+#pcsu-brief-card a{font:12px/1.5 Arial,sans-serif;color:#17334d;text-decoration:underline;text-underline-offset:3px;flex-shrink:0}
+#pcsu-brief-card .brief-stage{position:relative;width:100%;height:var(--brief-height);background:#071018}
+#pcsu-brief-card .brief-cover{position:absolute;inset:0;z-index:2;display:flex;align-items:flex-end;isolation:isolate;background:#17334d;overflow:hidden}
+#pcsu-brief-card .brief-cover img{position:absolute;inset:0;z-index:-2;display:block;width:100%;height:100%;max-width:none;object-fit:cover;object-position:center}
+#pcsu-brief-card .brief-cover::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,transparent 35%,rgba(7,16,24,.20) 58%,rgba(7,16,24,.88) 100%)}
+#pcsu-brief-card .brief-cover-copy{width:100%;padding:28px;color:#fff}
+#pcsu-brief-card .brief-kicker{margin:0 0 9px;font:700 11px/1.4 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#fff}
+#pcsu-brief-card .brief-status{margin:0;color:#fff;font:500 18px/1.5 Arial,sans-serif;max-width:440px}
+#pcsu-brief-card button{margin:16px 0 0;padding:9px 15px;border:1px solid #94c7b3;border-radius:9px;background:#162c36;color:#fff;min-height:44px;font:13px Arial,sans-serif;cursor:pointer}
+#pcsu-brief-card iframe{display:block;width:100%;height:var(--brief-height);border:0;margin:0;padding:0;background:#071018;visibility:hidden}
+#pcsu-brief-card[data-state="ready"] iframe{visibility:visible}
+#pcsu-brief-card :is(button,a,iframe):focus-visible{outline:3px solid #a74210;outline-offset:-3px}
+#pcsu-brief-card .brief-sr{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(max-width:900px){#pcs1-map-layout.pcsu-brief-layout{grid-template-columns:minmax(0,1fr)!important;gap:30px}#pcsu-brief-card{border-radius:16px}}
+@media(max-width:480px){#pcsu-brief-card .brief-head{padding:15px;gap:10px}#pcsu-brief-card h3{font-size:16px}#pcsu-brief-card a{font-size:11px}}
+</style>
+<section id="pcsu-brief-card" data-state="idle" aria-labelledby="pcsu-brief-heading"
+ data-app-url="https://thewing.netlify.app/PCS-Snapshot-Brief/index.html">
+ <header class="brief-head">
+  <div><h3 id="pcsu-brief-heading">PCS Snapshot Brief</h3><p class="brief-selection" id="pcsu-brief-selection">Your next base, at a glance</p></div>
+  <a id="pcsu-brief-open" hidden target="_blank" rel="noopener noreferrer">Open larger ↗</a>
+ </header>
+ <div class="brief-stage">
+  <div class="brief-cover" id="pcsu-brief-cover">
+   <img src="https://cdn.prod.website-files.com/6acde39c80b636b344e4764b/6acde39f80b636b344e47996_363630dc37390a1ed90ba0356ed45a4c_Air%20Force%20Base%20Demographics.jpg" alt="" decoding="async">
+   <div class="brief-cover-copy">
+    <p class="brief-kicker">Know your next base</p>
+    <p id="pcsu-brief-status" class="brief-status">Enter your rank, years of service, family size, and destination. Then select Analyze.</p>
+    <button id="pcsu-brief-retry" type="button" hidden>Retry loading</button>
+   </div>
+  </div>
+  <iframe id="pcsu-brief-frame" title="PCS Snapshot Brief" referrerpolicy="strict-origin-when-cross-origin" tabindex="-1" aria-hidden="true"></iframe>
+ </div>
+ <p id="pcsu-brief-live" class="brief-sr" role="status" aria-live="polite"></p>
+ <noscript><p>Enable JavaScript to view your PCS Snapshot Brief.</p></noscript>
+</section>
+<script>
+(() => {
+ 'use strict';
+ let queued = window.PCSU_SNAPSHOT_BRIEF_REQUEST || null;
+ let handleRequest, handleReset;
+ window.addEventListener('pcsu:snapshot-brief-reset', () => {
+  queued = null;
+  if (handleReset) handleReset();
+ });
+ window.addEventListener('pcsu:snapshot-brief-request', event => {
+  queued = event.detail;
+  if (handleRequest) handleRequest(queued);
+ });
+ function init() {
+  const card = document.getElementById('pcsu-brief-card');
+  if (!card || card.dataset.mounted) return;
+  card.dataset.mounted = 'true';
+  const layout = document.getElementById('pcs1-map-layout');
+  const host = document.getElementById('pcs1-map-host');
+  if (layout && host && layout.contains(host)) {
+   if (!host.contains(card)) host.appendChild(card);
+   layout.classList.remove('pcsu-demo-layout');
+   layout.classList.add('pcsu-brief-layout');
+  }
+  const get = id => document.getElementById('pcsu-brief-' + id);
+  const frame=get('frame'),cover=get('cover'),status=get('status'),live=get('live');
+  const selection=get('selection'),open=get('open'),retry=get('retry');
+  const appURL = new URL(card.dataset.appUrl);
+  let requestId='', timer, lastInput=null;
+  function setState(state, message) {
+   card.dataset.state=state;
+   card.setAttribute('aria-busy', String(state === 'loading'));
+   status.textContent=message; live.textContent=message;
+   cover.hidden=state === 'ready';
+   frame.setAttribute('aria-hidden',String(state !== 'ready'));
+   frame.tabIndex=state === 'ready' ? 0 : -1;
+   retry.hidden=state !== 'error' || !lastInput;
+   open.hidden=state !== 'ready';
+  }
+  function resize(height) {
+   const n=Number(height);
+   if (Number.isFinite(n) && n > 0) card.style.setProperty('--brief-height', Math.max(480,Math.min(2400,Math.ceil(n)))+'px');
+  }
+  function show(input) {
+   const rank=String(input?.rank || '').toUpperCase().replace('-','');
+   const yos=Number(input?.yos),family=Number(input?.family);
+   const base=String(input?.base || ''),key=String(input?.cityKey || '');
+   if (!/^[EO]\d{1,2}$/.test(rank) || input?.yos == null || !Number.isFinite(yos) || yos<0 || !Number.isInteger(family) || family<1 || !base || !/^[A-Za-z0-9.-]+$/.test(key)) return;
+   clearTimeout(timer);
+   lastInput={rank,yos,family,base,cityKey:key,newZip:String(input?.newZip || '')};
+   requestId=crypto.randomUUID ? crypto.randomUUID() : Date.now()+'-'+Math.random().toString(36).slice(2);
+   const url=new URL(appURL);
+   const values={...lastInput,hasDependents:family>=2,baseFile:key+'.json',
+    newBase:base,newCityKey:key,newFileKey:key,type:'ad'};
+   Object.entries(values).forEach(([key,value])=>url.searchParams.set(key,String(value)));
+   open.href=url.href;
+   url.searchParams.set('parentOrigin',location.origin);
+   url.searchParams.set('requestId',requestId);
+   selection.textContent=base+' · '+rank.replace(/^([EO])/,'$1-')+' · '+yos+' years · '+family+(family===1?' person':' people');
+   frame.title=base+' — PCS Snapshot Brief';
+   card.style.removeProperty('--brief-height');
+   setState('loading','Preparing your pay, destination, and housing brief…');
+   frame.src=url.href;
+   timer=setTimeout(()=>{requestId='';setState('error','Your brief has not confirmed it is ready. Please retry shortly.');},30000);
+  }
+  window.addEventListener('message',event=>{
+   if (event.origin!==appURL.origin || event.source!==frame.contentWindow) return;
+   const data=event.data;
+   if (!data || data.source!=='pcsu-snapshot-brief' || !requestId || data.requestId!==requestId) return;
+   if (data.type==='pcsu:brief-status' && card.dataset.state==='loading') {
+    if (data.state==='ready') {clearTimeout(timer);resize(data.height);setState('ready','Your PCS Snapshot Brief is ready.');}
+    else if (data.state==='error') {clearTimeout(timer);requestId='';setState('error','Your brief could not load. Please retry.');}
+   } else if (data.type==='pcsu:brief-resize' && card.dataset.state==='ready') resize(data.height);
+  });
+  // Navigation/load events cannot prove API success; only a matching child message can.
+  handleReset=()=>{
+   clearTimeout(timer);requestId='';lastInput=null;
+   frame.removeAttribute('src');open.removeAttribute('href');
+   selection.textContent='Your next base, at a glance';
+   card.style.removeProperty('--brief-height');
+   setState('idle','Select Analyze to view your updated brief.');
+  };
+  retry.addEventListener('click',()=>{if(lastInput)show(lastInput);});
+  setState('idle','Enter your rank, years of service, family size, and destination. Then select Analyze.');
+  handleRequest=show;
+  if (queued) show(queued);
+ }
+ if (document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
+ else init();
+})();
+</script>
