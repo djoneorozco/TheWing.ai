@@ -173,18 +173,10 @@
   ========================================================= */
 
   function resolveCurrentBaseLabel() {
-    return baseDisplayName(
-      getParam(
-        "curBase",
-        getParam(
-          "currentBase",
-          getParam(
-            "currentLocation",
-            getStorageItem("pcs_current_base") || (hasExplicitHandoff() ? "" : "Fort-Sam-Houston AFB")
-          )
-        )
-      )
-    );
+    // A destination-only Brief has no previous duty station. Stale session
+    // data and sample bases must never become the comparison baseline.
+    return String(getParam("curBase", getParam("currentBase", getParam("currentLocation", ""))) || "")
+      .replace(/\+/g, " ").trim();
   }
 
   function resolveNewBaseLabel() {
@@ -235,12 +227,12 @@
     currentBase: CURRENT_BASE_LABEL,
     newBase: NEW_BASE_LABEL,
 
-    currentCityKey: resolveCityKey(
+    currentCityKey: CURRENT_BASE_LABEL ? resolveCityKey(
       ["curCityKey", "curFileKey"],
-      ["pcs_current_cityKey", "pcs_current_fileKey"],
+      [],
       CURRENT_BASE_LABEL,
-      "Fort-Sam-Houston"
-    ),
+      ""
+    ) : "",
 
     newCityKey: resolveCityKey(
       ["newCityKey", "cityKey", "newFileKey"],
@@ -249,7 +241,7 @@
       "Lackland"
     ),
 
-    currentZip: getParam("curZip", getStorageItem("pcs_current_zip") || "78234"),
+    currentZip: CURRENT_BASE_LABEL ? getParam("curZip", "") : "",
     newZip: getParam("newZip", getStorageItem("pcs_new_zip") || "78236"),
 
     bedroom: 3
@@ -518,8 +510,8 @@
   }
 
   function getBah(cityKey, role) {
-    if (role === "current" && COMP.bahCurrent !== null && COMP.bahCurrent !== undefined) {
-      return COMP.bahCurrent;
+    if (role === "current") {
+      return STATE.currentBase && Number.isFinite(COMP.bahCurrent) ? COMP.bahCurrent : null;
     }
 
     if (role !== "current" && COMP.bahNew !== null && COMP.bahNew !== undefined) {
@@ -803,6 +795,7 @@
   }
 
   function estimateBaseDistanceMiles(currentBase, newBase) {
+    if (!String(currentBase || "").trim() || !String(newBase || "").trim()) return 0;
     var from = normalizeBaseForDistance(currentBase);
     var to = normalizeBaseForDistance(newBase);
 
@@ -829,13 +822,7 @@
     var fromUrl = safeNum(getParam("distanceMiles", getParam("distance", "")), 0);
     if (fromUrl > 0) return fromUrl;
 
-    var fromStorage = safeNum(
-      getStorageItem("pcs_distance_miles") || getStorageItem("pcs_distance"),
-      0
-    );
-
-    if (fromStorage > 0) return fromStorage;
-
+    // Route mileage must belong to this request, not an earlier session.
     return estimateBaseDistanceMiles(STATE.currentBase, STATE.newBase);
   }
 
@@ -1503,15 +1490,22 @@
     var newBah = getBah(STATE.newCityKey, "new");
     var currentBah = getBah(STATE.currentCityKey, "current");
     var totalIncome = basePay + newBah + getBasAmount();
-    var bahDelta = newBah - currentBah;
+    var comparisonAvailable = Number.isFinite(currentBah);
+    var bahDelta = comparisonAvailable ? newBah - currentBah : null;
 
     text("pcs-income-main", money(totalIncome));
     html("pcs-income-breakdown", "Base Pay: " + money(basePay) + ", BAH " + money(newBah) + ",<br />BAS " + money(getBasAmount()));
     text("pts-income-meta", "True disposable baseline before housing");
 
-    text("pts-bah-delta", (bahDelta >= 0 ? "+" : "-") + money(Math.abs(bahDelta)));
-    text("pts-bah-copy", "Compared with your previous duty station housing allowance.");
-    text("pts-bah-meta", "vs. Previous Duty Station");
+    text("pts-bah-delta", comparisonAvailable ? (bahDelta >= 0 ? "+" : "-") + money(Math.abs(bahDelta)) : "Unavailable");
+    var deltaNode = $("pts-bah-delta");
+    if (deltaNode) {
+      deltaNode.style.fontSize = comparisonAvailable ? "" : "18px";
+      var deltaUnit = deltaNode.parentElement.querySelector(".pts-unit");
+      if (deltaUnit) deltaUnit.hidden = !comparisonAvailable;
+    }
+    text("pts-bah-copy", comparisonAvailable ? "Compared with your previous duty station housing allowance." : STATE.currentBase ? "Current-base BAH could not be verified." : "No current duty station was provided.");
+    text("pts-bah-meta", comparisonAvailable ? "vs. Previous Duty Station" : "Comparison unavailable");
 
     if (PCS_MOVE && PCS_MOVE.loaded && PCS_MOVE.total > 0) {
       text("pts-market-signal", money(PCS_MOVE.total));
@@ -1524,8 +1518,8 @@
         (getParam("distanceSource", "") === "manual" ? "Entered Miles = " : "Estimated Miles = ") + Math.round(PCS_MOVE.distanceMiles || 0).toLocaleString() + " mi • " + (PCS_MOVE.povs || 1) + " POV"
       );
     } else {
-      text("pts-market-signal", "$0");
-      text("pts-market-copy", "DLA + MALT unavailable for this route.");
+      text("pts-market-signal", "Unavailable");
+      text("pts-market-copy", STATE.currentBase ? "DLA + MALT unavailable for this route." : "Provide a current base or route distance to estimate travel allotments.");
       text("pts-market-meta", "PCS move cash estimate");
     }
 
@@ -1683,12 +1677,13 @@
   function paintComparison(currentData, newData) {
     var currentBah = getBah(STATE.currentCityKey, "current");
     var newBah = getBah(STATE.newCityKey, "new");
-    var currentHome = medianHome(currentData);
+    var currentHome = currentData && !currentData.__pcs_fallback ? medianHome(currentData) : null;
+    var comparisonAvailable = Number.isFinite(currentBah);
     var newHome = medianHome(newData);
 
     setImage("img-upcoming", cityImage(newData), cityLabel(newData));
 
-    text("side-current", STATE.currentBase);
+    text("side-current", STATE.currentBase || "Current base not provided");
     text("side-upcoming", STATE.newBase);
     text("loc-upcoming", cityLabel(newData));
 
@@ -1699,7 +1694,7 @@
 
     text(
       "pcsc-status",
-      newBah >= currentBah
+      !comparisonAvailable ? "Comparison unavailable: provide a current duty station with verified BAH." : newBah >= currentBah
         ? "BAH improves by " + money(newBah - currentBah) + " per month."
         : "BAH decreases by " + money(currentBah - newBah) + " per month."
     );
@@ -1711,15 +1706,15 @@
       + "<li>Market signal: " + marketSignal(newData) + "</li>"
     );
 
-    text("rating-current", (currentBah / Math.max(currentHome * 0.00635, 1) * 5).toFixed(1));
+    text("rating-current", comparisonAvailable && currentHome > 0 ? (currentBah / Math.max(currentHome * 0.00635, 1) * 5).toFixed(1) : "Unavailable");
     text("rating-upcoming", (newBah / Math.max(newHome * 0.00635, 1) * 5).toFixed(1));
-    text("stars-current", "★★★★★");
+    text("stars-current", comparisonAvailable && currentHome > 0 ? "★★★★★" : "");
     text("stars-upcoming", "★★★★★");
 
     destroyChart(chartCurrent);
     destroyChart(chartUpcoming);
 
-    chartCurrent = renderSimpleCanvasChart("chart-current", ["BAH", "Home"], [currentBah, currentHome / 100]);
+    chartCurrent = comparisonAvailable && currentHome > 0 ? renderSimpleCanvasChart("chart-current", ["BAH", "Home"], [currentBah, currentHome / 100]) : null;
     chartUpcoming = renderSimpleCanvasChart("chart-upcoming", ["BAH", "Home"], [newBah, newHome / 100]);
   }
 
@@ -1735,7 +1730,8 @@
     destroyChart(bahChart);
 
     incomeChart = renderSimpleCanvasChart("pcs-income-chart", ["Base Pay", "BAH", "BAS"], [basePay, bah, getBasAmount()]);
-    bahChart = renderSimpleCanvasChart("pcs-bah-chart", ["Current", "New"], [getBah(STATE.currentCityKey, "current"), bah]);
+    var currentBah = getBah(STATE.currentCityKey, "current");
+    bahChart = Number.isFinite(currentBah) ? renderSimpleCanvasChart("pcs-bah-chart", ["Current", "New"], [currentBah, bah]) : null;
 
     text("pcs-income-summary", "Total monthly compensation estimate: " + money(basePay + bah + getBasAmount()));
     text("pcs-bah-summary", "New duty station BAH estimate: " + money(bah));
@@ -1889,7 +1885,7 @@
       }
 
       var results = await Promise.all([
-        loadCityData(STATE.currentCityKey, FALLBACK_CURRENT_CITY, "current"),
+        STATE.currentBase ? loadCityData(STATE.currentCityKey, FALLBACK_CURRENT_CITY, "current") : Promise.resolve(null),
         loadCityData(STATE.newCityKey, FALLBACK_CITY, "destination"),
         loadCompensation(),
         loadPcsMoveEstimate()
