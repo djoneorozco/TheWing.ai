@@ -24,6 +24,9 @@ h2{font-size:15px;line-height:1.35;letter-spacing:-.015em}
 .label{font-size:11px;color:#5b6e7b;margin-bottom:4px}
 .fine{font-size:11px;line-height:1.55;color:#5b6e7b}
 .pay-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0}
+.pay-title{display:flex;align-items:center;gap:5px}
+#pay-info{min-height:24px;width:24px;padding:0;border:0;background:transparent;color:#667d8a;font-size:14px}
+#pay-info:hover{color:#17334b;background:#eef3f5}
 .total{font-size:clamp(25px,6.6vw,37px);line-height:1.2;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
 .donut{width:84px;height:84px;flex:none;border-radius:50%;display:grid;place-items:center;background:#dce6e9}
 .donut span{background:#fff;width:60px;height:60px;border-radius:50%;display:grid;place-content:center;text-align:center;font-size:9px;line-height:1.35;font-weight:650;color:#5b6e7b}
@@ -67,6 +70,58 @@ details p{margin-top:8px}
 .sources p,.sources a{font-size:10px;line-height:1.6;color:#5b6e7b}
 .sources a{display:inline-block;margin-top:6px}
 footer{display:flex;justify-content:space-between;gap:10px;font-size:9px;color:#667d8a;letter-spacing:.04em;padding:15px 3px 1px}
+
+/* Pay-first card: preserve the cover footprint; future sections remain in full view. */
+.pay-view #brief{max-width:none;min-height:100vh;padding:0}
+.pay-view #app-status,.pay-view #retry{margin:20px}
+.pay-view #result{display:flex;flex-direction:column;min-height:100vh}
+.pay-view .intro,.pay-view .destination,.pay-view .housing,.pay-view .footer-brand{display:none}
+.pay-toolbar{display:flex;align-items:center;gap:18px;padding:16px 12px;background:#f7f9fb;border-bottom:1px solid #dce6e9;min-height:76px}
+.pay-toolbar #pcsu-bah-header-progression-widget{min-width:0;flex:1}
+.pay-toolbar #brief-open{flex:none;font-size:12px;white-space:nowrap;text-underline-offset:3px;color:#17334b;padding:10px 0}
+.pay-view .compensation{margin:14px 18px 0;padding:18px}
+.pay-view .pay-top{margin:0 0 12px}
+.pay-view footer{margin-top:auto;justify-content:flex-end;padding:24px 20px 20px}
+#pay-notes{width:min(480px,calc(100% - 32px));max-height:calc(100% - 32px);padding:22px;border:1px solid #c9d7dd;border-radius:15px;color:#17334b;background:#fff;box-shadow:0 12px 50px #17334b33}
+#pay-notes::backdrop{background:#17334b66}
+#pay-notes form{float:right;margin:0 0 10px 12px}
+#pay-notes .sources{clear:both;padding-top:8px}
+#pay-notes summary{display:none}
+#pay-notes .sources p{font-size:12px}
+
+/* Scoped sizing of the shared BAH header; its original calculator styles stay intact. */
+.pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-card{padding:6px 8px;border-radius:14px;background:linear-gradient(110deg,#31556d,#354a61 65%,#6b727f);box-shadow:inset 0 1px 0 #ffffff40,0 1px 2px #17334b22}
+.pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-support{color:#e9f1ffb3}
+.pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-label{color:#e9f1ffcc}
+@media(min-width:520px){
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-grid{grid-template-columns:minmax(0,1fr) 9px minmax(0,1.2fr) 9px minmax(0,.8fr) 9px minmax(0,1.2fr);gap:3px}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-metric{padding:2px 3px}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-label{font-size:7px;margin:0 0 3px}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-value{font-size:12px}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-support{font-size:6px;min-height:7px;margin-top:2px}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-operator{display:flex;font-size:12px}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-metric.is-total{grid-column:auto;margin:0;padding:2px 3px 2px 8px;border-top:0;border-left:1px solid #ffffff26}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-metric.is-total::before{content:none}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-metric.is-total .pcsu-bah-header-label,.pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-metric.is-total .pcsu-bah-header-value{display:block}
+}
+@media(max-width:519px){
+ .pay-toolbar{flex-wrap:wrap;gap:4px;padding:12px 14px 7px}
+ .pay-toolbar #pcsu-bah-header-progression-widget{flex-basis:100%}
+ .pay-toolbar #brief-open{margin-left:auto;font-size:11px;padding:6px 0}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-grid{grid-template-columns:minmax(0,1fr) 10px minmax(0,1fr) 10px minmax(0,1fr)}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-label{font-size:8px}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-value{font-size:13px}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-support{font-size:7px}
+ .pay-toolbar #pcsu-bah-header-compensation-strip .pcsu-bah-header-metric.is-total{margin-top:5px;padding-top:6px}
+ .pay-view .compensation{margin:14px 12px 0;padding:14px}
+ .pay-view .pay-title h2{font-size:13px}
+ .pay-view .pay-title{gap:1px}
+ .pay-view .pay-top{gap:8px}
+ .pay-view .donut{width:66px;height:66px}
+ .pay-view .donut span{width:46px;height:46px;font-size:8px}
+ .pay-view .total{font-size:30px}
+ .pay-view .pay-parts dd{font-size:13px}
+}
 
 @media(max-width:360px){#brief{padding:12px}
 .panel{padding:14px}

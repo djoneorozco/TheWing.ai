@@ -5,7 +5,7 @@ Deploy the Brief app at the exact case-sensitive URL in data-app-url below.
 No default base, storage, or automatic analysis on page load.
 
 BRIEF APP CONTRACT (implemented in PCS-Snapshot-Brief/brief.js):
-Read rank, yos, family, hasDependents, base, cityKey, baseFile, newZip,
+Read view=pay, rank, yos, family, hasDependents, base, cityKey, baseFile, newZip,
 requestId, and parentOrigin from the URL. Load real data, then send:
 window.parent.postMessage({
   source: 'pcsu-snapshot-brief', type: 'pcsu:brief-status',
@@ -24,8 +24,9 @@ An iframe load event alone is NOT proof that data is ready.
 #pcsu-brief-card{--brief-height:680px;width:100%;min-width:0;margin:0;border:1px solid #dce3e8;border-radius:20px;overflow:hidden;background:#071018;color:#17334d;box-shadow:0 14px 40px #17334d0d;font:14px/1.5 Arial,sans-serif;text-align:left}
 #pcsu-brief-card [hidden]{display:none!important}
 #pcsu-brief-card .brief-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px 20px;background:#f7f9fb;border-bottom:1px solid #e2e7eb}
+#pcsu-brief-card .brief-head>div{min-width:0}
 #pcsu-brief-card h3{margin:0;font:700 17px/1.25 Arial,sans-serif;letter-spacing:-.02em;color:#17334d}
-#pcsu-brief-card .brief-selection{margin:4px 0 0;font:12px/1.4 Arial,sans-serif;color:#566b7c}
+#pcsu-brief-card .brief-selection{margin:4px 0 0;font:12px/1.4 Arial,sans-serif;color:#566b7c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #pcsu-brief-card a{font:12px/1.5 Arial,sans-serif;color:#17334d;text-decoration:underline;text-underline-offset:3px;flex-shrink:0}
 #pcsu-brief-card .brief-stage{position:relative;width:100%;height:var(--brief-height);background:#071018}
 #pcsu-brief-card .brief-cover{position:absolute;inset:0;z-index:2;display:flex;align-items:flex-end;isolation:isolate;background:#17334d;overflow:hidden}
@@ -37,12 +38,16 @@ An iframe load event alone is NOT proof that data is ready.
 #pcsu-brief-card button{margin:16px 0 0;padding:9px 15px;border:1px solid #94c7b3;border-radius:9px;background:#162c36;color:#fff;min-height:44px;font:13px Arial,sans-serif;cursor:pointer}
 #pcsu-brief-card iframe{display:block;width:100%;height:var(--brief-height);border:0;margin:0;padding:0;background:#071018;visibility:hidden}
 #pcsu-brief-card[data-state="ready"] iframe{visibility:visible}
+#pcsu-brief-card[data-view="pay"][data-fixed]{display:flex;flex-direction:column}
+#pcsu-brief-card[data-view="pay"][data-fixed] .brief-head{flex:none}
+#pcsu-brief-card[data-view="pay"][data-fixed] .brief-stage{flex:1;min-height:0;height:auto}
+#pcsu-brief-card[data-view="pay"][data-fixed] iframe{height:100%}
 #pcsu-brief-card :is(button,a,iframe):focus-visible{outline:3px solid #a74210;outline-offset:-3px}
 #pcsu-brief-card .brief-sr{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @media(max-width:900px){#pcs1-map-layout.pcsu-brief-layout{grid-template-columns:minmax(0,1fr)!important;gap:30px}#pcsu-brief-card{border-radius:16px}}
 @media(max-width:480px){#pcsu-brief-card .brief-head{padding:15px;gap:10px}#pcsu-brief-card h3{font-size:16px}#pcsu-brief-card a{font-size:11px}}
 </style>
-<section id="pcsu-brief-card" data-state="idle" aria-labelledby="pcsu-brief-heading"
+<section id="pcsu-brief-card" data-state="idle" data-view="pay" aria-labelledby="pcsu-brief-heading"
  data-app-url="https://thewing.netlify.app/PCS-Snapshot-Brief/index.html">
  <header class="brief-head">
   <div><h3 id="pcsu-brief-heading">PCS Snapshot Brief</h3><p class="brief-selection" id="pcsu-brief-selection">Your next base, at a glance</p></div>
@@ -90,18 +95,27 @@ An iframe load event alone is NOT proof that data is ready.
   const frame=get('frame'),cover=get('cover'),status=get('status'),live=get('live');
   const selection=get('selection'),open=get('open'),retry=get('retry');
   const appURL = new URL(card.dataset.appUrl);
+  const payView = card.dataset.view === 'pay';
+  // Record the actual original cover box before changing its ready-state layout.
+  // The child fills this footprint; its resize messages cannot lengthen the card.
+  if (payView) {
+   card.style.height=(card.getBoundingClientRect().height || 759)+'px';
+   card.dataset.fixed='true';
+  }
   let requestId='', timer, lastInput=null;
   function setState(state, message) {
    card.dataset.state=state;
    card.setAttribute('aria-busy', String(state === 'loading'));
    status.textContent=message; live.textContent=message;
    cover.hidden=state === 'ready';
+   card.querySelector('.brief-head').hidden=payView && state === 'ready';
    frame.setAttribute('aria-hidden',String(state !== 'ready'));
    frame.tabIndex=state === 'ready' ? 0 : -1;
    retry.hidden=state !== 'error' || !lastInput;
    open.hidden=state !== 'ready';
   }
   function resize(height) {
+   if (payView) return;
    const n=Number(height);
    if (Number.isFinite(n) && n > 0) card.style.setProperty('--brief-height', Math.max(480,Math.min(2400,Math.ceil(n)))+'px');
   }
@@ -115,7 +129,7 @@ An iframe load event alone is NOT proof that data is ready.
    requestId=crypto.randomUUID ? crypto.randomUUID() : Date.now()+'-'+Math.random().toString(36).slice(2);
    const url=new URL(appURL);
    const values={...lastInput,hasDependents:family>=2,baseFile:key+'.json',
-    newBase:base,newCityKey:key,newFileKey:key,type:'ad'};
+    newBase:base,newCityKey:key,newFileKey:key,type:'ad',view:payView?'pay':'full'};
    Object.entries(values).forEach(([key,value])=>url.searchParams.set(key,String(value)));
    open.href=url.href;
    url.searchParams.set('parentOrigin',location.origin);
@@ -123,7 +137,7 @@ An iframe load event alone is NOT proof that data is ready.
    selection.textContent=base+' · '+rank.replace(/^([EO])/,'$1-')+' · '+yos+' years · '+family+(family===1?' person':' people');
    frame.title=base+' — PCS Snapshot Brief';
    card.style.removeProperty('--brief-height');
-   setState('loading','Preparing your pay, destination, and housing brief…');
+   setState('loading',payView?'Preparing your monthly compensation…':'Preparing your pay, destination, and housing brief…');
    frame.src=url.href;
    timer=setTimeout(()=>{requestId='';setState('error','Your brief has not confirmed it is ready. Please retry shortly.');},30000);
   }

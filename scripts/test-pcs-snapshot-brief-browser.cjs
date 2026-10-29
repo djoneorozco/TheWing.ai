@@ -5,7 +5,7 @@ const assert=require('node:assert/strict'), fs=require('node:fs'), path=require(
 const root=path.resolve(__dirname,'..'), app=process.env.BRIEF_APP_ORIGIN||'https://thewing.netlify.app', parent='https://pcs-united-com.webflow.io';
 const deployed=process.env.BRIEF_DEPLOYED==='1', live=process.env.BRIEF_LIVE==='1'||deployed, out=process.env.BRIEF_OUTPUT;
 const strip=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCS-Snapshot-input-strip.txt'),'utf8');
-const embed=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCSUnited-PCS-Snapshot-Brief-iframe.txt'),'utf8').replace('data-app-url="https://thewing.netlify.app/',`data-app-url="${app}/`);
+const embed=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCSUnited-PCS-Snapshot-Brief-iframe.txt'),'utf8').replace('data-state="idle" data-view="pay"','data-state="idle" data-view="full"').replace('data-app-url="https://thewing.netlify.app/',`data-app-url="${app}/`);
 const head='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#f7f9fb;font-family:Arial;color:#17334b}main{max-width:1200px;padding:20px;margin:auto}h1{font-size:34px}#controls{margin-bottom:28px}</style></head><body><main>';
 const layout='<div id="pcs1-map-layout"><div class="pcs1-map-copy"><h1>Plan your next move</h1><p>Parent-to-iframe integration test using the complete Webflow replacement embeds.</p></div><div id="pcs1-map-host"></div></div>';
 const harness=head+'<div id="controls">'+strip+'</div>'+layout+embed+'</main></body></html>';
@@ -56,7 +56,7 @@ async function until(fn,label){for(let i=0;i<150;i++){if(await fn())return;await
     const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
     const state=()=>page.locator('#pcsu-brief-card').getAttribute('data-state');
     const ready=()=>until(async()=>await state()==='ready','brief ready');
-    const child=()=>page.frames().find(f=>f.url().startsWith(app+'/PCS-Snapshot-Brief/'));
+    const child=()=>page.frames().find(f=>f.url().toLowerCase().startsWith(app.toLowerCase()+'/pcs-snapshot-brief/'));
     const choose=async(base='Davis-Monthan AFB',family='3')=>{
       await page.selectOption('#sass-rank','E6');await page.selectOption('#sass-yos','14');await page.selectOption('#sass-family',family);await page.selectOption('#sass-base',base);
     };

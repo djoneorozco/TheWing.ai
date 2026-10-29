@@ -7,6 +7,7 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>PCS Snapshot Brief · PCSUnited</title>
   <link rel="stylesheet" href="./brief.css">
+  <script defer src="/BAH-Calculator/bah-header.js"></script>
   <script type="module" src="./brief.js"></script>
 </head>
 <body>
@@ -14,10 +15,13 @@
   <div id="app-status" role="status" aria-live="polite">Choose your destination in the PCSUnited input strip, then select Analyze.</div>
   <button id="retry" type="button" hidden>Retry brief</button>
   <article id="result" hidden>
+    <header id="pay-toolbar" class="pay-toolbar" hidden>
+      <div id="pcsu-bah-header-progression-widget" data-transport="manual"></div>
+      <a id="brief-open" target="_blank" rel="noopener noreferrer">Open larger ↗</a>
+    </header>
     <header class="intro"><p class="eyebrow">Your PCS, in focus</p><h1 id="base-name"></h1><p id="profile" class="muted"></p></header>
     <section class="panel compensation" aria-labelledby="pay-heading">
-      <h2 id="pay-heading">Your monthly compensation</h2>
-      <div class="pay-top"><div><p class="label">Total, including BAH</p><strong id="total-pay" class="total"></strong><p class="fine">Before taxes and deductions</p></div><div id="pay-donut" class="donut" role="img"><span>Monthly<br>pay</span></div></div>
+      <div class="pay-top"><div><div class="pay-title"><h2 id="pay-heading">Your monthly compensation</h2><button id="pay-info" type="button" aria-label="Pay sources and assumptions" title="Pay sources and assumptions">ⓘ</button></div><strong id="total-pay" class="total" aria-label="Total monthly compensation, including BAH"></strong><p class="fine">Before taxes and deductions</p></div><div id="pay-donut" class="donut" role="img"><span>Monthly<br>pay</span></div></div>
       <dl class="pay-parts"><div><dt><i class="dot base"></i>Base Pay</dt><dd id="base-pay"></dd></div><div class="bah-part"><dt><i class="dot bah"></i>BAH</dt><dd id="bah"></dd></div><div><dt><i class="dot bas"></i>BAS</dt><dd id="bas"></dd></div></dl>
     </section>
     <section class="panel destination" aria-labelledby="destination-heading">
@@ -39,9 +43,10 @@
         <details id="housing-details"><summary>Calculation assumptions &amp; breakdown</summary><p id="housing-assumptions" class="fine"></p><dl id="housing-breakdown" class="breakdown"></dl><p class="fine">Planning estimate, not a lender quote or loan approval. Actual taxes, insurance, fees and eligibility vary. BAH coverage compares this estimate with BAH only; other household spending is not assessed.</p></details>
       </div>
     </section>
-    <details class="sources"><summary>Data sources &amp; pay assumptions</summary><p id="pay-source"></p><p id="family-assumption"></p><p id="city-source"></p><a id="city-data" target="_blank" rel="noopener noreferrer">View destination data</a><p>Base Pay + BAH + BAS only. Special pays, bonuses, deductions and individual entitlement adjustments are not included. Confirm entitlements with your finance office.</p></details>
-    <footer>PCSUnited <span>Powered by TheWing.ai</span></footer>
+    <details id="sources" class="sources"><summary>Data sources &amp; pay assumptions</summary><p id="pay-source"></p><p id="family-assumption"></p><p id="city-source"></p><a id="city-data" target="_blank" rel="noopener noreferrer">View destination data</a><p>Total includes Base Pay + BAH + BAS only. Special pays, bonuses, deductions and individual entitlement adjustments are not included. Confirm entitlements with your finance office.</p></details>
+    <footer><span class="footer-brand">PCSUnited</span><span>Powered by TheWing.ai</span></footer>
   </article>
+  <dialog id="pay-notes" aria-labelledby="pay-notes-heading"><form method="dialog"><button aria-label="Close pay details">Close</button></form><h2 id="pay-notes-heading">Pay details</h2></dialog>
   <noscript>Enable JavaScript to load this brief.</noscript>
 </main>
 </body>

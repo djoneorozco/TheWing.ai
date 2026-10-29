@@ -99,6 +99,32 @@ function startBrief() {
   const $ = id => document.getElementById(id);
   const text = (id, value) => { $(id).textContent = value; };
   const params = new URLSearchParams(location.search);
+  const payView = params.get('view') !== 'full';
+  document.body.classList.toggle('pay-view', payView);
+  $('pay-toolbar').hidden = !payView;
+  $('pay-info').hidden = !payView;
+  if (payView) {
+    $('pay-notes').append($('sources'));
+    $('sources').open = true;
+    $('city-source').hidden = true; $('city-data').hidden = true;
+    const standalone = new URL(location.href);
+    standalone.searchParams.delete('parentOrigin'); standalone.searchParams.delete('requestId');
+    $('brief-open').href = standalone.href;
+  }
+  $('pay-info').addEventListener('click', () => $('pay-notes').showModal());
+  // The deferred shared script can initialize before or after this module.
+  // A cached API response must still wait until its real widget is mounted.
+  function headerReady(signal) {
+    if (window.PCSU_BAH_HEADER) return Promise.resolve(window.PCSU_BAH_HEADER);
+    return new Promise((resolve, reject) => {
+      const cleanup = () => { window.removeEventListener('pcsunited:bah-header-ready', done); signal.removeEventListener('abort', abort); };
+      const done = () => { cleanup(); resolve(window.PCSU_BAH_HEADER); };
+      const abort = () => { cleanup(); reject(new Error('The pay header could not load. Please retry shortly.')); };
+      window.addEventListener('pcsunited:bah-header-ready', done, {once:true});
+      signal.addEventListener('abort', abort, {once:true});
+      if (signal.aborted) abort();
+    });
+  }
   const parentOrigin = validatedParentOrigin(params.get('parentOrigin'), document.referrer, location.origin);
   const requestId = params.get('requestId') || '';
   let selection, city, compensation, run = 0, housingRun = 0, controller, housingController, ready = false, resizePending = false;
@@ -197,19 +223,30 @@ function startBrief() {
     controller = new AbortController(); const signal = controller.signal;
     const timeout = setTimeout(() => controller?.signal === signal && controller.abort(), 26000);
     ready = false; $('result').hidden = true; $('retry').hidden = true; $('app-status').hidden = false;
-    text('app-status', 'Preparing your compensation, destination and housing brief…');
+    text('app-status', payView ? 'Preparing your monthly compensation…' : 'Preparing your compensation, destination and housing brief…');
     try {
       selection = parseSelection(params);
       if (window.parent !== window && (!parentOrigin || !/^[\w-]{1,160}$/.test(requestId))) throw new Error('This embed connection could not be verified. Open the brief from PCSUnited and select Analyze again.');
       const [pay, destination] = await Promise.all([
         fetchJSON('/api/opensource-brain', {body:{tool:'PCS_SNAPSHOT', input:{rank:selection.rank, yos:selection.yos, base:selection.base, hasDependents:selection.hasDependents}}, signal}),
-        fetchJSON(`/netlify/functions/cities/${encodeURIComponent(selection.cityKey)}.json`, {signal})
+        payView ? null : fetchJSON(`/netlify/functions/cities/${encodeURIComponent(selection.cityKey)}.json`, {signal})
       ]);
       if (current !== run || signal.aborted) return;
-      if (!destination || typeof destination !== 'object' || Array.isArray(destination) || (!destination.city && !destination.place)) throw new Error('Destination data could not be verified. Please retry.');
-      city = destination; compensation = readCompensation(pay, selection);
-      renderPay(); renderDestination();
-      await loadHousing(true);
+      compensation = readCompensation(pay, selection);
+      renderPay();
+      if (payView) {
+        const header = await headerReady(signal);
+        if (current !== run || signal.aborted) return;
+        const m = compensation.monthly;
+        const painted = header.setSnapshot({basePay:m.basicPay, bah:m.bah, bas:m.bas, total:m.grossMonthlyComp,
+          rank:selection.rank.replace(/^([EOW])/, '$1-'), yos:`${selection.yos} years`,
+          location:selection.base, dependents:selection.hasDependents ? 'With dependents' : 'Without dependents'});
+        if (!painted) throw new Error('The pay header could not be displayed. Please retry.');
+      } else {
+        if (!destination || typeof destination !== 'object' || Array.isArray(destination) || (!destination.city && !destination.place)) throw new Error('Destination data could not be verified. Please retry.');
+        city = destination; renderDestination();
+        await loadHousing(true);
+      }
       if (current !== run || signal.aborted) return;
       $('result').hidden = false; $('app-status').hidden = true; ready = true;
       send('pcsu:brief-status', 'ready'); resize();

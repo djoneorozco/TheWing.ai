@@ -986,6 +986,10 @@
     mount.dataset.mounted =
       "true";
 
+    // Embedded Briefs feed verified results through setSnapshot(). Keep their
+    // isolated header out of the legacy calculator broadcast/request channel.
+    const manualTransport = mount.dataset.transport === "manual";
+
 
     ensureFont();
 
@@ -1576,7 +1580,7 @@
     }
 
 
-    window.addEventListener(
+    if (!manualTransport) window.addEventListener(
       "message",
       receiveMessage
     );
@@ -1587,6 +1591,8 @@
     ============================================================ */
 
     function requestSnapshotFromFrames() {
+
+      if (manualTransport) return;
 
       const request = {
 
