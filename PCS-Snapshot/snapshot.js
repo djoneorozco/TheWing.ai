@@ -185,6 +185,20 @@
     }
   }
 
+  // The selected base owns its artwork. Never substitute another destination.
+  function paintDestinationScene(data) {
+    var scene = $("pcs-scene");
+    if (!scene) return;
+    var src = data && !data.__pcs_fallback && typeof data.image_url === "string"
+      && /^https?:\/\//i.test(data.image_url.trim()) ? data.image_url.trim() : "";
+    if (src && scene.getAttribute("src") === src) return;
+    scene.hidden = true;
+    scene.onload = function () { scene.hidden = false; };
+    scene.onerror = function () { scene.hidden = true; };
+    if (src) scene.src = src;
+    else scene.removeAttribute("src");
+  }
+
   /* =========================================================
     #2) INPUT STATE FROM URL / SESSION
     URL params always win when present.
@@ -1061,11 +1075,14 @@
     trendChart = new ApexCharts(el, {
       chart: {
         type: "area",
-        height: 230,
+        height: 180,
         toolbar: { show: false },
         zoom: { enabled: false },
-        foreColor: "rgba(244,248,255,.72)"
+        foreColor: "#555f58",
+        animations: { enabled: false },
+        fontFamily: "Inter, system-ui, sans-serif"
       },
+      colors: ["#447f72"],
       series: [
         {
           name: "Median Home Price",
@@ -1087,25 +1104,26 @@
       },
       dataLabels: { enabled: false },
       markers: { size: 4 },
-      noData: { text: "History unavailable", style: { color: "#cbd5e1" } },
+      noData: { text: "History unavailable", style: { color: "#555f58" } },
       stroke: {
         curve: "straight",
-        width: 3
+        width: 2
       },
       fill: {
         type: "gradient",
         gradient: {
           shadeIntensity: 0.4,
-          opacityFrom: 0.32,
+          opacityFrom: 0.14,
           opacityTo: 0.04,
           stops: [0, 90, 100]
         }
       },
       grid: {
-        borderColor: "rgba(255,255,255,.08)",
+        borderColor: "rgba(62,76,65,.12)",
         strokeDashArray: 4
       },
       tooltip: {
+        theme: "light",
         x: { format: "MMM yyyy" },
         y: {
           formatter: function (val) {
@@ -1258,6 +1276,10 @@
     }
 
     var bed = bedroomData(newData, STATE.bedroom);
+    text("pcs-bah-main", money(newBah));
+    text("pcs-housing-main", money(bed.totalHousing, true));
+    if ($("pcs-bah-main")) $("pcs-bah-main").style.fontSize = newBah === null ? "18px" : "";
+    if ($("pcs-housing-main")) $("pcs-housing-main").style.fontSize = bed.totalHousing === null ? "18px" : "";
     var housingRatio = Number.isFinite(bed.totalHousing) && totalIncome > 0 ? bed.totalHousing / totalIncome : null;
     text("pts-power-score", housingRatio === null ? "—" : (housingRatio * 100).toFixed(1) + "%");
     text("pts-power-stars", "");
@@ -1266,6 +1288,9 @@
   }
 
   function paintCityBrief(newData) {
+    paintDestinationScene(newData);
+    text("pcs-destination-name", STATE.newBase || "Choose your destination");
+    text("pcs-destination-title", STATE.newBase || "Your destination");
     if (newData && newData.__pcs_fallback) {
       console.warn(
         "[PCS Snapshot] Destination base JSON unavailable for",
@@ -1277,7 +1302,7 @@
         (STATE.newBase || "Selected Base") + " • Base data unavailable"
       );
     } else {
-      text("pcs-city-line", cityLabel(newData) + " • Quick PCS Snapshot");
+      text("pcs-city-line", cityLabel(newData) + " • Housing insights for your next duty station");
     }
 
     setImage("img-current", cityImage(newData), cityLabel(newData));
@@ -1323,11 +1348,20 @@
     var covered = comparable && bed.totalHousing > 0 ? Math.round(bah / bed.totalHousing * 100) : null;
 
     text("pcs-bedroom-value", STATE.bedroom);
-    html("pcs-afford-headline", money(buffer) + " <span>BAH Balance</span>");
+    if ($("pcs-bedroom-up")) $("pcs-bedroom-up").disabled = STATE.bedroom >= 5;
+    if ($("pcs-bedroom-down")) $("pcs-bedroom-down").disabled = STATE.bedroom <= 2;
+    var balanceLabel = buffer === null ? "BAH comparison unavailable"
+      : buffer < 0 ? "Estimated amount not covered by BAH" : "BAH remaining after estimated housing";
+    html("pcs-afford-headline", money(buffer === null ? null : Math.abs(buffer), true) + " <span>" + balanceLabel + "</span>");
+    if ($("pcs-afford-headline")) $("pcs-afford-headline").style.fontSize = buffer === null ? "22px" : "";
+    text("pcs-housing-total", money(bed.totalHousing, true) + (costAvailable ? " / mo" : ""));
+    text("pcs-housing-bah", money(bah, true) + (bah === null ? "" : " / mo"));
+    text("pcs-housing-gap-label", buffer !== null && buffer >= 0 ? "BAH remaining" : "Remaining housing cost");
+    text("pcs-housing-gap", money(buffer === null ? null : Math.abs(buffer), true) + (buffer === null ? "" : " / mo"));
     html("pcs-afford-subline", covered === null ? "Verified BAH and a complete housing estimate are required."
       : "BAH covers <strong>" + covered + "%</strong> of estimated housing costs");
     ["home", "mortgage", "taxes", "insurance", "hoa", "utilities"].forEach(function (key) {
-      text(key === "home" ? "pcs-afford-home-price" : "pcs-afford-" + key, money(bed[key]));
+      text(key === "home" ? "pcs-afford-home-price" : "pcs-afford-" + key, money(bed[key], key !== "home"));
       if (key !== "home") text("pcs-amt-" + key, Number.isFinite(bed[key]) ? money(bed[key]) : "—");
     });
     text("pcs-donut-buffer", covered === null ? "—" : covered + "%");
@@ -1339,21 +1373,14 @@
 
     var donut = $("pcs-afford-donut");
     if (donut) {
-      if (!costAvailable || bed.totalHousing <= 0) {
-        donut.style.background = "rgba(255,255,255,.08)";
+      if (!comparable || bed.totalHousing <= 0) {
+        donut.style.background = "#d5dad3";
         return;
       }
-      var total = bed.totalHousing;
-      var mortgageDeg = bed.mortgage / total * 360;
-      var taxDeg = (bed.mortgage + bed.taxes) / total * 360;
-      var insDeg = (bed.mortgage + bed.taxes + bed.insurance) / total * 360;
-      var hoaDeg = (bed.mortgage + bed.taxes + bed.insurance + bed.hoa) / total * 360;
-      donut.style.background = "conic-gradient("
-        + "rgba(157,232,255,.95) 0deg " + mortgageDeg + "deg,"
-        + "rgba(80,229,191,.92) " + mortgageDeg + "deg " + taxDeg + "deg,"
-        + "rgba(255,181,107,.92) " + taxDeg + "deg " + insDeg + "deg,"
-        + "rgba(142,136,255,.92) " + insDeg + "deg " + hoaDeg + "deg,"
-        + "rgba(255,255,255,.35) " + hoaDeg + "deg 360deg)";
+      // The ring now represents the BAH coverage named in its center.
+      // Keep the actual percentage in the label when BAH exceeds housing cost.
+      var coverage = clamp(bah / bed.totalHousing * 100, 0, 100);
+      donut.style.background = "conic-gradient(#398778 0% " + coverage + "%, #d5dad3 " + coverage + "% 100%)";
     }
   }
 
@@ -1364,6 +1391,8 @@
     var base = mode === "base", rent = mode === "rent";
     var cost = base ? null : rent ? bed.totalRent : bed.totalHousing;
     var monthlyGap = base ? null : comparison.monthlyGap;
+    text("pcs-option-buy", money(bed.totalHousing, true));
+    text("pcs-option-rent", money(bed.totalRent, true));
     text("pcs-ls-status", base ? "BASE HOUSING • QUOTE REQUIRED" : "MONTHLY COST COMPARISON");
     text("pcs-ls-main", base ? "Base Housing" : rent ? "Rent" : "Buy");
     text("pcs-ls-sub", base ? "Actual rent and utility terms depend on the housing provider."
@@ -1537,6 +1566,8 @@
     if (btn1) {
       btn1.addEventListener("click", function () {
         btn1.classList.add("active");
+        btn1.setAttribute("aria-pressed", "true");
+        if (btn3) btn3.setAttribute("aria-pressed", "false");
         if (btn3) btn3.classList.remove("active");
         STATE.trendYears = 1;
         renderTrendChart(newData, STATE.trendYears);
@@ -1546,6 +1577,8 @@
     if (btn3) {
       btn3.addEventListener("click", function () {
         btn3.classList.add("active");
+        btn3.setAttribute("aria-pressed", "true");
+        if (btn1) btn1.setAttribute("aria-pressed", "false");
         if (btn1) btn1.classList.remove("active");
         STATE.trendYears = 3;
         renderTrendChart(newData, STATE.trendYears);
@@ -1558,9 +1591,11 @@
       tab.addEventListener("click", function () {
         tabs.forEach(function (t) {
           t.classList.remove("active");
+          t.setAttribute("aria-pressed", "false");
         });
 
         tab.classList.add("active");
+        tab.setAttribute("aria-pressed", "true");
 
         STATE.livingMode = tab.getAttribute("data-mode") || "buy";
         paintLivingStrategy(newData);
