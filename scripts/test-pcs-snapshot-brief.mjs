@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import {parseSelection, validatedParentOrigin, mortgageRequest, readMortgage, readCompensation, balanceText} from '../PCS-Snapshot-Brief/brief.js';
+import {parseSelection, validatedParentOrigin, mortgageRequest, readMortgage, readCompensation, balanceText, cityIntelligence, utilityEstimate} from '../PCS-Snapshot-Brief/brief.js';
 import {handler as brain} from '../netlify/functions/opensource-brain.js';
 import {handler as mortgage} from '../netlify/functions/mortgage.js';
 
@@ -62,4 +62,35 @@ test('complete embeds stay below Webflow limit with valid JS, no storage, and un
     if(name.includes('iframe'))assert.ok(s.includes('6acde39f80b636b344e47996_363630dc37390a1ed90ba0356ed45a4c_Air%20Force%20Base%20Demographics.jpg'));
   }
   const child=fs.readFileSync(new URL('../PCS-Snapshot-Brief/brief.js',import.meta.url),'utf8');assert.doesNotMatch(child,/localStorage|sessionStorage|supabase/i);
+});
+
+test('city intelligence follows source fields, preserves signed trends, and never invents missing values',()=>{
+  const d=cityIntelligence(city('Davis-Monthan'));
+  assert.equal(d.population,550000);assert.equal(d.metro,1070000);assert.equal(d.income,64500);assert.equal(d.trend,-2.4);assert.equal(d.median,327667);
+  assert.equal(cityIntelligence(city('Cannon')).trend,-0.6);
+  const missing=cityIntelligence({snapshot:{population_city:null,market_trend_yoy:null}});
+  for(const key of ['population','metro','income','trend','median'])assert.equal(missing[key],undefined);
+  for(const key of ['headline','summary','traffic','employment'])assert.equal(missing[key],'');
+  assert.equal(cityIntelligence({snapshot:{market_trend_yoy:0}}).trend,0);
+});
+test('compact housing adds bedroom utilities once through the shared budget engine',async()=>{
+  const c=city('Davis-Monthan'),req=mortgageRequest(c,'3',2145,{includeUtilities:true});
+  assert.equal(req.otherExpensesMonthly,335);
+  const r=readMortgage(await call(mortgage,req),req);
+  assert.equal(r.monthly.allIn,2599.26);assert.equal(r.budget.totalOutflow,2934.26);assert.equal(r.budget.remainder,-789.26);
+  assert.equal(balanceText(r.budget.remainder),'$789/month beyond BAH');
+  r.budget.totalOutflow+=335;assert.throws(()=>readMortgage(r,req));
+  delete c.by_bedroom['3'].utilities;assert.equal(utilityEstimate(c,'3'),undefined);assert.equal(mortgageRequest(c,'3',2145,{includeUtilities:true}),null);
+  c.by_bedroom['3'].utilities={total:{avg:0}};assert.equal(mortgageRequest(c,'3',2145,{includeUtilities:true}).otherExpensesMonthly,0);
+});
+test('all 44 destination utilities reconcile with their supported bedroom scenarios',async()=>{
+  const strip=fs.readFileSync(new URL('../PCS-Snapshot-Brief/webflow/PCS-Snapshot-input-strip.txt',import.meta.url),'utf8');
+  const keys=[...strip.matchAll(/fileKey: "([^"]+)"/g)].map(m=>m[1]);assert.equal(keys.length,44);
+  for(const key of keys)for(const bed of ['2','3','4','5']){
+    const c=city(key),req=mortgageRequest(c,bed,2145,{includeUtilities:true});
+    if(key==='Fort-Sam-Houston'&&['4','5'].includes(bed)){assert.equal(req,null);continue;}
+    assert.ok(req,`${key}/${bed}`);const r=readMortgage(await call(mortgage,req),req);
+    assert.equal(r.budget.expenses,utilityEstimate(c,bed));
+    assert.ok(r.budget.totalOutflow>=r.monthly.allIn);
+  }
 });

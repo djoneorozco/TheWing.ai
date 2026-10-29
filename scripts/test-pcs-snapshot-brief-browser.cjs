@@ -3,10 +3,12 @@
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict'), fs=require('node:fs'), path=require('node:path');
 const root=path.resolve(__dirname,'..'), app=process.env.BRIEF_APP_ORIGIN||'https://thewing.netlify.app', parent='https://pcs-united-com.webflow.io';
+const compact=process.env.BRIEF_COMPACT==='1';
 const deployed=process.env.BRIEF_DEPLOYED==='1', live=process.env.BRIEF_LIVE==='1'||deployed, out=process.env.BRIEF_OUTPUT;
 const strip=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCS-Snapshot-input-strip.txt'),'utf8');
-const embed=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCSUnited-PCS-Snapshot-Brief-iframe.txt'),'utf8').replace('data-state="idle" data-view="pay"','data-state="idle" data-view="full"').replace('data-app-url="https://thewing.netlify.app/',`data-app-url="${app}/`);
-const head='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#f7f9fb;font-family:Arial;color:#17334b}main{max-width:1200px;padding:20px;margin:auto}h1{font-size:34px}#controls{margin-bottom:28px}</style></head><body><main>';
+const embed=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCSUnited-PCS-Snapshot-Brief-iframe.txt'),'utf8').replace('data-state="idle" data-view="brief"',compact?'data-state="idle" data-view="brief"':'data-state="idle" data-view="full"').replace('data-app-url="https://thewing.netlify.app/',`data-app-url="${app}/`);
+const housingTotal=compact?'$2,934':'$2,599', balance=compact?'$789/month beyond BAH':'$478/month beyond BAH', bahTotal=compact?'$2,145.00':'$2,121.00', payTotal=compact?'$8,622.85':'$7,728.25';
+const head='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#f7f9fb;font-family:Arial;color:#17334b}main{max-width:1460px;padding:20px;margin:auto}h1{font-size:34px}#controls{margin-bottom:28px}</style></head><body><main>';
 const layout='<div id="pcs1-map-layout"><div class="pcs1-map-copy"><h1>Plan your next move</h1><p>Parent-to-iframe integration test using the complete Webflow replacement embeds.</p></div><div id="pcs1-map-host"></div></div>';
 const harness=head+'<div id="controls">'+strip+'</div>'+layout+embed+'</main></body></html>';
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -18,8 +20,8 @@ async function until(fn,label){for(let i=0;i<150;i++){if(await fn())return;await
   const report=[];
   const check=(name)=>{report.push(name);console.log('PASS '+name);};
   try{
-    const context=await browser.newContext({viewport:{width:1440,height:1100}});
-    let failPay=false,failHousing=false,holdPay=false,holdHousing=false,held=[],payCalls=[],housingCalls=[], childLoads=0;
+    const context=await browser.newContext({viewport:{width:1460,height:1100}});
+    let failPay=false,failCity=false,failHousing=false,holdPay=false,holdHousing=false,held=[],payCalls=[],housingCalls=[], childLoads=0;
     const errors=[];
     await context.addInitScript(()=>{
       for(const key of ['localStorage','sessionStorage'])Object.defineProperty(window,key,{get(){throw new Error(key+' accessed');}});
@@ -41,6 +43,7 @@ async function until(fn,label){for(let i=0;i<150;i++){if(await fn())return;await
         return route.fulfill({status:result.statusCode,headers:result.headers,body:result.body}).catch(()=>{});
       }
       if(u.origin===app){
+        if(failCity && u.pathname.startsWith('/netlify/functions/cities/'))return route.fulfill({status:503,json:{ok:false}});
         if(deployed)return route.continue();
         if(live&&u.pathname.startsWith('/netlify/functions/cities/'))return route.continue();
         let name=u.pathname.slice(1);if(name.endsWith('/'))name+='index.html';
@@ -57,41 +60,58 @@ async function until(fn,label){for(let i=0;i<150;i++){if(await fn())return;await
     const state=()=>page.locator('#pcsu-brief-card').getAttribute('data-state');
     const ready=()=>until(async()=>await state()==='ready','brief ready');
     const child=()=>page.frames().find(f=>f.url().toLowerCase().startsWith(app.toLowerCase()+'/pcs-snapshot-brief/'));
-    const choose=async(base='Davis-Monthan AFB',family='3')=>{
-      await page.selectOption('#sass-rank','E6');await page.selectOption('#sass-yos','14');await page.selectOption('#sass-family',family);await page.selectOption('#sass-base',base);
+    const choose=async(base='Davis-Monthan AFB',family=compact?'4':'3')=>{
+      await page.selectOption('#sass-rank',compact?'E7':'E6');await page.selectOption('#sass-yos',compact?'16':'14');await page.selectOption('#sass-family',family);await page.selectOption('#sass-base',base);
     };
     await page.goto(parent+'/brief-test',{waitUntil:'domcontentloaded'});
     assert.equal(await state(),'idle');assert.equal(await page.locator('#pcsu-brief-frame').getAttribute('src'),null);assert.equal(payCalls.length,0);assert.equal(childLoads,0);
     await page.click('#sass-analyze-btn');assert.match(await page.locator('#sass-status').innerText(),/Complete/);assert.equal(payCalls.length,0);
     check('fresh page and incomplete Analyze keep the exact cover; no default base or API call');
+    const originalHeight=await page.locator('#pcsu-brief-card').evaluate(el=>el.getBoundingClientRect().height);
     await choose();await page.click('#sass-analyze-btn');await ready();
-    let f=child();assert.equal(await f.locator('#base-name').innerText(),'Davis-Monthan AFB');assert.equal(await f.locator('#total-pay').innerText(),'$7,728.25');assert.equal(await f.locator('#bah').innerText(),'$2,121.00');assert.equal(await f.locator('#housing-cost').innerText(),'$2,599');assert.equal(await f.locator('#balance').innerText(),'$478/month beyond BAH');assert.match(await f.locator('#destination-heading').innerText(),/Tucson/);
-    assert.deepEqual(payCalls.at(-1),{tool:'PCS_SNAPSHOT',input:{rank:'E6',yos:14,base:'Davis-Monthan AFB',hasDependents:true}});
+    let f=child();assert.equal(await f.locator('#base-name').innerText(),'Davis-Monthan AFB');assert.equal(await f.locator('#total-pay').innerText(),payTotal);assert.equal(await f.locator('#bah').innerText(),bahTotal);assert.equal(await f.locator('#housing-cost').innerText(),housingTotal);assert.equal(await f.locator('#balance').innerText(),balance);assert.match(await f.locator('#destination-heading').innerText(),/Tucson/);
+    assert.deepEqual(payCalls.at(-1),{tool:'PCS_SNAPSHOT',input:{rank:compact?'E7':'E6',yos:compact?16:14,base:'Davis-Monthan AFB',hasDependents:true}});
     assert.equal(await page.locator('#pcsu-brief-cover').isVisible(),false);
-    check('E-6, 14 years, family 3, Davis-Monthan: compensation, destination and housing verified');
-    await f.selectOption('#bedrooms','5');await until(async()=>await f.locator('#housing-result').isVisible(),'5 bedrooms');assert.notEqual(await f.locator('#housing-cost').innerText(),'$2,599');assert.equal(housingCalls.at(-1).price,610000);
+    check(compact?'E-7, 16 years, family 4, Davis-Monthan: compensation, destination and housing verified':'E-6, 14 years, family 3, Davis-Monthan: compensation, destination and housing verified');
+    await f.selectOption('#bedrooms','5');await until(async()=>await f.locator('#housing-result').isVisible(),'5 bedrooms');assert.notEqual(await f.locator('#housing-cost').innerText(),housingTotal);assert.equal(housingCalls.at(-1).price,610000);
     await f.selectOption('#bedrooms','2');await until(async()=>await f.locator('#housing-result').isVisible(),'2 bedrooms');assert.equal(housingCalls.at(-1).price,265000);
     await f.selectOption('#bedrooms','3');await until(async()=>await f.locator('#housing-result').isVisible(),'3 bedrooms');
     check('2–5 bedroom changes recalculate through the mortgage API');
+    if (!compact) {
     const expanded=await page.locator('#pcsu-brief-frame').evaluate(el=>el.clientHeight);await f.locator('#housing-details summary').click();await until(async()=>Number.parseInt(await page.locator('#pcsu-brief-frame').evaluate(el=>el.clientHeight))>expanded,'expanded iframe');
     await f.locator('#housing-details summary').click();
     check('iframe height tracks expanded assumptions');
-    if(out){fs.mkdirSync(out,{recursive:true});await page.locator('#pcsu-brief-card').screenshot({path:path.join(out,'pcs-brief-desktop.png')});}
+    } else {
+      assert.equal(await page.locator('#pcsu-brief-card').evaluate(el=>el.getBoundingClientRect().height),originalHeight);
+      await f.locator('#housing-info').click();assert.equal(await f.locator('#housing-notes').isVisible(),true);assert.match(await f.locator('#housing-assumptions').innerText(),/Utilities: \$335.00/);await f.locator('#housing-notes button').click();
+      assert.equal(await f.locator('#city-population').innerText(),'550K');assert.equal(await f.locator('#city-income').innerText(),'$64,500');assert.equal(await f.locator('#city-trend').innerText(),'-2.4%');
+      assert.equal(await f.locator('#city-traffic').innerText(),'Moderate');assert.equal(await f.locator('#housing-percent').innerText(),'73%');assert.equal(housingCalls.at(-1).otherExpensesMonthly,335);
+      await f.locator('#city-info').click();assert.equal(await f.locator('#city-notes').isVisible(),true);assert.equal(await f.locator('#highlights li').count(),2);await f.locator('#city-notes button').click();
+      if(out)await page.locator('#pcsu-brief-card').screenshot({path:path.join(out,'pcs-brief-complete-desktop.png')});
+      assert.ok(await f.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+2),'desktop panels fit original cover');
+      check('city fields, cost composition, utility total, source dialogs and original fixed height verified');
+    }
+    if(out){fs.mkdirSync(out,{recursive:true});await page.locator('#pcsu-brief-card').screenshot({path:path.join(out,compact?'pcs-brief-complete-desktop.png':'pcs-brief-desktop.png')});}
     for(const width of [390,320,768]){
       await page.setViewportSize({width,height:900});await sleep(200);
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`parent ${width}`);
       assert.ok(await f.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`child ${width}`);
-      await until(async()=>await f.evaluate(()=>document.querySelector('#brief').getBoundingClientRect().height<=innerHeight+2),'height '+width);
-      if(out&&width===390)await page.locator('#pcsu-brief-card').screenshot({path:path.join(out,'pcs-brief-mobile.png')});
+      if(!compact)await until(async()=>await f.evaluate(()=>document.querySelector('#brief').getBoundingClientRect().height<=innerHeight+2),'height '+width);
+      else {assert.equal(await page.locator('#pcsu-brief-card').evaluate(el=>el.getBoundingClientRect().height),originalHeight);await f.locator('#bedrooms').scrollIntoViewIfNeeded();await f.selectOption('#bedrooms','2');await until(async()=>await f.locator('#housing-result').isVisible(),'mobile housing');assert.equal(housingCalls.at(-1).price,265000);await f.selectOption('#bedrooms','3');await until(async()=>await f.locator('#housing-result').isVisible(),'reset housing');
+       if(out&&width===390)await page.locator('#pcsu-brief-card').screenshot({path:path.join(out,'pcs-brief-complete-mobile-housing.png')});
+       await f.evaluate(()=>scrollTo(0,0));
+      }
+      if(out&&width===390)await page.locator('#pcsu-brief-card').screenshot({path:path.join(out,compact?'pcs-brief-complete-mobile.png':'pcs-brief-mobile.png')});
     }
-    check('390px, 320px and 768px: no horizontal overflow; child height fits');
-    await page.setViewportSize({width:1440,height:1100});
+    check(compact?'390px, 320px and 768px: no horizontal overflow; fixed card, scrollable panels and bedroom control verified':'390px, 320px and 768px: no horizontal overflow; child height fits');
+    await page.setViewportSize({width:1460,height:1100});
     await choose('Travis AFB');assert.equal(await state(),'idle');await page.click('#sass-analyze-btn');await ready();f=child();
-    assert.equal(await f.locator('#base-name').innerText(),'Travis AFB');assert.notEqual(await f.locator('#bah').innerText(),'$2,121.00');assert.notEqual(await f.locator('#housing-cost').innerText(),'$2,599');assert.doesNotMatch(await f.locator('#destination-heading').innerText(),/Tucson/);assert.equal(housingCalls.at(-1).price,585000);
+    assert.equal(await f.locator('#base-name').innerText(),'Travis AFB');assert.notEqual(await f.locator('#bah').innerText(),bahTotal);assert.notEqual(await f.locator('#housing-cost').innerText(),housingTotal);assert.doesNotMatch(await f.locator('#destination-heading').innerText(),/Tucson/);assert.equal(housingCalls.at(-1).price,585000);
     check('changing destination replaces pay, city and housing together');
-    await choose('Davis-Monthan AFB','1');await page.click('#sass-analyze-btn');await ready();assert.equal(payCalls.at(-1).input.hasDependents,false);assert.notEqual(await child().locator('#bah').innerText(),'$2,121.00');
+    await choose('Davis-Monthan AFB','1');await page.click('#sass-analyze-btn');await ready();assert.equal(payCalls.at(-1).input.hasDependents,false);assert.notEqual(await child().locator('#bah').innerText(),bahTotal);
     check('one-person family sends without-dependents status');
     if(!live){
+      if(compact){failCity=true;await page.click('#sass-analyze-btn');await until(async()=>await state()==='error','city failure');assert.equal(await page.locator('#pcsu-brief-cover').isVisible(),true);failCity=false;await page.click('#pcsu-brief-retry');await ready();check('city-data failure keeps cover and retry recovers without a substitute destination');}
       failPay=true;await page.click('#sass-analyze-btn');await until(async()=>await state()==='error','pay failure');assert.equal(await page.locator('#pcsu-brief-cover').isVisible(),true);assert.equal(await page.locator('#pcsu-brief-retry').isVisible(),true);
       const failedId=new URL(await page.locator('#pcsu-brief-frame').getAttribute('src')).searchParams.get('requestId');
       failPay=false;await page.click('#pcsu-brief-retry');await ready();assert.notEqual(new URL(await page.locator('#pcsu-brief-frame').getAttribute('src')).searchParams.get('requestId'),failedId);
@@ -142,7 +162,7 @@ async function until(fn,label){for(let i=0;i<150;i++){if(await fn())return;await
     assert.equal(payCalls.length,beforeBare);await bare.close();
     check('bare Brief URL remains idle without loading a default base');
     assert.deepEqual(errors,[]);assert.equal(await context.cookies().then(x=>x.length),0);check('no JavaScript exceptions, browser storage access or cookies');
-    if(out)fs.writeFileSync(path.join(out,deployed?'browser-deployed-results.json':live?'browser-live-results.json':'browser-results.json'),JSON.stringify({mode:deployed?'deployed app/APIs/city JSON + local parent embeds':live?'local app + live APIs/city JSON':'local app + repository API handlers',appOrigin:app,browser:await browser.version(),checks:report},null,2));
+    if(out)fs.writeFileSync(path.join(out,(compact?'compact-':'')+(deployed?'browser-deployed-results.json':live?'browser-live-results.json':'browser-results.json')),JSON.stringify({view:compact?'brief':'full',mode:deployed?'deployed app/APIs/city JSON + local parent embeds':live?'local app + live APIs/city JSON':'local app + repository API handlers',appOrigin:app,browser:await browser.version(),checks:report},null,2));
     await context.close();
   } catch(error) {
     for(const context of browser.contexts())for(const page of context.pages()){

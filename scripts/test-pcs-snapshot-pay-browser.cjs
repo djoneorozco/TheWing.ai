@@ -5,7 +5,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const root=path.resolve(__dirname,'..'),app=process.env.BRIEF_APP_ORIGIN||'https://thewing.netlify.app',parent='https://pcs-united-com.webflow.io';
 const deployed=process.env.BRIEF_DEPLOYED==='1',out=process.env.BRIEF_OUTPUT;
 const strip=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCS-Snapshot-input-strip.txt'),'utf8');
-const embed=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCSUnited-PCS-Snapshot-Brief-iframe.txt'),'utf8').replace('data-app-url="https://thewing.netlify.app/',`data-app-url="${app}/`);
+const embed=fs.readFileSync(path.join(root,'PCS-Snapshot-Brief/webflow/PCSUnited-PCS-Snapshot-Brief-iframe.txt'),'utf8').replace('data-state="idle" data-view="brief"','data-state="idle" data-view="pay"').replace('data-app-url="https://thewing.netlify.app/',`data-app-url="${app}/`);
 const header=fs.readFileSync(path.join(root,'BAH-Calculator/bah-header.js'),'utf8');
 const head='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;background:#f7f9fb;font-family:Arial;color:#17334b}main{max-width:1460px;padding:20px;margin:auto}h1{font-size:40px}p{line-height:1.6}</style></head><body><main>';
 const layout='<div id="pcs1-map-layout"><div class="pcs1-map-copy"><h1>Select your PCS Location</h1><p>Choose your base, rank, years of service and family size. Then select Analyze.</p>'+strip+'</div><div id="pcs1-map-host"></div></div>';
