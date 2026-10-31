@@ -22,7 +22,7 @@ import { RATE_VERSION as DLA_RATE_VERSION, getDlaAmount, normalizeRank as normal
 import { RATE_VERSION as HHG_RATE_VERSION, calculateHhgStatus, normalizeRank as normalizeHhgRank } from "./official-hhg.js";
 import { RATE_VERSION as PER_DIEM_RATE_VERSION, calculatePcsPerDiem } from "./official-pcs-per-diem.js";
 
-export const PCS_MOVE_ENGINE_VERSION = "pcs-move-engine-2026.3";
+export const PCS_MOVE_ENGINE_VERSION = "pcs-move-engine-2026.4";
 
 const PPM_WARNING = "PPM/GCC reimbursement estimate is not supported yet.";
 

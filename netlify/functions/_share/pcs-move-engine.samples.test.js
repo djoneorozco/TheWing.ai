@@ -33,15 +33,14 @@ runSample("A) E-7 with dependents, 588 miles, 1 POV, $1,200 expenses", {
   year: 2026
 }, (result) => {
   approx(result.malt.totalAmount, 120.54, "MALT");
-  assert(result.dla.available === false, "DLA should be pending");
-  assert(result.dla.amount === null, "DLA amount should be null when pending");
-  assert(result.perDiem.available === false, "Per diem should be pending");
-  approx(result.knownNetPosition, -1079.46, "knownNetPosition");
-  assert(result.projectedNetPosition === null, "projectedNetPosition should be null when partial");
-  assert(result.estimateStatus === "partial", "estimateStatus should be partial");
-  assert(result.summaryLabel === "Known Move Cash Position", "summaryLabel");
+  assert(result.dla.available === true, "DLA table is loaded");
+  approx(result.dla.amount, 3551.31, "DLA");
+  assert(result.perDiem.available === true, "Per diem table is loaded");
+  approx(result.knownNetPosition, 3628.85, "knownNetPosition");
+  approx(result.projectedNetPosition, 3628.85, "projectedNetPosition");
+  assert(result.estimateStatus === "complete", "estimateStatus should be complete");
   assert(result.knownEntitlements.malt === 120.54, "knownEntitlements.malt");
-  assert(result.knownEntitlements.dla === null, "knownEntitlements.dla should be null");
+  approx(result.knownEntitlements.dla, 3551.31, "knownEntitlements.dla");
   assert(result.allowanceChecks.hhg.available === true, "HHG allowance should be loaded");
   assert(result.allowanceChecks.hhg.allowanceLbs === 13000, "E-7 with deps HHG allowance");
 });

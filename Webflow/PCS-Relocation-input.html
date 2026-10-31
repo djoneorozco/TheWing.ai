@@ -1,0 +1,630 @@
+<!-- PCSUnited Relocation Brief: INPUT. Accuracy revision 2.
+Place in the left column of #pcs1-calculator-host.
+Install PCS-Relocation-outcome.txt in the right column on the same page.
+Uses the deployed /api/pcs-move relocation-brief mode.
+Page-memory only. Snapshot inputs are reused; no default base or stored profile. -->
+
+<style>
+/* Scoped to section 03: its two Webflow embeds share one responsive row. */
+#pcs1-calculator-host{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(24px,4vw,56px);align-items:start;width:100%;max-width:none;min-height:0;padding:0;border:0;background:transparent;overflow:visible}
+#pcs1-calculator-host>.w-embed{width:100%;min-width:0;max-width:none}
+#pcs1-move{scroll-margin-top:90px;padding:20px 40px 40px}
+@media(max-width:900px){#pcs1-calculator-host{grid-template-columns:minmax(0,1fr)}#pcs1-move{padding:32px 10px 40px}}
+
+#pcsu-relocation-input,#pcsu-relocation-input *{box-sizing:border-box}
+#pcsu-relocation-input{font:14px/1.5 Arial,sans-serif;color:#17334d;width:100%;min-width:0;text-align:left}
+#pcsu-relocation-input [hidden]{display:none!important}
+#pcsu-relocation-input p{margin:0}
+#pcsu-relocation-input .pr-profile{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:#eef4f5;border:1px solid #d9e3e7;border-radius:12px;margin-bottom:12px}
+#pcsu-relocation-input .pr-profile p{font-size:13px;overflow-wrap:anywhere}
+#pcsu-relocation-input button{cursor:pointer;font:700 13px/1.4 Arial,sans-serif;border-radius:9px;min-height:44px}
+#pcsu-relocation-input .pr-edit{font-size:13px;flex:none;border:0;background:transparent;color:#245f70;text-decoration:underline;text-underline-offset:3px;padding:4px}
+#pcsu-relocation-input fieldset{margin:0 0 12px;padding:12px;border:1px solid #d9e3e7;border-radius:12px;min-width:0}
+#pcsu-relocation-input legend{font-weight:700;padding:0 5px}
+#pcsu-relocation-input .pr-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#pcsu-relocation-input .pr-field{display:grid;gap:5px;min-width:0}
+#pcsu-relocation-input label{font-weight:700;font-size:13px;color:#476172}
+#pcsu-relocation-input input:not([type=checkbox]):not([type=range]),#pcsu-relocation-input select{width:100%;min-width:0;max-width:100%;min-height:44px;padding:9px 11px;border:1px solid #b9cbd6;border-radius:9px;background:#fff;color:#17334d;font:16px/1.3 Arial,sans-serif}
+#pcsu-relocation-input input:focus-visible,#pcsu-relocation-input select:focus-visible,#pcsu-relocation-input button:focus-visible,#pcsu-relocation-input summary:focus-visible{outline:3px solid #267f77;outline-offset:3px}
+#pcsu-relocation-input .pr-box{border:1px solid #dedbd4;border-radius:14px;padding:16px;margin:12px 0;background:#f1eee8}
+#pcsu-relocation-input .pr-expense-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+#pcsu-relocation-input .pr-amount{display:flex;align-items:center;gap:8px;width:145px;flex:none}
+#pcsu-relocation-input input[type=range]{display:block;width:100%;height:24px;margin:0;accent-color:#2d8179;cursor:pointer}
+#pcsu-relocation-input .pr-range{display:flex;justify-content:space-between;font-size:11px;color:#526b7c;margin:2px 0 6px}
+#pcsu-relocation-input .pr-help{font-size:13px;line-height:1.5;color:#516b7e;margin-top:6px}
+#pcsu-relocation-input .pr-perdiem{background:#eaf2f4;border-color:#dce7eb}
+#pcsu-relocation-input .pr-check{display:flex;align-items:flex-start;gap:9px;font-size:14px;color:#284d5c}
+#pcsu-relocation-input .pr-check input{width:18px;height:18px;margin:2px 0 0;accent-color:#2d8179;flex:none}
+#pcsu-relocation-input #pr-travelers .pr-fields{margin-top:10px}
+#pcsu-relocation-input #pr-travelers>.pr-field{margin-top:10px}
+#pcsu-relocation-input details{border:1px solid #d8e1e5;border-radius:12px;padding:0 14px;background:#f8fafb;margin:12px 0}
+#pcsu-relocation-input summary{min-height:48px;padding:13px 0;cursor:pointer;font-weight:700;font-size:13px;color:#284d5c}
+#pcsu-relocation-input details .pr-check{margin-top:12px;font-size:12px}
+#pcsu-relocation-input details .pr-help:last-child{margin-bottom:14px}
+#pcsu-relocation-input .pr-actions{text-align:center;margin-top:18px}
+#pcsu-relocation-input #pr-analyze{border:0;border-radius:999px;padding:12px 27px;color:#072539;background:linear-gradient(100deg,#8be8d1,#67a7fa);letter-spacing:.07em;box-shadow:0 9px 25px #17334d26}
+#pcsu-relocation-input #pr-analyze:disabled{cursor:progress;opacity:.65}
+#pcsu-relocation-input #pr-status{font-size:13px;color:#456174;margin-top:10px;min-height:20px}
+#pcsu-relocation-input #pr-status[data-error=true]{color:#963f22}
+@media(max-width:420px){#pcsu-relocation-input .pr-expense-top{align-items:start}#pcsu-relocation-input .pr-amount{width:125px}#pcsu-relocation-input .pr-fields{gap:9px}#pcsu-relocation-input .pr-profile{padding:10px}#pcsu-relocation-input .pr-profile .pr-edit{font-size:12px}}
+</style>
+
+<section id="pcsu-relocation-input" aria-label="Relocation estimate inputs">
+
+  <div class="pr-profile">
+    <p id="pr-profile-label">Choose your Snapshot details in section 01 first.</p>
+    <a class="pr-edit" id="pr-profile-edit" href="#pcs1-find">Edit Snapshot ↗</a>
+  </div>
+
+  <div id="pr-controls">
+
+    <div class="pr-box">
+      <div class="pr-expense-top">
+        <label for="pr-expenses">Projected Total Expenses</label>
+        <div class="pr-amount">
+          <span aria-hidden="true">$</span>
+          <input
+            id="pr-expenses"
+            type="number"
+            min="0"
+            max="1000000"
+            step="0.01"
+            required
+            inputmode="decimal"
+            placeholder="Enter total"
+            aria-describedby="pr-expense-help"
+          >
+        </div>
+      </div>
+
+      <input
+        id="pr-expense-slider"
+        type="range"
+        min="0"
+        max="30000"
+        step="100"
+        value="0"
+        aria-label="Projected total expenses"
+        aria-valuetext="Expense estimate not entered"
+      >
+
+      <div class="pr-range">
+        <span>$0</span>
+        <span id="pr-range-max">$30,000</span>
+      </div>
+
+      <p class="pr-help" id="pr-expense-help">
+        Include moving costs, fuel, food, lodging and other costs you expect to pay.
+        Enter 0 only if you expect no expenses.
+      </p>
+    </div>
+
+    <div class="pr-box pr-perdiem">
+      <div class="pr-field">
+        <label for="pr-dependency">Dependency status for this travel</label>
+        <select id="pr-dependency" required>
+          <option value="">Choose dependency status</option>
+          <option value="with">With authorized dependents</option>
+          <option value="without">Without dependents</option>
+        </select>
+        <p class="pr-help">Confirm your status; Snapshot household size does not establish eligibility.</p>
+      </div>
+      <label class="pr-check">
+        <input id="pr-include-perdiem" type="checkbox" checked>
+        <span>Include en-route per diem</span>
+      </label>
+
+      <p class="pr-help">
+        For driving within the contiguous U.S., with authorized dependents
+        traveling with the member.
+      </p>
+
+      <div id="pr-travelers">
+        <p class="pr-help">
+          Starts with the service member only. Do not count the member below.
+        </p>
+
+        <div class="pr-fields" id="pr-counts">
+          <div class="pr-field">
+            <label for="pr-adults">Dependents age 12+</label>
+            <input
+              id="pr-adults"
+              type="number"
+              min="0"
+              max="20"
+              step="1"
+              value="0"
+              inputmode="numeric"
+              required
+            >
+          </div>
+
+          <div class="pr-field">
+            <label for="pr-children">Dependents under 12</label>
+            <input
+              id="pr-children"
+              type="number"
+              min="0"
+              max="20"
+              step="1"
+              value="0"
+              inputmode="numeric"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="pr-field">
+          <label for="pr-driving-days">Planned driving days</label>
+          <input
+            id="pr-driving-days"
+            type="number"
+            min="1"
+            max="60"
+            step="1"
+            inputmode="numeric"
+            placeholder="Auto: mileage-based travel days"
+          >
+        </div>
+
+        <p class="pr-help">
+          Leave blank for mileage-based days. A shorter trip uses fewer days;
+          extra leave or lodging days do not increase per diem.
+        </p>
+      </div>
+    </div>
+
+    <details id="pr-assumptions" open>
+      <summary>
+        Travel details &amp; mileage source
+        <span id="pr-mileage-note">· Required</span>
+      </summary>
+
+      <div class="pr-fields">
+        <div class="pr-field">
+          <label for="pr-date">Travel start date</label>
+          <input
+            id="pr-date"
+            type="date"
+            min="2026-01-01"
+            max="2026-12-31"
+            required
+          >
+        </div>
+
+        <div class="pr-field">
+          <label for="pr-povs">Authorized vehicles</label>
+          <select id="pr-povs">
+            <option value="1">1 POV</option>
+            <option value="2">2 POVs</option>
+          </select>
+        </div>
+
+        <div class="pr-field">
+          <label for="pr-distance-source">Mileage source</label>
+          <select id="pr-distance-source" required>
+            <option value="">Choose a source</option>
+            <option value="entered_authorized">From orders / transportation office</option>
+            <option value="estimated_driving">Estimated driving distance</option>
+          </select>
+        </div>
+        <div class="pr-field">
+          <label for="pr-miles" id="pr-miles-label">Distance in miles</label>
+          <input
+            id="pr-miles"
+            type="number"
+            min="1"
+            max="20000"
+            step="1"
+            required
+            inputmode="numeric"
+            placeholder="Enter miles" aria-describedby="pr-distance-help"
+          >
+        </div>
+      </div>
+
+      <p class="pr-help" id="pr-distance-help">Choose the source, then enter mileage. An estimate is not official DTOD mileage. No route is assumed.</p>
+
+      <div class="pr-field" style="margin-top:12px">
+        <label for="pr-dla-eligibility">Primary DLA eligibility</label>
+        <select id="pr-dla-eligibility">
+          <option value="unknown">Not sure — exclude DLA for now</option>
+          <option value="confirmed">Confirmed on my orders or with finance</option>
+          <option value="excluded">Not eligible / not claiming DLA</option>
+        </select>
+        <p class="pr-help">DLA is included only after your confirmation. First/last moves, government quarters, another DLA payment this fiscal year, and dual-military situations can affect eligibility. <a href="https://www.travel.dod.mil/Travel-Transportation-Rates/Dislocation-Allowance/" target="_blank" rel="noopener noreferrer">Check official DLA guidance ↗</a></p>
+      </div>
+      <fieldset id="pr-dla-details" hidden>
+        <legend>Profile on the PCS order effective date</legend>
+        <p class="pr-help">Use the order effective date, which may differ from your departure date.</p>
+        <div class="pr-fields">
+          <div class="pr-field"><label for="pr-dla-date">PCS order effective date</label><input id="pr-dla-date" type="date" min="2026-01-01" max="2026-12-31" required disabled></div>
+          <div class="pr-field"><label for="pr-dla-rank">Pay grade on that date</label><select id="pr-dla-rank" required disabled><option value="">Choose pay grade</option></select></div>
+          <div class="pr-field"><label for="pr-dla-dependency">Dependency status on that date</label><select id="pr-dla-dependency" required disabled><option value="">Choose status</option><option value="with">With dependents</option><option value="without">Without dependents</option></select></div>
+        </div>
+      </fieldset>
+      <label class="pr-check"><input id="pr-travel-confirmed" type="checkbox" required><span>I am driving within the contiguous U.S.; any dependents counted above are authorized and traveling with me. This estimate is not for separate dependent, air, or mixed-mode travel.</span></label>
+
+      <p class="pr-help">
+        One service member, CONUS driving, and 1 POV initially. Confirm the date
+        and vehicles against your orders. Supports 2026 travel dates, including
+        FY2027 per diem from October 1. Air, overseas and mixed-mode travel need
+        a separate estimate.
+      </p>
+    </details>
+
+  </div>
+
+  <div class="pr-actions">
+    <button id="pr-analyze" type="button">ANALYZE</button>
+    <p id="pr-status" role="status" aria-live="polite">
+      Enter your expenses, travel details and mileage source, then select Analyze.
+    </p>
+  </div>
+
+</section>
+
+<script>
+(() => {
+  'use strict';
+
+  let queuedProfile = window.PCSU_SNAPSHOT_BRIEF_REQUEST || null;
+  let syncProfile;
+
+  window.addEventListener('pcsu:snapshot-brief-request', e => {
+    queuedProfile = e.detail;
+    if (syncProfile) syncProfile();
+  });
+
+  window.addEventListener('pcsu:snapshot-brief-reset', () => {
+    queuedProfile = null;
+    if (syncProfile) syncProfile(true);
+  });
+
+  function init() {
+    const root = document.getElementById('pcsu-relocation-input');
+    if (!root || root.dataset.mounted) return;
+    root.dataset.mounted = 'true';
+
+    const $ = id => document.getElementById('pr-' + id);
+    const money = n => new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(n);
+
+    const grades = (
+      'E-1 E-2 E-3 E-4 E-5 E-6 E-7 E-8 E-9 ' +
+      'W-1 W-2 W-3 W-4 W-5 O-1E O-2E O-3E ' +
+      'O-1 O-2 O-3 O-4 O-5 O-6 O-7 O-8 O-9 O-10'
+    ).split(' ');
+
+    for (const grade of grades) {
+      const option = document.createElement('option');
+      option.value = grade; option.textContent = grade;
+      $('dla-rank').append(option);
+    }
+    const today = new Date();
+    $('date').value = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getDate()).padStart(2, '0')
+    ].join('-');
+
+    let requestId = '';
+    let profile = null;
+    let profileKey = '';
+    let watchdog;
+
+    function status(message, error = false) {
+      $('status').textContent = message;
+      $('status').dataset.error = String(error);
+    }
+
+    function reset(
+      message = 'Details changed. Select Analyze to update your outcome.'
+    ) {
+      clearTimeout(watchdog);
+      requestId = '';
+      $('analyze').disabled = false;
+      window.PCSU_RELOCATION_BRIEF_REQUEST = null;
+
+      window.dispatchEvent(new CustomEvent('pcsu:relocation-reset'));
+      status(message);
+    }
+
+    function travelerFields() {
+      $('travelers').hidden = !$('include-perdiem').checked;
+      $('counts').hidden = $('dependency').value !== 'with';
+
+      if ($('dependency').value !== 'with') {
+        $('adults').value = '0';
+        $('children').value = '0';
+      }
+    }
+
+    function accuracyFields() {
+      const included = $('dla-eligibility').value === 'confirmed';
+      $('dla-details').hidden = !included;
+      for (const field of ['dla-date', 'dla-rank', 'dla-dependency']) $(field).disabled = !included;
+      const authorized = $('distance-source').value === 'entered_authorized';
+      $('miles-label').textContent = authorized ? 'Entered authorized mileage' : $('distance-source').value ? 'Estimated driving distance (miles)' : 'Distance in miles';
+      $('distance-help').textContent = authorized
+        ? 'Enter mileage from your orders or transportation office. This tool does not independently verify DTOD mileage.'
+        : 'Enter a driving-distance estimate from your route planner. MALT and travel days remain planning estimates until you enter authorized mileage.';
+      $('mileage-note').textContent = $('miles').value && $('miles').validity.valid
+        ? '· ' + Number($('miles').value).toLocaleString() + (authorized ? ' entered authorized miles' : ' estimated miles') : '· Required';
+    }
+
+    // The visible Snapshot selects are authoritative,
+    // including edits made before Analyze.
+    // The queued event covers either embed order and other
+    // pages using the same contract.
+    syncProfile = (force = false) => {
+      const rankEl = document.getElementById('sass-rank');
+      const familyEl = document.getElementById('sass-family');
+      const baseEl = document.getElementById('sass-base');
+
+      const p = rankEl && familyEl && baseEl
+        ? {
+            rank: rankEl.value,
+            family: familyEl.value,
+            base: baseEl.value
+          }
+        : queuedProfile;
+
+      const rank = String(p?.rank || '')
+        .toUpperCase()
+        .replace(/^([EOW])-?/, '$1-');
+
+      const family = Number(p?.family);
+      const base = String(p?.base || '').trim();
+
+      const next =
+        grades.includes(rank) &&
+        Number.isInteger(family) &&
+        family >= 1 &&
+        base
+          ? {
+              rank,
+              family,
+              base
+            }
+          : null;
+
+      const key = JSON.stringify(next);
+      const changed = key !== profileKey;
+      if (changed && profileKey) {
+        // An old distance cannot be carried onto a different destination.
+        if (profile?.base !== next?.base) {
+          $('miles').value = ''; $('distance-source').value = '';
+        }
+        $('dla-eligibility').value = 'unknown';
+        $('dla-date').value = ''; $('dla-rank').value = ''; $('dla-dependency').value = '';
+      }
+
+      profile = next;
+      profileKey = key;
+
+      if (changed || force) {
+        reset(
+          next
+            ? 'Snapshot details applied. Enter your expenses and travel details, then Analyze.'
+            : 'Choose your details in section 01, then return here to estimate your move.'
+        );
+      }
+
+      $('profile-label').textContent = next
+        ? next.rank + ' · ' +
+          next.family + ' in Snapshot household' +
+          ' · ' + next.base
+        : 'Choose your Snapshot details in section 01 first.';
+
+      travelerFields();
+      accuracyFields();
+    };
+
+    document.addEventListener('change', e => {
+      if ([
+        'sass-rank',
+        'sass-yos',
+        'sass-family',
+        'sass-base'
+      ].includes(e.target.id)) {
+        syncProfile(true);
+      }
+    });
+
+    $('profile-edit').addEventListener('click', () => {
+      document.getElementById('sass-edit-btn')?.click();
+      document.getElementById('pcs1-find')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    });
+
+    function expenses(slider) {
+      if (slider) {
+        $('expenses').value = $('expense-slider').value;
+      }
+
+      if (
+        $('expenses').value !== '' &&
+        $('expenses').validity.valid
+      ) {
+        const n = Number($('expenses').value);
+        const max = Math.max(30000, Math.ceil(n / 10000) * 10000);
+
+        $('expense-slider').max = String(max);
+        $('expense-slider').value = String(n);
+        $('range-max').textContent = money(max).replace('.00', '');
+        $('expense-slider').setAttribute('aria-valuetext', money(n));
+      } else {
+        $('expense-slider').setAttribute(
+          'aria-valuetext',
+          'Expense estimate not entered'
+        );
+      }
+    }
+
+    $('controls').addEventListener('input', e => {
+      if (e.target.id === 'pr-expense-slider') {
+        expenses(true);
+      } else if (e.target.id === 'pr-expenses') {
+        expenses(false);
+      }
+
+      if (e.target.id === 'pr-distance-source') $('miles').value = '';
+      reset();
+      travelerFields();
+      accuracyFields();
+    });
+
+    function focusInvalid(el) {
+      const details = el.closest('details');
+      if (details) details.open = true;
+      el.focus();
+      el.reportValidity();
+    }
+
+    function analyze() {
+      syncProfile();
+
+      if (!profile) {
+        status(
+          'Choose your rank, family size and destination in section 01 first. Use Edit Snapshot above.',
+          true
+        );
+        $('profile-edit').focus();
+        return;
+      }
+
+      if (/elmendorf|jber|anchorage/i.test(profile.base)) {
+        status('Alaska travel needs a separate estimate. This form supports driving within the contiguous U.S. only.', true);
+        return;
+      }
+
+      const fields = ['expenses', 'dependency', 'date', 'povs', 'distance-source', 'miles', 'travel-confirmed'];
+      if ($('dla-eligibility').value === 'confirmed') fields.push('dla-date', 'dla-rank', 'dla-dependency');
+
+      if ($('include-perdiem').checked) {
+        fields.push('driving-days');
+
+        if ($('dependency').value === 'with') {
+          fields.push('adults', 'children');
+        }
+      }
+
+      for (const name of fields) {
+        const el = $(name);
+
+        if (!el.checkValidity()) {
+          const label = root.querySelector(
+            'label[for="' + el.id + '"]'
+          )?.textContent || 'your entry';
+
+          status('Check ' + label + '.', true);
+          focusInvalid(el);
+          return;
+        }
+      }
+
+      const input = {
+        estimateMode: 'relocation-brief',
+        rank: profile.rank,
+        hasDependents: $('dependency').value === 'with',
+        accuracyVersion: 2,
+        distanceSource: $('distance-source').value,
+        travelersTogether: $('travel-confirmed').checked,
+        dlaEligibility: $('dla-eligibility').value,
+        dlaEffectiveDate: $('dla-eligibility').value === 'confirmed' ? $('dla-date').value : null,
+        dlaRank: $('dla-eligibility').value === 'confirmed' ? $('dla-rank').value : null,
+        dlaHasDependents: $('dla-eligibility').value === 'confirmed' ? $('dla-dependency').value === 'with' : null,
+        estimatedExpenses: Number($('expenses').value),
+        includeDla: $('dla-eligibility').value === 'confirmed',
+        includePerDiem: $('include-perdiem').checked,
+        dependents12Plus: $('include-perdiem').checked
+          ? Number($('adults').value)
+          : 0,
+        dependentsUnder12: $('include-perdiem').checked
+          ? Number($('children').value)
+          : 0,
+        plannedDrivingDays:
+          $('include-perdiem').checked &&
+          $('driving-days').value !== ''
+            ? Number($('driving-days').value)
+            : null,
+        travelDate: $('date').value,
+        povs: Number($('povs').value),
+        distanceMiles: Number($('miles').value),
+        travelMode: 'conus-pov'
+      };
+
+      requestId = crypto.randomUUID
+        ? crypto.randomUUID()
+        : Date.now() + '-' + Math.random().toString(36).slice(2);
+
+      $('analyze').disabled = true;
+
+      const request = {
+        requestId,
+        input,
+        profileLabel: $('profile-label').textContent
+      };
+
+      window.PCSU_RELOCATION_BRIEF_REQUEST = request;
+      status('Preparing your relocation outcome…');
+
+      clearTimeout(watchdog);
+      watchdog = setTimeout(() => {
+        reset();
+        status(
+          'The outcome card did not respond. Please retry Analyze.',
+          true
+        );
+      }, 22000);
+
+      window.dispatchEvent(new CustomEvent(
+        'pcsu:relocation-request',
+        { detail: request }
+      ));
+    }
+
+    $('analyze').addEventListener('click', analyze);
+
+    window.addEventListener('pcsu:relocation-retry', analyze);
+
+    window.addEventListener('pcsu:relocation-edit', () => {
+      $('expenses').focus();
+    });
+
+    window.addEventListener('pcsu:relocation-status', e => {
+      const d = e.detail;
+
+      if (!d || !requestId || d.requestId !== requestId) return;
+
+      clearTimeout(watchdog);
+      $('analyze').disabled = false;
+
+      if (d.state === 'ready') {
+        status(
+          'Your relocation outcome is ready. Adjust any detail and Analyze again.'
+        );
+      } else if (d.state === 'error') {
+        requestId = '';
+        status(
+          d.message || 'Your estimate could not load. Please retry.',
+          true
+        );
+      }
+    });
+
+    syncProfile();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+})();
+</script>

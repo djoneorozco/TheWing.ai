@@ -15,6 +15,7 @@
       currentBase: $("#pcs-current-base"),
       gainingBase: $("#pcs-gaining-base"),
       distance: $("#pcs-distance"),
+      distanceSource: $("#pcs-distance-source"),
       povs: $("#pcs-povs"),
       weight: $("#pcs-weight"),
       expenses: $("#pcs-expenses"),
@@ -285,15 +286,14 @@
         els.gainingBase.value
       );
 
-      if (Number.isFinite(estimated) && estimated > 0) {
-        els.distance.value = String(estimated);
-      }
+      // Only called on route changes or initialization; never from readInputs.
+      // A new route invalidates both stale mileage and any prior authorization.
+      if (els.distanceSource) els.distanceSource.value = "estimated_base_to_base";
+      els.distance.value = Number.isFinite(estimated) && estimated > 0 ? String(estimated) : "";
     }
 
     //#5) INPUT READER
     function readInputs() {
-      syncDistanceFromBases();
-
       const rank = normalizeRank(els.paygrade && els.paygrade.value);
       const dependents = normalizeDependents(els.dependents && els.dependents.value);
       const currentBase = String((els.currentBase && els.currentBase.value) || "").trim();
@@ -313,7 +313,7 @@
         currentBase,
         gainingBase,
         distanceMiles,
-        distanceSource: "estimated_base_to_base",
+        distanceSource: els.distanceSource?.value || "estimated_base_to_base",
         povs,
         estimatedWeightLbs,
         estimatedExpenses,
@@ -533,7 +533,7 @@
       setText(els.maltAmount, maltAmount > 0 ? money2(maltAmount) : "$0.00");
       setText(
         els.maltBreakdown,
-        payload.distanceMiles + " miles × " + payload.povs + " POV" + (payload.povs === 1 ? "" : "s") + " × $" + ratePerMile + "/mile"
+        payload.distanceMiles + (payload.distanceSource === "entered_authorized" ? " entered authorized miles × " : " estimated miles × ") + payload.povs + " POV" + (payload.povs === 1 ? "" : "s") + " × $" + ratePerMile + "/mile"
       );
 
       if (dlaAvailable) {
@@ -654,6 +654,12 @@
 
     //#12) BIND EVENTS
     function bind() {
+      els.distanceSource?.addEventListener("change", function () {
+        // Never relabel an automatically estimated value as authorized mileage.
+        els.distance.value = "";
+        if (els.distanceSource.value === "estimated_base_to_base") syncDistanceFromBases();
+        run();
+      });
       ["currentBase", "gainingBase"].forEach(function (key) {
         const el = els[key];
         if (el) {

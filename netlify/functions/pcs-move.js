@@ -20,7 +20,7 @@ import {
 import { calculateRelocationBrief, RelocationInputError } from "./_share/pcs-relocation-brief.js";
 
 const APP_NAME = "TheWing.ai";
-const HANDLER_VERSION = "thewing-pcs-move-handler-1.2.0";
+const HANDLER_VERSION = "thewing-pcs-move-handler-1.3.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
