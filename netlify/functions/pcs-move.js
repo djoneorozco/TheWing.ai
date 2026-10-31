@@ -18,9 +18,10 @@ import {
   calculatePcsMoveEstimate
 } from "./_share/pcs-move-engine.js";
 import { calculateRelocationBrief, RelocationInputError } from "./_share/pcs-relocation-brief.js";
+import { calculateStarterPlan } from "./_share/pcs-starter-plan.js";
 
 const APP_NAME = "TheWing.ai";
-const HANDLER_VERSION = "thewing-pcs-move-handler-1.3.0";
+const HANDLER_VERSION = "thewing-pcs-move-handler-1.4.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -80,7 +81,9 @@ export async function handler(event) {
 
   try {
     const input = body?.input && typeof body.input === "object" ? body.input : body;
-    const result = input?.estimateMode === 'relocation-brief'
+    const result = input?.estimateMode === 'starter-plan'
+      ? calculateStarterPlan(input)
+      : input?.estimateMode === 'relocation-brief'
       ? calculateRelocationBrief(input)
       : calculatePcsMoveEstimate(input);
     const warnings = Array.isArray(result?.warnings) ? result.warnings : [];

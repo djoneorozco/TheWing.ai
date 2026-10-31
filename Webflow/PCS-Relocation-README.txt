@@ -1,54 +1,67 @@
-PCSUnited PCS Resources — Allotment accuracy revision 2
+PCSUnited PCS starter estimates
 
-Webflow page: 6ad306fe2c010258981aa38a
-Host: pcs1-calculator-host (style pcs1-tool-host)
-Input HtmlEmbed: b2b7d6b4-665a-a9c2-228d-25c722228984
-Outcome HtmlEmbed: 2a3f2de2-afd0-d7c2-cf38-99080c575eb9
+Install PCS-Relocation-input.html and PCS-Relocation-outcome.html in the two
+existing HtmlEmbeds inside #pcs1-calculator-host on /pcs-resources.
+Both files must be updated together after the backend supports starter-plan.
 
-Replace the two existing embeds with the matching HTML files. Preserve their
-container and surrounding layout. Deploy the backend first; the result card
-rejects an older backend response that lacks the revision-2 accuracy metadata.
+The user supplies only Current base to start, after selecting a destination
+and household in PCS Snapshot. Travel date starts at today, one car, all
+Snapshot household members together with one service member. These assumptions
+are visible and editable. No account, localStorage or sessionStorage is used.
 
-API: POST /api/pcs-move, {input:{estimateMode:'relocation-brief', ...}}
-Schema pcs-relocation-brief.v1 is preserved. New callers send accuracyVersion:2.
-Legacy callers keep their existing field semantics with corrected travel days.
+The new opt-in /api/pcs-move mode is estimateMode: starter-plan.
+Existing legacy PCS Calculator and relocation-brief request modes are preserved.
+The new result schema is pcs-starter-plan.v1. Existing relocation request/reset/
+status event names are preserved; these two revised embeds use the new mode.
 
-Revision-2 request additions:
-- distanceSource: entered_authorized | estimated_driving
-- travelersTogether: true (one member, contiguous-U.S. POV travel; dependents
-  counted in this estimate must accompany the member)
-- dlaEligibility: unknown | confirmed | excluded
-- includeDla must be true exactly when dlaEligibility is confirmed
-- dlaEffectiveDate, dlaRank, dlaHasDependents are required when DLA is included;
-  otherwise send null. These describe the PCS order effective-date profile.
+Source of truth:
+- _share/pcs-starter-plan.js owns route approximation, spending and composition.
+- Existing relocation-brief and official modules own date-aware allowance rules.
+- pcs-base-coordinates.js derives all 44 names from cities/index.byBase.json,
+  with existing Base-Map coordinates and three legacy PCS-Calculator fallbacks.
+  Unit tests detect changes in the canonical index and coordinate inventories.
+- Alaska is explicitly unsupported. All 1,806 distinct directed pairs among
+  the other 43 bases are tested. Same-base moves require a local-move estimate.
 
-The response adds accuracyVersion, distance provenance, and DLA inclusion,
-eligibility and rate-profile metadata. An entered authorized distance is NOT
-independently verified through DTOD. Unknown DLA is excluded from the subtotal,
-not presented as a finding of no entitlement. A user confirmation is not an
-eligibility adjudication by the application.
+Automatic mileage uses the existing heuristic: great-circle miles x 1.18.
+This is a rough geographic estimate, not road routing, gate routing or DTOD.
+No unlicensed map service or production dependency on a public demo router is
+introduced. A licensed route provider is a future precision upgrade.
+Users may replace automatic mileage with their route-planner or orders miles.
+Changing either endpoint resets old mileage and DLA confirmation. Other manual
+spending assumptions remain under user control.
 
-Travel dates, member/age-12+/under-12 per diem factors, actual-day caps, dated
-MALT rates, CORS, timeouts, request IDs and stale-result resets are retained.
-Changing destination clears mileage/source and DLA confirmation. Switching
-mileage source clears the number so an estimate cannot be relabeled as official.
-Alaska, air, mixed-mode and separate-dependent travel are outside this form.
-Dates outside 2026 and trips crossing rate periods remain guarded pending
-validated extensions. No official-routing service has been added.
+Travel days default to the corrected mileage rule. Planned days can override
+trip duration; budget hotel nights = planned days - 1. Allowance days are capped
+by the mileage maximum. Changing dates uses existing MALT/FY per diem rules;
+unsupported 2027 travel and rate-boundary trips retain the budget but clearly
+withhold unavailable allowance calculations.
 
-Official travel-day reference:
-https://www.travel.dod.mil/Travel-Transportation-Rates/Mileage-Rates/
-For distance <=400 use one day; otherwise floor(total miles / 350), plus one
-when the remainder is >=51. 401 -> 2; 751 -> 3; 1101 -> 4.
+Budget = fuel + lodging + meals + extras + cushion.
+Fuel = miles / MPG x price per gallon x cars.
+Lodging = hotel nights x rooms x tax-inclusive room price.
+Meals = planned days x travelers x daily food budget.
+Cushion = selected percentage of fuel, lodging, meals and extras.
+Defaults are planning assumptions, not market quotes: 25 MPG, $4.50/gallon,
+$150/room/night, $45/person/day, 15% cushion, one room per four travelers.
+Every input can be changed, including a manual total (zero allowed).
+Moving trucks, pet fees, tolls, shipments, arrival lodging and housing deposits
+are excluded until added. This is not presented as the full cost of a PCS.
 
-DLA profile/date reference:
-https://www.travel.dod.mil/Travel-Transportation-Rates/Dislocation-Allowance/
+Age mix is unknown initially. The per diem range spans all accompanying
+dependents under 12 to all age 12+. One optional under-12 count narrows the range;
+the other age group is derived from the selected travel party. No spouse/child
+age or dependent eligibility is inferred as fact. Separate itineraries retain
+only route/budget support.
 
-Validation command:
-node --test PCS-Calculator/pcs-distance.test.cjs netlify/functions/_share/official-pcs-travel-days.test.js netlify/functions/_share/pcs-relocation-brief.test.js netlify/functions/_share/official-malt.test.js netlify/functions/_share/pcs-move-engine.samples.test.js
+DLA defaults to unknown and is excluded from the allowance total. A possible
+primary-DLA rate is shown separately using Snapshot grade/household assumptions.
+To include DLA, users confirm eligibility and the order-effective date, grade
+and dependency status. This preserves the prior accuracy safeguards.
 
-Synthetic control: E-7, confirmed primary DLA with dependents on 2026-11-05,
-751 entered miles, one POV, member + one age-12+ + two under-12 dependents,
-three mileage-based days: MALT $176.49; DLA $3551.31; per diem $1493.25;
-selected allowances $5221.05. With DLA unconfirmed: subtotal $1669.74.
-These are test inputs, not a claim about an actual base-to-base official route.
+Validation:
+node --test netlify/functions/_share/pcs-starter-plan.test.js netlify/functions/_share/pcs-relocation-brief.test.js netlify/functions/_share/official-pcs-travel-days.test.js netlify/functions/_share/official-malt.test.js netlify/functions/_share/pcs-move-engine.samples.test.js PCS-Calculator/pcs-distance.test.cjs
+
+Browser checks must cover one-selection generation, optional age refinement,
+manual mileage preservation, destination/household changes, DLA confirmation,
+partial results for unsupported dates and a phone viewport.
