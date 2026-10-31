@@ -1,147 +1,123 @@
-<!-- PCSUnited Relocation Brief: OUTCOME. Accuracy revision 2. Place in the right Webflow column.
-Pair with PCS-Relocation-input.txt. Uses the deployed /api/pcs-move relocation-brief mode.
-No automatic calculation, storage, account, iframe, or default route. -->
+<!-- PCSUnited Relocation Brief: OUTCOME. Starter planning revision 1. Pair with INPUT on the same page. -->
 <style>
 #pcsu-relocation-card,#pcsu-relocation-card *{box-sizing:border-box}
-#pcsu-relocation-card{font:14px/1.5 Arial,sans-serif;color:#17334d;width:100%;min-width:0;height:680px;border:1px solid #ccd9df;border-radius:20px;background:#edf4f6;box-shadow:0 6px 24px #17334d12;overflow:hidden;display:flex;flex-direction:column;text-align:left}
+#pcsu-relocation-card{font:14px/1.5 Arial,sans-serif;color:#17334d;min-width:0;width:100%;border:1px solid #ccd9df;border-radius:20px;background:#edf4f6;box-shadow:0 6px 24px #17334d12;overflow:hidden;text-align:left}
 #pcsu-relocation-card [hidden]{display:none!important}
 #pcsu-relocation-card p,#pcsu-relocation-card h2,#pcsu-relocation-card h3{margin:0}
-#pcsu-relocation-card .ro-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px 20px;background:#f7f9fb;border-bottom:1px solid #dce5e9;flex:none}
-#pcsu-relocation-card h2{font:700 18px/1.3 Arial,sans-serif;letter-spacing:-.02em;color:#17334d}
-#pcsu-relocation-card #ro-profile{font-size:12px;line-height:1.5;color:#516b7e;margin-top:4px;overflow-wrap:anywhere}
-#pcsu-relocation-card .ro-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior-y:contain;padding:16px}
-#pcsu-relocation-card #ro-cover{height:100%;min-height:400px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:28px;border-radius:15px;background:linear-gradient(145deg,#193845,#335366);color:#fff}
-#pcsu-relocation-card .ro-kicker{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#a8ded9}
-#pcsu-relocation-card #ro-cover h3{font-size:clamp(25px,3vw,34px);line-height:1.15;letter-spacing:-.025em;margin:13px 0;color:#fff}
-#pcsu-relocation-card #ro-message{font-size:15px;line-height:1.6;color:#e3edf1;max-width:410px}
-#pcsu-relocation-card .ro-cover-note{margin-top:20px;font-size:12px;color:#bfd2dc}
-#pcsu-relocation-card button{cursor:pointer;min-height:44px;border-radius:9px;padding:9px 15px;font:700 13px Arial,sans-serif}
-#pcsu-relocation-card #ro-retry{margin-top:18px;border:1px solid #b8e8e0;background:#edf8f6;color:#173d43}
-#pcsu-relocation-card #ro-edit{border:0;background:none;padding:4px 0;color:#245f70;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
-#pcsu-relocation-card :is(button,a,summary):focus-visible{outline:3px solid #8fe5d5;outline-offset:3px}
-#pcsu-relocation-card .ro-results{background:#19313b;border-radius:15px;padding:20px;color:#f7fbfc}
-#pcsu-relocation-card .ro-overline{font-size:13px;color:#d8e6ec}
-#pcsu-relocation-card .ro-outcome{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;margin:11px 0 5px}
-#pcsu-relocation-card #ro-net{font-size:clamp(33px,5vw,48px);line-height:1.1;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
-#pcsu-relocation-card #ro-badge{font-size:12px;padding:6px 10px;border-radius:999px;background:#255b51;color:#effff9}
-#pcsu-relocation-card #ro-badge[data-tone=gap]{background:#824632;color:#fff3eb}
-#pcsu-relocation-card #ro-context{font-size:13px;color:#e0eaee}
-#pcsu-relocation-card .ro-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;border-block:1px solid #ffffff29;padding:13px 0;margin:15px 0}
-#pcsu-relocation-card .ro-stats span{display:block;font-size:12px;line-height:1.4;color:#d9e5eb}
-#pcsu-relocation-card .ro-stats strong{display:block;font-size:17px;line-height:1.3;margin-top:5px;font-variant-numeric:tabular-nums}
-#pcsu-relocation-card .ro-chart{display:grid;gap:12px;margin:0 0 13px}
-#pcsu-relocation-card .ro-chart-label{display:flex;justify-content:space-between;gap:10px;font-size:12px;margin-bottom:6px}
-#pcsu-relocation-card .ro-chart-label strong{white-space:nowrap}
-#pcsu-relocation-card .ro-track{display:flex;width:100%;height:20px;overflow:hidden;border-radius:5px;background:#ffffff0d}
-#pcsu-relocation-card .ro-track i{display:block;height:100%;flex:none}
-#pcsu-relocation-card .ro-dla{background:#e9ad78}
-#pcsu-relocation-card .ro-malt{background:#73d0c8}
-#pcsu-relocation-card .ro-pd{background:#b8a5e7}
-#pcsu-relocation-card #ro-bar-expenses{background:#bac8d7}
-#pcsu-relocation-card .ro-legend{display:flex;gap:7px 14px;flex-wrap:wrap;font-size:12px;margin-bottom:9px}
-#pcsu-relocation-card .ro-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
-#pcsu-relocation-card .ro-method{font-size:12px;line-height:1.5;color:#d5e4eb;margin-top:9px}
-#pcsu-relocation-card .ro-method strong{color:#f5fbfd}
-#pcsu-relocation-card .ro-sources{margin-top:14px;padding:0 14px;background:#fff;border:1px solid #d9e4e8;border-radius:12px;font-size:13px;color:#456174}
-#pcsu-relocation-card summary{cursor:pointer;min-height:44px;padding:12px 0;font-size:13px;font-weight:700;color:#244d5e}
-#pcsu-relocation-card .ro-sources p{margin-bottom:12px}
-#pcsu-relocation-card .ro-sources ul{padding-left:18px;margin:0 0 12px}
-#pcsu-relocation-card .ro-links{display:flex;flex-wrap:wrap;gap:8px 15px;padding-bottom:14px}
+#pcsu-relocation-card .ro-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;background:#f7f9fb;border-bottom:1px solid #dce5e9}
+#pcsu-relocation-card h2{font:700 20px/1.3 Arial,sans-serif;color:#17334d}
+#pcsu-relocation-card #ro-profile{font-size:12px;color:#516b7e;margin-top:5px}
+#pcsu-relocation-card .ro-body{padding:16px}
+#pcsu-relocation-card #ro-cover{min-height:360px;display:flex;justify-content:center;flex-direction:column;padding:28px;border-radius:15px;background:linear-gradient(145deg,#193845,#335366);color:white}
+#pcsu-relocation-card #ro-cover h3{font:700 28px/1.2 Arial,sans-serif;margin:14px 0;color:white}
+#pcsu-relocation-card #ro-message{color:#e3edf1;line-height:1.7}
+#pcsu-relocation-card .ro-kicker{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+#pcsu-relocation-card .ro-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+#pcsu-relocation-card .ro-stat{background:#fff;border:1px solid #d9e3e7;border-radius:12px;padding:13px 10px}
+#pcsu-relocation-card .ro-stat span{display:block;font-size:12px;color:#526b7c}
+#pcsu-relocation-card .ro-stat strong{display:block;font:700 clamp(20px,2.4vw,27px)/1.25 Arial,sans-serif;color:#17334d;margin:6px 0}
+#pcsu-relocation-card .ro-note{font-size:12px;color:#516b7e;line-height:1.6;margin:9px 0 14px}
+#pcsu-relocation-card .ro-main{background:#19313b;color:#f7fbfc;border-radius:14px;padding:20px;margin:12px 0}
+#pcsu-relocation-card .ro-main h3{color:#f7fbfc;font:700 14px/1.4 Arial,sans-serif}
+#pcsu-relocation-card #ro-total{display:block;font:700 clamp(25px,3vw,37px)/1.2 Arial,sans-serif;letter-spacing:-.025em;margin:12px 0;overflow-wrap:anywhere}
+#pcsu-relocation-card .ro-main p{font-size:12px;color:#d5e4eb}
+#pcsu-relocation-card .ro-line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #d8e1e5;font-size:13px}
+#pcsu-relocation-card .ro-line strong{text-align:right;font-variant-numeric:tabular-nums}
+#pcsu-relocation-card .ro-main .ro-line{border-color:#ffffff26}
+#pcsu-relocation-card .ro-line:last-child{border:0}
+#pcsu-relocation-card .ro-dla{background:#fff7e9;border:1px solid #dfc9a4;border-radius:12px;padding:14px;margin:12px 0}
+#pcsu-relocation-card .ro-dla h3{font:700 14px/1.4 Arial,sans-serif;color:#5e462e;margin-bottom:5px}
+#pcsu-relocation-card .ro-dla p{font-size:12px;color:#665444}
+#pcsu-relocation-card .ro-budget{background:white;border:1px solid #d9e3e7;border-radius:12px;padding:15px}
+#pcsu-relocation-card .ro-budget h3{font:700 15px/1.4 Arial,sans-serif;color:#17334d;margin-bottom:5px}
+#pcsu-relocation-card #ro-budget-assumptions{font-size:12px;color:#516b7e;margin-top:9px}
+#pcsu-relocation-card details{margin-top:12px;background:#fff;border:1px solid #d9e3e7;border-radius:12px;padding:0 14px;font-size:12px}
+#pcsu-relocation-card summary{cursor:pointer;min-height:44px;padding:12px 0;font-size:13px;font-weight:700}
+#pcsu-relocation-card details p{margin-bottom:10px}
 #pcsu-relocation-card a{color:#185c70;text-underline-offset:3px}
-#pcsu-relocation-card footer{flex:none;padding:7px 18px 10px;font-size:10px;text-align:right;color:#5c7686}
-#pcsu-relocation-card .ro-sr{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
-@media(max-width:480px){#pcsu-relocation-card{border-radius:16px}#pcsu-relocation-card .ro-head{padding:15px}#pcsu-relocation-card .ro-scroll{padding:12px}#pcsu-relocation-card .ro-results{padding:16px}#pcsu-relocation-card #ro-cover{padding:22px}#pcsu-relocation-card .ro-stats{grid-template-columns:repeat(2,minmax(0,1fr))}#pcsu-relocation-card .ro-stats>div:last-child{grid-column:1/-1}#pcsu-relocation-card #ro-net{font-size:36px}}
+#pcsu-relocation-card .ro-links{display:flex;flex-wrap:wrap;gap:10px;padding-bottom:14px}
+#pcsu-relocation-card button{cursor:pointer;min-height:44px;font:700 12px Arial,sans-serif;border:0;border-radius:8px;padding:8px 12px;background:#eef6f7;color:#245f70}
+#pcsu-relocation-card #ro-retry{align-self:start;margin-top:15px}
+#pcsu-relocation-card :is(button,a,summary):focus-visible{outline:3px solid #267f77;outline-offset:3px}
+#pcsu-relocation-card footer{font-size:10px;padding:0 18px 12px;text-align:right;color:#5c7686}
+#pcsu-relocation-card .ro-sr{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}
+@media(max-width:480px){#pcsu-relocation-card .ro-head{padding:15px}#pcsu-relocation-card .ro-body{padding:12px}#pcsu-relocation-card .ro-stats{grid-template-columns:repeat(2,minmax(0,1fr))}#pcsu-relocation-card .ro-stat:last-child{grid-column:1/-1}#pcsu-relocation-card .ro-main{padding:16px}}
 </style>
 <section id="pcsu-relocation-card" data-state="idle" data-api-url="https://thewing.netlify.app/api/pcs-move" aria-labelledby="ro-title">
- <header class="ro-head"><div><h2 id="ro-title">PCS Relocation Brief</h2><p id="ro-profile">Your move, in focus</p></div><button id="ro-edit" type="button" hidden>Edit details</button></header>
- <div class="ro-scroll">
-  <div id="ro-cover"><p class="ro-kicker">Plan with a clearer picture</p><h3 id="ro-cover-title">What could your move cost?</h3><p id="ro-message">Enter your projected expenses, accompanying travelers and your mileage source. Then select Analyze.</p><p class="ro-cover-note">Compare selected DLA, mileage and per diem allowances with the expenses you expect to pay.</p><button id="ro-retry" type="button" hidden>Retry estimate</button></div>
+ <header class="ro-head"><div><h2 id="ro-title">Your PCS starting plan</h2><p id="ro-profile">A useful starting point, before you know every detail.</p></div><button id="ro-edit" type="button" hidden>Edit trip</button></header>
+ <div class="ro-body">
+  <div id="ro-cover"><p class="ro-kicker">One less thing to figure out</p><h3 id="ro-cover-title">Where are you moving from?</h3><p id="ro-message">We already have your destination and family size from PCS Snapshot. Choose your current base to see estimated miles, travel days and a driving budget.</p><button id="ro-retry" type="button" hidden>Try again</button></div>
   <div id="ro-result" hidden>
-   <section class="ro-results" aria-labelledby="ro-outcome-title">
-    <h3 class="ro-overline" id="ro-outcome-title">Estimated net relocation outcome</h3>
-    <div class="ro-outcome"><strong id="ro-net"></strong><span id="ro-badge"></span></div><p id="ro-context"></p>
-    <div class="ro-stats"><div><span>Included allowances</span><strong id="ro-total"></strong></div><div><span>Projected expenses</span><strong id="ro-cost"></strong></div><div><span>Travel days used</span><strong id="ro-days"></strong></div></div>
-    <div class="ro-chart" id="ro-chart" role="img"><div><div class="ro-chart-label"><span id="ro-allowance-label"></span><strong id="ro-chart-total"></strong></div><div class="ro-track" aria-hidden="true"><i id="ro-bar-dla" class="ro-dla"></i><i id="ro-bar-malt" class="ro-malt"></i><i id="ro-bar-perdiem" class="ro-pd"></i></div></div><div><div class="ro-chart-label"><span>Projected total expenses</span><strong id="ro-chart-cost"></strong></div><div class="ro-track" aria-hidden="true"><i id="ro-bar-expenses"></i></div></div></div>
-    <div class="ro-legend"><span><i class="ro-dot ro-dla"></i>DLA <strong id="ro-dla"></strong></span><span><i class="ro-dot ro-malt"></i>MALT <strong id="ro-malt"></strong></span><span><i class="ro-dot ro-pd"></i>Per diem <strong id="ro-perdiem"></strong></span></div>
-    <p class="ro-method" id="ro-perdiem-note"></p><p class="ro-method" id="ro-malt-note"></p><p class="ro-method" id="ro-distance-note"></p><p class="ro-method" id="ro-eligibility-note"></p><p class="ro-method"><strong>Planning estimate—not a payment guarantee.</strong> TLE, PPM and other reimbursements are excluded. Eligibility and payment timing may differ.</p>
+   <div class="ro-stats">
+    <div class="ro-stat"><span id="ro-miles-label">Estimated miles</span><strong id="ro-miles"></strong><span id="ro-miles-caption"></span></div>
+    <div class="ro-stat"><span>Estimated travel days</span><strong id="ro-days"></strong><span id="ro-nights"></span></div>
+    <div class="ro-stat"><span id="ro-budget-label">Starting driving budget</span><strong id="ro-expenses"></strong><span id="ro-budget-caption">Fuel + hotels + meals + cushion</span></div>
+   </div>
+   <p class="ro-note" id="ro-route-note"></p>
+   <section class="ro-main" aria-labelledby="ro-allowance-title">
+    <h3 id="ro-allowance-title">Estimated travel allowances</h3><strong id="ro-total"></strong><p id="ro-allowance-note"></p>
+    <div id="ro-allowance-lines"><div class="ro-line"><span>Mileage allowance (MALT)</span><strong id="ro-malt"></strong></div><div class="ro-line"><span>Meals &amp; lodging (per diem)</span><strong id="ro-perdiem"></strong></div><div class="ro-line"><span>Included moving allowance (DLA)</span><strong id="ro-dla"></strong></div><div class="ro-line"><span>After the driving budget</span><strong id="ro-net"></strong></div></div>
    </section>
-   <details class="ro-sources"><summary>Calculation assumptions &amp; sources</summary><p id="ro-date-note"></p><p id="ro-days-note"></p><p id="ro-dla-note"></p><ul id="ro-assumptions"></ul><div class="ro-links"><a id="ro-dla-source" target="_blank" rel="noopener noreferrer">DLA rates ↗</a><a id="ro-malt-source" target="_blank" rel="noopener noreferrer">Mileage rates ↗</a><a id="ro-pd-source" target="_blank" rel="noopener noreferrer">Per diem rates ↗</a><a href="https://www.dfas.mil/militarymembers/travelpay/armypcs/En-Route-Travel/" target="_blank" rel="noopener noreferrer">Travel rules ↗</a></div></details>
+   <div class="ro-dla"><h3 id="ro-dla-title"></h3><p id="ro-dla-note"></p></div>
+   <section class="ro-budget" aria-labelledby="ro-budget-title"><h3 id="ro-budget-title">What’s in your driving budget?</h3>
+    <div class="ro-line"><span>Fuel</span><strong id="ro-fuel"></strong></div><div class="ro-line"><span id="ro-lodging-label">Hotel stops</span><strong id="ro-lodging"></strong></div><div class="ro-line"><span>Meals during travel</span><strong id="ro-food"></strong></div><div class="ro-line"><span>Other costs you added</span><strong id="ro-extra"></strong></div><div class="ro-line"><span id="ro-cushion-label">Extra cushion</span><strong id="ro-cushion"></strong></div><p id="ro-budget-assumptions"></p>
+   </section>
+   <p class="ro-note">This is a driving-trip budget, not the full cost of your PCS. Add moving trucks, pet fees, tolls, shipment costs, arrival lodging and housing deposits if needed. Allowances are estimates, not guaranteed payments or cash available before departure.</p>
+   <details><summary>How we estimated this &amp; official sources</summary><p id="ro-method"></p><p id="ro-day-method"></p><p id="ro-rate-note"></p><p>Budget defaults: 25 MPG per car, $4.50/gallon, $150 per room/night including tax, $45 per traveler/day for food, and a 15% cushion. These are editable assumptions, not official rates or live price quotes. Default rooms: one per four travelers; confirm occupancy with your hotel.</p><div class="ro-links"><a href="https://www.travel.dod.mil/Travel-Transportation-Rates/Mileage-Rates/" target="_blank" rel="noopener noreferrer">Mileage rules ↗</a><a href="https://www.dfas.mil/militarymembers/travelpay/armypcs/En-Route-Travel/" target="_blank" rel="noopener noreferrer">Travel allowances ↗</a><a href="https://www.travel.dod.mil/Travel-Transportation-Rates/Dislocation-Allowance/" target="_blank" rel="noopener noreferrer">DLA eligibility ↗</a></div></details>
   </div>
  </div>
- <footer>Powered by TheWing.ai</footer><p id="ro-live" class="ro-sr" role="status" aria-live="polite"></p>
+ <footer>Amounts rounded for planning · Powered by TheWing.ai</footer><p id="ro-live" class="ro-sr" role="status" aria-live="polite"></p>
 </section>
 <script>
 (()=>{'use strict';
  let queued=window.PCSU_RELOCATION_BRIEF_REQUEST||null,request,reset;
- window.addEventListener('pcsu:relocation-request',e=>{queued=e.detail;if(request)request(queued);});
- window.addEventListener('pcsu:relocation-reset',()=>{queued=null;if(reset)reset();});
+ window.addEventListener('pcsu:relocation-request',e=>{queued=e.detail;request?.(queued);});
+ window.addEventListener('pcsu:relocation-reset',()=>{queued=null;reset?.();});
  function init(){
   const card=document.getElementById('pcsu-relocation-card');if(!card||card.dataset.mounted)return;card.dataset.mounted='true';
-  const $=id=>document.getElementById('ro-'+id),money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(n),finite=n=>typeof n==='number'&&Number.isFinite(n),close=(a,b)=>Math.abs(a-b)<.011;
-  let generation=0,controller=null,activeId='',timer;
-  const endpoint=new URL(card.dataset.apiUrl);
-  function state(value,message){card.dataset.state=value;card.setAttribute('aria-busy',String(value==='loading'));$('cover').hidden=value==='ready';$('result').hidden=value!=='ready';$('retry').hidden=value!=='error';$('edit').hidden=value!=='ready';$('message').textContent=message;$('live').textContent=message;$('cover-title').textContent=value==='loading'?'Preparing your outcome…':value==='error'?'Your estimate needs attention':'What could your move cost?';}
-  function notify(state,message,id){window.dispatchEvent(new CustomEvent('pcsu:relocation-status',{detail:{requestId:id,state,message}}));}
+  const $=id=>document.getElementById('ro-'+id),text=(id,value)=>$(id).textContent=value;
+  const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+  const range=(low,high)=>low===high?money(low):money(low)+' – '+money(high);
+  let generation=0,controller,timer;
+  function state(s,message){card.dataset.state=s;card.setAttribute('aria-busy',String(s==='loading'));$('cover').hidden=s==='ready';$('result').hidden=s!=='ready';$('edit').hidden=s!=='ready';$('retry').hidden=s!=='error';text('message',message);text('live',message);text('cover-title',s==='loading'?'Building your starting plan…':s==='error'?'Let’s check your trip':'Where are you moving from?');}
+  function render(r,label){
+   const a=r.allowances,b=r.budget,route=r.route;
+   text('profile',label);text('miles-label',route.source==='entered_authorized'?'Entered authorized miles':'Estimated miles');text('miles',route.miles.toLocaleString());text('miles-caption',route.source==='auto'?'Rough base-to-base estimate':route.source==='entered_authorized'?'From your orders':'From your route planner');
+   text('days',route.estimatedTravelDays+' day'+(route.estimatedTravelDays===1?'':'s'));text('nights',b.nights+' hotel night'+(b.nights===1?'':'s'));text('expenses',money(b.total));text('budget-label',b.source==='user_entered'?'Your expense total':'Starting driving budget');text('budget-caption',b.source==='user_entered'?'Your total replaces the calculated budget':'Fuel + hotels + meals + cushion');
+   text('route-note',route.from+' → '+route.to+'. '+(route.source==='auto'?'Rough mileage; roads, gates and detours can change the trip.':'Mileage supplied by you.'));
+   $('allowance-lines').hidden=!a;
+   text('total',a?range(a.low,a.high):'Needs a little more detail');
+   text('allowance-note',a?(!a.perDiemIncluded?'Per diem is excluded by your choice.':r.travelers.ageMixKnown?'Based on your selected traveler ages.':'Ages are not known yet, so per diem is shown as a range. Enter dependents under 12 to narrow it.')+(r.dla.included?' Confirmed DLA is included.':' DLA is not included.'):'Your driving budget is available. '+r.allowanceIssue);
+   if(a){text('malt',money(a.malt));text('perdiem',a.perDiemIncluded?range(a.perDiemLow,a.perDiemHigh):'Excluded');text('dla',r.dla.included?money(a.dla):'Not included');text('net',range(r.net.low,r.net.high));}
+   text('dla-title',r.dla.included?'DLA included: '+money(a.dla):r.dla.possibleAmount!==null?'Possible DLA: '+money(r.dla.possibleAmount):r.dla.eligibility==='excluded'?'DLA excluded by your choice':'DLA: eligibility still to confirm');
+   text('dla-note',r.dla.included?'Based on your confirmation and the grade / dependency status on '+r.dla.effectiveDate+'.':r.dla.possibleAmount!==null?'Not included in the total above. This possible primary-DLA rate uses your Snapshot grade and household assumption. Confirm eligibility and your order-effective profile under “Moving allowance (DLA).”':r.dla.eligibility==='excluded'?'No DLA is included in this plan.':'DLA is separate from the starting total until eligibility and the order-effective profile are confirmed.');
+   text('budget-title',b.source==='user_entered'?'Calculated budget before your override':'What’s in your driving budget?');text('fuel',money(b.fuel));text('lodging',money(b.lodging));text('food',money(b.meals));text('extra',money(b.extraCosts));text('cushion',money(b.cushion));text('lodging-label',`${b.nights} hotel night${b.nights===1?'':'s'} × ${b.assumptions.rooms} room${b.assumptions.rooms===1?'':'s'}`);text('cushion-label',b.assumptions.cushionPercent+'% extra cushion');
+   text('budget-assumptions',`${r.travelers.count} travelers; ${r.input.povs} car${r.input.povs===1?'':'s'} at ${b.assumptions.mpg} MPG and $${b.assumptions.fuelPrice.toFixed(2)}/gallon; ${money(b.assumptions.hotelRate)}/room/night and ${money(b.assumptions.foodPerPerson)}/person/day for meals.`+(b.source==='user_entered'?' Your own total replaces this '+money(b.calculatedTotal)+' calculated breakdown.':' Adjust these values on the left.'));
+   text('method',route.method);text('day-method',route.mileageBasedMaximumDays+' mileage-based allowance-day maximum; '+route.estimatedTravelDays+' days planned. Allowances use no more than '+route.allowanceDays+' days. Your orders determine what is authorized.');
+   text('rate-note',a?`Travel starts ${r.input.travelDate}. MALT uses $${a.maltRate.toFixed(3)}/mile.`+(a.perDiemIncluded?` Per diem uses FY${a.perDiemFiscalYear}.`:' Per diem excluded.'):'Allowance rates unavailable: '+r.allowanceIssue);
+  }
   function validate(r,input){
-   if(r?.schema!=='pcs-relocation-brief.v1'||!r.input||Object.entries(input).some(([k,v])=>r.input[k]!==v))throw new Error('The estimate did not match your current inputs. Please retry.');
-   if(input.accuracyVersion!==2||r.accuracyVersion!==2||r.distance?.source!==input.distanceSource||r.distance?.miles!==input.distanceMiles||r.dla?.eligibility!==input.dlaEligibility||r.dla?.included!==input.includeDla)throw new Error('The updated mileage and eligibility checks are unavailable. Please reload and retry.');
-   const a=r.allowances;
-   if(!a||!['dla','malt','perDiem','total'].every(k=>finite(a[k])&&a[k]>=0)||!finite(r.net)||!finite(r.estimatedExpenses)||!Number.isInteger(r.usedTravelDays)||r.usedTravelDays<1||!Number.isInteger(r.mileageBasedTravelDays)||r.usedTravelDays>r.mileageBasedTravelDays||!close(a.dla+a.malt+a.perDiem,a.total)||!close(r.estimatedExpenses,input.estimatedExpenses)||!close(a.total-r.estimatedExpenses,r.net)||r.outcome!==(r.net<0?'gap':r.net>0?'surplus':'break-even'))throw new Error('The allowance totals could not be verified. Please retry.');
-   if((!input.includeDla&&a.dla!==0)||(!input.includePerDiem&&a.perDiem!==0)||(input.includeDla&&(input.dlaEligibility!=='confirmed'||r.dla.effectiveDate!==input.dlaEffectiveDate||r.dla.rank!==input.dlaRank||r.dla.hasDependents!==input.dlaHasDependents)))throw new Error('Selected allowances could not be verified. Please retry.');
-   if(input.includePerDiem&&(!r.perDiem?.rates||!['memberDailyRate','dependent12PlusDailyRate','dependentUnder12DailyRate'].every(k=>finite(r.perDiem.rates[k])&&r.perDiem.rates[k]>0)))throw new Error('Per diem could not be verified. Please retry.');
-   if(!finite(r.malt?.ratePerMile)||!r.sources||!Array.isArray(r.assumptions))throw new Error('Calculation sources could not be verified. Please retry.');
+   if(r?.schema!=='pcs-starter-plan.v1'||r.input?.currentBase!==input.currentBase||r.input?.destinationBase!==input.destinationBase||r.input?.familySize!==input.familySize||r.input?.travelDate!==input.travelDate)throw new Error('The estimate does not match your current trip. Try again.');
+   if(!Number.isFinite(r.route?.miles)||!Number.isFinite(r.budget?.total)||r.budget.total<0||!Number.isInteger(r.route.estimatedTravelDays))throw new Error('This estimate could not be verified. Try again.');
+   if(r.allowances&&(!Number.isFinite(r.allowances.low)||!Number.isFinite(r.allowances.high)||r.allowances.low>r.allowances.high))throw new Error('The allowance range could not be verified.');
    return r;
   }
-  function text(id,value){$(id).textContent=value;}
-  function source(id,url){if(!url){$(id).hidden=true;return;}const u=new URL(url);if(u.protocol!=='https:'||!['www.gsa.gov','www.travel.dod.mil','media.defense.gov'].includes(u.hostname))throw new Error('An official source could not be verified. Please retry.');$(id).href=u.href;$(id).hidden=false;}
-  function render(r,label){
-   const i=r.input,a=r.allowances; text('profile',label||i.rank+' · '+(i.hasDependents?'With dependents':'Without dependents'));
-   const badge=r.net<0?'Estimated out-of-pocket gap':r.net>0?'Estimated surplus':'Estimated break-even';
-   text('net',money(Math.abs(r.net)));text('badge',badge);$('badge').dataset.tone=r.outcome;
-   text('context',r.net<0?'Projected expenses exceed the included allowance estimate.':r.net>0?'Included allowances exceed your projected expenses.':'Included allowances match your projected expenses.');
-   text('total',money(a.total));text('chart-total',money(a.total));text('cost',money(r.estimatedExpenses));text('chart-cost',money(r.estimatedExpenses));text('days',r.usedTravelDays+' day'+(r.usedTravelDays===1?'':'s'));
-   text('dla',i.includeDla?money(a.dla):i.dlaEligibility==='unknown'?'Unconfirmed · excluded':'Excluded');text('malt',money(a.malt));text('perdiem',i.includePerDiem?money(a.perDiem):'Excluded');
-   text('allowance-label',[i.includeDla?'DLA':null,'MALT',i.includePerDiem?'Per diem':null].filter(Boolean).join(' + '));
-   const max=Math.max(a.total,r.estimatedExpenses,1);$('bar-dla').style.width=a.dla/max*100+'%';$('bar-malt').style.width=a.malt/max*100+'%';$('bar-perdiem').style.width=a.perDiem/max*100+'%';$('bar-expenses').style.width=r.estimatedExpenses/max*100+'%';
-   $('chart').setAttribute('aria-label','Included allowances '+money(a.total)+' compared with projected expenses '+money(r.estimatedExpenses)+'. '+badge+': '+money(Math.abs(r.net))+'. Both bars use the same scale.');
-   if(i.includePerDiem){
-    const rates=r.perDiem.rates;let note=r.usedTravelDays+' day'+(r.usedTravelDays===1?'':'s')+' × (member '+money(rates.memberDailyRate)+'/day';
-    if(i.dependents12Plus)note+=' + '+i.dependents12Plus+' age 12+ × '+money(rates.dependent12PlusDailyRate);
-    if(i.dependentsUnder12)note+=' + '+i.dependentsUnder12+' under 12 × '+money(rates.dependentUnder12DailyRate);
-    note+='); '+(1+i.dependents12Plus+i.dependentsUnder12)+' traveler'+(i.dependents12Plus+i.dependentsUnder12?'s':'')+'. FY'+r.perDiem.fiscalYear+' rates.';
-    text('perdiem-note',note);
-   }else text('perdiem-note','En-route per diem is excluded from this selected-allowance estimate.');
-   text('malt-note',i.distanceMiles.toLocaleString()+(i.distanceSource==='entered_authorized'?' entered authorized miles × $':' estimated driving miles × $')+r.malt.ratePerMile.toFixed(3)+'/mile × '+i.povs+' POV'+(i.povs===1?'':'s')+'. Mileage rate effective '+r.malt.effectiveFrom+'.');
-   text('distance-note',i.distanceSource==='estimated_driving'?'Planning distance: MALT and the mileage-based maximum days are estimates. Recalculate with mileage from your orders or transportation office before claiming.':'Mileage source: entered from orders / transportation office. Not independently verified through DTOD.');
-   text('date-note','Travel start: '+i.travelDate+'. MALT calendar year: '+r.sources.calendarYear+'.'+(i.includeDla?' DLA order effective date: '+i.dlaEffectiveDate+'; rate year '+r.sources.dlaCalendarYear+'.':'')+(i.includePerDiem?' Per diem fiscal year: '+r.perDiem.fiscalYear+'.':''));
-   text('days-note',r.mileageBasedTravelDays+(i.distanceSource==='estimated_driving'?' estimated maximum travel days; ':' mileage-based maximum travel days; ')+r.usedTravelDays+' days used.'+(r.daysCapped?' Your longer planned trip is capped at the mileage-based allowance.':'')+' Additional leave or lodging does not increase per diem.');
-   const dlaNote=i.includeDla?'Primary DLA included based on your eligibility confirmation: '+i.dlaRank+', '+(i.dlaHasDependents?'with dependents':'without dependents')+' on '+i.dlaEffectiveDate+'. This tool does not determine entitlement.':i.dlaEligibility==='unknown'?'DLA eligibility is unconfirmed, so DLA is excluded from the total. This is not a determination that your entitlement is $0.':'Primary DLA is excluded by your selection.';
-   text('dla-note',dlaNote);text('eligibility-note',dlaNote);
-   $('assumptions').replaceChildren(...r.assumptions.map(t=>{const li=document.createElement('li');li.textContent=t;return li;}));
-   source('dla-source',r.sources.dla);source('malt-source',r.sources.malt);source('pd-source',r.sources.perDiem);
-  }
   request=async payload=>{
-   if(!payload||typeof payload.requestId!=='string'||!payload.input)return;
-   const current=++generation;controller?.abort();clearTimeout(timer);controller=new AbortController();const signal=controller.signal;activeId=payload.requestId;
-   state('loading','Loading your selected allowances and projected expenses…');
-   timer=setTimeout(()=>{if(generation===current)controller.abort();},15000);
+   if(!payload?.requestId||payload.input?.estimateMode!=='starter-plan')return;
+   const current=++generation;controller?.abort();clearTimeout(timer);controller=new AbortController();const signal=controller.signal;
+   state('loading','Estimating your route, driving budget and available allowances…');timer=setTimeout(()=>controller.abort(),15000);
    try{
-    const response=await fetch(endpoint.href,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',cache:'no-store',signal,body:JSON.stringify({input:payload.input})});
-    const body=await response.json();if(current!==generation||signal.aborted)return;
-    if(!response.ok||!body.ok)throw new Error(response.status===400&&typeof body.error==='string'?body.error:'The relocation estimate could not load. Please retry.');
-    const result=validate(body.result,payload.input);render(result,payload.profileLabel);
-    state('ready','Your relocation outcome is ready.');notify('ready','Your relocation outcome is ready.',activeId);
-   }catch(error){
-    if(current!==generation)return;
-    const id=activeId;activeId='';const message=error.name==='AbortError'?'The calculation timed out. Please retry.':error.message||'The relocation estimate could not load. Please retry.';
-    state('error',message);notify('error',message,id);
-   }finally{if(current===generation)clearTimeout(timer);}
+    const response=await fetch(card.dataset.apiUrl,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',cache:'no-store',signal,body:JSON.stringify({input:payload.input})});
+    const body=await response.json();if(current!==generation)return;
+    if(!response.ok||!body.ok)throw new Error(response.status===400?body.error:'The estimate is temporarily unavailable. Try again.');
+    const result=validate(body.result,payload.input);render(result,payload.profileLabel);state('ready','Your starting plan is ready.');
+    window.dispatchEvent(new CustomEvent('pcsu:relocation-status',{detail:{requestId:payload.requestId,state:'ready',message:'Your estimate is ready. It updates automatically when you change a detail.'}}));
+   }catch(e){if(current!==generation)return;const message=e.name==='AbortError'?'The estimate timed out. Please try again.':e.message;state('error',message);window.dispatchEvent(new CustomEvent('pcsu:relocation-status',{detail:{requestId:payload.requestId,state:'error',message}}));}
+   finally{if(current===generation)clearTimeout(timer);}
   };
-  reset=()=>{++generation;controller?.abort();clearTimeout(timer);activeId='';text('profile','Your move, in focus');state('idle','Your details changed. Select Analyze to see the updated outcome.');};
-  $('retry').addEventListener('click',()=>window.dispatchEvent(new CustomEvent('pcsu:relocation-retry')));
-  $('edit').addEventListener('click',()=>window.dispatchEvent(new CustomEvent('pcsu:relocation-edit')));
-  window.addEventListener('pagehide',()=>{++generation;controller?.abort();clearTimeout(timer);});
-  if(queued)request(queued);
+  reset=()=>{++generation;controller?.abort();clearTimeout(timer);state('idle','Choose your current base. We’ll use the destination and family size from PCS Snapshot.');};
+  $('retry').addEventListener('click',()=>window.dispatchEvent(new CustomEvent('pcsu:relocation-retry')));$('edit').addEventListener('click',()=>window.dispatchEvent(new CustomEvent('pcsu:relocation-edit')));
+  window.addEventListener('pagehide',()=>{++generation;controller?.abort();clearTimeout(timer);});if(queued)request(queued);
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
