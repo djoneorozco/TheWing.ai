@@ -1,4 +1,4 @@
-<!-- PCSUnited Relocation Brief: OUTCOME. Starter planning revision 1. Pair with INPUT on the same page. -->
+<!-- PCSUnited Relocation Brief: OUTCOME. Starter planning revision 2; allowance comparison graph. Pair with INPUT on the same page. -->
 <style>
 #pcsu-relocation-card,#pcsu-relocation-card *{box-sizing:border-box}
 #pcsu-relocation-card{font:14px/1.5 Arial,sans-serif;color:#17334d;min-width:0;width:100%;border:1px solid #ccd9df;border-radius:20px;background:#edf4f6;box-shadow:0 6px 24px #17334d12;overflow:hidden;text-align:left}
@@ -20,6 +20,31 @@
 #pcsu-relocation-card .ro-main{background:#19313b;color:#f7fbfc;border-radius:14px;padding:20px;margin:12px 0}
 #pcsu-relocation-card .ro-main h3{color:#f7fbfc;font:700 14px/1.4 Arial,sans-serif}
 #pcsu-relocation-card #ro-total{display:block;font:700 clamp(25px,3vw,37px)/1.2 Arial,sans-serif;letter-spacing:-.025em;margin:12px 0;overflow-wrap:anywhere}
+#pcsu-relocation-card .ro-balance{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:10px 0}
+#pcsu-relocation-card .ro-balance #ro-total{margin:0;font-size:clamp(25px,2.8vw,36px)}
+#pcsu-relocation-card .ro-badge{font:700 11px/1.4 Arial,sans-serif;padding:6px 10px;border-radius:99px;background:#405662;color:#fff}
+#pcsu-relocation-card .ro-badge[data-tone="surplus"]{background:#20594e;color:#d9fff1}
+#pcsu-relocation-card .ro-badge[data-tone="gap"]{background:#70412e;color:#ffecdd}
+#pcsu-relocation-card .ro-badge[data-tone="range"]{background:#4c466a;color:#f2eaff}
+#pcsu-relocation-card .ro-comparison-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;border-block:1px solid #ffffff26;padding:14px 0;margin:16px 0}
+#pcsu-relocation-card .ro-comparison-stats span{display:block;font-size:11px;color:#d5e4eb}
+#pcsu-relocation-card .ro-comparison-stats strong{display:block;font:700 16px/1.5 Arial,sans-serif;font-variant-numeric:tabular-nums;margin-top:4px}
+#pcsu-relocation-card .ro-bar-label{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;font-size:12px;margin:14px 0 7px}
+#pcsu-relocation-card .ro-bar-label strong{font-variant-numeric:tabular-nums}
+#pcsu-relocation-card .ro-track{display:flex;width:100%;height:22px;background:#ffffff10;border-radius:6px;overflow:hidden}
+#pcsu-relocation-card .ro-segment{height:100%;flex:none}
+#pcsu-relocation-card .ro-color-dla{background:#efb17e}
+#pcsu-relocation-card .ro-color-malt{background:#71cfcc}
+#pcsu-relocation-card .ro-color-perdiem{background:#bda6e8}
+#pcsu-relocation-card .ro-color-range{background:repeating-linear-gradient(135deg,#cdbaf0 0 3px,#655782 3px 7px)}
+#pcsu-relocation-card .ro-color-expenses{background:#bac8d7}
+#pcsu-relocation-card .ro-axis{display:flex;justify-content:space-between;gap:10px;margin:8px 0 14px;color:#c2d2da;font-size:10px}
+#pcsu-relocation-card .ro-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;margin:0 0 14px;padding:0;list-style:none}
+#pcsu-relocation-card .ro-legend li{display:grid;grid-template-columns:9px minmax(0,1fr);gap:7px;font-size:11px;color:#d5e4eb;margin:0}
+#pcsu-relocation-card .ro-key{width:9px;height:9px;display:inline-block;border-radius:2px;margin-top:4px}
+#pcsu-relocation-card .ro-legend strong{display:block;color:#fff;font-size:12px;font-variant-numeric:tabular-nums}
+#pcsu-relocation-card #ro-range-note{margin:0 0 12px}
+#pcsu-relocation-card #ro-allowance-note{border-top:1px solid #ffffff26;padding-top:12px;margin-top:12px}
 #pcsu-relocation-card .ro-main p{font-size:12px;color:#d5e4eb}
 #pcsu-relocation-card .ro-line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #d8e1e5;font-size:13px}
 #pcsu-relocation-card .ro-line strong{text-align:right;font-variant-numeric:tabular-nums}
@@ -55,8 +80,29 @@
    </div>
    <p class="ro-note" id="ro-route-note"></p>
    <section class="ro-main" aria-labelledby="ro-allowance-title">
-    <h3 id="ro-allowance-title">Estimated travel allowances</h3><strong id="ro-total"></strong><p id="ro-allowance-note"></p>
-    <div id="ro-allowance-lines"><div class="ro-line"><span>Mileage allowance (MALT)</span><strong id="ro-malt"></strong></div><div class="ro-line"><span>Meals &amp; lodging (per diem)</span><strong id="ro-perdiem"></strong></div><div class="ro-line"><span>Included moving allowance (DLA)</span><strong id="ro-dla"></strong></div><div class="ro-line"><span>After the driving budget</span><strong id="ro-net"></strong></div></div>
+    <h3 id="ro-allowance-title">Estimated balance after your trip</h3>
+    <div class="ro-balance"><strong id="ro-total"></strong><span id="ro-badge" class="ro-badge"></span></div>
+    <p id="ro-net-context"></p>
+    <div id="ro-comparison">
+     <div class="ro-comparison-stats"><div><span>Included allowances</span><strong id="ro-included-total"></strong></div><div><span id="ro-comparison-cost-label">Estimated driving expenses</span><strong id="ro-comparison-cost"></strong></div></div>
+     <div id="ro-chart" role="img" aria-label="Allowance and expense comparison">
+      <div aria-hidden="true">
+       <div class="ro-bar-label"><span>Included allowances</span><strong id="ro-chart-total"></strong></div>
+       <div class="ro-track"><span id="ro-bar-dla" class="ro-segment ro-color-dla"></span><span id="ro-bar-malt" class="ro-segment ro-color-malt"></span><span id="ro-bar-perdiem" class="ro-segment ro-color-perdiem"></span><span id="ro-bar-range" class="ro-segment ro-color-range"></span></div>
+       <div class="ro-bar-label"><span id="ro-chart-cost-label">Estimated driving expenses</span><strong id="ro-chart-cost"></strong></div>
+       <div class="ro-track"><span id="ro-bar-expenses" class="ro-segment ro-color-expenses"></span></div>
+       <div class="ro-axis"><span>$0</span><span>Same scale · <span id="ro-scale-max"></span></span></div>
+      </div>
+     </div>
+     <ul class="ro-legend" aria-label="Included allowance breakdown">
+      <li><i class="ro-key ro-color-dla" aria-hidden="true"></i><span>Moving allowance · DLA<strong id="ro-dla"></strong></span></li>
+      <li><i class="ro-key ro-color-malt" aria-hidden="true"></i><span>Mileage allowance · MALT<strong id="ro-malt"></strong></span></li>
+      <li><i class="ro-key ro-color-perdiem" aria-hidden="true"></i><span>Meals &amp; lodging · Per diem<strong id="ro-perdiem"></strong></span></li>
+      <li id="ro-range-key"><i class="ro-key ro-color-range" aria-hidden="true"></i><span>Age-dependent range<strong id="ro-range-amount"></strong></span></li>
+     </ul>
+     <p id="ro-range-note"></p>
+    </div>
+    <p id="ro-allowance-note"></p>
    </section>
    <div class="ro-dla"><h3 id="ro-dla-title"></h3><p id="ro-dla-note"></p></div>
    <section class="ro-budget" aria-labelledby="ro-budget-title"><h3 id="ro-budget-title">What’s in your driving budget?</h3>
@@ -66,7 +112,7 @@
    <details><summary>How we estimated this &amp; official sources</summary><p id="ro-method"></p><p id="ro-day-method"></p><p id="ro-rate-note"></p><p>Budget defaults: 25 MPG per car, $4.50/gallon, $150 per room/night including tax, $45 per traveler/day for food, and a 15% cushion. These are editable assumptions, not official rates or live price quotes. Default rooms: one per four travelers; confirm occupancy with your hotel.</p><div class="ro-links"><a href="https://www.travel.dod.mil/Travel-Transportation-Rates/Mileage-Rates/" target="_blank" rel="noopener noreferrer">Mileage rules ↗</a><a href="https://www.dfas.mil/militarymembers/travelpay/armypcs/En-Route-Travel/" target="_blank" rel="noopener noreferrer">Travel allowances ↗</a><a href="https://www.travel.dod.mil/Travel-Transportation-Rates/Dislocation-Allowance/" target="_blank" rel="noopener noreferrer">DLA eligibility ↗</a></div></details>
   </div>
  </div>
- <footer>Amounts rounded for planning · Powered by TheWing.ai</footer><p id="ro-live" class="ro-sr" role="status" aria-live="polite"></p>
+ <footer>Planning estimates · Powered by TheWing.ai</footer><p id="ro-live" class="ro-sr" role="status" aria-live="polite"></p>
 </section>
 <script>
 (()=>{'use strict';
@@ -76,7 +122,7 @@
  function init(){
   const card=document.getElementById('pcsu-relocation-card');if(!card||card.dataset.mounted)return;card.dataset.mounted='true';
   const $=id=>document.getElementById('ro-'+id),text=(id,value)=>$(id).textContent=value;
-  const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+  const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
   const range=(low,high)=>low===high?money(low):money(low)+' – '+money(high);
   let generation=0,controller,timer;
   function state(s,message){card.dataset.state=s;card.setAttribute('aria-busy',String(s==='loading'));$('cover').hidden=s==='ready';$('result').hidden=s!=='ready';$('edit').hidden=s!=='ready';$('retry').hidden=s!=='error';text('message',message);text('live',message);text('cover-title',s==='loading'?'Building your starting plan…':s==='error'?'Let’s check your trip':'Where are you moving from?');}
@@ -85,10 +131,23 @@
    text('profile',label);text('miles-label',route.source==='entered_authorized'?'Entered authorized miles':'Estimated miles');text('miles',route.miles.toLocaleString());text('miles-caption',route.source==='auto'?'Rough base-to-base estimate':route.source==='entered_authorized'?'From your orders':'From your route planner');
    text('days',route.estimatedTravelDays+' day'+(route.estimatedTravelDays===1?'':'s'));text('nights',b.nights+' hotel night'+(b.nights===1?'':'s'));text('expenses',money(b.total));text('budget-label',b.source==='user_entered'?'Your expense total':'Starting driving budget');text('budget-caption',b.source==='user_entered'?'Your total replaces the calculated budget':'Fuel + hotels + meals + cushion');
    text('route-note',route.from+' → '+route.to+'. '+(route.source==='auto'?'Rough mileage; roads, gates and detours can change the trip.':'Mileage supplied by you.'));
-   $('allowance-lines').hidden=!a;
-   text('total',a?range(a.low,a.high):'Needs a little more detail');
-   text('allowance-note',a?(!a.perDiemIncluded?'Per diem is excluded by your choice.':r.travelers.ageMixKnown?'Based on your selected traveler ages.':'Ages are not known yet, so per diem is shown as a range. Enter dependents under 12 to narrow it.')+(r.dla.included?' Confirmed DLA is included.':' DLA is not included.'):'Your driving budget is available. '+r.allowanceIssue);
-   if(a){text('malt',money(a.malt));text('perdiem',a.perDiemIncluded?range(a.perDiemLow,a.perDiemHigh):'Excluded');text('dla',r.dla.included?money(a.dla):'Not included');text('net',range(r.net.low,r.net.high));}
+   $('comparison').hidden=!a;$('badge').hidden=!a;
+   text('total','Needs a little more detail');text('net-context','Your driving budget is available.');
+   text('allowance-note',a?(!a.perDiemIncluded?'Per diem is excluded by your choice.':r.travelers.ageMixKnown?'Based on your selected traveler ages.':'Enter dependents under 12 to narrow the allowance range.')+(r.dla.included?' Confirmed DLA is included.':' DLA is not included.')+' Estimates are not guaranteed payments or cash available before departure.':r.allowanceIssue);
+   if(a){
+    const n=r.net,max=Math.max(a.high,b.total,1),hasRange=a.high>a.low;
+    const tone=n.low>=0&&n.high>0?'surplus':n.high<=0&&n.low<0?'gap':n.low===0&&n.high===0?'even':'range';
+    $('badge').dataset.tone=tone;text('badge',tone==='surplus'?'Estimated surplus':tone==='gap'?'Estimated shortfall':tone==='even'?'Estimated break-even':'Could go either way');
+    text('total',tone==='gap'?range(Math.abs(n.high),Math.abs(n.low)):range(n.low,n.high));
+    text('net-context',tone==='surplus'?'Estimated allowances exceed the expenses included in this plan.':tone==='gap'?'This is the extra amount you may need beyond the included allowances.':tone==='even'?'Estimated allowances match the expenses included in this plan.':'The age-based allowance range could leave a shortfall or a surplus. Negative amounts mean a shortfall.');
+    const costLabel=b.source==='user_entered'?'Your expense total':'Estimated driving expenses';
+    text('included-total',range(a.low,a.high));text('chart-total',range(a.low,a.high));text('comparison-cost',money(b.total));text('chart-cost',money(b.total));text('comparison-cost-label',costLabel);text('chart-cost-label',costLabel);text('scale-max',money(max));
+    // Display scaling only; allowance, expense and net amounts come from the API.
+    for(const [id,value] of Object.entries({dla:a.dla,malt:a.malt,perdiem:a.perDiemLow,range:a.perDiemHigh-a.perDiemLow,expenses:b.total}))$('bar-'+id).style.width=(value/max*100)+'%';
+    text('malt',money(a.malt));text('perdiem',a.perDiemIncluded?range(a.perDiemLow,a.perDiemHigh):'Excluded');text('dla',r.dla.included?money(a.dla):'Not included');
+    $('range-key').hidden=!hasRange;$('range-note').hidden=!hasRange;text('range-amount','Up to '+money(a.high-a.low)+' more');text('range-note','Solid colors show the lower estimate. The striped part extends to the upper estimate while dependent ages are unknown.');
+    $('chart').setAttribute('aria-label',`Included allowances: ${range(a.low,a.high)}. ${costLabel}: ${money(b.total)}. Moving allowance DLA: ${r.dla.included?money(a.dla):'not included'}. Mileage allowance MALT: ${money(a.malt)}. Per diem: ${a.perDiemIncluded?range(a.perDiemLow,a.perDiemHigh):'excluded'}. Both bars use the same scale from zero to ${money(max)}.`+(hasRange?' The striped extension is the age-dependent range.':''));
+   }
    text('dla-title',r.dla.included?'DLA included: '+money(a.dla):r.dla.possibleAmount!==null?'Possible DLA: '+money(r.dla.possibleAmount):r.dla.eligibility==='excluded'?'DLA excluded by your choice':'DLA: eligibility still to confirm');
    text('dla-note',r.dla.included?'Based on your confirmation and the grade / dependency status on '+r.dla.effectiveDate+'.':r.dla.possibleAmount!==null?'Not included in the total above. This possible primary-DLA rate uses your Snapshot grade and household assumption. Confirm eligibility and your order-effective profile under “Moving allowance (DLA).”':r.dla.eligibility==='excluded'?'No DLA is included in this plan.':'DLA is separate from the starting total until eligibility and the order-effective profile are confirmed.');
    text('budget-title',b.source==='user_entered'?'Calculated budget before your override':'What’s in your driving budget?');text('fuel',money(b.fuel));text('lodging',money(b.lodging));text('food',money(b.meals));text('extra',money(b.extraCosts));text('cushion',money(b.cushion));text('lodging-label',`${b.nights} hotel night${b.nights===1?'':'s'} × ${b.assumptions.rooms} room${b.assumptions.rooms===1?'':'s'}`);text('cushion-label',b.assumptions.cushionPercent+'% extra cushion');
@@ -99,7 +158,10 @@
   function validate(r,input){
    if(r?.schema!=='pcs-starter-plan.v1'||r.input?.currentBase!==input.currentBase||r.input?.destinationBase!==input.destinationBase||r.input?.familySize!==input.familySize||r.input?.travelDate!==input.travelDate)throw new Error('The estimate does not match your current trip. Try again.');
    if(!Number.isFinite(r.route?.miles)||!Number.isFinite(r.budget?.total)||r.budget.total<0||!Number.isInteger(r.route.estimatedTravelDays))throw new Error('This estimate could not be verified. Try again.');
-   if(r.allowances&&(!Number.isFinite(r.allowances.low)||!Number.isFinite(r.allowances.high)||r.allowances.low>r.allowances.high))throw new Error('The allowance range could not be verified.');
+   if(r.allowances){
+    const a=r.allowances,n=r.net,validAmount=x=>Number.isFinite(x)&&x>=0,close=(x,y)=>Math.abs(x-y)<.011;
+    if(![a.low,a.high,a.dla,a.malt,a.perDiemLow,a.perDiemHigh].every(validAmount)||a.low>a.high||a.perDiemLow>a.perDiemHigh||!Number.isFinite(n?.low)||!Number.isFinite(n?.high)||!close(a.low,a.dla+a.malt+a.perDiemLow)||!close(a.high,a.dla+a.malt+a.perDiemHigh)||!close(n.low,a.low-r.budget.total)||!close(n.high,a.high-r.budget.total)||(!r.dla.included&&a.dla!==0))throw new Error('The allowance comparison could not be verified. Try again.');
+   }
    return r;
   }
   request=async payload=>{

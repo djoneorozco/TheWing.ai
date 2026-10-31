@@ -65,3 +65,22 @@ node --test netlify/functions/_share/pcs-starter-plan.test.js netlify/functions/
 Browser checks must cover one-selection generation, optional age refinement,
 manual mileage preservation, destination/household changes, DLA confirmation,
 partial results for unsupported dates and a phone viewport.
+
+Outcome graph revision 2:
+- Uses the net estimate from the API as the main result, with surplus, shortfall,
+  break-even, or a range crossing zero. Shortfalls use a positive amount and an
+  explicit label; mixed ranges retain negative signs.
+- DLA, MALT, and per diem form one stacked bar, compared with the expense bar
+  on the same zero-based scale. Unknown-age variation is a striped extension.
+- Possible, unconfirmed DLA remains outside both totals and graph. Unavailable
+  allowances hide the comparison while retaining route and budget results.
+- Amounts display cents so the displayed components reconcile with totals.
+- The chart has a screen-reader description, labeled legend, no animation,
+  and wraps on small screens. Financial calculations remain on the backend.
+- This is an outcome-only upgrade; the revision-1 starter INPUT is compatible.
+
+Graph regression checks:
+node --test Webflow/PCS-Relocation-outcome.test.cjs
+Covers unknown and known ages, confirmed and excluded DLA, zero/high expenses,
+shortfall, break-even, mixed-sign ranges, excluded per diem, unsupported dates,
+invalid response components, and stale-result reset.
