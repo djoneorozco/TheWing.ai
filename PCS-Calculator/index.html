@@ -241,10 +241,16 @@
         <!-- //#9B) DETAIL INPUTS -->
         <div class="summary-grid detail-grid">
           <div class="mini-card glass">
-            <div class="mini-label">Official Distance Miles</div>
+            <label class="mini-label" for="pcs-distance">Distance in miles</label>
+            <label class="mini-label" for="pcs-distance-source">Mileage source</label>
+            <select id="pcs-distance-source" aria-describedby="pcs-distance-help">
+              <option value="estimated_base_to_base">Rough base-to-base estimate</option>
+              <option value="entered_authorized">Entered from orders / transportation office</option>
+            </select>
             <div class="mini-value">
-              <input id="pcs-distance" type="number" min="0" step="1" value="588" />
+              <input id="pcs-distance" type="number" min="1" step="1" placeholder="Enter miles" />
             </div>
+            <p id="pcs-distance-help">An estimate is not official DTOD mileage. Enter authorized mileage before claiming.</p>
           </div>
 
           <div class="mini-card glass">

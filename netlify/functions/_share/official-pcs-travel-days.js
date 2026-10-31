@@ -14,7 +14,7 @@
 //
 // RULES (JTR-style PCS POV travel days)
 // - 1 day for the first 400 miles
-// - If distance is greater than 400 miles, divide the excess by 350
+// - If distance is greater than 400 miles, divide the TOTAL distance by 350
 // - If the remainder is 51 miles or more, add one additional travel day
 // - Return at least 1 day for valid PCS travel distance
 //
@@ -22,7 +22,7 @@
 // - ES Module exports for Netlify Functions with "type": "module"
 // ============================================================
 
-export const RULE_VERSION = "official-pcs-travel-days-2026.1";
+export const RULE_VERSION = "official-pcs-travel-days-2026.2";
 
 const FIRST_SEGMENT_MILES = 400;
 const ADDITIONAL_SEGMENT_MILES = 350;
@@ -71,11 +71,12 @@ export function calculatePcsTravelDays(distanceMiles) {
     };
   }
 
-  const excessMiles = distance - FIRST_SEGMENT_MILES;
-  const additionalSegmentDays = Math.floor(excessMiles / ADDITIONAL_SEGMENT_MILES);
-  const remainderMiles = excessMiles % ADDITIONAL_SEGMENT_MILES;
+  // DTMO PCS/MALT guidance (JTR 050205): divide total miles, not miles
+  // remaining after 400. https://www.travel.dod.mil/Travel-Transportation-Rates/Mileage-Rates/
+  const fullTravelDays = Math.floor(distance / ADDITIONAL_SEGMENT_MILES);
+  const remainderMiles = distance % ADDITIONAL_SEGMENT_MILES;
   const remainderAddsDay = remainderMiles >= REMAINDER_THRESHOLD_MILES;
-  const days = 1 + additionalSegmentDays + (remainderAddsDay ? 1 : 0);
+  const days = fullTravelDays + (remainderAddsDay ? 1 : 0);
 
   return {
     ok: true,
@@ -84,7 +85,8 @@ export function calculatePcsTravelDays(distanceMiles) {
     ruleVersion: RULE_VERSION,
     breakdown: {
       firstSegmentDays: 1,
-      additionalSegmentDays,
+      additionalSegmentDays: fullTravelDays - 1,
+      fullTravelDays,
       remainderMiles,
       remainderAddsDay
     }
