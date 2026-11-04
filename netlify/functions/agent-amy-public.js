@@ -83,6 +83,7 @@ const ALLOW_ORIGINS = [
   "https://pcsunited.netlify.app",
   "https://www.pcsunited.netlify.app",
   "https://pcsunited-com-28346d.webflow.io",
+  "https://pcs-united-com.webflow.io",
   "https://www.pcsunited-com-28346d.webflow.io",
   "https://pcsunited.webflow.io",
   "https://www.pcsunited.webflow.io",
@@ -2345,8 +2346,49 @@ function attachProvenance(packet, provenance) {
   return { ...packet, provenance };
 }
 
+// Financial Guidance sends its displayed ledger. Validate and total it on the
+// server; keep payroll deductions and savings distinct from living expenses.
+function normalizeFinancialGuidanceIncome(raw) {
+  if (!isPlainObject(raw) || raw.schemaVersion !== 2 || raw.complete !== true ||
+      !["active", "veteran", "retired"].includes(raw.status) ||
+      raw.currency !== "USD" || raw.period !== "monthly" ||
+      !Array.isArray(raw.sources) || raw.sources.length < 1 || raw.sources.length > 40) return null;
+  const cents = x => Math.round((x + Number.EPSILON) * 100) / 100;
+  const validMoney = x => typeof x === "number" && Number.isFinite(x) && x >= 0 && x <= 100000000;
+  const sources = [];
+  for (const source of raw.sources) {
+    if (!isPlainObject(source) || typeof source.label !== "string" ||
+        !source.label.trim() || source.label.length > 120 || !validMoney(source.amount) ||
+        !["rate-estimate", "user-entered"].includes(source.basis)) return null;
+    sources.push({ label:source.label.trim(), amount:cents(source.amount), basis:source.basis });
+  }
+  const total = cents(sources.reduce((sum, source) => sum + source.amount, 0));
+  if (!validMoney(raw.grossMonthlyIncome) || Math.abs(total - raw.grossMonthlyIncome) > 0.02) return null;
+  const optional = key => raw[key] == null ? null : validMoney(raw[key]) ? cents(raw[key]) : NaN;
+  const deductions = optional("monthlyDeductions"), savings = optional("monthlySavingsContributions");
+  if (Number.isNaN(deductions) || Number.isNaN(savings)) return null;
+  const net = deductions === null ? null : cents(total - deductions);
+  const available = net === null || savings === null ? null : cents(net - savings);
+  const fields = {"Base pay":"base_pay", "BAH":"bah", "BAS":"bas",
+    "VA disability compensation":"va_disability_pay", "Retired pay after VA offset":"retirement_pay",
+    "Spouse / partner income":"spouse_income", "Special / incentive pay":"special_pay"};
+  const packet = {ok:true, total_monthly:total, source:"financial_guidance_ledger",
+    status:raw.status, income_sources:sources, gross_monthly_income:total,
+    monthly_deductions:deductions, net_monthly_income:net,
+    monthly_savings_contributions:savings, available_after_savings:available,
+    contains_estimates:sources.some(source => source.basis === "rate-estimate"),
+    note:"Current displayed monthly income ledger. Statement amounts are user supplied. Available after savings is before living expenses; it is not a financial-health or affordability verdict.",
+    provenance:{type:"client_structured_output", engine:"financial_guidance", official_data_used:null}};
+  for (const source of sources) {
+    const key = fields[source.label] || "additional_income";
+    packet[key] = cents((packet[key] || 0) + source.amount);
+  }
+  return packet;
+}
+
 function normalizeProvidedCompensationPacket(raw) {
   if (!isPlainObject(raw)) return null;
+  if (Object.hasOwn(raw, "financial_guidance")) return normalizeFinancialGuidanceIncome(raw.financial_guidance);
 
   const base_pay = num(
     pickFirst(raw.base_pay, raw.basePay, raw.basicPay, raw.monthly?.basePay)
@@ -2648,7 +2690,8 @@ function isUsableCompensationPacket(packet) {
   return Boolean(
     packet &&
       typeof packet === "object" &&
-      (num(packet.total_monthly) > 0 ||
+      ((packet.source === "financial_guidance_ledger" && packet.total_monthly === 0) ||
+        num(packet.total_monthly) > 0 ||
         num(packet.bah) > 0 ||
         num(packet.base_pay) > 0)
   );
