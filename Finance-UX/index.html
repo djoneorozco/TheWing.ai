@@ -30,15 +30,13 @@
   <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 </head>
 
-<body>
+<body class="finance-compact">
 
   <div class="budget-app" id="budgetApp">
 
     <!-- =====================================================
       APP CONTENT
     ====================================================== -->
-    <div class="finance-context"><div><strong>Your monthly picture</strong><p id="fu-income-summary">Add income to personalize your budget.</p></div><button id="fu-edit-income" type="button">Edit income</button></div>
-<div id="fu-income-fields" class="finance-inputs" hidden><label>Gross household income / month<input id="fu-gross" type="number" min="0" max="1000000" step="0.01"></label><label>Total take-home household income / month<input id="fu-net" type="number" min="0" max="1000000" step="0.01"></label></div>
 <main class="budget-app__main">
 
       <!-- ===================================================
@@ -94,7 +92,7 @@
             <span>Other</span>
           </button>
 
-        </nav><details class="finance-settings"><summary>Savings &amp; future housing assumptions</summary><div class="finance-inputs"><label>Monthly savings contribution<input id="fu-savings" type="number" min="0" max="1000000" step="0.01" value="0"></label><label>Emergency fund balance<input id="fu-emergency" type="number" min="0" max="1000000" step="0.01" placeholder="Add your balance"></label><label>Minimum cash left each month<input id="fu-buffer" type="number" min="0" max="1000000" step="0.01" value="500"></label><label>Extra cushion at comfortable end<input id="fu-extra-buffer" type="number" min="0" max="1000000" step="0.01" value="500"></label></div><p>The $500 cushions are adjustable planning assumptions. Do not repeat savings already withheld from take-home pay. Keep expected utilities, repairs and maintenance in your budget.</p></details><div class="finance-review"><label><input id="fu-reviewed" type="checkbox"> I reviewed all four categories, including housing, debts and savings. Zero amounts do not apply to me.</label><p id="fu-status" role="status" aria-live="polite">Enter your amounts. This starts with an unconfirmed budget.</p><button id="fu-retry" type="button" hidden>Retry budget calculation</button><small>Financial amounts remain in memory while this page is open.</small></div>
+        </nav>
 
 
         <!-- =================================================
@@ -164,753 +162,8 @@
             EXPENSE LIST
           ================================================ -->
           <div class="expense-list" id="expenseList">
-
-
-            <!-- Groceries -->
-            <article
-              class="expense-row"
-              data-expense-id="groceries"
-              data-value="650"
-              data-min="200"
-              data-max="1500"
-              data-step="10"
-              data-color="purple"
-            >
-
-              <div class="expense-row__identity">
-
-                <div class="expense-icon expense-icon--purple">
-                  <i data-lucide="utensils" aria-hidden="true"></i>
-                </div>
-
-                <h3 class="expense-row__name">
-                  Groceries
-                </h3>
-
-              </div>
-
-              <div class="expense-row__slider">
-
-                <output
-                  class="slider-value-bubble slider-value-bubble--purple"
-                  for="groceriesRange"
-                  id="groceriesBubble"
-                >
-                  $650
-                </output>
-
-                <input
-                  class="expense-range expense-range--purple"
-                  id="groceriesRange"
-                  name="groceries"
-                  type="range"
-                  min="200"
-                  max="1500"
-                  step="10"
-                  value="650"
-                  aria-label="Monthly groceries expense"
-                  data-output="groceriesValue"
-                  data-bubble="groceriesBubble"
-                >
-
-                <div class="expense-range-labels">
-                  <span>$200</span>
-                  <span>$1,500</span>
-                </div>
-
-              </div>
-
-              <div class="expense-row__amount">
-
-                <label class="sr-only" for="groceriesValue">
-                  Groceries monthly amount
-                </label>
-
-                <div class="expense-amount-input expense-amount-input--purple">
-                  <span class="expense-amount-input__currency">$</span>
-
-                  <input
-                    id="groceriesValue"
-                    type="number"
-                    min="200"
-                    max="1500"
-                    step="10"
-                    value="650"
-                    inputmode="numeric"
-                    aria-label="Groceries amount"
-                  >
-
-                  <span class="expense-amount-input__suffix">
-                    /mo
-                  </span>
-                </div>
-
-              </div>
-
-              <button
-                class="expense-row__expand"
-                type="button"
-                aria-label="Expand groceries options"
-                aria-expanded="false"
-              >
-                <i data-lucide="chevron-down" aria-hidden="true"></i>
-              </button>
-
-            </article>
-
-
-            <!-- Utilities -->
-            <article
-              class="expense-row"
-              data-expense-id="utilities"
-              data-value="280"
-              data-min="80"
-              data-max="600"
-              data-step="10"
-              data-color="blue"
-            >
-
-              <div class="expense-row__identity">
-
-                <div class="expense-icon expense-icon--blue">
-                  <i data-lucide="zap" aria-hidden="true"></i>
-                </div>
-
-                <h3 class="expense-row__name">
-                  Utilities
-                </h3>
-
-              </div>
-
-              <div class="expense-row__slider">
-
-                <output
-                  class="slider-value-bubble slider-value-bubble--blue"
-                  for="utilitiesRange"
-                  id="utilitiesBubble"
-                >
-                  $280
-                </output>
-
-                <input
-                  class="expense-range expense-range--blue"
-                  id="utilitiesRange"
-                  name="utilities"
-                  type="range"
-                  min="80"
-                  max="600"
-                  step="10"
-                  value="280"
-                  aria-label="Monthly utilities expense"
-                  data-output="utilitiesValue"
-                  data-bubble="utilitiesBubble"
-                >
-
-                <div class="expense-range-labels">
-                  <span>$80</span>
-                  <span>$600</span>
-                </div>
-
-              </div>
-
-              <div class="expense-row__amount">
-
-                <label class="sr-only" for="utilitiesValue">
-                  Utilities monthly amount
-                </label>
-
-                <div class="expense-amount-input expense-amount-input--blue">
-                  <span class="expense-amount-input__currency">$</span>
-
-                  <input
-                    id="utilitiesValue"
-                    type="number"
-                    min="80"
-                    max="600"
-                    step="10"
-                    value="280"
-                    inputmode="numeric"
-                    aria-label="Utilities amount"
-                  >
-
-                  <span class="expense-amount-input__suffix">
-                    /mo
-                  </span>
-                </div>
-
-              </div>
-
-              <button
-                class="expense-row__expand"
-                type="button"
-                aria-label="Expand utilities options"
-                aria-expanded="false"
-              >
-                <i data-lucide="chevron-down" aria-hidden="true"></i>
-              </button>
-
-            </article>
-
-
-            <!-- Phone / Internet -->
-            <article
-              class="expense-row"
-              data-expense-id="phone-internet"
-              data-value="120"
-              data-min="40"
-              data-max="250"
-              data-step="5"
-              data-color="teal"
-            >
-
-              <div class="expense-row__identity">
-
-                <div class="expense-icon expense-icon--teal">
-                  <i data-lucide="smartphone" aria-hidden="true"></i>
-                </div>
-
-                <h3 class="expense-row__name">
-                  Phone / Internet
-                </h3>
-
-              </div>
-
-              <div class="expense-row__slider">
-
-                <output
-                  class="slider-value-bubble slider-value-bubble--teal"
-                  for="phoneInternetRange"
-                  id="phoneInternetBubble"
-                >
-                  $120
-                </output>
-
-                <input
-                  class="expense-range expense-range--teal"
-                  id="phoneInternetRange"
-                  name="phoneInternet"
-                  type="range"
-                  min="40"
-                  max="250"
-                  step="5"
-                  value="120"
-                  aria-label="Monthly phone and internet expense"
-                  data-output="phoneInternetValue"
-                  data-bubble="phoneInternetBubble"
-                >
-
-                <div class="expense-range-labels">
-                  <span>$40</span>
-                  <span>$250</span>
-                </div>
-
-              </div>
-
-              <div class="expense-row__amount">
-
-                <label class="sr-only" for="phoneInternetValue">
-                  Phone and internet monthly amount
-                </label>
-
-                <div class="expense-amount-input expense-amount-input--teal">
-                  <span class="expense-amount-input__currency">$</span>
-
-                  <input
-                    id="phoneInternetValue"
-                    type="number"
-                    min="40"
-                    max="250"
-                    step="5"
-                    value="120"
-                    inputmode="numeric"
-                    aria-label="Phone and internet amount"
-                  >
-
-                  <span class="expense-amount-input__suffix">
-                    /mo
-                  </span>
-                </div>
-
-              </div>
-
-              <button
-                class="expense-row__expand"
-                type="button"
-                aria-label="Expand phone and internet options"
-                aria-expanded="false"
-              >
-                <i data-lucide="chevron-down" aria-hidden="true"></i>
-              </button>
-
-            </article>
-
-
-            <!-- Entertainment -->
-            <article
-              class="expense-row"
-              data-expense-id="entertainment"
-              data-value="150"
-              data-min="0"
-              data-max="400"
-              data-step="5"
-              data-color="pink"
-            >
-
-              <div class="expense-row__identity">
-
-                <div class="expense-icon expense-icon--pink">
-                  <i data-lucide="monitor-play" aria-hidden="true"></i>
-                </div>
-
-                <h3 class="expense-row__name">
-                  Entertainment
-                </h3>
-
-              </div>
-
-              <div class="expense-row__slider">
-
-                <output
-                  class="slider-value-bubble slider-value-bubble--pink"
-                  for="entertainmentRange"
-                  id="entertainmentBubble"
-                >
-                  $150
-                </output>
-
-                <input
-                  class="expense-range expense-range--pink"
-                  id="entertainmentRange"
-                  name="entertainment"
-                  type="range"
-                  min="0"
-                  max="400"
-                  step="5"
-                  value="150"
-                  aria-label="Monthly entertainment expense"
-                  data-output="entertainmentValue"
-                  data-bubble="entertainmentBubble"
-                >
-
-                <div class="expense-range-labels">
-                  <span>$0</span>
-                  <span>$400</span>
-                </div>
-
-              </div>
-
-              <div class="expense-row__amount">
-
-                <label class="sr-only" for="entertainmentValue">
-                  Entertainment monthly amount
-                </label>
-
-                <div class="expense-amount-input expense-amount-input--pink">
-                  <span class="expense-amount-input__currency">$</span>
-
-                  <input
-                    id="entertainmentValue"
-                    type="number"
-                    min="0"
-                    max="400"
-                    step="5"
-                    value="150"
-                    inputmode="numeric"
-                    aria-label="Entertainment amount"
-                  >
-
-                  <span class="expense-amount-input__suffix">
-                    /mo
-                  </span>
-                </div>
-
-              </div>
-
-              <button
-                class="expense-row__expand"
-                type="button"
-                aria-label="Expand entertainment options"
-                aria-expanded="false"
-              >
-                <i data-lucide="chevron-down" aria-hidden="true"></i>
-              </button>
-
-            </article>
-
-
-            <!-- Insurance Other -->
-            <article
-              class="expense-row"
-              data-expense-id="insurance-other"
-              data-value="195"
-              data-min="50"
-              data-max="500"
-              data-step="5"
-              data-color="orange"
-            >
-
-              <div class="expense-row__identity">
-
-                <div class="expense-icon expense-icon--orange">
-                  <i data-lucide="shield-check" aria-hidden="true"></i>
-                </div>
-
-                <h3 class="expense-row__name">
-                  Insurance (Other)
-                </h3>
-
-              </div>
-
-              <div class="expense-row__slider">
-
-                <output
-                  class="slider-value-bubble slider-value-bubble--orange"
-                  for="insuranceOtherRange"
-                  id="insuranceOtherBubble"
-                >
-                  $195
-                </output>
-
-                <input
-                  class="expense-range expense-range--orange"
-                  id="insuranceOtherRange"
-                  name="insuranceOther"
-                  type="range"
-                  min="50"
-                  max="500"
-                  step="5"
-                  value="195"
-                  aria-label="Other monthly insurance expense"
-                  data-output="insuranceOtherValue"
-                  data-bubble="insuranceOtherBubble"
-                >
-
-                <div class="expense-range-labels">
-                  <span>$50</span>
-                  <span>$500</span>
-                </div>
-
-              </div>
-
-              <div class="expense-row__amount">
-
-                <label class="sr-only" for="insuranceOtherValue">
-                  Other insurance monthly amount
-                </label>
-
-                <div class="expense-amount-input expense-amount-input--orange">
-                  <span class="expense-amount-input__currency">$</span>
-
-                  <input
-                    id="insuranceOtherValue"
-                    type="number"
-                    min="50"
-                    max="500"
-                    step="5"
-                    value="195"
-                    inputmode="numeric"
-                    aria-label="Other insurance amount"
-                  >
-
-                  <span class="expense-amount-input__suffix">
-                    /mo
-                  </span>
-                </div>
-
-              </div>
-
-              <button
-                class="expense-row__expand"
-                type="button"
-                aria-label="Expand other insurance options"
-                aria-expanded="false"
-              >
-                <i data-lucide="chevron-down" aria-hidden="true"></i>
-              </button>
-
-            </article>
-
-
-            <!-- Childcare Education -->
-            <article
-              class="expense-row"
-              data-expense-id="childcare-education"
-              data-value="450"
-              data-min="0"
-              data-max="1200"
-              data-step="10"
-              data-color="purple"
-            >
-
-              <div class="expense-row__identity">
-
-                <div class="expense-icon expense-icon--purple">
-                  <i data-lucide="graduation-cap" aria-hidden="true"></i>
-                </div>
-
-                <h3 class="expense-row__name">
-                  Childcare / Education
-                </h3>
-
-              </div>
-
-              <div class="expense-row__slider">
-
-                <output
-                  class="slider-value-bubble slider-value-bubble--purple"
-                  for="childcareEducationRange"
-                  id="childcareEducationBubble"
-                >
-                  $450
-                </output>
-
-                <input
-                  class="expense-range expense-range--purple"
-                  id="childcareEducationRange"
-                  name="childcareEducation"
-                  type="range"
-                  min="0"
-                  max="1200"
-                  step="10"
-                  value="450"
-                  aria-label="Monthly childcare and education expense"
-                  data-output="childcareEducationValue"
-                  data-bubble="childcareEducationBubble"
-                >
-
-                <div class="expense-range-labels">
-                  <span>$0</span>
-                  <span>$1,200</span>
-                </div>
-
-              </div>
-
-              <div class="expense-row__amount">
-
-                <label class="sr-only" for="childcareEducationValue">
-                  Childcare and education monthly amount
-                </label>
-
-                <div class="expense-amount-input expense-amount-input--purple">
-                  <span class="expense-amount-input__currency">$</span>
-
-                  <input
-                    id="childcareEducationValue"
-                    type="number"
-                    min="0"
-                    max="1200"
-                    step="10"
-                    value="450"
-                    inputmode="numeric"
-                    aria-label="Childcare and education amount"
-                  >
-
-                  <span class="expense-amount-input__suffix">
-                    /mo
-                  </span>
-                </div>
-
-              </div>
-
-              <button
-                class="expense-row__expand"
-                type="button"
-                aria-label="Expand childcare and education options"
-                aria-expanded="false"
-              >
-                <i data-lucide="chevron-down" aria-hidden="true"></i>
-              </button>
-
-            </article>
-
-
-            <!-- Health Medical -->
-            <article
-              class="expense-row"
-              data-expense-id="health-medical"
-              data-value="150"
-              data-min="50"
-              data-max="600"
-              data-step="5"
-              data-color="red"
-            >
-
-              <div class="expense-row__identity">
-
-                <div class="expense-icon expense-icon--red">
-                  <i data-lucide="heart-pulse" aria-hidden="true"></i>
-                </div>
-
-                <h3 class="expense-row__name">
-                  Health / Medical
-                </h3>
-
-              </div>
-
-              <div class="expense-row__slider">
-
-                <output
-                  class="slider-value-bubble slider-value-bubble--red"
-                  for="healthMedicalRange"
-                  id="healthMedicalBubble"
-                >
-                  $150
-                </output>
-
-                <input
-                  class="expense-range expense-range--red"
-                  id="healthMedicalRange"
-                  name="healthMedical"
-                  type="range"
-                  min="50"
-                  max="600"
-                  step="5"
-                  value="150"
-                  aria-label="Monthly health and medical expense"
-                  data-output="healthMedicalValue"
-                  data-bubble="healthMedicalBubble"
-                >
-
-                <div class="expense-range-labels">
-                  <span>$50</span>
-                  <span>$600</span>
-                </div>
-
-              </div>
-
-              <div class="expense-row__amount">
-
-                <label class="sr-only" for="healthMedicalValue">
-                  Health and medical monthly amount
-                </label>
-
-                <div class="expense-amount-input expense-amount-input--red">
-                  <span class="expense-amount-input__currency">$</span>
-
-                  <input
-                    id="healthMedicalValue"
-                    type="number"
-                    min="50"
-                    max="600"
-                    step="5"
-                    value="150"
-                    inputmode="numeric"
-                    aria-label="Health and medical amount"
-                  >
-
-                  <span class="expense-amount-input__suffix">
-                    /mo
-                  </span>
-                </div>
-
-              </div>
-
-              <button
-                class="expense-row__expand"
-                type="button"
-                aria-label="Expand health and medical options"
-                aria-expanded="false"
-              >
-                <i data-lucide="chevron-down" aria-hidden="true"></i>
-              </button>
-
-            </article>
-
-
-            <!-- Personal Misc -->
-            <article
-              class="expense-row"
-              data-expense-id="personal-misc"
-              data-value="165"
-              data-min="50"
-              data-max="600"
-              data-step="5"
-              data-color="slate"
-            >
-
-              <div class="expense-row__identity">
-
-                <div class="expense-icon expense-icon--slate">
-                  <i data-lucide="ellipsis" aria-hidden="true"></i>
-                </div>
-
-                <h3 class="expense-row__name">
-                  Personal / Misc.
-                </h3>
-
-              </div>
-
-              <div class="expense-row__slider">
-
-                <output
-                  class="slider-value-bubble slider-value-bubble--slate"
-                  for="personalMiscRange"
-                  id="personalMiscBubble"
-                >
-                  $165
-                </output>
-
-                <input
-                  class="expense-range expense-range--slate"
-                  id="personalMiscRange"
-                  name="personalMisc"
-                  type="range"
-                  min="50"
-                  max="600"
-                  step="5"
-                  value="165"
-                  aria-label="Monthly personal and miscellaneous expense"
-                  data-output="personalMiscValue"
-                  data-bubble="personalMiscBubble"
-                >
-
-                <div class="expense-range-labels">
-                  <span>$50</span>
-                  <span>$600</span>
-                </div>
-
-              </div>
-
-              <div class="expense-row__amount">
-
-                <label class="sr-only" for="personalMiscValue">
-                  Personal and miscellaneous monthly amount
-                </label>
-
-                <div class="expense-amount-input expense-amount-input--slate">
-                  <span class="expense-amount-input__currency">$</span>
-
-                  <input
-                    id="personalMiscValue"
-                    type="number"
-                    min="50"
-                    max="600"
-                    step="5"
-                    value="165"
-                    inputmode="numeric"
-                    aria-label="Personal and miscellaneous amount"
-                  >
-
-                  <span class="expense-amount-input__suffix">
-                    /mo
-                  </span>
-                </div>
-
-              </div>
-
-              <button
-                class="expense-row__expand"
-                type="button"
-                aria-label="Expand personal and miscellaneous options"
-                aria-expanded="false"
-              >
-                <i data-lucide="chevron-down" aria-hidden="true"></i>
-              </button>
-
-            </article>
-
+            <p class="expense-loading" role="status">Loading expense categories…</p>
           </div>
-
 
           <!-- Add custom expense -->
           <button
@@ -990,7 +243,7 @@
               <button
                 class="info-button"
                 type="button"
-                aria-label="About monthly cash flow"
+                id="fu-settings-open" aria-label="Edit income and budget settings"
               >
                 <i data-lucide="info" aria-hidden="true"></i>
               </button>
@@ -1016,10 +269,100 @@
           </section>
           <div class="finance-income-needed" id="fu-income-needed">
             <strong>Your income is connected.</strong>
-            <p id="fu-income-help">Add the amount your household receives after deductions to calculate available cash and your housing range. Include additional income once.</p>
+            <p id="fu-income-help">Add your household take-home pay to see what remains after expenses, debt payments and savings.</p>
             <button id="fu-add-take-home" type="button">Add take-home pay ↗</button>
           </div>
 
+          <div class="cash-flow-breakdown">
+
+            <div class="cash-flow-breakdown__row">
+
+              <span class="cash-flow-breakdown__label">
+
+                <span
+                  class="breakdown-dot breakdown-dot--income"
+                  aria-hidden="true"
+                ></span>
+
+                Take-home Income
+              </span>
+
+              <strong
+                class="cash-flow-breakdown__value cash-flow-breakdown__value--positive"
+                id="monthlyIncomeValue"
+              >—</strong>
+
+            </div>
+
+
+            <div class="cash-flow-breakdown__row">
+
+              <span class="cash-flow-breakdown__label">
+
+                <span
+                  class="breakdown-dot breakdown-dot--expenses"
+                  aria-hidden="true"
+                ></span>
+
+                Total Expenses
+              </span>
+
+              <strong
+                class="cash-flow-breakdown__value cash-flow-breakdown__value--negative"
+                id="totalExpensesValue"
+              >—</strong>
+
+            </div>
+
+
+            <div class="cash-flow-breakdown__row">
+
+              <span class="cash-flow-breakdown__label">
+
+                <span
+                  class="breakdown-dot breakdown-dot--debt"
+                  aria-hidden="true"
+                ></span>
+
+                Monthly Debt Payments
+              </span>
+
+              <strong
+                class="cash-flow-breakdown__value cash-flow-breakdown__value--negative"
+                id="totalDebtValue"
+              >—</strong>
+
+            </div>
+
+
+            <div class="cash-flow-breakdown__row">
+
+              <span class="cash-flow-breakdown__label">
+
+                <span
+                  class="breakdown-dot breakdown-dot--savings"
+                  aria-hidden="true"
+                ></span>
+
+                Monthly Savings
+              </span>
+
+              <button type="button" class="cash-flow-breakdown__value cash-flow-breakdown__value--savings snapshot-savings" id="totalSavingsValue" aria-label="Edit monthly savings">—</button>
+
+            </div>
+
+          </div>
+
+
+          <footer class="cash-flow-card__footer">
+
+            <span>
+              Monthly Cash Flow
+            </span>
+
+            <span id="fu-cash-state">Add take-home pay</span><strong class="sr-only" id="cashFlowFooterAmount">—</strong>
+
+          </footer>
           <div class="cash-flow-card__hero">
 
             <div class="cash-flow-summary">
@@ -1109,103 +452,13 @@
           </div>
 
 
-          <div class="cash-flow-breakdown">
+<div class="snapshot-status"><p id="fu-status" role="status" aria-live="polite">Enter your amounts. This starts with an unconfirmed budget.</p><button id="fu-retry" type="button" hidden>Retry budget calculation</button></div>
 
-            <div class="cash-flow-breakdown__row">
-
-              <span class="cash-flow-breakdown__label">
-
-                <span
-                  class="breakdown-dot breakdown-dot--income"
-                  aria-hidden="true"
-                ></span>
-
-                Take-home Income
-              </span>
-
-              <strong
-                class="cash-flow-breakdown__value cash-flow-breakdown__value--positive"
-                id="monthlyIncomeValue"
-              >—</strong>
-
-            </div>
-
-
-            <div class="cash-flow-breakdown__row">
-
-              <span class="cash-flow-breakdown__label">
-
-                <span
-                  class="breakdown-dot breakdown-dot--expenses"
-                  aria-hidden="true"
-                ></span>
-
-                Total Expenses
-              </span>
-
-              <strong
-                class="cash-flow-breakdown__value cash-flow-breakdown__value--negative"
-                id="totalExpensesValue"
-              >—</strong>
-
-            </div>
-
-
-            <div class="cash-flow-breakdown__row">
-
-              <span class="cash-flow-breakdown__label">
-
-                <span
-                  class="breakdown-dot breakdown-dot--debt"
-                  aria-hidden="true"
-                ></span>
-
-                Monthly Debt Payments
-              </span>
-
-              <strong
-                class="cash-flow-breakdown__value cash-flow-breakdown__value--negative"
-                id="totalDebtValue"
-              >—</strong>
-
-            </div>
-
-
-            <div class="cash-flow-breakdown__row">
-
-              <span class="cash-flow-breakdown__label">
-
-                <span
-                  class="breakdown-dot breakdown-dot--savings"
-                  aria-hidden="true"
-                ></span>
-
-                Monthly Savings
-              </span>
-
-              <strong
-                class="cash-flow-breakdown__value cash-flow-breakdown__value--savings"
-                id="totalSavingsValue"
-              >—</strong>
-
-            </div>
-
-          </div>
-
-
-          <footer class="cash-flow-card__footer">
-
-            <span>
-              Monthly Cash Flow
-            </span>
-
-            <strong id="cashFlowFooterAmount">—</strong>
-
-          </footer>
 
         </section>
 
 
+        <div class="finance-deferred" hidden>
         <section class="finance-result"><p class="finance-eyebrow">Your housing range</p><span>Suggested total monthly housing</span><strong id="fu-payment">Review your budget</strong><span>Estimated home purchase price</span><strong id="fu-price">—</strong><span>Cash remaining after buying / month</span><strong id="fu-remaining">—</strong><button id="fu-explore" type="button" disabled>Explore this home scenario ↗</button><details><summary>How this range works</summary><p>Uses the lower of the 28/36 income guideline and your cash-flow budget. The comfortable end preserves your additional cushion. Existing rent or mortgage is replaced unless you mark it as continuing. Total housing includes principal, interest, taxes, insurance, HOA and applicable mortgage insurance.</p><p id="fu-assumption-copy"></p><p>Planning guidance, not loan approval or a VA qualification test. Utilities, maintenance, cash to close and reserves need separate consideration.</p></details></section>
 <!-- Expenses percentage card -->
         <section
@@ -1357,6 +610,7 @@
 
         </section>
 
+        </div>
       </aside>
 
     </main>
@@ -1473,6 +727,17 @@
 
   </div>
 
+
+
+  <dialog id="budgetDetailsDialog" class="budget-details-dialog" aria-labelledby="budgetDetailsTitle">
+    <header class="modal__header"><h2 id="budgetDetailsTitle">Income &amp; budget settings</h2><button type="button" id="budgetDetailsClose" class="modal__close" aria-label="Close budget settings"><i data-lucide="x" aria-hidden="true"></i></button></header>
+    <div class="budget-details-body">
+    <div class="finance-context"><div><strong>Your monthly picture</strong><p id="fu-income-summary">Add income to personalize your budget.</p></div><button id="fu-edit-income" type="button">Edit income</button></div>
+<div id="fu-income-fields" class="finance-inputs" hidden><label>Gross household income / month<input id="fu-gross" type="number" min="0" max="1000000" step="0.01"></label><label>Total take-home household income / month<input id="fu-net" type="number" min="0" max="1000000" step="0.01"></label></div>
+<details class="finance-settings" open><summary>Savings &amp; planning assumptions</summary><div class="finance-inputs"><label>Monthly savings contribution<input id="fu-savings" type="number" min="0" max="1000000" step="0.01" value="0"></label><label>Emergency fund balance<input id="fu-emergency" type="number" min="0" max="1000000" step="0.01" placeholder="Add your balance"></label><label>Minimum cash left each month<input id="fu-buffer" type="number" min="0" max="1000000" step="0.01" value="500"></label><label>Extra cushion at comfortable end<input id="fu-extra-buffer" type="number" min="0" max="1000000" step="0.01" value="500"></label></div><p>The $500 cushions are adjustable planning assumptions. Do not repeat savings already withheld from take-home pay. Keep expected utilities, repairs and maintenance in your budget.</p></details><div class="finance-review"><label><input id="fu-reviewed" type="checkbox"> I reviewed all four categories, including housing, debts and savings. Zero amounts do not apply to me.</label><small>Financial amounts remain in memory while this page is open.</small></div>
+    </div>
+    <form method="dialog" class="modal__actions"><button class="button button--primary">Done</button></form>
+  </dialog>
 
   <!-- App JavaScript -->
   <script src="/public/ask-amy/tor-calculator-bridge.js"></script>
