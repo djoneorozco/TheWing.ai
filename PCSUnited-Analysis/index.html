@@ -41,216 +41,9 @@
 
 
     <!-- =====================================================
-      TOP APPLICATION HEADER
-    ====================================================== -->
-    <header class="analysis-header">
-
-      <!-- PCSUnited Brand -->
-      <a
-        class="analysis-brand"
-        href="../"
-        aria-label="Return to PCSUnited Financial"
-      >
-
-        <div
-          class="analysis-brand__mark"
-          aria-hidden="true"
-        >
-          <span class="analysis-brand__wing analysis-brand__wing--left"></span>
-
-          <span class="analysis-brand__star">
-            <i data-lucide="star"></i>
-          </span>
-
-          <span class="analysis-brand__wing analysis-brand__wing--right"></span>
-        </div>
-
-        <div class="analysis-brand__copy">
-          <strong class="analysis-brand__name">
-            PCSUNITED
-          </strong>
-
-          <span class="analysis-brand__tagline">
-            MOVE SMARTER.
-          </span>
-        </div>
-
-      </a>
-
-
-      <div
-        class="analysis-header__divider"
-        aria-hidden="true"
-      ></div>
-
-
-      <!-- Page Title -->
-      <div class="analysis-header__title-group">
-
-        <h1 class="analysis-header__title">
-          Home Buying Financial Analysis
-        </h1>
-
-        <p class="analysis-header__subtitle">
-          Here’s your complete picture for buying the home you selected.
-        </p>
-
-      </div>
-
-
-      <!-- Selected Home Summary -->
-      <section
-        class="selected-home-card"
-        aria-labelledby="selectedHomeHeading"
-      >
-
-        <div class="selected-home-card__image-wrap">
-
-          <img
-            class="selected-home-card__image"
-            id="selectedHomeImage"
-            src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=600&q=85"
-            alt="Selected home"
-          >
-
-        </div>
-
-        <div class="selected-home-card__content">
-
-          <span
-            class="selected-home-card__eyebrow"
-            id="selectedHomeHeading"
-          >
-            Selected Home
-          </span>
-
-          <strong
-            class="selected-home-card__price"
-            id="selectedHomePrice"
-          >
-            $475,000
-          </strong>
-
-          <div class="selected-home-card__details">
-
-            <span id="selectedHomeBedrooms">
-              4 bd
-            </span>
-
-            <span
-              class="selected-home-card__separator"
-              aria-hidden="true"
-            >
-              |
-            </span>
-
-            <span id="selectedHomeBathrooms">
-              2.5 ba
-            </span>
-
-            <span
-              class="selected-home-card__separator"
-              aria-hidden="true"
-            >
-              |
-            </span>
-
-            <span id="selectedHomeSquareFeet">
-              2,100 sq ft
-            </span>
-
-          </div>
-
-          <span
-            class="selected-home-card__location"
-            id="selectedHomeLocation"
-          >
-            San Antonio, TX
-          </span>
-
-        </div>
-
-      </section>
-
-
-      <!-- User Profile Summary -->
-      <section
-        class="analysis-user"
-        aria-label="Current user and military profile"
-      >
-
-        <div class="analysis-user__avatar-wrap">
-
-          <img
-            class="analysis-user__avatar"
-            id="analysisUserAvatar"
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=85"
-            alt="PCSUnited financial guide"
-          >
-
-        </div>
-
-        <div class="analysis-user__content">
-
-          <strong
-            class="analysis-user__greeting"
-            id="analysisUserGreeting"
-          >
-            Good afternoon, John!
-          </strong>
-
-          <span class="analysis-user__detail">
-            <i
-              data-lucide="badge-check"
-              aria-hidden="true"
-            ></i>
-
-            <span id="analysisUserRank">
-              Master Sergeant (E7)
-            </span>
-          </span>
-
-          <span class="analysis-user__detail">
-            <i
-              data-lucide="map-pin"
-              aria-hidden="true"
-            ></i>
-
-            <span id="analysisUserBase">
-              Lackland AFB, TX
-            </span>
-          </span>
-
-        </div>
-
-      </section>
-
-
-      <!-- Ask Amy -->
-      <button
-        class="ask-amy-button"
-        id="askAmyButton"
-        type="button"
-      >
-        <span class="ask-amy-button__icon">
-          <i
-            data-lucide="message-circle"
-            aria-hidden="true"
-          ></i>
-        </span>
-
-        <span>
-          Ask Amy
-        </span>
-      </button>
-
-    </header>
-
-
-    <!-- =====================================================
       MAIN DASHBOARD GRID
     ====================================================== -->
-    <main class="analysis-main">
+    <main class="analysis-main" aria-label="Home Buying Financial Analysis">
 
 
       <!-- ===================================================
@@ -1321,27 +1114,27 @@
             </p>
 
 
-            <div class="affordability-gauge">
+            <div class="affordability-gauge" role="img" aria-label="Housing payment as a share of take-home pay">
 
               <svg
                 class="affordability-gauge__svg"
-                viewBox="0 0 320 180"
+                viewBox="0 0 320 175"
                 aria-hidden="true"
               >
 
                 <path
                   class="affordability-gauge__segment affordability-gauge__segment--danger"
-                  d="M40 155 A120 120 0 0 1 62 90"
+                  d="M40 150 A120 120 0 0 1 62.918 79.466"
                 ></path>
 
                 <path
                   class="affordability-gauge__segment affordability-gauge__segment--warning"
-                  d="M69 78 A120 120 0 0 1 130 40"
+                  d="M62.918 79.466 A120 120 0 0 1 122.918 35.873"
                 ></path>
 
                 <path
                   class="affordability-gauge__segment affordability-gauge__segment--healthy"
-                  d="M143 35 A120 120 0 0 1 280 155"
+                  d="M122.918 35.873 A120 120 0 0 1 280 150"
                 ></path>
 
                 <circle
@@ -1356,8 +1149,8 @@
                   id="affordabilityGaugeNeedle"
                   x1="160"
                   y1="150"
-                  x2="230"
-                  y2="108"
+                  x2="160"
+                  y2="62"
                 ></line>
 
               </svg>
@@ -1647,174 +1440,6 @@
       </div>
 
     </main>
-
-
-    <!-- =====================================================
-      BOTTOM APPLICATION NAVIGATION
-    ====================================================== -->
-    <footer class="analysis-footer">
-
-
-      <!-- Progress -->
-      <nav
-        class="analysis-progress"
-        aria-label="PCSUnited financial process"
-      >
-
-        <button
-          class="analysis-progress__step analysis-progress__step--complete"
-          type="button"
-          data-analysis-step="profile"
-        >
-          <span class="analysis-progress__number">
-            1
-          </span>
-
-          <span class="analysis-progress__label">
-            Profile
-          </span>
-
-          <span class="analysis-progress__check">
-            <i
-              data-lucide="check"
-              aria-hidden="true"
-            ></i>
-          </span>
-        </button>
-
-
-        <span
-          class="analysis-progress__connector"
-          aria-hidden="true"
-        ></span>
-
-
-        <button
-          class="analysis-progress__step analysis-progress__step--complete"
-          type="button"
-          data-analysis-step="income"
-        >
-          <span class="analysis-progress__number">
-            2
-          </span>
-
-          <span class="analysis-progress__label">
-            Income
-          </span>
-
-          <span class="analysis-progress__check">
-            <i
-              data-lucide="check"
-              aria-hidden="true"
-            ></i>
-          </span>
-        </button>
-
-
-        <span
-          class="analysis-progress__connector"
-          aria-hidden="true"
-        ></span>
-
-
-        <button
-          class="analysis-progress__step analysis-progress__step--complete"
-          type="button"
-          data-analysis-step="expenses"
-        >
-          <span class="analysis-progress__number">
-            3
-          </span>
-
-          <span class="analysis-progress__label">
-            Expenses
-          </span>
-
-          <span class="analysis-progress__check">
-            <i
-              data-lucide="check"
-              aria-hidden="true"
-            ></i>
-          </span>
-        </button>
-
-
-        <span
-          class="analysis-progress__connector"
-          aria-hidden="true"
-        ></span>
-
-
-        <button
-          class="analysis-progress__step analysis-progress__step--active"
-          type="button"
-          data-analysis-step="analysis"
-          aria-current="step"
-        >
-          <span class="analysis-progress__number">
-            4
-          </span>
-
-          <span class="analysis-progress__label">
-            Home Analysis
-          </span>
-
-          <span class="analysis-progress__check">
-            <i
-              data-lucide="check"
-              aria-hidden="true"
-            ></i>
-          </span>
-        </button>
-
-
-        <span
-          class="analysis-progress__connector"
-          aria-hidden="true"
-        ></span>
-
-
-        <button
-          class="analysis-progress__step"
-          type="button"
-          data-analysis-step="summary"
-        >
-          <span class="analysis-progress__number">
-            5
-          </span>
-
-          <span class="analysis-progress__label">
-            Summary
-          </span>
-
-          <span class="analysis-progress__check">
-            <i
-              data-lucide="check"
-              aria-hidden="true"
-            ></i>
-          </span>
-        </button>
-
-      </nav>
-
-
-      <!-- Save and Continue -->
-      <button
-        class="analysis-next-button"
-        id="analysisNextButton"
-        type="button"
-      >
-        <span>
-          Next: Save &amp; Continue
-        </span>
-
-        <i
-          data-lucide="arrow-right"
-          aria-hidden="true"
-        ></i>
-      </button>
-
-    </footer>
 
 
     <!-- =====================================================
