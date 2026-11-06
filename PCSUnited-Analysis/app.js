@@ -2655,6 +2655,9 @@ function renderSummaryCards() {
 function getHousingStatus(
   housingRatio
 ) {
+  // Avoid floating-point noise putting an exact boundary in the next range.
+  housingRatio = Math.round(housingRatio * 1e8) / 1e8;
+
   if (
     housingRatio <=
     PCSU_ANALYSIS_CONFIG.thresholds
@@ -2662,7 +2665,7 @@ function getHousingStatus(
   ) {
     return {
       label:
-        "Within the excellent range (Below 28%)",
+        "Within the excellent range (28% or less)",
       modifier: "excellent"
     };
   }
@@ -2674,7 +2677,7 @@ function getHousingStatus(
   ) {
     return {
       label:
-        "Within the healthy range (Below 36%)",
+        "Within the healthy range (36% or less)",
       modifier: "good"
     };
   }
@@ -2713,7 +2716,31 @@ function calculateGaugeRotation(
       1
     );
 
-  return -70 + normalized * 140;
+  // The existing dial runs from high housing cost on the left to low on the right.
+  return 90 - normalized * 180;
+}
+
+
+function renderGaugeSegments(gauge) {
+  if (!gauge) return;
+
+  const pointAt = (ratio) => {
+    const radians = calculateGaugeRotation(ratio) * Math.PI / 180;
+    return `${160 + 120 * Math.sin(radians)} ${150 - 120 * Math.cos(radians)}`;
+  };
+
+  // Use the same scale and existing thresholds for the needle and colored arcs.
+  const { housingHealthy, housingCaution } = PCSU_ANALYSIS_CONFIG.thresholds;
+  const ranges = [
+    ["danger", 50, housingCaution],
+    ["warning", housingCaution, housingHealthy],
+    ["healthy", housingHealthy, 15]
+  ];
+  ranges.forEach(([name, from, to]) => {
+    gauge.querySelector(`.affordability-gauge__segment--${name}`)?.setAttribute(
+      "d", `M${pointAt(from)} A120 120 0 0 1 ${pointAt(to)}`
+    );
+  });
 }
 
 
@@ -2751,6 +2778,12 @@ function renderAffordabilityResult() {
     housingStatus.label
   );
 
+  setStatusClass(
+    DOM.affordabilityGaugeStatus,
+    "affordability-result-card__status",
+    housingStatus.modifier
+  );
+
   if (
     DOM.affordabilityGaugeNeedle
   ) {
@@ -2759,8 +2792,16 @@ function renderAffordabilityResult() {
         analysis.housingRatio
       );
 
-    DOM.affordabilityGaugeNeedle.style.transform =
-      `rotate(${rotation}deg)`;
+    DOM.affordabilityGaugeNeedle.setAttribute(
+      "transform", `rotate(${rotation} 160 150)`
+    );
+
+    const gauge = DOM.affordabilityGaugeNeedle.closest(".affordability-gauge");
+    renderGaugeSegments(gauge);
+    gauge?.setAttribute(
+      "aria-label",
+      `${formatPercent(analysis.housingRatio)} of take-home pay. ${housingStatus.label}.`
+    );
   }
 }
 
