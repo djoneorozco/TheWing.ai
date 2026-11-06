@@ -1,0 +1,10 @@
+.pcsu-mm-controls { box-sizing:border-box; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; padding:18px 12px; font-family:Barlow,system-ui,sans-serif; }
+.pcsu-mm-controls * { box-sizing:border-box; }
+.pcsu-mm-controls button { min-height:44px; padding:12px 22px; border:1px solid #a78d56; border-radius:12px; background:#18222c; color:#f3efe7; font:700 15px/1.2 Barlow,system-ui,sans-serif; cursor:pointer; }
+.pcsu-mm-controls button[aria-pressed="true"] { color:#171c20; background:#efd17d; border-color:#efd17d; }
+.pcsu-mm-controls button:hover:not(:disabled) { box-shadow:0 0 0 2px #d8b87a55; }
+.pcsu-mm-controls button:focus-visible { outline:3px solid #73d4ba; outline-offset:4px; }
+.pcsu-mm-controls button:disabled { opacity:.55; cursor:wait; }
+.pcsu-mm-controls [data-mm-controls-status] { width:100%; margin:4px 0 0; text-align:center; color:#8e846f; font-size:13px; }
+.pcsu-mm-controls [hidden] { display:none!important; }
+@media(max-width:440px) { .pcsu-mm-controls { gap:7px; padding:14px 4px; } .pcsu-mm-controls button { padding:12px 13px; font-size:13px; flex:1 1 auto; } }

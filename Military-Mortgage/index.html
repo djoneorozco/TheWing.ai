@@ -8,7 +8,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
+  <script>if (new URLSearchParams(location.search).get('embedded') === '1') document.documentElement.dataset.embedded = 'true';</script>
+  <link rel="stylesheet" href="./controls.css">
   <script defer src="./app.js"></script>
+  <script defer src="./views.js"></script>
+  <script defer src="./controls.js"></script>
 </head>
 <body>
 <main id="pcsu-financial-input-panel" data-mortgage-api="/api/mortgage" data-state="pending">
@@ -51,7 +55,7 @@
           </div>
         </div>
       </div>
-      <section class="fi-section">
+      <section class="fi-section" id="fi-view-calculator" data-mm-screen="calculator" aria-label="Mortgage calculator">
         <div class="fi-section-title">
           Mortgage Scenario Inputs
         </div>
@@ -197,7 +201,7 @@
                 id="fi-rate-label"
                 class="fi-label-side"
               >
-                Rate assumption: 6.25%
+                Planning rate: 6.10%
               </span>
             </label>
             <div class="fi-money-wrap">
@@ -242,7 +246,7 @@
               </div>
             </div>
             <div class="fi-hint">
-              Used for the conventional PMI estimate. Set your interest rate below; a credit score alone cannot determine your rate.
+              Used for PMI planning. Review your interest rate in Summary.
             </div>
           </div>
           <div
@@ -266,7 +270,7 @@
             </div>
             <p class="fi-total-cost-caption">
               Estimated principal, interest, property taxes, homeowners
-              insurance, HOA, mortgage insurance and other ownership costs entered below.
+              insurance, HOA and applicable mortgage insurance. Other ownership costs are included when entered.
             </p>
             <div class="fi-total-cost-source">
               <span
@@ -302,7 +306,7 @@
                 min="0"
                 max="10000000"
                 step="0.01"
-                placeholder="Optional — enter your reserve"
+                value="8500" placeholder="Optional — enter your reserve"
               >
             </div>
             <div class="fi-slider-wrap">
@@ -333,28 +337,38 @@
               </div>
             </div>
             <div class="fi-hint">
-              Optional: cash expected to remain after the PCS, closing costs, down payment and move-in expenses. It does not change your monthly payment.
+              Cash expected to remain after the PCS, closing costs, down payment and move-in expenses.
             </div>
           </div>
         </div>
-        <p id="fi-assumptions-summary" class="fi-estimate-summary">Example scenario: 6.25% fixed interest, 30 years, $3,125 annual tax, $1,125 annual insurance, $0 HOA. VA first use with financed fee. Edit these assumptions below.</p>
         <button id="fi-retry" type="button" hidden>Retry calculation</button>
-        <details class="fi-details" id="fi-cost-details">
-          <summary>Rate &amp; cost details</summary>
-          <p class="fi-detail-note">Use your lender’s interest rate and property-specific costs when available. Starting amounts are editable planning assumptions, not quotes.</p>
-          <div class="fi-details-grid">
-            <div><label class="fi-label" for="fi-interest-rate">Interest rate (%)</label><input class="fi-control" id="fi-interest-rate" type="number" min="0" max="30" step="0.0001" value="6.25"><p class="fi-hint">Note rate used for payments; APR includes fees.</p></div>
-            <div><label class="fi-label" for="fi-term-years">Loan term</label><select class="fi-control" id="fi-term-years"><option value="30">30 years</option><option value="25">25 years</option><option value="20">20 years</option><option value="15">15 years</option><option value="10">10 years</option></select></div>
-            <div><label class="fi-label" for="fi-property-tax">Property taxes / year ($)</label><input class="fi-control" id="fi-property-tax" type="number" min="0" max="1000000" step="0.01" value="3125"><p class="fi-hint">Use expected taxes after purchase and any confirmed exemption.</p></div>
-            <div><label class="fi-label" for="fi-insurance">Homeowners insurance / year ($)</label><input class="fi-control" id="fi-insurance" type="number" min="0" max="1000000" step="0.01" value="1125"></div>
-            <div><label class="fi-label" for="fi-hoa">HOA / month ($)</label><input class="fi-control" id="fi-hoa" type="number" min="0" max="100000" step="0.01" value="0"></div>
-            <div><label class="fi-label" for="fi-other-costs">Other ownership costs / month ($)</label><input class="fi-control" id="fi-other-costs" type="number" min="0" max="100000" step="0.01" value="0"><p class="fi-hint">Maintenance, utilities, flood insurance or assessments not already included.</p></div>
-            <div id="fi-va-options"><label class="fi-label" for="fi-va-fee-status">VA funding fee status</label><select class="fi-control" id="fi-va-fee-status"><option value="first">First use — fee applies</option><option value="subsequent">Subsequent use — fee applies</option><option value="exempt">Exempt — confirmed with lender</option></select></div>
-            <div id="fi-fee-options"><label class="fi-label" for="fi-fee-payment">Upfront loan fee</label><select class="fi-control" id="fi-fee-payment"><option value="finance">Finance in the loan</option><option value="cash">Pay at closing</option></select><p class="fi-hint">VA funding fee or FHA upfront MIP.</p></div>
-            <div id="fi-pmi-options" hidden><label class="fi-label" for="fi-pmi">Quoted PMI / month ($)</label><input class="fi-control" id="fi-pmi" type="number" min="0" max="100000" step="0.01" placeholder="Optional — use planning estimate"><p class="fi-hint">Leave blank for an estimate; enter 0 only for confirmed no PMI.</p></div>
-          </div>
-        </details>
-        <details class="fi-details" id="fi-breakdown-details">
+      </section>
+      <section class="fi-section mm-screen" id="fi-view-visualization" data-mm-screen="visualization" aria-labelledby="mm-viz-title" hidden>
+        <div class="mm-heading"><div><p class="fi-section-title">Your mortgage at a glance</p><h2 id="mm-viz-title" tabindex="-1">Mortgage Visualization</h2></div><button type="button" data-mm-view="calculator">← Calculator</button></div>
+        <p class="mm-status" data-mm-status role="status"></p>
+        <div class="mm-viz-grid" data-mm-result hidden>
+          <article class="mm-card"><h3>Your monthly housing cost</h3><p class="fi-detail-note">See what makes up your monthly estimate.</p>
+            <div class="mm-donut-layout"><div class="mm-donut" id="mm-donut" role="img"><div class="mm-donut-center" aria-live="polite"><span id="mm-donut-label">Total / month</span><strong id="mm-donut-total">—</strong><small id="mm-donut-share"></small></div></div><div id="mm-legend" class="mm-legend" aria-label="Monthly cost components"></div></div>
+            <p class="mm-chart-hint">Select a cost to see its share. Select it again to see the total.</p>
+          </article>
+          <article class="mm-card"><h3>Principal &amp; interest over time</h3><p id="mm-term-description" class="fi-detail-note"></p>
+            <div id="mm-term-ready" hidden><div class="mm-term-total"><span>Total scheduled loan payments</span><strong id="mm-term-total">—</strong></div><div id="mm-term-bar" class="mm-stack" role="img"></div><div class="mm-term-legend"><div><span><i class="mm-dot mm-principal"></i>Principal</span><strong id="mm-principal">—</strong></div><div><span><i class="mm-dot mm-interest"></i>Interest</span><strong id="mm-interest">—</strong></div></div></div>
+            <p id="mm-term-unavailable" class="fi-detail-note" hidden>Loan-term totals are not available from this calculation service yet. Your monthly breakdown is available.</p>
+            <p class="mm-chart-hint">Fixed-rate illustration with no extra payments. Excludes taxes, insurance, HOA and upfront cash.</p>
+            <div class="mm-small-total"><span>Down payment + cash loan fee</span><strong id="mm-upfront">—</strong></div><p class="mm-chart-hint" id="mm-upfront-exclusions"></p>
+          </article>
+        </div>
+      </section>
+      <section class="fi-section mm-screen" id="fi-view-summary" data-mm-screen="summary" aria-labelledby="mm-summary-title" hidden>
+        <div class="mm-heading"><div><p class="fi-section-title">Your mortgage, explained</p><h2 id="mm-summary-title" tabindex="-1">Mortgage Summary</h2></div><button type="button" data-mm-view="calculator">← Calculator</button></div>
+        <p class="mm-status" data-mm-status role="status"></p>
+        <div data-mm-result hidden>
+          <div class="mm-summary-hero"><div><p class="fi-section-title">Estimated monthly housing cost</p><strong class="mm-total" id="mm-summary-total">—</strong><span class="mm-per"> / month</span></div><p id="mm-summary-explanation"></p></div>
+          <div class="mm-kpis"><div><span>Home price</span><strong id="mm-summary-price">—</strong></div><div><span>Total loan amount</span><strong id="mm-summary-loan">—</strong></div><div><span>Emergency fund after closing</span><strong id="mm-summary-reserve">—</strong></div></div>
+          <p id="mm-summary-fee" class="fi-detail-note"></p>
+        </div>
+        <p id="fi-assumptions-summary" class="fi-estimate-summary">Example scenario: 6.10% fixed interest, 30 years, $3,125 annual tax, $1,125 annual insurance, $0 HOA. VA first use with financed fee. Edit these assumptions below.</p>
+        <details class="fi-details" id="fi-breakdown-details" open>
           <summary>What’s included in this estimate</summary>
           <div id="fi-result-details" hidden>
             <div class="fi-breakdown">
@@ -367,11 +381,28 @@
           </div>
           <p id="fi-breakdown-status" class="fi-detail-note">Your breakdown will appear after calculation.</p>
         </details>
+        <details class="fi-details" id="fi-cost-details">
+          <summary>Rate &amp; cost details</summary>
+          <p class="fi-detail-note">Use your lender’s interest rate and property-specific costs when available. Starting amounts are editable planning assumptions, not quotes.</p>
+          <div class="fi-details-grid">
+            <div><label class="fi-label" for="fi-interest-rate">Interest rate (%)</label><input class="fi-control" id="fi-interest-rate" type="number" min="0" max="30" step="0.0001" value="6.10"><p class="fi-hint">Note rate used for payments; APR includes fees.</p></div>
+            <div><label class="fi-label" for="fi-term-years">Loan term</label><select class="fi-control" id="fi-term-years"><option value="30">30 years</option><option value="25">25 years</option><option value="20">20 years</option><option value="15">15 years</option><option value="10">10 years</option></select></div>
+            <div><label class="fi-label" for="fi-property-tax">Property taxes / year ($)</label><input class="fi-control" id="fi-property-tax" type="number" min="0" max="1000000" step="0.01" value="3125"><p class="fi-hint">Use expected taxes after purchase and any confirmed exemption.</p></div>
+            <div><label class="fi-label" for="fi-insurance">Homeowners insurance / year ($)</label><input class="fi-control" id="fi-insurance" type="number" min="0" max="1000000" step="0.01" value="1125"></div>
+            <div><label class="fi-label" for="fi-hoa">HOA / month ($)</label><input class="fi-control" id="fi-hoa" type="number" min="0" max="100000" step="0.01" value="0"></div>
+            <div><label class="fi-label" for="fi-other-costs">Other ownership costs / month ($)</label><input class="fi-control" id="fi-other-costs" type="number" min="0" max="100000" step="0.01" value="0"><p class="fi-hint">Maintenance, utilities, flood insurance or assessments not already included.</p></div>
+            <div id="fi-va-options"><label class="fi-label" for="fi-va-fee-status">VA funding fee status</label><select class="fi-control" id="fi-va-fee-status"><option value="first">First use — fee applies</option><option value="subsequent">Subsequent use — fee applies</option><option value="exempt">Exempt — confirmed with lender</option></select></div>
+            <div id="fi-fee-options"><label class="fi-label" for="fi-fee-payment">Upfront loan fee</label><select class="fi-control" id="fi-fee-payment"><option value="finance">Finance in the loan</option><option value="cash">Pay at closing</option></select><p class="fi-hint">VA funding fee or FHA upfront MIP.</p></div>
+            <div id="fi-pmi-options" hidden><label class="fi-label" for="fi-pmi">Quoted PMI / month ($)</label><input class="fi-control" id="fi-pmi" type="number" min="0" max="100000" step="0.01" placeholder="Optional — use planning estimate"><p class="fi-hint">Leave blank for an estimate; enter 0 only for confirmed no PMI.</p></div>
+          </div>
+        </details>
         <p class="fi-footer-note">Planning estimate, not a loan approval or lender quote. Confirm costs, eligibility and fees with your lender. <a href="https://www.va.gov/housing-assistance/home-loans/funding-fee-and-closing-costs/" target="_blank" rel="noopener">VA fee rules</a> · <a href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf" target="_blank" rel="noopener">FHA MIP rules</a></p>
       </section>
     </div>
   </div>
 </main>
+<!-- These controls are supplied separately when embedded in Webflow. -->
+<div id="mm-standalone-controls"></div>
 <noscript>Please enable JavaScript to use the mortgage calculator.</noscript>
 </body>
 </html>

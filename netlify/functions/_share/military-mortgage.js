@@ -2,7 +2,7 @@
 // Existing VA/conventional calculations remain in mortgage-scenario/official-va.
 // Rates are percentage points (6.25 means 6.25%); money is USD.
 import { calculateMortgageScenario } from './mortgage-scenario.js';
-import { monthlyPrincipalInterest, monthlyPmiEstimate, round2 } from './mortgage-engine.js';
+import { monthlyPrincipalInterest, monthlyPmiEstimate, amortizationTotals, round2 } from './mortgage-engine.js';
 
 export const MILITARY_MORTGAGE_CONTRACT = 'military-mortgage-v1';
 // Verified against HUD Handbook 4000.1, revised 2026-08-12, printed page 1749.
@@ -130,10 +130,15 @@ export function calculateMilitaryMortgage(body) {
   monthly.totalHousing = round2(monthly.mortgagePayment + monthly.otherOwnership);
   const feePaidAtClosing = round2(fee - financedFee);
   return {
-    ok: true, contract: MILITARY_MORTGAGE_CONTRACT, version: '1.0.0',
+    ok: true, contract: MILITARY_MORTGAGE_CONTRACT, version: '1.1.0',
     inputs: { loanType, homePrice, downPayment, interestRate, termYears, creditScore, propertyTaxAnnual, insuranceAnnual,
       hoaMonthly, otherOwnershipMonthly, pmiMonthly, vaFeeStatus, feePayment },
     monthly, loan: { baseLoan, financedFee, loanAmount, fee, feeRate, feeLabel, feePaidAtClosing },
+    // Reuse the canonical schedule after financed fees establish final principal.
+    // These totals cover P&I only; do not extrapolate taxes or insurance premiums.
+    amortization: { ...amortizationTotals(loanAmount, interestRate, termYears),
+      principal: loanAmount, basis: 'fixed-rate-no-extra-payments',
+      excludes: 'Taxes, insurance, HOA, other ownership costs and upfront cash are excluded.' },
     upfront: { downPayment, feePaidAtClosing, knownSubtotal: round2(downPayment + feePaidAtClosing),
       excludes: 'Other closing costs, prepaid items and escrow deposits are not included in this subtotal.' },
     mortgageInsurance: { note: insuranceNote, annualRate: annualMipRate, durationYears: mipDurationYears },

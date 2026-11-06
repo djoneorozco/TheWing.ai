@@ -1,0 +1,79 @@
+<!-- PCSUnited Military Mortgage: Embed 2. Place on the same Webflow page as Embed 1. -->
+<style>.pcsu-mm-controls { box-sizing:border-box; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; padding:18px 12px; font-family:Barlow,system-ui,sans-serif; }
+.pcsu-mm-controls * { box-sizing:border-box; }
+.pcsu-mm-controls button { min-height:44px; padding:12px 22px; border:1px solid #a78d56; border-radius:12px; background:#18222c; color:#f3efe7; font:700 15px/1.2 Barlow,system-ui,sans-serif; cursor:pointer; }
+.pcsu-mm-controls button[aria-pressed="true"] { color:#171c20; background:#efd17d; border-color:#efd17d; }
+.pcsu-mm-controls button:hover:not(:disabled) { box-shadow:0 0 0 2px #d8b87a55; }
+.pcsu-mm-controls button:focus-visible { outline:3px solid #73d4ba; outline-offset:4px; }
+.pcsu-mm-controls button:disabled { opacity:.55; cursor:wait; }
+.pcsu-mm-controls [data-mm-controls-status] { width:100%; margin:4px 0 0; text-align:center; color:#8e846f; font-size:13px; }
+.pcsu-mm-controls [hidden] { display:none!important; }
+@media(max-width:440px) { .pcsu-mm-controls { gap:7px; padding:14px 4px; } .pcsu-mm-controls button { padding:12px 13px; font-size:13px; flex:1 1 auto; } }
+</style>
+<nav class="pcsu-mm-controls" data-mortgage-controls aria-label="Mortgage views">
+  <button type="button" data-mm-select="calculator" aria-pressed="true" aria-controls="pcsu-mortgage-frame">Calculator</button>
+  <button type="button" data-mm-select="visualization" aria-pressed="false" aria-controls="pcsu-mortgage-frame">Visualization</button>
+  <button type="button" data-mm-select="summary" aria-pressed="false" aria-controls="pcsu-mortgage-frame">Summary</button>
+  <p data-mm-controls-status role="status">Loading calculator…</p>
+</nav>
+<script>/* Separate Webflow controls; supports a same-page calculator or the hosted iframe. */
+(() => {
+  'use strict';
+  const standalone = document.getElementById('mm-standalone-controls');
+  if (standalone && !standalone.children.length) standalone.innerHTML = `<nav class="pcsu-mm-controls" data-mortgage-controls aria-label="Mortgage views"><button type="button" data-mm-select="calculator" aria-pressed="true">Calculator</button><button type="button" data-mm-select="visualization" aria-pressed="false">Visualization</button><button type="button" data-mm-select="summary" aria-pressed="false">Summary</button><p data-mm-controls-status role="status">Loading calculator…</p></nav>`;
+  document.querySelectorAll('[data-mortgage-controls]').forEach(nav => {
+    if (nav.dataset.initialized) return;
+    nav.dataset.initialized = 'true';
+    const buttons = [...nav.querySelectorAll('[data-mm-select]')];
+    const status = nav.querySelector('[data-mm-controls-status]');
+    let frame = null, origin = null, available = false;
+    function sync(view) {
+      available = true;
+      buttons.forEach(b => { b.disabled = false; b.setAttribute('aria-pressed', String(b.dataset.mmSelect === view)); });
+      if (status) status.hidden = true;
+    }
+    function connect() {
+      const direct = window.PCSUnitedMortgageViews;
+      if (!nav.dataset.targetFrame && direct) { sync(direct.getView()); return; }
+      frame = document.getElementById(nav.dataset.targetFrame || 'pcsu-mortgage-frame');
+      if (!frame || frame.tagName !== 'IFRAME') return;
+      try { origin = new URL(frame.src, location.href).origin; } catch (_) { return; }
+      frame.contentWindow?.postMessage({source:'pcsunited-mortgage-controls',type:'get-state'}, origin);
+      if (!frame.dataset.mmControlsBound) {
+        frame.dataset.mmControlsBound = 'true';
+        frame.addEventListener('load', () => {
+          available = false; buttons.forEach(b => { b.disabled = true; });
+          if (status) { status.hidden = false; status.textContent = 'Loading calculator…'; }
+          connect();
+        });
+      }
+    }
+    buttons.forEach(button => {
+      button.disabled = true;
+      button.addEventListener('click', () => {
+        if (!available) return;
+        const view = button.dataset.mmSelect;
+        if (!nav.dataset.targetFrame && window.PCSUnitedMortgageViews) window.PCSUnitedMortgageViews.setView(view);
+        else if (frame && origin) {
+          frame.contentWindow?.postMessage({source:'pcsunited-mortgage-controls', type:'set-view',view},origin);
+          frame.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',block:'start'});
+        }
+      });
+    });
+    window.addEventListener('message', e => {
+      if (!frame || e.source !== frame.contentWindow || e.origin !== origin || e.data?.source !== 'pcsunited-military-mortgage' || e.data?.type !== 'view-state') return;
+      if (!['calculator','visualization','summary'].includes(e.data.view)) return;
+      sync(e.data.view);
+      const h = e.data.height;
+      if (typeof h === 'number' && Number.isFinite(h) && h > 0 && h <= 12000) frame.style.height = `${Math.max(300,Math.ceil(h))}px`;
+    });
+    window.addEventListener('pcsunited:mortgage-views-ready', connect);
+    window.addEventListener('pcsunited:mortgage-view-changed', e => {
+      if (!nav.dataset.targetFrame && window.PCSUnitedMortgageViews) sync(e.detail.view);
+    });
+    // Either embed can appear first in the document.
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', connect, {once:true});
+    connect();
+  });
+})();
+</script>

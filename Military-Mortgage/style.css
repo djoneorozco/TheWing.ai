@@ -795,3 +795,79 @@ body { margin: 0; padding: 24px; background: #071018; }
 }
 
 #pcsu-financial-input-panel .fi-range { height: 44px; inset: -17px 0; margin: 0; }
+
+/* Screenshot-matched calculator. Detailed content lives on separate screens. */
+body { padding: 0; background: #171e22; }
+#pcsu-financial-input-panel { width: 100%; }
+#pcsu-financial-input-panel .fi-panel { background: radial-gradient(ellipse at 3% 0%,#3c3b33 0%,transparent 58%),radial-gradient(ellipse at 100% 0%,#30445e 0%,transparent 66%),linear-gradient(#20282e,#171c20); box-shadow: none; }
+#pcsu-financial-input-panel .fi-subtitle { font-weight: 600; }
+#pcsu-financial-input-panel .fi-inner { padding: 24px; }
+#pcsu-financial-input-panel .fi-section { margin-bottom: 0; }
+#pcsu-financial-input-panel .fi-section-sub { font-weight: 600; }
+#pcsu-financial-input-panel .mm-screen { min-height: 420px; }
+#pcsu-financial-input-panel .mm-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:22px; }
+#pcsu-financial-input-panel .mm-heading h2 { font:400 clamp(28px,3.3vw,40px)/1.15 "Gilda Display",serif; margin:8px 0 0; color:var(--ink); }
+#pcsu-financial-input-panel .mm-heading button { white-space:nowrap; font-size:14px; background:rgba(0,0,0,.15); }
+#pcsu-financial-input-panel .mm-status { padding:22px; background:rgba(255,255,255,.03); border:1px solid var(--stroke); border-radius:16px; line-height:1.6; }
+#pcsu-financial-input-panel .mm-status button { margin:12px; }
+#pcsu-financial-input-panel .mm-viz-grid { display:grid; grid-template-columns:1.15fr 1fr; gap:20px; }
+#pcsu-financial-input-panel .mm-card { min-width:0; padding:24px; background:rgba(6,13,20,.35); border:1px solid var(--stroke); border-radius:18px; }
+#pcsu-financial-input-panel .mm-card h3 { font:700 19px/1.3 Barlow,system-ui,sans-serif; margin:0; color:var(--ink); }
+#pcsu-financial-input-panel .mm-donut-layout { display:grid; grid-template-columns:minmax(0,1fr); justify-items:center; gap:24px; margin:24px 0; }
+#pcsu-financial-input-panel .mm-donut { position:relative; width:min(260px,100%); aspect-ratio:1; border-radius:50%; display:grid; place-items:center; }
+#pcsu-financial-input-panel .mm-donut-center { position:absolute; inset:14%; background:#19242b; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:12px; }
+#pcsu-financial-input-panel .mm-donut-center span { font-size:13px; color:#d0d6d8; }
+#pcsu-financial-input-panel .mm-donut-center strong { font-size:clamp(21px,2.4vw,30px); font-weight:700; margin:8px 0; font-variant-numeric:tabular-nums; }
+#pcsu-financial-input-panel .mm-donut-center small { color:var(--muted); font-size:11px; }
+#pcsu-financial-input-panel .mm-legend { width:100%; display:grid; gap:4px; }
+#pcsu-financial-input-panel .mm-legend button { display:grid; grid-template-columns:10px 1fr auto; align-items:center; gap:10px; text-align:left; padding:10px 8px; border:1px solid transparent; background:transparent; border-radius:8px; font-size:14px; }
+#pcsu-financial-input-panel .mm-legend button[aria-pressed="true"],#pcsu-financial-input-panel .mm-legend button:hover { border-color:var(--stroke); background:rgba(255,255,255,.04); }
+#pcsu-financial-input-panel .mm-legend strong { font-variant-numeric:tabular-nums; }
+#pcsu-financial-input-panel .mm-dot { display:inline-block; width:9px; height:9px; border-radius:50%; flex:none; }
+#pcsu-financial-input-panel .mm-principal { background:#e5b571; }
+#pcsu-financial-input-panel .mm-interest { background:#73d4ba; }
+#pcsu-financial-input-panel .mm-chart-hint { font-size:13px; color:var(--muted); line-height:1.5; margin:18px 0 0; }
+#pcsu-financial-input-panel .mm-term-total { display:flex; flex-direction:column; gap:12px; margin:48px 0 26px; color:#d2d8d9; font-size:14px; }
+#pcsu-financial-input-panel .mm-term-total strong { font:400 clamp(28px,3vw,40px)/1.15 "Gilda Display",serif; color:var(--ink); overflow-wrap:anywhere; }
+#pcsu-financial-input-panel .mm-stack { display:flex; height:22px; border-radius:12px; overflow:hidden; background:rgba(255,255,255,.09); }
+#pcsu-financial-input-panel .mm-term-legend { display:grid; gap:20px; margin:28px 0 36px; }
+#pcsu-financial-input-panel .mm-term-legend>div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; }
+#pcsu-financial-input-panel .mm-term-legend span { display:flex; gap:10px; align-items:center; }
+#pcsu-financial-input-panel .mm-small-total { display:flex; flex-direction:column; gap:10px; border-top:1px solid var(--stroke); padding-top:24px; margin-top:30px; }
+#pcsu-financial-input-panel .mm-small-total span { font-size:14px; color:var(--muted); }
+#pcsu-financial-input-panel .mm-small-total strong { font-size:26px; }
+#pcsu-financial-input-panel .mm-summary-hero { padding:26px; border:1px solid rgba(246,208,109,.3); border-radius:18px; background:linear-gradient(110deg,rgba(246,208,109,.10),rgba(6,13,20,.4)); display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:30px; }
+#pcsu-financial-input-panel .mm-total { font:400 clamp(32px,4.5vw,54px)/1.2 "Gilda Display",serif; overflow-wrap:anywhere; }
+#pcsu-financial-input-panel .mm-per { font-size:14px; color:var(--muted); }
+#pcsu-financial-input-panel .mm-summary-hero p:not(.fi-section-title) { font-size:16px; line-height:1.6; margin:0; color:#d6d6ce; }
+#pcsu-financial-input-panel .mm-kpis { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; margin:26px 0; }
+#pcsu-financial-input-panel .mm-kpis>div { display:flex; flex-direction:column; gap:10px; padding:16px 0; }
+#pcsu-financial-input-panel .mm-kpis span { font-size:14px; color:var(--muted); }
+#pcsu-financial-input-panel .mm-kpis strong { font-size:24px; overflow-wrap:anywhere; }
+#pcsu-financial-input-panel .fi-breakdown { gap:30px; }
+#pcsu-financial-input-panel .fi-line { font-size:15px; }
+#pcsu-financial-input-panel .fi-breakdown dt { overflow-wrap:anywhere; }
+html[data-embedded="true"] #mm-standalone-controls { display:none; }
+@media(min-width:1440px) { #pcsu-financial-input-panel .mm-donut-layout { grid-template-columns:1fr 1fr; } }
+@media(max-width:900px) {
+  #pcsu-financial-input-panel .mm-viz-grid { grid-template-columns:1fr; }
+  #pcsu-financial-input-panel .mm-summary-hero { grid-template-columns:1fr; gap:18px; }
+}
+@media(max-width:760px) {
+  #pcsu-financial-input-panel .fi-inner { padding:18px; }
+  #pcsu-financial-input-panel .mm-kpis { grid-template-columns:1fr; gap:0; }
+  #pcsu-financial-input-panel .mm-heading { align-items:flex-start; flex-wrap:wrap; }
+  #pcsu-financial-input-panel .mm-card { padding:18px; }
+  #pcsu-financial-input-panel .fi-label { flex-wrap:wrap; }
+}
+@media(max-width:440px) {
+  #pcsu-financial-input-panel .fi-inner { padding:14px; }
+  #pcsu-financial-input-panel .fi-panel { border-radius:20px; }
+  #pcsu-financial-input-panel .fi-line { flex-wrap:wrap; gap:5px; }
+  #pcsu-financial-input-panel .mm-summary-hero { padding:20px; }
+  #pcsu-financial-input-panel .mm-legend button { grid-template-columns:9px minmax(0,1fr) auto; font-size:13px; gap:7px; }
+}
+@media(min-width:761px) {
+  #pcsu-financial-input-panel .fi-title { font-size:clamp(2.15rem,4.4vw,3.4rem); }
+  #pcsu-financial-input-panel .fi-total-cost-value { font-size:clamp(2.35rem,4.8vw,3.5rem); }
+}

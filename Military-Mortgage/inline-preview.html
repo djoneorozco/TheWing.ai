@@ -1,0 +1,1339 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Same-page mortgage embed preview</title><style>body{margin:0;background:#171e22}</style></head><body><!-- PCSUnited Military Mortgage: same-page calculator embed. Load the paired view-buttons embed on this page. -->
+<link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+#pcsu-financial-input-panel,
+#pcsu-financial-input-panel * {
+  box-sizing: border-box;
+  font-family:
+    "Barlow",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+#pcsu-financial-input-panel {
+  --bg: #071018;
+  --bg2: #0b1621;
+  --bg3: #050912;
+
+  --stroke: rgba(216, 184, 122, 0.16);
+
+  --ink: #f3efe7;
+  --muted: #b8b0a4;
+
+  --gold: #d8b87a;
+  --gold2: #f6d06d;
+
+  --sapphire: #6aa7ff;
+  --mint: #8ef3c5;
+  --green: #8ef3a6;
+  --danger: #ff8aa6;
+
+  --panel: rgba(17, 24, 34, 0.58);
+  --panel2: rgba(8, 13, 20, 0.72);
+
+  --shadow: 0 34px 90px rgba(0, 0, 0, 0.38);
+
+  display: block;
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  color: var(--ink);
+}
+
+
+
+#pcsu-financial-input-panel .fi-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  width: 100%;
+  border-radius: 30px;
+
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      rgba(216, 184, 122, 0.08),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 92% 4%,
+      rgba(111, 143, 183, 0.10),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      rgba(142, 243, 197, 0.045),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(7, 16, 24, 0.22),
+      rgba(11, 22, 33, 0.22) 58%,
+      rgba(5, 9, 18, 0.22)
+    );
+
+  border: 1px solid rgba(216, 184, 122, 0.13);
+  box-shadow: var(--shadow);
+
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+}
+
+#pcsu-financial-input-panel .fi-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045),
+      transparent 22%
+    ),
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(216, 184, 122, 0.08),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 88% 16%,
+      rgba(106, 167, 255, 0.07),
+      transparent 26%
+    );
+
+  mix-blend-mode: screen;
+}
+
+#pcsu-financial-input-panel .fi-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.12),
+      transparent 44%,
+      rgba(0, 0, 0, 0.10)
+    ),
+    linear-gradient(
+      180deg,
+      transparent 52%,
+      rgba(0, 0, 0, 0.16)
+    );
+}
+
+#pcsu-financial-input-panel .fi-inner {
+  position: relative;
+  z-index: 2;
+  padding: 24px;
+}
+
+
+
+#pcsu-financial-input-panel .fi-topbar {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  align-items: start;
+  gap: 18px;
+
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+}
+
+#pcsu-financial-input-panel .fi-topbar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(216, 184, 122, 0.28),
+      rgba(111, 143, 183, 0.16),
+      transparent
+    );
+}
+
+#pcsu-financial-input-panel .fi-title {
+  margin: 0 0 8px;
+
+  font-family: "Gilda Display", serif;
+  font-size: clamp(2.15rem, 4vw, 3.2rem);
+  font-weight: 400;
+  line-height: 0.98;
+
+  color: #fbf4e7;
+}
+
+#pcsu-financial-input-panel .fi-subtitle {
+  max-width: 740px;
+  margin: 0;
+
+  color: #dcd4c8;
+
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.62;
+}
+
+#pcsu-financial-input-panel .fi-scenario-top {
+  display: grid;
+  gap: 8px;
+}
+
+#pcsu-financial-input-panel .fi-loan-label {
+  color: #f8f1e6;
+
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+
+
+#pcsu-financial-input-panel .fi-select-wrap,
+#pcsu-financial-input-panel .fi-money-wrap {
+  position: relative;
+}
+
+#pcsu-financial-input-panel .fi-select-wrap::after {
+  content: "⌄";
+
+  position: absolute;
+  top: 50%;
+  right: 14px;
+
+  transform: translateY(-56%);
+
+  color: var(--gold2);
+
+  font-size: 18px;
+  font-weight: 900;
+
+  pointer-events: none;
+}
+
+#pcsu-financial-input-panel .fi-control {
+  width: 100%;
+  height: 46px;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  border: 1px solid rgba(216, 184, 122, 0.13);
+  border-radius: 15px;
+  outline: none;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(17, 24, 34, 0.72),
+      rgba(8, 13, 20, 0.64)
+    );
+
+  color: #f8f1e6;
+
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 24px rgba(0, 0, 0, 0.14);
+
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+#pcsu-financial-input-panel select.fi-control {
+  padding: 0 40px 0 13px;
+}
+
+#pcsu-financial-input-panel input.fi-control {
+  padding: 0 13px;
+}
+
+#pcsu-financial-input-panel .fi-control:hover {
+  border-color: rgba(216, 184, 122, 0.28);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(18, 24, 34, 0.82),
+      rgba(8, 13, 20, 0.72)
+    );
+}
+
+#pcsu-financial-input-panel .fi-control:focus {
+  border-color: rgba(216, 184, 122, 0.42);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 4px rgba(216, 184, 122, 0.10),
+    0 14px 28px rgba(0, 0, 0, 0.20);
+}
+
+#pcsu-financial-input-panel .fi-control option {
+  color: #172033;
+  background: #ffffff;
+}
+
+#pcsu-financial-input-panel .fi-prefix {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  display: grid;
+  place-items: center;
+
+  width: 48px;
+  height: 46px;
+
+  border-right: 1px solid rgba(216, 184, 122, 0.12);
+
+  color: var(--muted);
+
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+#pcsu-financial-input-panel .fi-money-wrap .fi-control {
+  padding-left: 62px;
+}
+
+
+
+#pcsu-financial-input-panel .fi-slider-wrap {
+  margin-top: 10px;
+}
+
+#pcsu-financial-input-panel .fi-slider-track {
+  position: relative;
+
+  height: 10px;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.13);
+
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.24),
+    0 8px 18px rgba(0, 0, 0, 0.10);
+}
+
+#pcsu-financial-input-panel .fi-slider-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 50%;
+  height: 100%;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(142, 243, 197, 1),
+      rgba(226, 255, 236, 0.94)
+    );
+
+  box-shadow: 0 0 18px rgba(142, 243, 197, 0.15);
+
+  pointer-events: none;
+}
+
+#pcsu-financial-input-panel .fi-range {
+  position: absolute;
+  inset: -7px 0;
+  z-index: 4;
+
+  width: 100%;
+  height: 24px;
+
+  opacity: 0;
+  cursor: pointer;
+}
+
+#pcsu-financial-input-panel .fi-slider-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+
+  width: 18px;
+  height: 10px;
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 999px;
+
+  background: #dbe3ff;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+
+  pointer-events: none;
+}
+
+#pcsu-financial-input-panel .fi-slider-scale {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 8px;
+
+  color: #b8c2ec;
+
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+
+
+#pcsu-financial-input-panel .fi-section {
+  position: relative;
+  overflow: hidden;
+
+  padding: 20px;
+  margin-bottom: 14px;
+
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(12, 18, 28, 0.34),
+      rgba(7, 12, 19, 0.28)
+    );
+
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.16);
+}
+
+#pcsu-financial-input-panel .fi-section::before {
+  content: "";
+
+  position: absolute;
+  inset: 0 0 auto;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(216, 184, 122, 0.28),
+      rgba(111, 143, 183, 0.16),
+      transparent
+    );
+}
+
+#pcsu-financial-input-panel .fi-section > * {
+  position: relative;
+  z-index: 1;
+}
+
+#pcsu-financial-input-panel .fi-section-title {
+  margin: 0 0 5px;
+
+  color: var(--gold2);
+
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+#pcsu-financial-input-panel .fi-section-sub {
+  margin: 0 0 16px;
+
+  color: #dcd4c8;
+
+  font-size: 0.94rem;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+#pcsu-financial-input-panel .fi-input-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 14px;
+}
+
+#pcsu-financial-input-panel .fi-field {
+  min-width: 0;
+}
+
+#pcsu-financial-input-panel .fi-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin: 0 0 8px;
+
+  color: #fbf2e2;
+
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+#pcsu-financial-input-panel .fi-label .fi-label-side {
+  margin-left: auto;
+
+  color: var(--mint);
+
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1;
+
+  white-space: nowrap;
+}
+
+#pcsu-financial-input-panel .fi-info {
+  display: inline-grid;
+  place-items: center;
+
+  width: 16px;
+  height: 16px;
+
+  border: 1px solid rgba(243, 239, 231, 0.36);
+  border-radius: 999px;
+
+  color: rgba(243, 239, 231, 0.72);
+
+  font-size: 0.70rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+#pcsu-financial-input-panel .fi-hint {
+  margin-top: 7px;
+
+  color: var(--muted);
+
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+
+
+#pcsu-financial-input-panel .fi-total-cost {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  min-width: 0;
+  min-height: 166px;
+  padding: 20px 22px 20px 24px;
+
+  border: 1px solid rgba(246, 208, 109, 0.28);
+  border-radius: 18px;
+
+  background:
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(246, 208, 109, 0.15),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 96% 100%,
+      rgba(106, 167, 255, 0.08),
+      transparent 38%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(27, 34, 43, 0.76),
+      rgba(8, 14, 21, 0.82)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 16px 32px rgba(0, 0, 0, 0.20);
+}
+
+#pcsu-financial-input-panel .fi-total-cost::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  width: 4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--gold2),
+      rgba(216, 184, 122, 0.42)
+    );
+
+  box-shadow: 0 0 22px rgba(246, 208, 109, 0.20);
+}
+
+#pcsu-financial-input-panel .fi-total-cost::after {
+  content: "";
+
+  position: absolute;
+  top: -58px;
+  right: -38px;
+  z-index: -1;
+
+  width: 150px;
+  height: 150px;
+
+  border-radius: 999px;
+
+  background: rgba(246, 208, 109, 0.05);
+  filter: blur(12px);
+}
+
+#pcsu-financial-input-panel .fi-total-cost-label {
+  margin: 0 0 8px;
+
+  color: var(--gold2);
+
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+#pcsu-financial-input-panel .fi-total-cost-value {
+  margin: 0;
+
+  color: #fff8ea;
+
+  font-family: "Gilda Display", serif;
+  font-size: clamp(2.35rem, 4vw, 3.5rem);
+  font-weight: 400;
+  line-height: 0.98;
+
+  text-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+#pcsu-financial-input-panel .fi-total-cost-period {
+  margin-left: 5px;
+
+  color: #cfc5b6;
+
+  font-family: "Barlow", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+#pcsu-financial-input-panel .fi-total-cost-caption {
+  max-width: 640px;
+  margin: 10px 0 0;
+
+  color: #d4cec4;
+
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.42;
+}
+
+#pcsu-financial-input-panel .fi-total-cost-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  width: fit-content;
+  margin-top: 10px;
+
+  color: var(--mint);
+
+  font-size: 0.70rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+#pcsu-financial-input-panel .fi-total-cost-dot {
+  flex: 0 0 auto;
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: var(--mint);
+
+  box-shadow:
+    0 0 10px rgba(142, 243, 197, 0.50);
+}
+
+
+
+@media (min-width: 1041px) {
+  #pcsu-financial-input-panel .fi-total-cost {
+    grid-column: span 2;
+  }
+}
+
+
+
+@media (max-width: 1040px) {
+  #pcsu-financial-input-panel .fi-input-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #pcsu-financial-input-panel .fi-total-cost {
+    grid-column: span 2;
+  }
+}
+
+
+
+@media (max-width: 760px) {
+  #pcsu-financial-input-panel {
+    width: 100%;
+  }
+
+  #pcsu-financial-input-panel .fi-inner {
+    padding: 18px;
+  }
+
+  #pcsu-financial-input-panel .fi-topbar {
+    grid-template-columns: 1fr;
+  }
+
+  #pcsu-financial-input-panel .fi-input-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #pcsu-financial-input-panel .fi-total-cost {
+    grid-column: auto;
+    min-height: 150px;
+  }
+}
+
+@media (max-width: 440px) {
+  #pcsu-financial-input-panel .fi-inner {
+    padding: 14px;
+  }
+
+  #pcsu-financial-input-panel .fi-section {
+    padding: 16px;
+  }
+
+  #pcsu-financial-input-panel .fi-total-cost {
+    padding: 18px;
+  }
+
+  #pcsu-financial-input-panel .fi-title {
+    font-size: 2rem;
+  }
+
+  #pcsu-financial-input-panel .fi-label {
+    flex-wrap: wrap;
+  }
+
+  #pcsu-financial-input-panel .fi-label .fi-label-side {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+/* Additional controls stay inside the existing visual system. */
+#pcsu-financial-input-panel [hidden] { display: none !important; }
+#pcsu-financial-input-panel input, #pcsu-financial-input-panel select { min-width: 0; }
+#pcsu-financial-input-panel .fi-field { min-width: 0; }
+#pcsu-financial-input-panel :focus-visible { outline: 3px solid var(--gold2); outline-offset: 4px; }
+#pcsu-financial-input-panel .fi-slider-track:focus-within { outline: 2px solid var(--gold2); outline-offset: 8px; }
+#pcsu-financial-input-panel .fi-details { margin-top: 24px; border-top: 1px solid var(--stroke); padding-top: 20px; }
+#pcsu-financial-input-panel .fi-details summary { cursor: pointer; color: var(--gold2); font-weight: 700; font-size: 17px; padding: 8px 0; }
+#pcsu-financial-input-panel .fi-details-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; margin-top: 20px; }
+#pcsu-financial-input-panel .fi-details .fi-control { padding: 14px; height: auto; min-height: 48px; font-size: 18px; width: 100%; }
+#pcsu-financial-input-panel .fi-details .fi-label { display: block; font-size: 16px; }
+#pcsu-financial-input-panel .fi-detail-note { margin: 12px 0 0; color: var(--muted); font-size: 15px; line-height: 1.5; }
+#pcsu-financial-input-panel .fi-estimate-summary { color: var(--muted); font-size: 15px; margin: 12px 0 0; line-height: 1.5; }
+#pcsu-financial-input-panel .fi-breakdown { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 36px; margin-top: 18px; }
+#pcsu-financial-input-panel dl { margin: 0; }
+#pcsu-financial-input-panel .fi-line { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--stroke); font-size: 16px; }
+#pcsu-financial-input-panel dt { color: var(--muted); }
+#pcsu-financial-input-panel dd { margin: 0; white-space: nowrap; font-weight: 700; font-variant-numeric: tabular-nums; }
+#pcsu-financial-input-panel a { color: var(--gold2); }
+#pcsu-financial-input-panel button { padding: 9px 18px; border: 1px solid var(--gold); border-radius: 12px; color: var(--ink); background: var(--bg); font: inherit; cursor: pointer; }
+#pcsu-financial-input-panel [aria-invalid="true"] { border-color: var(--danger); }
+#pcsu-financial-input-panel[data-state="error"] .fi-total-cost-dot,
+#pcsu-financial-input-panel[data-state="invalid"] .fi-total-cost-dot { background: var(--danger); }
+#pcsu-financial-input-panel[data-state="pending"] .fi-total-cost-dot { background: var(--gold); }
+#pcsu-financial-input-panel .fi-total-cost-value { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+#pcsu-financial-input-panel .fi-footer-note { color: var(--muted); font-size: 14px; line-height: 1.5; padding: 18px 0 0; margin: 0; }
+@media (max-width: 760px) {
+  #pcsu-financial-input-panel .fi-details-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  #pcsu-financial-input-panel .fi-breakdown { grid-template-columns: 1fr; gap: 12px; }
+}
+@media (max-width: 520px) {
+  #pcsu-financial-input-panel .fi-details-grid { grid-template-columns: 1fr; }
+  #pcsu-financial-input-panel .fi-total-cost-value { font-size: clamp(36px, 11vw, 62px); }
+}
+
+#pcsu-financial-input-panel .fi-range { height: 44px; inset: -17px 0; margin: 0; }
+
+/* Screenshot-matched calculator. Detailed content lives on separate screens. */
+#pcsu-financial-input-panel { width: 100%; }
+#pcsu-financial-input-panel .fi-panel { background: radial-gradient(ellipse at 3% 0%,#3c3b33 0%,transparent 58%),radial-gradient(ellipse at 100% 0%,#30445e 0%,transparent 66%),linear-gradient(#20282e,#171c20); box-shadow: none; }
+#pcsu-financial-input-panel .fi-subtitle { font-weight: 600; }
+#pcsu-financial-input-panel .fi-inner { padding: 24px; }
+#pcsu-financial-input-panel .fi-section { margin-bottom: 0; }
+#pcsu-financial-input-panel .fi-section-sub { font-weight: 600; }
+#pcsu-financial-input-panel .mm-screen { min-height: 420px; }
+#pcsu-financial-input-panel .mm-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:22px; }
+#pcsu-financial-input-panel .mm-heading h2 { font:400 clamp(28px,3.3vw,40px)/1.15 "Gilda Display",serif; margin:8px 0 0; color:var(--ink); }
+#pcsu-financial-input-panel .mm-heading button { white-space:nowrap; font-size:14px; background:rgba(0,0,0,.15); }
+#pcsu-financial-input-panel .mm-status { padding:22px; background:rgba(255,255,255,.03); border:1px solid var(--stroke); border-radius:16px; line-height:1.6; }
+#pcsu-financial-input-panel .mm-status button { margin:12px; }
+#pcsu-financial-input-panel .mm-viz-grid { display:grid; grid-template-columns:1.15fr 1fr; gap:20px; }
+#pcsu-financial-input-panel .mm-card { min-width:0; padding:24px; background:rgba(6,13,20,.35); border:1px solid var(--stroke); border-radius:18px; }
+#pcsu-financial-input-panel .mm-card h3 { font:700 19px/1.3 Barlow,system-ui,sans-serif; margin:0; color:var(--ink); }
+#pcsu-financial-input-panel .mm-donut-layout { display:grid; grid-template-columns:minmax(0,1fr); justify-items:center; gap:24px; margin:24px 0; }
+#pcsu-financial-input-panel .mm-donut { position:relative; width:min(260px,100%); aspect-ratio:1; border-radius:50%; display:grid; place-items:center; }
+#pcsu-financial-input-panel .mm-donut-center { position:absolute; inset:14%; background:#19242b; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:12px; }
+#pcsu-financial-input-panel .mm-donut-center span { font-size:13px; color:#d0d6d8; }
+#pcsu-financial-input-panel .mm-donut-center strong { font-size:clamp(21px,2.4vw,30px); font-weight:700; margin:8px 0; font-variant-numeric:tabular-nums; }
+#pcsu-financial-input-panel .mm-donut-center small { color:var(--muted); font-size:11px; }
+#pcsu-financial-input-panel .mm-legend { width:100%; display:grid; gap:4px; }
+#pcsu-financial-input-panel .mm-legend button { display:grid; grid-template-columns:10px 1fr auto; align-items:center; gap:10px; text-align:left; padding:10px 8px; border:1px solid transparent; background:transparent; border-radius:8px; font-size:14px; }
+#pcsu-financial-input-panel .mm-legend button[aria-pressed="true"],#pcsu-financial-input-panel .mm-legend button:hover { border-color:var(--stroke); background:rgba(255,255,255,.04); }
+#pcsu-financial-input-panel .mm-legend strong { font-variant-numeric:tabular-nums; }
+#pcsu-financial-input-panel .mm-dot { display:inline-block; width:9px; height:9px; border-radius:50%; flex:none; }
+#pcsu-financial-input-panel .mm-principal { background:#e5b571; }
+#pcsu-financial-input-panel .mm-interest { background:#73d4ba; }
+#pcsu-financial-input-panel .mm-chart-hint { font-size:13px; color:var(--muted); line-height:1.5; margin:18px 0 0; }
+#pcsu-financial-input-panel .mm-term-total { display:flex; flex-direction:column; gap:12px; margin:48px 0 26px; color:#d2d8d9; font-size:14px; }
+#pcsu-financial-input-panel .mm-term-total strong { font:400 clamp(28px,3vw,40px)/1.15 "Gilda Display",serif; color:var(--ink); overflow-wrap:anywhere; }
+#pcsu-financial-input-panel .mm-stack { display:flex; height:22px; border-radius:12px; overflow:hidden; background:rgba(255,255,255,.09); }
+#pcsu-financial-input-panel .mm-term-legend { display:grid; gap:20px; margin:28px 0 36px; }
+#pcsu-financial-input-panel .mm-term-legend>div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; }
+#pcsu-financial-input-panel .mm-term-legend span { display:flex; gap:10px; align-items:center; }
+#pcsu-financial-input-panel .mm-small-total { display:flex; flex-direction:column; gap:10px; border-top:1px solid var(--stroke); padding-top:24px; margin-top:30px; }
+#pcsu-financial-input-panel .mm-small-total span { font-size:14px; color:var(--muted); }
+#pcsu-financial-input-panel .mm-small-total strong { font-size:26px; }
+#pcsu-financial-input-panel .mm-summary-hero { padding:26px; border:1px solid rgba(246,208,109,.3); border-radius:18px; background:linear-gradient(110deg,rgba(246,208,109,.10),rgba(6,13,20,.4)); display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:30px; }
+#pcsu-financial-input-panel .mm-total { font:400 clamp(32px,4.5vw,54px)/1.2 "Gilda Display",serif; overflow-wrap:anywhere; }
+#pcsu-financial-input-panel .mm-per { font-size:14px; color:var(--muted); }
+#pcsu-financial-input-panel .mm-summary-hero p:not(.fi-section-title) { font-size:16px; line-height:1.6; margin:0; color:#d6d6ce; }
+#pcsu-financial-input-panel .mm-kpis { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; margin:26px 0; }
+#pcsu-financial-input-panel .mm-kpis>div { display:flex; flex-direction:column; gap:10px; padding:16px 0; }
+#pcsu-financial-input-panel .mm-kpis span { font-size:14px; color:var(--muted); }
+#pcsu-financial-input-panel .mm-kpis strong { font-size:24px; overflow-wrap:anywhere; }
+#pcsu-financial-input-panel .fi-breakdown { gap:30px; }
+#pcsu-financial-input-panel .fi-line { font-size:15px; }
+#pcsu-financial-input-panel .fi-breakdown dt { overflow-wrap:anywhere; }
+@media(min-width:1440px) { #pcsu-financial-input-panel .mm-donut-layout { grid-template-columns:1fr 1fr; } }
+@media(max-width:900px) {
+  #pcsu-financial-input-panel .mm-viz-grid { grid-template-columns:1fr; }
+  #pcsu-financial-input-panel .mm-summary-hero { grid-template-columns:1fr; gap:18px; }
+}
+@media(max-width:760px) {
+  #pcsu-financial-input-panel .fi-inner { padding:18px; }
+  #pcsu-financial-input-panel .mm-kpis { grid-template-columns:1fr; gap:0; }
+  #pcsu-financial-input-panel .mm-heading { align-items:flex-start; flex-wrap:wrap; }
+  #pcsu-financial-input-panel .mm-card { padding:18px; }
+  #pcsu-financial-input-panel .fi-label { flex-wrap:wrap; }
+}
+@media(max-width:440px) {
+  #pcsu-financial-input-panel .fi-inner { padding:14px; }
+  #pcsu-financial-input-panel .fi-panel { border-radius:20px; }
+  #pcsu-financial-input-panel .fi-line { flex-wrap:wrap; gap:5px; }
+  #pcsu-financial-input-panel .mm-summary-hero { padding:20px; }
+  #pcsu-financial-input-panel .mm-legend button { grid-template-columns:9px minmax(0,1fr) auto; font-size:13px; gap:7px; }
+}
+@media(min-width:761px) {
+  #pcsu-financial-input-panel .fi-title { font-size:clamp(2.15rem,4.4vw,3.4rem); }
+  #pcsu-financial-input-panel .fi-total-cost-value { font-size:clamp(2.35rem,4.8vw,3.5rem); }
+}
+</style>
+<main id="pcsu-financial-input-panel" data-mortgage-api="/api/mortgage" data-state="pending">
+<div class="fi-panel">
+    <div class="fi-inner">
+      <div class="fi-topbar">
+        <div>
+          <h1 class="fi-title">
+            Military Mortgage Calculator
+          </h1>
+          <p class="fi-subtitle">
+            Enter the home and loan details needed to estimate what the
+            property may really cost each month, including principal,
+            interest, estimated property taxes, homeowners insurance,
+            and applicable mortgage insurance.
+          </p>
+        </div>
+        <div class="fi-scenario-top">
+          <label
+            class="fi-loan-label"
+            for="fi-loan-type"
+          >
+            Loan Type
+          </label>
+          <div class="fi-select-wrap">
+            <select
+              id="fi-loan-type"
+              class="fi-control"
+            >
+              <option value="VA" selected>
+                VA Loan
+              </option>
+              <option value="CONVENTIONAL">
+                Conventional
+              </option>
+              <option value="FHA">
+                FHA
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <section class="fi-section" id="fi-view-calculator" data-mm-screen="calculator" aria-label="Mortgage calculator">
+        <div class="fi-section-title">
+          Mortgage Scenario Inputs
+        </div>
+        <p class="fi-section-sub">
+          Adjust the scenario below to see the estimated total monthly
+          housing cost update automatically.
+        </p>
+        <div class="fi-input-grid">
+          <div class="fi-field">
+            <label
+              class="fi-label"
+              for="fi-home-price"
+            >
+              Target Home Price
+              <span
+                class="fi-info"
+                aria-hidden="true"
+              >
+                i
+              </span>
+            </label>
+            <div class="fi-money-wrap">
+              <span class="fi-prefix">
+                $
+              </span>
+              <input
+                id="fi-home-price"
+                class="fi-control"
+                type="number" inputmode="decimal"
+                min="1"
+                max="10000000"
+                step="0.01"
+                value="250000"
+              >
+            </div>
+            <div class="fi-slider-wrap">
+              <div class="fi-slider-track">
+                <div
+                  id="fi-home-price-fill"
+                  class="fi-slider-fill"
+                ></div>
+                <div
+                  id="fi-home-price-knob"
+                  class="fi-slider-knob"
+                ></div>
+                <input
+                  id="fi-home-price-slider"
+                  class="fi-range"
+                  type="range"
+                  min="100000"
+                  max="750000"
+                  step="5000"
+                  value="250000"
+                  aria-label="Target home price"
+                >
+              </div>
+              <div class="fi-slider-scale">
+                <span>$100k</span>
+                <span>$425k</span>
+                <span>$750k</span>
+              </div>
+            </div>
+            <div class="fi-hint">
+              Use the purchase price you want to test in this market.
+            </div>
+          </div>
+          <div class="fi-field">
+            <label
+              class="fi-label"
+              for="fi-down-payment"
+            >
+              Down Payment
+              <span
+                class="fi-info"
+                aria-hidden="true"
+              >
+                i
+              </span>
+              <span
+                id="fi-down-payment-pct"
+                class="fi-label-side"
+              >
+                0% of price
+              </span>
+            </label>
+            <div class="fi-money-wrap">
+              <span class="fi-prefix">
+                $
+              </span>
+              <input
+                id="fi-down-payment"
+                class="fi-control"
+                type="number" inputmode="decimal"
+                min="0"
+                step="0.01"
+                value="0"
+              >
+            </div>
+            <div class="fi-slider-wrap">
+              <div class="fi-slider-track">
+                <div
+                  id="fi-down-payment-fill"
+                  class="fi-slider-fill"
+                ></div>
+                <div
+                  id="fi-down-payment-knob"
+                  class="fi-slider-knob"
+                ></div>
+                <input
+                  id="fi-down-payment-slider"
+                  class="fi-range"
+                  type="range"
+                  min="0"
+                  max="20"
+                  step="0.1"
+                  value="0"
+                  aria-label="Down payment percentage"
+                >
+              </div>
+              <div class="fi-slider-scale">
+                <span>0%</span>
+                <span>10%</span>
+                <span>20%</span>
+              </div>
+            </div>
+            <div class="fi-hint">
+              VA buyers may leave this at $0 or test the impact of cash down.
+            </div>
+          </div>
+          <div class="fi-field">
+            <label
+              class="fi-label"
+              for="fi-credit-score"
+            >
+              Credit Score
+              <span
+                class="fi-info"
+                aria-hidden="true"
+              >
+                i
+              </span>
+              <span
+                id="fi-rate-label"
+                class="fi-label-side"
+              >
+                Planning rate: 6.10%
+              </span>
+            </label>
+            <div class="fi-money-wrap">
+              <span class="fi-prefix">
+                Score
+              </span>
+              <input
+                id="fi-credit-score"
+                class="fi-control"
+                type="number" inputmode="decimal"
+                min="580"
+                max="850"
+                step="1"
+                value="720"
+              >
+            </div>
+            <div class="fi-slider-wrap">
+              <div class="fi-slider-track">
+                <div
+                  id="fi-credit-score-fill"
+                  class="fi-slider-fill"
+                ></div>
+                <div
+                  id="fi-credit-score-knob"
+                  class="fi-slider-knob"
+                ></div>
+                <input
+                  id="fi-credit-score-slider"
+                  class="fi-range"
+                  type="range"
+                  min="580"
+                  max="850"
+                  step="1"
+                  value="720"
+                  aria-label="Credit score"
+                >
+              </div>
+              <div class="fi-slider-scale">
+                <span>580</span>
+                <span>720</span>
+                <span>850</span>
+              </div>
+            </div>
+            <div class="fi-hint">
+              Used for PMI planning. Review your interest rate in Summary.
+            </div>
+          </div>
+          <div
+            class="fi-total-cost"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <div class="fi-total-cost-label">
+              Total Monthly Housing Cost
+            </div>
+            <div>
+              <span
+                id="fi-total-monthly-cost"
+                class="fi-total-cost-value"
+              >
+                —
+              </span>
+              <span class="fi-total-cost-period">
+                / month
+              </span>
+            </div>
+            <p class="fi-total-cost-caption">
+              Estimated principal, interest, property taxes, homeowners
+              insurance, HOA and applicable mortgage insurance. Other ownership costs are included when entered.
+            </p>
+            <div class="fi-total-cost-source">
+              <span
+                class="fi-total-cost-dot"
+                aria-hidden="true"
+              ></span>
+              <span id="fi-total-cost-source">
+                Calculating your scenario…
+              </span>
+            </div>
+          </div>
+          <div class="fi-field">
+            <label
+              class="fi-label"
+              for="fi-emergency-fund"
+            >
+              Emergency Fund
+              <span
+                class="fi-info"
+                aria-hidden="true"
+              >
+                i
+              </span>
+            </label>
+            <div class="fi-money-wrap">
+              <span class="fi-prefix">
+                $
+              </span>
+              <input
+                id="fi-emergency-fund"
+                class="fi-control"
+                type="number" inputmode="decimal"
+                min="0"
+                max="10000000"
+                step="0.01"
+                value="8500" placeholder="Optional — enter your reserve"
+              >
+            </div>
+            <div class="fi-slider-wrap">
+              <div class="fi-slider-track">
+                <div
+                  id="fi-emergency-fund-fill"
+                  class="fi-slider-fill"
+                ></div>
+                <div
+                  id="fi-emergency-fund-knob"
+                  class="fi-slider-knob"
+                ></div>
+                <input
+                  id="fi-emergency-fund-slider"
+                  class="fi-range"
+                  type="range"
+                  min="0"
+                  max="50000"
+                  step="500"
+                  value="0"
+                  aria-label="Emergency fund"
+                >
+              </div>
+              <div class="fi-slider-scale">
+                <span>$0</span>
+                <span>$25k</span>
+                <span>$50k</span>
+              </div>
+            </div>
+            <div class="fi-hint">
+              Cash expected to remain after the PCS, closing costs, down payment and move-in expenses.
+            </div>
+          </div>
+        </div>
+        <button id="fi-retry" type="button" hidden>Retry calculation</button>
+      </section>
+      <section class="fi-section mm-screen" id="fi-view-visualization" data-mm-screen="visualization" aria-labelledby="mm-viz-title" hidden>
+        <div class="mm-heading"><div><p class="fi-section-title">Your mortgage at a glance</p><h2 id="mm-viz-title" tabindex="-1">Mortgage Visualization</h2></div><button type="button" data-mm-view="calculator">← Calculator</button></div>
+        <p class="mm-status" data-mm-status role="status"></p>
+        <div class="mm-viz-grid" data-mm-result hidden>
+          <article class="mm-card"><h3>Your monthly housing cost</h3><p class="fi-detail-note">See what makes up your monthly estimate.</p>
+            <div class="mm-donut-layout"><div class="mm-donut" id="mm-donut" role="img"><div class="mm-donut-center" aria-live="polite"><span id="mm-donut-label">Total / month</span><strong id="mm-donut-total">—</strong><small id="mm-donut-share"></small></div></div><div id="mm-legend" class="mm-legend" aria-label="Monthly cost components"></div></div>
+            <p class="mm-chart-hint">Select a cost to see its share. Select it again to see the total.</p>
+          </article>
+          <article class="mm-card"><h3>Principal &amp; interest over time</h3><p id="mm-term-description" class="fi-detail-note"></p>
+            <div id="mm-term-ready" hidden><div class="mm-term-total"><span>Total scheduled loan payments</span><strong id="mm-term-total">—</strong></div><div id="mm-term-bar" class="mm-stack" role="img"></div><div class="mm-term-legend"><div><span><i class="mm-dot mm-principal"></i>Principal</span><strong id="mm-principal">—</strong></div><div><span><i class="mm-dot mm-interest"></i>Interest</span><strong id="mm-interest">—</strong></div></div></div>
+            <p id="mm-term-unavailable" class="fi-detail-note" hidden>Loan-term totals are not available from this calculation service yet. Your monthly breakdown is available.</p>
+            <p class="mm-chart-hint">Fixed-rate illustration with no extra payments. Excludes taxes, insurance, HOA and upfront cash.</p>
+            <div class="mm-small-total"><span>Down payment + cash loan fee</span><strong id="mm-upfront">—</strong></div><p class="mm-chart-hint" id="mm-upfront-exclusions"></p>
+          </article>
+        </div>
+      </section>
+      <section class="fi-section mm-screen" id="fi-view-summary" data-mm-screen="summary" aria-labelledby="mm-summary-title" hidden>
+        <div class="mm-heading"><div><p class="fi-section-title">Your mortgage, explained</p><h2 id="mm-summary-title" tabindex="-1">Mortgage Summary</h2></div><button type="button" data-mm-view="calculator">← Calculator</button></div>
+        <p class="mm-status" data-mm-status role="status"></p>
+        <div data-mm-result hidden>
+          <div class="mm-summary-hero"><div><p class="fi-section-title">Estimated monthly housing cost</p><strong class="mm-total" id="mm-summary-total">—</strong><span class="mm-per"> / month</span></div><p id="mm-summary-explanation"></p></div>
+          <div class="mm-kpis"><div><span>Home price</span><strong id="mm-summary-price">—</strong></div><div><span>Total loan amount</span><strong id="mm-summary-loan">—</strong></div><div><span>Emergency fund after closing</span><strong id="mm-summary-reserve">—</strong></div></div>
+          <p id="mm-summary-fee" class="fi-detail-note"></p>
+        </div>
+        <p id="fi-assumptions-summary" class="fi-estimate-summary">Example scenario: 6.10% fixed interest, 30 years, $3,125 annual tax, $1,125 annual insurance, $0 HOA. VA first use with financed fee. Edit these assumptions below.</p>
+        <details class="fi-details" id="fi-breakdown-details" open>
+          <summary>What’s included in this estimate</summary>
+          <div id="fi-result-details" hidden>
+            <div class="fi-breakdown">
+              <dl id="fi-monthly-breakdown"></dl>
+              <div><dl id="fi-loan-breakdown"></dl><p id="fi-upfront-note" class="fi-detail-note"></p></div>
+            </div>
+            <p id="fi-mi-note" class="fi-detail-note"></p>
+            <p id="fi-program-note" class="fi-detail-note"></p>
+            <p class="fi-detail-note">Fixed-rate purchase estimate. Tax and insurance amounts stay at the annual amounts you entered when you change home price. Adjust them for each property.</p>
+          </div>
+          <p id="fi-breakdown-status" class="fi-detail-note">Your breakdown will appear after calculation.</p>
+        </details>
+        <details class="fi-details" id="fi-cost-details">
+          <summary>Rate &amp; cost details</summary>
+          <p class="fi-detail-note">Use your lender’s interest rate and property-specific costs when available. Starting amounts are editable planning assumptions, not quotes.</p>
+          <div class="fi-details-grid">
+            <div><label class="fi-label" for="fi-interest-rate">Interest rate (%)</label><input class="fi-control" id="fi-interest-rate" type="number" min="0" max="30" step="0.0001" value="6.10"><p class="fi-hint">Note rate used for payments; APR includes fees.</p></div>
+            <div><label class="fi-label" for="fi-term-years">Loan term</label><select class="fi-control" id="fi-term-years"><option value="30">30 years</option><option value="25">25 years</option><option value="20">20 years</option><option value="15">15 years</option><option value="10">10 years</option></select></div>
+            <div><label class="fi-label" for="fi-property-tax">Property taxes / year ($)</label><input class="fi-control" id="fi-property-tax" type="number" min="0" max="1000000" step="0.01" value="3125"><p class="fi-hint">Use expected taxes after purchase and any confirmed exemption.</p></div>
+            <div><label class="fi-label" for="fi-insurance">Homeowners insurance / year ($)</label><input class="fi-control" id="fi-insurance" type="number" min="0" max="1000000" step="0.01" value="1125"></div>
+            <div><label class="fi-label" for="fi-hoa">HOA / month ($)</label><input class="fi-control" id="fi-hoa" type="number" min="0" max="100000" step="0.01" value="0"></div>
+            <div><label class="fi-label" for="fi-other-costs">Other ownership costs / month ($)</label><input class="fi-control" id="fi-other-costs" type="number" min="0" max="100000" step="0.01" value="0"><p class="fi-hint">Maintenance, utilities, flood insurance or assessments not already included.</p></div>
+            <div id="fi-va-options"><label class="fi-label" for="fi-va-fee-status">VA funding fee status</label><select class="fi-control" id="fi-va-fee-status"><option value="first">First use — fee applies</option><option value="subsequent">Subsequent use — fee applies</option><option value="exempt">Exempt — confirmed with lender</option></select></div>
+            <div id="fi-fee-options"><label class="fi-label" for="fi-fee-payment">Upfront loan fee</label><select class="fi-control" id="fi-fee-payment"><option value="finance">Finance in the loan</option><option value="cash">Pay at closing</option></select><p class="fi-hint">VA funding fee or FHA upfront MIP.</p></div>
+            <div id="fi-pmi-options" hidden><label class="fi-label" for="fi-pmi">Quoted PMI / month ($)</label><input class="fi-control" id="fi-pmi" type="number" min="0" max="100000" step="0.01" placeholder="Optional — use planning estimate"><p class="fi-hint">Leave blank for an estimate; enter 0 only for confirmed no PMI.</p></div>
+          </div>
+        </details>
+        <p class="fi-footer-note">Planning estimate, not a loan approval or lender quote. Confirm costs, eligibility and fees with your lender. <a href="https://www.va.gov/housing-assistance/home-loans/funding-fee-and-closing-costs/" target="_blank" rel="noopener">VA fee rules</a> · <a href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf" target="_blank" rel="noopener">FHA MIP rules</a></p>
+      </section>
+    </div>
+  </div>
+</main>
+<script src="/Military-Mortgage/app.js" defer></script>
+<script src="/Military-Mortgage/views.js" defer></script>
+<!-- PCSUnited Military Mortgage: Embed 2. Place on the same Webflow page as Embed 1. -->
+<style>.pcsu-mm-controls { box-sizing:border-box; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; padding:18px 12px; font-family:Barlow,system-ui,sans-serif; }
+.pcsu-mm-controls * { box-sizing:border-box; }
+.pcsu-mm-controls button { min-height:44px; padding:12px 22px; border:1px solid #a78d56; border-radius:12px; background:#18222c; color:#f3efe7; font:700 15px/1.2 Barlow,system-ui,sans-serif; cursor:pointer; }
+.pcsu-mm-controls button[aria-pressed="true"] { color:#171c20; background:#efd17d; border-color:#efd17d; }
+.pcsu-mm-controls button:hover:not(:disabled) { box-shadow:0 0 0 2px #d8b87a55; }
+.pcsu-mm-controls button:focus-visible { outline:3px solid #73d4ba; outline-offset:4px; }
+.pcsu-mm-controls button:disabled { opacity:.55; cursor:wait; }
+.pcsu-mm-controls [data-mm-controls-status] { width:100%; margin:4px 0 0; text-align:center; color:#8e846f; font-size:13px; }
+.pcsu-mm-controls [hidden] { display:none!important; }
+@media(max-width:440px) { .pcsu-mm-controls { gap:7px; padding:14px 4px; } .pcsu-mm-controls button { padding:12px 13px; font-size:13px; flex:1 1 auto; } }
+</style>
+<nav class="pcsu-mm-controls" data-mortgage-controls aria-label="Mortgage views">
+  <button type="button" data-mm-select="calculator" aria-pressed="true" aria-controls="pcsu-mortgage-frame">Calculator</button>
+  <button type="button" data-mm-select="visualization" aria-pressed="false" aria-controls="pcsu-mortgage-frame">Visualization</button>
+  <button type="button" data-mm-select="summary" aria-pressed="false" aria-controls="pcsu-mortgage-frame">Summary</button>
+  <p data-mm-controls-status role="status">Loading calculator…</p>
+</nav>
+<script>/* Separate Webflow controls; supports a same-page calculator or the hosted iframe. */
+(() => {
+  'use strict';
+  const standalone = document.getElementById('mm-standalone-controls');
+  if (standalone && !standalone.children.length) standalone.innerHTML = `<nav class="pcsu-mm-controls" data-mortgage-controls aria-label="Mortgage views"><button type="button" data-mm-select="calculator" aria-pressed="true">Calculator</button><button type="button" data-mm-select="visualization" aria-pressed="false">Visualization</button><button type="button" data-mm-select="summary" aria-pressed="false">Summary</button><p data-mm-controls-status role="status">Loading calculator…</p></nav>`;
+  document.querySelectorAll('[data-mortgage-controls]').forEach(nav => {
+    if (nav.dataset.initialized) return;
+    nav.dataset.initialized = 'true';
+    const buttons = [...nav.querySelectorAll('[data-mm-select]')];
+    const status = nav.querySelector('[data-mm-controls-status]');
+    let frame = null, origin = null, available = false;
+    function sync(view) {
+      available = true;
+      buttons.forEach(b => { b.disabled = false; b.setAttribute('aria-pressed', String(b.dataset.mmSelect === view)); });
+      if (status) status.hidden = true;
+    }
+    function connect() {
+      const direct = window.PCSUnitedMortgageViews;
+      if (!nav.dataset.targetFrame && direct) { sync(direct.getView()); return; }
+      frame = document.getElementById(nav.dataset.targetFrame || 'pcsu-mortgage-frame');
+      if (!frame || frame.tagName !== 'IFRAME') return;
+      try { origin = new URL(frame.src, location.href).origin; } catch (_) { return; }
+      frame.contentWindow?.postMessage({source:'pcsunited-mortgage-controls',type:'get-state'}, origin);
+      if (!frame.dataset.mmControlsBound) {
+        frame.dataset.mmControlsBound = 'true';
+        frame.addEventListener('load', () => {
+          available = false; buttons.forEach(b => { b.disabled = true; });
+          if (status) { status.hidden = false; status.textContent = 'Loading calculator…'; }
+          connect();
+        });
+      }
+    }
+    buttons.forEach(button => {
+      button.disabled = true;
+      button.addEventListener('click', () => {
+        if (!available) return;
+        const view = button.dataset.mmSelect;
+        if (!nav.dataset.targetFrame && window.PCSUnitedMortgageViews) window.PCSUnitedMortgageViews.setView(view);
+        else if (frame && origin) {
+          frame.contentWindow?.postMessage({source:'pcsunited-mortgage-controls', type:'set-view',view},origin);
+          frame.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',block:'start'});
+        }
+      });
+    });
+    window.addEventListener('message', e => {
+      if (!frame || e.source !== frame.contentWindow || e.origin !== origin || e.data?.source !== 'pcsunited-military-mortgage' || e.data?.type !== 'view-state') return;
+      if (!['calculator','visualization','summary'].includes(e.data.view)) return;
+      sync(e.data.view);
+      const h = e.data.height;
+      if (typeof h === 'number' && Number.isFinite(h) && h > 0 && h <= 12000) frame.style.height = `${Math.max(300,Math.ceil(h))}px`;
+    });
+    window.addEventListener('pcsunited:mortgage-views-ready', connect);
+    window.addEventListener('pcsunited:mortgage-view-changed', e => {
+      if (!nav.dataset.targetFrame && window.PCSUnitedMortgageViews) sync(e.detail.view);
+    });
+    // Either embed can appear first in the document.
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', connect, {once:true});
+    connect();
+  });
+})();
+</script>
+</body></html>
