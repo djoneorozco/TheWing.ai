@@ -1,7 +1,7 @@
 // netlify/functions/mortgage.js
 // ============================================================
 // TheWing.ai • Mortgage API Handler
-// v1.3.0
+// v1.5.0
 //
 // ROUTES
 // - /.netlify/functions/mortgage
@@ -19,8 +19,10 @@ import {
   RATE_VERSION as OFFICIAL_VA_RATE_VERSION
 } from "./_share/official-va.js";
 
+import { calculateMilitaryMortgage, MILITARY_MORTGAGE_CONTRACT } from "./_share/military-mortgage.js";
+
 const APP_NAME = "TheWing.ai";
-const HANDLER_VERSION = "thewing-mortgage-handler-1.4.0";
+const HANDLER_VERSION = "thewing-mortgage-handler-1.5.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,7 +30,8 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Max-Age": "86400",
   "Vary": "Origin",
-  "Content-Type": "application/json; charset=utf-8"
+  "Content-Type": "application/json; charset=utf-8",
+  "Cache-Control": "no-store"
 };
 
 function json(statusCode, body) {
@@ -97,6 +100,9 @@ export async function handler(event) {
   }
 
   try {
+    if (body?.contract === MILITARY_MORTGAGE_CONTRACT) {
+      return json(200, calculateMilitaryMortgage(body));
+    }
     const enriched = calculateMortgageScenario(body);
 
     return json(200, {
@@ -105,11 +111,12 @@ export async function handler(event) {
       ...enriched
     });
   } catch (err) {
-    return json(err.statusCode || 500, {
+    return json(err.code === "INVALID_INPUT" ? 400 : err.statusCode || 500, {
       ok: false,
       app: APP_NAME,
       engineVersion: ENGINE_VERSION,
-      error: err?.message || "Unexpected mortgage calculation error."
+      error: err.code === "INVALID_INPUT" || err.statusCode === 400 ? err.message : "Mortgage calculation unavailable. Please try again.",
+      field: err.code === "INVALID_INPUT" ? err.field : undefined
     });
   }
 }
