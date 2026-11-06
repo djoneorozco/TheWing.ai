@@ -14,15 +14,17 @@
 
   function sendState(force = false) {
     forceState = forceState || force;
-    cancelAnimationFrame(sizeFrame);
-    sizeFrame = requestAnimationFrame(() => {
+    // Cross-origin iframes below the fold can have animation frames suspended.
+    // Readiness must reach external controls before the user scrolls to the frame.
+    clearTimeout(sizeFrame);
+    sizeFrame = setTimeout(() => {
       const height = Math.ceil(document.body.getBoundingClientRect().height);
       if (parentOrigin && (forceState || height !== lastHeight)) {
         window.parent.postMessage({source:'pcsunited-military-mortgage', type:'view-state', view,
           height, ready:true}, parentOrigin);
       }
       lastHeight = height; forceState = false;
-    });
+    }, 0);
   }
   function setView(next, focus = true) {
     if (!views.includes(next)) return false;

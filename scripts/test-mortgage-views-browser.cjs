@@ -103,7 +103,7 @@ fs.mkdirSync(screenshots,{recursive:true});
   check(await inline.evaluate(()=>window.submitCount===0),'Controls never submit Webflow form');
   // Serve the parent from a different local port: a real cross-origin document,
   // not an intercepted document (Chrome treats those as public-network sources).
-  const hostHTML=fs.readFileSync(path.join(__dirname,'../Military-Mortgage/embed-preview.html'),'utf8').replace('src="/Military-Mortgage/','src="'+base+'/Military-Mortgage/');
+  const hostHTML=fs.readFileSync(path.join(__dirname,'../Military-Mortgage/embed-preview.html'),'utf8').replace('src="/Military-Mortgage/','src="'+base+'/Military-Mortgage/').replace('<body>','<body><div style="height:2200px" aria-hidden="true"></div>');
   hostServer=http.createServer((req,res)=>{res.writeHead(200,{'Content-Type':'text/html'});res.end(hostHTML);});
   await new Promise(resolve=>hostServer.listen(0,'127.0.0.1',resolve));
   const host=await browser.newPage({viewport:{width:1180,height:900}});host.on('pageerror',e=>errors.push(e.message));
@@ -111,6 +111,7 @@ fs.mkdirSync(screenshots,{recursive:true});
   const frame=host.frameLocator('#pcsu-mortgage-frame');
   await host.getByRole('button',{name:'Visualization',exact:true}).waitFor();
   await host.waitForFunction(()=>!document.querySelector('[data-mm-select="visualization"]').disabled);
+  check(await host.locator('#pcsu-mortgage-frame').evaluate(e=>e.getBoundingClientRect().top>innerHeight),'Controls become ready while the cross-origin iframe is below the fold');
   await host.getByRole('button',{name:'Visualization',exact:true}).click();
   await frame.locator('#fi-view-visualization:not([hidden])').waitFor();checks++;
   check(await frame.locator('#mm-standalone-controls').isHidden(),'No duplicate iframe controls');

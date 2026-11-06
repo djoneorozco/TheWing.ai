@@ -1309,13 +1309,14 @@
     }
     buttons.forEach(button => {
       button.disabled = true;
-      button.addEventListener('click', () => {
+      button.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
         if (!available) return;
         const view = button.dataset.mmSelect;
         if (!nav.dataset.targetFrame && window.PCSUnitedMortgageViews) window.PCSUnitedMortgageViews.setView(view);
         else if (frame && origin) {
           frame.contentWindow?.postMessage({source:'pcsunited-mortgage-controls', type:'set-view',view},origin);
-          frame.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',block:'start'});
         }
       });
     });
