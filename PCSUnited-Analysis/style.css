@@ -208,7 +208,7 @@ a {
   padding:
     18px
     25px
-    90px;
+    18px;
 }
 
 .analysis-main {
@@ -793,7 +793,7 @@ a {
 
 .analysis-content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 384px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 26.5%);
   gap: 18px;
   align-items: start;
 }
@@ -801,7 +801,7 @@ a {
 .analysis-content-grid__main {
   min-width: 0;
   display: grid;
-  grid-template-columns: 43% minmax(0, 57%);
+  grid-template-columns: minmax(0, 43fr) minmax(0, 57fr);
   gap: 18px;
 }
 
@@ -809,10 +809,11 @@ a {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .analysis-card {
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: 15px;
   background: rgba(255, 255, 255, 0.94);
@@ -860,15 +861,16 @@ a {
 
 .payment-breakdown-card__body {
   display: grid;
-  grid-template-columns: 195px minmax(0, 1fr);
+  grid-template-columns: minmax(110px, 0.9fr) minmax(0, 1.1fr);
   gap: 17px;
   align-items: center;
   padding: 8px 20px 17px;
 }
 
 .payment-donut {
-  width: 188px;
-  height: 188px;
+  width: min(100%, 188px);
+  aspect-ratio: 1;
+  container-type: inline-size;
   position: relative;
   margin: 0 auto;
 }
@@ -923,7 +925,7 @@ a {
 
 .payment-donut__value {
   color: var(--text-primary);
-  font-size: 1.6rem;
+  font-size: clamp(1.05rem, 14cqi, 1.6rem);
   font-weight: 750;
   letter-spacing: -0.045em;
 }
@@ -931,7 +933,7 @@ a {
 .payment-donut__label {
   margin-top: 4px;
   color: var(--text-secondary);
-  font-size: 0.72rem;
+  font-size: clamp(0.55rem, 7cqi, 0.72rem);
 }
 
 .payment-breakdown-list {
@@ -1050,8 +1052,8 @@ a {
   height: 236px;
   position: relative;
   display: grid;
-  grid-template-columns: repeat(6, minmax(60px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(5px, 0.8vw, 12px);
   align-items: end;
   padding: 5px 16px 9px;
 }
@@ -1441,14 +1443,15 @@ a {
 
 .affordability-gauge {
   width: 100%;
-  height: 184px;
-  position: relative;
+  padding: 0 18px 10px;
   margin-top: 7px;
 }
 
 .affordability-gauge__svg {
-  width: 100%;
-  height: 100%;
+  display: block;
+  width: min(100%, 300px);
+  height: auto;
+  margin: 0 auto;
 }
 
 .affordability-gauge__segment {
@@ -1481,17 +1484,12 @@ a {
   stroke: var(--purple);
   stroke-width: 7;
   stroke-linecap: round;
-  transform-origin: 160px 150px;
 }
 
 .affordability-gauge__value {
-  position: absolute;
-  left: 50%;
-  bottom: 3px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transform: translateX(-50%);
 }
 
 .affordability-gauge__value strong {
@@ -1518,6 +1516,16 @@ a {
   background: #eaf7ed;
   font-size: 0.66rem;
   text-align: center;
+}
+
+.affordability-result-card__status--warning {
+  color: #975600;
+  background: #fff3dd;
+}
+
+.affordability-result-card__status--danger {
+  color: #b4233b;
+  background: #ffedf0;
 }
 
 
@@ -2035,8 +2043,20 @@ a {
     padding-right: 28px;
   }
 
-  .analysis-content-grid {
-    grid-template-columns: minmax(0, 1fr) 392px;
+}
+
+/* Share row tracks so the three top cards and the lower cards line up. */
+@media (min-width: 1101px) {
+  .analysis-content-grid__main {
+    grid-row: 1 / span 2;
+    grid-template-rows: subgrid;
+  }
+
+  .analysis-content-grid__sidebar {
+    display: grid;
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    grid-template-rows: subgrid;
   }
 }
 
@@ -2065,10 +2085,6 @@ a {
     width: 91px;
   }
 
-  .analysis-content-grid {
-    grid-template-columns: minmax(0, 1fr) 345px;
-  }
-
   .affordability-hero {
     grid-template-columns:
       205px
@@ -2082,15 +2098,6 @@ a {
   .hero-metric {
     padding-left: 14px;
     padding-right: 14px;
-  }
-
-  .payment-breakdown-card__body {
-    grid-template-columns: 170px minmax(0, 1fr);
-  }
-
-  .payment-donut {
-    width: 165px;
-    height: 165px;
   }
 
   .analysis-progress__connector {
@@ -2219,7 +2226,7 @@ a {
     padding:
       12px
       11px
-      92px;
+      12px;
   }
 
   .analysis-header {
