@@ -1,4 +1,4 @@
-/* PCSUnited Military Mortgage v1.0.0 — thin client; TheWing backend calculates. */
+/* PCSUnited Military Mortgage v1.1.0 — thin client; TheWing backend calculates. */
 (() => {
   'use strict';
   const root = document.getElementById('pcsu-financial-input-panel');
@@ -7,6 +7,7 @@
   const CONTRACT = 'military-mortgage-v1';
   const $ = id => root.querySelector(`#${id}`);
   const money = value => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+  const headlineMoney = value => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
   const clone = value => JSON.parse(JSON.stringify(value));
   const fields = {
     homePrice: 'fi-home-price', downPayment: 'fi-down-payment', creditScore: 'fi-credit-score',
@@ -32,7 +33,8 @@
   function showState(state, message) {
     root.dataset.state = state;
     $('fi-total-cost-source').textContent = message;
-    $('fi-total-monthly-cost').textContent = state === 'ready' ? money(result.monthly.totalHousing) : '—';
+    $('fi-total-monthly-cost').textContent = state === 'ready' ? headlineMoney(result.monthly.totalHousing) : '—';
+    $('fi-total-monthly-cost').title = state === 'ready' ? `${money(result.monthly.totalHousing)} / month; rounded here to the nearest dollar.` : '';
     $('fi-result-details').hidden = state !== 'ready';
     $('fi-breakdown-status').hidden = state === 'ready';
     $('fi-breakdown-status').textContent = message;
@@ -41,7 +43,10 @@
   function markInvalid(element, message) {
     element.setAttribute('aria-invalid', 'true');
     element.setAttribute('aria-describedby', 'fi-total-cost-source');
-    if (element.closest('details')) $('fi-cost-details').open = true;
+    if (element.closest('details')) {
+      $('fi-cost-details').open = true;
+      window.dispatchEvent(new CustomEvent('pcsunited:mortgage-view-request', { detail: { view: 'summary', focus: false } }));
+    }
     showState('invalid', message);
   }
   function validate() {
@@ -93,7 +98,7 @@
     $('fi-va-options').hidden = data.loanType !== 'VA';
     $('fi-fee-options').hidden = data.loanType === 'CONVENTIONAL' || (data.loanType === 'VA' && data.vaFeeStatus === 'exempt');
     $('fi-pmi-options').hidden = data.loanType !== 'CONVENTIONAL';
-    $('fi-rate-label').textContent = data.interestRate === null ? 'Set interest rate below' : `Rate: ${data.interestRate}%`;
+    $('fi-rate-label').textContent = data.interestRate === null ? 'Set rate in Summary' : `Planning rate: ${data.interestRate.toFixed(2)}%`;
     const text = value => value === null ? 'not entered' : money(value);
     const fee = data.loanType === 'VA'
       ? `VA ${data.vaFeeStatus === 'exempt' ? 'fee exemption selected' : `${data.vaFeeStatus === 'first' ? 'first' : 'subsequent'} use; fee ${data.feePayment === 'finance' ? 'financed' : 'paid at closing'}`}`
@@ -104,7 +109,7 @@
     const reserve = readNumber($('fi-emergency-fund'));
     const validReserve = reserve !== null && $('fi-emergency-fund').checkValidity() ? reserve : null;
     return {
-      source: 'PCSUnited-Military-Mortgage', version: '1.0.0', status: root.dataset.state,
+      source: 'PCSUnited-Military-Mortgage', version: '1.1.0', status: root.dataset.state,
       ready: root.dataset.state === 'ready', revision, ...clone(currentInput || capture()),
       totalMonthlyHousingCost: result?.monthly.totalHousing ?? null,
       mortgagePayment: result?.monthly.mortgagePayment ?? null,
@@ -145,7 +150,7 @@
     $('fi-upfront-note').textContent = result.upfront.excludes;
     $('fi-mi-note').textContent = result.mortgageInsurance.note;
     $('fi-program-note').textContent = result.notes.join(' ');
-    showState('ready', 'Calculated with TheWing mortgage engine · includes scenario assumptions');
+    showState('ready', `${touched ? 'TheWing estimate' : 'Example estimate'} · includes assumed costs & loan fees`);
     emit();
   }
   function validResponse(data, input) {
@@ -245,7 +250,7 @@
     touched = true; homeTouched = true; refresh(true);
   }
   // Existing hosts can consume events and this in-memory API. No financial data is persisted.
-  const api = Object.freeze({ version: '1.0.0', getInputs: handoff, setInputs,
+  const api = Object.freeze({ version: '1.1.0', getInputs: handoff, setInputs,
     refresh: () => refresh(true), refreshAndEmit: () => refresh(true), refreshMortgageEstimate: () => refresh(true),
     getBasicBrain: () => basicBrain ? clone(basicBrain) : null,
     getComp: () => comp ? clone(comp) : null, getMarketIntent: () => market ? clone(market) : null,
