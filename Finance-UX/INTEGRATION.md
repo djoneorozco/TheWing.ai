@@ -26,3 +26,23 @@ The legacy affordability score engine remains unchanged; its 28/30/35 intake-bas
 Run `node --test scripts/test-finance-utility.mjs`. No package-level test/lint/build scripts are defined in this repository. The regression comparison also checked 16 VA/conventional mortgage scenarios (zero/6.65% interest and four down payments) against the previous mortgage handler with identical monetary results.
 
 Financial amounts are held in page memory only and POSTed to TheWing for calculation. The old localStorage budget is not loaded or silently treated as confirmed data. No Supabase, account, LLM, new dependency, or financial analytics is introduced.
+
+## Financial Guidance: Section 01 → 02 → 03
+
+Install `Webflow/financial-guidance-budget.html` in the Section 03 Finance-UX embed.
+Its `housing=projected` URL opts this page into the mortgage workflow; other consumers retain the original categories.
+The host reads `PCSU_FINANCIAL_INCOME.getSnapshot()` and subscribes to `pcsu:financial-income-change`.
+Gross, net, monthly savings and income sources transfer as numbers over the existing version-1 context protocol. Capital reserves are not monthly income and are not imported as an after-closing emergency fund.
+
+`Military-Mortgage/budget-bridge.js` sends the current calculator snapshot to the allowlisted parent on change and on a `pcsu:mortgage-budget-request` handshake.
+The host accepts only the actual mortgage iframe, the TheWing origin, a nonstale revision, and a ready `military-mortgage-v1` result.
+The amount is `mortgageEstimate.monthly.totalHousing` with exact cents, not the rounded headline or principal and interest alone. Loading, invalid, failed and reloaded calculators clear linked mortgage totals.
+
+In projected mode, Mortgage replaces Groceries in Monthly Expenses. Groceries remains available under Other.
+The former Debt mortgage row becomes Other property mortgage; it starts at zero and represents a separate continuing obligation. Rent is labeled Continuing rent.
+The imported Mortgage counts once as a housing expense. A manual slider/number edit stays in place across income or calculator changes; Options → Use Section 02 estimate reconnects it.
+
+When net income is unknown, the separate backend metric `beforeDeductionsRemaining` shows gross income less entered costs and savings, explicitly labeled before payroll deductions.
+It never fills `cashFlow`, take-home income, or a housing recommendation. Once payroll deductions are supplied in Section 01, the display uses the existing cash-flow result. Other costs are still based on entered amounts, not assumed complete.
+
+Verification: `node --test scripts/test-finance-utility.mjs scripts/test-finance-mortgage-bridge.mjs scripts/test-military-mortgage.mjs scripts/test-tor-amy.mjs`.

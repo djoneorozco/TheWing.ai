@@ -1836,3 +1836,15 @@ p {
   .finance-compact .info-button { width:44px; height:44px; }
   .budget-details-body .finance-inputs { grid-template-columns:1fr; }
 }
+
+/* Projected mortgage uses the existing row and responsive slider layout. */
+.finance-mortgage-note{grid-column:1/-1;display:block;color:var(--pcsu-text-secondary);font-size:11px;line-height:1.4;white-space:normal}
+.expense-row[data-id="projected-mortgage"] .expense-row__identity{display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px;align-items:center}
+#fu-income-sources>div{display:flex;justify-content:space-between;gap:12px;margin-top:8px;font-size:12px}
+#fu-income-sources b{white-space:nowrap}
+.finance-row-options [data-relink]{border:1px solid var(--pcsu-text-muted);border-radius:8px;padding:8px 12px;background:transparent;color:var(--pcsu-text-primary);cursor:pointer}
+.finance-row-options [data-relink]:disabled{opacity:.5;cursor:default}
+/* Webflow's padded mobile container can make the iframe narrower than 320px. */
+body.finance-compact,.finance-compact .budget-app{min-width:0}
+body[data-housing="projected"] .cash-flow-summary__label{display:block;font-size:11px;line-height:1.4;margin-top:6px;color:var(--pcsu-text-secondary)}
+@media(max-width:600px){.finance-compact .expense-amount-input input{max-width:100%;min-width:0}.finance-compact .expense-row__identity{min-width:0}}
