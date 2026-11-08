@@ -1,0 +1,31 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import fs from 'node:fs';
+const origin='https://pcs-united-com.webflow.io';
+test('mortgage transport accepts only its trusted parent and returns current state',()=>{
+ const listeners={},sent=[],parent={postMessage:(data,target)=>sent.push({data,target})};
+ let snapshot={revision:1,status:'ready',ready:true,totalMonthlyHousingCost:1901.73};
+ const window={parent,PCSUnitedMilitaryMortgage:{getInputs:()=>snapshot},addEventListener:(name,fn)=>listeners[name]=fn};
+ vm.runInNewContext(fs.readFileSync(new URL('../Military-Mortgage/budget-bridge.js',import.meta.url),'utf8'),{window,parent,document:{referrer:origin+'/financial-guidance'},location:{hostname:'thewing.netlify.app'},URL});
+ assert.equal(sent.length,1);assert.equal(sent[0].target,origin);
+ const data={source:'pcsu-finance-host',version:1,type:'pcsu:mortgage-budget-request'};
+ listeners.message({source:parent,origin:'https://evil.example',data});listeners.message({source:{},origin,data});assert.equal(sent.length,1);
+ snapshot={revision:2,status:'loading',ready:false};listeners['pcsunited:financial-input-updated']();assert.equal(sent.at(-1).data.snapshot.ready,false);
+ listeners.message({source:parent,origin,data});assert.equal(sent.length,3);
+});
+test('host rejects other frames, stale mortgage results and noncontract results',()=>{
+ const listeners={},sent=[],mortgageWindow={postMessage(){}},budgetWindow={postMessage:data=>sent.push(data)};
+ const elements={'pcsu-budget-frame':{dataset:{},contentWindow:budgetWindow,addEventListener(){}},'pcsu-mortgage-frame':{contentWindow:mortgageWindow,addEventListener(){}}};
+ const window={addEventListener:(name,fn)=>listeners[name]=fn,PCSU_FINANCIAL_INCOME:{getSnapshot:()=>({complete:true,grossMonthlyIncome:8000,netMonthlyIncome:null,monthlySavingsContributions:0,sources:[]})}};
+ const document={getElementById:id=>elements[id],readyState:'complete'};
+ const code=fs.readFileSync(new URL('../Webflow/financial-guidance-budget.html',import.meta.url),'utf8').split('<script>')[1].split('</script>')[0];vm.runInNewContext(code,{window,document,Number,Array,Object});
+ const snapshot={revision:2,ready:true,status:'ready',mortgageEstimate:{ok:true,contract:'military-mortgage-v1',monthly:{totalHousing:1901.73}}};
+ const data={source:'pcsu-mortgage-budget',version:1,type:'pcsu:mortgage-budget-state',snapshot};
+ const message={origin:'https://thewing.netlify.app',source:mortgageWindow,data};
+ const before=sent.length;listeners.message({...message,source:{}});listeners.message({...message,origin:'https://evil.example'});assert.equal(sent.length,before);
+ listeners.message(message);assert.equal(sent.at(-1).mortgage.amount,1901.73);
+ listeners.message({...message,data:{...data,snapshot:{...snapshot,revision:1}}});assert.equal(sent.length,before+1);
+ listeners.message({...message,data:{...data,snapshot:{revision:3,ready:false,status:'loading'}}});assert.equal(sent.at(-1).mortgage.amount,null);
+ listeners.message({...message,data:{...data,snapshot:{...snapshot,revision:4,mortgageEstimate:{ok:true,contract:'wrong',monthly:{totalHousing:1}}}}});assert.equal(sent.at(-1).mortgage.amount,null);
+});

@@ -1,0 +1,63 @@
+<!-- Section 03 / Finance-UX. Income and mortgage stay in memory on this page. -->
+<div style="width:100%;height:100vh;overflow:hidden;">
+  <iframe id="pcsu-budget-frame" src="https://thewing.netlify.app/Finance-UX/?housing=projected" title="Monthly Expenses and Debt | PCSUnited" referrerpolicy="origin" style="display:block;width:100%;height:100%;border:0;"></iframe>
+</div>
+<script>
+(() => {
+  'use strict';
+  function init() {
+    const frame = document.getElementById('pcsu-budget-frame');
+    const mortgageFrame = document.getElementById('pcsu-mortgage-frame');
+    if (!frame || frame.dataset.bridgeReady) return;
+    frame.dataset.bridgeReady = 'true';
+    const ORIGIN = 'https://thewing.netlify.app';
+    let revision = 0, mortgageRevision = -1, mortgage = {status:'loading',amount:null};
+    const amount = value => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1000000 ? value : null;
+    function send() {
+      const income = window.PCSU_FINANCIAL_INCOME?.getSnapshot?.();
+      const ready = income?.complete === true;
+      const base = document.getElementById('fi-base');
+      frame.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:finance-context',revision:++revision,
+        grossMonthly:ready ? amount(income.grossMonthlyIncome) : null,
+        netMonthly:ready ? amount(income.netMonthlyIncome) : null,
+        savingsMonthly:ready ? amount(income.monthlySavingsContributions) : null,
+        incomeSources:ready && Array.isArray(income.sources) ? income.sources.map(s => ({label:s.label,amount:amount(s.amount)})) : [],
+        location:ready && income.status === 'active' && base?.value ? base.selectedOptions[0].textContent : ready ? 'Your household' : 'Complete Section 01',
+        mortgage}, ORIGIN);
+    }
+    function requestMortgage() {
+      mortgageFrame?.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:mortgage-budget-request'},ORIGIN);
+    }
+    window.addEventListener('pcsu:financial-income-change', send);
+    window.addEventListener('message', event => {
+      if (event.origin !== ORIGIN || !event.data || typeof event.data !== 'object') return;
+      const d = event.data;
+      if (event.source === mortgageFrame?.contentWindow && d.source === 'pcsu-mortgage-budget' && d.version === 1 && d.type === 'pcsu:mortgage-budget-state') {
+        const s = d.snapshot;
+        if (s && (!Number.isInteger(s.revision) || s.revision < mortgageRevision)) return;
+        if (s) mortgageRevision = s.revision;
+        const estimate = s?.mortgageEstimate;
+        const total = amount(estimate?.monthly?.totalHousing);
+        const ready = s?.ready === true && s.status === 'ready' && estimate?.ok === true && estimate.contract === 'military-mortgage-v1' && total !== null;
+        mortgage = {status:ready ? 'ready' : 'unavailable',amount:ready ? total : null,example:s?.hasUserInteracted !== true};
+        send();
+      }
+      if (event.source !== frame.contentWindow || d.source !== 'pcsu-finance' || d.version !== 1) return;
+      if (d.type === 'pcsu:finance-ready') { send(); requestMortgage(); }
+      if (d.type === 'pcsu:finance-edit-income') {
+        window.PCSUFinancialUtility?.open?.();
+        document.getElementById('fi-entry-step')?.click();
+        if (d.focus === 'net') {
+          const options = document.getElementById('fi-options');
+          if (options) options.open = true;
+          document.getElementById('fi-deductions')?.focus();
+        }
+      }
+    });
+    frame.addEventListener('load', () => { send(); requestMortgage(); });
+    mortgageFrame?.addEventListener('load', () => { mortgageRevision = -1; mortgage = {status:'loading',amount:null}; send(); requestMortgage(); });
+    send(); requestMortgage();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
+})();
+</script>
