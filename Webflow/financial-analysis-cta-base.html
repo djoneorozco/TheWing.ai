@@ -1,0 +1,329 @@
+<!-- ============================================================
+  PCSUnited • Financial Analysis CTA
+  Full-Width Narrow Footer Button
+  Opens Destination Outside Embedded Frame
+=============================================================== -->
+
+<div id="pcsu-analysis-cta">
+  <a
+    id="pcsu-analysis-link"
+    class="pcsu-analysis-link"
+    href="https://pcs-united-com.webflow.io/financial-analysis"
+    target="_top"
+    rel="noopener"
+    aria-label="Open the PCSUnited Financial Analysis"
+  >
+    <span class="pcsu-analysis-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 19V11"></path>
+        <path d="M10 19V7"></path>
+        <path d="M15 19V13"></path>
+        <path d="M20 19V4"></path>
+      </svg>
+    </span>
+
+    <span class="pcsu-analysis-text">
+      Provide Financial Analysis
+    </span>
+
+    <span class="pcsu-analysis-arrow" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path d="M5 12h13"></path>
+        <path d="m14 7 5 5-5 5"></path>
+      </svg>
+    </span>
+  </a>
+</div>
+
+<style>
+  #pcsu-analysis-cta,
+  #pcsu-analysis-cta *,
+  #pcsu-analysis-cta *::before,
+  #pcsu-analysis-cta *::after {
+    box-sizing: border-box;
+  }
+
+  #pcsu-analysis-cta {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding: 6px 10px;
+
+    font-family:
+      Inter,
+      Barlow,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      Arial,
+      sans-serif;
+  }
+
+  #pcsu-analysis-cta .pcsu-analysis-link {
+    position: relative;
+    isolation: isolate;
+
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    overflow: hidden;
+
+    color: #f5f2e9;
+    text-decoration: none;
+    cursor: pointer;
+
+    background:
+      radial-gradient(
+        circle at 50% -80%,
+        rgba(222, 184, 87, 0.17),
+        transparent 60%
+      ),
+      linear-gradient(
+        180deg,
+        #202126 0%,
+        #141518 100%
+      );
+
+    border: 1px solid rgba(214, 175, 76, 0.42);
+    border-radius: 10px;
+
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.055),
+      0 7px 18px rgba(0, 0, 0, 0.25),
+      0 0 0 rgba(214, 175, 76, 0);
+
+    transition:
+      transform 220ms ease,
+      border-color 220ms ease,
+      box-shadow 220ms ease;
+  }
+
+  /* Restrained animated light sweep */
+  #pcsu-analysis-cta .pcsu-analysis-link::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+
+    top: -35px;
+    bottom: -35px;
+    left: -45%;
+    width: 28%;
+
+    pointer-events: none;
+
+    background:
+      linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 228, 159, 0.04),
+        rgba(255, 228, 159, 0.20),
+        rgba(255, 228, 159, 0.04),
+        transparent
+      );
+
+    opacity: 0;
+    transform: skewX(-20deg);
+
+    animation:
+      pcsu-analysis-sweep 5.5s ease-in-out infinite;
+  }
+
+  /* Interior depth */
+  #pcsu-analysis-cta .pcsu-analysis-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+    border-radius: inherit;
+
+    box-shadow:
+      inset 0 0 16px rgba(214, 175, 76, 0.025),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+  }
+
+  #pcsu-analysis-cta .pcsu-analysis-icon {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+
+    place-items: center;
+
+    color: #dfbb60;
+    background: rgba(214, 175, 76, 0.09);
+
+    border: 1px solid rgba(214, 175, 76, 0.25);
+    border-radius: 7px;
+
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  #pcsu-analysis-cta .pcsu-analysis-icon svg,
+  #pcsu-analysis-cta .pcsu-analysis-arrow svg {
+    width: 14px;
+    height: 14px;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  #pcsu-analysis-cta .pcsu-analysis-text {
+    overflow: hidden;
+
+    color: #f5f2e9;
+
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.02em;
+
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #pcsu-analysis-cta .pcsu-analysis-arrow {
+    display: grid;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+
+    place-items: center;
+
+    color: rgba(223, 187, 96, 0.9);
+
+    transition:
+      transform 220ms ease;
+  }
+
+  #pcsu-analysis-cta .pcsu-analysis-link:hover {
+    transform: translateY(-1px);
+
+    border-color: rgba(229, 194, 105, 0.72);
+
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      0 9px 22px rgba(0, 0, 0, 0.30),
+      0 0 20px rgba(214, 175, 76, 0.11);
+  }
+
+  #pcsu-analysis-cta
+    .pcsu-analysis-link:hover
+    .pcsu-analysis-arrow {
+    transform: translateX(3px);
+  }
+
+  #pcsu-analysis-cta .pcsu-analysis-link:active {
+    transform: translateY(0) scale(0.995);
+  }
+
+  #pcsu-analysis-cta .pcsu-analysis-link:focus-visible {
+    outline: 2px solid rgba(229, 194, 105, 0.92);
+    outline-offset: 2px;
+  }
+
+  @keyframes pcsu-analysis-sweep {
+    0%,
+    18% {
+      left: -45%;
+      opacity: 0;
+    }
+
+    30% {
+      opacity: 0.65;
+    }
+
+    58%,
+    100% {
+      left: 120%;
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #pcsu-analysis-cta {
+      padding: 5px 7px;
+    }
+
+    #pcsu-analysis-cta .pcsu-analysis-link {
+      height: 42px;
+      gap: 8px;
+    }
+
+    #pcsu-analysis-cta .pcsu-analysis-text {
+      font-size: 12px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #pcsu-analysis-cta .pcsu-analysis-link::before {
+      animation: none;
+    }
+
+    #pcsu-analysis-cta .pcsu-analysis-link,
+    #pcsu-analysis-cta .pcsu-analysis-arrow {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    "use strict";
+
+    var destination =
+      "https://pcs-united-com.webflow.io/financial-analysis";
+
+    var link = document.getElementById("pcsu-analysis-link");
+
+    if (!link || link.dataset.pcsuNavigationReady === "1") {
+      return;
+    }
+
+    link.dataset.pcsuNavigationReady = "1";
+
+    link.addEventListener("click", function (event) {
+      event.preventDefault();
+
+      /*
+       * First try to navigate the full browser window.
+       * This prevents the destination from loading inside an iframe.
+       */
+      try {
+        if (window.top && window.top !== window.self) {
+          window.top.location.assign(destination);
+          return;
+        }
+
+        window.location.assign(destination);
+      } catch (error) {
+        /*
+         * Some sandboxed frames block top-level navigation.
+         * In that case, open the page in a new browser tab.
+         */
+        var newWindow = window.open(
+          destination,
+          "_blank",
+          "noopener,noreferrer"
+        );
+
+        if (!newWindow) {
+          window.location.href = destination;
+        }
+      }
+    });
+  })();
+</script>

@@ -13,6 +13,13 @@
  const embedded=window.parent!==window, rows=()=>Object.values(state.categories).flat();
  const allowed=o=>['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com'].includes(o)||(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o)&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname));
  const post=(type,detail={})=>{if(parentOrigin&&!inlineIncome)parent.postMessage({source:'pcsu-finance',version:1,type,...detail},parentOrigin);};
+ function analysisSnapshot(){
+  const keys=['grossMonthly','netMonthly','savingsMonthly','emergencyFund','bufferMonthly','extraBufferMonthly','reviewed'];
+  const snapshot={revision:seq,status:!loaded?'loading':result?'ready':'pending',mortgageLinked,
+   state:{...Object.fromEntries(keys.map(key=>[key,state[key]])),items:rows().map(x=>({id:x.id,label:x.label,category:x.category,value:x.value,minimumPayment:x.minimumPayment??x.value,essential:x.essential===true,housing:x.housing===true,continues:x.continues===true}))}};
+  return structuredClone(snapshot);
+ }
+ function sendAnalysis(requestId){post('pcsu:finance-analysis-state',{requestId,snapshot:analysisSnapshot()});}
  const icons=()=>window.lucide?.createIcons({attrs:{'stroke-width':2}});
  const rangeText=(a,b)=>a==null||a===b?'Up to '+money(b):money(a)+' – '+money(b);
  function mortgageRow(){return rows().find(x=>x.id==='projected-mortgage');}
@@ -85,13 +92,13 @@
   document.querySelectorAll('.expense-row').forEach(paint);decorateMortgage();icons();
  }
  function paint(row){const x=rows().find(x=>x.id===row.dataset.id),r=row.querySelector('[type=range]'),b=row.querySelector('output');r.max=String(Math.max(x.max,x.value));r.value=String(x.value);b.textContent=money(x.value);const p=Math.min(100,x.value/Number(r.max)*100);r.style.setProperty('--range-progress',p+'%');b.style.left=`calc(${p}% + ${(50-p)*.45}px)`;b.style.transform='translateX(-50%)';}
- function clear(){result=null;$('fu-cash-state').textContent=state.netMonthly==null?'Add take-home pay':'Updating…';window.dispatchEvent(new CustomEvent('pcsunited:financial-invalidated'));for(const id of ['cashFlowAmount','cashFlowFooterAmount','cashFlowPercentage','monthlyIncomeDonut','monthlyIncomeValue','totalExpensesValue','totalDebtValue','totalSavingsValue','expensesIncomeRatio','emergencyFundAmount','emergencyFundMonths','debtIncomeRatio','fu-payment','fu-price','fu-remaining'])$(id).textContent='—';$('fu-explore').disabled=true;document.querySelectorAll('.health-status').forEach(e=>{e.textContent='Pending';e.style.color='var(--pcsu-text-muted)';});document.querySelectorAll('.income-donut__segment').forEach(e=>e.style.strokeDasharray='0 100');}
+ function clear(){result=null;sendAnalysis();$('fu-cash-state').textContent=state.netMonthly==null?'Add take-home pay':'Updating…';window.dispatchEvent(new CustomEvent('pcsunited:financial-invalidated'));for(const id of ['cashFlowAmount','cashFlowFooterAmount','cashFlowPercentage','monthlyIncomeDonut','monthlyIncomeValue','totalExpensesValue','totalDebtValue','totalSavingsValue','expensesIncomeRatio','emergencyFundAmount','emergencyFundMonths','debtIncomeRatio','fu-payment','fu-price','fu-remaining'])$(id).textContent='—';$('fu-explore').disabled=true;document.querySelectorAll('.health-status').forEach(e=>{e.textContent='Pending';e.style.color='var(--pcsu-text-muted)';});document.querySelectorAll('.income-donut__segment').forEach(e=>e.style.strokeDasharray='0 100');}
  function schedule(){incomeView();if(!loaded)return;seq++;controller?.abort();clearTimeout(timer);clear();$('fu-status').textContent='Updating your budget…';timer=setTimeout(calculate,300);}
  async function calculate(){
   if(projected && mortgageLinked && mortgage.status!=='ready'){clear();$('fu-cash-state').textContent='Mortgage pending';$('fu-status').textContent='Complete the mortgage estimate in Section 02, or enter your payment.';return;}
   if([...document.querySelectorAll('.expense-row input[type=number]')].some(e=>e.value===''||!e.checkValidity())){clear();$('fu-cash-state').textContent='Check entries';$('fu-status').textContent='Finish entering a valid amount before calculating.';return;}
   const id=++seq;controller?.abort();const abort=new AbortController();controller=abort;const timeout=setTimeout(()=>abort.abort(),15000);
-  try{const body={...state,items:rows().map(x=>({...x,minimumPayment:x.minimumPayment??x.value})),categories:undefined,incomeBreakdown:undefined};const response=await fetch('/api/finance-budget',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:abort.signal});const d=await response.json();if(id!==seq)return;if(!response.ok||!d.ok||d.version!=='finance-budget-v1')throw Error(d.error||'Budget service unavailable.');result=d;summary(d);projectedSummary(d);post('pcsu:finance-result',{metrics:d.metrics,affordability:d.affordability});window.dispatchEvent(new CustomEvent('pcsunited:financial-updated',{detail:d}));}
+   try{const body={...state,items:rows().map(x=>({...x,minimumPayment:x.minimumPayment??x.value})),categories:undefined,incomeBreakdown:undefined};const response=await fetch('/api/finance-budget',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:abort.signal});const d=await response.json();if(id!==seq)return;if(!response.ok||!d.ok||d.version!=='finance-budget-v1')throw Error(d.error||'Budget service unavailable.');result=d;summary(d);projectedSummary(d);post('pcsu:finance-result',{metrics:d.metrics,affordability:d.affordability});sendAnalysis();window.dispatchEvent(new CustomEvent('pcsunited:financial-updated',{detail:d}));}
   catch(e){if(id!==seq)return;clear();$('fu-cash-state').textContent='Unavailable';$('fu-status').textContent=e.name==='AbortError'?'Budget calculation timed out. Retry below.':e.message;$('fu-retry').hidden=false;}finally{clearTimeout(timeout);}
  }
  function summary(d){
@@ -131,7 +138,7 @@
   installMortgage();loaded=true;bind();render();clear();if(!embedded||inlineIncome)$('fu-income-fields').hidden=false;if(inlineIncome){state.location='Your household';$('fu-explore').hidden=true;}$('selectedLocation').textContent=state.location;icons();schedule();
   try{const o=new URL(document.referrer).origin;if(allowed(o))parentOrigin=o;}catch{}post('pcsu:finance-ready');window.dispatchEvent(new CustomEvent('pcsunited:financial-ready',{detail:{state,metrics:null}}));
  }
- window.addEventListener('message',e=>{const d=e.data;if(inlineIncome||e.source!==parent||!allowed(e.origin)||!d||d.source!=='pcsu-finance-host'||d.version!==1)return;parentOrigin=e.origin;if(d.type!=='pcsu:finance-context'||!Number.isInteger(d.revision)||d.revision<parentRevision)return;parentRevision=d.revision;
+ window.addEventListener('message',e=>{const d=e.data;if(inlineIncome||e.source!==parent||!allowed(e.origin)||!d||d.source!=='pcsu-finance-host'||d.version!==1)return;parentOrigin=e.origin;if(d.type==='pcsu:finance-analysis-request'){if(typeof d.requestId==='string'&&d.requestId.length<=100)sendAnalysis(d.requestId);return;}if(d.type!=='pcsu:finance-context'||!Number.isInteger(d.revision)||d.revision<parentRevision)return;parentRevision=d.revision;
   if(projected){
    state.incomeSources=Array.isArray(d.incomeSources)?d.incomeSources.filter(x=>typeof x?.label==='string'&&typeof x.amount==='number'&&Number.isFinite(x.amount)&&x.amount>=0).slice(0,20):[];
    if(Object.hasOwn(d,'mortgage')){const m=d.mortgage;const valid=m?.status==='ready'&&typeof m.amount==='number'&&Number.isFinite(m.amount)&&m.amount>=0&&m.amount<=1000000;const next={status:valid?'ready':'unavailable',amount:valid?m.amount:null,example:m?.example===true};pendingMortgage=JSON.stringify(mortgage)!==JSON.stringify(next);mortgage=next;applyMortgage();}

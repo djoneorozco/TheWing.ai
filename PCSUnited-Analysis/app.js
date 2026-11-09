@@ -4266,6 +4266,7 @@ function initializePCSUnitedAnalysis() {
 }
 
 
+if (new URLSearchParams(window.location.search).get("connected") !== "1") {
 if (document.readyState === "loading") {
   document.addEventListener(
     "DOMContentLoaded",
@@ -4274,4 +4275,5 @@ if (document.readyState === "loading") {
   );
 } else {
   initializePCSUnitedAnalysis();
+}
 }
