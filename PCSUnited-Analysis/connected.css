@@ -1,0 +1,25 @@
+.pcsu-connected .analysis-connection{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:16px 24px;padding:14px 18px;border:1px solid #cbd7dd;border-radius:12px;background:#f4f7f7;color:#17334d;font:14px/1.5 Arial,sans-serif}
+.pcsu-connected .analysis-connection p{flex:1 1 300px;margin:0}
+.pcsu-connected .analysis-connection button{border:1px solid #17334d;border-radius:24px;padding:8px 14px;background:#17334d;color:white;cursor:pointer}
+.pcsu-connected .affordability-verdict__answer{font-size:24px}
+.pcsu-connected .affordability-verdict__message{font-size:12px;line-height:1.4;max-width:160px}
+.pcsu-connected .affordability-score__value{font-size:22px}
+.pcsu-connected .affordability-verdict__ring,.pcsu-connected .affordability-score__ring{background:#77939e;box-shadow:none}
+.pcsu-connected[data-analysis-status=within-guideline] .affordability-verdict__ring{background:#58b978}
+.pcsu-connected[data-analysis-status=above-guideline] .affordability-verdict__ring{background:#d6a04a}
+.pcsu-connected .affordability-gauge__status{background:#eef3f4;color:#355c6a}
+.pcsu-connected .analysis-deficit{background:#bd4653}
+.pcsu-connected .price-scenario{grid-template-columns:1fr 1fr;gap:8px 16px}
+.pcsu-connected .price-scenario__ratio{color:#526777;text-align:left}
+.pcsu-connected [data-price-scenario=lower],.pcsu-connected [data-price-scenario=higher],.pcsu-connected .affordability-gauge__svg,.pcsu-connected #waterfallConnector{display:none}
+.pcsu-connected .affordability-gauge{min-height:0;height:auto;padding:20px 0}
+.pcsu-connected .affordability-gauge__value{position:static;transform:none}
+.pcsu-connected .hero-status,.pcsu-connected .compact-status{color:#355c6a;background:#eef3f4}
+.pcsu-connected .payment-donut__segment--other{stroke:#b7c794}
+.pcsu-connected .payment-breakdown-item__dot--other{background:#b7c794}
+.pcsu-connected .summary-card__note{font-size:12px;line-height:1.5;color:#526777;margin:12px 0 0}
+.pcsu-connected .analysis-report-section dl{display:grid;grid-template-columns:1fr auto;gap:8px 16px}
+.pcsu-connected .analysis-report-section dd{margin:0}
+.pcsu-connected .analysis-modal-backdrop{overflow:auto}
+.pcsu-connected .analysis-modal{max-height:90vh;overflow:auto}
+@media(max-width:600px){.pcsu-connected .analysis-connection{margin:12px}.pcsu-connected .waterfall-column__value{font-size:10px}.pcsu-connected .waterfall-column__label{font-size:10px}}

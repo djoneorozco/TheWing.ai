@@ -18,7 +18,7 @@
   const selectors = new Set(['loanType', 'vaFeeStatus', 'feePayment']);
   const sliders = ['home-price', 'down-payment', 'credit-score', 'emergency-fund'];
   let revision = 0, controller = null, timer = null, result = null, currentInput = null;
-  let touched = false, homeTouched = false, basicBrain = null, comp = null, market = null;
+  let touched = false, homeTouched = false, reserveTouched = false, basicBrain = null, comp = null, market = null;
 
   function readNumber(element) {
     const value = element.value.trim() === '' ? null : Number(element.value);
@@ -114,7 +114,7 @@
       totalMonthlyHousingCost: result?.monthly.totalHousing ?? null,
       mortgagePayment: result?.monthly.mortgagePayment ?? null,
       mortgageEstimate: result ? clone(result) : null,
-      emergencyFund: validReserve, emergencyFundBasis: 'after-closing',
+      emergencyFund: validReserve, emergencyFundBasis: 'after-closing', emergencyFundUserEntered: reserveTouched,
       hasUserInteracted: touched
     };
   }
@@ -232,11 +232,11 @@
         $('fi-down-payment').value = (price * value / 100).toFixed(2);
       } else $(`fi-${name}`).value = String(value);
       if (name === 'home-price') homeTouched = true;
-      if (name === 'emergency-fund') { syncSliders(); emit(); } else refresh();
+      if (name === 'emergency-fund') { reserveTouched = true; syncSliders(); emit(); } else refresh();
     });
   }
   $('fi-emergency-fund').addEventListener('input', () => {
-    touched = true; syncSliders();
+    touched = true; reserveTouched = true; syncSliders();
     $('fi-emergency-fund').setAttribute('aria-invalid', String(!$('fi-emergency-fund').checkValidity()));
     emit();
   });
@@ -246,7 +246,7 @@
     for (const [key,id] of Object.entries(fields)) {
       if (Object.hasOwn(values,key)) $(id).value = values[key] === null ? '' : String(values[key]);
     }
-    if (Object.hasOwn(values,'emergencyFund')) $('fi-emergency-fund').value = values.emergencyFund ?? '';
+    if (Object.hasOwn(values,'emergencyFund')) { $('fi-emergency-fund').value = values.emergencyFund ?? ''; reserveTouched = true; }
     touched = true; homeTouched = true; refresh(true);
   }
   // Existing hosts can consume events and this in-memory API. No financial data is persisted.

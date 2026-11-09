@@ -14,6 +14,9 @@
   >
 
   <title>Home Buying Financial Analysis | PCSUnited</title>
+  <script>if(new URLSearchParams(location.search).get('connected')==='1')document.documentElement.classList.add('pcsu-connected');</script>
+  <style>.pcsu-connected:not(.pcsu-connected-ready) #pcsuAnalysisApp{visibility:hidden}</style>
+  <link rel="stylesheet" href="./connected.css">
 
   <!-- =======================================================
     PCSUnited Analysis Stylesheet
@@ -1661,6 +1664,7 @@
     APPLICATION JAVASCRIPT
   ======================================================== -->
   <script src="./app.js"></script>
+  <script src="./connected.js"></script>
 
 
   <!-- =======================================================

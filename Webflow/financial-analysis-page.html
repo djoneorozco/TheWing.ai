@@ -1,0 +1,48 @@
+<!-- Financial Analysis destination. Keep the figures in memory; no storage or URL financial data. -->
+<p id="pcsu-analysis-page-status" role="status" style="margin:0;padding:12px 18px;color:#17334d;background:#f4f7f7;font:14px/1.5 Arial,sans-serif">Connecting to Financial Guidance…</p>
+<div style="width:100%;height:calc(100vh - 56px);min-height:600px;overflow:hidden">
+<iframe id="pcsu-analysis-frame" src="https://thewing.netlify.app/PCSUnited-Analysis/?connected=1" title="PCSUnited Financial Analysis powered by TheWing.ai" referrerpolicy="origin" aria-hidden="true" style="display:block;width:100%;height:100%;border:0;visibility:hidden"></iframe>
+</div>
+<script>
+/* Destination-page bridge. The context exists only in this tab's memory. */
+(() => {
+  'use strict';
+  const frame = document.getElementById('pcsu-analysis-frame'), status = document.getElementById('pcsu-analysis-page-status');
+  if (!frame || frame.dataset.bridge === '1') return;
+  frame.dataset.bridge = '1';
+  const appOrigin = new URL(frame.src).origin, requestId = crypto.randomUUID();
+  const allowed = origin => ['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com'].includes(origin)
+    || (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname));
+  let openerOrigin = location.origin, context = null, revision = -1, frameId = null, attempts = 0;
+  try { const ref = new URL(document.referrer).origin; if (allowed(ref)) openerOrigin = ref; } catch (_) {}
+  function send() {
+    if (frameId && context) frame.contentWindow.postMessage({source:'pcsu-analysis-host',version:1,type:'pcsu:analysis-context',requestId:frameId,revision,context},appOrigin);
+  }
+  function request() {
+    if (window.opener && !window.opener.closed && allowed(openerOrigin)) {
+      window.opener.postMessage({source:'pcsu-analysis-page',version:1,type:'pcsu:analysis-ready',requestId},openerOrigin);
+    } else status.textContent = 'Open Financial Analysis from the Financial Guidance button to bring your current figures with you.';
+  }
+  window.addEventListener('message',event => {
+    const data = event.data;
+    if (!data || data.version !== 1) return;
+    if (event.source === window.opener && event.origin === openerOrigin && allowed(event.origin) && data.source === 'pcsu-analysis-launch'
+        && data.type === 'pcsu:analysis-context' && data.requestId === requestId && Number.isInteger(data.revision) && data.revision > revision) {
+      try { if (!data.context || JSON.stringify(data.context).length > 100000) return; } catch (_) { return; }
+      revision = data.revision; context = data.context;
+      status.textContent = 'Connected to Financial Guidance. Changes in the original tab update this analysis.';
+      send(); return;
+    }
+    if (event.source !== frame.contentWindow || event.origin !== appOrigin || data.source !== 'pcsu-analysis') return;
+    if (data.type === 'pcsu:analysis-ready' && typeof data.requestId === 'string' && data.requestId.length <= 100) {
+      frameId = data.requestId; frame.style.visibility = 'visible'; frame.removeAttribute('aria-hidden'); send();
+      if(context)status.textContent = 'Connected to Financial Guidance. Changes in the original tab update this analysis.';
+    }
+    if (data.type === 'pcsu:analysis-refresh' && data.requestId === frameId) request();
+  });
+  frame.addEventListener('load',() => { frameId = null; frame.style.visibility = 'hidden'; frame.setAttribute('aria-hidden','true'); frame.contentWindow.postMessage({source:'pcsu-analysis-host',version:1,type:'pcsu:analysis-host-ready'},appOrigin); });
+  const timer = setInterval(() => { if ((context && frameId) || ++attempts >= 15) { clearInterval(timer); if (!frameId) status.textContent = 'The analysis connection is not available yet. Return to Financial Guidance and try again.'; } else request(); },1000);
+  request();
+})();
+
+</script>
