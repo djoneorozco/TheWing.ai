@@ -27,7 +27,7 @@ let hostOrigin;
 const host=http.createServer((req,res)=>{
  res.setHeader('Content-Type','text/html; charset=utf-8');
  if(req.url==='/financial-analysis'){
-  res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0">'+read('Webflow/financial-analysis-page.html').replaceAll('https://thewing.netlify.app',appOrigin)+'</body></html>');return;
+  res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0"><main style="margin-inline:45px">'+read('Webflow/financial-analysis-page.html').replaceAll('https://thewing.netlify.app',appOrigin)+'</main></body></html>');return;
  }
  const fixture='<script>window.income={complete:true,status:"manual",grossMonthlyIncome:8000,netMonthlyIncome:null,monthlySavingsContributions:null};window.PCSU_FINANCIAL_INCOME={getSnapshot:()=>structuredClone(income)};window.setIncome=(gross,net,savings=0)=>{income={complete:gross!==null,status:"manual",grossMonthlyIncome:gross,netMonthlyIncome:net,monthlySavingsContributions:savings};window.dispatchEvent(new CustomEvent("pcsu:financial-income-change",{detail:structuredClone(income)}));};</script>';
  res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>'+fixture+
@@ -102,6 +102,7 @@ try{
  const screenshots=process.env.ANALYSIS_SCREENSHOT_DIR;
  if(screenshots){fs.mkdirSync(screenshots,{recursive:true});await popup.screenshot({path:path.join(screenshots,'Financial-Analysis-Connected-Desktop.png'),fullPage:true});}
  await popup.setViewportSize({width:390,height:850});
+ assert.equal(await analysis.evaluate(()=>innerWidth),300,'Webflow mobile wrapper leaves a 300px iframe');
  assert.equal(await analysis.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'mobile iframe overflow');
  if(screenshots)await popup.screenshot({path:path.join(screenshots,'Financial-Analysis-Connected-Mobile.png'),fullPage:true});
  const direct=await context.newPage();await direct.goto(hostOrigin+'/financial-analysis');await direct.waitForFunction(()=>document.querySelector('#pcsu-analysis-frame')?.style.visibility==='visible');const empty=direct.frames().find(f=>f.url().includes('/PCSUnited-Analysis/'));
