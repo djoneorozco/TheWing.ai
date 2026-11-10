@@ -1,6 +1,10 @@
 <!-- Section 03 / Finance-UX. Income and mortgage stay in memory on this page. -->
-<div style="width:100%;height:100vh;overflow:hidden;">
-  <iframe id="pcsu-budget-frame" src="https://thewing.netlify.app/Finance-UX/?housing=projected" title="Monthly Expenses and Debt | PCSUnited" referrerpolicy="origin" style="display:block;width:100%;height:100%;border:0;"></iframe>
+<style>
+  /* Only this embed: remove the old negative margin that clips a fitted iframe. */
+  [data-pcs-budget-fit] { margin-bottom:0 !important; padding-bottom:8px !important; }
+</style>
+<div style="width:100%;overflow:hidden;">
+  <iframe id="pcsu-budget-frame" src="https://thewing.netlify.app/Finance-UX/?housing=projected" title="Monthly Expenses and Debt | PCSUnited" referrerpolicy="origin" style="display:block;width:100%;height:900px;border:0;"></iframe>
 </div>
 <script>
 (() => {
@@ -10,6 +14,7 @@
     const mortgageFrame = document.getElementById('pcsu-mortgage-frame');
     if (!frame || frame.dataset.bridgeReady) return;
     frame.dataset.bridgeReady = 'true';
+    frame.closest?.('.w-embed')?.setAttribute('data-pcs-budget-fit','');
     const ORIGIN = 'https://thewing.netlify.app';
     let revision = 0, mortgageRevision = -1, mortgage = {status:'loading',amount:null};
     const amount = value => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1000000 ? value : null;
@@ -28,6 +33,9 @@
     function requestMortgage() {
       mortgageFrame?.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:mortgage-budget-request'},ORIGIN);
     }
+    function requestSize() {
+      frame.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:finance-request-size'},ORIGIN);
+    }
     window.addEventListener('pcsu:financial-income-change', send);
     window.addEventListener('message', event => {
       if (event.origin !== ORIGIN || !event.data || typeof event.data !== 'object') return;
@@ -43,7 +51,10 @@
         send();
       }
       if (event.source !== frame.contentWindow || d.source !== 'pcsu-finance' || d.version !== 1) return;
-      if (d.type === 'pcsu:finance-ready') { send(); requestMortgage(); }
+      if (d.type === 'pcsu:finance-resize' && typeof d.height === 'number' && Number.isFinite(d.height) && d.height > 0 && d.height <= 30000) {
+        frame.style.height = Math.ceil(d.height) + 'px';
+      }
+      if (d.type === 'pcsu:finance-ready') { send(); requestMortgage(); requestSize(); }
       if (d.type === 'pcsu:finance-edit-income') {
         window.PCSUFinancialUtility?.open?.();
         document.getElementById('fi-entry-step')?.click();
@@ -54,9 +65,9 @@
         }
       }
     });
-    frame.addEventListener('load', () => { send(); requestMortgage(); });
+    frame.addEventListener('load', () => { send(); requestMortgage(); requestSize(); });
     mortgageFrame?.addEventListener('load', () => { mortgageRevision = -1; mortgage = {status:'loading',amount:null}; send(); requestMortgage(); });
-    send(); requestMortgage();
+    send(); requestMortgage(); requestSize();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();

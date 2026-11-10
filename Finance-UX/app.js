@@ -13,6 +13,19 @@
  const embedded=window.parent!==window, rows=()=>Object.values(state.categories).flat();
  const allowed=o=>['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com'].includes(o)||(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o)&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname));
  const post=(type,detail={})=>{if(parentOrigin&&!inlineIncome)parent.postMessage({source:'pcsu-finance',version:1,type,...detail},parentOrigin);};
+ // Measure the intrinsic dashboard, not the iframe viewport, so it can shrink too.
+ let sizeTimer,lastHeight=0,forceSize=false;
+ function queueSize(force=false){
+  forceSize=forceSize||force;clearTimeout(sizeTimer);
+  sizeTimer=setTimeout(()=>{
+   if(!embedded||inlineIncome||!parentOrigin)return;
+   const height=Math.ceil($('budgetApp')?.getBoundingClientRect().height||0);
+   if(height>0&&height<=30000&&(forceSize||height!==lastHeight)){
+    post('pcsu:finance-resize',{height});lastHeight=height;
+   }
+   forceSize=false;
+  },0);
+ }
  function analysisSnapshot(){
   const keys=['grossMonthly','netMonthly','savingsMonthly','emergencyFund','bufferMonthly','extraBufferMonthly','reviewed'];
   const snapshot={revision:seq,status:!loaded?'loading':result?'ready':'pending',mortgageLinked,
@@ -136,9 +149,9 @@
  async function boot(){
   try{const r=await fetch('items.json');if(!r.ok)throw Error();state.categories=await r.json();}catch{$('expenseList').textContent='Budget categories could not load. Reload to try again.';return;}
   installMortgage();loaded=true;bind();render();clear();if(!embedded||inlineIncome)$('fu-income-fields').hidden=false;if(inlineIncome){state.location='Your household';$('fu-explore').hidden=true;}$('selectedLocation').textContent=state.location;icons();schedule();
-  try{const o=new URL(document.referrer).origin;if(allowed(o))parentOrigin=o;}catch{}post('pcsu:finance-ready');window.dispatchEvent(new CustomEvent('pcsunited:financial-ready',{detail:{state,metrics:null}}));
+  try{const o=new URL(document.referrer).origin;if(allowed(o))parentOrigin=o;}catch{}post('pcsu:finance-ready');queueSize(true);window.dispatchEvent(new CustomEvent('pcsunited:financial-ready',{detail:{state,metrics:null}}));
  }
- window.addEventListener('message',e=>{const d=e.data;if(inlineIncome||e.source!==parent||!allowed(e.origin)||!d||d.source!=='pcsu-finance-host'||d.version!==1)return;parentOrigin=e.origin;if(d.type==='pcsu:finance-analysis-request'){if(typeof d.requestId==='string'&&d.requestId.length<=100)sendAnalysis(d.requestId);return;}if(d.type!=='pcsu:finance-context'||!Number.isInteger(d.revision)||d.revision<parentRevision)return;parentRevision=d.revision;
+ window.addEventListener('message',e=>{const d=e.data;if(inlineIncome||e.source!==parent||!allowed(e.origin)||!d||d.source!=='pcsu-finance-host'||d.version!==1)return;parentOrigin=e.origin;queueSize();if(d.type==='pcsu:finance-request-size'){queueSize(true);return;}if(d.type==='pcsu:finance-analysis-request'){if(typeof d.requestId==='string'&&d.requestId.length<=100)sendAnalysis(d.requestId);return;}if(d.type!=='pcsu:finance-context'||!Number.isInteger(d.revision)||d.revision<parentRevision)return;parentRevision=d.revision;
   if(projected){
    state.incomeSources=Array.isArray(d.incomeSources)?d.incomeSources.filter(x=>typeof x?.label==='string'&&typeof x.amount==='number'&&Number.isFinite(x.amount)&&x.amount>=0).slice(0,20):[];
    if(Object.hasOwn(d,'mortgage')){const m=d.mortgage;const valid=m?.status==='ready'&&typeof m.amount==='number'&&Number.isFinite(m.amount)&&m.amount>=0&&m.amount<=1000000;const next={status:valid?'ready':'unavailable',amount:valid?m.amount:null,example:m?.example===true};pendingMortgage=JSON.stringify(mortgage)!==JSON.stringify(next);mortgage=next;applyMortgage();}
@@ -146,5 +159,12 @@
   }
   const b=d.incomeBreakdown;state.incomeBreakdown=b&&typeof b==='object'?Object.fromEntries(['militaryMonthly','additionalMonthly','basePay','bah','bas'].map(key=>[key,typeof b[key]==='number'&&Number.isFinite(b[key])&&b[key]>=0&&b[key]<=1000000?b[key]:null])):null;for(const key of ['grossMonthly','netMonthly'])state[key]=typeof d[key]==='number'&&Number.isFinite(d[key])&&d[key]>=0?d[key]:null;if(Object.hasOwn(d,'savingsMonthly')&&typeof d.savingsMonthly==='number'&&Number.isFinite(d.savingsMonthly)&&d.savingsMonthly>=0&&d.savingsMonthly<=1000000){state.savingsMonthly=d.savingsMonthly;$('fu-savings').value=d.savingsMonthly;}if(typeof d.location==='string')state.location=d.location.slice(0,160);if(d.scenario&&typeof d.scenario==='object')state.scenario={...d.scenario};$('selectedLocation').textContent=state.location;$('fu-gross').value=state.grossMonthly??'';$('fu-net').value=state.netMonthly??'';if(loaded&&pendingMortgage){pendingMortgage=false;render();}schedule();});
  window.PCSUnitedFinancial={getState:()=>structuredClone(state),getMetrics:()=>result?.metrics??null,updateIncome:v=>{state.netMonthly=Number(v);schedule();},updateSavings:v=>{state.savingsMonthly=Number(v);$('fu-savings').value=v;schedule();},updateEmergencyFund:v=>{state.emergencyFund=Number(v);$('fu-emergency').value=v;schedule();},reset:()=>location.reload()};
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+ function start(){
+  if(embedded&&!inlineIncome){
+   if(window.ResizeObserver)new ResizeObserver(()=>queueSize()).observe($('budgetApp'));
+   window.addEventListener('resize',()=>queueSize());
+  }
+  boot();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
