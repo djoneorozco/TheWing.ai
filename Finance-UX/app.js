@@ -77,7 +77,7 @@
   if(projected){$('fu-income-help').textContent='Income carries over from Section 01. Add payroll deductions there to see take-home cash flow.';const sources=$('fu-income-sources');sources.hidden=!state.incomeSources?.length;sources.innerHTML=(state.incomeSources||[]).map(x=>`<div><span>${esc(x.label)}</span><b>${money(x.amount)}</b></div>`).join('');}
   if(b)for(const [id,key]of Object.entries({'fu-military-income':'militaryMonthly','fu-additional-income':'additionalMonthly','fu-base-pay':'basePay','fu-bah':'bah','fu-bas':'bas'}))$(id).textContent=money(b[key]);
   $('fu-income-summary').textContent=`Total income ${money(state.grossMonthly)} before deductions${b?.additionalMonthly!=null?' · '+money(b.additionalMonthly)+' additional income included':''} · ${missing?'Take-home pay not entered':'Take-home '+money(state.netMonthly)+'/month'}`;
-  $('fu-income-needed').hidden=!missing;
+  $('fu-income-needed').hidden=!missing || (projected && state.grossMonthly!=null);
   $('fu-income-needed').querySelector('strong').textContent=state.grossMonthly==null?'Complete your income details.':'Your income is connected.';
   document.querySelector('.cash-flow-card__hero').hidden=false;
   $('fu-cash-state').textContent=missing?'Add take-home pay':'Updating…';
