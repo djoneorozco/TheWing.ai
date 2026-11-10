@@ -54,6 +54,7 @@ export function calculateFinanceBudget(body) {
   // A gross-income preview is not spendable cash. Keep it separate from cashFlow.
   const beforeDeductionsRemaining=gross===null?null:cents(gross-expenses-debt-savings);
   const projectedBeforeHousing=net===null?null:cents(net-sum(retained)-savings);
+  const projectedBeforeHousingGross=gross===null?null:cents(gross-sum(retained)-savings);
   const rule28=gross>0?cents(gross*.28):null;
   const rule36=gross>0?cents(gross*.36-continuingDebt):null;
   const cashLimit=projectedBeforeHousing===null?null:cents(projectedBeforeHousing-buffer);
@@ -74,5 +75,5 @@ export function calculateFinanceBudget(body) {
   }
   return {ok:true,version:VERSION,reviewed:body.reviewed===true,
     metrics:{monthlyIncome:net,grossMonthly: gross,totalExpenses:expenses,totalDebt:debt,totalSavings:savings,cashFlow:currentCash,beforeDeductionsRemaining,cashFlowPercentage:net>0?currentCash/net*100:null,expensesIncomeRatio:net>0?expenses/net*100:null,debtIncomeRatio:gross>0?qualifyingCurrent/gross*100:null,emergencyFund:reserve,essentialMonthlyExpenses:essential,emergencyFundMonths:reserve!==null&&essential>0?reserve/essential:null},
-    affordability:{monthlyRange,homeRange,scenario,scenarioError,limits:{housing28:rule28,totalDebt36:rule36,cashFlow:cashLimit},continuingDebt,bufferMonthly:buffer,extraBufferMonthly:extra,projectedBeforeHousing,remainingAtUpper:upper===null?null:cents(projectedBeforeHousing-upper),remainingAtComfortable:lower===null?null:cents(projectedBeforeHousing-lower),missing:[...(gross>0?[]:['gross income']),...(net===null?['take-home income']:[]),...(body.reviewed===true?[]:['budget review'])],guidance:'28/36 is a planning guideline, not loan approval or a VA qualification test. Utilities and maintenance remain in the budget. Cash to close and reserves require separate review.'}};
+    affordability:{monthlyRange,homeRange,scenario,scenarioError,limits:{housing28:rule28,totalDebt36:rule36,cashFlow:cashLimit,beforeDeductionsCashFlow:projectedBeforeHousingGross===null?null:cents(projectedBeforeHousingGross-buffer)},continuingDebt,bufferMonthly:buffer,extraBufferMonthly:extra,projectedBeforeHousing,remainingAtUpper:upper===null?null:cents(projectedBeforeHousing-upper),remainingAtComfortable:lower===null?null:cents(projectedBeforeHousing-lower),missing:[...(gross>0?[]:['gross income']),...(net===null?['take-home income']:[]),...(body.reviewed===true?[]:['budget review'])],guidance:'28/36 is a planning guideline, not loan approval or a VA qualification test. Utilities and maintenance remain in the budget. Cash to close and reserves require separate review.'}};
 }

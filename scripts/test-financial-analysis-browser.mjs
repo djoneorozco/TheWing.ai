@@ -29,17 +29,19 @@ const host=http.createServer((req,res)=>{
  if(req.url==='/financial-analysis'){
   res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0"><main style="margin-inline:45px">'+read('Webflow/financial-analysis-page.html').replaceAll('https://thewing.netlify.app',appOrigin)+'</main></body></html>');return;
  }
- const fixture='<script>window.income={complete:true,status:"manual",grossMonthlyIncome:8000,netMonthlyIncome:null,monthlySavingsContributions:null};window.PCSU_FINANCIAL_INCOME={getSnapshot:()=>structuredClone(income)};window.setIncome=(gross,net,savings=0)=>{income={complete:gross!==null,status:"manual",grossMonthlyIncome:gross,netMonthlyIncome:net,monthlySavingsContributions:savings};window.dispatchEvent(new CustomEvent("pcsu:financial-income-change",{detail:structuredClone(income)}));};</script>';
+ const fixture='<script>window.income={complete:true,status:"manual",grossMonthlyIncome:8000,netMonthlyIncome:null,monthlySavingsContributions:null,capitalReservesTotal:9100,monthlyDeductions:null,sources:[{label:"Household income",amount:8000,basis:"user-entered"}]};window.PCSU_FINANCIAL_INCOME={getSnapshot:()=>structuredClone(income)};window.setIncome=(gross,net,savings=0)=>{income={complete:gross!==null,status:"manual",grossMonthlyIncome:gross,netMonthlyIncome:net,monthlySavingsContributions:savings};window.dispatchEvent(new CustomEvent("pcsu:financial-income-change",{detail:structuredClone(income)}));};</script>';
+ const launch=read('Webflow/financial-analysis-cta.html').replaceAll('https://pcs-united-com.webflow.io/financial-analysis',hostOrigin+'/financial-analysis');
+ const cta=req.url.includes('legacy')?launch.replace('return snapshot;',"return Object.fromEntries(['complete','status','grossMonthlyIncome','netMonthlyIncome','monthlySavingsContributions'].map(key=>[key,snapshot[key]]));"):launch;
  res.end('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>'+fixture+
   `<iframe id="pcsu-mortgage-frame" title="Mortgage" src="${appOrigin}/Military-Mortgage/?embedded=1" style="width:100%;height:700px"></iframe>`+
   read('Webflow/financial-guidance-budget.html').replaceAll('https://thewing.netlify.app',appOrigin)+
-  read('Webflow/financial-analysis-cta.html').replaceAll('https://pcs-united-com.webflow.io/financial-analysis',hostOrigin+'/financial-analysis')+'</body></html>');
+  cta+'</body></html>');
 });
 await new Promise(resolve=>host.listen(0,'127.0.0.1',resolve));hostOrigin='http://localhost:'+host.address().port;
 const browser=await chromium.launch({channel:'chrome',headless:true,args:['--disable-gpu']});
 const errors=[];
 try{
- const context=await browser.newContext({viewport:{width:1440,height:1000}});
+ const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:"reduce"});
  await context.addInitScript(()=>window.addEventListener('message',e=>{if(e.data?.type==='pcsu:analysis-context')window.lastAnalysisMessage=structuredClone(e.data);}));
  await context.route(/^https:\/\//,route=>route.abort());
  context.on('page',page=>page.on('pageerror',error=>errors.push(error.message)));
@@ -65,46 +67,11 @@ try{
  await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.beforeDeductionsRemaining===6099.75);
  let result=await get();assert.equal(result.summary.cashFlow,null);assert.equal(result.status,'incomplete');assert.equal(result.summary.reservesAfterClosing,null);
  assert.match(await analysis.locator('#heroCashLeft').textContent(),/6,099.75/);
- assert.equal(await analysis.locator('#healthResidual').textContent(),'—');
- assert.equal(await analysis.locator('#recommendedHomeRange').textContent(),'—');
- // Complete the real gross-only path on Analysis, without editing the source tab.
- assert.equal(await analysis.locator('#analysisInputsPanel').getAttribute('open'),'');
- assert.equal(await analysis.locator('#analysisBudgetReviewed').isChecked(),false);
- assert.match(await analysis.locator('#selectedHomeNote').textContent(),/Selected home: \$240,000/);
- const originalBudget=await budget.evaluate(()=>JSON.stringify(PCSUnitedFinancial.getState()));
- await popup.bringToFront();await analysis.locator('#analysisNetIncome').fill('6000');
- await analysis.locator('#applyAnalysisInputs').click();
- await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.income.netMonthly===6000);
- assert.equal((await get()).planning.homeRange.upper,null,'entering net does not imply budget review');
- await analysis.locator('#analysisBudgetReviewed').check();await analysis.locator('#applyAnalysisInputs').click();
- await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.planning.homeRange.upper>0);
- assert.equal((await get()).planning.health.status,'provisional');assert.equal((await get()).summary.cashFlow,4099.75);
- assert.notEqual(await analysis.locator('#healthResidual').textContent(),'—');assert.equal(await analysis.locator('#analysisInputsPanel').getAttribute('open'),null);
- assert.equal(await budget.evaluate(()=>JSON.stringify(PCSUnitedFinancial.getState())),originalBudget);
- assert.equal(await page.evaluate(()=>income.netMonthlyIncome),null);
- await analysis.locator('#stressMortgageAmount').fill('1500');await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.planning.summary.cashFlow===3599.75);
- await analysis.locator('#resetStressTest').click();await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.planning.stressTest.active===false);
- await analysis.evaluate(()=>PCSUnitedAnalysis.refresh());
- await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.income.netMonthly===6000);
- // Reconnect's later duplicate source snapshot must preserve the local details too.
- await analysis.waitForFunction(()=>!document.documentElement.classList.contains('analysis-preview-pending'),{},{polling:100});
- assert.equal((await get()).summary.reviewed,true);
- await analysis.locator('#analysisInputsHeading').click();await analysis.locator('#analysisReserves').fill('20000');await analysis.locator('#applyAnalysisInputs').click();
- await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.reservesAfterClosing===20000);
- assert.equal((await get()).planning.health.status,'stable');
- await analysis.locator('#analysisInputsHeading').click();await analysis.locator('#resetAnalysisInputs').click();
- await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.income.netMonthly===null);
- assert.equal((await get()).summary.reservesAfterClosing,null);assert.equal((await get()).planning.homeRange.upper,null);
- assert.equal(await analysis.locator('#analysisBudgetReviewed').isChecked(),false);
- await analysis.locator('#analysisNetIncome').fill('6000');await analysis.locator('#analysisBudgetReviewed').check();await analysis.locator('#applyAnalysisInputs').click();
- await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.planning.homeRange.upper>0);
+ assert.notEqual(await analysis.locator('#healthResidual').textContent(),'—');assert.match(await analysis.locator('#healthPercentLabel').textContent(),/Before-tax/);
+ assert.notEqual(await analysis.locator('#recommendedHomeRange').textContent(),'—');assert.match(await analysis.locator('#homeRangeTitle').textContent(),/Provisional/);assert.equal(await analysis.locator('#analysisInputsPanel').count(),0);assert.match(await analysis.locator('#heroReserves').textContent(),/9,100/);assert.match(await analysis.locator('#heroReservesTitle').textContent(),/Reported/);assert.equal(result.financialProfile.reportedSavingsInvestmentsReserves,9100);assert.equal(result.income.sources[0].label,'Household income');
  // Changes in the original tab update the already-open analysis tab.
  await budget.click('[data-category="monthly-expenses"]');await budget.locator('[data-id="utilities"] .expense-amount-input input').fill('600.25');
  await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.beforeDeductionsRemaining===5799.75);
- assert.equal((await get()).income.netMonthly,null);assert.equal((await get()).analysisInputs,null);
- assert.equal(await analysis.locator('#analysisNetIncome').inputValue(),'');
- assert.equal(await analysis.locator('#analysisBudgetReviewed').isChecked(),false);
- assert.match(await analysis.locator('#analysisInputsStatus').textContent(),/figures changed/);
  await page.evaluate(()=>setIncome(8000,6000,500));
  await page.bringToFront();await budget.click('#fu-settings-open');await budget.locator('#fu-reviewed').focus();await budget.locator('#fu-reviewed').press('Space');await budget.click('#budgetDetailsClose');
  await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.cashFlow===3299.75&&PCSUnitedAnalysis.getAnalysis()?.summary.reviewed);
@@ -174,14 +141,25 @@ try{
  await popup.setViewportSize({width:390,height:850});
  assert.equal(await analysis.evaluate(()=>innerWidth),300,'Webflow mobile wrapper leaves a 300px iframe');
  assert.equal(await analysis.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'mobile iframe overflow');
- await analysis.locator('#analysisInputsHeading').click();
- assert.equal(await analysis.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'open completion form fits a 300px iframe');
- await analysis.locator('#analysisInputsHeading').click();
  if(screenshots)await popup.screenshot({path:path.join(screenshots,'Financial-Analysis-Connected-Mobile.png'),fullPage:true});
+ // A source tab opened before deployment still transfers its full original
+ // snapshot when only Analysis is refreshed. No source reload or re-entry.
+ const legacy=await context.newPage();await legacy.goto(hostOrigin+'/financial-guidance?legacy=1');
+ const legacyMortgage=legacy.frames().find(f=>f.url().includes('/Military-Mortgage/'));
+ await legacyMortgage.waitForFunction(()=>window.PCSUnitedMilitaryMortgage);
+ await legacyMortgage.evaluate(()=>PCSUnitedMilitaryMortgage.setInputs({loanType:'VA',homePrice:240000,downPayment:0,interestRate:0,termYears:20,propertyTaxAnnual:0,insuranceAnnual:0,vaFeeStatus:'exempt'}));
+ const legacyPopupPromise=legacy.waitForEvent('popup');await legacy.click('#pcsu-analysis-link');const legacyPopup=await legacyPopupPromise;
+ await legacyPopup.waitForFunction(()=>document.querySelector('#pcsu-analysis-frame')?.style.visibility==='visible');
+ const legacyAnalysis=legacyPopup.frames().find(f=>f.url().includes('/PCSUnited-Analysis/'));
+ await legacyAnalysis.waitForFunction(()=>window.PCSUnitedAnalysis?.getAnalysis()?.financialProfile.reportedSavingsInvestmentsReserves===9100,{},{polling:100});
+ assert.equal(await legacyPopup.evaluate(()=>lastAnalysisMessage.context.income.capitalReservesTotal),undefined,'legacy source packet excludes assets');
+ assert.equal(await legacyAnalysis.evaluate(()=>PCSUnitedAnalysis.getAnalysis().income.sources[0].label),'Household income');
+ assert.equal(await legacyAnalysis.locator('#analysisInputsPanel').count(),0);
+ await legacyPopup.close();await legacy.close();
  const direct=await context.newPage();await direct.goto(hostOrigin+'/financial-analysis');await direct.waitForFunction(()=>document.querySelector('#pcsu-analysis-frame')?.style.visibility==='visible');const empty=direct.frames().find(f=>f.url().includes('/PCSUnited-Analysis/'));
  assert.equal(await empty.evaluate(()=>PCSUnitedAnalysis.getAnalysis()),null);assert.equal(await empty.locator('#healthResidual').textContent(),'—');assert.equal(await empty.locator('#stressMortgage').isDisabled(),true);assert.match(await direct.locator('#pcsu-analysis-page-status').textContent(),/Open Financial Analysis from/);
  // Popup blocking leaves the source page and its inputs intact.
  await popup.close();await page.evaluate(()=>{window.open=()=>null});await page.click('#pcsu-analysis-link');assert.match(await page.locator('#pcsu-analysis-status').textContent(),/Allow a new tab/);assert.equal(page.url(),hostOrigin+'/financial-guidance');
  assert.deepEqual(errors,[]);assert(requests.includes('/api/financial-analysis'));
- console.log('PASS: actual Finance-UX + mortgage → CTA → separate Webflow page → analysis iframe; inline take-home/budget review/reserves complete the gross-only path; reset, reconnect, source invalidation, unchanged source data, cents, stress tests, reload, direct visit, cross-origin rejection, no storage, and mobile layout.');
+ console.log('PASS: actual Finance-UX + mortgage → CTA → separate Webflow page → analysis iframe; cents, live changes, manual mortgage, gross-only/zero income, invalidation, reserve intent, reload/reconnect, blocked popup, direct visit, cross-origin rejection, no storage, and mobile layout.');
 }finally{await browser.close();app.closeAllConnections();host.closeAllConnections();await Promise.all([new Promise(r=>app.close(r)),new Promise(r=>host.close(r))]);}

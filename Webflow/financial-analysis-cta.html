@@ -302,7 +302,10 @@
     function small(value) { try { return value && JSON.stringify(value).length < 80000; } catch (_) { return false; } }
     function income() {
       const value = window.PCSU_FINANCIAL_INCOME?.getSnapshot?.();
-      return value ? pick(value,['complete','status','grossMonthlyIncome','netMonthlyIncome','monthlySavingsContributions']) : null;
+      if (!value) return null;
+      const snapshot=pick(value,['schemaVersion','complete','status','audience','entryMethod','currency','period','containsEstimates','grossMonthlyIncome','monthlyDeductions','netMonthlyIncome','monthlySavingsContributions','availableAfterSavings','capitalReservesTotal']);
+      snapshot.sources=Array.isArray(value.sources)?value.sources.slice(0,50).map(source=>pick(source,['label','amount','basis'])):[];
+      return snapshot;
     }
     function send() {
       if (!analysisWindow || analysisWindow.closed || !receiverId) return;
