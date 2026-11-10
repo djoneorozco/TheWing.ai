@@ -67,13 +67,13 @@ try{
  await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.beforeDeductionsRemaining===6099.75);
  let result=await get();assert.equal(result.summary.cashFlow,null);assert.equal(result.status,'incomplete');assert.equal(result.summary.reservesAfterClosing,null);
  assert.match(await analysis.locator('#heroCashLeft').textContent(),/6,099.75/);
- assert.notEqual(await analysis.locator('#healthResidual').textContent(),'—');assert.match(await analysis.locator('#healthPercentLabel').textContent(),/Before-tax/);
+ assert.notEqual(await analysis.locator('#healthResidual').textContent(),'—');assert.match(await analysis.locator('#healthPercentLabel').textContent(),/Left before deductions/);
  assert.notEqual(await analysis.locator('#recommendedHomeRange').textContent(),'—');assert.match(await analysis.locator('#homeRangeTitle').textContent(),/Provisional/);assert.equal(await analysis.locator('#analysisInputsPanel').count(),0);assert.match(await analysis.locator('#heroReserves').textContent(),/9,100/);assert.match(await analysis.locator('#heroReservesTitle').textContent(),/Reported/);assert.equal(result.financialProfile.reportedSavingsInvestmentsReserves,9100);assert.equal(result.income.sources[0].label,'Household income');
  // Changes in the original tab update the already-open analysis tab.
  await budget.click('[data-category="monthly-expenses"]');await budget.locator('[data-id="utilities"] .expense-amount-input input').fill('600.25');
  await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.beforeDeductionsRemaining===5799.75);
  await page.evaluate(()=>setIncome(8000,6000,500));
- await page.bringToFront();await budget.click('#fu-settings-open');await budget.locator('#fu-reviewed').focus();await budget.locator('#fu-reviewed').press('Space');await budget.click('#budgetDetailsClose');
+ await page.bringToFront();await page.locator('#pcsu-budget-reviewed').check();
  await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.cashFlow===3299.75&&PCSUnitedAnalysis.getAnalysis()?.summary.reviewed);
  assert.equal((await get()).status,'within-guideline');
  await budget.locator('[data-id="projected-mortgage"] .expense-amount-input input').fill('1250.50');
@@ -100,7 +100,7 @@ try{
  assert.equal((await get()).planning.summary.monthlyDebt,200);assert.equal((await get()).planning.summary.monthlySavings,500);
  await analysis.locator('#stressMortgageAmount').fill('4500.25');await analysis.locator('#stressMortgageAmount').fill('5000.75');
  await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.planning.summary.cashFlow===-1701);
- assert.equal((await get()).planning.health.status,'at-risk');assert.match(await analysis.locator('#healthResidual').textContent(),/^-/);
+ assert.equal(await analysis.locator('#stressTestedBar').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(209, 71, 89)');assert.equal((await get()).planning.health.status,'at-risk');assert.match(await analysis.locator('#healthResidual').textContent(),/^-/);
  await analysis.locator('#stressMortgageAmount').fill('');assert.match(await analysis.locator('#stressStatus').textContent(),/valid amount/);
  await analysis.click('#resetStressTest');await waitResult(()=>!PCSUnitedAnalysis.getAnalysis()?.planning.stressTest.active&&PCSUnitedAnalysis.getAnalysis()?.planning.summary.cashFlow===3049.25);
  assert.equal(await analysis.locator('#previewBadge').isVisible(),false);assert.equal(await analysis.locator('#stressMortgageAmount').inputValue(),'1250.5');
@@ -109,6 +109,29 @@ try{
  await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.planning.stressTest.active===true);
  await analysis.click('#resetStressTest');await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.planning.stressTest.active===false);
  await analysis.click('#reviewPlanButton');assert.match(await analysis.locator('#analysisReportContent').textContent(),/not an overall score/);await analysis.locator('#closeAnalysisReportButton').press('Escape');
+ await analysis.locator('#cashFlowPeriod').selectOption('annual');assert.match(await analysis.locator('#cashFlowCaption').textContent(),/each year/);
+ await analysis.locator('#cashFlowPeriod').selectOption('monthly');assert.match(await analysis.locator('#cashFlowCaption').textContent(),/each month/);
+ assert.match(await analysis.locator('#healthPercentLabel').textContent(),/Income left after costs/);
+ assert.notEqual(await analysis.locator('#upperHousingPayment').textContent(),'—');
+ // Purchase-budget figures are entered once, computed server-side and carried into Analysis.
+ await mortgage.evaluate(()=>PCSUnitedMortgageViews.setView('summary'));
+ await mortgage.locator('#fi-purchase-details').evaluate(el=>el.open=true);
+ for(const [id,value]of [['fi-closing-costs','4000'],['fi-prepaids','2000'],['fi-cash-available','30000'],['fi-move-in','1000']])await mortgage.locator('#'+id).fill(value);
+ await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.reservesAfterClosing===23000&&PCSUnitedAnalysis.getAnalysis()?.budget!==null);
+ assert.equal((await get()).mortgage.upfront.purchaseCash,6000);assert.equal((await get()).mortgage.upfront.totalCashNeeded,7000);
+ assert.match(await analysis.locator('#totalDueAtClosing').textContent(),/6,000/);assert.match(await analysis.locator('#closingCostsSummary').textContent(),/4,000/);
+ assert.match(await mortgage.locator('#mm-summary-reserve').textContent(),/23,000/);assert.equal(await mortgage.locator('#fi-emergency-fund').isDisabled(),true);
+ await mortgage.locator('#fi-cash-available').fill('5000');await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.reservesAfterClosing===-2000&&PCSUnitedAnalysis.getAnalysis()?.budget!==null);
+ assert.match(await analysis.locator('#analysisConclusion').textContent(),/short of/);assert.equal((await get()).planning.health.status,'at-risk');
+ await mortgage.locator('#fi-prepaids').fill('');await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.reservesAfterClosing===null&&PCSUnitedAnalysis.getAnalysis()?.budget!==null);
+ assert.match(await analysis.locator('#analysisConclusion').textContent(),/still need review/);
+ for(const id of ['fi-closing-costs','fi-prepaids','fi-cash-available','fi-move-in'])await mortgage.locator('#'+id).fill('');
+ await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.reservesAfterClosing===5000&&PCSUnitedAnalysis.getAnalysis()?.budget!==null);
+ // Both review controls reflect the same state; untrusted messages cannot mark a budget reviewed.
+ await page.locator('#pcsu-budget-reviewed').uncheck();await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.reviewed===false);
+ await budget.evaluate(origin=>window.dispatchEvent(new MessageEvent('message',{origin:'https://evil.example',source:parent,data:{source:'pcsu-finance-host',version:1,type:'pcsu:finance-review',reviewed:true}})),hostOrigin);
+ assert.equal(await budget.evaluate(()=>PCSUnitedFinancial.getState().reviewed),false);
+ await page.locator('#pcsu-budget-reviewed').check();await waitResult(()=>PCSUnitedAnalysis.getAnalysis()?.summary.reviewed===true);
  // A failed preview stays visibly unconfirmed and can be reset without losing the source budget.
  await context.route('**/api/financial-analysis',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({ok:false,error:'Preview service unavailable.'})}));
  await analysis.locator('#stressMortgageAmount').fill('1800');

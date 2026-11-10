@@ -46,15 +46,16 @@ function health(analysis, summary, upper) {
       status='stretched'; label='Stretched'; reason=reserve !== null && reserve < 3 ? 'Reserves are below the three-month planning cushion.' : 'This payment exceeds the budget guideline or your cash-cushion goal.';
     } else if (reserve === null && summary.reservesAfterClosing !== null) { status='incomplete'; label='Review expenses'; reason='Reserve coverage needs an entered monthly expense basis.'; }
     else if (reserve === null) { status='provisional'; label='Check reserves'; reason='The monthly budget fits the planning guideline. Add after-closing reserves to complete the budget signal.'; }
+    else if (analysis.mortgage.upfront.purchaseCash === null) { status='provisional'; label='Review closing costs'; reason='The monthly budget fits the planning guideline. Enter closing costs and prepaids in the mortgage Summary to complete the purchase-cost review.'; }
     else { status='stable'; label='Stable'; reason='The payment fits the budget guideline and at least three months of entered costs remain in reserves.'; }
   }
   if (factors.knownUpfrontShortfall>0) {
     if (status==='stable') { status='provisional';label='Review upfront funds'; }
-    reason+=' Reported savings and investments are below the known upfront costs; other closing costs are not yet included.';
+    reason+=analysis.financialProfile.cashAvailableForPurchase!==null?' Cash available is below the entered purchase costs.':' Reported savings and investments are below the known upfront costs; confirm usable cash and remaining purchase costs.';
   }
   return {status,label,reason,missing,factors,residualPercent:ratio(cash,analysis.income.netMonthly),
     beforeDeductionsPercent:ratio(summary.beforeDeductionsRemaining,analysis.income.grossMonthly),basis:grossOnly?'before-payroll-deductions':'take-home',
-    scope:'Budget planning signal; closing costs, credit underwriting and VA residual-income qualification are not assessed.',
+    scope:'Budget planning signal using entered purchase costs when supplied. Credit underwriting and VA residual-income qualification are not assessed.',
     rules:'Uses the existing 28% housing / 36% housing-plus-debt planning guideline, your monthly cushion, and reserve bands below 1 month, 1–3 months, and 3+ months. These are planning assumptions, not loan approval rules. Credit and LTV are financing context, not an approval score.'};
 }
 
@@ -89,6 +90,24 @@ function homeRange(analysis, upper, comfortable, termYears) {
     assumptions:'Uses your entered fixed interest rate, loan term and cash down payment. Taxes and insurance scale with price; HOA and other ownership costs stay fixed. The preferred target preserves your additional comfort cushion. When provided, after-closing cash must cover three months of tested housing, living expenses and debt; that cash balance is held fixed across prices. Closing-cost differences are not estimated. No live market rate or lender approval is implied.'};
 }
 
+function conclusion(analysis,s,h,upper,preview) {
+  const currency=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);
+  const prefix=preview?'In this temporary budget test: ':'';
+  if(!analysis.mortgage||s.housingMonthly===null||!analysis.budget)return 'Complete your income, mortgage and expense entries to see how this home fits.';
+  if(s.example)return 'Review the example mortgage price, rate and costs in Section 02 before using this as your housing plan.';
+  if(s.cashFlow===null)return `${prefix}Entered housing costs are ${currency(s.housingMonthly)}/month. Add payroll deductions in Section 01 to find the money left after expenses, debt and savings.`;
+  let text=s.cashFlow<0?`${prefix}This home exceeds the monthly budget you entered. Housing costs of ${currency(s.housingMonthly)}/month leave a ${currency(-s.cashFlow)} monthly shortfall after expenses, debt and savings.`
+    : `${prefix}${s.reviewed&&s.housingMonthly<=upper?'This home fits the monthly budget you entered.':'Review this home against your monthly budget.'} Estimated housing costs are ${currency(s.housingMonthly)}/month, leaving ${currency(s.cashFlow)} after expenses, debt and savings.`;
+  if(!s.reviewed)text+=' Confirm your expense review beside Provide Financial Analysis.';
+  if(analysis.mortgage.upfront.purchaseCash===null)text+=' Closing costs and prepaids still need review in the mortgage Summary.';
+  else if(s.reservesAfterClosing===null)text+=' Enter usable cash and moving costs in the mortgage Summary to calculate remaining reserves.';
+  else if(s.reservesAfterClosing<0)text+=` You are ${currency(-s.reservesAfterClosing)} short of the entered purchase and moving costs.`;
+  else text+=` Estimated cash after purchase is ${currency(s.reservesAfterClosing)}${s.reserveMonths===null?'':`, covering ${s.reserveMonths.toFixed(1)} months of entered costs`}.`;
+  if(h.status==='stretched'&&s.cashFlow>=0)text+=' The payment or reserves fall short of your planning cushion.';
+  if(h.status==='at-risk'&&s.cashFlow>=0&&s.reservesAfterClosing>=0&&s.reserveMonths!==null&&s.reserveMonths<1)text+=' Remaining reserves cover less than one month of costs.';
+  return text;
+}
+
 export function calculateFinancialPlanning(analysis, input) {
   const stress = stressInputs(input.stressTest,analysis.summary);
   const base = analysis.summary, s = {...base}, budget = analysis.budget;
@@ -120,7 +139,8 @@ export function calculateFinancialPlanning(analysis, input) {
   if (range.knownUpfrontShortfall>0) range.reason+=' Assumes the entered down payment can be funded; reported balances are below the known upfront subtotal.';
   const currentRemaining=analysis.income.netMonthly===null?base.beforeDeductionsRemaining:base.cashFlow;
   const testedRemaining=analysis.income.netMonthly===null?s.beforeDeductionsRemaining:s.cashFlow;
-  return {version:PLANNING_VERSION,summary:s,health:health(analysis,s,upper),homeRange:range,
+  const assessed=health(analysis,s,upper);
+  return {version:PLANNING_VERSION,summary:s,health:assessed,homeRange:range,conclusion:conclusion(analysis,s,assessed,upper,!!stress),
     monthlyLimit:upper,comfortablePayment:comfortable,bufferMonthly:budget?.affordability.bufferMonthly??null,
     limits:limits?{housingIncome:limits.housing28,housingAndDebtIncome:limits.totalDebt36,cashCushion:cashLimit===null?null:cents(cashLimit-deltaExpenses),reserveCushion:reserveLimit}:null,
     stressTest:{available:base.housingMonthly!==null&&base.nonHousingExpenses!==null,active:!!stress&&(deltaHousing!==0||deltaExpenses!==0),

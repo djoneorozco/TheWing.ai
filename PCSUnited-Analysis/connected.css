@@ -86,7 +86,7 @@
 .pcsu-connected .stress-comparison strong{color:#7138ce;font-size:12px;font-variant-numeric:tabular-nums}
 .pcsu-connected .stress-comparison>div:last-child b{background:#46b762}
 .pcsu-connected .stress-comparison>div:last-child strong{color:#258743}
-.pcsu-connected .stress-comparison b.is-negative{background:#d14759}
+.pcsu-connected .stress-comparison>div b.is-negative{background:#d14759}
 .pcsu-connected .stress-comparison>div:has(.is-negative) strong{color:#bd4653}
 .pcsu-connected .stress-change{font-size:10px;color:#556079;margin:12px 0}
 .pcsu-connected .stress-health-result{border:1px solid #e7e0f6;border-radius:8px;background:#fbf9ff;padding:10px 12px;margin-top:auto;font-size:11px}
@@ -107,3 +107,6 @@
 @media(max-width:1100px){.pcsu-connected .analysis-health-hero{grid-template-columns:1fr 1.7fr;padding:20px 8px;gap:22px 0}.pcsu-connected .analysis-health-hero>div:nth-child(2){border:0}.pcsu-connected .planning-range{font-size:28px}.pcsu-connected .planning-value strong{font-size:29px}.pcsu-connected .stress-test-card{min-height:440px}}
 @media(max-width:680px){.pcsu-connected .analysis-health-hero{grid-template-columns:1fr;padding:0;gap:0}.pcsu-connected .analysis-health-hero>div{padding:20px;border:0;border-bottom:1px solid #ffffff29}.pcsu-connected .analysis-health-hero>div:nth-child(2){border-bottom:1px solid #ffffff29}.pcsu-connected .analysis-health-hero h2{font-size:12px}.pcsu-connected .planning-range{font-size:26px}.pcsu-connected .analysis-health-hero p{font-size:12px}.pcsu-connected .stress-test-card{min-height:0;padding:18px}.pcsu-connected .stress-control-label{font-size:12px}.pcsu-connected .stress-number input{font-size:16px}.pcsu-connected .stress-health-result{margin-top:10px}.pcsu-connected .analysis-connection{margin:0 0 12px}.pcsu-connected .analysis-report-section dl{grid-template-columns:1fr}.pcsu-connected .analysis-report-section dd{margin-bottom:10px}}
 @media(prefers-reduced-motion:reduce){.pcsu-connected .stress-comparison b{transition:none}}
+
+.pcsu-connected .health-ring span{max-width:82px;text-align:center;line-height:1.35;letter-spacing:.3px}
+.pcsu-connected .analysis-conclusion{margin:0 0 18px;padding:14px 18px;background:#fff;border:1px solid #e1e5ed;border-radius:12px;color:#26354d;font:500 14px/1.6 Inter,Arial,sans-serif}

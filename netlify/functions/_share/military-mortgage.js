@@ -20,7 +20,7 @@ function number(body, key, min, max, optional = false) {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) {
     invalid(key, `${key} must be a number from ${min} to ${max}.`);
   }
-  if (['homePrice','downPayment','propertyTaxAnnual','insuranceAnnual','hoaMonthly','otherOwnershipMonthly','pmiMonthly'].includes(key) && Math.abs(value - round2(value)) > 1e-7) {
+  if (['homePrice','downPayment','propertyTaxAnnual','insuranceAnnual','hoaMonthly','otherOwnershipMonthly','pmiMonthly','closingCosts','prepaidsEscrow','cashAvailable','moveInCosts'].includes(key) && Math.abs(value - round2(value)) > 1e-7) {
     invalid(key, `${key} must use dollars and cents (at most two decimal places).`);
   }
   return value;
@@ -129,18 +129,28 @@ export function calculateMilitaryMortgage(body) {
   monthly.mortgagePayment = round2(monthly.principalInterest + monthly.propertyTax + monthly.insurance + monthly.hoa + monthly.mortgageInsurance);
   monthly.totalHousing = round2(monthly.mortgagePayment + monthly.otherOwnership);
   const feePaidAtClosing = round2(fee - financedFee);
+  const cashInputs = Object.fromEntries(['closingCosts','prepaidsEscrow','cashAvailable','moveInCosts']
+    .map(key => [key, number(body,key,0,10000000,true)]));
+  const {closingCosts,prepaidsEscrow,cashAvailable,moveInCosts} = cashInputs;
+  const knownSubtotal = round2(downPayment + feePaidAtClosing);
+  const purchaseCash = closingCosts !== null && prepaidsEscrow !== null
+    ? round2(knownSubtotal + closingCosts + prepaidsEscrow) : null;
+  const totalCashNeeded = purchaseCash !== null && moveInCosts !== null ? round2(purchaseCash + moveInCosts) : null;
+  const reservesAfterPurchase = totalCashNeeded !== null && cashAvailable !== null ? round2(cashAvailable-totalCashNeeded) : null;
   return {
     ok: true, contract: MILITARY_MORTGAGE_CONTRACT, version: '1.1.0',
     inputs: { loanType, homePrice, downPayment, interestRate, termYears, creditScore, propertyTaxAnnual, insuranceAnnual,
-      hoaMonthly, otherOwnershipMonthly, pmiMonthly, vaFeeStatus, feePayment },
+      hoaMonthly, otherOwnershipMonthly, pmiMonthly, vaFeeStatus, feePayment, ...cashInputs },
     monthly, loan: { baseLoan, financedFee, loanAmount, fee, feeRate, feeLabel, feePaidAtClosing },
     // Reuse the canonical schedule after financed fees establish final principal.
     // These totals cover P&I only; do not extrapolate taxes or insurance premiums.
     amortization: { ...amortizationTotals(loanAmount, interestRate, termYears),
       principal: loanAmount, basis: 'fixed-rate-no-extra-payments',
       excludes: 'Taxes, insurance, HOA, other ownership costs and upfront cash are excluded.' },
-    upfront: { downPayment, feePaidAtClosing, knownSubtotal: round2(downPayment + feePaidAtClosing),
-      excludes: 'Other closing costs, prepaid items and escrow deposits are not included in this subtotal.' },
+    upfront: { downPayment, feePaidAtClosing, knownSubtotal, ...cashInputs, purchaseCash, totalCashNeeded, reservesAfterPurchase,
+      cashPlanStarted:Object.values(cashInputs).some(value=>value!==null),
+      excludes:purchaseCash === null ? 'Other closing costs, prepaid items and escrow deposits are not included in this subtotal.'
+        : 'Purchase cash includes down payment, cash loan fee, entered other closing costs and prepaids. It includes deposits already paid; it is not the remaining amount due on closing day. Financed loan fees are not added again.' },
     mortgageInsurance: { note: insuranceNote, annualRate: annualMipRate, durationYears: mipDurationYears },
     notes, sources: loanType === 'VA' ? [VA_SOURCE] : loanType === 'FHA' ? [FHA_SOURCE] : [],
     assumptions: { rateMeaning: 'note-interest-rate-not-apr', fixedRate: true, purchaseOnly: true,

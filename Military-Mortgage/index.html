@@ -302,12 +302,13 @@
               </span>
               <input
                 id="fi-emergency-fund"
+                  placeholder="Not entered"
                 class="fi-control"
                 type="number" inputmode="decimal"
                 min="0"
                 max="10000000"
                 step="0.01"
-                value="8500" placeholder="Optional — enter your reserve"
+                value=""
               >
             </div>
             <div class="fi-slider-wrap">
@@ -338,7 +339,7 @@
               </div>
             </div>
             <div class="fi-hint">
-              Cash expected to remain after the PCS, closing costs, down payment and move-in expenses.
+              Enter cash expected after all purchase and moving costs, or calculate it under Summary → Cash needed to buy this home.
             </div>
           </div>
         </div>
@@ -396,6 +397,18 @@
             <div id="fi-fee-options"><label class="fi-label" for="fi-fee-payment">Upfront loan fee</label><select class="fi-control" id="fi-fee-payment"><option value="finance">Finance in the loan</option><option value="cash">Pay at closing</option></select><p class="fi-hint">VA funding fee or FHA upfront MIP.</p></div>
             <div id="fi-pmi-options" hidden><label class="fi-label" for="fi-pmi">Quoted PMI / month ($)</label><input class="fi-control" id="fi-pmi" type="number" min="0" max="100000" step="0.01" placeholder="Optional — use planning estimate"><p class="fi-hint">Leave blank for an estimate; enter 0 only for confirmed no PMI.</p></div>
           </div>
+        </details>
+        <details id="fi-purchase-details" class="fi-details">
+          <summary>Cash needed to buy this home</summary>
+          <p class="fi-detail-note">Enter your estimates, or 0 where none applies. These amounts calculate your remaining cash automatically. Leaving them blank keeps the purchase budget incomplete.</p>
+          <div class="fi-details-grid">
+            <div><label class="fi-label" for="fi-closing-costs">Other closing costs ($)</label><input class="fi-control" id="fi-closing-costs" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" placeholder="Enter an amount, or 0"><p class="fi-hint">Your share after seller/lender credits. Exclude the down payment, VA/FHA loan fee and prepaids entered separately.</p></div>
+            <div><label class="fi-label" for="fi-prepaids">Prepaids & initial escrow ($)</label><input class="fi-control" id="fi-prepaids" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" placeholder="Enter an amount, or 0"><p class="fi-hint">Prepaid interest, insurance and initial escrow deposits. Use your lender estimate; enter 0 if none.</p></div>
+            <div><label class="fi-label" for="fi-cash-available">Cash available before purchase ($)</label><input class="fi-control" id="fi-cash-available" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" placeholder="Enter an amount, or 0"><p class="fi-hint">Only cash you can use, including deposits already paid. Exclude investments you will keep. This is separate from monthly income.</p></div>
+            <div><label class="fi-label" for="fi-move-in">Moving & other one-time costs ($)</label><input class="fi-control" id="fi-move-in" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" placeholder="Enter an amount, or 0"><p class="fi-hint">Cash you expect to spend outside closing. Enter 0 if none. Do not repeat costs above.</p></div>
+          </div>
+          <dl id="fi-purchase-breakdown"></dl>
+          <p class="fi-detail-note">Planning budget. Check the lender’s Loan Estimate or Closing Disclosure for the actual cash due at closing.</p>
         </details>
         <p class="fi-footer-note">Planning estimate, not a loan approval or lender quote. Confirm costs, eligibility and fees with your lender. <a href="https://www.va.gov/housing-assistance/home-loans/funding-fee-and-closing-costs/" target="_blank" rel="noopener">VA fee rules</a> · <a href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf" target="_blank" rel="noopener">FHA MIP rules</a></p>
       </section>

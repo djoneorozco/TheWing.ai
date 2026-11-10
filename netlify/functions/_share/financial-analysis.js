@@ -62,7 +62,7 @@ export function calculateFinancialAnalysis(input) {
 
   // Section 02 explicitly labels this input AFTER closing. Its illustrative default
   // must not become a user's reserve, and closing costs must not be subtracted again.
-  const reserve = input.mortgage?.emergencyFundBasis === 'after-closing' && input.mortgage.emergencyFundUserEntered === true
+  const reserve = mortgage?.upfront.cashPlanStarted ? mortgage.upfront.reservesAfterPurchase : input.mortgage?.emergencyFundBasis === 'after-closing' && input.mortgage.emergencyFundUserEntered === true
     ? amount(input.mortgage.emergencyFund, 'reserves after closing') : null;
   const metrics = budget?.metrics;
   const reserveBasis = metrics ? money(metrics.totalExpenses + metrics.totalDebt) : null;
@@ -76,15 +76,17 @@ export function calculateFinancialAnalysis(input) {
     detail = 'Compares your entered housing cost with the existing income, debt and cash-cushion guideline. This is not a loan approval.';
   }
   const components = mortgage ? Object.entries({principalInterest:mortgage.monthly.principalInterest,propertyTaxes:mortgage.monthly.propertyTax,homeInsurance:mortgage.monthly.insurance,hoaFees:mortgage.monthly.hoa,pmi:mortgage.monthly.mortgageInsurance,otherOwnership:mortgage.monthly.otherOwnership}).map(([key,value])=>({key,amount:value,share:ratio(value,mortgage.monthly.totalHousing)})) : [];
-  const knownUpfrontShortfall=reportedAssets!==null&&mortgage?Math.max(0,money(mortgage.upfront.knownSubtotal-reportedAssets)):null;
+  const cashAvailable=mortgage?.upfront.cashAvailable??null;
+  const knownUpfrontShortfall= mortgage && (cashAvailable??reportedAssets)!==null
+    ? Math.max(0,money((mortgage.upfront.totalCashNeeded??mortgage.upfront.purchaseCash??mortgage.upfront.knownSubtotal)-(cashAvailable??reportedAssets))) : null;
   const result = {ok:true,version:VERSION,status,missing,notes,income:{grossMonthly:gross,netMonthly:net,payrollDeductions:deductions,monthlySavingsContributions:monthlyContributions,availableAfterIncomeSavings:net!==null&&monthlyContributions!==null?money(net-monthlyContributions):null,sources:incomeSources,containsEstimates:income?.containsEstimates===true},
-    financialProfile:{reportedSavingsInvestmentsReserves:reportedAssets,knownUpfrontShortfall,reserveBasis:'current combined balance; liquidity and after-closing balance are not established',incomeSource:income?.status??null},mortgage,budget,components,
+    financialProfile:{reportedSavingsInvestmentsReserves:reportedAssets,cashAvailableForPurchase:cashAvailable,knownUpfrontShortfall,reserveBasis:'current combined balance; liquidity and after-closing balance are not established',incomeSource:income?.status??null},mortgage,budget,components,
     summary:{housingMonthly:housing,nonHousingExpenses:nonHousing,monthlyDebt:metrics?.totalDebt??null,monthlySavings:metrics?.totalSavings??null,
       cashFlow:metrics?.cashFlow??null,beforeDeductionsRemaining:metrics?.beforeDeductionsRemaining??null,
       housingRatioNet:ratio(housing,net),housingRatioGross:ratio(housing,gross),debtRatio:metrics?.debtIncomeRatio??null,
       combinedDebtHousingRatio:budget ? ratio(money(housing+budget.affordability.continuingDebt),gross) : null,
       downPaymentPercent:mortgage ? ratio(mortgage.upfront.downPayment,mortgage.inputs.homePrice) : null,
-      reservesAfterClosing:reserve,reserveMonths:reserve!==null&&reserveBasis>0?reserve/reserveBasis:null,
+      reservesAfterClosing:reserve,reservesBasis:mortgage?.upfront.cashPlanStarted?'calculated-purchase-budget':'user-entered-after-closing',reserveMonths:reserve!==null&&reserveBasis>0?reserve/reserveBasis:null,
       manuallyAdjusted,example,reviewed:budget?.reviewed===true},guidance:{title,detail},items};
   result.planning = calculateFinancialPlanning(result,input);
   return result;

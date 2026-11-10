@@ -19,7 +19,7 @@
     hero.innerHTML=`
       <div class="health-overview">
         <h2 id="affordabilityHeroTitle">Your financial health</h2>
-        <div class="health-ring" id="healthRing" role="img" aria-label="Residual percentage unavailable"><div><strong id="healthResidual">—</strong><span id="healthPercentLabel">Residual %</span></div></div>
+        <div class="health-ring" id="healthRing" role="img" aria-label="Residual percentage unavailable"><div><strong id="healthResidual">—</strong><span id="healthPercentLabel">Income left after costs</span></div></div>
         <strong class="health-verdict" id="healthVerdict">Needs inputs</strong>
         <button class="planning-text-button" id="healthDetails" type="button">How this is assessed ↗</button>
       </div>
@@ -27,6 +27,7 @@
         <h2 id="homeRangeTitle">Recommended home-price range</h2>
         <strong class="planning-range" id="recommendedHomeRange">—</strong>
         <p class="planning-target">Preferred target <strong id="preferredHomePrice">—</strong></p>
+        <p class="planning-small">Monthly housing target <strong id="preferredHousingPayment">—</strong><br>Upper planning limit <strong id="upperHousingPayment">—</strong></p>
         <div class="home-range-track" id="homeRangeTrack" role="img" aria-label="Price range unavailable"><span id="homeRangeBand"></span><i id="homeRangeTarget"></i><b id="homeRangeSelected"></b></div>
         <p class="selected-home-note" id="selectedHomeNote">Connect your current mortgage and budget.</p>
         <p class="planning-small" id="homeRangeNote">Budget-based estimate; closing costs need separate review.</p>
@@ -44,6 +45,7 @@
         <p id="heroReserveMonths">Enter your after-closing reserve.</p>
         <button class="planning-review-button" id="reviewPlanButton" type="button">Review your plan ↗</button>
       </div>`;
+    const conclusion=document.createElement('p');conclusion.id='analysisConclusion';conclusion.className='analysis-conclusion';hero.after(conclusion);
     const card=document.querySelector('.affordability-result-card');card.classList.add('stress-test-card');
     card.innerHTML=`
       <header class="stress-test-heading"><span class="stress-test-icon" aria-hidden="true">↗</span><div><h2 id="affordabilityResultTitle">Test your budget</h2><p id="stressIncome">Connect income and expenses</p></div></header>
@@ -84,13 +86,13 @@
     const grossOnly=data?.income.netMonthly==null;
     document.documentElement.dataset.health=h?.status||'incomplete';
     const residual=grossOnly?h?.beforeDeductionsPercent:h?.residualPercent;
-    set('healthPercentLabel',grossOnly?'Before-tax %':'Residual %');
+    set('healthPercentLabel',grossOnly?'Left before deductions':'Income left after costs');
     set('healthResidual',percent(residual));set('healthVerdict',h?.label||'Needs inputs');
     $('healthRing').style.setProperty('--health-fill',`${Math.max(0,Math.min(100,residual??0))}%`);
     $('healthRing').setAttribute('aria-label',residual==null?'Connect income and expenses from Financial Guidance':percent(residual)+` of ${grossOnly?'income before payroll deductions':'take-home income'} remains after entered costs and savings. `+h.label+'.');
-    set('homeRangeTitle',grossOnly||!s.reviewed||r?.knownUpfrontShortfall>0?'Provisional home-price range':'Recommended home-price range');
+    set('homeRangeTitle',h?.status!=='stable'?'Provisional home-price range':'Recommended home-price range');
     set('recommendedHomeRange',r?.upper!=null?(r.lower!=null?`${wholeMoney(r.lower)} – ${wholeMoney(r.upper)}`:`Up to ${wholeMoney(r.upper)}`):'—');
-    set('preferredHomePrice',wholeMoney(r?.target));set('homeRangeNote',r?.reason||'Add take-home income and review your budget.');
+    set('preferredHomePrice',wholeMoney(r?.target));set('preferredHousingPayment',r?.upper!=null&&r.targetPayment==null?'Cushion not met':money(r?.targetPayment));set('upperHousingPayment',money(r?.upperPayment));set('analysisConclusion',p?.conclusion||'Connect your income, mortgage and expenses to see your result.');set('homeRangeNote',r?.reason||'Add take-home income and review your budget.');
     set('selectedHomeNote',r?.selectedPrice!=null?`Selected home: ${wholeMoney(r.selectedPrice)}${r.selectedPosition?' · '+(r.selectedPosition==='above'?'Above range':r.selectedPosition==='below'?'Below range':'Within range'):''}`:'Connect your mortgage assumptions from Financial Guidance.');
     $('selectedHomeNote').classList.toggle('is-above',r?.selectedPosition==='above');
     $('homeRangeTrack').classList.toggle('is-empty',r?.upper==null);
@@ -127,6 +129,7 @@
   function chart() {
     const s=packet?.planning?.summary||packet?.summary||{},income=packet?.income||{},grossOnly=income.netMonthly==null;
     const multiplier=$('cashFlowPeriod').value==='annual'?12:1;
+    set('cashFlowCaption',multiplier===12?'Where your money goes each year.':'Where your money goes each month.');
     const values={Income:grossOnly?income.grossMonthly:income.netMonthly,Housing:s.housingMonthly,Expenses:s.nonHousingExpenses,Debt:s.monthlyDebt,Savings:s.monthlySavings,Remaining:grossOnly?s.beforeDeductionsRemaining:s.cashFlow};
     const complete=Object.values(values).every(v=>typeof v==='number'&&Number.isFinite(v));
     const minimum=complete?Math.min(0,values.Remaining):0,maximum=complete?Math.max(1,values.Income):1;
@@ -166,20 +169,20 @@
     set('debtSummaryMonthly',money(s.monthlyDebt));set('debtSummaryRatio',percent(s.combinedDebtHousingRatio));set('debtSummaryRatioStatus','Gross-income planning ratio');
     labelFor('debtSummaryRatio','Housing + required debt / gross income');
     set('vaFundingFee',money(m?.loan.fee));labelFor('vaFundingFee',m?.loan.feeLabel||'Upfront loan fee');set('vaFundingFeeStatus',m?m.loan.financedFee>0?'Financed':m.loan.fee>0?'Paid at closing':'None in scenario':'Not available');
-    set('downPaymentSummaryLabel','Down payment');set('downPaymentSummaryAmount',money(m?.upfront.downPayment));set('closingCostsSummary','—');set('prepaidsEscrowAmount','—');
-    set('totalDueAtClosing',money(m?.upfront.knownSubtotal));document.querySelector('.upfront-total>span').textContent='Known subtotal: down payment + cash loan fee';
+    set('downPaymentSummaryLabel','Down payment');set('downPaymentSummaryAmount',money(m?.upfront.downPayment));set('closingCostsSummary',money(m?.upfront.closingCosts));set('prepaidsEscrowAmount',money(m?.upfront.prepaidsEscrow));
+    set('totalDueAtClosing',money(m?.upfront.purchaseCash??m?.upfront.knownSubtotal));document.querySelector('.upfront-total>span').textContent=m?.upfront.purchaseCash!=null?'Total purchase cash (includes paid deposits)':'Known subtotal: down payment + cash loan fee';
     set('analysisUpfrontNote',m?.upfront.excludes||'Closing costs, prepaids and escrow deposits have not been supplied.');
     const reported=data?.financialProfile?.reportedSavingsInvestmentsReserves,showReported=s.reservesAfterClosing==null&&reported!=null;
     set('reservesTitle',showReported?'Reported savings & investments':'Reserves after closing');
     document.querySelector('.reserves-card__label').textContent=showReported?'Current combined balance':'Cash reserves remaining';
-    set('reservesAfterClosing',money(showReported?reported:s.reservesAfterClosing));set('reservesStatus',showReported?'Transferred from Financial Guidance':s.reservesAfterClosing==null?'Not supplied':'Your entered reserve');
-    set('reservesDescription',showReported?'Savings, investments and reserves reported in the original income calculator. Liquidity and closing costs have not been assessed.':s.reservesAfterClosing==null?'An after-closing cash balance was not supplied in Financial Guidance.':s.reserveMonths==null?'Your entered balance after closing. Complete expenses to calculate coverage.':`${s.reserveMonths.toFixed(1)} months of entered housing, other expenses and debt. This balance is already after closing.`);
+    set('reservesAfterClosing',money(showReported?reported:s.reservesAfterClosing));set('reservesStatus',showReported?'Transferred from Financial Guidance':s.reservesAfterClosing==null?'Not supplied':s.reservesAfterClosing<0?'Cash shortfall':s.reservesBasis==='calculated-purchase-budget'?'Calculated from purchase costs':'Your entered reserve');
+    set('reservesDescription',s.reservesAfterClosing<0?`You need ${money(-s.reservesAfterClosing)} more to cover the entered purchase and moving costs.`:s.reservesBasis==='calculated-purchase-budget'&&s.reservesAfterClosing!=null?`Usable cash minus ${money(m.upfront.purchaseCash)} purchase cash and ${money(m.upfront.moveInCosts)} moving costs. ${s.reserveMonths==null?'':s.reserveMonths.toFixed(1)+' months of entered costs remain.'}`:showReported?'Savings, investments and reserves reported in the original income calculator. Liquidity and closing costs have not been assessed.':s.reservesAfterClosing==null?'An after-closing cash balance was not supplied in Financial Guidance.':s.reserveMonths==null?'Your entered balance after closing. Complete expenses to calculate coverage.':`${s.reserveMonths.toFixed(1)} months of entered housing, other expenses and debt. This balance is already after closing.`);
     set('priceScenariosTitle','Section 02 mortgage scenario');set('selectedScenarioPrice',money(m?.inputs.homePrice));set('selectedScenarioPayment',money(m?.monthly.totalHousing));set('selectedScenarioRatio',s.example?'Example':m?'Entered assumptions':'Not available');
     document.querySelector('[data-price-scenario="selected"] .price-scenario__label').textContent='Current price assumption';
     document.querySelector('.price-scenarios-card__footer').textContent='Uses the price, rate and costs entered in Section 02.';
     set('takeawayAffordability',data?.planning.health.reason||'Your current figures have not been connected.');
     set('takeawayCashFlow',grossOnly?'Payroll deductions are not known. The remaining amount is before deductions.':'The mortgage is included once in your monthly cash flow.');
-    set('takeawayReserves',showReported?`Reported savings, investments and reserves: ${money(reported)}. After-closing cash is not established.`:s.reservesAfterClosing==null?'After-closing reserves have not been entered.':`After-closing reserves entered: ${money(s.reservesAfterClosing)}.`);
+    set('takeawayReserves',showReported?`Reported savings, investments and reserves: ${money(reported)}. After-closing cash is not established.`:s.reservesAfterClosing==null?'After-closing reserves have not been entered.':`Reserves after purchase: ${money(s.reservesAfterClosing)}.`);
     set('takeawayVALoan',m?`${m.inputs.loanType} scenario. Closing costs and eligibility require separate review.`:'Choose your mortgage assumptions in Section 02.');
     chart();
   }
@@ -204,18 +207,18 @@
     const content=$('analysisReportContent');content.replaceChildren();
     const section=document.createElement('section');section.className='analysis-report-section';
     const title=document.createElement('h3');title.textContent=debtOnly?'Your entered debt payments':packet?.planning?.stressTest.active?'Your entered budget (before the test)':'Your connected financial analysis';section.append(title);
-    const copy=document.createElement('p');copy.textContent=packet?.guidance.detail||'Connect your current figures to prepare a report.';section.append(copy);
+    const copy=document.createElement('p');copy.textContent=packet?.planning?.stressTest.active?'Your original entries are listed below. The temporary budget test is explained in the following section.':packet?.planning.conclusion||packet?.guidance.detail||'Connect your current figures to prepare a report.';section.append(copy);
     const dl=document.createElement('dl');
     const s=packet?.summary||{};
     const entries=debtOnly?(packet?.items||[]).filter(x=>x.category==='debt').map(x=>[x.label,x.value]):[
-      ['Income before payroll deductions',packet?.income.grossMonthly],...(packet?.income.sources||[]).map(source=>[source.label,source.amount]),['Payroll deductions supplied',packet?.income.payrollDeductions],['Take-home income',packet?.income.netMonthly],['Housing used in budget',s.housingMonthly],['Other expenses',s.nonHousingExpenses],['Debt payments',s.monthlyDebt],['Monthly savings used in budget',s.monthlySavings],['Monthly savings supplied by income calculator',packet?.income.monthlySavingsContributions],['Reported savings, investments and reserves (current balance)',packet?.financialProfile?.reportedSavingsInvestmentsReserves],['Remaining after deductions',s.cashFlow],['Remaining before deductions',s.beforeDeductionsRemaining],['Known upfront subtotal (not all closing costs)',packet?.mortgage?.upfront.knownSubtotal],['Entered reserves after closing',s.reservesAfterClosing]];
+      ['Income before payroll deductions',packet?.income.grossMonthly],...(packet?.income.sources||[]).map(source=>[source.label,source.amount]),['Payroll deductions supplied',packet?.income.payrollDeductions],['Take-home income',packet?.income.netMonthly],['Housing used in budget',s.housingMonthly],['Other expenses',s.nonHousingExpenses],['Debt payments',s.monthlyDebt],['Monthly savings used in budget',s.monthlySavings],['Monthly savings supplied by income calculator',packet?.income.monthlySavingsContributions],['Reported savings, investments and reserves (current balance)',packet?.financialProfile?.reportedSavingsInvestmentsReserves],['Remaining after deductions',s.cashFlow],['Remaining before deductions',s.beforeDeductionsRemaining],['Purchase cash (includes paid deposits)',packet?.mortgage?.upfront.purchaseCash],['Moving and other one-time costs',packet?.mortgage?.upfront.moveInCosts],['Cash available before purchase',packet?.mortgage?.upfront.cashAvailable],['Reserves after purchase',s.reservesAfterClosing]];
     for(const [label,value]of entries){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=money(value);dl.append(dt,dd);}section.append(dl);
     for(const note of packet?.notes||[]){const p=document.createElement('p');p.textContent=note;section.append(p);}content.append(section);
     if(!debtOnly&&packet?.planning){
       const p=packet.planning,detail=document.createElement('section');detail.className='analysis-report-section';
       const h=document.createElement('h3');h.textContent='Financial health and home-price guidance';detail.append(h);
       for(const text of [p.stressTest.active?'Stress-test preview: original financial entries have not changed.':'Based on the entered budget.',p.health.label+': '+p.health.reason,p.health.scope,p.health.rules,
-        p.health.factors.knownUpfrontShortfall>0?`Reported savings and investments are ${money(p.health.factors.knownUpfrontShortfall)} below the known upfront subtotal. This compares reported balances with the down payment and cash loan fee only; liquidity and other closing costs are not established.`:null,
+        p.health.factors.knownUpfrontShortfall>0?`Available balances are ${money(p.health.factors.knownUpfrontShortfall)} below the entered upfront requirement. Review usable cash and all purchase costs in the mortgage Summary.`:null,
         p.stressTest.active?`Tested housing: ${money(p.summary.housingMonthly)}. Tested living expenses: ${money(p.summary.nonHousingExpenses)}. Remaining ${p.stressTest.basis==='take-home'?'after deductions':'before payroll deductions'}: ${money(p.stressTest.tested.remaining)}. Housing + required debt / gross income: ${percent(p.summary.combinedDebtHousingRatio)}.`:null,
         p.health.basis==='before-payroll-deductions'?'Before-tax percentage is the amount remaining after entered housing, expenses, debt and savings divided by income before deductions. Taxes and payroll deductions have not been subtracted; this is not spendable cash or a final health score.':'Residual percentage is money remaining after entered housing, expenses, debt and savings divided by take-home income. It is not an overall score or VA residual-income calculation.',
         'Entered credit-score assumption: '+(p.health.factors.creditScore??'not available')+'. Estimated LTV: '+percent(p.health.factors.estimatedLtv)+' (loan including financed fees / selected price).',

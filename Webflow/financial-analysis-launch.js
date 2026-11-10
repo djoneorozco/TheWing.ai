@@ -32,6 +32,11 @@
     function requestBudget() {
       budgetFrame?.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:finance-analysis-request',requestId:crypto.randomUUID()},appOrigin);
     }
+    const review=document.getElementById('pcsu-budget-reviewed');
+    review?.addEventListener('change',()=>{
+      budget=null;send();
+      budgetFrame?.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:finance-review',reviewed:review.checked},appOrigin);
+    });
     function requestFrames() {
       mortgageFrame?.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:mortgage-budget-request'},appOrigin);
       requestBudget();
@@ -59,13 +64,13 @@
         if (data.type === 'pcsu:finance-ready') { requestBudget(); return; }
         const value = data.snapshot;
         if (data.type !== 'pcsu:finance-analysis-state' || !small(value) || !Number.isInteger(value.revision) || value.revision < budgetRevision) return;
-        budgetRevision = value.revision; budget = value; send();
+        budgetRevision = value.revision; budget = value; if(review){review.disabled=value.status==='loading';review.checked=value.state?.reviewed===true;} send();
       }
       if (event.source === mortgageFrame?.contentWindow && data.source === 'pcsu-mortgage-budget' && data.type === 'pcsu:mortgage-budget-state') {
         const value = data.snapshot;
         if (!value || !Number.isInteger(value.revision) || value.revision < mortgageRevision) return;
         mortgageRevision = value.revision;
-        mortgage = pick(value,['ready','status','revision','homePrice','downPayment','creditScore','interestRate','termYears','propertyTaxAnnual','insuranceAnnual','hoaMonthly','otherOwnershipMonthly','pmiMonthly','loanType','vaFeeStatus','feePayment','emergencyFund','emergencyFundBasis','emergencyFundUserEntered','hasUserInteracted']);
+        mortgage = pick(value,['ready','status','revision','homePrice','downPayment','creditScore','interestRate','termYears','propertyTaxAnnual','insuranceAnnual','hoaMonthly','otherOwnershipMonthly','pmiMonthly','loanType','vaFeeStatus','feePayment','emergencyFund','emergencyFundBasis','emergencyFundUserEntered','hasUserInteracted','closingCosts','prepaidsEscrow','cashAvailable','moveInCosts']);
         budget = null; send(); requestBudget();
       }
     });

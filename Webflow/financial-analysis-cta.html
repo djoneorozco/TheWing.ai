@@ -5,6 +5,7 @@
 =============================================================== -->
 
 <div id="pcsu-analysis-cta">
+  <label class="pcsu-budget-review"><input id="pcsu-budget-reviewed" type="checkbox" disabled> <span>I reviewed all four expense categories, including housing, debts and savings. Zero amounts do not apply to me.</span></label>
   <a
     id="pcsu-analysis-link"
     class="pcsu-analysis-link"
@@ -61,6 +62,8 @@
       sans-serif;
   }
 
+  #pcsu-analysis-cta .pcsu-budget-review { display:flex; align-items:flex-start; gap:10px; margin:0 0 12px; padding:12px; border:1px solid #b9aaa0; border-radius:10px; background:#faf9f6; color:#17334d; font-size:14px; line-height:1.5; cursor:pointer; }
+  #pcsu-analysis-cta .pcsu-budget-review input { flex:0 0 20px; width:20px; height:20px; margin:1px 0 0; accent-color:#17334d; }
   #pcsu-analysis-cta .pcsu-analysis-link {
     position: relative;
     isolation: isolate;
@@ -258,7 +261,9 @@
       padding: 5px 7px;
     }
 
-    #pcsu-analysis-cta .pcsu-analysis-link {
+    #pcsu-analysis-cta .pcsu-budget-review { display:flex; align-items:flex-start; gap:10px; margin:0 0 12px; padding:12px; border:1px solid #b9aaa0; border-radius:10px; background:#faf9f6; color:#17334d; font-size:14px; line-height:1.5; cursor:pointer; }
+  #pcsu-analysis-cta .pcsu-budget-review input { flex:0 0 20px; width:20px; height:20px; margin:1px 0 0; accent-color:#17334d; }
+  #pcsu-analysis-cta .pcsu-analysis-link {
       height: 42px;
       gap: 8px;
     }
@@ -315,6 +320,11 @@
     function requestBudget() {
       budgetFrame?.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:finance-analysis-request',requestId:crypto.randomUUID()},appOrigin);
     }
+    const review=document.getElementById('pcsu-budget-reviewed');
+    review?.addEventListener('change',()=>{
+      budget=null;send();
+      budgetFrame?.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:finance-review',reviewed:review.checked},appOrigin);
+    });
     function requestFrames() {
       mortgageFrame?.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:mortgage-budget-request'},appOrigin);
       requestBudget();
@@ -342,13 +352,13 @@
         if (data.type === 'pcsu:finance-ready') { requestBudget(); return; }
         const value = data.snapshot;
         if (data.type !== 'pcsu:finance-analysis-state' || !small(value) || !Number.isInteger(value.revision) || value.revision < budgetRevision) return;
-        budgetRevision = value.revision; budget = value; send();
+        budgetRevision = value.revision; budget = value; if(review){review.disabled=value.status==='loading';review.checked=value.state?.reviewed===true;} send();
       }
       if (event.source === mortgageFrame?.contentWindow && data.source === 'pcsu-mortgage-budget' && data.type === 'pcsu:mortgage-budget-state') {
         const value = data.snapshot;
         if (!value || !Number.isInteger(value.revision) || value.revision < mortgageRevision) return;
         mortgageRevision = value.revision;
-        mortgage = pick(value,['ready','status','revision','homePrice','downPayment','creditScore','interestRate','termYears','propertyTaxAnnual','insuranceAnnual','hoaMonthly','otherOwnershipMonthly','pmiMonthly','loanType','vaFeeStatus','feePayment','emergencyFund','emergencyFundBasis','emergencyFundUserEntered','hasUserInteracted']);
+        mortgage = pick(value,['ready','status','revision','homePrice','downPayment','creditScore','interestRate','termYears','propertyTaxAnnual','insuranceAnnual','hoaMonthly','otherOwnershipMonthly','pmiMonthly','loanType','vaFeeStatus','feePayment','emergencyFund','emergencyFundBasis','emergencyFundUserEntered','hasUserInteracted','closingCosts','prepaidsEscrow','cashAvailable','moveInCosts']);
         budget = null; send(); requestBudget();
       }
     });

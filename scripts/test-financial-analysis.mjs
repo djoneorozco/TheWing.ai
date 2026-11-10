@@ -66,7 +66,7 @@ test('endpoint handles malformed requests and never caches financial responses',
 test('health ring uses take-home residual, with explicit reserve and budget-rule explanations',()=>{
  const data=fixture();data.mortgage.emergencyFundUserEntered=true;data.mortgage.emergencyFund=20000;
  const r=calculateFinancialAnalysis(data),h=r.planning.health;
- assert.equal(h.residualPercent,3599.75/6000*100);assert.equal(h.label,'Stable');assert.equal(h.factors.creditScore,720);
+ assert.equal(h.residualPercent,3599.75/6000*100);assert.equal(h.label,'Review closing costs');assert.equal(h.factors.creditScore,720);
  assert.equal(h.factors.estimatedLtv,100);assert.match(h.scope,/not assessed/);assert.match(h.rules,/not loan approval/);
  data.mortgage.emergencyFundUserEntered=false;assert.equal(calculateFinancialAnalysis(data).planning.health.status,'provisional');
  data.mortgage.emergencyFundUserEntered=true;data.mortgage.emergencyFund=0;assert.equal(calculateFinancialAnalysis(data).planning.health.status,'at-risk');
@@ -168,4 +168,17 @@ test('invalid source financial details and obsolete analysis overrides fail vali
  for(const change of [d=>{d.income.capitalReservesTotal=-1},d=>{d.income.sources=[{amount:'4000'}]},d=>{d.income.sources=[null]},d=>{d.income.sources=Array(51).fill({amount:0})},d=>{d.income.monthlyDeductions=3000},d=>{d.income.monthlyDeductions=9000},d=>{d.analysisInputs={netMonthlyIncome:9000,reviewed:true}}]){
   const data=fixture();change(data);assert.throws(()=>calculateFinancialAnalysis(data));assert.equal((await handler({httpMethod:'POST',body:JSON.stringify(data)})).statusCode,400);
  }
+});
+
+test('purchase cash is recalculated from original entries, reserves are subtracted once and a shortfall is explicit',()=>{
+ const d=fixture();Object.assign(d.mortgage,{closingCosts:4000,prepaidsEscrow:2000,cashAvailable:30000,moveInCosts:1000,emergencyFundUserEntered:true,emergencyFund:999999,upfront:{reservesAfterPurchase:999999}});
+ let r=calculateFinancialAnalysis(d);assert.equal(r.summary.reservesAfterClosing,23000);assert.equal(r.summary.cashFlow,3599.75);assert.equal(r.planning.health.label,'Stable');assert.match(r.planning.conclusion,/fits the monthly budget/);assert.match(r.planning.conclusion,/23,000/);
+ d.mortgage.cashAvailable=5000;r=calculateFinancialAnalysis(d);assert.equal(r.summary.reservesAfterClosing,-2000);assert.equal(r.planning.health.status,'at-risk');assert.match(r.planning.conclusion,/2,000.00 short/);
+ d.mortgage.prepaidsEscrow=null;r=calculateFinancialAnalysis(d);assert.equal(r.summary.reservesAfterClosing,null);assert.match(r.planning.conclusion,/still need review/);
+});
+test('final conclusion distinguishes gross-only, unreviewed, missing costs and monthly deficit',()=>{
+ const d=fixture();let r=calculateFinancialAnalysis(d);assert.match(r.planning.conclusion,/Closing costs and prepaids still need review/);
+ d.budget.state.reviewed=false;assert.match(calculateFinancialAnalysis(d).planning.conclusion,/Confirm your expense review/);
+ d.income.netMonthlyIncome=null;d.budget.state.netMonthly=null;assert.match(calculateFinancialAnalysis(d).planning.conclusion,/Add payroll deductions/);
+ d.income.netMonthlyIncome=1000;d.budget.state.netMonthly=1000;assert.match(calculateFinancialAnalysis(d).planning.conclusion,/monthly shortfall/);
 });

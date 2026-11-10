@@ -13,6 +13,7 @@
     homePrice: 'fi-home-price', downPayment: 'fi-down-payment', creditScore: 'fi-credit-score',
     interestRate: 'fi-interest-rate', termYears: 'fi-term-years', propertyTaxAnnual: 'fi-property-tax',
     insuranceAnnual: 'fi-insurance', hoaMonthly: 'fi-hoa', otherOwnershipMonthly: 'fi-other-costs',
+    closingCosts:'fi-closing-costs', prepaidsEscrow:'fi-prepaids', cashAvailable:'fi-cash-available', moveInCosts:'fi-move-in',
     pmiMonthly: 'fi-pmi', loanType: 'fi-loan-type', vaFeeStatus: 'fi-va-fee-status', feePayment: 'fi-fee-payment'
   };
   const selectors = new Set(['loanType', 'vaFeeStatus', 'feePayment']);
@@ -44,7 +45,7 @@
     element.setAttribute('aria-invalid', 'true');
     element.setAttribute('aria-describedby', 'fi-total-cost-source');
     if (element.closest('details')) {
-      $('fi-cost-details').open = true;
+      element.closest('details').open = true;
       window.dispatchEvent(new CustomEvent('pcsunited:mortgage-view-request', { detail: { view: 'summary', focus: false } }));
     }
     showState('invalid', message);
@@ -55,7 +56,7 @@
       el.removeAttribute('aria-invalid');
       if (key === 'pmiMonthly' && currentInput.loanType !== 'CONVENTIONAL') continue;
       if (selectors.has(key)) continue;
-      const optional = key === 'pmiMonthly';
+      const optional = ['pmiMonthly','closingCosts','prepaidsEscrow','cashAvailable','moveInCosts'].includes(key);
       el.required = !optional;
       if ((!optional && readNumber(el) === null) || !el.checkValidity()) {
         const label = root.querySelector(`label[for="${id}"]`).childNodes[0].textContent.trim();
@@ -107,7 +108,7 @@
   }
   function handoff() {
     const reserve = readNumber($('fi-emergency-fund'));
-    const validReserve = reserve !== null && $('fi-emergency-fund').checkValidity() ? reserve : null;
+    const validReserve = reserveTouched && reserve !== null && $('fi-emergency-fund').checkValidity() ? reserve : null;
     return {
       source: 'PCSUnited-Military-Mortgage', version: '1.1.0', status: root.dataset.state,
       ready: root.dataset.state === 'ready', revision, ...clone(currentInput || capture()),
@@ -135,6 +136,19 @@
   }
   function renderResult() {
     const m = result.monthly, loan = result.loan;
+    const calculated=result.upfront.cashPlanStarted;
+    $('fi-emergency-fund').disabled=calculated;
+    $('fi-emergency-fund-slider').disabled=calculated;
+    if(calculated){
+      if(!Object.hasOwn($('fi-emergency-fund').dataset,'manualValue')) $('fi-emergency-fund').dataset.manualValue=$('fi-emergency-fund').value;
+      $('fi-emergency-fund').value=result.upfront.reservesAfterPurchase??'';
+    }else if(Object.hasOwn($('fi-emergency-fund').dataset,'manualValue')){
+      $('fi-emergency-fund').value=$('fi-emergency-fund').dataset.manualValue;delete $('fi-emergency-fund').dataset.manualValue;
+    }
+    $('fi-emergency-fund').closest('.fi-field').querySelector('.fi-hint').textContent=calculated
+      ? 'Calculated from Summary → Cash needed to buy this home. Complete those fields to see cash remaining.'
+      : 'Enter cash expected after all purchase and moving costs, or calculate it under Summary → Cash needed to buy this home.';
+    syncSliders();
     renderRows('fi-monthly-breakdown', [
       ['Principal & interest', m.principalInterest], ['Property taxes', m.propertyTax],
       ['Homeowners insurance', m.insurance], ['HOA', m.hoa],
@@ -159,7 +173,7 @@
     if (!numberKeys.every(k => typeof data.monthly[k] === 'number' && Number.isFinite(data.monthly[k]) && data.monthly[k] >= 0)) return false;
     const m = data.monthly;
     if (Math.abs(m.principalInterest + m.propertyTax + m.insurance + m.hoa + m.mortgageInsurance - m.mortgagePayment) > 0.011 || Math.abs(m.mortgagePayment + m.otherOwnership - m.totalHousing) > 0.011) return false;
-    for (const key of ['loanType','homePrice','downPayment','interestRate','termYears','creditScore','propertyTaxAnnual','insuranceAnnual','hoaMonthly','otherOwnershipMonthly','pmiMonthly']) {
+    for (const key of ['loanType','homePrice','downPayment','interestRate','termYears','creditScore','propertyTaxAnnual','insuranceAnnual','hoaMonthly','otherOwnershipMonthly','pmiMonthly','closingCosts','prepaidsEscrow','cashAvailable','moveInCosts']) {
       if (data.inputs[key] !== input[key]) return false;
     }
     if (input.loanType === 'VA' && data.inputs.vaFeeStatus !== input.vaFeeStatus) return false;
@@ -209,6 +223,7 @@
     controller?.abort(); controller = null;
     result = null;
     currentInput = capture();
+    if(Object.hasOwn($('fi-emergency-fund').dataset,'manualValue')) $('fi-emergency-fund').value='';
     syncSliders(); syncLabels();
     if (!validate()) { emit(); return; }
     showState('pending', 'Updating your housing estimate…');

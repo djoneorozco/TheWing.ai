@@ -3355,6 +3355,8 @@ function handleCashFlowPeriodChange() {
     DOM.cashFlowPeriod?.value ||
     "monthly";
 
+  const caption=document.getElementById('cashFlowCaption');
+  if(caption)caption.textContent=analysisState.ui.cashFlowPeriod==='annual'?'Where your money goes each year.':'Where your money goes each month.';
   renderWaterfallChart();
 }
 

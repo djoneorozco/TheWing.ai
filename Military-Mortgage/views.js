@@ -112,7 +112,14 @@
     const i = r.inputs, loan = r.loan;
     text('mm-summary-total', money(r.monthly.totalHousing));
     text('mm-summary-price', money(i.homePrice)); text('mm-summary-loan', money(loan.loanAmount));
-    text('mm-summary-reserve', snapshot.emergencyFund === null ? 'Not entered' : money(snapshot.emergencyFund));
+    const u=r.upfront, calculated=u.cashPlanStarted;
+    const reserve=calculated?u.reservesAfterPurchase:snapshot.emergencyFundUserEntered?snapshot.emergencyFund:null;
+    text('mm-summary-reserve', reserve == null ? 'Not entered' : money(reserve));
+    $('mm-summary-reserve').previousElementSibling.textContent=calculated?'Cash after purchase & moving':'Emergency fund after closing';
+    const list=$('fi-purchase-breakdown');list.replaceChildren();
+    for(const [label,value]of [['Purchase cash (includes paid deposits)',u.purchaseCash],['Purchase + moving costs',u.totalCashNeeded],['Cash remaining',u.reservesAfterPurchase]]){
+      const line=document.createElement('div');line.className='fi-line';const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value==null?'Not entered':money(value);line.append(dt,dd);list.append(line);
+    }
     const program = {VA:'VA',FHA:'FHA',CONVENTIONAL:'conventional'}[i.loanType];
     text('mm-summary-explanation', loan.loanAmount > 0
       ? `For a ${money(i.homePrice)} home with ${money(i.downPayment)} down, this ${i.termYears}-year ${program} scenario uses ${i.interestRate}% fixed interest. Your monthly estimate combines the loan payment with the housing costs listed below.`
