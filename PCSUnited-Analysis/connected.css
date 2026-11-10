@@ -107,3 +107,30 @@
 @media(max-width:1100px){.pcsu-connected .analysis-health-hero{grid-template-columns:1fr 1.7fr;padding:20px 8px;gap:22px 0}.pcsu-connected .analysis-health-hero>div:nth-child(2){border:0}.pcsu-connected .planning-range{font-size:28px}.pcsu-connected .planning-value strong{font-size:29px}.pcsu-connected .stress-test-card{min-height:440px}}
 @media(max-width:680px){.pcsu-connected .analysis-health-hero{grid-template-columns:1fr;padding:0;gap:0}.pcsu-connected .analysis-health-hero>div{padding:20px;border:0;border-bottom:1px solid #ffffff29}.pcsu-connected .analysis-health-hero>div:nth-child(2){border-bottom:1px solid #ffffff29}.pcsu-connected .analysis-health-hero h2{font-size:12px}.pcsu-connected .planning-range{font-size:26px}.pcsu-connected .analysis-health-hero p{font-size:12px}.pcsu-connected .stress-test-card{min-height:0;padding:18px}.pcsu-connected .stress-control-label{font-size:12px}.pcsu-connected .stress-number input{font-size:16px}.pcsu-connected .stress-health-result{margin-top:10px}.pcsu-connected .analysis-connection{margin:0 0 12px}.pcsu-connected .analysis-report-section dl{grid-template-columns:1fr}.pcsu-connected .analysis-report-section dd{margin-bottom:10px}}
 @media(prefers-reduced-motion:reduce){.pcsu-connected .stress-comparison b{transition:none}}
+
+/* Inline completion keeps the connected gross-income path actionable. */
+.pcsu-connected .analysis-inputs{margin:0 0 18px;border:1px solid #dce4e8;border-radius:14px;background:#fff;color:#24334a;overflow:hidden;font:13px/1.5 var(--font-ui)}
+.pcsu-connected .analysis-inputs>summary{padding:14px 20px;cursor:pointer;font-weight:700;background:#f1f8f5;color:#214f48}
+.pcsu-connected .analysis-inputs form{padding:0 20px 16px}
+.pcsu-connected .analysis-inputs p{margin:12px 0}
+.pcsu-connected .analysis-inputs fieldset{padding:0;margin:0;border:0;min-width:0}
+.pcsu-connected .analysis-inputs fieldset:disabled{opacity:.5}
+.pcsu-connected .analysis-inputs-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:16px 0}
+.pcsu-connected .analysis-inputs-grid label{display:flex;flex-direction:column;gap:6px;font-weight:650;min-width:0}
+.pcsu-connected .analysis-inputs input[type=number]{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #bccbd6;border-radius:7px;background:#fff;color:#182d44;font:16px var(--font-ui)}
+.pcsu-connected .analysis-inputs small,.pcsu-connected .analysis-inputs-hint{font-size:11px;font-weight:400;line-height:1.6;color:#5e6c7d}
+.pcsu-connected .analysis-budget-totals{padding:10px 12px;background:#f7f8fc;border-radius:7px;font-size:12px;font-variant-numeric:tabular-nums}
+.pcsu-connected .analysis-budget-rows summary{cursor:pointer;color:#4b4084;font-size:12px}
+.pcsu-connected .analysis-budget-rows dl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;max-height:210px;overflow:auto;padding:12px;background:#fafbfc;border:1px solid #e5e8f0;border-radius:7px}
+.pcsu-connected .analysis-budget-rows dt{overflow-wrap:anywhere}
+.pcsu-connected .analysis-budget-rows dd{margin:0;font-variant-numeric:tabular-nums}
+.pcsu-connected .analysis-review-check{display:flex;align-items:flex-start;gap:9px;margin:15px 0;cursor:pointer;font-size:12px}
+.pcsu-connected .analysis-review-check input{width:17px;height:17px;margin:1px 0 0;accent-color:#357c6f;flex-shrink:0}
+.pcsu-connected .analysis-input-actions{display:flex;flex-wrap:wrap;gap:10px}
+.pcsu-connected .analysis-input-actions button{padding:10px 16px;border:1px solid #193750;border-radius:7px;background:#193750;color:white;cursor:pointer;font:600 12px var(--font-ui)}
+.pcsu-connected .analysis-input-actions button+button{background:white;color:#193750}
+.pcsu-connected .analysis-input-actions button:disabled{opacity:.5;cursor:default}
+.pcsu-connected #analysisInputsStatus{font-size:12px;color:#354d67}
+.pcsu-connected #analysisInputsStatus:empty{display:none}
+.pcsu-connected summary:focus-visible{outline:3px solid #70bde9;outline-offset:-3px}
+@media(max-width:680px){.pcsu-connected .analysis-inputs-grid{grid-template-columns:1fr;gap:16px}.pcsu-connected .analysis-inputs>summary{padding:13px 16px}.pcsu-connected .analysis-inputs form{padding:0 16px 12px}}

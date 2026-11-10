@@ -46,7 +46,11 @@ function health(analysis, summary, upper) {
 }
 
 function homeRange(analysis, upper, comfortable, termYears) {
-  if (!analysis.mortgage || analysis.summary.example || upper === null) return {status:'incomplete',lower:null,target:null,upper:null,reason:'Add take-home income, review expenses and confirm the mortgage assumptions.'};
+  if (!analysis.mortgage || analysis.summary.example || upper === null) {
+    const missing = health(analysis,analysis.summary,upper).missing;
+    return {status:'incomplete',lower:null,target:null,upper:null,selectedPrice:analysis.mortgage?.inputs.homePrice ?? null,selectedPosition:null,
+      reason:missing.length ? 'To calculate your range, add or review: '+missing.join(', ')+'.' : 'Complete your current income and expense entries.'};
+  }
   const original = analysis.mortgage.inputs;
   // Fixed cash down payment; taxes and insurance scale with price at the entered rates.
   // All fees, PMI/MIP, and principal/interest come from the same Section 02 engine.
