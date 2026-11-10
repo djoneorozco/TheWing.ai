@@ -1803,6 +1803,17 @@ p {
 .budget-details-body .finance-review { padding:12px 0; background:transparent; border:0; }
 .budget-details-dialog .modal__actions { padding:16px 20px; }
 .finance-compact .sort-control select:focus-visible { outline:2px solid var(--pcsu-gold); outline-offset:2px; }
+/* Share the editor row so both panels align as their content changes. */
+@media(min-width:961px){
+  .finance-compact .budget-app__main { grid-template-rows:auto 1fr; row-gap:10px; align-items:stretch; }
+  .finance-compact .budget-workspace { grid-row:1 / span 2; display:grid; grid-template-rows:subgrid; }
+  .finance-compact .budget-editor-card { display:flex; flex-direction:column; }
+  .finance-compact .expense-list { flex:1; }
+  .finance-compact .financial-sidebar { grid-column:2; grid-row:2; margin-top:0; position:static; }
+  .finance-compact .cash-flow-card { flex:1; display:flex; flex-direction:column; }
+  .finance-compact .cash-flow-card>* { flex-shrink:0; }
+  .finance-compact .cash-flow-breakdown { margin-top:auto; }
+}
 @media(max-width:960px){
   .finance-compact .budget-app__main { display:flex; flex-direction:column; gap:16px; }
   .finance-compact .financial-sidebar { width:100%; margin-top:0; position:static; }
