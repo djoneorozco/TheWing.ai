@@ -19,6 +19,7 @@ function stressInputs(value, summary) {
 
 function health(analysis, summary, upper) {
   const cash = summary.cashFlow, reserve = summary.reserveMonths;
+  const grossOnly = analysis.income.netMonthly === null;
   const missing = [];
   if (!(analysis.income.netMonthly > 0)) missing.push('positive take-home income');
   if (!(analysis.income.grossMonthly > 0)) missing.push('positive gross income');
@@ -28,11 +29,18 @@ function health(analysis, summary, upper) {
     cashAfterSavings:cash, monthlyCushion:analysis.budget?.affordability.bufferMonthly ?? null,
     housingAndDebtRatio:summary.combinedDebtHousingRatio, reserveMonths:reserve,
     creditScore:analysis.mortgage?.inputs.creditScore ?? null,
+    reportedSavingsInvestmentsReserves:analysis.financialProfile.reportedSavingsInvestmentsReserves,
+    knownUpfrontShortfall:analysis.financialProfile.knownUpfrontShortfall,
     estimatedLtv:analysis.mortgage ? ratio(analysis.mortgage.loan.loanAmount, analysis.mortgage.inputs.homePrice) : null
   };
   let status = 'incomplete', label = 'Needs inputs', reason = missing.length ? 'Add or review: ' + missing.join(', ') + '.' : '';
-  if (!missing.length) {
-    if (cash < 0) { status='at-risk'; label='At risk'; reason='Entered costs and savings exceed take-home income.'; }
+  if (analysis.income.grossMonthly>0 && analysis.mortgage && !summary.example && analysis.budget) {
+    if (grossOnly) {
+      status='provisional';label=summary.beforeDeductionsRemaining<0?'Before-tax shortfall':'Before-tax estimate';
+      reason='Uses transferred income before taxes and payroll deductions. The remaining percentage is provisional, not spendable cash or a final financial-health assessment.';
+    }
+    else if (cash < 0) { status='at-risk'; label='At risk'; reason='Entered costs and savings exceed take-home income.'; }
+    else if (!summary.reviewed) { status='provisional'; label='Budget estimate'; reason='Uses your transferred take-home income and entered expenses. The expense review is still incomplete in Financial Guidance.'; }
     else if (reserve !== null && reserve < 1) { status='at-risk'; label='At risk'; reason='After-closing reserves cover less than one month of entered costs.'; }
     else if (summary.housingMonthly > upper || cash < factors.monthlyCushion || (reserve !== null && reserve < 3)) {
       status='stretched'; label='Stretched'; reason=reserve !== null && reserve < 3 ? 'Reserves are below the three-month planning cushion.' : 'This payment exceeds the budget guideline or your cash-cushion goal.';
@@ -40,7 +48,12 @@ function health(analysis, summary, upper) {
     else if (reserve === null) { status='provisional'; label='Check reserves'; reason='The monthly budget fits the planning guideline. Add after-closing reserves to complete the budget signal.'; }
     else { status='stable'; label='Stable'; reason='The payment fits the budget guideline and at least three months of entered costs remain in reserves.'; }
   }
+  if (factors.knownUpfrontShortfall>0) {
+    if (status==='stable') { status='provisional';label='Review upfront funds'; }
+    reason+=' Reported savings and investments are below the known upfront costs; other closing costs are not yet included.';
+  }
   return {status,label,reason,missing,factors,residualPercent:ratio(cash,analysis.income.netMonthly),
+    beforeDeductionsPercent:ratio(summary.beforeDeductionsRemaining,analysis.income.grossMonthly),basis:grossOnly?'before-payroll-deductions':'take-home',
     scope:'Budget planning signal; closing costs, credit underwriting and VA residual-income qualification are not assessed.',
     rules:'Uses the existing 28% housing / 36% housing-plus-debt planning guideline, your monthly cushion, and reserve bands below 1 month, 1–3 months, and 3+ months. These are planning assumptions, not loan approval rules. Credit and LTV are financing context, not an approval score.'};
 }
@@ -92,17 +105,24 @@ export function calculateFinancialPlanning(analysis, input) {
     s.reserveMonths=s.reservesAfterClosing!==null&&costs>0?s.reservesAfterClosing/costs:null;
   }
   const limits=budget?.affordability.limits;
-  const ready=!!budget?.affordability.monthlyRange&&analysis.income.netMonthly>0;
+  const grossOnly=analysis.income.netMonthly===null;
+  const ready=!!budget&&analysis.income.grossMonthly>0&&!!analysis.mortgage&&!base.example;
+  const cashLimit=grossOnly?limits?.beforeDeductionsCashFlow:limits?.cashFlow;
   const reserveLimit=s.reservesAfterClosing!==null&&s.nonHousingExpenses!==null?cents(s.reservesAfterClosing/3-s.nonHousingExpenses-s.monthlyDebt):null;
-  const upper=ready?Math.max(0,cents(Math.min(limits.housing28,limits.totalDebt36,limits.cashFlow-deltaExpenses,reserveLimit??Infinity))):null;
+  const upper=ready?Math.max(0,cents(Math.min(limits.housing28,limits.totalDebt36,cashLimit-deltaExpenses,reserveLimit??Infinity))):null;
   const comfortable=upper===null?null:Math.max(0,cents(upper-budget.affordability.extraBufferMonthly));
   // Term is transported in the validated source context; the canonical result's inputs omit it.
   const range=homeRange(analysis,upper,comfortable,input.mortgage?.termYears);
+  range.basis=grossOnly?'before-payroll-deductions':'take-home';
+  range.budgetReviewed=base.reviewed;
+  range.knownUpfrontShortfall=analysis.financialProfile.knownUpfrontShortfall;
+  if (ready) range.reason=(grossOnly?'Provisional before-tax estimate; payroll deductions are not supplied. ':'')+(!base.reviewed?'Expense entries have not been marked reviewed in Financial Guidance. ':'')+range.reason;
+  if (range.knownUpfrontShortfall>0) range.reason+=' Assumes the entered down payment can be funded; reported balances are below the known upfront subtotal.';
   const currentRemaining=analysis.income.netMonthly===null?base.beforeDeductionsRemaining:base.cashFlow;
   const testedRemaining=analysis.income.netMonthly===null?s.beforeDeductionsRemaining:s.cashFlow;
   return {version:PLANNING_VERSION,summary:s,health:health(analysis,s,upper),homeRange:range,
     monthlyLimit:upper,comfortablePayment:comfortable,bufferMonthly:budget?.affordability.bufferMonthly??null,
-    limits:limits?{housingIncome:limits.housing28,housingAndDebtIncome:limits.totalDebt36,cashCushion:limits.cashFlow===null?null:cents(limits.cashFlow-deltaExpenses),reserveCushion:reserveLimit}:null,
+    limits:limits?{housingIncome:limits.housing28,housingAndDebtIncome:limits.totalDebt36,cashCushion:cashLimit===null?null:cents(cashLimit-deltaExpenses),reserveCushion:reserveLimit}:null,
     stressTest:{available:base.housingMonthly!==null&&base.nonHousingExpenses!==null,active:!!stress&&(deltaHousing!==0||deltaExpenses!==0),
       baseline:{housingMonthly:base.housingMonthly,expensesMonthly:base.nonHousingExpenses,remaining:currentRemaining},
       tested:{housingMonthly:s.housingMonthly,expensesMonthly:s.nonHousingExpenses,remaining:testedRemaining},

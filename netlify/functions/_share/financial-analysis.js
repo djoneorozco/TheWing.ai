@@ -13,27 +13,21 @@ function amount(value, name, max = 1000000) {
   return value;
 }
 
-// Explicit entries made on Analysis supplement the connected snapshot for this
-// request only. Validate the original handoff independently before using them.
-function analysisInputs(value) {
-  if (value === undefined || value === null) return null;
-  if (!object(value) || !Object.keys(value).length || Object.keys(value).some(key => !['netMonthlyIncome','reviewed','reservesAfterClosing'].includes(key))) throw new Error('Check the analysis details.');
-  const result = {};
-  for (const key of ['netMonthlyIncome','reservesAfterClosing']) if (Object.hasOwn(value,key)) result[key] = amount(value[key],key === 'netMonthlyIncome' ? 'take-home income' : 'reserves after closing');
-  if (Object.hasOwn(value,'reviewed')) {
-    if (typeof value.reviewed !== 'boolean') throw new Error('Confirm whether the expense budget has been reviewed.');
-    result.reviewed = value.reviewed;
-  }
-  return result;
-}
-
 export function calculateFinancialAnalysis(input) {
   if (!object(input) || input.version !== 1) throw new Error('Provide a version-1 financial context.');
+  if (input.analysisInputs != null) throw new Error('Refresh Financial Analysis to use your original Financial Guidance entries.');
   const income = input.income?.complete === true ? input.income : null;
   const gross = amount(income?.grossMonthlyIncome, 'monthly income');
   const sourceNet = amount(income?.netMonthlyIncome, 'take-home income');
-  const completion = analysisInputs(input.analysisInputs);
-  const net = completion && Object.hasOwn(completion,'netMonthlyIncome') ? completion.netMonthlyIncome : sourceNet;
+  const deductions = amount(income?.monthlyDeductions, 'monthly payroll deductions');
+  const derivedNet = gross !== null && deductions !== null ? money(gross-deductions) : null;
+  if (derivedNet !== null && (derivedNet < 0 || (sourceNet !== null && Math.abs(sourceNet-derivedNet)>.005))) throw new Error('Income and payroll deductions do not match. Review the original income calculator.');
+  const net = sourceNet ?? derivedNet;
+  const monthlyContributions = amount(income?.monthlySavingsContributions,'monthly savings contributions');
+  const reportedAssets = amount(income?.capitalReservesTotal,'savings, investments and reserves',10000000);
+  const sources = income?.sources ?? [];
+  if (!Array.isArray(sources) || sources.length>50 || sources.some(source=>!object(source))) throw new Error('Provide the current income-source breakdown.');
+  const incomeSources = sources.map(source=>({label:typeof source.label==='string'?source.label.slice(0,160):'Income source',amount:amount(source.amount,'income source'),basis:typeof source.basis==='string'?source.basis.slice(0,80):null}));
   const missing = [], notes = [];
   if (gross === null) missing.push('monthly income');
   if (net === null) missing.push('take-home income');
@@ -47,7 +41,6 @@ export function calculateFinancialAnalysis(input) {
   if (mortgage) notes.push(mortgage.upfront.excludes);
 
   const state = input.budget?.state;
-  if (completion && (!(gross > 0) || !mortgage || example || input.budget?.status !== 'ready' || !object(state))) throw new Error('Connect positive gross income, a confirmed mortgage and current expenses before completing the analysis.');
   let budget = null, housing = null, nonHousing = null, manuallyAdjusted = false, items = [];
   if (input.budget?.status === 'ready' && object(state)) {
     if (state.grossMonthly !== gross || state.netMonthly !== sourceNet) throw new Error('Income changed. Wait for the expense calculator to update, then try again.');
@@ -61,7 +54,7 @@ export function calculateFinancialAnalysis(input) {
     if (!manuallyAdjusted && (!mortgage || Math.abs(housing - mortgage.monthly.totalHousing) > .005)) throw new Error('The mortgage changed. Wait for the expense calculator to update, then try again.');
     // The Mortgage row is already in items. Never subtract the mortgage a second time.
     // Omit the old Finance-UX home-price scenario: it is not Section 02's scenario.
-    budget = calculateFinanceBudget({grossMonthly:gross,netMonthly:net,items,savingsMonthly:state.savingsMonthly,emergencyFund:state.emergencyFund,bufferMonthly:state.bufferMonthly,extraBufferMonthly:state.extraBufferMonthly,reviewed:completion?.reviewed ?? state.reviewed});
+    budget = calculateFinanceBudget({grossMonthly:gross,netMonthly:net,items,savingsMonthly:state.savingsMonthly,emergencyFund:state.emergencyFund,bufferMonthly:state.bufferMonthly,extraBufferMonthly:state.extraBufferMonthly,reviewed:state.reviewed});
     nonHousing = money(budget.metrics.totalExpenses - housing);
   } else missing.push('current expense totals');
   if (budget && !budget.reviewed) missing.push('budget review');
@@ -69,10 +62,8 @@ export function calculateFinancialAnalysis(input) {
 
   // Section 02 explicitly labels this input AFTER closing. Its illustrative default
   // must not become a user's reserve, and closing costs must not be subtracted again.
-  const sourceReserve = input.mortgage?.emergencyFundBasis === 'after-closing' && input.mortgage.emergencyFundUserEntered === true
+  const reserve = input.mortgage?.emergencyFundBasis === 'after-closing' && input.mortgage.emergencyFundUserEntered === true
     ? amount(input.mortgage.emergencyFund, 'reserves after closing') : null;
-  const reserve = completion && Object.hasOwn(completion,'reservesAfterClosing') ? completion.reservesAfterClosing : sourceReserve;
-  if (completion) notes.push('Take-home income, budget review or reserves entered on this analysis page apply to this session only. Financial Guidance entries are unchanged.');
   const metrics = budget?.metrics;
   const reserveBasis = metrics ? money(metrics.totalExpenses + metrics.totalDebt) : null;
   const upper = budget?.affordability.monthlyRange?.upper ?? null;
@@ -85,7 +76,9 @@ export function calculateFinancialAnalysis(input) {
     detail = 'Compares your entered housing cost with the existing income, debt and cash-cushion guideline. This is not a loan approval.';
   }
   const components = mortgage ? Object.entries({principalInterest:mortgage.monthly.principalInterest,propertyTaxes:mortgage.monthly.propertyTax,homeInsurance:mortgage.monthly.insurance,hoaFees:mortgage.monthly.hoa,pmi:mortgage.monthly.mortgageInsurance,otherOwnership:mortgage.monthly.otherOwnership}).map(([key,value])=>({key,amount:value,share:ratio(value,mortgage.monthly.totalHousing)})) : [];
-  const result = {ok:true,version:VERSION,status,missing,notes,analysisInputs:completion,income:{grossMonthly:gross,netMonthly:net},mortgage,budget,components,
+  const knownUpfrontShortfall=reportedAssets!==null&&mortgage?Math.max(0,money(mortgage.upfront.knownSubtotal-reportedAssets)):null;
+  const result = {ok:true,version:VERSION,status,missing,notes,income:{grossMonthly:gross,netMonthly:net,payrollDeductions:deductions,monthlySavingsContributions:monthlyContributions,availableAfterIncomeSavings:net!==null&&monthlyContributions!==null?money(net-monthlyContributions):null,sources:incomeSources,containsEstimates:income?.containsEstimates===true},
+    financialProfile:{reportedSavingsInvestmentsReserves:reportedAssets,knownUpfrontShortfall,reserveBasis:'current combined balance; liquidity and after-closing balance are not established',incomeSource:income?.status??null},mortgage,budget,components,
     summary:{housingMonthly:housing,nonHousingExpenses:nonHousing,monthlyDebt:metrics?.totalDebt??null,monthlySavings:metrics?.totalSavings??null,
       cashFlow:metrics?.cashFlow??null,beforeDeductionsRemaining:metrics?.beforeDeductionsRemaining??null,
       housingRatioNet:ratio(housing,net),housingRatioGross:ratio(housing,gross),debtRatio:metrics?.debtIncomeRatio??null,

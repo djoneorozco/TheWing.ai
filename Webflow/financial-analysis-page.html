@@ -15,6 +15,22 @@
     || (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname));
   let openerOrigin = location.origin, context = null, revision = -1, frameId = null, attempts = 0;
   try { const ref = new URL(document.referrer).origin; if (allowed(ref)) openerOrigin = ref; } catch (_) {}
+  function withOriginalIncome(value) {
+    // Existing source tabs may still run the older narrow handoff. Read only
+    // the public calculator snapshot from the verified same-origin opener so
+    // reloading Analysis does not require clearing/re-entering the source data.
+    try {
+      if (!window.opener || window.opener.closed || openerOrigin!==location.origin || window.opener.location.origin!==openerOrigin) return value;
+      const snapshot=window.opener.PCSU_FINANCIAL_INCOME?.getSnapshot?.();
+      const core=['complete','status','grossMonthlyIncome','netMonthlyIncome','monthlySavingsContributions'];
+      if (!snapshot || !value.income || core.some(key=>snapshot[key]!==value.income[key])) return value;
+      const keys=[...core,'schemaVersion','audience','entryMethod','currency','period','containsEstimates','monthlyDeductions','availableAfterSavings','capitalReservesTotal'];
+      const income=Object.fromEntries(keys.filter(key=>snapshot[key]!==undefined).map(key=>[key,snapshot[key]]));
+      income.sources=Array.isArray(snapshot.sources)?snapshot.sources.slice(0,50).map(source=>({label:source.label,amount:source.amount,basis:source.basis})):[];
+      const enriched={...value,income};
+      return JSON.stringify(enriched).length<=100000?enriched:value;
+    } catch (_) { return value; }
+  }
   function send() {
     if (frameId && context) frame.contentWindow.postMessage({source:'pcsu-analysis-host',version:1,type:'pcsu:analysis-context',requestId:frameId,revision,context},appOrigin);
   }
@@ -29,7 +45,7 @@
     if (event.source === window.opener && event.origin === openerOrigin && allowed(event.origin) && data.source === 'pcsu-analysis-launch'
         && data.type === 'pcsu:analysis-context' && data.requestId === requestId && Number.isInteger(data.revision) && data.revision > revision) {
       try { if (!data.context || JSON.stringify(data.context).length > 100000) return; } catch (_) { return; }
-      revision = data.revision; context = data.context;
+      revision = data.revision; context = withOriginalIncome(data.context);
       status.textContent = 'Connected to Financial Guidance. Changes in the original tab update this analysis.';
       send(); return;
     }

@@ -81,11 +81,11 @@ test('budget-test costs change cash flow and residual once, holding debt, saving
  assert.equal(r.mortgage.monthly.totalHousing,1000);delete data.stressTest;assert.deepEqual(data,original);
  assert.equal(calculateFinancialAnalysis(data).planning.summary.cashFlow,3599.75);
 });
-test('gross-only previews never produce a take-home residual, health verdict or recommended price',()=>{
+test('gross-only previews provide explicitly provisional results without inventing take-home cash',()=>{
  const data=fixture();data.income.netMonthlyIncome=null;data.budget.state.netMonthly=null;data.stressTest={housingMonthly:1500,expensesMonthly:900};
  const p=calculateFinancialAnalysis(data).planning;
  assert.equal(p.summary.cashFlow,null);assert.equal(p.summary.beforeDeductionsRemaining,4900);
- assert.equal(p.health.residualPercent,null);assert.equal(p.health.status,'incomplete');assert.equal(p.homeRange.upper,null);
+ assert.equal(p.health.residualPercent,null);assert.equal(p.health.status,'provisional');assert(p.homeRange.upper>0);assert.equal(p.health.beforeDeductionsPercent,4900/8000*100);assert.equal(p.homeRange.basis,'before-payroll-deductions');assert.match(p.homeRange.reason,/before-tax/);
  assert.equal(p.stressTest.basis,'before-payroll-deductions');
 });
 test('mortgage-only stress leaves the price budget unchanged; higher living costs can constrain it',()=>{
@@ -108,11 +108,11 @@ test('price range solves canonical loans, including zero interest, FHA limits an
   assert(r.targetPayment<=p.comfortablePayment+.005);
  }
 });
-test('zero housing budget has no invented price; examples and unreviewed budgets stay incomplete',()=>{
+test('zero housing budget and examples have no invented price; unreviewed budgets are provisional',()=>{
  const data=fixture();data.stressTest={housingMonthly:0,expensesMonthly:9000};
  assert.equal(calculateFinancialAnalysis(data).planning.homeRange.status,'unavailable');
  delete data.stressTest;data.mortgage.hasUserInteracted=false;assert.equal(calculateFinancialAnalysis(data).planning.homeRange.status,'incomplete');
- data.mortgage.hasUserInteracted=true;data.budget.state.reviewed=false;assert.equal(calculateFinancialAnalysis(data).planning.homeRange.upper,null);
+ data.mortgage.hasUserInteracted=true;data.budget.state.reviewed=false;const unreviewed=calculateFinancialAnalysis(data).planning;assert(unreviewed.homeRange.upper>0);assert.equal(unreviewed.health.status,'provisional');assert.match(unreviewed.homeRange.reason,/not been marked reviewed/);
 });
 test('preview restores baseline at equal amounts and preserves explicitly entered zero expenses',()=>{
  const data=fixture();data.stressTest={housingMonthly:1000,expensesMonthly:700.25};
@@ -141,37 +141,31 @@ test('missing gross income blocks the health verdict even when take-home income 
  const p=calculateFinancialAnalysis(data).planning;assert.equal(p.health.status,'incomplete');assert.equal(p.homeRange.upper,null);assert(p.health.missing.includes('positive gross income'));
 });
 
-test('analysis details complete gross-only, unreviewed handoffs without mutating source figures',async()=>{
- const data=fixture();data.income.netMonthlyIncome=null;data.budget.state.netMonthly=null;data.budget.state.reviewed=false;
- const original=structuredClone(data);
- let r=calculateFinancialAnalysis(data);
- assert.match(r.planning.homeRange.reason,/take-home income/);assert.match(r.planning.homeRange.reason,/reviewed expense budget/);
- assert.doesNotMatch(r.planning.homeRange.reason,/confirm.*mortgage/);assert.equal(r.planning.homeRange.selectedPrice,240000);
- data.analysisInputs={netMonthlyIncome:6000,reviewed:true,reservesAfterClosing:20000};
- r=calculateFinancialAnalysis(data);
- assert.equal(r.summary.cashFlow,3599.75);assert.equal(r.summary.reviewed,true);assert.equal(r.summary.reservesAfterClosing,20000);
- assert.equal(r.planning.health.status,'stable');assert(r.planning.homeRange.upper>0);assert(r.planning.health.residualPercent>0);
- assert.deepEqual(r.analysisInputs,data.analysisInputs);assert.match(r.notes.join(' '),/session only/);
- const response=await handler({httpMethod:'POST',body:JSON.stringify(data)});assert.equal(response.statusCode,200);assert.equal(JSON.parse(response.body).planning.health.status,'stable');
- data.stressTest={housingMonthly:1500,expensesMonthly:900};r=calculateFinancialAnalysis(data);
- assert.equal(r.summary.cashFlow,3599.75);assert.equal(r.planning.summary.cashFlow,2900);
- delete data.analysisInputs;delete data.stressTest;assert.deepEqual(data,original);assert.equal(calculateFinancialAnalysis(data).planning.homeRange.upper,null);
+test('original income breakdown, deductions and reported assets flow through without duplicate entry',()=>{
+ const data=fixture();Object.assign(data.income,{monthlyDeductions:2000,monthlySavingsContributions:500,capitalReservesTotal:9100,containsEstimates:true,sources:[{label:'Base pay',amount:4000,basis:'rate-estimate'},{label:'BAH',amount:2000,basis:'rate-estimate'},{label:'Additional income',amount:2000,basis:'user-entered'}]});
+ const original=structuredClone(data),r=calculateFinancialAnalysis(data);
+ assert.equal(r.income.payrollDeductions,2000);assert.equal(r.income.netMonthly,6000);assert.equal(r.income.availableAfterIncomeSavings,5500);assert.equal(r.income.sources[1].label,'BAH');assert.equal(r.income.sources[1].amount,2000);assert.equal(r.income.containsEstimates,true);
+ assert.equal(r.financialProfile.reportedSavingsInvestmentsReserves,9100);assert.equal(r.summary.reservesAfterClosing,null);assert.equal(r.summary.reserveMonths,null);
+ assert.equal(r.summary.cashFlow,3599.75);assert.deepEqual(data,original);
+ data.mortgage.emergencyFundUserEntered=true;data.mortgage.emergencyFund=4000;const supplied=calculateFinancialAnalysis(data);
+ assert.equal(supplied.summary.reservesAfterClosing,4000);assert.equal(supplied.financialProfile.reportedSavingsInvestmentsReserves,9100);
+ data.mortgage.downPayment=12000;data.budget.state.items[0].value=calculateMilitaryMortgage(data.mortgage).monthly.totalHousing;
+ const funds=calculateFinancialAnalysis(data);assert.equal(funds.financialProfile.knownUpfrontShortfall,2900);assert.match(funds.planning.health.reason,/below the known upfront costs/);
 });
-test('completion preserves unknowns and zeroes and never silently confirms the budget',()=>{
+test('source deductions can derive take-home income; unknown deductions never become zero',()=>{
  const data=fixture();data.income.netMonthlyIncome=null;data.budget.state.netMonthly=null;data.budget.state.reviewed=false;
- data.analysisInputs={netMonthlyIncome:6000};let r=calculateFinancialAnalysis(data);
- assert.equal(r.summary.reviewed,false);assert.equal(r.planning.homeRange.upper,null);assert.equal(r.summary.reservesAfterClosing,null);
- data.analysisInputs.reviewed=true;r=calculateFinancialAnalysis(data);assert(r.planning.homeRange.upper>0);assert.equal(r.planning.health.status,'provisional');
- data.analysisInputs.reservesAfterClosing=0;r=calculateFinancialAnalysis(data);assert.equal(r.summary.reservesAfterClosing,0);assert.equal(r.planning.health.status,'at-risk');
- data.analysisInputs.reservesAfterClosing=null;data.analysisInputs.netMonthlyIncome=0;r=calculateFinancialAnalysis(data);assert.equal(r.planning.health.residualPercent,null);assert.equal(r.planning.health.status,'incomplete');
- data.analysisInputs.netMonthlyIncome=null;r=calculateFinancialAnalysis(data);assert.equal(r.summary.cashFlow,null);
+ let r=calculateFinancialAnalysis(data);assert.equal(r.income.netMonthly,null);assert.equal(r.planning.health.basis,'before-payroll-deductions');assert.equal(r.planning.health.status,'provisional');assert(r.planning.homeRange.upper>0);assert.equal(r.summary.reviewed,false);
+ data.income.monthlyDeductions=2000;r=calculateFinancialAnalysis(data);assert.equal(r.income.netMonthly,6000);assert.equal(r.summary.cashFlow,3599.75);assert.equal(r.planning.homeRange.basis,'take-home');assert.equal(r.planning.health.status,'provisional');
+ data.income.monthlyDeductions=0;r=calculateFinancialAnalysis(data);assert.equal(r.income.netMonthly,8000);assert.equal(r.income.payrollDeductions,0);
+ data.income.capitalReservesTotal=0;assert.equal(calculateFinancialAnalysis(data).financialProfile.reportedSavingsInvestmentsReserves,0);
 });
-test('analysis details reject invalid entries and cannot mask stale or incomplete source snapshots',async()=>{
- for(const analysisInputs of [[],{},'6000',{reviewed:'true'},{netMonthlyIncome:-1},{netMonthlyIncome:6000.001},{netMonthlyIncome:'6000'},{reservesAfterClosing:1000001},{reviewed:true,creditScore:800}]){
-  const data={...fixture(),analysisInputs};assert.throws(()=>calculateFinancialAnalysis(data));
-  assert.equal((await handler({httpMethod:'POST',body:JSON.stringify(data)})).statusCode,400);
- }
- for(const change of [d=>{d.budget.state.netMonthly=null},d=>{d.budget.state.grossMonthly=8001},d=>{d.mortgage.interestRate=6},d=>{d.budget.status='pending'},d=>{d.mortgage.hasUserInteracted=false},d=>{d.income.grossMonthlyIncome=0}]){
-  const data=fixture();data.analysisInputs={netMonthlyIncome:6000,reviewed:true};change(data);assert.throws(()=>calculateFinancialAnalysis(data));
+test('provisional gross-income stress tests constrain prices and preserve before-tax labels',()=>{
+ const data=fixture();data.income.netMonthlyIncome=null;data.budget.state.netMonthly=null;data.budget.state.reviewed=false;
+ const before=calculateFinancialAnalysis(data);data.stressTest={housingMonthly:1500,expensesMonthly:6100};const r=calculateFinancialAnalysis(data);
+ assert.equal(r.planning.summary.beforeDeductionsRemaining,-300);assert.equal(r.planning.summary.cashFlow,null);assert.equal(r.planning.health.residualPercent,null);assert(r.planning.health.beforeDeductionsPercent<0);assert.equal(r.planning.health.label,'Before-tax shortfall');assert.equal(r.planning.monthlyLimit,700);assert(r.planning.homeRange.upper<before.planning.homeRange.upper);assert.match(r.planning.homeRange.reason,/before-tax/);
+});
+test('invalid source financial details and obsolete analysis overrides fail validation',async()=>{
+ for(const change of [d=>{d.income.capitalReservesTotal=-1},d=>{d.income.sources=[{amount:'4000'}]},d=>{d.income.sources=[null]},d=>{d.income.sources=Array(51).fill({amount:0})},d=>{d.income.monthlyDeductions=3000},d=>{d.income.monthlyDeductions=9000},d=>{d.analysisInputs={netMonthlyIncome:9000,reviewed:true}}]){
+  const data=fixture();change(data);assert.throws(()=>calculateFinancialAnalysis(data));assert.equal((await handler({httpMethod:'POST',body:JSON.stringify(data)})).statusCode,400);
  }
 });
