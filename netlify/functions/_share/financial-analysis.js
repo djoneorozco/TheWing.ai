@@ -1,6 +1,7 @@
 // Compose the existing budget and mortgage engines. No demo values or new lending rules.
 import { calculateFinanceBudget } from './finance-budget.js';
 import { calculateMilitaryMortgage } from './military-mortgage.js';
+import { calculateFinancialPlanning } from './financial-planning.js';
 
 export const VERSION = 'financial-analysis-v1';
 const money = n => Math.round((n + Number.EPSILON) * 100) / 100;
@@ -65,7 +66,7 @@ export function calculateFinancialAnalysis(input) {
     detail = 'Compares your entered housing cost with the existing income, debt and cash-cushion guideline. This is not a loan approval.';
   }
   const components = mortgage ? Object.entries({principalInterest:mortgage.monthly.principalInterest,propertyTaxes:mortgage.monthly.propertyTax,homeInsurance:mortgage.monthly.insurance,hoaFees:mortgage.monthly.hoa,pmi:mortgage.monthly.mortgageInsurance,otherOwnership:mortgage.monthly.otherOwnership}).map(([key,value])=>({key,amount:value,share:ratio(value,mortgage.monthly.totalHousing)})) : [];
-  return {ok:true,version:VERSION,status,missing,notes,income:{grossMonthly:gross,netMonthly:net},mortgage,budget,components,
+  const result = {ok:true,version:VERSION,status,missing,notes,income:{grossMonthly:gross,netMonthly:net},mortgage,budget,components,
     summary:{housingMonthly:housing,nonHousingExpenses:nonHousing,monthlyDebt:metrics?.totalDebt??null,monthlySavings:metrics?.totalSavings??null,
       cashFlow:metrics?.cashFlow??null,beforeDeductionsRemaining:metrics?.beforeDeductionsRemaining??null,
       housingRatioNet:ratio(housing,net),housingRatioGross:ratio(housing,gross),debtRatio:metrics?.debtIncomeRatio??null,
@@ -73,4 +74,6 @@ export function calculateFinancialAnalysis(input) {
       downPaymentPercent:mortgage ? ratio(mortgage.upfront.downPayment,mortgage.inputs.homePrice) : null,
       reservesAfterClosing:reserve,reserveMonths:reserve!==null&&reserveBasis>0?reserve/reserveBasis:null,
       manuallyAdjusted,example,reviewed:budget?.reviewed===true},guidance:{title,detail},items};
+  result.planning = calculateFinancialPlanning(result,input);
+  return result;
 }
