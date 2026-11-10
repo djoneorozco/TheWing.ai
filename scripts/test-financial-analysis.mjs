@@ -140,3 +140,38 @@ test('missing gross income blocks the health verdict even when take-home income 
  const data=fixture();data.income.grossMonthlyIncome=null;data.budget.state.grossMonthly=null;
  const p=calculateFinancialAnalysis(data).planning;assert.equal(p.health.status,'incomplete');assert.equal(p.homeRange.upper,null);assert(p.health.missing.includes('positive gross income'));
 });
+
+test('analysis details complete gross-only, unreviewed handoffs without mutating source figures',async()=>{
+ const data=fixture();data.income.netMonthlyIncome=null;data.budget.state.netMonthly=null;data.budget.state.reviewed=false;
+ const original=structuredClone(data);
+ let r=calculateFinancialAnalysis(data);
+ assert.match(r.planning.homeRange.reason,/take-home income/);assert.match(r.planning.homeRange.reason,/reviewed expense budget/);
+ assert.doesNotMatch(r.planning.homeRange.reason,/confirm.*mortgage/);assert.equal(r.planning.homeRange.selectedPrice,240000);
+ data.analysisInputs={netMonthlyIncome:6000,reviewed:true,reservesAfterClosing:20000};
+ r=calculateFinancialAnalysis(data);
+ assert.equal(r.summary.cashFlow,3599.75);assert.equal(r.summary.reviewed,true);assert.equal(r.summary.reservesAfterClosing,20000);
+ assert.equal(r.planning.health.status,'stable');assert(r.planning.homeRange.upper>0);assert(r.planning.health.residualPercent>0);
+ assert.deepEqual(r.analysisInputs,data.analysisInputs);assert.match(r.notes.join(' '),/session only/);
+ const response=await handler({httpMethod:'POST',body:JSON.stringify(data)});assert.equal(response.statusCode,200);assert.equal(JSON.parse(response.body).planning.health.status,'stable');
+ data.stressTest={housingMonthly:1500,expensesMonthly:900};r=calculateFinancialAnalysis(data);
+ assert.equal(r.summary.cashFlow,3599.75);assert.equal(r.planning.summary.cashFlow,2900);
+ delete data.analysisInputs;delete data.stressTest;assert.deepEqual(data,original);assert.equal(calculateFinancialAnalysis(data).planning.homeRange.upper,null);
+});
+test('completion preserves unknowns and zeroes and never silently confirms the budget',()=>{
+ const data=fixture();data.income.netMonthlyIncome=null;data.budget.state.netMonthly=null;data.budget.state.reviewed=false;
+ data.analysisInputs={netMonthlyIncome:6000};let r=calculateFinancialAnalysis(data);
+ assert.equal(r.summary.reviewed,false);assert.equal(r.planning.homeRange.upper,null);assert.equal(r.summary.reservesAfterClosing,null);
+ data.analysisInputs.reviewed=true;r=calculateFinancialAnalysis(data);assert(r.planning.homeRange.upper>0);assert.equal(r.planning.health.status,'provisional');
+ data.analysisInputs.reservesAfterClosing=0;r=calculateFinancialAnalysis(data);assert.equal(r.summary.reservesAfterClosing,0);assert.equal(r.planning.health.status,'at-risk');
+ data.analysisInputs.reservesAfterClosing=null;data.analysisInputs.netMonthlyIncome=0;r=calculateFinancialAnalysis(data);assert.equal(r.planning.health.residualPercent,null);assert.equal(r.planning.health.status,'incomplete');
+ data.analysisInputs.netMonthlyIncome=null;r=calculateFinancialAnalysis(data);assert.equal(r.summary.cashFlow,null);
+});
+test('analysis details reject invalid entries and cannot mask stale or incomplete source snapshots',async()=>{
+ for(const analysisInputs of [[],{},'6000',{reviewed:'true'},{netMonthlyIncome:-1},{netMonthlyIncome:6000.001},{netMonthlyIncome:'6000'},{reservesAfterClosing:1000001},{reviewed:true,creditScore:800}]){
+  const data={...fixture(),analysisInputs};assert.throws(()=>calculateFinancialAnalysis(data));
+  assert.equal((await handler({httpMethod:'POST',body:JSON.stringify(data)})).statusCode,400);
+ }
+ for(const change of [d=>{d.budget.state.netMonthly=null},d=>{d.budget.state.grossMonthly=8001},d=>{d.mortgage.interestRate=6},d=>{d.budget.status='pending'},d=>{d.mortgage.hasUserInteracted=false},d=>{d.income.grossMonthlyIncome=0}]){
+  const data=fixture();data.analysisInputs={netMonthlyIncome:6000,reviewed:true};change(data);assert.throws(()=>calculateFinancialAnalysis(data));
+ }
+});

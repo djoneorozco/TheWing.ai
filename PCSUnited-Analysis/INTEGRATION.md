@@ -58,6 +58,14 @@ Both values must be finite numbers from 0 to 1,000,000 with at most two decimal 
 
 The thin client debounces API requests, cancels superseded requests and marks pending/failed previews visibly. Reset and incoming source changes restore the baseline. There are no upstream mutations, storage writes, new accounts, external AI calls or authentication/CORS changes. Annual chart display does not change the monthly controls.
 
+## Complete missing details in Analysis
+
+The connected dashboard exposes an inline **Complete your analysis** form when required inputs are missing. Users can enter take-home household income, inspect the connected expense rows and totals, explicitly confirm their budget review, and optionally enter savings remaining after closing. The form collapses after completion and remains available as **Your analysis details · Edit**. The rest of the dashboard and budget sliders use these explicit entries immediately. Gross income is never silently converted into take-home income, and entering income alone does not check the budget-review box.
+
+The optional request field `analysisInputs` accepts only `netMonthlyIncome` and `reservesAfterClosing` (null or finite amounts from 0–1,000,000 with up to two decimals), and `reviewed` (boolean). The server validates the original income/budget and linked mortgage for consistency before applying these fields. Positive connected gross income, a confirmed mortgage and a ready expense snapshot are required. The response echoes the accepted `analysisInputs` and identifies their session-only provenance. Existing clients and packets remain compatible.
+
+These details stay in the analysis iframe's memory; they do not write back to Financial Guidance or browser storage. An unchanged reconnect preserves them. A changed ready source snapshot clears them with an explanation and reopens the review form; transport revision changes alone do not count. Pending snapshots clear displayed results without discarding local details until the refreshed snapshot can be compared. Reloading clears local entries. **Use Financial Guidance entries** restores the original connected figures, and applying details resets any stress-test preview. The home-price panel lists only the actually missing inputs and retains the selected home price while a range is unavailable.
+
 ## Webflow embeds and deployment
 
 Run `node scripts/build-financial-analysis-embeds.mjs`. The script verifies both embeds remain below 50,000 characters.
