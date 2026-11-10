@@ -29,3 +29,20 @@ test('host rejects other frames, stale mortgage results and noncontract results'
  listeners.message({...message,data:{...data,snapshot:{revision:3,ready:false,status:'loading'}}});assert.equal(sent.at(-1).mortgage.amount,null);
  listeners.message({...message,data:{...data,snapshot:{...snapshot,revision:4,mortgageEstimate:{ok:true,contract:'wrong',monthly:{totalHousing:1}}}}});assert.equal(sent.at(-1).mortgage.amount,null);
 });
+test('host fits only trusted dashboard sizes and supports growth and shrink',()=>{
+ const listeners={},sent=[],frameListeners={},windowRef={postMessage:data=>sent.push(data)};
+ const frame={dataset:{},style:{height:'900px'},contentWindow:windowRef,addEventListener:(name,fn)=>frameListeners[name]=fn};
+ const window={addEventListener:(name,fn)=>listeners[name]=fn};
+ const document={getElementById:id=>id==='pcsu-budget-frame'?frame:null,readyState:'complete'};
+ const code=fs.readFileSync(new URL('../Webflow/financial-guidance-budget.html',import.meta.url),'utf8').split('<script>')[1].split('</script>')[0];
+ vm.runInNewContext(code,{window,document,Number,Array,Object});
+ assert.equal(sent.at(-1).type,'pcsu:finance-request-size');
+ const data={source:'pcsu-finance',version:1,type:'pcsu:finance-resize',height:700.2};
+ const message={origin:'https://thewing.netlify.app',source:windowRef,data};
+ for(const invalid of [{...message,source:{}},{...message,origin:'https://evil.example'},{...message,data:{...data,source:'wrong'}},{...message,data:{...data,version:2}},...[-1,0,NaN,Infinity,30001,'700',null].map(height=>({...message,data:{...data,height}}))])listeners.message(invalid);
+ assert.equal(frame.style.height,'900px');
+ listeners.message(message);assert.equal(frame.style.height,'701px');
+ listeners.message({...message,data:{...data,height:1400}});assert.equal(frame.style.height,'1400px');
+ listeners.message({...message,data:{...data,height:650}});assert.equal(frame.style.height,'650px');
+ frameListeners.load();assert.equal(sent.at(-1).type,'pcsu:finance-request-size');
+});
