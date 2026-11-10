@@ -10,17 +10,24 @@
   "geo_id": "1600000US0646170",
   "year": 2026,
   "last_updated_data_from_sources": "March 2026",
+  "last_verified_base_profile": "2026-09-16",
+  "gold_standard_profile": {
+    "status": "canonical",
+    "purpose": "PCSUnited Base Map, Ask Amy Base Map Concierge, Base Demographics, and related PCS planning experiences",
+    "profile_version": "pcsu-base-profile-v1.1.0",
+    "verified_on": "2026-09-16",
+    "verification_scope": "Installation identity, current host-wing mission and RQ-4 transition note, operator, published MilitaryINSTALLATIONS population profile, visitor control, gate hours/status, housing contacts, medical, commissary, family readiness, lodging, MPS, school support, and PCS arrival references.",
+    "market_data_note": "Existing housing-market and demographic values are preserved from the file's recorded March 2026 and January 2026 sources and are not re-dated by this installation-profile verification. MARKET_REFRESH_REQUIRED: RentCast was not called during this upgrade, so market fields were not refreshed."
+  },
   "image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69fa066a5e8a8b7be9777b60_Beale%20California.png",
   "base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f9f9a595d4965441a7696e_Beale%20AFB.png",
   "zip": "95903",
   "market_label": "Yuba City-Marysville Metro",
   "profile": "Military-friendly Beale AFB housing snapshot anchored to the Marysville, Wheatland, Plumas Lake, and Yuba-Sutter market, built for PCSUnited base-level market overviews.",
-
   "avg_home_value": 465000,
   "average_home_value": 465000,
   "avgHome": 465000,
   "city_avg_home": 465000,
-
   "snapshot": {
     "population_city": 12500,
     "population_metro": 182000,
@@ -30,7 +37,6 @@
     "traffic_level": "Low to Moderate",
     "employment_status": "Stable"
   },
-
   "market_metrics": {
     "median_list_price": 475000,
     "median_sold_price": 458000,
@@ -44,7 +50,6 @@
     "zillow_one_year_change_percent": 1.4,
     "as_of": "2026-03"
   },
-
   "metrics": {
     "median_list_price": 475000,
     "median_sold_price": 458000,
@@ -57,7 +62,6 @@
     "property_tax_rate": 0.0115,
     "as_of": "2026-03"
   },
-
   "mortgage_assumptions": {
     "apr_percent": 6.25,
     "term_years": 30,
@@ -65,13 +69,11 @@
     "includes": "va_loan_all_in",
     "defaults_note": "Based on March 2026 California VA loan rates."
   },
-
   "property_tax_rate": 0.0115,
   "property_tax_rate_percent": 1.15,
   "insurance_rate": 0.0048,
   "insurance_rate_percent": 0.48,
   "hoa_monthly": 15,
-
   "ownership_costs": {
     "property_tax_rate": 0.0115,
     "property_tax_rate_percent": 1.15,
@@ -85,92 +87,75 @@
       "Insurance, utilities, wildfire-adjacent risk, commute distance, and maintenance reserves should be included in all-in housing comparisons."
     ]
   },
-
   "costs": {
     "property_tax_rate": 0.0115,
     "insurance_annual_default": 2232,
     "hoa_monthly_default": 15
   },
-
   "avg_home_mortgage_monthly": {
     "avg": 3280,
     "as_of": "2026-03",
     "notes": "VA loan estimate; Plumas Lake and Wheatland are primary growth markets."
   },
-
   "population": {
     "estimate": 12500,
     "median_age": 31.4,
     "persons_per_household": 2.7
   },
-
   "households": {
     "total_households": 4600
   },
-
   "income": {
     "median_household_income": 61800,
     "per_capita_income": 28400,
     "poverty_rate_percent": 16.2
   },
-
   "education": {
     "high_school_grad_or_higher_percent": 86.5,
     "bachelors_degree_or_higher_percent": 18.4
   },
-
   "veterans": {
     "veteran_population_percent": 12.1
   },
-
   "immigration": {
     "foreign_born_percent": 13.5
   },
-
   "labor": {
     "mean_travel_time_to_work_minutes": 26.4,
     "unemployment_rate_percent": 5.2
   },
-
   "crime_status": {
     "installation": "Extremely safe; gated military community.",
     "metro_yuba_sutter": "Marysville has higher crime rates in older districts; Wheatland and Plumas Lake are often preferred by military families for safety, newer housing, and family lifestyle fit."
   },
-
   "school_quality": {
     "on_base": "Lone Tree Elementary and local Wheatland-area school options may serve many base-connected families; families should verify current attendance boundaries by exact housing address.",
     "off_base": "Wheatland and Plumas Lake districts are commonly preferred by military families; Marysville and Yuba City options vary and should be verified by address."
   },
-
   "rental_vacancy": {
     "rate_percent": 6.8,
     "notes": "Steady supply of single-family rentals in newer developments, especially in growth corridors near Wheatland and Plumas Lake."
   },
-
   "rental_metrics": {
     "median_rent": 2400,
     "vacancy_rate_percent": 6.8,
     "notes": "Based on 3-bedroom average rent and steady single-family rental demand in the Beale / Yuba-Sutter market."
   },
-
   "climate_weather": {
     "spring": "Mild/Green; 52–75°F",
     "summer": "Hot/Dry; 92–104°F",
     "fall": "Dry/Pleasant; 55–82°F",
     "winter": "Cool/Wet; 38–54°F"
   },
-
   "special_events": [
     "Beale Air Expo",
     "Bok Kai Festival",
     "Yuba-Sutter Fair"
   ],
-
   "military_lifestyle_fit": {
     "rating": "Exceptional",
     "description": "Quiet rural feel with high community support; Beale is a major economic and military anchor for the Yuba-Sutter region."
   },
-
   "financial_brief": {
     "bah_vs_buy_position": "Favorable",
     "bah_vs_rent_position": "Favorable",
@@ -178,7 +163,6 @@
     "buyer_opportunity": "Strongest opportunities appear in Plumas Lake, Wheatland, and selected Marysville/Yuba City pockets where commute, home condition, and resale appeal align.",
     "renter_advantage": false
   },
-
   "market_bluf": {
     "bluf_headline": "Affordable California Anchor",
     "bluf_summary": "Beale offers a quieter lifestyle, stable military demand, and comparatively reachable California housing, especially in Plumas Lake and Wheatland growth corridors.",
@@ -189,7 +173,6 @@
     "verdict_color": "green",
     "confidence_score": 89
   },
-
   "scorecard": {
     "affordability_score": 72,
     "growth_score": 68,
@@ -197,13 +180,11 @@
     "military_fit_score": 94,
     "overall_score": 81
   },
-
   "rules": {
     "max_safe_housing_ratio": 0.3,
     "warning_ratio": 0.35,
     "danger_ratio": 0.4
   },
-
   "summary_points": [
     "Beale AFB gives military families one of the more approachable California housing markets compared with coastal or major-metro installations.",
     "Plumas Lake and Wheatland are key growth corridors for buyers wanting newer housing and stronger family fit.",
@@ -211,7 +192,6 @@
     "California home prices still create payment pressure, even when Beale is more affordable than Travis, Vandenberg, or coastal markets.",
     "The best Beale housing decision balances commute, BAH, schools, insurance, utility cost, and long-term resale logic."
   ],
-
   "opportunities": [
     "Lower California entry price than many other Air Force markets.",
     "Wheatland and Plumas Lake provide stronger family and newer-home options.",
@@ -219,7 +199,6 @@
     "Rural-suburban lifestyle may appeal to families wanting less congestion.",
     "Buyers may find more space for the money compared with larger California metros."
   ],
-
   "risks": [
     "California purchase prices can still create high monthly payments relative to income.",
     "Marysville and older districts require stronger crime, school, and property-condition screening.",
@@ -227,7 +206,6 @@
     "Wildfire-adjacent risk, insurance, heat, and utility costs should be included in ownership planning.",
     "Lower-growth rural markets may not appreciate as aggressively as larger California metros."
   ],
-
   "buyer_notes": [
     "Beale is a strong market for disciplined VA buyers who want California access without coastal-level pricing.",
     "Focus on all-in monthly cost, not just the home price.",
@@ -235,21 +213,18 @@
     "Marysville can work, but buyers should perform property-level and neighborhood-level due diligence.",
     "This market rewards buyers who protect residual income and avoid stretching into California payment pressure."
   ],
-
   "seller_notes": [
     "Sellers should position homes around commute, family fit, condition, energy efficiency, and affordability compared with larger California markets.",
     "Move-in-ready homes in Wheatland or Plumas Lake can appeal strongly to military families.",
     "Homes in older areas should be priced and presented with condition transparency.",
     "Military-friendly listing language should highlight BAH practicality, commute simplicity, and nearby services."
   ],
-
   "investor_angles": [
     "Military demand supports rental relevance near Beale, especially for clean single-family homes in practical commute corridors.",
     "Plumas Lake and Wheatland may provide stronger family-renter appeal than generic low-price areas.",
     "Investors should stress-test California acquisition cost, insurance, maintenance, vacancy, and property management.",
     "Best suited for stability-focused investors rather than speculative appreciation-only strategies."
   ],
-
   "neighborhoods": [
     "Plumas Lake",
     "Wheatland",
@@ -257,14 +232,12 @@
     "Yuba City",
     "Lincoln edge / southern commute corridors"
   ],
-
   "target_neighborhoods": [
     "Plumas Lake",
     "Wheatland",
     "Yuba City",
     "Select Marysville areas"
   ],
-
   "buyer_guidance": [
     "Use all-in monthly payment as the main affordability screen.",
     "Compare Plumas Lake, Wheatland, Marysville, and Yuba City by commute, school zones, safety, and property age.",
@@ -272,21 +245,18 @@
     "Do not choose strictly by proximity; choose by total fit.",
     "Use PCSUnited calculators to compare rent, buy, residual income, and assignment-length risk."
   ],
-
   "seller_guidance": [
     "Price against current buyer payment sensitivity, not just California home-price expectations.",
     "Highlight commute logic, school-zone clarity, condition, and low-maintenance features.",
     "Homes with newer systems, clean inspections, and practical military-family appeal should be positioned clearly.",
     "Military buyers need practical monthly value, not just emotional listing copy."
   ],
-
   "landlord_notes": [
     "Military renter demand can support stable occupancy near Beale.",
     "Single-family rentals in good commute corridors may appeal to families avoiding purchase risk.",
     "Investors should model vacancy, maintenance, insurance, and California ownership costs conservatively.",
     "Clean, practical homes in Plumas Lake or Wheatland may outperform generic low-cost inventory."
   ],
-
   "by_bedroom": {
     "2": {
       "rent_monthly": {
@@ -441,7 +411,6 @@
       }
     }
   },
-
   "housing": {
     "housing_units": 5200,
     "median_value_owner_occupied": 465000,
@@ -477,35 +446,118 @@
       ]
     }
   },
-
   "base_profile": {
-    "schema_version": "pcsu-base-profile-v1.0.0",
+    "schema_version": "pcsu-base-profile-v1.1.0",
+    "profile_status": "gold_standard",
+    "last_verified": "2026-09-16",
     "base_id": "beale-afb",
     "base_name": "Beale AFB",
     "display_name": "Beale Air Force Base",
     "short_name": "Beale",
+    "official_installation_name": "Beale Air Force Base",
     "branch": "Air Force",
     "joint_base": false,
-    "parent_installation": "Beale AFB",
+    "parent_installation": "Beale Air Force Base",
     "city": "Marysville",
     "state": "California",
     "state_abbr": "CA",
     "zip": "95903",
     "metro": "Yuba City-Marysville, CA",
     "market_label": "Yuba-Sutter / Beale Military Housing Market",
-    "installation_type": "Intelligence / Reconnaissance / High-Altitude ISR Base",
-    "host_or_major_command": "9th Reconnaissance Wing / Air Combat Command",
-    "primary_mission_summary": "Beale AFB is a major Air Force installation in Northern California supporting intelligence, surveillance, reconnaissance, high-altitude reconnaissance heritage, global mission support, and expeditionary readiness.",
-    "pcs_personality": "Quiet, rural-suburban, family-oriented, commute-sensitive, California-affordability-conscious, and strongly tied to Wheatland, Plumas Lake, Marysville, and Yuba City housing choices.",
-    "base_bluf": "Beale is not a generic California housing market. It is a rural Northern California PCS decision where families should compare affordability, commute, school zones, safety, insurance, wildfire-adjacent risk, and long-term resale before choosing between Plumas Lake, Wheatland, Marysville, or Yuba City.",
-
-    "user_positioning": {
-      "military_family_bluf": "Prioritize commute reliability, school-zone verification, neighborhood safety, insurance cost, and all-in monthly payment before signing a lease or purchase contract.",
-      "single_airman_bluf": "Prioritize affordability, commute simplicity, rental flexibility, and access to daily services without overpaying for newer-family housing if it does not fit your lifestyle.",
-      "realtor_bluf": "The strongest Beale housing conversations are about California affordability, Wheatland versus Plumas Lake tradeoffs, commute realism, school-zone confidence, and payment discipline.",
-      "investor_bluf": "Rental demand near Beale is influenced by military turnover, limited nearby inventory, family housing needs, and the appeal of clean single-family rentals in practical commute corridors."
+    "installation_type": "High-altitude ISR / reconnaissance host-wing Air Force base",
+    "host_or_major_command": "Air Combat Command / Sixteenth Air Force / 9th Reconnaissance Wing (host wing)",
+    "primary_mission_summary": "Beale Air Force Base is hosted by the 9th Reconnaissance Wing under Sixteenth Air Force and Air Combat Command. Current official MilitaryINSTALLATIONS and 9th Reconnaissance Wing language describes the host wing as equipped with the nation's only fleet of U-2 Dragon Lady high-altitude reconnaissance aircraft, supported by T-38 companion trainers, and tasked to provide high-altitude reconnaissance, mission-ready Airmen, and combat-ammunition expertise while delivering resilient installation services. An official Air Combat Command article dated July 2022 states the RQ-4 Global Hawk Block 30 flying mission at Beale ended when the final aircraft assigned to the 12th Reconnaissance Squadron departed. A September 2025 ACC leadership visit described ongoing preparations for mission transitions, including possible Collaborative Combat Aircraft integration; treat that as a sourced potential transition, not a completed aircraft change.",
+    "mission_partners": [
+      "9th Reconnaissance Wing (host wing)",
+      "Sixteenth Air Force / Air Combat Command",
+      "1st Reconnaissance Squadron (U-2 / T-38 training)",
+      "99th Reconnaissance Squadron (U-2 operations)",
+      "Air Force Combat Ammunition Center / 9th Munitions Squadron",
+      "548th Intelligence, Surveillance and Reconnaissance Group",
+      "7th Space Warning Squadron (21st Space Wing)",
+      "940th Air Refueling Wing (Air Force Reserve Command / KC-135)",
+      "195th Wing (California Air National Guard)",
+      "12th Reconnaissance Squadron (MilitaryINSTALLATIONS still lists this 319th Reconnaissance Wing unit as physically remaining at Beale after the 2019 realignment; RQ-4 Block 30 flying at Beale ended in 2022 per ACC)"
+    ],
+    "pcs_personality": "Rural-suburban Northern California PCS decision: California payment pressure without coastal pricing, Wheatland and Plumas Lake family corridors, Marysville/Yuba City screening, fog and rural-road commute risk, and strong dependence on which of five gates is actually open.",
+    "base_bluf": "Beale is not a generic California housing market. Families should compare Wheatland, Plumas Lake, Marysville, Yuba City, and longer Lincoln-edge options against BAH, insurance, wildfire-adjacent risk, school assignment by exact address, and a realistic gate/report-time commute. On-base housing can reduce commute uncertainty on a geographically large installation.",
+    "base_operator": {
+      "label": "Beale AFB Base Operator / information line",
+      "phone": "530-634-3000",
+      "type": "directory_assistance",
+      "availability": "Directory assistance / information line",
+      "verification_status": "verified_official_with_source_conflicts",
+      "verified_on": "2026-09-16",
+      "source_label": "Official Beale Directory, Newcomer Info, and MilitaryINSTALLATIONS contact listing"
     },
-
+    "base_operator_phone": "530-634-3000",
+    "installation_operator_phone": "530-634-3000",
+    "installation_population": {
+      "total": "Approximately 4,587",
+      "scope": "MilitaryINSTALLATIONS published active-duty figure only. Not a combined total-force census and not Marysville, Yuba City, Yuba County, or Sacramento metro population.",
+      "active_duty": 4587,
+      "family_members": 4284,
+      "civilian": 772,
+      "contractors": 507,
+      "reservists": 611,
+      "reserve_guard": 1071,
+      "note": "MilitaryINSTALLATIONS publishes Active duty 4,587; Family members 4,284; Civilian employees 772; Contractors 507; Reservists/Guard 1,071; and Retirees 25,000. The same page's narrative lists 611 reservists and 239 guardsmen (850), which conflicts with the 1,071 Reservists/Guard line. Those unlike categories are not added into a fabricated grand total. The 25,000 retirees/widows/retiree family members are a surrounding-area support statement, not on-installation population. The same page's Yuba-Sutter civilian figure and five-county civilian population are not installation population. Cows listed on the same page are not people and are not used here. Treat as a published profile, not a live 2026 headcount.",
+      "source_freshness": "MilitaryINSTALLATIONS Beale overview reviewed 2026-09-16; underlying headcount year is not stated. Treat as a published profile, not a live headcount.",
+      "verified_on": "2026-09-16"
+    },
+    "security_contacts": {
+      "base_defense_operations_center": {
+        "name": "Beale AFB Base Defense Operations Center",
+        "phone": "not_published_on_current_official_public_pages",
+        "availability": "not_published",
+        "status": "not_published",
+        "verification_status": "not_published",
+        "verified_on": "2026-09-16",
+        "note": "A dedicated public BDOC number was not published on the current official Directory, homepage, or MilitaryINSTALLATIONS pages reviewed on 2026-09-16. Do not invent one. For access questions use 9th Security Forces Squadron / Law Enforcement Desk 530-634-2131, Pass and Registration 530-634-3128, or the base operator."
+      },
+      "security_forces_law_enforcement_desk": {
+        "name": "9th Security Forces Squadron / Law Enforcement Desk",
+        "phone": "530-634-2131",
+        "availability": "Published public access/operations contact",
+        "verified_on": "2026-09-16",
+        "note": "Official Directory, homepage visitor guidance, REAL ID article, and DeCA store-page gate note all point to 9th SFS at 530-634-2131 for current gate and access questions. This is not labeled as BDOC."
+      },
+      "pass_and_registration": {
+        "name": "9th SFS Pass and Registration / Visitor Control",
+        "phone": "530-634-3128",
+        "email": "9SFS.VCC.RegistrationRequest@us.af.mil",
+        "verified_on": "2026-09-16"
+      },
+      "command_post": {
+        "name": "Beale Command Post",
+        "phone": "530-634-5700",
+        "verified_on": "2026-09-16",
+        "note": "Published on the official Directory. Not a visitor-pass number."
+      },
+      "emergency": {
+        "phone": "911",
+        "note": "Use 911 for emergencies. Official 9th Medical Group guidance states Beale does not offer urgent or emergency care on base."
+      }
+    },
+    "access_guidance": {
+      "bluf": "Beale currently operates five named gates. Visitors without an accepted DoD ID must be sponsored. Official homepage and REAL ID article state REAL ID-compliant identification or another accepted credential is required. Visitor passes are processed by 9th SFS at the Visitors Center adjacent to Wheatland Gate and by Pass and Registration. Gate hours are time-sensitive; call 530-634-2131 immediately before travel.",
+      "current_posture": [
+        "Official homepage: all visitors accessing the base must be REAL ID compliant; if the visitor does not yet have a REAL ID driver's license, a second form of government-issued identification such as a valid U.S. passport is needed.",
+        "Official 7 May 2025 REAL ID article: possession of a REAL ID alone does not grant access; visitors must still be sponsored and accompanied by a DoD ID cardholder at all times while on base.",
+        "Official 9th SFS visitor-pass guidance: sponsors may email 9SFS.VCC.RegistrationRequest@us.af.mil; Pass and Registration 530-634-3128; DBIDS pre-enrollment is available; visitors can also obtain a pass at the gate on initial arrival. Wheatland Gate is listed for duty-hour pass printing Monday-Friday 0730-1600 in that guidance.",
+        "Sponsors and visitors may meet at the Visitors Center adjacent to Wheatland Gate for vetting and 1-30 day passes.",
+        "Gold Country Inn is the published 24-hour arrival point for newcomers, not a substitute for 9th SFS visitor-pass processing. The official Directory lists Welcome/Visitors Center at the lodging number 530-634-2953, which is a naming conflict with the Wheatland-adjacent SFS Visitors Center.",
+        "DeCA Beale store page published gate hours effective 14 April 2026. Older official PDFs and some newcomer pages disagree. Verify with 9th SFS 530-634-2131 before travel."
+      ],
+      "access_questions_contact": "9th SFS / Law Enforcement Desk 530-634-2131; Pass and Registration 530-634-3128 / 9SFS.VCC.RegistrationRequest@us.af.mil; Base Operator 530-634-3000",
+      "verified_on": "2026-09-16"
+    },
+    "user_positioning": {
+      "military_family_bluf": "Prioritize school-zone verification by exact address, Wheatland versus Plumas Lake versus Marysville tradeoffs, insurance and wildfire-adjacent cost, and a commute tested to the gate that will actually be open at report time.",
+      "single_airman_bluf": "Confirm unaccompanied-housing eligibility first. If living off base, prioritize West Gate/Schneider or other 24/7 access, rental flexibility, and not overpaying for newer family housing that does not fit the tour length.",
+      "realtor_bluf": "The strongest Beale conversations are about California all-in payment, which gate the client can actually use, Wheatland versus Plumas Lake versus Marysville screening, and whether assignment length supports buying.",
+      "investor_bluf": "Rental demand is influenced by military turnover, limited nearby inventory, and the need for clean single-family homes in practical commute corridors — not by Sacramento-metro appreciation assumptions."
+    },
     "base_map_image": {
       "url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
       "alt": "PCSUnited public-facing Beale AFB placeholder orientation image for base housing and relocation planning.",
@@ -517,136 +569,227 @@
       "confidence": "medium",
       "safety_note": "This is not an official DoD map. It is a placeholder PCSUnited orientation image and should not be used for access control, emergency routing, or official navigation."
     },
-
     "official_links": {
+      "base_home": "https://www.beale.af.mil/",
+      "gate_hours": "https://www.beale.af.mil/Home/Newcomer-Info/Beale-Space-A-Program/",
+      "visitor_info": "https://www.beale.af.mil/",
+      "visitor_control_center": "https://www.beale.af.mil/Portals/110/(DVES)%20Public%20How%20to.pdf",
+      "housing": "https://www.housing.af.mil/Home/Installations/Beale-AFB/",
+      "medical": "https://beale.tricare.mil/",
+      "commissary": "https://corp.commissaries.com/shopping/store-locations/beale-afb",
+      "exchange": "https://www.shopmyexchange.com/",
+      "military_installations": "https://installations.militaryonesource.mil/in-depth-overview/beale-afb",
+      "family_readiness": "https://www.beale.af.mil/Home/Beale-Information-Central/",
+      "temporary_lodging": "https://www.beale.af.mil/Home/Newcomer-Info/Lodging/",
+      "newcomers": "https://www.beale.af.mil/Home/Newcomer-Info/",
+      "mps": "https://www.beale.af.mil/Contact-Us/Directory/",
+      "school_liaison": "https://www.beale.af.mil/Home/Newcomer-Info/",
       "beale_home": "https://www.beale.af.mil/",
-      "beale_newcomers": "https://www.beale.af.mil/",
-      "beale_housing": "https://www.housing.af.mil/Home/Units/Beale/",
-      "air_force_housing_beale": "https://www.housing.af.mil/",
+      "beale_newcomers": "https://www.beale.af.mil/Home/Newcomer-Info/",
+      "beale_arriving": "https://www.beale.af.mil/Home/Newcomer-Info/Arriving-to-Beale/",
+      "beale_directory": "https://www.beale.af.mil/Contact-Us/Directory/",
+      "beale_contact": "https://www.beale.af.mil/Contact-Us/",
+      "beale_housing": "https://www.housing.af.mil/Home/Installations/Beale-AFB/",
+      "air_force_housing_beale": "https://www.housing.af.mil/Home/Installations/Beale-AFB/",
       "beale_exchange": "https://www.shopmyexchange.com/",
-      "beale_commissary": "https://corp.commissaries.com/",
-      "beale_medical": "https://beale.tricare.mil/"
+      "beale_commissary": "https://corp.commissaries.com/shopping/store-locations/beale-afb",
+      "beale_medical": "https://beale.tricare.mil/",
+      "beale_medical_contact": "https://beale.tricare.mil/About-Us/Contact-Us",
+      "beale_urgent_emergency_care": "https://beale.tricare.mil/Health-Services/Urgent-Emergency-Care",
+      "beale_pharmacy": "https://beale.tricare.mil/Health-Services/Pharmacy",
+      "beale_real_id": "https://www.beale.af.mil/News/Article-Display/Article/4178077/real-id-required-for-military-base-access-starting-may-7/",
+      "beale_gate_hours_space_a": "https://www.beale.af.mil/Home/Newcomer-Info/Beale-Space-A-Program/",
+      "beale_mfrc_factsheet": "https://www.beale.af.mil/Information/Fact-Sheets/Display/Article/279988/military-and-family-readiness-center-mfrc/",
+      "beale_9rw_factsheet": "https://www.beale.af.mil/Information/Fact-Sheets/Display/Article/279932/9th-reconnaissance-wing/",
+      "air_force_inns_beale": "https://af.dodlodging.net/propertys/Beale-AFB",
+      "beale_family_housing": "https://www.bealeafbhomes.com/"
     },
-
     "visitor_control_center": {
-      "name": "Beale AFB Visitor Control Center",
-      "building": "Verify current building before arrival",
-      "address": "Verify current visitor center routing with official Beale AFB sources before arrival",
-      "phone": "Verify current phone number with official installation sources",
-      "hours": "Verify official hours before travel",
+      "name": "9th SFS Visitors Center (adjacent to Wheatland Gate)",
+      "status": "scheduled_published_hours_time_sensitive",
+      "building": "Visitors Center adjacent to Wheatland Gate",
+      "address": "Wheatland Gate / Highway 65 and South Beale Road area; a separate street address was not published on the current official SFS visitor-pass PDF",
+      "location": "Official 9th SFS visitor-pass guidance: Visitors Center adjacent to Wheatland Gate",
+      "phone": "530-634-3128",
+      "email": "9SFS.VCC.RegistrationRequest@us.af.mil",
+      "hours": "Official visitor-pass PDF lists Wheatland Gate duty hours Monday-Friday 0730-1600 for pass printing at that gate. Confirm current hours with 530-634-3128 or 530-634-2131 before travel.",
       "best_for": [
-        "Visitors",
-        "Newcomers",
-        "Family members without routine installation access",
-        "PCS arrival planning"
+        "Visitors needing passes",
+        "Sponsored guests",
+        "Contractors following 9th SFS procedures",
+        "PCS family members without routine installation access"
       ],
       "map_label": "Visitor Control Center",
-      "map_zone": "main access / visitor processing area",
-      "note": "Use official Beale AFB visitor information before arrival. Access requirements, sponsor rules, gate procedures, and hours can change."
+      "map_zone": "Wheatland Gate visitor processing area",
+      "note": "Do not confuse the SFS Visitors Center with Gold Country Inn. Official Directory lists Welcome/Visitors Center at 530-634-2953, which is the lodging/24-hour arrival number. Official 9th SFS PDF is the source for visitor-pass processing, email, and the Wheatland-adjacent Visitors Center. REAL ID and sponsorship rules apply. A public street address for the SFS Visitors Center was not published on the pages reviewed 2026-09-16.",
+      "verification_status": "verified_official_with_source_conflicts",
+      "verified_on": "2026-09-16"
     },
-
+    "visitor_control_centers": [
+      {
+        "name": "9th SFS Visitors Center adjacent to Wheatland Gate",
+        "status": "scheduled",
+        "hours": "Visitor-pass PDF: Wheatland Gate duty hours Monday-Friday 0730-1600 for pass printing. Verify before travel.",
+        "location": "Adjacent to Wheatland Gate",
+        "phone": "530-634-3128",
+        "email": "9SFS.VCC.RegistrationRequest@us.af.mil",
+        "role": "primary_current_vcc",
+        "note": "Only the Visitors Center and the 9th SFS Pass and Registration Office are authorized to write passes for up to 30 days per the official visitor-pass PDF.",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "Gold Country Inn 24-hour arrival point",
+        "status": "open_24_7",
+        "hours": "Front desk 24/7 per official lodging and arriving-to-Beale guidance",
+        "location": "24112 A Street, Beale AFB, CA 95903",
+        "phone": "530-634-2953",
+        "role": "newcomer_24_hour_arrival_point",
+        "note": "Official arriving guidance: 24-hour arrival point for contacting a sponsor. Official Directory aliases this as Welcome/Visitors Center. It is not a substitute for 9th SFS visitor-pass processing.",
+        "verified_on": "2026-09-16"
+      }
+    ],
     "gates": [
       {
-        "name": "Main Gate",
+        "name": "Schneider Gate",
         "type": "primary_gate",
-        "status": "verify_current_status",
-        "hours": "Verify official Beale AFB gate hours",
-        "map_label": "Main Gate",
-        "map_zone": "primary access area",
+        "status": "open_24_7",
+        "hours": "Open 24/7 per the DeCA Beale store-page gate update effective 14 April 2026 and the official Space-A/newcomer gate listing. Federal-holiday listing on the same DeCA page also keeps Schneider 24/7.",
+        "map_label": "Schneider Gate",
+        "map_zone": "North Beale Road / primary access area",
         "best_for": [
           "Newcomer routing",
-          "General base access",
-          "Visitor processing when directed",
-          "Marysville / Wheatland routing depending on final route"
+          "After-hours and weekend entry",
+          "Marysville / CA-70 approaches",
+          "Visitor and general access when other gates are closed"
         ],
-        "commute_notes": "Common anchor point for arrival planning and general base access. Route performance depends on gate flow, report time, and exact housing location.",
-        "user_warning": "Verify current gate status with official Beale AFB sources before travel."
+        "commute_notes": "Official Space-A listing: off North Beale Road. MilitaryINSTALLATIONS arriving notes also treat Schneider as a 24-hour option. Route performance depends on North Beale Road, report time, and fog/rural conditions.",
+        "user_warning": "Gate schedules are time-sensitive. An older official Gate hours PDF listed Schneider as weekday morning-only and is treated as superseded by the 14 April 2026 DeCA update. Call 530-634-2131 immediately before travel.",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "Vassar Lake Gate",
+        "type": "housing_access_gate",
+        "status": "open_24_7",
+        "hours": "Open 24/7 per the DeCA Beale store-page gate update effective 14 April 2026, the Space-A listing, and MilitaryINSTALLATIONS arriving notes. Federal-holiday listing on the DeCA page also keeps Vassar Lake 24/7.",
+        "map_label": "Vassar Lake Gate",
+        "map_zone": "Camp Beale Highway / on-base housing access",
+        "best_for": [
+          "On-base housing residents",
+          "Wheatland / CA-65 / Camp Beale Highway approaches",
+          "After-hours and weekend housing access"
+        ],
+        "commute_notes": "MilitaryINSTALLATIONS arriving-by-car notes: Vassar Lake brings traffic into the housing area via Camp Beale Highway and is listed 24/7. Useful for Wheatland-side and on-base housing routing.",
+        "user_warning": "Confirm current status with 530-634-2131. Do not assume this is the best gate for every main-base duty location.",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "Wheatland Gate",
+        "type": "commuter_and_visitor_gate",
+        "status": "scheduled_weekdays",
+        "hours": "0500-1800 Monday-Friday per the DeCA Beale store-page update effective 14 April 2026. Closed federal holidays per that same listing. Official Space-A page lists 0600-1800 Monday-Friday. Official visitor-pass PDF lists Wheatland duty hours Monday-Friday 0730-1600 for pass printing.",
+        "map_label": "Wheatland Gate",
+        "map_zone": "Highway 65 / South Beale Road / visitor processing",
+        "best_for": [
+          "Wheatland-area commuters during published hours",
+          "Visitor processing at the adjacent SFS Visitors Center",
+          "Weekday CA-65 approaches"
+        ],
+        "commute_notes": "Official Space-A listing: off Highway 65 and South Beale Road. Often the most intuitive Wheatland commute gate when it is open, but it is not 24/7 under the current dated listings.",
+        "user_warning": "Standing hour sources conflict (0500 vs 0600 vs 0730). Closed weekends and federal holidays on the April 2026 DeCA listing. Verify immediately before travel.",
+        "verified_on": "2026-09-16"
       },
       {
         "name": "Doolittle Gate",
         "type": "commuter_gate",
-        "status": "verify_current_status",
-        "hours": "Verify official Beale AFB gate hours",
+        "status": "scheduled_weekdays",
+        "hours": "0600-1800 Monday-Friday per the DeCA Beale store-page update effective 14 April 2026 and the official Space-A listing. Closed federal holidays per the DeCA listing.",
         "map_label": "Doolittle Gate",
-        "map_zone": "commuter access area",
+        "map_zone": "Hammonton-Smartsville Road / commuter access",
         "best_for": [
-          "Daily commuters",
-          "Alternate route planning",
-          "Users approaching from selected local corridors"
+          "Weekday commuters approaching from Hammonton-Smartsville Road",
+          "Selected Marysville / east-side routing during published hours"
         ],
-        "commute_notes": "May be useful depending on home location, duty location, and current access procedures.",
-        "user_warning": "Do not assume availability or best routing without checking current gate procedures."
+        "commute_notes": "Official Space-A listing: Hammonton-Smartsville Road. MilitaryINSTALLATIONS arriving notes previously described Schneider 24-hour operations due to Doolittle construction; the April 2026 DeCA listing shows Doolittle operating on a weekday schedule again. Treat construction notes as potentially historical.",
+        "user_warning": "Not a 24/7 default under the current dated listing. An older official PDF listed Doolittle 24 hours and is treated as superseded. Verify before travel.",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Wheatland Gate",
-        "type": "commuter_or_limited_gate",
-        "status": "verify_current_status",
-        "hours": "Verify official Beale AFB gate hours",
-        "map_label": "Wheatland Gate",
-        "map_zone": "Wheatland-side access area",
+        "name": "Grass Valley Gate",
+        "type": "limited_commuter_gate",
+        "status": "scheduled_peak_windows",
+        "hours": "0600-0800 and 1500-1800 Monday-Friday per the DeCA Beale store-page update effective 14 April 2026. Official Space-A page: 0600-0800 Monday-Friday inbound/outbound and 1500-1800 outbound only. Closed federal holidays per the DeCA listing.",
+        "map_label": "Grass Valley Gate",
+        "map_zone": "Chuck Yeager Road / CA-20 / Grass Valley approach",
         "best_for": [
-          "Wheatland-area commuters",
-          "Specific commute patterns",
-          "Alternate access when applicable"
+          "Limited weekday peak commuting from the Grass Valley / CA-20 direction",
+          "Not a default newcomer gate"
         ],
-        "commute_notes": "Potentially useful for Wheatland-area residents if current access rules support the route.",
-        "user_warning": "Gate hours and routing can change. Confirm before relying on this gate."
+        "commute_notes": "Official Space-A listing: off Chuck Yeager Road. Peak-window only. Do not plan after-hours, weekend, or holiday entry here.",
+        "user_warning": "Inbound versus outbound afternoon rules conflict between DeCA and the Space-A page. Call 530-634-2131 before relying on this gate.",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Commercial Gate",
-        "type": "commercial_or_limited_gate",
-        "status": "verify_current_status",
-        "hours": "Verify official Beale AFB commercial access procedures",
-        "map_label": "Commercial Gate",
-        "map_zone": "commercial access area",
+        "name": "Wheatland Vehicle Inspection / commercial processing",
+        "type": "commercial_or_search_gate",
+        "status": "scheduled_weekdays",
+        "hours": "0600-1600 Monday-Friday per the DeCA Beale store-page update effective 14 April 2026. Closed federal holidays per that listing.",
+        "map_label": "Wheatland Vehicle Inspection",
+        "map_zone": "Wheatland Gate commercial / inspection area",
         "best_for": [
           "Commercial traffic",
           "Deliveries",
           "Mover coordination when directed"
         ],
-        "commute_notes": "Useful for commercial or delivery planning, not a default family commute gate.",
-        "user_warning": "Movers and commercial deliveries should verify procedures through official base access guidance."
+        "commute_notes": "Not a default family commute gate. Use only when directed for inspection or commercial processing.",
+        "user_warning": "An older official Gate hours PDF listed a Commercial Vehicle Inspection Area Monday-Friday 6 a.m.-4 p.m.; the April 2026 DeCA listing is used as the current dated public schedule.",
+        "verified_on": "2026-09-16"
       }
     ],
-
     "major_services": [
       {
-        "name": "Beale Medical Clinic",
+        "name": "9th Medical Group",
         "category": "medical",
         "map_label": "Medical Clinic",
-        "address": "Verify current clinic address before travel",
-        "phone": "Verify through official TRICARE / Beale medical source",
-        "hours": "Verify current clinic and pharmacy hours",
+        "address": "15301 Warren Shingle Road, Beale AFB, CA 95903-1907",
+        "phone": "Appointments 530-634-2941; Patient Advocate 530-713-4056",
+        "hours": "Appointment line Monday-Friday 7:30 a.m.-4:30 p.m. except federal holidays and training days; the 9th MDG opens at 9:30 a.m. every Wednesday due to readiness training. Family Health clinic hours Monday-Friday 7:30 a.m.-5:00 p.m. Do not treat those as one facility-wide schedule.",
         "best_for": [
           "Primary military medical services",
-          "Pharmacy-related planning",
           "Family medical orientation",
+          "Pharmacy-related planning",
           "PCS arrival healthcare setup"
         ],
-        "map_zone": "medical support area",
-        "user_note": "Treat this as a major medical anchor for PCS planning. Verify emergency care options, pharmacy procedures, and clinic availability directly with official medical sources."
+        "map_zone": "medical support area / Warren Shingle Road",
+        "user_note": "Official Urgent & Emergency Care page: Beale does not offer urgent or emergency care. Call 911 for emergencies. Nurse Advice Line 1-800-TRICARE (874-2273). Pharmacy hours are listed separately on the official Pharmacy page as Monday-Friday 7:30 a.m.-4:30 p.m., not available weekends, federal holidays, or Wednesday training-day mornings 7:30-9:15 a.m.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Beale Commissary",
+        "name": "Beale AFB Commissary",
         "category": "commissary",
         "map_label": "Commissary",
-        "address": "Verify current commissary address before travel",
-        "phone": "Verify current phone number with DeCA",
+        "address": "17601 25th Street, Bldg 25608, Beale AFB, CA 95903-1723",
+        "phone": "530-956-6114",
+        "email": "deca.lee.store-ops-grp.list.websitez14beale@mail.mil",
+        "hours": "Sunday 1000-1700; Monday 0900-1700; Tuesday-Friday 0900-1900; Saturday 1000-1700 per the current DeCA corporate store page. CLICK2GO Sunday 1100-1600; Monday 1000-1600; Tuesday-Friday 1000-1800; Saturday 1100-1600. CLICK2GO 530-956-6120.",
         "best_for": [
           "Grocery savings",
           "Family shopping",
-          "BAH and monthly budget planning"
+          "BAH and monthly budget planning",
+          "CLICK2GO pickup"
         ],
-        "map_zone": "main services / retail area",
-        "user_note": "Commissary access can materially affect monthly food budget for eligible users, especially in a rural market with longer shopping routes."
+        "map_zone": "main services / retail area / 25th Street",
+        "user_note": "DeCA corporate store locator is the source used for address, phone, hours, and the 14 April 2026 gate-hour update posted on the same page. Verify the store page before travel, especially around holidays.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       },
       {
         "name": "Beale Exchange",
         "category": "exchange_bx",
         "map_label": "BX / Exchange",
-        "address": "Verify current Exchange location before travel",
-        "phone": "Verify current phone number with AAFES",
-        "hours": "Verify current Exchange hours",
+        "address": "Verify current Exchange location on the official AAFES store locator before travel.",
+        "phone": "530-788-0221",
+        "hours": "Verify current hours on the official Exchange store locator before travel.",
         "best_for": [
           "Shopping",
           "Uniform-related errands",
@@ -654,167 +797,225 @@
           "Family convenience"
         ],
         "map_zone": "main services / retail area",
-        "user_note": "Important daily-life anchor for new arrivals, families, and permanent party."
+        "user_note": "Phone is from the official Beale Directory (Beale Base Exchange). Current Main Exchange address and hours were not independently readable from AAFES during this verification pass. Military Clothing Sales is listed separately in the Directory at 530-788-0211 x501.",
+        "verification_status": "official_source_retained_hours_require_recheck",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Military Clothing Store",
-        "category": "military_clothing",
-        "map_label": "Military Clothing",
-        "address": "Verify current location before travel",
-        "hours": "Verify current hours",
-        "best_for": [
-          "Uniform items",
-          "New arrivals",
-          "Permanent party needs"
-        ],
-        "map_zone": "retail / services area",
-        "user_note": "Useful for military-specific shopping needs after arrival."
-      },
-      {
-        "name": "Beale AFB Housing Office",
+        "name": "Beale AFB Military Housing Office",
         "category": "housing_office",
         "map_label": "Housing Office",
-        "address": "Verify current housing office address before travel",
-        "phone": "Verify current housing office phone number",
-        "email": "Verify current housing office email through official sources",
-        "hours": "Verify current housing office hours",
+        "address": "17860 Warren Shingle Rd, Beale AFB, CA 95903",
+        "phone": "530-634-2731",
+        "email": "9ces.ceih.housing@us.af.mil",
+        "hours": "Monday-Wednesday 0730-1530; Thursday 0930-1530; Friday 0730-1530 per current Air Force Housing.",
         "best_for": [
           "On-base housing questions",
           "Off-base housing guidance",
           "PCS housing counseling",
-          "Unaccompanied housing questions"
+          "Lease and purchase counseling"
         ],
-        "map_zone": "housing support area",
-        "user_note": "Military families should contact the housing office before committing to on-base or off-base housing."
+        "map_zone": "Warren Shingle Road / housing support area",
+        "user_note": "Current Air Force Housing installation page. Official Directory also lists Housing Office 530-634-2792. This profile uses the current Air Force Housing number 530-634-2731 and documents the Directory conflict. Fax listed as 530-634-2800.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Unaccompanied Housing Office",
+        "name": "Beale Unaccompanied Housing",
         "category": "unaccompanied_housing",
         "map_label": "Unaccompanied Housing",
-        "address": "Verify current office location before travel",
-        "phone": "Verify current phone number with official installation sources",
-        "email": "Verify current email with official installation sources",
-        "hours": "Verify current hours",
+        "address": "17860 Warren Shingle Rd, Beale AFB, CA 95903",
+        "phone": "530-634-2266",
+        "email": "9ces.ceihd.uhteam@us.af.mil",
+        "hours": "Monday-Friday 0800-1630 per current Air Force Housing.",
         "best_for": [
           "Dormitory questions",
           "Single service member housing",
           "Unaccompanied PCS planning"
         ],
-        "map_zone": "housing support area",
-        "user_note": "Eligibility and availability should be verified directly with the housing office."
+        "map_zone": "unaccompanied housing campuses / Warren Shingle Road",
+        "user_note": "Current Air Force Housing listing. UH is provided for unaccompanied Airmen E-1 to E-3 and E-4 with less than 3 years of service. Beale has East and West UH campuses. DSN 368-2266. Deprecated housing page listed a different UH email and hours; current page won.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Bank / Credit Union / ATM Services",
-        "category": "banking",
-        "map_label": "Bank / ATM",
-        "address": "Verify current branch or ATM location before travel",
+        "name": "Balfour Beatty Communities / Beale Family Housing",
+        "category": "privatized_housing",
+        "map_label": "Family Housing",
+        "address": "33001 Ridge Dr, Beale AFB, CA 95903",
+        "phone": "530-788-9500",
+        "hours": "Monday-Friday 0800-1700; Saturday 1000-1600 per current Air Force Housing.",
         "best_for": [
-          "Daily banking",
-          "PCS funds access",
-          "ATM convenience",
-          "Relocation errands"
+          "Privatized family housing",
+          "Active-duty family housing applications",
+          "On-base housing availability",
+          "PCS housing planning"
         ],
-        "map_zone": "main services / retail area",
-        "user_note": "Specific bank or credit union locations may change. Use current official branch locator or base directory before routing users."
+        "map_zone": "family housing / Ridge Drive",
+        "user_note": "Current Air Force Housing listing. Balfour Beatty Communities owns and manages privatized family housing. MilitaryINSTALLATIONS notes five pet-friendly neighborhoods. Official Directory lists Privatized Housing Resident Advocate 530-634-2795. Deprecated housing page listed management at 17860 Warren Shingle Blvd; current installation housing page lists 33001 Ridge Dr.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Legal / Finance / Admin Services",
-        "category": "admin_support",
-        "map_label": "Admin Support",
-        "address": "Verify current office location before travel",
+        "name": "Beale Military & Family Readiness Center",
+        "category": "family_readiness",
+        "map_label": "M&FRC",
+        "address": "17800 13th Street, Beale AFB, CA 95903",
+        "phone": "530-634-2863",
+        "hours": "Monday, Tuesday, Thursday, Friday 7:30 a.m.-4:30 p.m.; Wednesday 7:30 a.m.-1:30 p.m. per official Beale Information Central.",
         "best_for": [
-          "Power of attorney",
-          "PCS documents",
-          "Pay questions",
-          "Arrival admin"
+          "Relocation readiness",
+          "Information and referral",
+          "Spouse employment / Career Focus",
+          "Transition assistance",
+          "PCS resources"
         ],
-        "map_zone": "administrative services area",
-        "user_note": "Use this as a planning category in the Base tab; exact office routing should point to official base directory links."
+        "map_zone": "13th and B Streets / family readiness",
+        "user_note": "Official MFRC factsheet: located at 17800 13th Street on the corner of 13th and B Streets. DSN 368-2863. Official Information Central also lists fax 530-634-2087 and points to www.bealefss.com/afrc.html.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       },
       {
-        "name": "Child / Youth / Family Support Services",
-        "category": "family_support",
-        "map_label": "Family Support",
-        "address": "Verify current CDC, youth center, and school liaison locations before travel",
+        "name": "Beale Military Personnel Flight",
+        "category": "personnel_admin",
+        "map_label": "MPS",
+        "address": "17855 Warren Shingle Rd, Consolidated Support Center, Beale AFB, CA 95903",
+        "phone": "530-634-4200",
+        "hours": "Confirm current customer-service hours with MPF before travel. Official Arriving-to-Beale page: in-processing with the MPF Customer Support Team Mondays, Wednesdays, and Fridays at 0900 after unit CSS check-in.",
         "best_for": [
-          "Childcare planning",
-          "Youth programs",
-          "School transition support",
-          "Family PCS support"
+          "ID cards and DEERS support",
+          "Base in-processing",
+          "Career development",
+          "Assignments",
+          "Retirements and separations"
         ],
-        "map_zone": "family services / youth support areas",
-        "user_note": "Critical for families. Exact program availability, waitlists, and eligibility should be verified with official Beale resources."
+        "map_zone": "Warren Shingle Road / administrative services",
+        "user_note": "Official Directory: MPF 530-634-4200; DEERS / ID/CAC 530-634-3187; Newcomer Info also lists manning control 530-634-3116 during duty hours. Do not treat an older COVID-era facility-status PDF as current hours.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "Beale Personal Property / TMO",
+        "category": "personal_property",
+        "map_label": "Personal Property",
+        "address": "Confirm current office location with TMO before travel.",
+        "phone": "TMO Personal Property 530-634-2936 / 530-634-8421; TMO Passenger Travel 530-634-2932 / 530-634-5191; JPPSO 800-771-1819",
+        "hours": "Confirm current customer-service hours with TMO before travel. A public hour grid was not published on the current Directory or newcomer pages reviewed.",
+        "best_for": [
+          "Household-goods movement",
+          "PCS personal property questions",
+          "Passenger travel",
+          "Move coordination"
+        ],
+        "map_zone": "logistics / personal property",
+        "user_note": "Official Directory numbers. 9th Logistics Readiness Squadron factsheet describes Personal Property coordination inside the Deployment and Distribution Flight.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "Gold Country Inn",
+        "category": "temporary_lodging",
+        "map_label": "Lodging",
+        "address": "24112 A Street, Beale AFB, CA 95903",
+        "phone": "530-634-2953",
+        "hours": "Front desk 24/7 per official lodging guest-directory and arriving-to-Beale guidance.",
+        "best_for": [
+          "PCS temporary lodging",
+          "TDY lodging",
+          "After-hours newcomer arrival"
+        ],
+        "map_zone": "A Street / lodging / dormitory area",
+        "user_note": "Official Lodging page: reservations 530-634-2953/3662 or DSN 368-2953/3662. Two pet-friendly TLF spaces; pet-friendly VAQ/VOQ units are not currently offered. Official Arriving page also lists 5786 A St.; Air Force Inns and the guest directory use 24112 A Street, which is used here. Gold Country Inn is the 24-hour arrival point.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
+      },
+      {
+        "name": "Beale School Liaison Program",
+        "category": "school_liaison",
+        "map_label": "School Liaison",
+        "address": "Building 3308, Child and Youth Resource Center, Beale AFB, CA 95903",
+        "phone": "530-634-3539",
+        "email": "9FSS.CYES.SLO@us.af.mil",
+        "hours": "Hours were not published on the current official Newcomer Info School Liaison listing reviewed 2026-09-16. Confirm before travel.",
+        "best_for": [
+          "K-12 transition support",
+          "School boundary questions",
+          "Interstate Compact guidance",
+          "Homeschool and community school information"
+        ],
+        "map_zone": "CYRC / family support",
+        "user_note": "Official Newcomer Info listing also includes retha.goodly@us.af.mil and DSN 368-3539. School assignment must be verified by exact residence. Official newcomer local-school list includes Wheatland, Yuba City, Marysville, Grass Valley, Roseville, Rocklin, and related options as research starting points, not guaranteed assignments. Child Development Center is a separate Directory listing at 530-634-4717.",
+        "verification_status": "verified_official",
+        "verified_on": "2026-09-16"
       }
     ],
-
+    "temporary_lodging": {
+      "primary_contact_name": "Gold Country Inn",
+      "reservations_phone": "530-634-2953",
+      "alternate_phone": "530-634-3662 / DSN 368-2953 / DSN 368-3662",
+      "email": "not_published_on_current_official_public_pages",
+      "locations": [
+        {
+          "name": "Gold Country Inn",
+          "address": "24112 A Street, Beale AFB, CA 95903"
+        }
+      ],
+      "note": "Official arriving guidance: Gold Country Inn is the 24-hour arrival point; lodging personnel help contact the sponsor. Official Lodging page: 29 TLF units in the family housing area; two pet-friendly TLF spaces; pet-friendly VAQ/VOQ units not currently offered. Address conflict: Arriving page 5786 A St. versus Air Force Inns / guest directory 24112 A Street — 24112 A Street won. Confirm pets, TLF, and current availability directly with lodging.",
+      "verified_on": "2026-09-16"
+    },
     "on_base_housing": {
-      "housing_type": "Privatized and military housing support environment",
-      "housing_office_name": "Beale AFB Housing Office",
-      "housing_office_address": "Verify current housing office address before travel",
-      "housing_office_phone": "Verify current housing office phone number",
-      "housing_office_email": "Verify current housing office email through official sources",
-      "housing_office_hours": "Verify current housing office hours",
+      "housing_type": "Privatized family housing plus military housing and unaccompanied-housing support",
+      "housing_office_name": "Beale AFB Military Housing Office",
+      "housing_office_address": "17860 Warren Shingle Rd, Beale AFB, CA 95903",
+      "housing_office_phone": "530-634-2731",
+      "housing_office_email": "9ces.ceih.housing@us.af.mil",
+      "housing_office_hours": "Monday-Wednesday 0730-1530; Thursday 0930-1530; Friday 0730-1530",
+      "privatized_housing_name": "Balfour Beatty Communities / Beale Family Housing",
+      "privatized_housing_provider": "Balfour Beatty Communities",
+      "privatized_housing_phone": "530-788-9500",
+      "privatized_housing_address": "33001 Ridge Dr, Beale AFB, CA 95903",
+      "privatized_housing_hours": "Monday-Friday 0800-1700; Saturday 1000-1600",
+      "unaccompanied_housing_name": "Beale Unaccompanied Housing",
+      "unaccompanied_housing_phone": "530-634-2266",
+      "unaccompanied_housing_address": "17860 Warren Shingle Rd, Beale AFB, CA 95903",
+      "unaccompanied_housing_email": "9ces.ceihd.uhteam@us.af.mil",
       "map_label": "Family Housing / Housing Office",
-      "map_zone": "housing support area",
+      "map_zone": "Warren Shingle Road, Ridge Drive, and on-base family housing areas",
       "best_for": [
-        "Families prioritizing proximity",
-        "New arrivals wanting simplicity",
+        "Families prioritizing proximity on a geographically large installation",
+        "New arrivals wanting to reduce rural commute uncertainty",
         "Users who value base-connected lifestyle",
-        "Families wanting to reduce commute uncertainty"
+        "Unaccompanied Airmen in UH-eligible ranks"
       ],
       "watchouts": [
         "Availability and waitlists can change",
         "On-base housing may capture BAH differently than off-base renting",
-        "Pet policies and breed restrictions should be verified",
-        "School assignment must be verified by exact address",
-        "Off-base options in Plumas Lake and Wheatland should be compared carefully against on-base convenience"
+        "Pet policies should be verified; MilitaryINSTALLATIONS describes neighborhoods as pet-friendly but rules can change",
+        "School assignment must be verified by exact address even for on-base housing",
+        "Vassar Lake Gate is the published 24/7 housing-area access point, but duty location may still require a long on-base drive",
+        "Off-base Wheatland and Plumas Lake options should still be compared against waitlists and BAH treatment"
       ],
-      "pcsu_strategy_note": "Compare on-base housing against off-base rent and mortgage options. Around Beale, the best choice depends on rank, dependents, BAH, debt, commute tolerance, school priorities, California cost exposure, pet needs, and expected assignment length."
+      "pcsu_strategy_note": "Compare on-base Balfour Beatty housing against off-base rent and mortgage options. Around Beale, the best choice depends on rank, dependents, BAH, debt, commute tolerance to the actual duty location, school priorities, California insurance, pet needs, and expected assignment length. Distance on this installation is not the same as a short work commute.",
+      "verification_status": "verified_official",
+      "verified_on": "2026-09-16",
+      "source_conflict_note": "MHO phone 530-634-2731 (Air Force Housing) versus 530-634-2792 (official Directory). Air Force Housing won for the housing-office number. Privatized management address 33001 Ridge Dr (current housing page) versus 17860 Warren Shingle Blvd on the deprecated housing page. Current page won. UH email/hours on the deprecated page differ; current Air Force Housing page won."
     },
-
     "recommended_neighborhoods": [
-      {
-        "name": "Plumas Lake",
-        "type": "nearby_growth_area",
-        "fit_summary": "Popular newer-home corridor with strong family appeal, better housing stock, and practical access to Beale.",
-        "best_for": [
-          "Families",
-          "VA buyers",
-          "Users wanting newer housing",
-          "Buyers prioritizing resale and family lifestyle"
-        ],
-        "commute_band": "Approx. 20-35 minutes depending on exact address, gate, and traffic",
-        "likely_gate_logic": [
-          "Main Gate",
-          "Other gates depending on duty location and current access rules"
-        ],
-        "bah_fit": "medium",
-        "family_fit": "high",
-        "single_airman_fit": "medium_low",
-        "va_buyer_fit": "high",
-        "traffic_risk": "medium",
-        "watchouts": [
-          "Pricing may stretch some BAH profiles",
-          "Commute should be tested during expected duty hours",
-          "Utility costs and insurance should be included in payment planning"
-        ],
-        "pcsu_recommendation": "Strong first-look area for families who want newer housing and stronger resale logic while accepting a moderate commute."
-      },
       {
         "name": "Wheatland",
         "type": "nearby_city_area",
-        "fit_summary": "Close and practical Beale-adjacent option with strong base connection, family appeal, and manageable commute potential.",
+        "fit_summary": "Closest practical off-base town with strong Beale connection, family appeal, and potential Wheatland Gate / Vassar Lake routing when hours allow.",
         "best_for": [
           "Families",
           "Shorter commute seekers",
           "VA buyers",
           "Users wanting a smaller-town feel"
         ],
-        "commute_band": "Approx. 10-25 minutes depending on exact address, gate, and current access rules",
+        "commute_band": "Approx. 10-25 minutes depending on exact address, gate, traffic, weather, and report time",
         "likely_gate_logic": [
-          "Main Gate",
-          "Wheatland Gate when available",
-          "Other gates depending on duty location"
+          "Wheatland Gate during published weekday hours",
+          "Vassar Lake Gate for 24/7 and housing-area access",
+          "Schneider Gate as the after-hours and weekend backup"
         ],
         "bah_fit": "medium_high",
         "family_fit": "high",
@@ -824,24 +1025,56 @@
         "watchouts": [
           "Inventory may be limited",
           "Newer homes may price higher than older Marysville options",
-          "Gate procedures should be verified before relying on a route"
+          "Wheatland Gate is not 24/7 under the current dated listing",
+          "School assignment must be verified by exact address"
         ],
-        "pcsu_recommendation": "Strong Beale-fit area for families who value commute, small-town feel, and military-connected lifestyle."
+        "pcsu_recommendation": "Strong Beale-fit area for families who value commute, small-town feel, and military-connected lifestyle when the specific property and school zone check out.",
+        "intelligence_type": "curated_pcsunited_intelligence"
+      },
+      {
+        "name": "Plumas Lake",
+        "type": "nearby_growth_area",
+        "fit_summary": "Popular newer-home corridor with strong family appeal and better housing stock, with a moderate commute tradeoff into Beale.",
+        "best_for": [
+          "Families",
+          "VA buyers",
+          "Users wanting newer housing",
+          "Buyers prioritizing resale and family lifestyle"
+        ],
+        "commute_band": "Approx. 20-35 minutes depending on exact address, gate, traffic, weather, and report time",
+        "likely_gate_logic": [
+          "Schneider Gate for 24/7 and CA-70 approaches",
+          "Wheatland Gate during published weekday hours depending on exact route",
+          "Other gates depending on duty location"
+        ],
+        "bah_fit": "medium",
+        "family_fit": "high",
+        "single_airman_fit": "medium_low",
+        "va_buyer_fit": "high",
+        "traffic_risk": "medium",
+        "watchouts": [
+          "Pricing may stretch some BAH profiles once insurance and utilities are included",
+          "Commute should be tested during expected duty hours, including fog season",
+          "CA-70 / North Beale Road reliability matters more than pin-drop mileage"
+        ],
+        "pcsu_recommendation": "Strong first-look area for families who want newer housing and stronger resale logic while accepting a moderate commute.",
+        "intelligence_type": "curated_pcsunited_intelligence"
       },
       {
         "name": "Marysville",
         "type": "nearby_city_area",
-        "fit_summary": "Affordable and close to Beale, but requires stronger neighborhood, crime, property-condition, and school-zone screening.",
+        "fit_summary": "Closest larger town and often more affordable, but requires stronger neighborhood, crime, property-condition, and school-zone screening.",
         "best_for": [
           "Budget-sensitive buyers",
           "Renters",
           "Single airmen",
           "Investors comfortable with property-level due diligence"
         ],
-        "commute_band": "Approx. 15-30 minutes depending on exact address, gate, and traffic",
+        "commute_band": "Approx. 15-30 minutes depending on exact address, gate, traffic, weather, and report time",
         "likely_gate_logic": [
-          "Main Gate",
-          "Other gates depending on route and current access rules"
+          "Schneider Gate via North Beale Road",
+          "Doolittle Gate during published weekday hours depending on route",
+          "Other gates depending on current access rules"
         ],
         "bah_fit": "high",
         "family_fit": "medium",
@@ -854,22 +1087,24 @@
           "School assignment must be verified",
           "Resale appeal can be neighborhood-sensitive"
         ],
-        "pcsu_recommendation": "Use Marysville selectively. It can work financially, but the best choices require address-level due diligence."
+        "pcsu_recommendation": "Use Marysville selectively. It can work financially, but the best choices require address-level due diligence.",
+        "intelligence_type": "curated_pcsunited_intelligence"
       },
       {
         "name": "Yuba City",
         "type": "nearby_city_area",
-        "fit_summary": "Broader services, shopping, and housing options across the Yuba-Sutter region, with a longer commute tradeoff for some addresses.",
+        "fit_summary": "Broader services, shopping, and housing options across Sutter County, with a longer commute tradeoff for many addresses.",
         "best_for": [
           "Families wanting more city services",
           "Buyers comparing broader inventory",
           "Renters",
           "Users wanting more daily-life convenience"
         ],
-        "commute_band": "Approx. 25-45 minutes depending on exact address, route, and gate",
+        "commute_band": "Approx. 25-45 minutes depending on exact address, gate, traffic, weather, and report time",
         "likely_gate_logic": [
-          "Main Gate",
-          "Other gates depending on duty location and current access rules"
+          "Schneider Gate",
+          "Wheatland Gate during published weekday hours depending on route",
+          "Other gates depending on duty location"
         ],
         "bah_fit": "medium",
         "family_fit": "medium_high",
@@ -878,10 +1113,11 @@
         "traffic_risk": "medium",
         "watchouts": [
           "Commute can become a daily quality-of-life factor",
-          "Exact route reliability should be tested",
+          "Exact route reliability should be tested, including CA-99/CA-70 connections",
           "Prices and school quality vary by pocket"
         ],
-        "pcsu_recommendation": "Good for users who want more services and broader inventory, as long as commute and payment stay controlled."
+        "pcsu_recommendation": "Good for users who want more services and broader inventory, as long as commute and payment stay controlled.",
+        "intelligence_type": "curated_pcsunited_intelligence"
       },
       {
         "name": "Lincoln Edge / Southern Commute Corridors",
@@ -893,10 +1129,11 @@
           "Buyers prioritizing amenities and resale",
           "Families willing to accept a longer commute"
         ],
-        "commute_band": "Approx. 35-60+ minutes depending on exact address, route, gate, and traffic",
+        "commute_band": "Approx. 35-60+ minutes depending on exact address, gate, traffic, weather, and report time",
         "likely_gate_logic": [
-          "Main Gate",
-          "Other gates depending on duty location and current access rules"
+          "Wheatland Gate during published weekday hours via CA-65",
+          "Schneider Gate as a 24/7 backup depending on route",
+          "Other gates depending on duty location"
         ],
         "bah_fit": "low_medium",
         "family_fit": "medium_high",
@@ -905,85 +1142,298 @@
         "traffic_risk": "high",
         "watchouts": [
           "Higher prices may stretch BAH profiles",
-          "Commute can be draining",
-          "Assignment length and resale logic matter more in this area"
+          "CA-65 traffic can be draining",
+          "Assignment length and resale logic matter more in this area",
+          "Rocklin/Roseville extensions are even longer and should not be assumed to fit a typical Beale tour"
         ],
-        "pcsu_recommendation": "Only makes sense when the user has stronger income, a longer timeline, and a clear reason to accept the commute and higher price."
+        "pcsu_recommendation": "Only makes sense when the user has stronger income, a longer timeline, and a clear reason to accept the commute and higher price.",
+        "intelligence_type": "curated_pcsunited_intelligence"
       }
     ],
-
     "commute_intelligence": {
-      "overall_commute_posture": "Generally manageable compared with major California metros, but Beale’s rural location makes route choice and neighborhood selection important.",
+      "commute_bluf": "Beale commute pressure is usually lighter than major California metros, but the installation is geographically large and rural. Gate choice, CA-70 / CA-65 / North Beale Road, tule fog, and the exact duty location can matter more than mileage. Times below are approximate and depend on exact address, gate, traffic, weather, and report time.",
+      "overall_commute_posture": "Generally manageable compared with major California metros if the household plans around published gate hours, keeps a 24/7 Schneider or Vassar Lake backup, and tests the route during expected report time.",
+      "primary_commute_factors": [
+        "Five-gate network with only Schneider and Vassar Lake listed 24/7 on the 14 April 2026 dated public schedule",
+        "CA-70, CA-65, North Beale Road, Camp Beale Highway, and Hammonton-Smartsville Road",
+        "Tule fog and wet-season rural-road conditions",
+        "School drop-off timing in Wheatland, Marysville, and Yuba City",
+        "On-base distance between housing areas and the actual duty location",
+        "No military airport shuttle from Sacramento International Airport"
+      ],
       "primary_commute_risks": [
         "Choosing by mileage instead of actual gate commute",
-        "Longer daily drives from Yuba City, Lincoln-edge areas, or deeper growth corridors",
-        "Gate availability and report-time flow",
-        "Weather, fog, rural-road conditions, and seasonal delays"
+        "Assuming Wheatland or Doolittle will be open on weekends, holidays, or after hours",
+        "Longer daily drives from Yuba City, Lincoln-edge areas, or Sacramento-region corridors",
+        "Fog and wet-weather delays on rural approaches",
+        "On-base housing that still requires a long internal drive to the work location"
+      ],
+      "commute_bands": [
+        {
+          "label": "Close-in",
+          "range": "Approx. 0-20 minutes depending on gate, traffic, weather, and exact address",
+          "fit": "Best for users prioritizing proximity: on-base housing, Wheatland, and selected closer Marysville pockets",
+          "watchout": "Close-in still needs school, safety, and property screening. On-base distance can surprise first-time arrivals."
+        },
+        {
+          "label": "Balanced",
+          "range": "Approx. 20-35 minutes depending on gate, traffic, weather, and exact address",
+          "fit": "Often the best balance between newer housing and commute, especially Plumas Lake and selected Yuba-Sutter pockets",
+          "watchout": "Gate choice and fog can still change the real commute."
+        },
+        {
+          "label": "Lifestyle tradeoff",
+          "range": "Approx. 35-60+ minutes depending on gate, traffic, weather, and exact address",
+          "fit": "May work for families wanting Lincoln-edge amenities, broader Sacramento-region services, or specific schools",
+          "watchout": "Can become painful for early reporting, weekend duty, or frequent base errands."
+        }
+      ],
+      "gate_selection_logic": [
+        "Start with the user's likely duty location and whether they will live on base or off base.",
+        "Identify the realistic 24/7 gates under the current dated listing (Schneider and Vassar Lake).",
+        "Use Wheatland Gate only during published weekday hours, especially from Wheatland / CA-65.",
+        "Use Doolittle Gate only during published weekday hours.",
+        "Treat Grass Valley Gate as a limited peak-window option, not a default.",
+        "Keep a Schneider or Vassar Lake backup for nights, weekends, holidays, and fog delays.",
+        "Do not choose a neighborhood based only on mileage."
       ],
       "planning_guidance": [
-        "Test the commute during the user’s expected report-time window.",
-        "Confirm which gate best supports the user’s duty location.",
-        "Compare Plumas Lake, Wheatland, Marysville, and Yuba City by route reliability, not just price.",
-        "Use commute plus all-in housing cost as the core PCSUnited decision screen."
+        "Test the commute during the user's expected report-time window, including at least one low-visibility morning if arriving in winter.",
+        "Confirm which gate best supports the user's duty location and day of week.",
+        "Compare Wheatland, Plumas Lake, Marysville, and Yuba City by route reliability, not just price.",
+        "If flying into Sacramento International Airport, plan sponsor pickup or a rental car; official MilitaryINSTALLATIONS notes there is no military shuttle.",
+        "Use commute plus all-in housing cost, including insurance, as the core PCSUnited decision screen."
       ],
-      "pcsu_bluf": "Beale commute pressure is manageable when the home is chosen carefully. The best housing choice balances gate logic, family lifestyle, payment discipline, and realistic drive time."
+      "user_instruction": "Before signing a lease or contract, users should test the commute from the exact property address to the expected gate during the same time window they would normally report to work. Times are approximate and depend on gate, traffic, weather, and exact address.",
+      "pcsu_bluf": "Beale commute pressure is manageable when the home is chosen against the actual open gate and report time. Distance is not the same as commute.",
+      "intelligence_type": "curated_pcsunited_intelligence"
     },
-
     "bah_market_reality": {
+      "bah_bluf": "Beale should be modeled as a more approachable California market than coastal or major-metro installations, not as a cheap market. BAH is a decision filter, not a promise of affordability. Compare BAH against rent or mortgage, California purchase prices, insurance, utilities, commute cost, debt, residual income, and assignment length.",
       "overall_position": "Favorable for disciplined buyers, but California pricing still requires payment discipline.",
-      "buying_power_summary": "Beale offers more attainable California buying power than many other California bases, especially in Wheatland, Plumas Lake, and select Yuba-Sutter corridors.",
-      "renting_summary": "Renting remains practical for shorter assignments or users who are not ready to absorb California ownership costs.",
+      "buying_power_summary": "Beale offers more attainable California buying power than many other California bases, especially in Wheatland, Plumas Lake, and select Yuba-Sutter corridors. Headline prices can still create high monthly payments once insurance, utilities, and commute cost are included.",
+      "renting_summary": "Renting remains practical for shorter assignments, unaccompanied personnel, or households not ready to absorb California ownership costs and transaction risk.",
+      "recommended_calculations": [
+        "BAH with dependents vs estimated rent",
+        "BAH without dependents vs estimated rent",
+        "BAH vs estimated mortgage payment",
+        "Total housing cost including insurance and utilities vs 30% income lane",
+        "Residual monthly income after expenses and housing",
+        "Debt-to-income pressure",
+        "Commute fuel/time cost",
+        "Rent vs buy break-even horizon / assignment-length exit strategy"
+      ],
+      "pcsu_decision_outputs": [
+        "Rent",
+        "Buy",
+        "Wait",
+        "Widen search",
+        "Reduce target price",
+        "Consider roommate",
+        "Use on-base housing as comparison"
+      ],
       "watch_items": [
+        "Assignment length",
         "California purchase price pressure",
         "Insurance and wildfire-adjacent risk",
         "Utility costs during hot summers",
         "Older-home maintenance exposure in Marysville and select areas",
+        "Commute route and gate hours",
+        "School zones by exact address",
         "Debt-to-income pressure",
-        "Assignment length and resale risk"
+        "Exit strategy if the tour is short"
       ],
-      "pcsu_strategy_note": "Beale should be modeled as a favorable California affordability market, but PCSUnited should still test each user’s rank, BAH, debt, savings, credit score, timeline, and location preference before recommending buy versus rent."
+      "base_tab_message": "Show BAH as a decision filter, not a promise of affordability. Push users into the PCSUnited financial calculator when insurance, commute cost, or residual income looks tight even if the purchase price looks lower than other California bases.",
+      "pcsu_strategy_note": "Beale should be modeled as a favorable California affordability market relative to coastal installations, but PCSUnited should still test each user's rank, BAH, debt, savings, credit score, insurance quotes, timeline, and location preference before recommending buy versus rent.",
+      "intelligence_type": "curated_pcsunited_intelligence"
     },
-
     "family_readiness": {
+      "family_bluf": "Beale can be a strong family PCS location when the household chooses the right corridor, verifies school assignment by exact address, plans childcare early, and protects against California payment pressure, insurance, and rural commute risk. It is more geographically spread out than urban installations, but it is not isolated from Yuba-Sutter services.",
       "family_fit": "High",
+      "school_guidance": {
+        "on_base_option": "Lone Tree Elementary is a documented on-base/Wheatland-area school associated with Beale-connected families in official photos and local coverage. Treat it as a research starting point only. Exact attendance boundaries must be verified by housing address.",
+        "school_liaison_phone": "530-634-3539",
+        "school_liaison_email": "9FSS.CYES.SLO@us.af.mil",
+        "school_liaison_address": "Building 3308, Child and Youth Resource Center, Beale AFB, CA 95903",
+        "school_zone_warning": "Always verify school assignment by exact residence before signing a lease or purchase contract. Official newcomer pages list Wheatland, Yuba City, Marysville, Grass Valley, Roseville, Rocklin, and related systems as local options; none of those is a guaranteed assignment.",
+        "nearby_school_district_note": "Common off-base research includes Wheatland schools, Marysville schools, and Yuba City schools. Wheatland Union High School received a 2025 Purple Star honor in official Beale news coverage; that is a support designation, not a promise of assignment or quality for every address."
+      },
+      "childcare_guidance": {
+        "cdc_note": "Official Directory lists Child Development Center 530-634-4717 and Child and Youth Resource Center 530-634-4418. Availability, waitlists, and eligibility should be verified through MilitaryChildCare.com or current 9th FSS Child and Youth Services resources.",
+        "youth_program_note": "Official Directory lists Youth Center 530-634-4953 and Family Child Care 530-812-3117. Confirm current waitlists and hours before making a housing decision around childcare."
+      },
+      "medical_guidance": {
+        "primary_medical_anchor": "9th Medical Group, 15301 Warren Shingle Road",
+        "urgent_care": "Official Urgent & Emergency Care page: Beale does not offer urgent or emergency care services. Call 911 for emergencies. Nurse Advice Line 1-800-TRICARE (874-2273). The same official page lists nearby civilian urgent-care options in Yuba City, Auburn, Grass Valley, and Lincoln as community references, not on-base capability.",
+        "medical_warning": "Do not assume on-base emergency capability. Plan a civilian emergency-department backup. Verify clinic availability, referrals, pharmacy procedures, and the Wednesday 9:30 a.m. training opening directly with official medical sources.",
+        "general_hours_note": "Appointment line Monday-Friday 7:30 a.m.-4:30 p.m.; clinic opens 9:30 a.m. Wednesdays for readiness training. Family Health 7:30 a.m.-5:00 p.m. Pharmacy Monday-Friday 7:30 a.m.-4:30 p.m., closed Wednesday training mornings 7:30-9:15 a.m."
+      },
+      "military_family_readiness_center": {
+        "name": "Beale Military & Family Readiness Center",
+        "address": "17800 13th Street, Beale AFB, CA 95903",
+        "phone": "530-634-2863",
+        "hours": "Monday, Tuesday, Thursday, Friday 7:30 a.m.-4:30 p.m.; Wednesday 7:30 a.m.-1:30 p.m. per official Beale Information Central"
+      },
+      "spouse_employment_note": "Official A&FRC/Career Focus listing is 530-634-2863. Yuba-Sutter employment is smaller than Sacramento-metro options. Dual-commute households considering Lincoln, Rocklin, Roseville, or Sacramento should test both work locations against Beale report time rather than assuming a Sacramento job automatically fits a Beale housing choice.",
       "strengths": [
-        "Quiet rural-suburban lifestyle",
-        "Strong base-connected community",
-        "Plumas Lake and Wheatland growth corridors",
-        "More affordable than many California military markets",
-        "Manageable commute options when housing is chosen carefully"
+        "Quiet rural-suburban lifestyle with a strong base-connected community",
+        "Wheatland and Plumas Lake family corridors",
+        "More approachable California pricing than many coastal installations",
+        "On-base housing, CDCs, School Liaison, and A&FRC available as planning anchors",
+        "Manageable commute options when housing and gate choice are aligned"
       ],
       "watchouts": [
         "School assignments must be verified by exact address",
         "Marysville and older districts vary materially",
         "California payment pressure can still tighten budgets",
         "Insurance, utilities, heat, and wildfire-adjacent risk should be considered",
-        "Some preferred areas require longer commute tradeoffs"
+        "No on-base urgent or emergency care",
+        "Some preferred amenity areas require a long CA-65 commute"
       ],
-      "pcsu_family_bluf": "Beale can be a strong family PCS location when the household chooses the right corridor, verifies schools, protects against hidden costs, and avoids stretching too far into California home-price pressure."
+      "pcsu_family_bluf": "Beale can work well for families who want Northern California access without coastal pricing, but it requires disciplined screening for schools, commute, insurance, and all-in payment.",
+      "verified_on": "2026-09-16"
     },
-
-    "arrival_checklist": [
-      "Verify current gate hours and visitor access procedures through official Beale AFB sources.",
-      "Confirm whether on-base housing or off-base housing better fits rank, dependents, BAH, pets, school needs, and expected assignment length.",
-      "Compare Plumas Lake, Wheatland, Marysville, and Yuba City using commute, schools, safety, and all-in monthly cost.",
-      "Check insurance and utility estimates before finalizing a purchase budget.",
-      "Verify school zones by exact property address.",
-      "Review roof, HVAC, insulation, drainage, wildfire-adjacent considerations, and heat-related utility exposure before buying.",
-      "Use PCSUnited calculators to compare rent, buy, residual income, and risk level before committing."
-    ],
-
+    "arrival_checklist": {
+      "before_arrival": [
+        "Verify current gate status with 9th SFS at 530-634-2131 and review the latest public gate listing. Do not rely on an old PDF.",
+        "If visitor access is needed, start 9th SFS pass procedures early: 9SFS.VCC.RegistrationRequest@us.af.mil or 530-634-3128. REAL ID and sponsorship rules apply.",
+        "Confirm sponsor contact and unit CSS reporting instructions.",
+        "Call Gold Country Inn at 530-634-2953. It is the published 24-hour arrival point. Ask about TLF and the two pet-friendly TLF spaces; pet-friendly VAQ/VOQ units are not currently offered.",
+        "Review Military Housing Office guidance at 530-634-2731 before signing a lease or purchase contract.",
+        "Compare BAH against rent or mortgage, California insurance, utilities, commute cost, debt, and assignment length.",
+        "Shortlist Wheatland, Plumas Lake, Marysville, Yuba City, and on-base housing by realistic 24/7 Schneider or Vassar Lake access.",
+        "Verify school assignment by exact residence with the School Liaison at 530-634-3539.",
+        "Plan Sacramento International Airport pickup. Official MilitaryINSTALLATIONS notes there is no military shuttle and airport cabs/rentals are not reimbursable."
+      ],
+      "arrival_and_inprocessing": [
+        "If arriving after hours, report to Gold Country Inn at 24112 A Street and contact the sponsor.",
+        "If arriving during duty hours, official arriving guidance says report first to the squadron Commander Support Staff.",
+        "MPF Customer Support in-processing is listed Mondays, Wednesdays, and Fridays at 0900 at 17855 Warren Shingle Rd after unit CSS check-in.",
+        "Use A&FRC at 17800 13th Street, 530-634-2863, for relocation information and referrals.",
+        "Contact TMO Personal Property at 530-634-2936 / 530-634-8421 for household-goods issues."
+      ],
+      "first_week": [
+        "Complete unit check-in, MPF, medical, and required Right Start appointments as scheduled by the unit/CSS.",
+        "Visit or contact the housing office if still deciding between on-base and off-base options.",
+        "Confirm medical, pharmacy, and emergency-care procedures. There is no on-base urgent or emergency care; call 911 for emergencies.",
+        "Drive the commute from target neighborhoods during the actual expected report window, including a 24/7 gate backup.",
+        "Tour properties before committing when possible.",
+        "Avoid choosing housing solely by distance, rent, or list price."
+      ],
+      "first_30_days": [
+        "Finalize housing only after comparing commute, BAH fit, insurance, school needs, and total monthly cost.",
+        "Save operator, 9th SFS, Pass and Registration, medical, housing, TMO, and family-readiness contacts.",
+        "Update PCSUnited financial inputs with final housing numbers.",
+        "Review whether the selected area supports assignment length, family needs, resale/rental exit risk, and daily quality of life."
+      ],
+      "legacy_flat_checklist": [
+        "Verify current gate hours and visitor access procedures through official Beale AFB sources.",
+        "Confirm whether on-base housing or off-base housing better fits rank, dependents, BAH, pets, school needs, and expected assignment length.",
+        "Compare Plumas Lake, Wheatland, Marysville, and Yuba City using commute, schools, safety, and all-in monthly cost.",
+        "Check insurance and utility estimates before finalizing a purchase budget.",
+        "Verify school zones by exact property address.",
+        "Review roof, HVAC, insulation, drainage, wildfire-adjacent considerations, and heat-related utility exposure before buying.",
+        "Use PCSUnited calculators to compare rent, buy, residual income, and risk level before committing."
+      ],
+      "verified_on": "2026-09-16"
+    },
     "pcs_watchouts": [
-      "Do not assume Beale is cheap simply because it is more affordable than other California bases.",
-      "Do not choose by distance alone; gate route, road conditions, and family lifestyle matter.",
-      "California home prices can still create a high monthly payment.",
-      "Marysville affordability should be balanced against safety, condition, schools, and resale.",
-      "Preferred family areas like Plumas Lake and Wheatland may cost more but can offer stronger lifestyle fit.",
-      "If the assignment is short, compare transaction costs and resale risk before buying."
+      {
+        "title": "Gate hours conflict across official pages",
+        "severity": "high",
+        "message": "Use 9th SFS 530-634-2131 immediately before travel. The most recently dated public listing on the DeCA Beale store page (effective 14 April 2026) is Schneider 24/7, Vassar Lake 24/7, Wheatland 0500-1800 Monday-Friday, Doolittle 0600-1800 Monday-Friday, and Grass Valley peak windows. Older official PDFs and some newcomer pages disagree."
+      },
+      {
+        "title": "Visitor access is not the same as lodging check-in",
+        "severity": "high",
+        "message": "Visitor passes are a 9th SFS process (Wheatland-adjacent Visitors Center / Pass and Registration 530-634-3128). Gold Country Inn is the 24-hour arrival point at 530-634-2953. REAL ID and sponsorship rules apply. A public BDOC number was not published."
+      },
+      {
+        "title": "RQ-4 flying at Beale ended; do not use old ISR language as current",
+        "severity": "medium_high",
+        "message": "Official ACC reporting: the RQ-4 Global Hawk Block 30 flying mission at Beale ended in July 2022. Current official MilitaryINSTALLATIONS language centers the host wing on the U-2 fleet, with T-38 and KC-135 also listed among today's aircraft. A September 2025 ACC visit described possible future mission transitions, including Collaborative Combat Aircraft integration — sourced as potential, not completed."
+      },
+      {
+        "title": "Distance is not the same as commute",
+        "severity": "high",
+        "message": "The installation is geographically large. Neighborhoods should be compared by realistic 24/7 gate access, duty location, CA-70/CA-65 routing, and fog/report-time windows. Times are approximate and depend on gate, traffic, weather, and exact address."
+      },
+      {
+        "title": "School assignments are residence-specific",
+        "severity": "high",
+        "message": "Verify school assignment by exact property address with the School Liaison at 530-634-3539. Do not assume Lone Tree Elementary or any Wheatland/Marysville/Yuba City school is automatically assigned."
+      },
+      {
+        "title": "BAH is not the full affordability picture",
+        "severity": "high",
+        "message": "Beale is more approachable than many California bases, not cheap. Compare rent or mortgage against income, debt, utilities, insurance, commute cost, savings goals, and assignment length."
+      },
+      {
+        "title": "Published population is an MOS profile, not a live census",
+        "severity": "medium_high",
+        "message": "MilitaryINSTALLATIONS publishes 4,587 active duty and other categories separately. Reservists/Guard 1,071 conflicts with the narrative 611 reservists plus 239 guardsmen. Do not use Marysville, Yuba-Sutter, or five-county civilian population as installation population. The 25,000 retiree figure is not on-installation population."
+      },
+      {
+        "title": "No on-base urgent or emergency care",
+        "severity": "high",
+        "message": "Official 9th Medical Group guidance: Beale does not offer urgent or emergency care. Call 911 for emergencies and use the Nurse Advice Line 1-800-TRICARE (874-2273)."
+      },
+      {
+        "title": "On-base housing is not automatically the best financial answer",
+        "severity": "medium",
+        "message": "On-base Balfour Beatty housing can reduce rural commute uncertainty, but waitlists, BAH treatment, school assignment, and off-base Wheatland/Plumas Lake options still need a side-by-side comparison."
+      }
     ],
-
     "realtor_intelligence": {
-      "best_client_positioning": "Lead with California affordability strategy, BAH discipline, commute realism, and neighborhood comparison. Beale clients need a guide who can separate good value from cheap risk.",
+      "best_client_positioning": "Lead with California affordability strategy, BAH discipline, commute realism against the actual open gate, and Wheatland versus Plumas Lake versus Marysville screening. Beale clients need a guide who can separate good value from cheap risk.",
+      "buyer_personas": [
+        {
+          "persona": "First-time VA buyer",
+          "likely_questions": [
+            "Can I afford to buy near Beale?",
+            "Is this cheaper than other California bases?",
+            "Should I rent first?",
+            "Is Wheatland or Plumas Lake worth the extra price?"
+          ],
+          "agent_strategy": "Lead with all-in payment clarity, insurance quotes, commute testing, and VA loan education. Do not sell on headline price alone."
+        },
+        {
+          "persona": "E-5 / E-6 family with dependents",
+          "likely_questions": [
+            "Where do military families usually live?",
+            "Which school zones should I research?",
+            "Is Yuba City too far?",
+            "Is on-base housing better?"
+          ],
+          "agent_strategy": "Compare Wheatland, Plumas Lake, selected Marysville, Yuba City, and on-base Balfour Beatty housing against commute, parish/district school assignment, and monthly cost."
+        },
+        {
+          "persona": "Single airman / short-term renter",
+          "likely_questions": [
+            "Do I have to live in the dorms?",
+            "What is close and affordable?",
+            "Where should I avoid signing too fast?"
+          ],
+          "agent_strategy": "Confirm UH eligibility first. Keep off-base recommendations practical: 24/7 gate access, rent, safety, property condition, and lease flexibility."
+        },
+        {
+          "persona": "Permanent party / dual-income household",
+          "likely_questions": [
+            "Should I buy if I may be here longer?",
+            "Can a Sacramento or Lincoln job work with a Beale commute?",
+            "What areas have resale strength with military buyers?"
+          ],
+          "agent_strategy": "Use assignment length, dual-commute geography, family needs, insurance, and rent-versus-buy math. Do not assume a Lincoln/Roseville home automatically fits a Beale report time."
+        }
+      ],
+      "listing_angles": [
+        "Manageable commute to Beale AFB with a realistic gate plan",
+        "Wheatland or Plumas Lake family appeal",
+        "Move-in ready condition",
+        "Updated HVAC, roof, insulation, or energy-efficiency features",
+        "VA-friendly pricing and appraisal confidence",
+        "Clear school-zone and neighborhood positioning"
+      ],
       "strong_listing_angles": [
         "Manageable commute to Beale AFB",
         "Plumas Lake or Wheatland family appeal",
@@ -996,7 +1446,7 @@
         "Rent versus buy based on assignment length",
         "All-in payment including taxes, insurance, utilities, and maintenance",
         "Plumas Lake versus Wheatland versus Marysville tradeoffs",
-        "Commute testing during actual duty hours",
+        "Commute testing during actual duty hours and day of week",
         "Future resale appeal to military buyers"
       ],
       "investor_consultation_angles": [
@@ -1006,69 +1456,363 @@
         "Insurance and maintenance reserves",
         "Neighborhood stability and property condition"
       ],
-      "pcsu_realtor_bluf": "A strong Beale realtor should sound like a California affordability strategist, commute filter, and neighborhood-risk advisor — not just a generic agent."
+      "common_objections": [
+        "California payment shock relative to BAH",
+        "Neighborhood quality variation in Marysville",
+        "School-zone confusion",
+        "Wheatland / Doolittle hour limitations",
+        "Fog and rural-road commute",
+        "Short assignment timeline"
+      ],
+      "recommended_agent_behavior": [
+        "Do not overpromise commute times.",
+        "Always recommend school-zone verification by address.",
+        "Use payment math including insurance, not just listing price.",
+        "Discuss 24/7 Schneider/Vassar Lake backup early.",
+        "Compare on-base Balfour Beatty housing as a legitimate alternative.",
+        "Avoid generic California advice when the user is assigned to Beale."
+      ],
+      "pcsu_realtor_bluf": "A strong Beale realtor should sound like a California affordability strategist, commute filter, and neighborhood-risk advisor — not just a generic agent.",
+      "intelligence_type": "curated_pcsunited_intelligence"
     },
-
     "data_confidence": {
-      "overall": "medium",
-      "market_data": "medium",
-      "base_services": "medium",
-      "gate_data": "low_medium",
-      "neighborhood_guidance": "medium",
-      "notes": [
-        "Market and housing values are PCSUnited planning estimates and should be refreshed periodically.",
-        "Gate, visitor, service, medical, and housing office details should be verified against official installation sources before publication or use in routing.",
-        "Placeholder map image is used until a dedicated Beale base orientation map is created."
-      ]
+      "overall": "high_for_current_base_essentials_medium_high_for_curated_pcs_intelligence",
+      "identity": "high_current_public_official",
+      "mission": "high_current_public_official_with_transition_notes",
+      "base_operator": "high_current_public_official_with_number_conflicts",
+      "installation_population": "medium_published_profile_not_live_headcount",
+      "gate_data": "high_current_public_official_time_sensitive_with_source_conflicts",
+      "visitor_control_center": "high_current_public_official_with_naming_conflicts",
+      "housing_office": "high_current_air_force_housing",
+      "unaccompanied_housing": "high_current_air_force_housing",
+      "privatized_housing": "high_current_air_force_housing",
+      "medical": "high_current_tricare",
+      "commissary": "high_current_deca",
+      "exchange": "medium_official_directory_phone_hours_require_direct_recheck",
+      "military_family_readiness": "high_current_official_information_central",
+      "school_liaison": "high_current_official_newcomer_listing_hours_not_published",
+      "recommended_neighborhoods": "curated_pcsunited_intelligence",
+      "commute_bands": "estimated_requires_address_and_report_time_validation",
+      "bah_market_guidance": "strategy_layer_requires_rank_family_and_financial_inputs",
+      "housing_market_demographics": "preserved_from_existing_2026_03_and_2026_01_source_records_not_revalidated_in_this_installation_profile_pass",
+      "last_reviewed": "2026-09-16"
     },
-
     "source_notes": [
-      "Use official Beale AFB sources for gate hours, visitor control, newcomer guidance, and installation access.",
-      "Use official Air Force Housing and local housing office sources for on-base housing and privatized housing details.",
-      "Use DeCA, AAFES, and TRICARE sources for commissary, exchange, and medical details.",
-      "Use local MLS, Zillow-style indexes, rental listing aggregators, and Census-style demographic sources for housing and market refreshes."
+      {
+        "label": "Official Beale AFB homepage",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/",
+        "source_key": "official_links.base_home",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Installation identity",
+          "REAL ID visitor requirement summary",
+          "9th SFS Operations 634-2131 referral"
+        ]
+      },
+      {
+        "label": "Official Beale Directory",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/Contact-Us/Directory/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Base Operator 530-634-3000",
+          "Exchange 530-788-0221",
+          "MPF 530-634-4200",
+          "TMO personal property and passenger-travel numbers",
+          "Law Enforcement / 9th SFS 530-634-2131",
+          "Gold Country Inn / Welcome Center 530-634-2953",
+          "Housing Office 530-634-2792 conflict note",
+          "CDC, Youth Center, and related family numbers"
+        ]
+      },
+      {
+        "label": "Official Beale Contact Us",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/Contact-Us/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Contact-form Base Operator listing 530-634-3262 documented as a conflict"
+        ],
+        "source_conflict_note": "Contact Us lists Base Operator 530-634-3262. Directory, Newcomer Info, and MilitaryINSTALLATIONS list 530-634-3000 (MilitaryINSTALLATIONS also lists 530-634-0902 / DSN 368-3000/0902). 530-634-3000 won as the widely published operator/information line."
+      },
+      {
+        "label": "Official Beale Newcomer Info",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/Home/Newcomer-Info/",
+        "source_key": "official_links.newcomers",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Operator 530-634-3000 / DSN 368-1110",
+          "School Liaison Building 3308 / 530-634-3539 / 9FSS.CYES.SLO@us.af.mil",
+          "Local school research list"
+        ]
+      },
+      {
+        "label": "Official Arriving to Beale",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/Home/Newcomer-Info/Arriving-to-Beale/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Gold Country Inn 24-hour arrival point",
+          "Lodging phone 530-634-2953",
+          "MPF in-processing days/time and 17855 Warren Shingle Rd"
+        ],
+        "source_conflict_note": "Arriving page lists lodging at 5786 A St.; Air Force Inns and the lodging guest directory use 24112 A Street. 24112 A Street won."
+      },
+      {
+        "label": "Official Lodging page",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/Home/Newcomer-Info/Lodging/",
+        "source_key": "official_links.temporary_lodging",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Reservations 530-634-2953/3662",
+          "TLF count and pet-friendly TLF warning",
+          "No pet-friendly VAQ/VOQ currently"
+        ]
+      },
+      {
+        "label": "Official Space-A / Gates at Beale",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/Home/Newcomer-Info/Beale-Space-A-Program/",
+        "source_key": "official_links.gate_hours",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Five named gates and road approaches",
+          "Law Enforcement Desk 530-634-2131 for current hours"
+        ],
+        "source_conflict_note": "Space-A lists Wheatland 0600-1800 Monday-Friday. DeCA store page dated 14 April 2026 lists Wheatland 0500-1800 Monday-Friday. DeCA listing won as the more recently dated public schedule; Space-A retained for gate names/roads. Grass Valley inbound/outbound rules also conflict."
+      },
+      {
+        "label": "DeCA Beale AFB Commissary store page",
+        "type": "official_current",
+        "url": "https://corp.commissaries.com/shopping/store-locations/beale-afb",
+        "source_key": "official_links.commissary",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Commissary address, phone, hours, CLICK2GO",
+          "Gate hours update effective 14 April 2026",
+          "Federal-holiday gate closures"
+        ],
+        "freshness_note": "The 14 April 2026 gate update is the most recently dated public gate schedule found in this pass and is still treated as time-sensitive."
+      },
+      {
+        "label": "Official 9th SFS visitor-pass / DVES PDF",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/Portals/110/(DVES)%20Public%20How%20to.pdf",
+        "source_key": "official_links.visitor_control_center",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Visitors Center adjacent to Wheatland Gate",
+          "Pass and Registration 530-634-3128",
+          "9SFS.VCC.RegistrationRequest@us.af.mil",
+          "Wheatland duty hours Monday-Friday 0730-1600 for pass printing",
+          "1-30 day pass authority"
+        ]
+      },
+      {
+        "label": "REAL ID required for military base access starting May 7",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/News/Article-Display/Article/4178077/real-id-required-for-military-base-access-starting-may-7/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "REAL ID requirement effective 7 May 2025",
+          "Sponsorship/accompaniment rule",
+          "9th SFS 634-2131 contact"
+        ]
+      },
+      {
+        "label": "MilitaryINSTALLATIONS — Beale AFB",
+        "type": "official_dod_current_portal",
+        "url": "https://installations.militaryonesource.mil/in-depth-overview/beale-afb",
+        "source_key": "official_links.military_installations",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Host-wing / 16th Air Force alignment",
+          "U-2 fleet language",
+          "Published population profile",
+          "Tenant organizations",
+          "Operator 530-634-3000/0902",
+          "Current aircraft list U-2, T-38, KC-135",
+          "No military airport shuttle note"
+        ],
+        "freshness_note": "Population year is not stated. Surrounding county/metro civilian figures and 25,000 retirees were not used as installation population. Reservists/Guard 1,071 conflicts with narrative 611+239.",
+        "source_conflict_note": "History section still discusses Global Hawk; the same page's current aircraft sentence lists U-2, T-38, and KC-135. ACC July 2022 article is used for the Beale RQ-4 Block 30 flying-mission end date."
+      },
+      {
+        "label": "Official 9th Reconnaissance Wing factsheet",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/Information/Fact-Sheets/Display/Article/279932/9th-reconnaissance-wing/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Current host-wing mission pair: high-altitude reconnaissance, mission-ready Airmen, and combat-ammunition expertise; resilient installation services"
+        ]
+      },
+      {
+        "label": "ACC — Beale says farewell to the RQ-4 Global Hawk Block 30",
+        "type": "official_current",
+        "url": "https://www.acc.af.mil/News/Article-Display/Article/3123103/beale-afb-says-farewell-to-the-rq-4-global-hawk-block-30/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "RQ-4 Block 30 flying mission at Beale ended July 2022"
+        ],
+        "freshness_note": "Article describes the July 2022 departure. Do not describe RQ-4 as a current Beale flying mission."
+      },
+      {
+        "label": "ACC — Beale showcases reconnaissance and combat capabilities, September 2025",
+        "type": "official_current",
+        "url": "https://www.acc.af.mil/News/Article-Display/Article/4300948/beale-afb-showcases-vital-reconnaissance-and-combat-capabilities-to-air-combat/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Current 9 RW reconnaissance and combat-ammunition role",
+          "Sourced note that the wing was preparing for mission transitions including possible Collaborative Combat Aircraft integration"
+        ]
+      },
+      {
+        "label": "Air Force Housing — Beale AFB",
+        "type": "official_current",
+        "url": "https://www.housing.af.mil/Home/Installations/Beale-AFB/",
+        "source_key": "official_links.housing",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Military Housing Office phone, email, address, hours",
+          "Balfour Beatty privatized housing contacts",
+          "Unaccompanied Housing phone, email, address, hours"
+        ]
+      },
+      {
+        "label": "9th Medical Group Contact Us / Urgent & Emergency Care / Family Health / Pharmacy",
+        "type": "official_medical_current",
+        "url": "https://beale.tricare.mil/About-Us/Contact-Us",
+        "source_key": "official_links.medical",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "15301 Warren Shingle Road",
+          "Appointment line 530-634-2941",
+          "No on-base urgent or emergency care",
+          "Family Health hours",
+          "Pharmacy hours and Wednesday training-morning closure"
+        ]
+      },
+      {
+        "label": "Official Beale Information Central — A&FRC",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/Home/Beale-Information-Central/",
+        "source_key": "official_links.family_readiness",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "A&FRC phone and hours",
+          "DSN and fax"
+        ]
+      },
+      {
+        "label": "Official MFRC factsheet",
+        "type": "official_current",
+        "url": "https://www.beale.af.mil/Information/Fact-Sheets/Display/Article/279988/military-and-family-readiness-center-mfrc/",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "17800 13th Street address",
+          "530-634-2863"
+        ]
+      },
+      {
+        "label": "Air Force Inns — Beale AFB",
+        "type": "official_current",
+        "url": "https://af.dodlodging.net/propertys/Beale-AFB",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Lodging address 24112 A Street"
+        ]
+      },
+      {
+        "label": "AAFES shopmyexchange.com",
+        "type": "official_commercial_military_retained",
+        "url": "https://www.shopmyexchange.com/",
+        "source_key": "official_links.exchange",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Official Exchange homepage reference"
+        ],
+        "freshness_note": "Current Main Exchange address and hours were not independently readable from AAFES during this verification pass. Directory phone 530-788-0221 is retained."
+      },
+      {
+        "label": "Existing Beale.json market and PCSUnited intelligence",
+        "type": "preserved_internal_profile",
+        "source_key": "existing Beale.json",
+        "verified_on": "2026-09-16",
+        "used_for": [
+          "Census-style demographics",
+          "March 2026 housing-market values",
+          "January 2026 by-bedroom home prices",
+          "sale history",
+          "recommended neighborhoods",
+          "BAH / commute / realtor intelligence foundations"
+        ],
+        "freshness_note": "MARKET_REFRESH_REQUIRED. Market as_of dates remain 2026-03 for most fields and 2026-01 for by-bedroom home prices. RentCast was not called during this installation-profile upgrade."
+      }
     ],
-
-    "disclaimer": "PCSUnited base profiles are planning tools only. They are not official DoD, Air Force, installation, legal, financial, real estate, lending, or navigation guidance. Users should verify gate access, housing rules, school zones, medical services, visitor procedures, market prices, insurance estimates, and commute conditions through official and professional sources before making decisions."
+    "disclaimer": "PCSUnited is not an official DoD or Department of the Air Force source. This profile is for public-facing PCS orientation, housing research, relocation planning, and Ask Amy explanations. Time-sensitive information—especially gate/VCC status, access rules, medical operations, housing availability, lodging, and office hours—must be verified with the official installation or service provider before travel or making a housing decision."
   },
-
   "sources": {
     "demographics": {
       "provider": "US Census Bureau / Yuba County EDC",
-      "as_of": "2026-03"
+      "as_of": "2026-03",
+      "status": "MARKET_REFRESH_REQUIRED",
+      "note": "Existing demographic values and as_of date were preserved. They were not re-dated by this installation-profile verification."
     },
     "rent": {
       "provider": "RentCafe / Zumper",
-      "as_of": "2026-03"
+      "as_of": "2026-03",
+      "status": "MARKET_REFRESH_REQUIRED",
+      "note": "Existing rental values were preserved. RentCast was not called during this update. These figures are not RentCast-validated."
     },
     "home_price": {
       "provider": "Sutter-Yuba Association of Realtors",
-      "as_of": "2026-03"
+      "as_of": "2026-03",
+      "status": "MARKET_REFRESH_REQUIRED",
+      "note": "Existing home-price values were preserved. RentCast was not called during this update. These figures are not RentCast-validated. By-bedroom home_price as_of dates remain 2026-01."
     },
     "base_profile": {
-      "provider": "PCSUnited planning profile using public-facing installation, housing, and market research structure",
-      "as_of": "2026-05"
+      "provider": "PCSUnited Gold Standard installation profile using official Beale AFB, 9th Reconnaissance Wing, Air Force Housing, MilitaryINSTALLATIONS, TRICARE, DeCA, 9th FSS, and other public authoritative sources",
+      "as_of": "2026-09-16",
+      "verification_level": "official-source-validated for Base Map / Ask Amy essentials",
+      "market_data_scope_note": "Housing-market and demographic data elsewhere in this file retain their March 2026 and January 2026 source dates and were not re-dated during this installation-profile upgrade. MARKET_REFRESH_REQUIRED."
+    },
+    "housing_market": {
+      "provider": "Sutter-Yuba Association of Realtors / Zillow-style market estimates preserved from existing file",
+      "as_of": "2026-03",
+      "status": "MARKET_REFRESH_REQUIRED",
+      "note": "RentCast was not called during this installation-profile upgrade. Existing market values and as_of dates were preserved and are not presented as a September 2026 refresh."
     }
   },
-
   "compatibility": {
     "orozco_realty_ready": true,
     "pcsunited_ready": true,
     "intended_primary_slug": "beale-afb",
     "schema_family": "pcsunited-city-base-json",
-    "schema_version": "pcsu-base-profile-v1.0.0",
+    "schema_version": "pcsu-base-profile-v1.1.0",
     "base_demographics_shell_ready": true,
     "base_tab_ready": true,
     "uses_placeholder_base_image": true,
     "placeholder_base_image_url": "https://cdn.prod.website-files.com/69eb162337c57d450e0e19a3/69f1786791ebcdddcdb6b68f_D11B76B2-958B-4871-B121-30BA68667423.png",
     "parser_notes": [
-      "Expanded from uploaded Beale.json into the PCSUnited city/base JSON pattern.",
+      "Gold Standard architecture: root city/market/demographic data, nested base_profile, root sources, then compatibility.",
+      "Root market and demographic data were preserved, including March 2026 as_of dates and January 2026 by-bedroom home-price dates.",
+      "base_profile is nested as the object consumed by Base-Map/base-map.js getProfile(json) and Base-Map/ask-amy-base-map-server.js sanitizeBaseSnapshot().",
       "All major PCSUnited fields preserved and adapted for Beale AFB.",
       "Compatible with PCS Snapshot, Base Demographics Shell, Base SaaS, and TOR parsing.",
-      "Preserves duplicate value aliases for avg_home_value, average_home_value, avgHome, and city_avg_home.",
-      "Preserves duplicate median price aliases for median_list_price, median_sold_price, and median_sale_price.",
+      "Preserves duplicate home-value aliases for avg_home_value, average_home_value, avgHome, and city_avg_home.",
+      "Preserves duplicate median-price aliases for median_list_price, median_sold_price, and median_sale_price.",
       "Preserves by_bedroom entries for 2, 3, 4, and 5-bedroom Market Insight compatibility.",
-      "Expanded base_profile to include map image, official links, visitor control center, gates, major services, on-base housing, recommended neighborhoods, commute intelligence, BAH market reality, family readiness, arrival checklist, PCS watchouts, realtor intelligence, data confidence, source notes, and disclaimer."
-    ]
+      "Current official installation facts inside base_profile were researched separately from older market data.",
+      "Beale market data retains its recorded source dates. MARKET_REFRESH_REQUIRED: RentCast was not called during this upgrade.",
+      "Gold Standard v1.1.0 adds canonical base_operator and installation_population objects recognized by Base Map and Ask Amy.",
+      "Ask Amy and Base Map compatibility are maintained via nested json.base_profile.",
+      "Placeholder orientation image status is preserved until a dedicated Beale gate/neighborhood map is available."
+    ],
+    "gold_standard_base_map_ask_amy_ready": true,
+    "base_map_required_fields_ready": true,
+    "ask_amy_server_required_fields_ready": true
   }
 }
