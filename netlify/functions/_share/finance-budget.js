@@ -1,4 +1,5 @@
 import { calculateMortgageScenario } from './mortgage-scenario.js';
+import { purchasePriceForPayment } from './purchase-price.js';
 
 export const VERSION = 'finance-budget-v1';
 const categories = ['monthly-expenses','debt','lifestyle','other'];
@@ -20,16 +21,10 @@ function number(value, name, nullable = false, max = 1000000) {
 function priceForPayment(target, scenario) {
   if (!(target > 0)) return null;
   const down = number(scenario.downPayment ?? 0, 'Down payment');
-  const quote = price => calculateMortgageScenario({...scenario,price,downPayment:Math.min(down,price)});
-  const floor = Math.max(100,down), ceiling = 5000000;
-  if (floor > ceiling || quote(floor).monthly.allIn > target) return null;
-  let low = floor, high = ceiling;
-  for (let i=0;i<26;i++) {
-    const middle = (low+high)/2;
-    if (quote(middle).monthly.allIn <= target) low=middle; else high=middle;
-  }
-  const price = Math.floor(low/100)*100, result=quote(price);
-  return {price,monthlyHousing:result.monthly.allIn,rate:result.mortgage.apr,capped:low>=ceiling-1};
+  return purchasePriceForPayment(target, price => {
+    const result = calculateMortgageScenario({...scenario,price,downPayment:Math.min(down,price)});
+    return {monthlyHousing:result.monthly.allIn,rate:result.mortgage.apr};
+  }, Math.max(100, down));
 }
 
 export function calculateFinanceBudget(body) {
