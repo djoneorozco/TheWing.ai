@@ -43,7 +43,11 @@ Existing VA, FHA and conventional monthly calculations are retained. The API add
 
 Amortization describes fixed-rate principal and interest with no extra payments, using full-precision payment math. Lender payment rounding can slightly change the final installment. It excludes taxes, insurance, HOA and upfront cash. There is no speculative lifetime projection of insurance, taxes or HOA. An older API that lacks amortization still supplies the monthly chart, with term totals explicitly unavailable.
 
-Down payment + cash loan fee is a **known subtotal**, not complete cash to close. Other closing costs, prepaids and escrow deposits remain explicitly excluded. The Emergency Fund input is already after closing and is never reduced by closing costs again.
+Down payment + cash loan fee remains the backward-compatible **known subtotal**. Summary → Cash needed to buy this home accepts four optional dollar amounts: `closingCosts` (other costs net of credits, excluding loan fee and prepaids), `prepaidsEscrow`, `cashAvailable` (usable cash before the purchase, including deposits already paid), and `moveInCosts`. Blank means unknown; explicit 0 means none.
+
+The canonical mortgage result adds `upfront.purchaseCash`, `totalCashNeeded`, `reservesAfterPurchase`, and `cashPlanStarted`. Purchase cash includes down payment and cash-paid loan fees once; financed fees remain in principal. Moving costs are deducted separately from usable cash. This is a total purchase budget, not the outstanding closing-day wire amount. Confirm lender figures using the [CFPB Closing Disclosure guide](https://www.consumerfinance.gov/owning-a-home/closing-disclosure/).
+
+If any purchase-cash field is used, its calculated reserve takes precedence and the manual Emergency Fund control is disabled. An incomplete cash plan yields unknown reserves. Without a cash plan, an explicitly entered after-closing reserve remains supported and is never reduced again. The former $8,500 example is no longer treated or displayed as entered cash.
 
 Preserved APIs: `window.PCSU_FINANCIAL_INPUT_PANEL`, `window.PCSUnitedMilitaryMortgage`, `getInputs`, `setInputs`, refresh methods and existing `pcsunited:*` input events. New presentation API: `window.PCSUnitedMortgageViews.setView('calculator'|'visualization'|'summary')` and `getView()`. New view events: `pcsunited:mortgage-view-request`, `pcsunited:mortgage-view-changed`, `pcsunited:mortgage-views-ready`.
 

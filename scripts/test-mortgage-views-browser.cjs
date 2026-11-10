@@ -35,7 +35,7 @@ fs.mkdirSync(screenshots,{recursive:true});
   await page.locator('#pcsu-financial-input-panel').screenshot({path:path.join(screenshots,'visualization-desktop.png')});
   await select('Summary');
   check((await page.locator('#mm-summary-total').textContent())==='$1,901.73','Summary total matches');
-  check((await page.locator('#mm-summary-reserve').textContent())==='$8,500.00','After-closing reserves not reduced again');
+  check((await page.locator('#mm-summary-reserve').textContent())==='Not entered','Example reserves remain unknown');
   check((await state()).revision===revision,'Switching views does not recalculate or reset');
   await page.locator('#pcsu-financial-input-panel').screenshot({path:path.join(screenshots,'summary-desktop.png')});
   await page.locator('#fi-cost-details summary').click();await page.locator('#fi-interest-rate').fill('0');await ready();

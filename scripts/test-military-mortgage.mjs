@@ -122,3 +122,21 @@ test('nonloan costs never inflate principal-and-interest lifetime totals', () =>
   assert.notEqual(a.monthly.totalHousing,b.monthly.totalHousing);
   assert.equal(a.contract,'military-mortgage-v1');
 });
+
+test('purchase budget separates financed fees, upfront costs, current cash and monthly costs',()=>{
+ const input=fixture({downPayment:12500,closingCosts:4000,prepaidsEscrow:2500,cashAvailable:40000,moveInCosts:1000});
+ const r=calc(input),cash=calc({...input,feePayment:'cash'});
+ assert.equal(r.upfront.purchaseCash,19000);assert.equal(r.upfront.totalCashNeeded,20000);assert.equal(r.upfront.reservesAfterPurchase,20000);
+ assert.equal(cash.upfront.purchaseCash,19000+cash.loan.fee);
+ assert.equal(cash.upfront.reservesAfterPurchase,20000-cash.loan.fee);
+ assert.equal(r.monthly.totalHousing,calc(fixture({downPayment:12500})).monthly.totalHousing);
+ assert.equal(r.upfront.knownSubtotal,12500);
+});
+test('purchase cash distinguishes unknown, explicit zero, negative reserves and unusable input',()=>{
+ const zero=calc(fixture({closingCosts:0,prepaidsEscrow:0,cashAvailable:0,moveInCosts:0}));
+ assert.equal(zero.upfront.purchaseCash,0);assert.equal(zero.upfront.reservesAfterPurchase,0);
+ const unknown=calc(fixture());assert.equal(unknown.upfront.purchaseCash,null);assert.equal(unknown.upfront.reservesAfterPurchase,null);assert.equal(unknown.upfront.cashPlanStarted,false);
+ const partial=calc(fixture({cashAvailable:5000,closingCosts:1000}));assert.equal(partial.upfront.reservesAfterPurchase,null);assert.equal(partial.upfront.cashPlanStarted,true);
+ const deficit=calc(fixture({closingCosts:5000,prepaidsEscrow:2000,cashAvailable:6000,moveInCosts:1000}));assert.equal(deficit.upfront.reservesAfterPurchase,-2000);
+ for(const key of ['closingCosts','prepaidsEscrow','cashAvailable','moveInCosts'])for(const value of [-1,'100',1.001,Infinity,10000001])assert.throws(()=>calc(fixture({[key]:value})));
+});
