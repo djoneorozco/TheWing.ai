@@ -5,7 +5,7 @@
   const $ = id => document.getElementById(id), set = (id,value) => { if ($(id)) $(id).textContent = value; };
   const money = n => typeof n === 'number' && Number.isFinite(n) ? new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(n) : '—';
   const percent = n => typeof n === 'number' && Number.isFinite(n) ? n.toFixed(1)+'%' : '—';
-  const allowed = origin => ['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com'].includes(origin)
+  const allowed = origin => ['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com','https://orozcorealty.webflow.io'].includes(origin)
     || (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname));
   let parentOrigin = null, revision = -1, sequence = 0, controller = null, packet = null, context = null, timer = null, reportTrigger = null;
   let stressTest = null;
@@ -257,3 +257,4 @@
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
+

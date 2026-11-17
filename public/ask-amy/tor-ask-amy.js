@@ -33,13 +33,13 @@
     }
     function typeForFrame(frame){
       try{const u=new URL(frame.src);if(u.origin!==toolOrigin||u.searchParams.get('amy')!=='tor')return null;
-        return /^\/Finance-UX\/$/i.test(u.pathname)?'finance':/^\/Mortgage-Calculator\/$/i.test(u.pathname)?'mortgage':null;
+        return /^\/Finance-UX\/$/i.test(u.pathname)?'finance':/^\/(?:Mortgage-Calculator|Military-Mortgage)\/$/i.test(u.pathname)?'mortgage':null;
       }catch{return null;}
     }
     function request(frame){frame.contentWindow?.postMessage({source:'tor-amy-host',version:1,type:'tor:context-request'},toolOrigin);}
     function scanFrames(){
       for(const [frame,record] of frames)if(!frame.isConnected||typeForFrame(frame)!==record.tool){calculators[record.tool]=null;frames.delete(frame);}
-      document.querySelectorAll('#tl-tool-body iframe').forEach(frame=>{
+      document.querySelectorAll('#tl-tool-body iframe, #pcsu-budget-frame, #pcsu-mortgage-frame').forEach(frame=>{
         const tool=typeForFrame(frame);if(!tool||frames.has(frame))return;
         frames.set(frame,{tool,revision:-1});calculators[tool]=null;
         frame.addEventListener('load',()=>{const record=frames.get(frame);if(!record)return;record.revision=-1;calculators[tool]=null;contextView();request(frame);});request(frame);
@@ -99,3 +99,4 @@
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
+

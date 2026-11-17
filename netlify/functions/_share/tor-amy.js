@@ -1,6 +1,7 @@
 // TOR presentation context. All financial calculations reuse canonical engines.
 import { calculateFinanceBudget } from './finance-budget.js';
 import { calculateMortgageScenario } from './mortgage-scenario.js';
+import { calculateMilitaryMortgage } from './military-mortgage.js';
 
 export const TOR_ORIGIN = 'https://orozcorealty.webflow.io';
 export const TOR_STAGES = {
@@ -19,15 +20,21 @@ export function buildTorTruth(context = {}) {
   // Never trust browser result amounts or labels. Recompute from allowlisted inputs.
   if (object(calculators.mortgage?.inputs)) {
     try {
-      const input = pick(calculators.mortgage.inputs,mortgageKeys);
-      // An incomplete form must not turn into engine default assumptions.
-      for (const key of ['price','downPayment','termYears','propertyTaxPercent','insuranceMonthly','hoaMonthly']) {
-        if (typeof input[key] !== 'number' || !Number.isFinite(input[key]) || input[key] < 0) throw Error('Incomplete input');
+      if (calculators.mortgage.inputs.contract === 'military-mortgage-v1') {
+        const input=pick(calculators.mortgage.inputs,['contract','homePrice','downPayment','creditScore','interestRate','termYears','loanType','propertyTaxAnnual','insuranceAnnual','hoaMonthly','otherOwnershipMonthly','pmiMonthly','vaFeeStatus','feePayment','closingCosts','prepaidsEscrow','cashAvailable','moveInCosts']);
+        const r=calculateMilitaryMortgage(input);
+        truth.mortgage={source:'TheWing military-mortgage-v1',monthly:{...r.monthly,allIn:r.monthly.totalHousing},mortgage:r,assumptions:r.assumptions,warnings:r.warnings};
+      } else {
+        const input = pick(calculators.mortgage.inputs,mortgageKeys);
+        // An incomplete form must not turn into engine default assumptions.
+        for (const key of ['price','downPayment','termYears','propertyTaxPercent','insuranceMonthly','hoaMonthly']) {
+          if (typeof input[key] !== 'number' || !Number.isFinite(input[key]) || input[key] < 0) throw Error('Incomplete input');
+        }
+        if (input.price <= 0 || !['va','conventional','fha'].includes(input.loanType)) throw Error('Incomplete input');
+        if (input.interestRate == null && input.creditScore == null) throw Error('Missing rate');
+        const r = calculateMortgageScenario(input);
+        truth.mortgage = {source:'TheWing mortgage-v2',monthly:r.monthly,mortgage:r.mortgage,totals:r.totals,budget:r.budget,assumptions:r.assumptions,warnings:r.warnings};
       }
-      if (input.price <= 0 || !['va','conventional','fha'].includes(input.loanType)) throw Error('Incomplete input');
-      if (input.interestRate == null && input.creditScore == null) throw Error('Missing rate');
-      const r = calculateMortgageScenario(input);
-      truth.mortgage = {source:'TheWing mortgage-v2',monthly:r.monthly,mortgage:r.mortgage,totals:r.totals,budget:r.budget,assumptions:r.assumptions,warnings:r.warnings};
     } catch (_) {truth.warnings.push('Mortgage inputs are incomplete or invalid. Reopen the mortgage workspace and calculate again.');}
   }
   if (object(calculators.finance?.inputs)) {
@@ -62,7 +69,7 @@ export function torFallback(message, truth) {
   const out = [];
   if (wantsMortgage) {
     const m = truth.mortgage?.monthly;
-    out.push(m ? `Your current estimated monthly housing cost is ${money(m.allIn)}, including principal and interest, property tax, homeowners insurance, HOA, and applicable mortgage insurance. Utilities, maintenance and cash to close need separate review.` : 'I do not have a current mortgage calculation. Open the mortgage workspace, complete the inputs, and calculate your estimate.');
+    out.push(m ? `Your current estimated monthly housing cost is ${money(m.allIn)}, including principal and interest, property tax, homeowners insurance, HOA, and applicable mortgage insurance. Other ownership costs are included when entered; review utilities, maintenance and cash to close separately.` : 'I do not have a current mortgage calculation. Open the mortgage workspace, complete the inputs, and calculate your estimate.');
   }
   if (wantsBudget) {
     const f = truth.finance;
@@ -79,3 +86,4 @@ export function torFallback(message, truth) {
   }
   return out.join('\n\n');
 }
+
