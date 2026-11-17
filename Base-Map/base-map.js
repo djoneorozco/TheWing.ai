@@ -49,6 +49,12 @@
 
   window[MOUNT_KEY] = true;
 
+  if (new URLSearchParams(window.location.search).get('brand') === 'tor') {
+    document.title = 'TOR Interactive U.S. Air Force Base Map';
+    const sourceNote = document.querySelector('#pcsu-be-footer span:last-child');
+    if (sourceNote) sourceNote.textContent = sourceNote.textContent.replace(/PCSUnited|PCS United|\bPCSU\b/g, 'TOR');
+  }
+
   /* =======================================================
      REQUIRED DOM
   ======================================================= */
