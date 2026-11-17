@@ -549,7 +549,8 @@ body{overflow-x:hidden}
   // This dedicated iframe page uses only the selected file in its URL.
   // Webflow and Netlify have separate localStorage; no profile data is shared.
   const params = new URLSearchParams(location.search);
-  if (params.get('brand') === 'tor' || params.get('parentOrigin') === 'https://orozcorealty.webflow.io') {
+  const torBrand = params.get('brand') === 'tor' || params.get('parentOrigin') === 'https://orozcorealty.webflow.io';
+  if (torBrand) {
     document.getElementById('pcsuDemoBrand').textContent = 'The Orozco Realty (TOR)';
     document.title = 'Base Demographics · TOR';
   }
@@ -621,8 +622,14 @@ body{overflow-x:hidden}
     return Array.isArray(v) ? v : [];
   }
 
+  function displayText(value){
+    return torBrand && typeof value === "string"
+      ? value.replace(/PCSUnited|PCS United|\bPCSU\b/g, "TOR").replace(/\.\.(?=\s|$)/g, ".")
+      : value;
+  }
+
   function esc(str){
-    return String(str ?? "")
+    return String(displayText(str) ?? "")
       .replaceAll("&","&amp;")
       .replaceAll("<","&lt;")
       .replaceAll(">","&gt;")
@@ -647,7 +654,7 @@ body{overflow-x:hidden}
 
   function setText(sel, value){
     const el = $(sel);
-    if (el) el.textContent = value ?? "—";
+    if (el) el.textContent = displayText(value) ?? "—";
   }
 
   function setHtml(sel, html){
