@@ -1,0 +1,108 @@
+<style id="pcsu-financial-navigation-footer-style">
+html[data-wf-page="6ad5a8ff8991dbd28744eeaf"] body>header.stage1-navabr{display:none!important}
+#pcs1-main{position:relative;z-index:1;background:#fff}
+#pcs1-page>.pcsu26-hero{position:relative;z-index:1;background-color:#f5f5f0;margin-bottom:0}
+#pcsu-financial-footer{position:relative;inset:auto;isolation:isolate;z-index:0;width:100%;box-sizing:border-box}
+#pcsu-financial-footer[data-reveal="true"]{position:sticky;top:auto;bottom:var(--pcsu-reveal-bottom,0px)}
+#tor-analysis-header .pcs1-nav-item,#tor-analysis-header .pcs1-nav-item.w--current{border-top-color:#cdd8e1;box-shadow:none}
+#tor-analysis-header .pcs1-nav-item::before{content:none;box-shadow:none}
+#tor-analysis-header .pcs1-nav-item[data-active="true"]{border-top-color:#b83d13}
+#tor-analysis-header .navbar-two-menu-button-5:focus-visible,#tor-analysis-header .menu-big-text.home-text:focus-visible{outline:2px solid #b83d13;outline-offset:4px}
+#tor-analysis-header .navbar-fullscreen-menu-2{display:none!important}
+#tor-analysis-header[data-menu-open="true"] .navbar-fullscreen-menu-2{display:flex!important;align-items:flex-start;overflow:auto;overscroll-behavior:contain;padding:90px 30px 32px;background:rgba(16,42,66,.96)}
+#tor-analysis-header[data-menu-open="true"] .navbar-two-main-menu,
+#tor-analysis-header[data-menu-open="true"] .navbar-fullscreen-menu-right-column,
+#tor-analysis-header[data-menu-open="true"] .navbar-small-menus,
+#tor-analysis-header[data-menu-open="true"] .navbar-bottom-copyright{opacity:1!important;transform:none!important}
+#tor-analysis-header[data-menu-open="true"] .pcs1-section-nav{visibility:hidden}
+#tor-analysis-header[data-menu-open="true"] .navbar-two-main-wrapper-8{pointer-events:none}
+#tor-analysis-header[data-menu-open="true"] .navbar-two-menu-button-5{pointer-events:auto}
+#tor-analysis-header[data-menu-open="true"] .navbar-bar{background-color:#fff}
+#tor-analysis-header[data-menu-open="true"] .bar-one{transform:translateY(4px) rotate(45deg)!important}
+#tor-analysis-header[data-menu-open="true"] .bar-two-copy{transform:translateY(-4px) rotate(-45deg)!important}
+#tor-analysis-header .navbar-two-sub-menus{display:none!important}
+#tor-analysis-header[data-apps-open="true"] .navbar-two-sub-menus{display:block!important;opacity:1!important;transform:none!important}
+#tor-analysis-header .navbar-two-sub-menus .sub-menu{display:none!important}
+#tor-analysis-header[data-apps-open="true"] .navbar-two-sub-menus .home-submenu{display:flex!important;opacity:1!important;transform:none!important}
+#tor-analysis-header .menu-big-text.home-text{cursor:pointer}
+body:has(#tor-analysis-header[data-menu-open="true"]) .badges,
+#pcs1-page[data-footer-visible="true"]>.badges{visibility:hidden}
+@media(max-width:767px){
+ #tor-analysis-header[data-menu-open="true"] .navbar-fullscreen-menu-2{padding:90px 24px 32px}
+ #tor-analysis-header .navbar-fullscreen-menu-main-wrapper{padding-left:0;gap:32px;flex-direction:column}
+ #tor-analysis-header .navbar-fullscreen-menu-left-column{width:100%;flex-direction:column;gap:24px}
+ #tor-analysis-header .navbar-two-main-menu{gap:20px}
+ #tor-analysis-header .menu-big-text{font-size:clamp(24px,7vw,38px);line-height:1.2}
+ #tor-analysis-header .navbar-fullscreen-menu-right-column{width:100%;max-width:100%}
+ #pcsu-financial-footer{padding:32px 24px;gap:24px;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){#pcsu-financial-footer[data-reveal]{position:relative;inset:auto}}
+</style>
+<style>
+html[data-wf-page="69da7ad9b64e89161ff33089"] body{padding-top:72px;background:#f4f7f7}
+#tor-analysis-header{height:72px;background:#f5f5f0!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+#tor-analysis-header>[class*="navbar-blur-background"]{display:none!important}
+#tor-analysis-header .navbar-two-main-wrapper-8{min-height:72px}
+#tor-analysis-header .home-three-nav-logo-6{width:110px;height:58px;display:flex;align-items:center}
+#tor-analysis-header .fa-image{width:110px;height:58px;object-fit:contain}
+#pcsu-analysis-page-status+div{height:calc(100dvh - 112px)!important;min-height:500px!important}
+</style>
+<script>
+(function(){
+function init(){
+const header=document.querySelector('body>header.modern-navbar-2');
+if(!header||header.dataset.analysisNavReady)return;
+header.dataset.analysisNavReady='true';header.id='tor-analysis-header';
+  const menu=header.querySelector('.navbar-fullscreen-menu-2');
+  const toggle=header.querySelector('.navbar-two-menu-button-5');
+  const apps=menu.querySelector('.menu-big-text.home-text');
+  const appsPanel=menu.querySelector('.home-submenu');
+  let open=false,frame=0,focusMode=false,savedOverflow='',inertElements=[];
+  menu.id='pcsu-financial-site-menu';menu.setAttribute('role','navigation');
+  menu.setAttribute('aria-label','Site navigation');menu.inert=true;
+  toggle.setAttribute('role','button');toggle.tabIndex=0;
+  toggle.setAttribute('aria-controls',menu.id);toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Open navigation menu');
+  if(apps&&appsPanel){
+   appsPanel.id='pcsu-financial-apps';apps.setAttribute('role','button');apps.tabIndex=0;
+   apps.setAttribute('aria-controls',appsPanel.id);apps.setAttribute('aria-expanded','false');
+   // These two destinations already exist in the same native menu.
+   const sources=menu.querySelectorAll('.portfolio-sub-menu a');
+   appsPanel.querySelectorAll('a').forEach((link,i)=>{if(sources[i])link.setAttribute('href',sources[i].getAttribute('href'));});
+  }
+  function setOpen(next,restoreFocus=true){
+   if(open===next)return;
+   open=next;header.dataset.menuOpen=String(open);menu.inert=!open;
+   toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');
+   if(open){
+    header.setAttribute('role','dialog');header.setAttribute('aria-modal','true');header.setAttribute('aria-label','Site navigation');
+    savedOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
+    inertElements=Array.from(document.body.children).filter(e=>e!==header&&!['SCRIPT','STYLE'].includes(e.tagName)).map(e=>[e,e.inert]);
+    inertElements.forEach(([e])=>e.inert=true);
+    menu.querySelector('a[href]')?.focus({preventScroll:true});
+   }else{
+    header.removeAttribute('role');header.removeAttribute('aria-modal');header.removeAttribute('aria-label');
+    document.body.style.overflow=savedOverflow;inertElements.forEach(([e,value])=>e.inert=value);inertElements=[];
+    header.dataset.appsOpen='false';apps?.setAttribute('aria-expanded','false');
+    if(restoreFocus)toggle.focus({preventScroll:true});
+   }
+  }
+  toggle.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();setOpen(!open);},true);
+  toggle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopImmediatePropagation();setOpen(!open);}},true);
+  function toggleApps(e){e.preventDefault();e.stopImmediatePropagation();const next=header.dataset.appsOpen!=='true';header.dataset.appsOpen=String(next);apps.setAttribute('aria-expanded',String(next));}
+  apps?.addEventListener('click',toggleApps,true);
+  apps?.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')toggleApps(e);},true);
+  menu.addEventListener('click',e=>{if(e.target.closest('a[href]'))setOpen(false,false);});
+  document.addEventListener('keydown',e=>{
+   if(!open)return;
+   if(e.key==='Escape'){e.preventDefault();setOpen(false);return;}
+   if(e.key!=='Tab')return;
+   const focusable=[...menu.querySelectorAll('a[href],button,[tabindex="0"]'),toggle].filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+   const first=focusable[0],last=focusable[focusable.length-1];
+   if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+   else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  });
+
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
