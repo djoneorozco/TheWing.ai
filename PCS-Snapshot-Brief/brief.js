@@ -52,11 +52,11 @@ export function parseSelection(params) {
       !Number.isInteger(family) || family < 1 || family > 20 ||
       !/^[A-Za-z][A-Za-z0-9.-]{0,63}$/.test(cityKey) || cityKey.includes('..') ||
       normalize(base.replace(/\s+(AFB|SFB|Field)$/i, '')) !== normalize(cityKey)) {
-    throw new Error('Choose a valid rank, years of service, family size and destination, then select Analyze.');
+    throw new Error('Choose a valid rank, years of service, family size and destination, and your brief will update automatically.');
   }
-  if (params.has('baseFile') && params.get('baseFile') !== cityKey + '.json') throw new Error('Destination details do not match. Select Analyze again.');
+  if (params.has('baseFile') && params.get('baseFile') !== cityKey + '.json') throw new Error('Destination details do not match. Update your selections and try again.');
   const hasDependents = family >= 2;
-  if (params.has('hasDependents') && params.get('hasDependents') !== String(hasDependents)) throw new Error('Family size and dependent status do not match. Select Analyze again.');
+  if (params.has('hasDependents') && params.get('hasDependents') !== String(hasDependents)) throw new Error('Family size and dependent status do not match. Update your selections and try again.');
   return {rank, yos, family, hasDependents, base, cityKey, newZip:params.get('newZip') || ''};
 }
 
@@ -65,7 +65,7 @@ export function validatedParentOrigin(raw, referrer, ownOrigin) {
   try {
     const url = new URL(raw), own = new URL(ownOrigin);
     const local = host => ['localhost', '127.0.0.1', '[::1]'].includes(host);
-    const allowed = new Set(['https://pcsunited.com', 'https://www.pcsunited.com', 'https://pcs-united-com.webflow.io', own.origin]);
+    const allowed = new Set(['https://pcsunited.com', 'https://www.pcsunited.com', 'https://pcs-united-com.webflow.io', 'https://orozcorealty.webflow.io', own.origin]);
     if (url.origin !== raw || url.username || url.password ||
         !(url.protocol === 'https:' || (url.protocol === 'http:' && local(url.hostname) && local(own.hostname))) ||
         !(allowed.has(raw) || (local(url.hostname) && local(own.hostname)))) return null;
@@ -159,6 +159,11 @@ function startBrief() {
   }
   const parentOrigin = validatedParentOrigin(params.get('parentOrigin'), document.referrer, location.origin);
   const requestId = params.get('requestId') || '';
+  const tor = parentOrigin === 'https://orozcorealty.webflow.io' || params.get('brand') === 'tor';
+  if (tor) {
+    document.title = 'PCS Snapshot Brief · TOR';
+    document.querySelector('.footer-brand').textContent = 'The Orozco Realty (TOR)';
+  }
   let selection, city, compensation, run = 0, housingRun = 0, controller, housingController, ready = false, resizePending = false;
   function send(type, state) {
     if (window.parent === window || !parentOrigin || !/^[\w-]{1,160}$/.test(requestId)) return;
@@ -183,7 +188,12 @@ function startBrief() {
       hasDependents:selection.hasDependents,newBase:selection.base,newCityKey:selection.cityKey,
       newFileKey:selection.cityKey,newZip:selection.newZip,type:'ad'};
     Object.entries(handoff).forEach(([key,value]) => snapshot.searchParams.set(key,String(value)));
-    $('brief-open').href = snapshot.href;
+    if (tor) {
+      const larger = new URL(location.href);
+      larger.searchParams.set('view', 'full'); larger.searchParams.set('brand', 'tor');
+      larger.searchParams.delete('requestId'); larger.searchParams.delete('parentOrigin');
+      $('brief-open').href = larger.href;
+    } else $('brief-open').href = snapshot.href;
     text('base-name', selection.base);
     text('profile', `${selection.rank.replace(/^([EOW])/, '$1-')} · ${selection.yos} years of service · Family of ${selection.family}`);
     text('total-pay', money(m.grossMonthlyComp, true));
@@ -216,7 +226,7 @@ function startBrief() {
     $('highlights').replaceChildren(...highlights.map((value, i) => {
       const li = document.createElement('li'); li.textContent = value || `${i === 0 ? 'School' : 'Local cost'} information unavailable.`; return li;
     }));
-    text('city-source', `${firstText(city.sources?.home_price?.provider) || 'Existing PCSUnited destination dataset'}. Market figures are dated planning data, not live listings.`);
+    text('city-source', `${firstText(city.sources?.home_price?.provider) || 'TheWing destination dataset'}. Market figures are dated planning data, not live listings.`);
     $('city-data').href = `/netlify/functions/cities/${encodeURIComponent(selection.cityKey)}.json`;
     text('city-notes-source', `${$('city-source').textContent} Market as of ${firstText(city.market_metrics?.as_of,city.metrics?.as_of,city.sources?.home_price?.as_of,city.last_updated_data_from_sources) || 'date unavailable'}. Demographics: ${firstText(city.sources?.demographics?.provider) || 'provider unavailable'}; ${firstText(city.sources?.demographics?.as_of) || 'date unavailable'}.`);
     $('city-notes-data').href = $('city-data').href;
@@ -301,7 +311,7 @@ function startBrief() {
     text('app-status', withDetails ? 'Preparing your compensation, destination and housing brief…' : 'Preparing your monthly compensation…');
     try {
       selection = parseSelection(params);
-      if (window.parent !== window && (!parentOrigin || !/^[\w-]{1,160}$/.test(requestId))) throw new Error('This embed connection could not be verified. Open the brief from PCSUnited and select Analyze again.');
+      if (window.parent !== window && (!parentOrigin || !/^[\w-]{1,160}$/.test(requestId))) throw new Error('This embed connection could not be verified. Return to the PCS support page and update your selections.');
       const [pay, destination] = await Promise.all([
         fetchJSON('/api/opensource-brain', {body:{tool:'PCS_SNAPSHOT', input:{rank:selection.rank, yos:selection.yos, base:selection.base, hasDependents:selection.hasDependents}}, signal}),
         withDetails ? fetchJSON(`/netlify/functions/cities/${encodeURIComponent(selection.cityKey)}.json`, {signal}) : null
@@ -335,3 +345,4 @@ function startBrief() {
 }
 
 if (typeof document !== 'undefined') startBrief();
+
