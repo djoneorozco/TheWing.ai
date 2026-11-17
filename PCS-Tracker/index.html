@@ -33,5 +33,23 @@
   <input type="file" id="import-file" accept=".json,application/json" hidden>
   <section id="print-plan" class="print-only"></section>
   <noscript><p class="notice">Enable JavaScript to use the planner. You can still visit the PCS Planning education page using the links above.</p></noscript>
+<script>
+// Branding changes presentation only; the shared planner and saved-plan format stay unchanged.
+if (new URLSearchParams(location.search).get('brand') === 'tor') {
+  const home = 'https://orozcorealty.webflow.io';
+  const support = home + '/military/air-force-pcs-support';
+  document.title = 'PCS Planning · TOR';
+  document.querySelector('.brand').textContent = 'The Orozco Realty';
+  document.querySelectorAll('a[href^="https://pcs-united-com.webflow.io/"]').forEach(link => {
+    const url = new URL(link.href);
+    link.href = url.hash === '#tw-pcs-organize' ? support + '#pcs1-move' :
+      url.hash === '#tw-pcs-arrival' ? support + '#pcs1-plan' : support + '#pcsu26-title';
+    if (link.classList.contains('brand')) link.href = home + '/';
+    if (link.textContent === 'PCS Resources') link.href = support;
+  });
+  document.querySelector('footer').textContent = 'The Orozco Realty (TOR) · Education for your next move. Confirm requirements with your unit, TMO, passenger travel, and finance.';
+}
+</script>
 </body>
 </html>
+

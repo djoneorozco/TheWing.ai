@@ -525,7 +525,7 @@ body{overflow-x:hidden}
       <div class="or-error" id="orCityError"></div>
 
       <div class="or-foot">
-        PCSUnited · Powered by TheWing.ai · <a id="pcsuDemoSource" target="_blank" rel="noopener noreferrer">View data source ↗</a>
+        <span id="pcsuDemoBrand">PCSUnited</span> · Powered by TheWing.ai · <a id="pcsuDemoSource" target="_blank" rel="noopener noreferrer">View data source ↗</a>
       </div>
     </div>
   </div>
@@ -549,6 +549,10 @@ body{overflow-x:hidden}
   // This dedicated iframe page uses only the selected file in its URL.
   // Webflow and Netlify have separate localStorage; no profile data is shared.
   const params = new URLSearchParams(location.search);
+  if (params.get('brand') === 'tor' || params.get('parentOrigin') === 'https://orozcorealty.webflow.io') {
+    document.getElementById('pcsuDemoBrand').textContent = 'The Orozco Realty (TOR)';
+    document.title = 'Base Demographics · TOR';
+  }
   const FILES = ["Andrews.json","Barksdale.json","Beale.json","Cannon.json","Charleston.json","Davis-Monthan.json","Dover.json","Dyess.json","Eglin.json","Elmendorf.json","F.E-Warren.json","Fairchild.json","Fort-Sam-Houston.json","Holloman.json","Hurlburt.json","Keesler.json","Kirtland.json","Lackland.json","Langley.json","Laughlin.json","Little-Rock.json","Luke.json","MacDill.json","Malmstrom.json","Maxwell.json","McConnell.json","McGuire.json","Minot.json","Moody.json","Mountain-Home.json","Nellis.json","Offutt.json","Peterson.json","Randolph.json","Robins.json","Scott.json","Seymour-Johnson.json","Shaw.json","Sheppard.json","Tinker.json","Travis.json","Tyndall.json","Whiteman.json","Wright-Patterson.json"];
   const normalize = value => String(value || '').replace(/\.json$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const requested = params.get('baseFile') || 'Lackland.json';
@@ -1124,4 +1128,5 @@ body{overflow-x:hidden}
   </script>
 </body>
 </html>
+
 
