@@ -11,7 +11,7 @@
   if (!frame || frame.dataset.bridge === '1') return;
   frame.dataset.bridge = '1';
   const appOrigin = new URL(frame.src).origin, requestId = crypto.randomUUID();
-  const allowed = origin => ['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com'].includes(origin)
+  const allowed = origin => ['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com','https://orozcorealty.webflow.io'].includes(origin)
     || (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname));
   let openerOrigin = location.origin, context = null, revision = -1, frameId = null, attempts = 0;
   try { const ref = new URL(document.referrer).origin; if (allowed(ref)) openerOrigin = ref; } catch (_) {}
@@ -60,5 +60,6 @@
   const timer = setInterval(() => { if ((context && frameId) || ++attempts >= 15) { clearInterval(timer); if (!frameId) status.textContent = 'The analysis connection is not available yet. Return to Financial Guidance and try again.'; } else request(); },1000);
   request();
 })();
+
 
 </script>
