@@ -27,3 +27,15 @@ test('TOR presentation context does not change profile validation',()=>{
  assert.deepEqual(parseSelection(params),{rank:'E7',yos:16,family:4,base:'Lackland AFB',cityKey:'Lackland',hasDependents:true,newZip:''});
  params.set('baseFile','Andrews.json');assert.throws(()=>parseSelection(params),/do not match/);
 });
+
+const mapSource=await readFile(new URL('../Base-Map/base-map.js',import.meta.url),'utf8');
+const mapFunction=mapSource.slice(mapSource.indexOf('  function baseDemographicsUrl('),mapSource.indexOf('  function updateDemographicsLink('));
+const mapURL=(search,base)=>new Function('window','LIVE_BASE_DEMOGRAPHICS_URL',mapFunction+';return baseDemographicsUrl(arguments[2]);')({location:{search,origin:own,href:own+'/base-map/'}},'https://pcsunited-com-28346d.webflow.io/air-force/base-demographics-air-force',base);
+test('TOR map opens the matching shared demographics record',()=>{
+ const url=new URL(mapURL('?brand=tor',{id:'lackland',fileName:'Lackland.json'}));
+ assert.equal(url.origin,own);assert.equal(url.pathname,'/Base-Demographic/embed.html');assert.equal(url.searchParams.get('baseFile'),'Lackland.json');assert.equal(url.searchParams.get('brand'),'tor');
+});
+test('existing PCSU map route is unchanged',()=>{
+ const url=new URL(mapURL('',{id:'lackland',fileName:'Lackland.json'}));
+ assert.equal(url.hostname,'pcsunited-com-28346d.webflow.io');assert.equal(url.searchParams.get('base'),'lackland');
+});
