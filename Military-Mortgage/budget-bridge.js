@@ -1,7 +1,7 @@
 /* Read-only handoff of the calculator's current result to its trusted host. */
 (() => {
   'use strict';
-  const allowed = origin => ['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com'].includes(origin)
+  const allowed = origin => ['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com','https://orozcorealty.webflow.io'].includes(origin)
     || (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname));
   let origin = null;
   try { const ref = new URL(document.referrer).origin; if (allowed(ref)) origin = ref; } catch (_) {}
@@ -18,3 +18,4 @@
   });
   send();
 })();
+
