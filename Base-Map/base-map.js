@@ -1119,6 +1119,14 @@
     base
   ) {
 
+    // TOR uses the shared demographics app, not the retired PCSU Webflow route.
+    if (new URLSearchParams(window.location.search).get('brand') === 'tor' && base?.fileName) {
+      const torURL = new URL('/Base-Demographic/embed.html', window.location.origin);
+      torURL.searchParams.set('brand', 'tor');
+      torURL.searchParams.set('baseFile', base.fileName);
+      return torURL.href;
+    }
+
     const url =
       new URL(
         LIVE_BASE_DEMOGRAPHICS_URL,
@@ -5071,3 +5079,4 @@
     );
 
 })();
+
