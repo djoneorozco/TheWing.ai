@@ -7,12 +7,12 @@
 #pcsu-ask-amy button,#pcsu-ask-amy textarea,#pcsu-ask-amy a{font:inherit}
 #pcsu-ask-amy button{cursor:pointer;color:inherit}
 #pcsu-ask-amy button:focus-visible,#pcsu-ask-amy a:focus-visible,#pcsu-ask-amy textarea:focus-visible,#pcsu-ask-amy input:focus-visible,#pcsu-ask-amy summary:focus-visible{outline:3px solid #a7e8dc;outline-offset:3px}
-#pcsu-ask-amy .amy-launch{position:fixed;right:24px;bottom:24px;display:flex;align-items:center;gap:11px;padding:9px 24px 9px 10px;border:1px solid rgba(255,255,255,.55);border-radius:99px;background:linear-gradient(135deg,rgba(28,61,83,.94),rgba(19,47,62,.84));backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 10px 36px #17334d40,inset 0 1px #ffffff45;text-align:left;transition:transform .2s}
+#pcsu-ask-amy .amy-launch{position:fixed;right:24px;bottom:48px;display:flex;align-items:center;gap:11px;padding:9px 24px 9px 10px;border:1px solid rgba(255,255,255,.55);border-radius:99px;background:linear-gradient(135deg,rgba(28,61,83,.94),rgba(19,47,62,.84));backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 10px 36px #17334d40,inset 0 1px #ffffff45;text-align:left;transition:transform .2s}
 #pcsu-ask-amy .amy-launch:hover{transform:translateY(-3px)}
 #pcsu-ask-amy .amy-avatar{width:44px;height:44px;object-fit:cover;border-radius:50%;border:1px solid #d9e9de85;flex:none}
 #pcsu-ask-amy .amy-launch strong{display:block;font-size:16px;letter-spacing:-.2px}
 #pcsu-ask-amy .amy-launch small{display:block;font-size:11px;color:#cae1df}
-#pcsu-ask-amy .amy-panel{position:fixed;right:22px;bottom:22px;width:470px;height:min(790px,calc(100dvh - 100px));max-height:calc(100dvh - 32px);border:1px solid rgba(224,238,242,.44);border-radius:27px;overflow:hidden;background:linear-gradient(150deg,rgba(39,67,87,.91),rgba(14,36,54,.95));backdrop-filter:blur(30px) saturate(130%);-webkit-backdrop-filter:blur(30px) saturate(130%);box-shadow:0 26px 90px #10283b55,inset 0 1px 0 #ffffff45;display:flex;flex-direction:column;isolation:isolate}
+#pcsu-ask-amy .amy-panel{position:fixed;right:22px;bottom:44px;width:470px;height:min(790px,calc(100dvh - 100px));max-height:calc(100dvh - 32px);border:1px solid rgba(224,238,242,.44);border-radius:27px;overflow:hidden;background:linear-gradient(150deg,rgba(39,67,87,.91),rgba(14,36,54,.95));backdrop-filter:blur(30px) saturate(130%);-webkit-backdrop-filter:blur(30px) saturate(130%);box-shadow:0 26px 90px #10283b55,inset 0 1px 0 #ffffff45;display:flex;flex-direction:column;isolation:isolate}
 #pcsu-ask-amy .amy-header{padding:21px 22px 17px;display:flex;gap:13px;align-items:center;background:linear-gradient(110deg,#ffffff10,transparent);border-bottom:1px solid var(--amy-line)}
 #pcsu-ask-amy .amy-eyebrow{font-size:9px;letter-spacing:1.8px;color:#b7ddd7;text-transform:uppercase;font-weight:700}
 #pcsu-ask-amy h2{font:500 26px/1.2 Arial,sans-serif;letter-spacing:-.7px;text-transform:none;color:var(--amy-paper);margin:3px 0}
@@ -55,7 +55,7 @@
 #pcsu-ask-amy .amy-reset{border:0;background:transparent;padding:0;color:#c8e0db;text-decoration:underline;text-underline-offset:3px;font-size:10px}
 #pcsu-ask-amy .amy-privacy{font-size:9px;color:#a9bec6;line-height:1.5;margin:9px 0 0}
 #pcsu-ask-amy .amy-retry{margin-top:8px;background:transparent;border:1px solid #b6d8d466;border-radius:12px;padding:5px 10px;font-size:11px}
-@media(max-width:600px){#pcsu-ask-amy .amy-panel{inset:10px 10px max(10px,env(safe-area-inset-bottom));width:auto;height:auto;max-height:none;border-radius:23px;background:linear-gradient(150deg,rgba(36,63,83,.96),rgba(14,36,54,.98))}#pcsu-ask-amy .amy-header{padding:16px}#pcsu-ask-amy .amy-context{padding:10px 17px}#pcsu-ask-amy .amy-chat{padding:16px}#pcsu-ask-amy textarea{font-size:16px;height:78px}#pcsu-ask-amy .amy-launch{right:14px;bottom:18px}#pcsu-ask-amy .amy-controls{font-size:10px}}
+@media(max-width:600px){#pcsu-ask-amy .amy-panel{inset:10px 10px max(44px,env(safe-area-inset-bottom));width:auto;height:auto;max-height:none;border-radius:23px;background:linear-gradient(150deg,rgba(36,63,83,.96),rgba(14,36,54,.98))}#pcsu-ask-amy .amy-header{padding:16px}#pcsu-ask-amy .amy-context{padding:10px 17px}#pcsu-ask-amy .amy-chat{padding:16px}#pcsu-ask-amy textarea{font-size:16px;height:78px}#pcsu-ask-amy .amy-launch{right:14px;bottom:48px}#pcsu-ask-amy .amy-controls{font-size:10px}}
 @media(prefers-reduced-motion:reduce){#pcsu-ask-amy *{scroll-behavior:auto!important;transition:none!important}}
 </style>
 <div id="pcsu-ask-amy" data-endpoint="https://thewing.netlify.app/api/pcsu-ask-amy" data-tool-origin="https://thewing.netlify.app"></div>
