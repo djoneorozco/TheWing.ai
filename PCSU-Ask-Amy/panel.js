@@ -30,7 +30,7 @@
       $('.amy-section').textContent=({income:'With you in · Income',mortgage:'With you in · Mortgage',budget:'With you in · Monthly expenses',analysis:'With you in · Financial analysis'})[section]||'Connected to Financial Guidance';
       const connected=[];if(income()?.complete)connected.push('Income');if(mortgage?.ready&&mortgage.status==='ready')connected.push(mortgage.hasUserInteracted?'Mortgage':'Example mortgage');if(budget?.status==='ready')connected.push(budget.state?.reviewed?'Reviewed budget':'Draft budget');
       $('.amy-context-text').textContent=!share.checked?'Page sharing is off. Ask a general question or supply a scenario.':connected.length?connected.join(' · ')+' connected. Updated inputs are used with your next question.':'Start with your income. I’ll help you work through the next step.';
-      if(busy&&pendingSignature!==signature())controller?.abort('context_changed');
+      if(busy&&pendingSignature!==null&&pendingSignature!==signature())controller?.abort('context_changed');
     }
     function trustedFrame(frame){try{return frame&&new URL(frame.src,location.href).origin===toolOrigin;}catch{return false;}}
     function requestBudget(){if(trustedFrame(budgetFrame))budgetFrame.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:finance-analysis-request',requestId:'pcsu-amy-'+crypto.randomUUID()},toolOrigin);}
@@ -82,11 +82,24 @@
       if(links.childNodes.length)copy.append(links);chat.scrollTop=chat.scrollHeight;
     }
     function trimHistory(){while(history.length>12||JSON.stringify(history).length>18000)history.splice(0,2);}
+    async function settleInputs(signal){
+      // Opening/requesting frames can briefly invalidate the expense result.
+      // Wait for a stable source snapshot before spending an AI request.
+      requestFrames();let previous=signature(),stable=0;
+      for(let elapsed=0;elapsed<1800&&!signal.aborted;elapsed+=100){
+        await new Promise(resolve=>setTimeout(resolve,100));const next=signature();
+        stable=next===previous?stable+100:0;previous=next;
+        const updating=share.checked&&(budget?.status==='pending'||budget?.status==='loading'||mortgage?.status==='pending'||mortgage?.status==='loading');
+        if(stable>=200&&!updating)return;
+      }
+    }
     async function ask(raw){
       const question=raw.trim();if(busy||!question||question.length>3000)return;
       busy=true;send.disabled=true;input.value='';const user=message(question,'user');status.textContent='Amy is reviewing your plan…';
-      controller=new AbortController();const active=controller,id=++generation;pendingSignature=signature();const captured=context();const timer=setTimeout(()=>active.abort('timeout'),55000);
+      controller=new AbortController();const active=controller,id=++generation;pendingSignature=null;const timer=setTimeout(()=>active.abort('timeout'),55000);
       try{
+        await settleInputs(active.signal);if(id!==generation||active.signal.aborted)return;
+        pendingSignature=signature();const captured=context();
         const response=await fetch(endpoint,{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json'},signal:active.signal,body:JSON.stringify({message:question,history,section,context:captured})});
         const data=await response.json();if(id!==generation)return;
         if(!response.ok||!data.ok||typeof data.reply!=='string')throw Error(data.code==='context_invalid'?'context_invalid':'unavailable');

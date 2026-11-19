@@ -57,6 +57,6 @@ node --test scripts/test-pcsu-ask-amy.mjs scripts/test-financial-analysis.mjs sc
 NODE_PATH=/path/to/playwright/node_modules node scripts/test-pcsu-ask-amy-browser.mjs
 ```
 
-The browser test uses the actual calculator apps and server engines with mocked AI prose. It checks context transport, exact cash flow, history, source links, what-if isolation, spoofed message rejection, retry without duplicate turns, changed-input cancellation, sharing opt-out, reset, keyboard close and mobile layout. Real provider checks are separate from these deterministic tests.
+The browser test uses the actual calculator apps and server engines with mocked AI prose. It checks context transport, exact cash flow, history, source links, what-if isolation, spoofed message rejection, retry without duplicate turns, changed-input cancellation, sharing opt-out, reset, keyboard close and mobile layout. Real provider checks are separate from these deterministic tests. On 2026-11-19 the Netlify preview returned `ai_grounded` with `gpt-6.2-astra` for current cash flow, a home-price what-if and a budget stress test; all selected numerical results matched the engines.
 
 Model integration references: [Responses function calling](https://developers.openai.com/api/docs/guides/function-calling), [GPT-6.2 Astra](https://developers.openai.com/api/docs/models/gpt-6.2-astra).
