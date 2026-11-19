@@ -1,0 +1,57 @@
+#pcsu-ask-amy{--amy-ink:#17334d;--amy-teal:#91d8cc;--amy-paper:#f8f7f2;--amy-line:rgba(220,237,242,.18);font:14px/1.55 Arial,sans-serif;color:var(--amy-paper);position:relative;z-index:2147483000}
+#pcsu-ask-amy *{box-sizing:border-box}
+#pcsu-ask-amy p{font:inherit;letter-spacing:normal;text-transform:none}
+#pcsu-ask-amy [hidden]{display:none!important}
+#pcsu-ask-amy button,#pcsu-ask-amy textarea,#pcsu-ask-amy a{font:inherit}
+#pcsu-ask-amy button{cursor:pointer;color:inherit}
+#pcsu-ask-amy button:focus-visible,#pcsu-ask-amy a:focus-visible,#pcsu-ask-amy textarea:focus-visible,#pcsu-ask-amy input:focus-visible,#pcsu-ask-amy summary:focus-visible{outline:3px solid #a7e8dc;outline-offset:3px}
+#pcsu-ask-amy .amy-launch{position:fixed;right:24px;bottom:48px;display:flex;align-items:center;gap:11px;padding:9px 24px 9px 10px;border:1px solid rgba(255,255,255,.55);border-radius:99px;background:linear-gradient(135deg,rgba(28,61,83,.94),rgba(19,47,62,.84));backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 10px 36px #17334d40,inset 0 1px #ffffff45;text-align:left;transition:transform .2s}
+#pcsu-ask-amy .amy-launch:hover{transform:translateY(-3px)}
+#pcsu-ask-amy .amy-avatar{width:44px;height:44px;object-fit:cover;border-radius:50%;border:1px solid #d9e9de85;flex:none}
+#pcsu-ask-amy .amy-launch strong{display:block;font-size:16px;letter-spacing:-.2px}
+#pcsu-ask-amy .amy-launch small{display:block;font-size:11px;color:#cae1df}
+#pcsu-ask-amy .amy-panel{position:fixed;right:22px;bottom:44px;width:470px;height:min(790px,calc(100dvh - 100px));max-height:calc(100dvh - 32px);border:1px solid rgba(224,238,242,.44);border-radius:27px;overflow:hidden;background:linear-gradient(150deg,rgba(39,67,87,.91),rgba(14,36,54,.95));backdrop-filter:blur(30px) saturate(130%);-webkit-backdrop-filter:blur(30px) saturate(130%);box-shadow:0 26px 90px #10283b55,inset 0 1px 0 #ffffff45;display:flex;flex-direction:column;isolation:isolate}
+#pcsu-ask-amy .amy-header{padding:21px 22px 17px;display:flex;gap:13px;align-items:center;background:linear-gradient(110deg,#ffffff10,transparent);border-bottom:1px solid var(--amy-line)}
+#pcsu-ask-amy .amy-eyebrow{font-size:9px;letter-spacing:1.8px;color:#b7ddd7;text-transform:uppercase;font-weight:700}
+#pcsu-ask-amy h2{font:500 26px/1.2 Arial,sans-serif;letter-spacing:-.7px;text-transform:none;color:var(--amy-paper);margin:3px 0}
+#pcsu-ask-amy .amy-subtitle{font-size:12px;color:#d6e0e5;margin:0}
+#pcsu-ask-amy .amy-close{margin-left:auto;align-self:flex-start;flex:none;width:32px;height:32px;border:1px solid var(--amy-line);background:#ffffff09;border-radius:50%;font-size:20px;line-height:1}
+#pcsu-ask-amy .amy-context{padding:13px 22px 12px;background:#7cbdcc0a;border-bottom:1px solid var(--amy-line)}
+#pcsu-ask-amy .amy-context-title{display:flex;align-items:center;gap:7px;color:#b8e4db;font-size:11px;font-weight:600}
+#pcsu-ask-amy .amy-dot{width:6px;height:6px;border-radius:50%;background:#99dccc;box-shadow:0 0 9px #99dccc65}
+#pcsu-ask-amy .amy-context p{margin:4px 0 0;color:#dae4e8;font-size:12px}
+#pcsu-ask-amy .amy-prompts{padding:13px 18px 2px;display:flex;gap:7px;flex-wrap:wrap}
+#pcsu-ask-amy .amy-prompts button{padding:7px 11px;background:#e8f8ff08;border:1px solid #ffffff23;border-radius:20px;font-size:11px;color:#e4eeee;transition:background .2s}
+#pcsu-ask-amy .amy-prompts button:hover{background:#cbe5e620}
+#pcsu-ask-amy .amy-chat{flex:1;min-height:0;overflow-y:auto;padding:20px 18px 16px;scrollbar-width:thin;scrollbar-color:#9bc9c73d transparent;overscroll-behavior:contain}
+#pcsu-ask-amy .amy-message{max-width:100%;margin-bottom:18px}
+#pcsu-ask-amy .amy-message>strong{display:block;font-size:9px;font-weight:700;letter-spacing:1.2px;color:#b6d8d4;margin:0 6px 6px;text-transform:uppercase}
+#pcsu-ask-amy .amy-message p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+#pcsu-ask-amy .amy-message .amy-copy{padding:15px 17px;background:linear-gradient(125deg,#ffffff0e,#ffffff04);border:1px solid #e0eefa21;border-radius:5px 19px 19px 19px;color:#f3f6f6;font-size:13px;line-height:1.65}
+#pcsu-ask-amy .amy-message[data-role=user]{margin-left:40px}
+#pcsu-ask-amy .amy-message[data-role=user] .amy-copy{background:#a6d6ce22;border-color:#acd6d329;border-radius:19px 5px 19px 19px}
+#pcsu-ask-amy .amy-message[data-role=user]>strong{text-align:right}
+#pcsu-ask-amy .amy-facts{border-top:1px solid var(--amy-line);margin:12px 0 0;padding:8px 0 0}
+#pcsu-ask-amy .amy-facts div{display:flex;justify-content:space-between;gap:18px;padding:6px 0}
+#pcsu-ask-amy dt{color:#c7dadf;font-size:11px;flex:1}
+#pcsu-ask-amy dd{margin:0;text-align:right;max-width:48%;font-size:12px;color:#e7f5f0;font-variant-numeric:tabular-nums}
+#pcsu-ask-amy .amy-scenario{margin-top:12px;padding:12px;border:1px solid #a4d7cc33;background:#64b9a40b;border-radius:13px}
+#pcsu-ask-amy .amy-scenario summary{cursor:pointer;color:#b8e4d8;font-size:12px}
+#pcsu-ask-amy .amy-scenario p{margin-top:8px;font-size:11px;color:#ccdadd}
+#pcsu-ask-amy .amy-sources{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+#pcsu-ask-amy .amy-sources a{color:#b4dfd7;text-underline-offset:3px;font-size:11px}
+#pcsu-ask-amy .amy-composer{padding:12px 18px 15px;border-top:1px solid var(--amy-line);background:#0f283852}
+#pcsu-ask-amy .amy-status{font-size:11px;color:#c5dfdc;min-height:17px;margin:0 0 7px}
+#pcsu-ask-amy form{display:flex;align-items:flex-end;gap:8px}
+#pcsu-ask-amy textarea{resize:none;flex:1;min-width:0;height:54px;max-height:108px;border-radius:15px;border:1px solid #d1e7ea4d;background:#0e26336b;color:#fff;padding:15px 13px;font-size:13px;line-height:1.5}
+#pcsu-ask-amy textarea::placeholder{color:#bdd0d6}
+#pcsu-ask-amy .amy-send{border:1px solid #dbfff08c;border-radius:14px;padding:15px 16px;background:linear-gradient(150deg,#c3e3da,#86bdb3);color:#133f43;font-weight:700;font-size:12px}
+#pcsu-ask-amy button:disabled{opacity:.45;cursor:wait}
+#pcsu-ask-amy .amy-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;font-size:10px;color:#c5d6da}
+#pcsu-ask-amy .amy-controls label{display:flex;gap:6px;align-items:center;cursor:pointer;font:inherit}
+#pcsu-ask-amy input.amy-share{accent-color:#9bd2c7;margin:0;padding:0;width:13px;height:13px;min-width:13px;flex:0 0 13px}
+#pcsu-ask-amy .amy-reset{border:0;background:transparent;padding:0;color:#c8e0db;text-decoration:underline;text-underline-offset:3px;font-size:10px}
+#pcsu-ask-amy .amy-privacy{font-size:9px;color:#a9bec6;line-height:1.5;margin:9px 0 0}
+#pcsu-ask-amy .amy-retry{margin-top:8px;background:transparent;border:1px solid #b6d8d466;border-radius:12px;padding:5px 10px;font-size:11px}
+@media(max-width:600px){#pcsu-ask-amy .amy-panel{inset:10px 10px max(44px,env(safe-area-inset-bottom));width:auto;height:auto;max-height:none;border-radius:23px;background:linear-gradient(150deg,rgba(36,63,83,.96),rgba(14,36,54,.98))}#pcsu-ask-amy .amy-header{padding:16px}#pcsu-ask-amy .amy-context{padding:10px 17px}#pcsu-ask-amy .amy-chat{padding:16px}#pcsu-ask-amy textarea{font-size:16px;height:78px}#pcsu-ask-amy .amy-launch{right:14px;bottom:48px}#pcsu-ask-amy .amy-controls{font-size:10px}}
+@media(prefers-reduced-motion:reduce){#pcsu-ask-amy *{scroll-behavior:auto!important;transition:none!important}}

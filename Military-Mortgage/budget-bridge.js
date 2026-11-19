@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const allowed = origin => ['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com','https://orozcorealty.webflow.io'].includes(origin)
+    || (origin===location.origin && /^https:\/\/(?:thewing|deploy-preview-\d+--thewing)\.netlify\.app$/.test(origin))
     || (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname));
   let origin = null;
   try { const ref = new URL(document.referrer).origin; if (allowed(ref)) origin = ref; } catch (_) {}
