@@ -33,11 +33,20 @@ node scripts/test-pcsu-ask-amy-browser.mjs
 
 Browser scripts require Playwright and an installed Chrome browser. Browser fixtures use real financial engines and mock only the language model; separately test the deployed preview with the actual provider before release. CI checks the generated files and both civilian/PCSU calculation contracts.
 
-## Webflow installation after release approval
+## Existing TOR Webflow page: preserve the user's design
 
-1. Merge and confirm the TheWing production deploy succeeds. Verify `/TOR-Financial-Guidance/` and `/api/tor-ask-elena` before installing the production embed.
-2. On TOR's Financial Guidance page only, replace the old financial body and old Elena widget with `Webflow/TOR-Civilian-Financial-Guidance.html` in one Code Embed. Keep the TOR navigation. Remove the old military income utility, calculator bridge scripts, PCS benefits/base map, and duplicate chat launcher from this page. Do not run the old host script alongside the new one.
-3. Update this page's heading/SEO to civilian Financial Guidance. The existing `/military/financial-guidance` route can remain to preserve links. Update the page's section navigation to Income, Mortgage, Budget, and Review, targeting `#pcs1-find`, `#pcs1-compare`, `#pcs1-move`, and `#pcs1-plan`. Do not change shared navigation globally without review.
-4. Publish to Webflow staging only after authorization. Enter sample income/deductions, change a mortgage assumption, add living expenses and debt, and verify their transfer. Test Elena's explanation, follow-up, sources, context opt-out and a what-if; check mobile layout.
+The standalone page and `Webflow/TOR-Civilian-Financial-Guidance.html` are NOT replacements for the existing Webflow page. The user requires their original layout, images, navigation, headings, footer, styles, and section structure to stay unchanged. Do not install `page.css`, `page.js`, or `content.html` on that page.
 
-A branch preview or merged PR does not establish Webflow installation or publication. The standalone preview has a simplified TOR navigation; Webflow retains its existing site navigation.
+Update only these three existing Code Embeds on `/military/financial-guidance`:
+
+| Existing embed | Replacement source | Change |
+| --- | --- | --- |
+| `Finance Input Code 3` (`015b7721-026d-2af0-ddba-cb6e3bef588f`) | `Webflow/TOR-Financial-Guidance-Mortgage.html` | Point the same iframe to the civilian mortgage view; preserve all dimensions and styling. |
+| `Finance-UX` (`015b7721-026d-2af0-ddba-cb6e3bef58ab`) | `Webflow/tor-financial-guidance-budget.html` | Point the same iframe to the civilian budget view; preserve the income/mortgage bridge and open the existing income dialog when editing income. |
+| Final floating Elena embed (`13ec47ea-58d6-58b7-1746-d165f90b35cb`) | `Webflow/TOR-Financial-Guidance-Elena.html` | Load only the approved gold/glass Elena panel and client, connected to `/api/tor-ask-elena`. |
+
+The existing civilian income utility already exposes `PCSU_FINANCIAL_INCOME` and its change event. Keep its UI and source code. The budget uses its income, deductions, and savings, and the mortgage replaces the projected housing row once. Elena consumes those same inputs, sends conversation history, and displays verified source links and separate what-if results. The backend recalculates financial results from the inputs.
+
+Before publishing, compare the native Webflow element tree with the original and confirm only these three embed contents changed. Publish to staging, verify the income → mortgage → budget flow and Elena's explanation, sources, follow-up, opt-out, and what-if behavior. Leave headings, images, navigation, other embeds, and page metadata untouched.
+
+A branch preview, saved Designer edit, or merged PR does not establish Webflow publication.
