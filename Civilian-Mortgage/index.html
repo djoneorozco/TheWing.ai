@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Mortgage Calculator | The Orozco Realty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../Military-Mortgage/style.css">
+  <script>if (new URLSearchParams(location.search).get('embedded') === '1') document.documentElement.dataset.embedded = 'true';</script>
+  <link rel="stylesheet" href="../Military-Mortgage/controls.css">
+  <script defer src="../Military-Mortgage/app.js"></script>
+  <script defer src="../Military-Mortgage/views.js"></script>
+  <script defer src="../Military-Mortgage/controls.js"></script>
+  <script defer src="../Military-Mortgage/budget-bridge.js"></script>
+</head>
+<body>
+<main id="pcsu-financial-input-panel" data-audience="civilian" data-mortgage-api="/api/mortgage" data-state="pending">
+<div class="fi-panel">
+    <div class="fi-inner">
+      <div class="fi-topbar">
+        <div>
+          <h1 class="fi-title">
+            Home Mortgage Calculator
+          </h1>
+          <p class="fi-subtitle">
+            Enter the home and loan details needed to estimate what the
+            property may really cost each month, including principal,
+            interest, estimated property taxes, homeowners insurance,
+            and applicable mortgage insurance.
+          </p>
+        </div>
+        <div class="fi-scenario-top">
+          <label
+            class="fi-loan-label"
+            for="fi-loan-type"
+          >
+            Loan Type
+          </label>
+          <div class="fi-select-wrap">
+            <select
+              id="fi-loan-type"
+              class="fi-control"
+            >
+              
+              <option value="CONVENTIONAL" selected>
+                Conventional
+              </option>
+              <option value="FHA">
+                FHA
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <section class="fi-section" id="fi-view-calculator" data-mm-screen="calculator" aria-label="Mortgage calculator">
+        <div class="fi-section-title">
+          Mortgage Scenario Inputs
+        </div>
+        <p class="fi-section-sub">
+          Adjust the scenario below to see the estimated total monthly
+          housing cost update automatically.
+        </p>
+        <div class="fi-input-grid">
+          <div class="fi-field">
+            <label
+              class="fi-label"
+              for="fi-home-price"
+            >
+              Target Home Price
+              <span
+                class="fi-info"
+                aria-hidden="true"
+              >
+                i
+              </span>
+            </label>
+            <div class="fi-money-wrap">
+              <span class="fi-prefix">
+                $
+              </span>
+              <input
+                id="fi-home-price"
+                class="fi-control"
+                type="number" inputmode="decimal"
+                min="1"
+                max="10000000"
+                step="0.01"
+                value="250000"
+              >
+            </div>
+            <div class="fi-slider-wrap">
+              <div class="fi-slider-track">
+                <div
+                  id="fi-home-price-fill"
+                  class="fi-slider-fill"
+                ></div>
+                <div
+                  id="fi-home-price-knob"
+                  class="fi-slider-knob"
+                ></div>
+                <input
+                  id="fi-home-price-slider"
+                  class="fi-range"
+                  type="range"
+                  min="100000"
+                  max="750000"
+                  step="5000"
+                  value="250000"
+                  aria-label="Target home price"
+                >
+              </div>
+              <div class="fi-slider-scale">
+                <span>$100k</span>
+                <span>$425k</span>
+                <span>$750k</span>
+              </div>
+            </div>
+            <div class="fi-hint">
+              Use the purchase price you want to test in this market.
+            </div>
+          </div>
+          <div class="fi-field">
+            <label
+              class="fi-label"
+              for="fi-down-payment"
+            >
+              Down Payment
+              <span
+                class="fi-info"
+                aria-hidden="true"
+              >
+                i
+              </span>
+              <span
+                id="fi-down-payment-pct"
+                class="fi-label-side"
+              >
+                0% of price
+              </span>
+            </label>
+            <div class="fi-money-wrap">
+              <span class="fi-prefix">
+                $
+              </span>
+              <input
+                id="fi-down-payment"
+                class="fi-control"
+                type="number" inputmode="decimal"
+                min="0"
+                step="0.01"
+                value="12500"
+              >
+            </div>
+            <div class="fi-slider-wrap">
+              <div class="fi-slider-track">
+                <div
+                  id="fi-down-payment-fill"
+                  class="fi-slider-fill"
+                ></div>
+                <div
+                  id="fi-down-payment-knob"
+                  class="fi-slider-knob"
+                ></div>
+                <input
+                  id="fi-down-payment-slider"
+                  class="fi-range"
+                  type="range"
+                  min="0"
+                  max="20"
+                  step="0.1"
+                  value="0"
+                  aria-label="Down payment percentage"
+                >
+              </div>
+              <div class="fi-slider-scale">
+                <span>0%</span>
+                <span>10%</span>
+                <span>20%</span>
+              </div>
+            </div>
+            <div class="fi-hint">
+              Enter your planned cash down payment. Review program requirements with a lender.
+            </div>
+          </div>
+          <div class="fi-field">
+            <label
+              class="fi-label"
+              for="fi-credit-score"
+            >
+              Credit Score
+              <span
+                class="fi-info"
+                aria-hidden="true"
+              >
+                i
+              </span>
+              <span
+                id="fi-rate-label"
+                class="fi-label-side"
+              >
+                Planning rate: 6.10%
+              </span>
+            </label>
+            <div class="fi-money-wrap">
+              <span class="fi-prefix">
+                Score
+              </span>
+              <input
+                id="fi-credit-score"
+                class="fi-control"
+                type="number" inputmode="decimal"
+                min="580"
+                max="850"
+                step="1"
+                value="720"
+              >
+            </div>
+            <div class="fi-slider-wrap">
+              <div class="fi-slider-track">
+                <div
+                  id="fi-credit-score-fill"
+                  class="fi-slider-fill"
+                ></div>
+                <div
+                  id="fi-credit-score-knob"
+                  class="fi-slider-knob"
+                ></div>
+                <input
+                  id="fi-credit-score-slider"
+                  class="fi-range"
+                  type="range"
+                  min="580"
+                  max="850"
+                  step="1"
+                  value="720"
+                  aria-label="Credit score"
+                >
+              </div>
+              <div class="fi-slider-scale">
+                <span>580</span>
+                <span>720</span>
+                <span>850</span>
+              </div>
+            </div>
+            <div class="fi-hint">
+              Used for PMI planning. Review your interest rate in Summary.
+            </div>
+          </div>
+          <div
+            class="fi-total-cost"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <div class="fi-total-cost-label">
+              Total Monthly Housing Cost
+            </div>
+            <div>
+              <span
+                id="fi-total-monthly-cost"
+                class="fi-total-cost-value"
+              >
+                —
+              </span>
+              <span class="fi-total-cost-period">
+                / month
+              </span>
+            </div>
+            <p class="fi-total-cost-caption">
+              Estimated principal, interest, property taxes, homeowners
+              insurance, HOA and applicable mortgage insurance. Other ownership costs are included when entered.
+            </p>
+            <div class="fi-total-cost-source">
+              <span
+                class="fi-total-cost-dot"
+                aria-hidden="true"
+              ></span>
+              <span id="fi-total-cost-source">
+                Calculating your scenario…
+              </span>
+            </div>
+          </div>
+          <div class="fi-field">
+            <label
+              class="fi-label"
+              for="fi-emergency-fund"
+            >
+              Emergency Fund
+              <span
+                class="fi-info"
+                aria-hidden="true"
+              >
+                i
+              </span>
+            </label>
+            <div class="fi-money-wrap">
+              <span class="fi-prefix">
+                $
+              </span>
+              <input
+                id="fi-emergency-fund"
+                  placeholder="Not entered"
+                class="fi-control"
+                type="number" inputmode="decimal"
+                min="0"
+                max="10000000"
+                step="0.01"
+                value=""
+              >
+            </div>
+            <div class="fi-slider-wrap">
+              <div class="fi-slider-track">
+                <div
+                  id="fi-emergency-fund-fill"
+                  class="fi-slider-fill"
+                ></div>
+                <div
+                  id="fi-emergency-fund-knob"
+                  class="fi-slider-knob"
+                ></div>
+                <input
+                  id="fi-emergency-fund-slider"
+                  class="fi-range"
+                  type="range"
+                  min="0"
+                  max="50000"
+                  step="500"
+                  value="0"
+                  aria-label="Emergency fund"
+                >
+              </div>
+              <div class="fi-slider-scale">
+                <span>$0</span>
+                <span>$25k</span>
+                <span>$50k</span>
+              </div>
+            </div>
+            <div class="fi-hint">
+              Enter cash expected after all purchase and moving costs, or calculate it under Summary → Cash needed to buy this home.
+            </div>
+          </div>
+        </div>
+        <button id="fi-retry" type="button" hidden>Retry calculation</button>
+      </section>
+      <section class="fi-section mm-screen" id="fi-view-visualization" data-mm-screen="visualization" aria-labelledby="mm-viz-title" hidden>
+        <div class="mm-heading"><div><p class="fi-section-title">Your mortgage at a glance</p><h2 id="mm-viz-title" tabindex="-1">Mortgage Visualization</h2></div><button type="button" data-mm-view="calculator">← Calculator</button></div>
+        <p class="mm-status" data-mm-status role="status"></p>
+        <div class="mm-viz-grid" data-mm-result hidden>
+          <article class="mm-card"><h3>Your monthly housing cost</h3><p class="fi-detail-note">See what makes up your monthly estimate.</p>
+            <div class="mm-donut-layout"><div class="mm-donut" id="mm-donut" role="img"><div class="mm-donut-center" aria-live="polite"><span id="mm-donut-label">Total / month</span><strong id="mm-donut-total">—</strong><small id="mm-donut-share"></small></div></div><div id="mm-legend" class="mm-legend" aria-label="Monthly cost components"></div></div>
+            <p class="mm-chart-hint">Select a cost to see its share. Select it again to see the total.</p>
+          </article>
+          <article class="mm-card"><h3>Principal &amp; interest over time</h3><p id="mm-term-description" class="fi-detail-note"></p>
+            <div id="mm-term-ready" hidden><div class="mm-term-total"><span>Total scheduled loan payments</span><strong id="mm-term-total">—</strong></div><div id="mm-term-bar" class="mm-stack" role="img"></div><div class="mm-term-legend"><div><span><i class="mm-dot mm-principal"></i>Principal</span><strong id="mm-principal">—</strong></div><div><span><i class="mm-dot mm-interest"></i>Interest</span><strong id="mm-interest">—</strong></div></div></div>
+            <p id="mm-term-unavailable" class="fi-detail-note" hidden>Loan-term totals are not available from this calculation service yet. Your monthly breakdown is available.</p>
+            <p class="mm-chart-hint">Fixed-rate illustration with no extra payments. Excludes taxes, insurance, HOA and upfront cash.</p>
+            <div class="mm-small-total"><span>Down payment + cash loan fee</span><strong id="mm-upfront">—</strong></div><p class="mm-chart-hint" id="mm-upfront-exclusions"></p>
+          </article>
+        </div>
+      </section>
+      <section class="fi-section mm-screen" id="fi-view-summary" data-mm-screen="summary" aria-labelledby="mm-summary-title" hidden>
+        <div class="mm-heading"><div><p class="fi-section-title">Your mortgage, explained</p><h2 id="mm-summary-title" tabindex="-1">Mortgage Summary</h2></div><button type="button" data-mm-view="calculator">← Calculator</button></div>
+        <p class="mm-status" data-mm-status role="status"></p>
+        <div data-mm-result hidden>
+          <div class="mm-summary-hero"><div><p class="fi-section-title">Estimated monthly housing cost</p><strong class="mm-total" id="mm-summary-total">—</strong><span class="mm-per"> / month</span></div><p id="mm-summary-explanation"></p></div>
+          <div class="mm-kpis"><div><span>Home price</span><strong id="mm-summary-price">—</strong></div><div><span>Total loan amount</span><strong id="mm-summary-loan">—</strong></div><div><span>Emergency fund after closing</span><strong id="mm-summary-reserve">—</strong></div></div>
+          <p id="mm-summary-fee" class="fi-detail-note"></p>
+        </div>
+        <p id="fi-assumptions-summary" class="fi-estimate-summary">Example scenario: 6.10% fixed interest, 30 years, $3,125 annual tax, $1,125 annual insurance, $0 HOA. Conventional loan; mortgage insurance may apply. Edit these assumptions below.</p>
+        <details class="fi-details" id="fi-breakdown-details" open>
+          <summary>What’s included in this estimate</summary>
+          <div id="fi-result-details" hidden>
+            <div class="fi-breakdown">
+              <dl id="fi-monthly-breakdown"></dl>
+              <div><dl id="fi-loan-breakdown"></dl><p id="fi-upfront-note" class="fi-detail-note"></p></div>
+            </div>
+            <p id="fi-mi-note" class="fi-detail-note"></p>
+            <p id="fi-program-note" class="fi-detail-note"></p>
+            <p class="fi-detail-note">Fixed-rate purchase estimate. Tax and insurance amounts stay at the annual amounts you entered when you change home price. Adjust them for each property.</p>
+          </div>
+          <p id="fi-breakdown-status" class="fi-detail-note">Your breakdown will appear after calculation.</p>
+        </details>
+        <details class="fi-details" id="fi-cost-details">
+          <summary>Rate &amp; cost details</summary>
+          <p class="fi-detail-note">Use your lender’s interest rate and property-specific costs when available. Starting amounts are editable planning assumptions, not quotes.</p>
+          <div class="fi-details-grid">
+            <div><label class="fi-label" for="fi-interest-rate">Interest rate (%)</label><input class="fi-control" id="fi-interest-rate" type="number" min="0" max="30" step="0.0001" value="6.10"><p class="fi-hint">Note rate used for payments; APR includes fees.</p></div>
+            <div><label class="fi-label" for="fi-term-years">Loan term</label><select class="fi-control" id="fi-term-years"><option value="30">30 years</option><option value="25">25 years</option><option value="20">20 years</option><option value="15">15 years</option><option value="10">10 years</option></select></div>
+            <div><label class="fi-label" for="fi-property-tax">Property taxes / year ($)</label><input class="fi-control" id="fi-property-tax" type="number" min="0" max="1000000" step="0.01" value="3125"><p class="fi-hint">Use expected taxes after purchase and any confirmed exemption.</p></div>
+            <div><label class="fi-label" for="fi-insurance">Homeowners insurance / year ($)</label><input class="fi-control" id="fi-insurance" type="number" min="0" max="1000000" step="0.01" value="1125"></div>
+            <div><label class="fi-label" for="fi-hoa">HOA / month ($)</label><input class="fi-control" id="fi-hoa" type="number" min="0" max="100000" step="0.01" value="0"></div>
+            <div><label class="fi-label" for="fi-other-costs">Other ownership costs / month ($)</label><input class="fi-control" id="fi-other-costs" type="number" min="0" max="100000" step="0.01" value="0"><p class="fi-hint">Maintenance, utilities, flood insurance or assessments not already included.</p></div>
+            <div id="fi-va-options" hidden><input id="fi-va-fee-status" type="hidden" value="first"></div>
+            <div id="fi-fee-options"><label class="fi-label" for="fi-fee-payment">Upfront loan fee</label><select class="fi-control" id="fi-fee-payment"><option value="finance">Finance in the loan</option><option value="cash">Pay at closing</option></select><p class="fi-hint">FHA upfront mortgage insurance premium.</p></div>
+            <div id="fi-pmi-options" hidden><label class="fi-label" for="fi-pmi">Quoted PMI / month ($)</label><input class="fi-control" id="fi-pmi" type="number" min="0" max="100000" step="0.01" placeholder="Optional — use planning estimate"><p class="fi-hint">Leave blank for an estimate; enter 0 only for confirmed no PMI.</p></div>
+          </div>
+        </details>
+        <details id="fi-purchase-details" class="fi-details">
+          <summary>Cash needed to buy this home</summary>
+          <p class="fi-detail-note">Enter your estimates, or 0 where none applies. These amounts calculate your remaining cash automatically. Leaving them blank keeps the purchase budget incomplete.</p>
+          <div class="fi-details-grid">
+            <div><label class="fi-label" for="fi-closing-costs">Other closing costs ($)</label><input class="fi-control" id="fi-closing-costs" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" placeholder="Enter an amount, or 0"><p class="fi-hint">Your share after seller/lender credits. Exclude the down payment, FHA loan fee and prepaids entered separately.</p></div>
+            <div><label class="fi-label" for="fi-prepaids">Prepaids & initial escrow ($)</label><input class="fi-control" id="fi-prepaids" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" placeholder="Enter an amount, or 0"><p class="fi-hint">Prepaid interest, insurance and initial escrow deposits. Use your lender estimate; enter 0 if none.</p></div>
+            <div><label class="fi-label" for="fi-cash-available">Cash available before purchase ($)</label><input class="fi-control" id="fi-cash-available" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" placeholder="Enter an amount, or 0"><p class="fi-hint">Only cash you can use, including deposits already paid. Exclude investments you will keep. This is separate from monthly income.</p></div>
+            <div><label class="fi-label" for="fi-move-in">Moving & other one-time costs ($)</label><input class="fi-control" id="fi-move-in" type="number" min="0" max="10000000" step="0.01" inputmode="decimal" placeholder="Enter an amount, or 0"><p class="fi-hint">Cash you expect to spend outside closing. Enter 0 if none. Do not repeat costs above.</p></div>
+          </div>
+          <dl id="fi-purchase-breakdown"></dl>
+          <p class="fi-detail-note">Planning budget. Check the lender’s Loan Estimate or Closing Disclosure for the actual cash due at closing.</p>
+        </details>
+        <p class="fi-footer-note">Planning estimate, not a loan approval or lender quote. Confirm costs, eligibility and fees with your lender. <a href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf" target="_blank" rel="noopener">FHA MIP rules</a></p>
+      </section>
+    </div>
+  </div>
+</main>
+<!-- These controls are supplied separately when embedded in Webflow. -->
+<div id="mm-standalone-controls"></div>
+<noscript>Please enable JavaScript to use the mortgage calculator.</noscript>
+</body>
+</html>
+

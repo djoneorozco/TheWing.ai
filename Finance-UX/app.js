@@ -7,11 +7,13 @@
  const state={categories:{},activeCategory:'monthly-expenses',sortMode:'high-low',grossMonthly:null,netMonthly:null,incomeBreakdown:null,savingsMonthly:0,emergencyFund:null,bufferMonthly:500,extraBufferMonthly:500,reviewed:false,location:'No base selected',scenario:{loanType:'va',termYears:30,creditScore:720,interestRate:null,downPayment:0,propertyTaxPercent:1.25,insurancePercent:.45,hoaMonthly:0,pmiMonthly:null,fundingFeeExempt:false,priorUse:'first_use',financeFundingFee:true}};
  let result=null,seq=0,controller,timer,parentOrigin=null,parentRevision=-1,loaded=false;
  // Explicit standalone embedding keeps income entry inside the tool; no parent financial transport.
+ const civilian=document.body.dataset.audience==='civilian';
+ if(civilian){state.location='Your household';state.scenario.loanType='conventional';}
  const inlineIncome=new URLSearchParams(location.search).get('income')==='inline';
  const projected=new URLSearchParams(location.search).get('housing')==='projected';
  let mortgage={status:'loading',amount:null}, mortgageLinked=true, pendingMortgage=false;
  const embedded=window.parent!==window, rows=()=>Object.values(state.categories).flat();
- const allowed=o=>['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com','https://orozcorealty.webflow.io'].includes(o)||(o===location.origin&&/^https:\/\/(?:thewing|deploy-preview-\d+--thewing)\.netlify\.app$/.test(o))||(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o)&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname));
+ const allowed=o=>['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com','https://orozcorealty.webflow.io','https://theorozcorealty.com','https://www.theorozcorealty.com','https://theorozcorealty.netlify.app'].includes(o)||/^https:\/\/deploy-preview-\d+--theorozcorealty\.netlify\.app$/.test(o)||(o===location.origin&&/^https:\/\/(?:thewing|deploy-preview-\d+--thewing)\.netlify\.app$/.test(o))||(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o)&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname));
  const post=(type,detail={})=>{if(parentOrigin&&!inlineIncome)parent.postMessage({source:'pcsu-finance',version:1,type,...detail},parentOrigin);};
  // Measure the intrinsic dashboard, not the iframe viewport, so it can shrink too.
  let sizeTimer,lastHeight=0,forceSize=false;
@@ -84,7 +86,7 @@
   $('cashFlowPercentage').textContent='';
  }
  function incomeView(){
-  const b=state.incomeBreakdown,missing=state.netMonthly==null;
+  const b=civilian?null:state.incomeBreakdown,missing=state.netMonthly==null;
   $('fu-total-income').textContent=state.grossMonthly==null?'Income not ready':money(state.grossMonthly);
   $('fu-income-breakdown').hidden=!b;
   if(projected){$('fu-income-help').textContent='Income carries over from Section 01. Add payroll deductions there to see take-home cash flow.';const sources=$('fu-income-sources');sources.hidden=!state.incomeSources?.length;sources.innerHTML=(state.incomeSources||[]).map(x=>`<div><span>${esc(x.label)}</span><b>${money(x.amount)}</b></div>`).join('');}
@@ -127,7 +129,7 @@
   for(const [i,name]of ['expenses','debt','savings','income'].entries()){const el=donut.querySelector('.income-donut__segment--'+name);if(!el)continue;const p=total>0?values[i]/total*100:0;el.style.strokeDasharray=`${p} ${100-p}`;el.style.strokeDashoffset=String(-offset);offset+=p;}
   $('fu-status').textContent=m.monthlyIncome==null?'Add take-home pay to complete your snapshot.':d.reviewed?'Budget updated · calculated by TheWing.ai':'Based on entered amounts';$('fu-retry').hidden=true;
   $('fu-payment').textContent=a.monthlyRange?rangeText(a.monthlyRange.comfortable,a.monthlyRange.upper):state.netMonthly==null?'Add take-home pay':!d.reviewed?'Review your budget':'Complete income details';$('fu-price').textContent=a.homeRange?rangeText(a.homeRange.comfortable,a.homeRange.upper):a.scenarioError||(a.monthlyRange?.upper===0?'No room within this guideline':'—');$('fu-remaining').textContent=a.remainingAtUpper==null?'—':a.remainingAtUpper===a.remainingAtComfortable?money(a.remainingAtUpper):rangeText(a.remainingAtUpper,a.remainingAtComfortable);$('fu-explore').disabled=!a.homeRange;
-  const s=state.scenario;$('fu-assumption-copy').textContent=`${s.loanType==='va'?'VA':'Conventional'} · ${s.termYears} years · credit ${s.creditScore} · ${money(s.downPayment)} down · tax ${s.propertyTaxPercent}%/year · insurance ${s.insurancePercent!==undefined?s.insurancePercent+'%/year':money(s.insuranceMonthly)+'/month'} · HOA ${money(s.hoaMonthly)}/month. ${a.homeRange?a.homeRange.rate+'% interest. ':''}Illustrative unless you entered a quote. VA: ${s.fundingFeeExempt?'fee exempt':s.priorUse+', fee '+(s.financeFundingFee?'financed':'paid at closing')}.`;
+  const s=state.scenario;$('fu-assumption-copy').textContent=`${s.loanType==='va'?'VA':'Conventional'} · ${s.termYears} years · credit ${s.creditScore} · ${money(s.downPayment)} down · tax ${s.propertyTaxPercent}%/year · insurance ${s.insurancePercent!==undefined?s.insurancePercent+'%/year':money(s.insuranceMonthly)+'/month'} · HOA ${money(s.hoaMonthly)}/month. ${a.homeRange?a.homeRange.rate+'% interest. ':''}Illustrative unless you entered a quote.${civilian?'':' VA: '+(s.fundingFeeExempt?'fee exempt':s.priorUse+', fee '+(s.financeFundingFee?'financed':'paid at closing'))+'.'}`;
  }
  function bind(){
   const settings=$('budgetDetailsDialog');$('fu-settings-open').onclick=()=>openSettings();$('budgetDetailsClose').onclick=()=>settings.close();$('totalSavingsValue').onclick=()=>openSettings('fu-savings');
@@ -147,7 +149,7 @@
   $('fu-explore').onclick=()=>{const a=result?.affordability;if(a?.homeRange)post('pcsu:finance-explore',{price:a.homeRange.comfortable||a.homeRange.upper,scenario:state.scenario});};
  }
  async function boot(){
-  try{const r=await fetch('items.json');if(!r.ok)throw Error();state.categories=await r.json();}catch{$('expenseList').textContent='Budget categories could not load. Reload to try again.';return;}
+  try{const r=await fetch(document.body.dataset.itemsUrl||'items.json');if(!r.ok)throw Error();state.categories=await r.json();}catch{$('expenseList').textContent='Budget categories could not load. Reload to try again.';return;}
   installMortgage();loaded=true;bind();render();clear();if(!embedded||inlineIncome)$('fu-income-fields').hidden=false;if(inlineIncome){state.location='Your household';$('fu-explore').hidden=true;}$('selectedLocation').textContent=state.location;icons();schedule();
   try{const o=new URL(document.referrer).origin;if(allowed(o))parentOrigin=o;}catch{}post('pcsu:finance-ready');queueSize(true);window.dispatchEvent(new CustomEvent('pcsunited:financial-ready',{detail:{state,metrics:null}}));
  }

@@ -1,0 +1,59 @@
+#tor-ask-elena{--amy-ink:#17334d;--amy-teal:#91d8cc;--amy-paper:#f8f7f2;--amy-line:rgba(220,237,242,.18);font:14px/1.55 Arial,sans-serif;color:var(--amy-paper);position:relative;z-index:2147483000}
+#tor-ask-elena *{box-sizing:border-box}
+#tor-ask-elena p{font:inherit;letter-spacing:normal;text-transform:none}
+#tor-ask-elena [hidden]{display:none!important}
+#tor-ask-elena button,#tor-ask-elena textarea,#tor-ask-elena a{font:inherit}
+#tor-ask-elena button{cursor:pointer;color:inherit}
+#tor-ask-elena button:focus-visible,#tor-ask-elena a:focus-visible,#tor-ask-elena textarea:focus-visible,#tor-ask-elena input:focus-visible,#tor-ask-elena summary:focus-visible{outline:3px solid #a7e8dc;outline-offset:3px}
+#tor-ask-elena .amy-launch{position:fixed;right:24px;bottom:48px;display:flex;align-items:center;gap:11px;padding:9px 24px 9px 10px;border:1px solid rgba(255,255,255,.55);border-radius:99px;background:linear-gradient(135deg,rgba(28,61,83,.94),rgba(19,47,62,.84));backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 10px 36px #17334d40,inset 0 1px #ffffff45;text-align:left;transition:transform .2s}
+#tor-ask-elena .amy-launch:hover{transform:translateY(-3px)}
+#tor-ask-elena .amy-avatar{width:44px;height:44px;object-fit:cover;border-radius:50%;border:1px solid #d9e9de85;flex:none}
+#tor-ask-elena .amy-launch strong{display:block;font-size:16px;letter-spacing:-.2px}
+#tor-ask-elena .amy-launch small{display:block;font-size:11px;color:#cae1df}
+#tor-ask-elena .amy-panel{position:fixed;right:22px;bottom:44px;width:470px;height:min(790px,calc(100dvh - 100px));max-height:calc(100dvh - 32px);border:1px solid rgba(224,238,242,.44);border-radius:27px;overflow:hidden;background:linear-gradient(150deg,rgba(39,67,87,.91),rgba(14,36,54,.95));backdrop-filter:blur(30px) saturate(130%);-webkit-backdrop-filter:blur(30px) saturate(130%);box-shadow:0 26px 90px #10283b55,inset 0 1px 0 #ffffff45;display:flex;flex-direction:column;isolation:isolate}
+#tor-ask-elena .amy-header{padding:21px 22px 17px;display:flex;gap:13px;align-items:center;background:linear-gradient(110deg,#ffffff10,transparent);border-bottom:1px solid var(--amy-line)}
+#tor-ask-elena .amy-eyebrow{font-size:9px;letter-spacing:1.8px;color:#b7ddd7;text-transform:uppercase;font-weight:700}
+#tor-ask-elena h2{font:500 26px/1.2 Arial,sans-serif;letter-spacing:-.7px;text-transform:none;color:var(--amy-paper);margin:3px 0}
+#tor-ask-elena .amy-subtitle{font-size:12px;color:#d6e0e5;margin:0}
+#tor-ask-elena .amy-close{margin-left:auto;align-self:flex-start;flex:none;width:32px;height:32px;border:1px solid var(--amy-line);background:#ffffff09;border-radius:50%;font-size:20px;line-height:1}
+#tor-ask-elena .amy-context{padding:13px 22px 12px;background:#7cbdcc0a;border-bottom:1px solid var(--amy-line)}
+#tor-ask-elena .amy-context-title{display:flex;align-items:center;gap:7px;color:#b8e4db;font-size:11px;font-weight:600}
+#tor-ask-elena .amy-dot{width:6px;height:6px;border-radius:50%;background:#99dccc;box-shadow:0 0 9px #99dccc65}
+#tor-ask-elena .amy-context p{margin:4px 0 0;color:#dae4e8;font-size:12px}
+#tor-ask-elena .amy-prompts{padding:13px 18px 2px;display:flex;gap:7px;flex-wrap:wrap}
+#tor-ask-elena .amy-prompts button{padding:7px 11px;background:#e8f8ff08;border:1px solid #ffffff23;border-radius:20px;font-size:11px;color:#e4eeee;transition:background .2s}
+#tor-ask-elena .amy-prompts button:hover{background:#cbe5e620}
+#tor-ask-elena .amy-chat{flex:1;min-height:0;overflow-y:auto;padding:20px 18px 16px;scrollbar-width:thin;scrollbar-color:#9bc9c73d transparent;overscroll-behavior:contain}
+#tor-ask-elena .amy-message{max-width:100%;margin-bottom:18px}
+#tor-ask-elena .amy-message>strong{display:block;font-size:9px;font-weight:700;letter-spacing:1.2px;color:#b6d8d4;margin:0 6px 6px;text-transform:uppercase}
+#tor-ask-elena .amy-message p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+#tor-ask-elena .amy-message .amy-copy{padding:15px 17px;background:linear-gradient(125deg,#ffffff0e,#ffffff04);border:1px solid #e0eefa21;border-radius:5px 19px 19px 19px;color:#f3f6f6;font-size:13px;line-height:1.65}
+#tor-ask-elena .amy-message[data-role=user]{margin-left:40px}
+#tor-ask-elena .amy-message[data-role=user] .amy-copy{background:#a6d6ce22;border-color:#acd6d329;border-radius:19px 5px 19px 19px}
+#tor-ask-elena .amy-message[data-role=user]>strong{text-align:right}
+#tor-ask-elena .amy-facts{border-top:1px solid var(--amy-line);margin:12px 0 0;padding:8px 0 0}
+#tor-ask-elena .amy-facts div{display:flex;justify-content:space-between;gap:18px;padding:6px 0}
+#tor-ask-elena dt{color:#c7dadf;font-size:11px;flex:1}
+#tor-ask-elena dd{margin:0;text-align:right;max-width:48%;font-size:12px;color:#e7f5f0;font-variant-numeric:tabular-nums}
+#tor-ask-elena .amy-scenario{margin-top:12px;padding:12px;border:1px solid #a4d7cc33;background:#64b9a40b;border-radius:13px}
+#tor-ask-elena .amy-scenario summary{cursor:pointer;color:#b8e4d8;font-size:12px}
+#tor-ask-elena .amy-scenario p{margin-top:8px;font-size:11px;color:#ccdadd}
+#tor-ask-elena .amy-sources{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+#tor-ask-elena .amy-sources a{color:#b4dfd7;text-underline-offset:3px;font-size:11px}
+#tor-ask-elena .amy-composer{padding:12px 18px 15px;border-top:1px solid var(--amy-line);background:#0f283852}
+#tor-ask-elena .amy-status{font-size:11px;color:#c5dfdc;min-height:17px;margin:0 0 7px}
+#tor-ask-elena form{display:flex;align-items:flex-end;gap:8px}
+#tor-ask-elena textarea{resize:none;flex:1;min-width:0;height:54px;max-height:108px;border-radius:15px;border:1px solid #d1e7ea4d;background:#0e26336b;color:#fff;padding:15px 13px;font-size:13px;line-height:1.5}
+#tor-ask-elena textarea::placeholder{color:#bdd0d6}
+#tor-ask-elena .amy-send{border:1px solid #dbfff08c;border-radius:14px;padding:15px 16px;background:linear-gradient(150deg,#c3e3da,#86bdb3);color:#133f43;font-weight:700;font-size:12px}
+#tor-ask-elena button:disabled{opacity:.45;cursor:wait}
+#tor-ask-elena .amy-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;font-size:10px;color:#c5d6da}
+#tor-ask-elena .amy-controls label{display:flex;gap:6px;align-items:center;cursor:pointer;font:inherit}
+#tor-ask-elena input.amy-share{accent-color:#9bd2c7;margin:0;padding:0;width:13px;height:13px;min-width:13px;flex:0 0 13px}
+#tor-ask-elena .amy-reset{border:0;background:transparent;padding:0;color:#c8e0db;text-decoration:underline;text-underline-offset:3px;font-size:10px}
+#tor-ask-elena .amy-privacy{font-size:9px;color:#a9bec6;line-height:1.5;margin:9px 0 0}
+#tor-ask-elena .amy-retry{margin-top:8px;background:transparent;border:1px solid #b6d8d466;border-radius:12px;padding:5px 10px;font-size:11px}
+@media(max-width:600px){#tor-ask-elena .amy-panel{inset:10px 10px max(44px,env(safe-area-inset-bottom));width:auto;height:auto;max-height:none;border-radius:23px;background:linear-gradient(150deg,rgba(36,63,83,.96),rgba(14,36,54,.98))}#tor-ask-elena .amy-header{padding:16px}#tor-ask-elena .amy-context{padding:10px 17px}#tor-ask-elena .amy-chat{padding:16px}#tor-ask-elena textarea{font-size:16px;height:78px}#tor-ask-elena .amy-launch{right:14px;bottom:48px}#tor-ask-elena .amy-controls{font-size:10px}}
+@media(prefers-reduced-motion:reduce){#tor-ask-elena *{scroll-behavior:auto!important;transition:none!important}}
+
+#tor-ask-elena{--amy-teal:#e1c68f;--amy-line:rgba(226,208,166,.19)}#tor-ask-elena .amy-launch{background:linear-gradient(135deg,#38372ff5,#182020e8);border-color:#cfb77d88}#tor-ask-elena .amy-panel{background:linear-gradient(145deg,rgba(52,52,44,.95),rgba(19,29,31,.97));border-color:#d0ba874f}#tor-ask-elena .amy-eyebrow,#tor-ask-elena .amy-context-title,#tor-ask-elena .amy-message>strong,#tor-ask-elena .amy-sources a,#tor-ask-elena .amy-scenario summary{color:#e1c995}#tor-ask-elena .amy-dot{background:#ddc68e;box-shadow:0 0 9px #ddc68e55}#tor-ask-elena .amy-send{background:linear-gradient(135deg,#e5d0a6,#bda071);color:#242619;border-color:#e2cb9f88}#tor-ask-elena .amy-composer{background:#17201d70}#tor-ask-elena textarea{background:#0e181570}#tor-ask-elena input.amy-share{accent-color:#dbc08a}#tor-ask-elena h2{font-family:Georgia,serif;font-weight:400}#tor-ask-elena .amy-context{background:#c9ae6610}#tor-ask-elena .amy-panel:focus-visible{outline-color:#e1c68f}

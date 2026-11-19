@@ -4,6 +4,7 @@
   const root = document.getElementById('pcsu-financial-input-panel');
   if (!root || root.dataset.initialized) return;
   root.dataset.initialized = 'true';
+  const civilian=root.dataset.audience==='civilian';
   const CONTRACT = 'military-mortgage-v1';
   const $ = id => root.querySelector(`#${id}`);
   const money = value => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
@@ -275,12 +276,13 @@
   window.PCSU_FINANCIAL_INPUT_PANEL = api;
   window.PCSUnitedMilitaryMortgage = api;
   ['pcsunited:basicbrain-updated','pcsunited:profile-ready','pcsunited:bridge-ready'].forEach(name => window.addEventListener(name, event => {
-    if (event.detail && typeof event.detail === 'object') basicBrain = clone(event.detail);
+    if (!civilian && event.detail && typeof event.detail === 'object') basicBrain = clone(event.detail);
   }));
   ['pcsunited:compensation-ready','pcsunited:compensation-preview-ready'].forEach(name => window.addEventListener(name, event => {
-    if (event.detail && typeof event.detail === 'object') comp = clone(event.detail);
+    if (!civilian && event.detail && typeof event.detail === 'object') comp = clone(event.detail);
   }));
   window.addEventListener('pcsunited:market-panel-ready', event => {
+    if(civilian)return;
     market = event.detail && typeof event.detail === 'object' ? clone(event.detail) : null;
     const price = market?.suggestedHomePrice ?? market?.typicalBuy ?? market?.medianList;
     if (!homeTouched && typeof price === 'number' && Number.isFinite(price) && price > 0 && price <= 10000000) {

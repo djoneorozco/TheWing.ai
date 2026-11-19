@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Financial Guidance | The Orozco Realty</title><meta name="description" content="Connect your household income, mortgage estimate and monthly budget. Ask Elena to explain your numbers and compare scenarios."><link rel="stylesheet" href="/TOR-Financial-Guidance/page.css"><link rel="stylesheet" href="/TOR-Financial-Guidance/elena.css"><script defer src="/TOR-Financial-Guidance/page.js"></script><script defer src="/Military-Mortgage/controls.js"></script><script defer src="/TOR-Financial-Guidance/elena.js"></script></head><body style="margin:0;background:#101313"><nav class="tor-preview-nav" style="padding:20px 32px;display:flex;align-items:center;justify-content:space-between;background:#f6f5ee;color:#4f482f;font-family:Georgia,serif"><a href="https://orozcorealty.webflow.io/" style="color:inherit;text-decoration:none;font-size:21px;line-height:1.05">The Orozco<br>Realty</a><span style="font:10px Arial;letter-spacing:2px">FINANCIAL GUIDANCE</span></nav><div id="tor-financial-guidance">
+  <header class="tor-hero">
+    <p class="tor-eyebrow">THE OROZCO REALTY · FINANCIAL GUIDANCE</p>
+    <h1>A home plan that<br><em>fits your life.</em></h1>
+    <p class="tor-intro">Start with what comes in. See what a home could cost. Then make room for everyday life.</p>
+    <nav class="tor-steps" aria-label="Financial guidance steps"><a href="#pcs1-find"><span>01</span>Your income</a><a href="#pcs1-compare"><span>02</span>Your home payment</a><a href="#pcs1-move"><span>03</span>Your monthly budget</a></nav>
+    <div class="tor-hero-note"><span class="tor-spark">✦</span> Your numbers. Your pace. Elena is here when you need a little clarity.</div>
+  </header>
+  <section class="tor-section" id="pcs1-find" aria-labelledby="tor-income-heading">
+    <div class="tor-section-head"><p class="tor-eyebrow">01 / YOUR HOUSEHOLD INCOME</p><h2 id="tor-income-heading">Know what comes in.<br><em>See what you can use.</em></h2><p>Enter your combined monthly household income before taxes and payroll deductions. Include wages, self-employment and other regular income once.</p></div>
+    <div class="tor-income-card" id="pcsf-launch">
+      <form id="tor-income-form" novalidate>
+        <label for="tor-total-income">Total monthly household income</label><div class="tor-money-field tor-income-primary"><span>$</span><input id="tor-total-income" type="number" inputmode="decimal" min="0" max="1000000" step="0.01" placeholder="Enter your total" autocomplete="off"><span>/ month</span></div>
+        <p class="tor-hint">Your income before taxes and payroll deductions.</p>
+        <div class="tor-input-grid"><div><label for="tor-deductions">Taxes &amp; payroll deductions</label><div class="tor-money-field"><span>$</span><input id="tor-deductions" type="number" inputmode="decimal" min="0" max="1000000" step="0.01" placeholder="Enter an amount, or 0" autocomplete="off"></div><p class="tor-hint">Include taxes, payroll insurance and workplace savings already withheld. Leave blank if unknown.</p></div><div><label for="tor-savings">Planned monthly savings</label><div class="tor-money-field"><span>$</span><input id="tor-savings" type="number" inputmode="decimal" min="0" max="1000000" step="0.01" value="0" autocomplete="off"></div><p class="tor-hint">Savings from take-home pay. Exclude contributions already included in payroll deductions.</p></div></div>
+        <details class="tor-optional"><summary>Savings, investments &amp; cash reserves</summary><label for="tor-reserves">Current combined balance</label><div class="tor-money-field"><span>$</span><input id="tor-reserves" type="number" inputmode="decimal" min="0" max="10000000" step="0.01" placeholder="Optional" autocomplete="off"></div><p class="tor-hint">This is a balance, not monthly income. Enter cash available for the purchase separately in the mortgage Summary.</p></details>
+      </form>
+      <div class="tor-income-results" aria-live="polite"><div><span>Take-home each month</span><strong id="tor-net">—</strong></div><div><span>After planned savings</span><strong id="tor-after-savings">—</strong></div></div>
+      <p id="tor-income-status" role="status">Add total income and deductions to see take-home pay.</p><button id="tor-income-retry" class="tor-quiet-button" hidden>Retry income calculation</button>
+      <a class="tor-next" href="#pcs1-compare">Next: explore your home payment <span>↗</span></a>
+    </div>
+  </section>
+  <section class="tor-section" id="pcs1-compare" aria-labelledby="tor-mortgage-heading">
+    <div class="tor-section-head"><p class="tor-eyebrow">02 / YOUR PROJECTED HOME PAYMENT</p><h2 id="tor-mortgage-heading">There’s more to a home<br><em>than the loan payment.</em></h2><p>Explore principal, interest, property taxes, insurance and HOA costs. Use Summary to review rate assumptions and the cash you’ll need to buy.</p></div>
+    <nav class="pcsu-mm-controls" data-mortgage-controls data-target-frame="pcsu-mortgage-frame" aria-label="Mortgage views"><button type="button" data-mm-select="calculator" aria-pressed="true">Calculator</button><button type="button" data-mm-select="visualization" aria-pressed="false">Visualization</button><button type="button" data-mm-select="summary" aria-pressed="false">Summary</button><p data-mm-controls-status role="status">Loading calculator…</p></nav>
+    <div class="tor-frame-shell"><iframe id="pcsu-mortgage-frame" title="Home Mortgage Calculator | The Orozco Realty" referrerpolicy="origin" loading="eager"></iframe></div>
+    <p class="tor-section-note">Starting amounts are editable examples. Review the rate and property costs for each home. Changing the price does not automatically change taxes or insurance.</p>
+    <a class="tor-next" href="#pcs1-move">Next: build your monthly budget <span>↗</span></a>
+  </section>
+  <section class="tor-section" id="pcs1-move" aria-labelledby="tor-budget-heading">
+    <div class="tor-section-head"><p class="tor-eyebrow">03 / MONTHLY EXPENSES &amp; DEBT</p><h2 id="tor-budget-heading">A home you love.<br><em>A budget you can live with.</em></h2><p>Your income and projected home payment carry over automatically. Add everyday expenses and monthly debt payments across the four categories. Your mortgage and planned savings are counted once.</p></div>
+    <div class="tor-frame-shell"><iframe id="pcsu-budget-frame" title="Monthly Budget Builder | The Orozco Realty" referrerpolicy="origin" loading="eager"></iframe></div>
+    <p class="tor-section-note">Debt means monthly loan and credit payments. Everyday expenses and planned savings stay separate, so you can see where your money goes.</p>
+  </section>
+  <section class="tor-summary-section" id="pcs1-plan" aria-labelledby="tor-review-heading">
+    <p class="tor-eyebrow">YOUR MONTHLY PICTURE</p><h2 id="tor-review-heading">Understand the room<br><em>you have left.</em></h2>
+    <label class="tor-review"><input type="checkbox" id="pcsu-budget-reviewed">I reviewed all four expense categories, debt payments and savings. Zero amounts do not apply to me.</label>
+    <div class="tor-summary-grid" aria-live="polite"><div><span>Housing each month</span><strong id="tor-summary-housing">—</strong></div><div><span>Monthly debt payments</span><strong id="tor-summary-debt">—</strong></div><div><span>After expenses &amp; savings</span><strong id="tor-summary-cash">—</strong></div></div>
+    <p id="tor-summary-status" role="status">Your connected monthly picture will appear here.</p>
+    <button class="tor-elena-cta" type="button">Talk it through with Elena <span>↗</span></button>
+    <p class="tor-review-note">Buying, renting or giving it more time are all valid choices. These are planning estimates based on your entries, not loan approval.</p>
+  </section>
+  <footer class="tor-guidance-footer"><p>The Orozco Realty <span>·</span> Financial clarity for your next chapter.</p><p>No account or email verification. Your entries stay in this page. Calculations and questions use TheWing.ai.</p><a href="https://www.consumerfinance.gov/owning-a-home/" target="_blank" rel="noopener noreferrer">CFPB homebuying resources ↗</a></footer>
+</div>
+<div id="tor-ask-elena"></div>
+</body></html>
