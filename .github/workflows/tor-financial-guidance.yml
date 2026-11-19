@@ -1,0 +1,29 @@
+name: TOR Civilian Financial Guidance
+on:
+  pull_request:
+    paths:
+      - 'TOR-Financial-Guidance/**'
+      - 'Civilian-Mortgage/**'
+      - 'Civilian-Budget/**'
+      - 'Finance-UX/**'
+      - 'Military-Mortgage/**'
+      - 'PCSU-Ask-Amy/**'
+      - 'netlify/functions/tor-*.js'
+      - 'netlify/functions/_share/tor-financial-context.js'
+      - 'netlify/functions/_share/pcsu-amy-*.js'
+      - 'netlify/functions/_share/financial-analysis.js'
+      - 'scripts/*tor-financial*'
+      - 'Webflow/TOR-Civilian-Financial-Guidance.html'
+      - '.github/workflows/tor-financial-guidance.yml'
+  workflow_dispatch:
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/build-tor-financial-guidance.mjs && node scripts/build-pcsu-ask-amy.mjs
+      - run: git diff --exit-code -- Civilian-Mortgage/index.html Civilian-Budget/index.html TOR-Financial-Guidance/index.html TOR-Financial-Guidance/elena.js TOR-Financial-Guidance/elena.css Webflow/TOR-Civilian-Financial-Guidance.html Webflow/PCSU-Ask-Amy.html
+      - run: node --test scripts/test-tor-financial-guidance.mjs scripts/test-pcsu-ask-amy.mjs scripts/test-financial-analysis.mjs scripts/test-finance-utility.mjs scripts/test-finance-mortgage-bridge.mjs scripts/test-military-mortgage.mjs
