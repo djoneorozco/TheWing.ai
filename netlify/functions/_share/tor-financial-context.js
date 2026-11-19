@@ -4,7 +4,7 @@ import {calculateFinancialAnalysis} from './financial-analysis.js';
 export const VERSION='TOR-Ask-Elena/1.0.0';
 export const CIVILIAN_MORTGAGE_KEYS=mortgageKeys.filter(k=>k!=='vaFeeStatus');
 export const SOURCES=[
- {id:'consumer-mortgage',title:'CFPB · Explore loan choices',url:'https://www.consumerfinance.gov/owning-a-home/explore/loan-choices/'},
+ {id:'consumer-mortgage',title:'CFPB · Explore loan choices',url:'https://www.consumerfinance.gov/owning-a-home/explore/'},
  {id:'budget',title:'CFPB · Budgeting and financial tools',url:'https://www.consumerfinance.gov/consumer-tools/educator-tools/your-money-your-goals/toolkit/'},
  {id:'fha',title:'HUD · FHA home loans',url:'https://www.hud.gov/helping-americans/loans'},
  {id:'texas-taxes',title:'Texas Comptroller · Property tax basics',url:'https://comptroller.texas.gov/taxes/property-tax/basics.php'}
