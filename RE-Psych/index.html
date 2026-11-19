@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#132a35">
+  <meta name="description" content="Explore your housing priorities, decision tendencies and financial well-being. A private, research-informed homebuyer reflection tool.">
+  <title>RE-Psych | A clearer picture of home</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="data/research-data.js" defer></script>
+  <script src="data/product-data.js" defer></script>
+  <script src="scoring.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="#" id="home-link" aria-label="RE-Psych home"><span class="brand-mark" aria-hidden="true">rp<span>·</span></span><span>RE-Psych<small>HOME, WITH INTENTION</small></span></a>
+    <nav aria-label="Main navigation"><button class="text-button" id="sources-open">The research</button><span class="private-label"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="5" y="8" width="10" height="9" rx="2"/><path d="M7 8V5a3 3 0 0 1 6 0v3"/></svg>Private by design</span></nav>
+  </header>
+  <main id="main" tabindex="-1">
+    <section id="welcome" class="welcome">
+      <div class="hero-copy"><p class="eyebrow">A RESEARCH-INFORMED BUYER REFLECTION</p><h1>A clearer<br>picture of <em>home.</em></h1><p class="hero-lead">Understand what matters to you before a beautiful listing makes the decision.</p><p class="hero-description">Explore your priorities, how you approach decisions, and what you still need to learn. Leave with a practical brief you can use on your next home search.</p><div class="hero-actions"><button id="begin" class="button primary">Build my buyer brief</button><button id="view-example" class="button secondary">See an example</button></div><p class="quiet hero-fine">Untimed. No account. No answers sent to a server.</p></div>
+      <div class="hero-visual" aria-label="Illustration of a home and sample buyer priorities">
+        <div class="visual-grid" aria-hidden="true"></div><p class="visual-kicker">MAKE ROOM FOR WHAT MATTERS</p>
+        <svg class="house-art" viewBox="0 0 480 330" aria-hidden="true"><defs><linearGradient id="wall" x2="0" y2="1"><stop stop-color="#f5f7f4"/><stop offset="1" stop-color="#d9e5df"/></linearGradient></defs><ellipse cx="244" cy="289" rx="182" ry="21" fill="#183b43" opacity=".12"/><path d="M68 171L225 52l183 112-159 107Z" fill="#20434d"/><path d="M91 169l138-94 148 92v108l-148 41L91 232Z" fill="url(#wall)"/><path d="M229 183l148-16v108l-148 41Z" fill="#a8c1b6"/><path d="M68 171L225 52l183 112-31 19L226 91 91 185Z" fill="#254c56"/><path d="M229 183l-3-92-135 94v47l138 84Z" fill="#edf2eb"/><path d="M126 183l43-18v48l-43 16Z" fill="#65a996"/><path d="M147 174v47M126 207l43-17" stroke="#d9e8df" stroke-width="5"/><path d="M191 230l25-8v86l-25-8Z" fill="#23464e"/><path d="M265 203l74-15v54l-74 19Z" fill="#43796e"/><path d="M302 196v56M265 230l74-17" stroke="#d9e8df" stroke-width="6"/><path d="M229 316l57 6 38-19-55-6Z" fill="#c3d4ca"/><path d="M80 235v-39M393 277v-60" stroke="#315f56" stroke-width="7"/><ellipse cx="80" cy="192" rx="24" ry="35" fill="#528775"/><ellipse cx="393" cy="212" rx="30" ry="43" fill="#6e9f81"/></svg>
+        <div class="priority-preview"><span class="sample-label">EXAMPLE PRIORITIES</span><div><span>Room to breathe</span><span class="tag">Daily life</span></div><div><span>A payment that feels manageable</span><span class="tag">Financial fit</span></div><div><span>Less time on the road</span><span class="tag">Tradeoffs</span></div></div>
+      </div>
+      <div class="intro-bottom"><div><span class="mini-icon" aria-hidden="true">◎</span><h2>Know your priorities</h2><p>Separate your everyday needs from the features that catch your eye.</p></div><div><span class="mini-icon" aria-hidden="true">≋</span><h2>Understand the tradeoffs</h2><p>Look at decision habits, financial well-being, and real choices.</p></div><div><span class="mini-icon" aria-hidden="true">▤</span><h2>Take a clearer next step</h2><p>Bring your brief to a viewing, a co-buyer conversation, or an agent.</p></div></div>
+      <div class="scope-note"><strong>A guide for reflection.</strong> RE-Psych combines existing measures with original housing exercises. It does not diagnose you, determine mortgage eligibility, or predict your ideal home.</div>
+    </section>
+    <section id="workspace" hidden>
+      <div class="workspace-top"><div><p class="eyebrow">YOUR BUYER BRIEF</p><p id="session-title">A little reflection. A more intentional decision.</p></div><div class="session-tools"><label class="save-toggle"><input type="checkbox" id="save-draft"> Save on this device</label><button id="reset-open" class="text-button">Start over</button><span id="save-status" class="quiet" role="status"></span></div></div>
+      <div class="app-layout"><aside class="sidebar"><nav id="step-nav" aria-label="Assessment sections"></nav><div class="sidebar-note"><span class="eyebrow">TAKE YOUR TIME</span><p>There is no ideal personality and no right housing preference.</p><p class="quiet">You can leave questions unanswered. Incomplete measures will not receive a score.</p></div></aside><div class="content-column"><div id="screen"></div></div></div>
+    </section>
+  </main>
+  <footer class="site-footer"><span>RE-Psych <span class="footer-dot">/</span> Home, with intention.</span><button class="text-button" id="footer-sources">Sources &amp; methodology</button><span>Research-informed · v1.0</span></footer>
+  <dialog id="sources-dialog" class="source-dialog"><div class="dialog-heading"><div><p class="eyebrow">OPEN BY DESIGN</p><h2>Sources &amp; methodology</h2></div><button class="icon-button" data-close="sources-dialog" aria-label="Close sources">×</button></div><p>Established measures retain their original questions and scoring. Housing exercises, comparison rules, and knowledge checks are original RE-Psych content. The combined application has not been validated as a homebuyer prediction test.</p><div id="sources-list"></div><div class="source-method"><h3>How your information is handled</h3><p>Answers stay in this browser session unless you choose “Save on this device” or download a report. There are no analytics, external fonts, AI calls, or data submissions. Saved drafts are stored unencrypted in your browser; use a private device. Opening an external source leaves this app.</p><a href="data/sources.html" target="_blank" rel="noopener noreferrer">Open the bundled source library</a></div><button class="button secondary" data-close="sources-dialog">Close sources</button></dialog>
+  <dialog id="reset-dialog" class="small-dialog"><h2>Start a new brief?</h2><p>This clears your answers, property comparison, and any RE-Psych draft saved in this browser. Download your current brief first if you want to keep it.</p><div class="button-row"><button class="button secondary" data-close="reset-dialog">Keep my answers</button><button class="button danger" id="reset-confirm">Clear and start over</button></div></dialog>
+  <dialog id="example-dialog" class="small-dialog"><p class="eyebrow">ILLUSTRATIVE EXAMPLE</p><h2>Your priorities, made practical.</h2><p><strong>You told us:</strong> predictable expenses, a short commute, and low maintenance matter most.</p><div class="example-callout"><strong>A tradeoff to review</strong><p>This property meets your space needs, but its 45-minute commute exceeds your 30-minute limit. Repair costs are still unknown.</p></div><p>The brief brings those conflicts into view, explains gaps in your buyer knowledge, and helps you decide what to investigate next.</p><p class="quiet">Example only. This is not a result from your answers.</p><button class="button primary" data-close="example-dialog">Got it</button></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript><div class="noscript">Enable JavaScript to use RE-Psych. The research library remains available in the data folder.</div></noscript>
+</body>
+</html>
