@@ -1,0 +1,16 @@
+name: PCSU Ask Amy
+on:
+  pull_request:
+    paths: ['PCSU-Ask-Amy/**', 'netlify/functions/pcsu-ask-amy.js', 'netlify/functions/_share/pcsu-amy-*.js', 'scripts/*pcsu-ask-amy*', 'Webflow/PCSU-Ask-Amy.html', '.github/workflows/pcsu-ask-amy.yml']
+  workflow_dispatch:
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/build-pcsu-ask-amy.mjs
+      - run: git diff --exit-code -- Webflow/PCSU-Ask-Amy.html
+      - run: node --test scripts/test-pcsu-ask-amy.mjs scripts/test-financial-analysis.mjs scripts/test-finance-utility.mjs scripts/test-finance-mortgage-bridge.mjs scripts/test-military-mortgage.mjs

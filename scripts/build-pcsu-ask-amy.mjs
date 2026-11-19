@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const css=fs.readFileSync(path.join(root,'PCSU-Ask-Amy/panel.css'),'utf8');
+const js=fs.readFileSync(path.join(root,'PCSU-Ask-Amy/panel.js'),'utf8');
+const embed=`<!-- PCSU-Ask-Amy: replace the old TOR Ask Amy embed on Financial Guidance only. -->\n<style>\n${css}</style>\n<div id="pcsu-ask-amy" data-endpoint="https://thewing.netlify.app/api/pcsu-ask-amy" data-tool-origin="https://thewing.netlify.app"></div>\n<script>\n${js}</script>\n`;
+if(embed.length>=50000)throw Error('Webflow embed exceeds 50,000 characters.');
+fs.writeFileSync(path.join(root,'Webflow/PCSU-Ask-Amy.html'),embed);
+console.log(`Built Webflow/PCSU-Ask-Amy.html (${embed.length} characters).`);

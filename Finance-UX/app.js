@@ -11,7 +11,7 @@
  const projected=new URLSearchParams(location.search).get('housing')==='projected';
  let mortgage={status:'loading',amount:null}, mortgageLinked=true, pendingMortgage=false;
  const embedded=window.parent!==window, rows=()=>Object.values(state.categories).flat();
- const allowed=o=>['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com','https://orozcorealty.webflow.io'].includes(o)||(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o)&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname));
+ const allowed=o=>['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com','https://orozcorealty.webflow.io'].includes(o)||(o===location.origin&&/^https:\/\/(?:thewing|deploy-preview-\d+--thewing)\.netlify\.app$/.test(o))||(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o)&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname));
  const post=(type,detail={})=>{if(parentOrigin&&!inlineIncome)parent.postMessage({source:'pcsu-finance',version:1,type,...detail},parentOrigin);};
  // Measure the intrinsic dashboard, not the iframe viewport, so it can shrink too.
  let sizeTimer,lastHeight=0,forceSize=false;
