@@ -355,3 +355,82 @@ function boot(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
+
+
+/* Append once to the end of RE-Psych/app.js, after the existing code. */
+(function () {
+  'use strict';
+
+  function connectWebflow() {
+    const params = new URLSearchParams(window.location.search);
+    if (window.parent === window || params.get('embed') !== '1') return;
+    if (window.__RE_PSYCH_EMBED_READY__) return;
+
+    let parentOrigin;
+    try {
+      const supplied = new URL(params.get('parentOrigin'));
+      if (!['https:', 'http:'].includes(supplied.protocol)) return;
+      parentOrigin = supplied.origin;
+      if (document.referrer && new URL(document.referrer).origin !== parentOrigin) return;
+    } catch {
+      return;
+    }
+
+    const api = window.REPsych || window.PCSUAIOUQuiz;
+    const dialog = document.getElementById('pcsaiou-dialog');
+    if (!api || !dialog) return;
+    window.__RE_PSYCH_EMBED_READY__ = true;
+
+    document.documentElement.classList.add('repsych-embedded');
+    const style = document.createElement('style');
+    style.textContent = `
+      html.repsych-embedded,
+      html.repsych-embedded body {
+        width:100%; height:100%; margin:0; overflow:hidden;
+        background:#fcfbf8;
+      }
+      html.repsych-embedded .site-header,
+      html.repsych-embedded .page-shell { display:none!important; }
+      html.repsych-embedded #pcsaiou-dialog {
+        inset:0!important; margin:0!important;
+        width:100%!important; height:100dvh!important;
+        max-width:none!important; max-height:none!important;
+        border:0!important; border-radius:0!important;
+        box-shadow:none!important;
+      }
+      html.repsych-embedded #pcsaiou-dialog::backdrop {
+        background:transparent; backdrop-filter:none;
+      }
+    `;
+    document.head.append(style);
+
+    let hostOpen = false;
+    const notify = type => window.parent.postMessage({
+      source:'re-psych', version:1, type
+    }, parentOrigin);
+
+    window.addEventListener('message', event => {
+      const data = event.data;
+      if (event.source !== window.parent || event.origin !== parentOrigin) return;
+      if (!data || data.source !== 're-psych-host' || data.version !== 1) return;
+      if (data.type !== 'visibility' || typeof data.visible !== 'boolean') return;
+      hostOpen = data.visible;
+      if (hostOpen) api.open();
+      else api.close();
+    });
+
+    dialog.addEventListener('close', () => {
+      if (!hostOpen || dialog.open) return;
+      hostOpen = false;
+      notify('close');
+    });
+
+    notify('ready');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', connectWebflow, {once:true});
+  } else {
+    connectWebflow();
+  }
+})();
