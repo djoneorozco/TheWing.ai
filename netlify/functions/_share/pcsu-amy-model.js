@@ -48,8 +48,9 @@ export async function explain(request,packet,options={}) {
   const apiKey=options.apiKey??process.env.OPENAI_API_KEY;
   const model=options.model||process.env.PCSU_AMY_OPENAI_MODEL||DEFAULT_MODEL;
   const name=options.name||'Amy', sources=packet.source_catalog||SOURCES, selectedTools=options.tools||tools;
-  const instructions=(options.identity||amyIdentity)+'\n'+FINANCIAL_INSTRUCTIONS;
-  if(!apiKey)return fallback(packet,'missing_configuration',[],name);
+  const instructions=(options.identity||amyIdentity)+'\n'+(options.instructions||FINANCIAL_INSTRUCTIONS);
+  const guidedFallback=options.fallback||fallback;
+  if(!apiKey)return guidedFallback(packet,'missing_configuration',[],name);
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),options.timeout??45000);
   const scenarios=[];
   try {
@@ -65,7 +66,7 @@ export async function explain(request,packet,options={}) {
         let output;
         try {
           if(typeof call.arguments!=='string'||call.arguments.length>6000)throw Error('Invalid scenario arguments.');
-          const s=(options.runScenario||runScenario)(call.name,JSON.parse(call.arguments),request,packet,scenarios.length+1);scenarios.push(s);output={ok:true,...s};
+          const s=await (options.runScenario||runScenario)(call.name,JSON.parse(call.arguments),request,packet,scenarios.length+1);scenarios.push(s);output={ok:true,...s};
         }catch(e){output={ok:false,error:String(e.message).slice(0,240)};}
         input.push({type:'function_call_output',call_id:call.call_id,output:JSON.stringify(output)});
       }
@@ -78,7 +79,7 @@ export async function explain(request,packet,options={}) {
     // Tool result cards always include their actual numbers even if the model
     // omits a fact ID. No model-created values or URLs reach the client.
     return {reply:answer.answer.trim(),facts:selected,citations:answer.source_ids.map(id=>sources.find(s=>s.id===id)),scenarios,explanation_mode:'ai_grounded',model:result.model||model,service_status:'ready'};
-  }catch(e){return fallback(packet,e.name==='AbortError'?'timeout':/^(provider_|model_access|tool_limit|incomplete_answer|refusal)/.test(e.message)?e.message:'invalid_answer',scenarios,name);}
+  }catch(e){return guidedFallback(packet,e.name==='AbortError'?'timeout':/^(provider_|model_access|tool_limit|incomplete_answer|refusal)/.test(e.message)?e.message:'invalid_answer',scenarios,name);}
   finally{clearTimeout(timer);}
 }
 export function historyReply(answer) {return (answer.reply+'\n'+formatFacts(answer.facts)).slice(0,3000);}
