@@ -5,7 +5,14 @@
   let origin;
   try {origin = new URL(document.referrer).origin;} catch (_) {return;}
   const local = ['localhost','127.0.0.1'].includes(location.hostname) && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
-  if (origin !== 'https://orozcorealty.webflow.io' && !local) return;
+  const torOrigins = new Set([
+    'https://orozcorealty.webflow.io',
+    'https://theorozcorealty.netlify.app',
+    'https://theorozcorealty.com',
+    'https://www.theorozcorealty.com'
+  ]);
+  const torPreview = /^https:\/\/deploy-preview-\d+--theorozcorealty\.netlify\.app$/.test(origin);
+  if (!torOrigins.has(origin) && !torPreview && !local) return;
   const tool = /\/Finance-UX\//i.test(location.pathname) ? 'finance' : /\/(?:Mortgage-Calculator|Military-Mortgage)\//i.test(location.pathname) ? 'mortgage' : null;
   if (!tool) return;
   const military = /\/Military-Mortgage\//i.test(location.pathname);
