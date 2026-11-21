@@ -17,6 +17,7 @@ client=client.replace("{style:'currency',currency:'USD'}","{style:'currency',cur
 client=client.replace("!['www.va.gov','www.consumerfinance.gov','www.dfas.mil','www.hud.gov','comptroller.texas.gov'].includes(u.hostname)","!(/\\.(mil|gov)$/.test(u.hostname)||u.hostname==='thewing.netlify.app')||u.username||u.password");
 fs.writeFileSync('PCSU-Resources-Elena/panel.js',client);
 fs.writeFileSync('Webflow/PCSU-Resources-Elena.html',`<!-- PCS Resources only: replaces the previous Amy launcher/HUD. Page tools are unchanged. -->
+<link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://thewing.netlify.app/TOR-Financial-Guidance/elena.css">
 <div id="tor-ask-elena" data-endpoint="https://thewing.netlify.app/api/pcsu-resources-elena"></div>
 <script defer src="https://thewing.netlify.app/PCSU-Resources-Elena/panel.js"></script>
