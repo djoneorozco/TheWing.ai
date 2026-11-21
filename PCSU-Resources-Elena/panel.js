@@ -15,6 +15,7 @@
     const endpoint=root.dataset.endpoint||'https://thewing.netlify.app/api/pcsu-resources-elena';
     // Only existing page inputs are shared; iframe results and arbitrary messages are not accepted.
     const pick=(v,keys)=>Object.fromEntries(keys.filter(k=>v?.[k]!==undefined).map(k=>[k,v[k]]));
+    const sameRank=(a,b)=>String(a||'').toUpperCase().replaceAll('-','')===String(b||'').toUpperCase().replaceAll('-','');
     const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
     let section=null,busy=false,controller=null,generation=0,pendingSignature=null,history=[],focusBefore=null;
     const relocationKeys=['rank','familySize','destinationBase','currentBase','travelDate','povs','travelers','dependentsUnder12','travelersTogether','includePerDiem','plannedDrivingDays','mileageMode','distanceMiles','estimatedExpenses','dlaEligibility','dlaEffectiveDate','dlaRank','dlaHasDependents'];
@@ -26,7 +27,7 @@
       if(object(snapshot)&&(!base||base===snapshot.base)){
         result.snapshot=pick(snapshot,['rank','yos','family','base']);result.base=snapshot.base;
         const request=window.PCSU_RELOCATION_BRIEF_REQUEST,relocation=request?.input;
-        if(object(relocation)&&relocation.destinationBase===snapshot.base&&relocation.rank===snapshot.rank&&relocation.familySize===snapshot.family){
+        if(object(relocation)&&relocation.destinationBase===snapshot.base&&sameRank(relocation.rank,snapshot.rank)&&relocation.familySize===snapshot.family){
           result.relocation=pick(relocation,relocationKeys);
           const view=window.PCSU_RELOCATION_PRESENTATION;
           if(object(view))result.presentation=pick(view,['expenses','includeDla']);
