@@ -60,7 +60,7 @@
         dd.textContent=(String(f.unit).startsWith('USD')?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:f.unit==='USD/mile'?3:2}).format(f.value):new Intl.NumberFormat('en-US',{maximumFractionDigits:4}).format(f.value))+(f.unit==='USD/month'?' / mo':f.unit==='USD/year'?' / year':f.unit==='USD/mile'?' / mile':f.unit==='USD'?'':f.unit==='%'?'%':f.unit?' '+f.unit:'');row.append(dt,dd);dl.append(row);}container.append(dl);
     }
     function answer(data){
-      const article=message(data.reply),copy=article.querySelector('.amy-copy');facts(data.facts,copy);
+      const article=message(data.reply),copy=article.querySelector('.amy-copy');const scenarioIds=new Set((data.scenarios||[]).flatMap(s=>(s.facts||[]).map(f=>f.id)));facts((data.facts||[]).filter(f=>!scenarioIds.has(f.id)),copy);
       for(const s of (Array.isArray(data.scenarios)?data.scenarios:[]).slice(0,3)){
         const details=document.createElement('details');details.className='amy-scenario';details.open=true;
         const title=document.createElement('summary');title.textContent=({lookup_base:'Base information · page unchanged',lookup_dla:'DLA lookup · page unchanged',calculate_malt:'MALT estimate · page unchanged',calculate_pcs:'What-if PCS · page unchanged'})[s.tool]||'Separate estimate · page unchanged';details.append(title);facts(s.facts,details);
