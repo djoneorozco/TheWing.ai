@@ -86,7 +86,7 @@ function requirementLines(){
 }
 function results(early){
  panels('results');state.report=rules.summarize(state.baseline,state.answers,early);const report=state.report;
- $('#rp-coverage').textContent=`Six baseline modules completed · ${report.coverage.followupsAnswered} follow-ups answered. ${early?'You finished early; unexplored choices remain open.':'The selected comparisons are complete; unresolved choices remain open.'}`;
+ $('#rp-coverage').textContent=`Six baseline modules completed · ${report.coverage.followupsReviewed} follow-ups reviewed, ${report.coverage.followupsAnswered} answered. ${early?'You finished early; unexplored choices remain open.':'The selected comparisons are complete; unresolved choices remain open.'}`;
  $('#rp-result-content').replaceChildren();addSection('Protect these household requirements',requirementLines());addSection('What you told us',baselineLines());
  if(report.reviewBeforeSearching.length)addSection('Resolve these before narrowing your search',report.reviewBeforeSearching.map(x=>x.text));
  report.evidence.forEach(e=>{addSection(e.label,[e.summary,'Evidence: '+e.questionIds.map(id=>id.toUpperCase()).join(', ')+(e.status==='supported-in-exercise'?'. Supported by your choices in these exercises.':'. Needs clarification; this is not a personality inconsistency score.')]);const g=bank.groups.find(x=>x.id===e.domain),context=[g.first,g.first+1].map(n=>'q'+n).filter(id=>state.answers[id]?.choice);if(context.length)addSection('More context for '+e.label.toLowerCase(),context.map(id=>{const q=bank.questions.find(x=>x.id===id);return q.text+' — '+q.options.find(o=>o.id===state.answers[id].choice)?.label;}));});
