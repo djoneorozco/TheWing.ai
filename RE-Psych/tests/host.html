@@ -1,0 +1,4 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>RE-Psych host contract test</title><body><script>
+window.messages=[];const frame=document.createElement('iframe');frame.title='RE-Psych';frame.style='width:100%;height:850px;border:0';frame.src='../?embed=1&parentOrigin='+encodeURIComponent(location.origin);document.body.append(frame);
+addEventListener('message',e=>{if(e.source!==frame.contentWindow||e.origin!==location.origin||e.data.source!=='re-psych')return;messages.push(e.data);if(e.data.type==='ready')frame.contentWindow.postMessage({source:'re-psych-host',version:1,type:'visibility',visible:true},location.origin);});
+</script></body></html>

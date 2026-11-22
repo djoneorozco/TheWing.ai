@@ -10,7 +10,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Montserrat:wght@600;700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
+  <script src="./question-bank.js" defer></script>
+  <script src="./decision-rules.js" defer></script>
+  <script src="./baseline/q1.js" defer></script>
+  <script src="./baseline/q2.js" defer></script>
+  <script src="./baseline/q3.js" defer></script>
+  <script src="./baseline/q4.js" defer></script>
+  <script src="./baseline/q5.js" defer></script>
+  <script src="./baseline/q6.js" defer></script>
   <script src="./app.js" defer></script>
+<link rel="stylesheet" href="./baseline/q1.css">
+<link rel="stylesheet" href="./baseline/q2.css">
+<link rel="stylesheet" href="./baseline/q3.css">
+<link rel="stylesheet" href="./baseline/q4.css">
+<link rel="stylesheet" href="./baseline/q5.css">
+<link rel="stylesheet" href="./baseline/q6.css">
 </head>
 <body>
   <header class="site-header">
@@ -20,170 +34,370 @@
   <main class="page-shell">
     <p class="page-kicker">Your homebuying priorities</p>
     <h1 class="page-title">Understand how you choose a home.</h1>
-    <p class="page-description">Explore your preferences, priorities, and homebuying style with the A.I.O.U timed quiz. Eighteen questions. About three minutes.</p>
+    <p class="page-description">Build your home baseline, then explore the tradeoffs that matter most to you.</p>
 <div id="pcsaiou-launch">
-  <div><span class="pa-kicker">01 / Your homebuying priorities</span><h3>Understand what home means to you.</h3><p>Take the A.I.O.U timed quiz to explore your preferences, priorities, and homebuying style.</p></div>
+  <div><span class="pa-kicker">01 / Your homebuying priorities</span><h3>Understand what home means to you.</h3><p>Six interactive baseline questions, followed by a short set of tailored comparisons.</p></div>
   <button id="pcsaiou-trigger" type="button" aria-haspopup="dialog" aria-controls="pcsaiou-dialog" aria-expanded="false">Open RE-Psych</button>
 </div>
-<dialog id="pcsaiou-dialog" aria-labelledby="pcsaiou-title" data-endpoint="https://theorozcorealty.netlify.app/.netlify/functions/aiou-report">
+<dialog id="pcsaiou-dialog" aria-labelledby="pcsaiou-title">
   <header class="pa-head"><div><span class="pa-kicker">PCSUNITED / Understand your priorities</span><h2 id="pcsaiou-title">RE-Psych Buyer Quiz</h2></div><button id="pcsaiou-close" type="button" aria-label="Close RE-Psych quiz">Close <span aria-hidden="true">×</span></button></header>
-  <div class="pa-scroll" id="pcsaiou-scroll"><div id="pcsaiou-host"></div></div>
-  <div class="pa-action"><span id="pcsaiou-status">18 questions · 10 seconds each · About 3 minutes</span><strong class="pa-clock" id="pcsaiou-clock" aria-label="Time remaining" role="timer">3:00</strong></div>
-  <footer class="pa-foot"><span id="pcsaiou-note">The timer starts when you select Start Timed Quiz.</span><span>Powered by TheWing.ai</span></footer>
-</dialog>
-<template id="pcsaiou-template">
-<link rel="stylesheet" href="./styles.css">
-<div id="aiou-portal">
-        <div class="aiou-wrap">
-          
-          <div class="aiou-card" id="introCard">
+  <div class="pa-scroll" id="pcsaiou-scroll"><div id="pcsaiou-host"><div id="rp-intro" class="rp-card"><span class="pa-kicker">Your home, in everyday life</span><h2 tabindex="-1">Start with what matters to you.</h2><p>Choose your commute, compare homes, rank priorities, and tell us what your household needs. Then explore a few tradeoffs based on your answers.</p><p>Six baseline modules. Usually 6–15 follow-up questions. Ten-second prompts encourage a first impression; you can take longer or switch the timer off.</p><p class="rp-muted">Your choices stay in this page session. Download your home brief to keep a copy.</p><button class="rp-button primary" id="rp-start" type="button">Build my home baseline →</button></div>
+<nav id="rp-baseline-nav" aria-label="Home baseline questions" hidden></nav>
+<div id="rp-baselines" hidden><div data-baseline-step="1" hidden>
+<section class="pcsu-fixed-zone" data-pcsu-fixed-zone>
+  <header class="pzf-header">
+    <div class="pzf-eyebrow">PCSUNITED / YOUR HOME BASELINE <span>01 / 06</span></div>
+    <h2>What commute would fit your everyday life?</h2>
+  </header>
+  <div class="pzf-body">
+    <h3>Choose your home zone</h3>
+    <p class="pzf-intro">Click the <strong>15, 25, or 35-minute zone</strong> you would feel comfortable with.<br><small>Think about a normal workday, including traffic and gate delays. Times are one way.</small></p>
+    <div class="pzf-map" role="group" aria-label="Choose a comfortable one-way commute. Selecting a zone opens the reasons question.">
+      <svg class="pzf-scene" aria-hidden="true" focusable="false"></svg>
+      <button class="pzf-zone-button" data-time="15" type="button" aria-pressed="false" aria-label="Choose 15 minutes one way and open the reasons question"><span class="pzf-zone-check" aria-hidden="true"></span>15 min</button>
+      <button class="pzf-zone-button" data-time="25" type="button" aria-pressed="false" aria-label="Choose 25 minutes one way and open the reasons question"><span class="pzf-zone-check" aria-hidden="true"></span>25 min</button>
+      <button class="pzf-zone-button" data-time="35" type="button" aria-pressed="false" aria-label="Choose 35 minutes one way and open the reasons question"><span class="pzf-zone-check" aria-hidden="true"></span>35 min</button>
+      <span class="pzf-base" aria-hidden="true"><span>★</span><b>Base</b></span>
+      <span class="pzf-home" aria-hidden="true" hidden><span><svg viewBox="0 0 24 24"><path d="M2 11 12 2l10 9-2 2-1-1v10h-5v-7h-4v7H5V12l-1 1z"/></svg></span></span>
+    </div>
+    <div class="pzf-map-hint"><span data-map-hint>Click a shaded zone or its time label. Your two-reason question opens next.</span><button class="pzf-link" data-timer-preference type="button" aria-pressed="false">Use without timer</button></div>
+    <div class="pzf-map-summary" hidden><span data-zone-summary></span><button class="pzf-link" type="button" data-edit>Change commute</button></div>
+    <section class="pzf-reasons" aria-label="Reasons for your commute choices" hidden>
+      <div class="pzf-time-track" aria-hidden="true"><span data-time-fill></span></div>
+      <div class="pzf-reasons-top"><span class="pzf-step">Q1 / WHAT MATTERS TO YOU</span><span class="pzf-timer" data-timer role="timer" aria-label="10 seconds remaining">10s</span></div>
+      <h3 class="pzf-reasons-title" tabindex="-1">What are your top two reasons for this commute?</h3>
+      <p class="pzf-reasons-intro">Choose what influenced your choices most. There are no right answers.</p>
+      <div class="pzf-reason-grid" role="group" aria-label="Choose two reasons">
+        <button class="pzf-reason" type="button" data-reason="less_driving" aria-pressed="false"><span class="pzf-check" aria-hidden="true"></span>Less time driving</button>
+        <button class="pzf-reason" type="button" data-reason="indoor_space" aria-pressed="false"><span class="pzf-check" aria-hidden="true"></span>More room inside</button>
+        <button class="pzf-reason" type="button" data-reason="outdoor_space" aria-pressed="false"><span class="pzf-check" aria-hidden="true"></span>More outdoor space</button>
+        <button class="pzf-reason" type="button" data-reason="housing_cost" aria-pressed="false"><span class="pzf-check" aria-hidden="true"></span>Lower housing costs</button>
+        <button class="pzf-reason" type="button" data-reason="city_convenience" aria-pressed="false"><span class="pzf-check" aria-hidden="true"></span>City life &amp; convenience</button>
+        <button class="pzf-reason" type="button" data-reason="quiet_privacy" aria-pressed="false"><span class="pzf-check" aria-hidden="true"></span>Quiet &amp; privacy</button>
+      </div>
+      <div class="pzf-other-row">
+        <button class="pzf-link" type="button" data-reason="other" aria-pressed="false">Another reason</button>
+        <button class="pzf-link" type="button" data-unsure aria-pressed="false">I’m not sure yet</button>
+        <span class="pzf-count" data-reason-count aria-live="polite">0 of 2 selected</span>
+      </div>
+      <label class="pzf-other-input" hidden>What else matters to you?
+        <input type="text" maxlength="140" data-other-text placeholder="A few words are enough">
+      </label>
+      <label class="pzf-only-one" hidden><input type="checkbox" data-only-one> Only one reason fits me</label>
+      <div class="pzf-reasons-bottom">
+        <div><p class="pzf-time-note" data-time-note role="status">Go with your first impression. You can keep choosing after 10 seconds.</p><button class="pzf-link" type="button" data-timer-off>Turn off timer</button></div>
+        <button class="pzf-save" data-finish type="button" disabled>Save my choices <span aria-hidden="true">→</span></button>
+      </div>
+    </section>
+    <p class="pzf-result" role="status" aria-live="polite"></p>
+    <p class="pzf-note">Illustrative map · not a live route estimate. Homes and scenery are examples, not promises about any location.</p>
+    <span class="pzf-live" aria-live="polite" aria-atomic="true"></span>
+  </div>
+</section>
 
-            <div class="aiou-title-block">
-              <h1>Understand how you choose a home</h1>
-              <p class="aiou-desc">
-                Each question is timed (<b>10 seconds</b>). Choose from
-                <b>-5</b> to <b>+5</b>.
-                Some items repeat in different words to check consistency.
-              </p>
-            </div>
 
-            <div class="aiou-bar">
-              <button type="button" class="aiou-btn primary" id="startQuiz">Start Timed Quiz</button>
-            </div>
-          </div>
 
-          <div class="aiou-card" id="profileCard">
-            <h2>Profile & Goals</h2>
-            <p class="blurb">
-              We use this context to generate your personalized Buyer Memo at the end.
-            </p>
 
-            <div class="aiou-grid">
-              <div>
-                <label class="aiou-label" for="firstName">First Name</label>
-                <input id="firstName" class="aiou-input" type="text" placeholder="e.g., Alex">
-              </div>
-              <div>
-                <label class="aiou-label" for="lastName">Last Name</label>
-                <input id="lastName" class="aiou-input" type="text" placeholder="e.g., Rivera">
-              </div>
+</div><div data-baseline-step="2" hidden>
+<section class="pcsu-home-choice" data-pcsu-home-choice>
+  <header class="ph2-header"><div class="ph2-eyebrow">PCSUNITED / YOUR HOME BASELINE <span>02 / 06</span></div><h2>Same budget. Five different ways to live.</h2></header>
+  <div class="ph2-body">
+    <div class="ph2-budget" aria-label="Locked purchase price: 300,000 US dollars for each home. Same commute for all options.">
+      <svg class="ph2-lock" viewBox="0 0 24 28" aria-hidden="true"><path d="M6 11V7a6 6 0 0 1 12 0v4" fill="none" stroke="currentColor" stroke-width="3"/><rect x="2" y="10" width="20" height="17" rx="3" fill="currentColor"/><circle cx="12" cy="17" r="2" fill="#d8efeb"/><path d="M12 18v4" stroke="#d8efeb" stroke-width="2"/></svg>
+      <span class="ph2-budget-label">LOCKED PURCHASE PRICE</span><strong>$300,000</strong><span class="ph2-budget-context">Each home · Same commute</span>
+    </div>
+    <h3 class="ph2-question" tabindex="-1">Which home would you choose to live in as shown?</h3>
+    <p class="ph2-intro">Compare the space and finishes you would have today. All five homes are structurally sound and livable. <strong>Renovation costs are not included in the $300,000 price.</strong></p>
+    <div class="ph2-comparison-bar"><span data-comparison-hint>Compare the exterior and kitchen of all five homes.</span><span class="ph2-scroll-nav" hidden><button type="button" data-scroll="-1" aria-label="Scroll toward Home A">←</button><button type="button" data-scroll="1" aria-label="Scroll toward Home E">→</button></span></div>
+    <div class="ph2-comparison" role="region" tabindex="0" aria-label="Home comparison. All five homes are in one row. Scroll horizontally to compare.">
+    <div class="ph2-home-grid" role="group" aria-label="Five homes, each with a 300,000 dollar purchase price">
+      <button class="ph2-home" data-home="A" type="button" aria-pressed="false" aria-label="Choose Home A: 2 beds · 1,200 sq. ft., Medium landscaped yard, Custom cabinetry &amp; natural stone, Finished now · compact rooms. Opens the reasons question.">
+        <span class="ph2-art"><svg viewBox="2 2 430.4 332" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><image data-home-art width="2172" height="724" preserveAspectRatio="none"/></svg><span class="ph2-photo-label">Exterior</span><span class="ph2-art-fallback" hidden>Home A</span></span>
+        <span class="ph2-art ph2-interior"><svg viewBox="2 338 430.4 384" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><image data-home-art width="2172" height="724" preserveAspectRatio="none"/></svg><span class="ph2-photo-label">Kitchen</span><span class="ph2-art-fallback" hidden>Home A kitchen</span></span>
+        <span class="ph2-home-body"><span class="ph2-home-title">Home A<span class="ph2-selected-mark" aria-hidden="true"> ✓</span></span><span class="ph2-home-facts">2 beds · 1,200 sq. ft.</span><span class="ph2-tradeoff">Compact · Premium finish</span><span class="ph2-home-detail">Medium landscaped yard</span><span class="ph2-home-detail">Custom cabinetry &amp; natural stone</span><span class="ph2-home-detail">Finished now · compact rooms</span><span class="ph2-home-cta" aria-hidden="true">Choose Home A</span></span>
+      </button>
+      <button class="ph2-home" data-home="B" type="button" aria-pressed="false" aria-label="Choose Home B: 3 beds · 1,550 sq. ft., Small yard, Modern, standard-grade finishes, Move-in ready. Opens the reasons question.">
+        <span class="ph2-art"><svg viewBox="436.4 2 430.4 332" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><image data-home-art width="2172" height="724" preserveAspectRatio="none"/></svg><span class="ph2-photo-label">Exterior</span><span class="ph2-art-fallback" hidden>Home B</span></span>
+        <span class="ph2-art ph2-interior"><svg viewBox="436.4 338 430.4 384" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><image data-home-art width="2172" height="724" preserveAspectRatio="none"/></svg><span class="ph2-photo-label">Kitchen</span><span class="ph2-art-fallback" hidden>Home B kitchen</span></span>
+        <span class="ph2-home-body"><span class="ph2-home-title">Home B<span class="ph2-selected-mark" aria-hidden="true"> ✓</span></span><span class="ph2-home-facts">3 beds · 1,550 sq. ft.</span><span class="ph2-tradeoff">Moderate space · Updated</span><span class="ph2-home-detail">Small yard</span><span class="ph2-home-detail">Modern, standard-grade finishes</span><span class="ph2-home-detail">Move-in ready</span><span class="ph2-home-cta" aria-hidden="true">Choose Home B</span></span>
+      </button>
+      <button class="ph2-home" data-home="C" type="button" aria-pressed="false" aria-label="Choose Home C: 3 beds · 1,750 sq. ft., Medium yard, Basic cabinets &amp; laminate, Well maintained. Opens the reasons question.">
+        <span class="ph2-art"><svg viewBox="870.8 2 430.4 332" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><image data-home-art width="2172" height="724" preserveAspectRatio="none"/></svg><span class="ph2-photo-label">Exterior</span><span class="ph2-art-fallback" hidden>Home C</span></span>
+        <span class="ph2-art ph2-interior"><svg viewBox="870.8 338 430.4 384" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><image data-home-art width="2172" height="724" preserveAspectRatio="none"/></svg><span class="ph2-photo-label">Kitchen</span><span class="ph2-art-fallback" hidden>Home C kitchen</span></span>
+        <span class="ph2-home-body"><span class="ph2-home-title">Home C<span class="ph2-selected-mark" aria-hidden="true"> ✓</span></span><span class="ph2-home-facts">3 beds · 1,750 sq. ft.</span><span class="ph2-tradeoff">Standard size · Basic finish</span><span class="ph2-home-detail">Medium yard</span><span class="ph2-home-detail">Basic cabinets &amp; laminate</span><span class="ph2-home-detail">Well maintained</span><span class="ph2-home-cta" aria-hidden="true">Choose Home C</span></span>
+      </button>
+      <button class="ph2-home" data-home="D" type="button" aria-pressed="false" aria-label="Choose Home D: 3 beds · 1,900 sq. ft., Large yard, Older oak cabinets &amp; laminate, Maintained, dated finishes. Opens the reasons question.">
+        <span class="ph2-art"><svg viewBox="1305.2 2 430.4 332" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><image data-home-art width="2172" height="724" preserveAspectRatio="none"/></svg><span class="ph2-photo-label">Exterior</span><span class="ph2-art-fallback" hidden>Home D</span></span>
+        <span class="ph2-art ph2-interior"><svg viewBox="1305.2 338 430.4 384" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><image data-home-art width="2172" height="724" preserveAspectRatio="none"/></svg><span class="ph2-photo-label">Kitchen</span><span class="ph2-art-fallback" hidden>Home D kitchen</span></span>
+        <span class="ph2-home-body"><span class="ph2-home-title">Home D<span class="ph2-selected-mark" aria-hidden="true"> ✓</span></span><span class="ph2-home-facts">3 beds · 1,900 sq. ft.</span><span class="ph2-tradeoff">More yard · Older finish</span><span class="ph2-home-detail">Large yard</span><span class="ph2-home-detail">Older oak cabinets &amp; laminate</span><span class="ph2-home-detail">Maintained, dated finishes</span><span class="ph2-home-cta" aria-hidden="true">Choose Home D</span></span>
+      </button>
+      <button class="ph2-home" data-home="E" type="button" aria-pressed="false" aria-label="Choose Home E: 4 beds · 2,250 sq. ft., Large yard, Dated cabinets &amp; patterned vinyl, Worn finishes · updates extra. Opens the reasons question.">
+        <span class="ph2-art"><svg viewBox="1739.6 2 430.4 332" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><image data-home-art width="2172" height="724" preserveAspectRatio="none"/></svg><span class="ph2-photo-label">Exterior</span><span class="ph2-art-fallback" hidden>Home E</span></span>
+        <span class="ph2-art ph2-interior"><svg viewBox="1739.6 338 430.4 384" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><image data-home-art width="2172" height="724" preserveAspectRatio="none"/></svg><span class="ph2-photo-label">Kitchen</span><span class="ph2-art-fallback" hidden>Home E kitchen</span></span>
+        <span class="ph2-home-body"><span class="ph2-home-title">Home E<span class="ph2-selected-mark" aria-hidden="true"> ✓</span></span><span class="ph2-home-facts">4 beds · 2,250 sq. ft.</span><span class="ph2-tradeoff">Most space · Dated finish</span><span class="ph2-home-detail">Large yard</span><span class="ph2-home-detail">Dated cabinets &amp; patterned vinyl</span><span class="ph2-home-detail">Worn finishes · updates extra</span><span class="ph2-home-cta" aria-hidden="true">Choose Home E</span></span>
+      </button>
+    </div>
+    </div>
+    <div class="ph2-choice-tools"><span>Choose a home to reveal your 10-second reasons question.</span><span class="ph2-tool-links"><button class="ph2-link" data-timer-preference type="button" aria-pressed="false">Use without timer</button><button class="ph2-link" data-none type="button">None fits my needs</button></span></div>
+    <div class="ph2-home-summary" hidden><span data-home-summary></span><button class="ph2-link" type="button" data-edit>Change home</button></div>
+    <section class="ph2-reasons" aria-label="Reasons for your home choice" hidden>
+      <div class="ph2-time-track" aria-hidden="true"><span data-time-fill></span></div>
+      <div class="ph2-reasons-top"><span class="ph2-step">Q2 / WHAT MATTERS TO YOU</span><span class="ph2-timer" data-timer role="timer" aria-label="10 seconds remaining">10s</span></div>
+      <h3 class="ph2-reasons-title" tabindex="-1">What are your top two reasons for choosing this home?</h3>
+      <p class="ph2-reasons-intro">Choose what influenced your choice most. There are no right answers.</p>
+      <div class="ph2-reason-grid" role="group" aria-label="Choose two reasons">
+        <button class="ph2-reason" type="button" data-reason="household_bedrooms" aria-pressed="false"><span class="ph2-check" aria-hidden="true"></span>Bedrooms my household needs</button>
+        <button class="ph2-reason" type="button" data-reason="indoor_space" aria-pressed="false"><span class="ph2-check" aria-hidden="true"></span>More usable indoor space</button>
+        <button class="ph2-reason" type="button" data-reason="outdoor_living" aria-pressed="false"><span class="ph2-check" aria-hidden="true"></span>Yard &amp; outdoor living</button>
+        <button class="ph2-reason" type="button" data-reason="finishes_design" aria-pressed="false"><span class="ph2-check" aria-hidden="true"></span>Finishes &amp; design</button>
+        <button class="ph2-reason" type="button" data-reason="little_updating" aria-pressed="false"><span class="ph2-check" aria-hidden="true"></span>Little updating needed</button>
+        <button class="ph2-reason" type="button" data-reason="dated_finish_acceptance" aria-pressed="false"><span class="ph2-check" aria-hidden="true"></span>Comfortable with older finishes</button>
+      </div>
+      <div class="ph2-other-row">
+        <button class="ph2-link" type="button" data-reason="other" aria-pressed="false">Another reason</button>
+        <button class="ph2-link" type="button" data-unsure aria-pressed="false">I’m not sure yet</button>
+        <span class="ph2-count" data-reason-count aria-live="polite">0 of 2 selected</span>
+      </div>
+      <label class="ph2-other-input" hidden>What else matters to you?
+        <input type="text" maxlength="140" data-other-text placeholder="A few words are enough">
+      </label>
+      <label class="ph2-only-one" hidden><input type="checkbox" data-only-one> Only one reason fits me</label>
+      <div class="ph2-reasons-bottom">
+        <div><p class="ph2-time-note" data-time-note role="status">Go with your first impression. You can keep choosing after 10 seconds.</p><button class="ph2-link" type="button" data-timer-off>Turn off timer</button></div>
+        <button class="ph2-save" data-finish type="button" disabled>Save my choices <span aria-hidden="true">→</span></button>
+      </div>
+    </section>
+    <p class="ph2-result" role="status" aria-live="polite"></p>
+    <p class="ph2-note">Illustrative homes · $300,000 purchase price each · Choose for living in today · Renovations cost extra</p>
+    <span class="ph2-live" aria-live="polite" aria-atomic="true"></span>
+  </div>
+</section>
 
-              <div>
-                <label class="aiou-label" for="bedrooms">Bedrooms wanted</label>
-                <input id="bedrooms" class="aiou-input" type="number" min="0" step="1" placeholder="e.g., 4">
-              </div>
-              <div>
-                <label class="aiou-label" for="budget">Budget (max $)</label>
-                <input id="budget" class="aiou-input" type="number" min="0" step="1000" placeholder="e.g., 450000">
-              </div>
 
-              <div>
-                <label class="aiou-label" for="setting">Preferred setting</label>
-                <select id="setting" class="aiou-select">
-                  <option value="city">City</option>
-                  <option value="suburb">Suburb</option>
-                  <option value="rural">Rural</option>
-                </select>
-              </div>
-              <div>
-                <label class="aiou-label" for="safety">Safety priority (1–5)</label>
-                <select id="safety" class="aiou-select">
-                  <option>1</option><option>2</option><option>3</option>
-                  <option>4</option><option selected>5</option>
-                </select>
-              </div>
-            </div>
-          </div>
+</div><div data-baseline-step="3" hidden>
+<section class="pcsu-q3" data-pcsu-q3>
+  <p class="rp-kicker">PCSUNITED / YOUR HOME BASELINE <span>03 / 06</span></p><h2>What should your home protect first?</h2>
 
-          <div class="aiou-card fullrow hidden" id="quizCard">
-            <div class="qtopbar"><i id="qTopTimer"></i></div>
+  <p class="pcsu-q3-help">
+    Order from most to least important. Drag the handles or use the arrows.
+  </p>
 
-            <h2 id="qTitle" tabindex="-1" aria-describedby="qText">Question</h2>
-            <div id="qText" class="aiou-desc"></div>
+  <ol
+    class="pcsu-q3-list"
+    aria-label="Your home priorities, most important first">
+  </ol>
 
-            <div id="visualArea" class="hidden">
-              <div class="dualpref">
-                <figure>
-                  <button type="button" class="visual-choice" id="vChoiceA" aria-label="Move toward May Require Fixes"><img id="vImgA"
-                    src="https://cdn.prod.website-files.com/68cecb820ec3dbdca3ef9099/68f9a10aab47946a36f5c135_04d878cc02583fb9bfda33ddbd28d91a_MinorFixesHome.jpg"
-                    alt="May Require Fixes (Option A)"></button>
-                  <figcaption>May Require Fixes</figcaption>
-                </figure>
+  <div class="pcsu-q3-footer">
+    <button class="pcsu-q3-confirm" type="button">
+      Confirm my order <span aria-hidden="true">→</span>
+    </button>
+    <p class="pcsu-q3-result" role="status"></p>
+  </div>
 
-                <figure>
-                  <button type="button" class="visual-choice" id="vChoiceB" aria-label="Move toward Brand New"><img id="vImgB"
-                    src="https://cdn.prod.website-files.com/68cecb820ec3dbdca3ef9099/68f9a113c4924ecebad2319a_a0cc3184b96f525ed5a278c3bac62891_BrandNewHome.jpg"
-                    alt="Brand New Home (Option B)"></button>
-                  <figcaption>Brand New Home</figcaption>
-                </figure>
+  <p
+    class="pcsu-q3-live"
+    aria-live="polite"
+    aria-atomic="true">
+  </p>
+</section>
 
-                <div class="sliderRow">
-                  <span class="end">Needs Fixes</span>
-                  <div class="rangeWrap">
-                    <input id="vSlider" type="range" min="-5" max="5" value="0" step="1"
-                      aria-label="Preference between Needs Fixes and Brand New">
-                  </div>
-                  <span class="end">Brand New</span>
-                </div>
-              </div>
-              <div class="aiou-desc" id="vLabel">Neutral</div>
-            </div>
 
-            <p class="scale-legend" id="scaleLegend">−5 = Strongly disagree · 0 = Neutral · +5 = Strongly agree</p><div class="scale" id="scaleBlock" role="group" aria-label="Choose your answer from minus five to plus five"></div>
 
-            <div class="quiz-controls"><button type="button" class="aiou-btn primary" id="confirmVisual">Confirm choice</button>
-              <button type="button" class="aiou-btn" id="skip">Skip</button>
-              <button type="button" class="aiou-btn warn" id="reset">Reset</button>
-            </div>
-            <div class="quiz-hint" id="quizHint">
-              No answer = neutral (0) after 10 seconds. “Skip” moves on immediately.
-            </div>
-          </div>
-
-          <div class="aiou-card fullrow hidden" id="resultsCard">
-            <h2 id="resultTitle" tabindex="-1">Results</h2>
-            <p class="blurb">
-              Your buyer psychology profile and personalized memo.
-            </p>
-
-            <div class="kpi-row">
-              <div class="kpi-chip">
-                <h3>OPENNESS</h3>
-                <div id="kO">—</div>
-              </div>
-              <div class="kpi-chip">
-                <h3>CONSCIENTIOUSNESS</h3>
-                <div id="kC">—</div>
-              </div>
-              <div class="kpi-chip">
-                <h3>EXTRAVERSION</h3>
-                <div id="kE">—</div>
-              </div>
-              <div class="kpi-chip">
-                <h3>AGREEABLENESS</h3>
-                <div id="kA">—</div>
-              </div>
-              <div class="kpi-chip">
-                <h3>RISK AVERSION</h3>
-                <div id="kN">—</div>
-              </div>
-            </div>
-
-            <div id="consistency" class="consistency-block"></div>
-            <div id="archetype" class="arch-block"></div>
-            <div id="mbti" class="mbti-block"></div>
-
-            <div id="jsonReportBox" role="status" aria-live="polite">(Generating your personalized memo…)</div>
-
-            <div class="results-actions">
-              <button type="button" class="aiou-btn" id="retryReport" hidden>Retry memo</button><button type="button" class="aiou-btn primary" id="retakeQuiz">Retake quiz</button>
-            </div>
-          </div>
+</div><div data-baseline-step="4" hidden>
+<section class="pcsu-condition-choice" data-pcsu-condition-choice>
+  <header class="ph4-header">
+    <div class="ph4-eyebrow">PCSUNITED / YOUR HOME BASELINE <span>04 / 06</span></div>
+    <h2>Your home. Your comfort with repairs.</h2>
+  </header>
+  <div class="ph4-body">
+    <div class="ph4-step">HOME CONDITION</div>
+    <fieldset class="ph4-fieldset">
+      <legend class="ph4-question">How much work could you realistically take on?</legend>
+      <p class="ph4-intro">Choose the most work you would accept before this home works for your household.</p>
+      <p class="ph4-context">Same home, layout, and size. Only the condition changes.</p>
+      <div class="ph4-comparison-bar">
+        <span data-comparison-hint>Compare all four condition levels.</span>
+        <span class="ph4-scroll-nav" hidden>
+          <button type="button" data-scroll="-1" aria-label="Show earlier condition levels">←</button>
+          <button type="button" data-scroll="1" aria-label="Show later condition levels">→</button>
+        </span>
+      </div>
+      <div class="ph4-comparison" role="region" tabindex="0" aria-label="Four home condition levels. Scroll horizontally to compare on small screens.">
+        <div class="ph4-grid">
+          <label class="ph4-card">
+            <input class="ph4-radio" type="radio" name="pcsu-q4-condition" value="ready">
+            <span class="ph4-art" aria-hidden="true">
+              <svg viewBox="41 312 318 218" preserveAspectRatio="xMidYMid slice" focusable="false"><image data-condition-art width="1402" height="1122" preserveAspectRatio="none"/></svg>
+              <span class="ph4-art-fallback">Loading home image…</span>
+              <span class="ph4-check">✓</span>
+            </span>
+            <span class="ph4-card-body"><span class="ph4-card-title">Ready to live in</span><span class="ph4-card-description">It already meets my needs.</span><span class="ph4-card-cta" aria-hidden="true">Choose this condition</span></span>
+          </label>
+          <label class="ph4-card">
+            <input class="ph4-radio" type="radio" name="pcsu-q4-condition" value="cosmetic">
+            <span class="ph4-art" aria-hidden="true">
+              <svg viewBox="379 312 313 218" preserveAspectRatio="xMidYMid slice" focusable="false"><image data-condition-art width="1402" height="1122" preserveAspectRatio="none"/></svg>
+              <span class="ph4-art-fallback">Loading home image…</span>
+              <span class="ph4-check">✓</span>
+            </span>
+            <span class="ph4-card-body"><span class="ph4-card-title">Light cosmetic work</span><span class="ph4-card-description">Paint, fixtures, and small updates.</span><span class="ph4-card-cta" aria-hidden="true">Choose this condition</span></span>
+          </label>
+          <label class="ph4-card">
+            <input class="ph4-radio" type="radio" name="pcsu-q4-condition" value="planned">
+            <span class="ph4-art" aria-hidden="true">
+              <svg viewBox="712 312 311 218" preserveAspectRatio="xMidYMid slice" focusable="false"><image data-condition-art width="1402" height="1122" preserveAspectRatio="none"/></svg>
+              <span class="ph4-art-fallback">Loading home image…</span>
+              <span class="ph4-check">✓</span>
+            </span>
+            <span class="ph4-card-body"><span class="ph4-card-title">Planned projects</span><span class="ph4-card-description">Kitchen, bathroom, or flooring work.</span><span class="ph4-card-cta" aria-hidden="true">Choose this condition</span></span>
+          </label>
+          <label class="ph4-card">
+            <input class="ph4-radio" type="radio" name="pcsu-q4-condition" value="extensive">
+            <span class="ph4-art" aria-hidden="true">
+              <svg viewBox="1042 312 320 218" preserveAspectRatio="xMidYMid slice" focusable="false"><image data-condition-art width="1402" height="1122" preserveAspectRatio="none"/></svg>
+              <span class="ph4-art-fallback">Loading home image…</span>
+              <span class="ph4-check">✓</span>
+            </span>
+            <span class="ph4-card-body"><span class="ph4-card-title">Extensive renovation</span><span class="ph4-card-description">Several major projects and disruption.</span><span class="ph4-card-cta" aria-hidden="true">Choose this condition</span></span>
+          </label>
         </div>
       </div>
-</template>
-    <noscript>Please enable JavaScript to use the RE-Psych quiz.</noscript>
-    <p class="page-footer">RE-Psych by PCSUnited · Powered by TheWing.ai</p>
-  </main>
-</body>
-</html>
+      <div class="ph4-choice-tools">
+        <label class="ph4-unsure"><input class="ph4-radio" type="radio" name="pcsu-q4-condition" value="needs-info"><span>I need more information</span></label>
+        <span class="ph4-note">Illustrative conditions; photos cannot verify hidden issues.</span>
+      </div>
+    </fieldset>
+    <p class="ph4-image-notice" data-image-notice hidden>Home images are unavailable. You can still choose using the descriptions.</p>
+    <div class="ph4-result" role="status" aria-live="polite" aria-atomic="true">
+      <span class="ph4-result-icon" aria-hidden="true">○</span>
+      <div><strong data-result-title>Choose the condition you would accept.</strong><span data-result-detail>Your selection completes Q4. You can change it anytime.</span></div>
+    </div>
+    <noscript><p>Enable JavaScript to record your Q4 choice.</p></noscript>
+  </div>
+</section>
+
+
+
+
+</div><div data-baseline-step="5" hidden>
+<section class="pcsu-features-choice" data-pcsu-features-choice>
+  <header class="ph5-header">
+    <div class="ph5-eyebrow">PCSUNITED / YOUR HOME BASELINE <span>05 / 06</span></div>
+    <h2>Features that fit your everyday life.</h2>
+  </header>
+  <div class="ph5-body">
+    <div class="ph5-step">01 / FEATURES YOU WOULD USE</div>
+    <fieldset class="ph5-feature-fieldset">
+      <legend class="ph5-question">Which features would support your daily life?</legend>
+      <div class="ph5-intro-row"><p>Select all you would use regularly.</p><strong data-feature-count aria-live="polite">0 selected</strong></div>
+      <div class="ph5-comparison-bar"><span data-comparison-hint>Choose the features that matter to you.</span><span class="ph5-scroll-nav" hidden><button type="button" data-scroll="-1" aria-label="Show earlier features">←</button><button type="button" data-scroll="1" aria-label="Show later features">→</button></span></div>
+      <div class="ph5-comparison" role="region" tabindex="0" aria-label="Six home features. Scroll horizontally to compare on small screens."><div class="ph5-grid" data-feature-cards></div></div>
+    </fieldset>
+    <div class="ph5-choice-tools">
+      <button type="button" class="ph5-link" data-custom-toggle aria-pressed="false">Another feature</button>
+      <button type="button" class="ph5-link" data-selection-mode="unsure" aria-pressed="false">I’m not sure yet</button>
+      <button type="button" class="ph5-link" data-selection-mode="none" aria-pressed="false">None of these</button>
+    </div>
+    <label class="ph5-custom-name" hidden>What other feature would you use?<input type="text" data-custom-name maxlength="80" autocomplete="off" placeholder="Name the feature"></label>
+    <p class="ph5-image-notice" data-image-notice hidden>Feature images are unavailable. You can still select the labeled options.</p>
+
+    <section class="ph5-followups" aria-label="Follow-up questions for selected features" hidden>
+      <div class="ph5-step">02 / HOW THESE FEATURES FIT YOUR LIFE</div>
+      <h3>A little more about your choices.</h3>
+      <p class="ph5-followup-intro">Tell us what feels realistic and how you would use the space.</p>
+      <div class="ph5-group" data-upkeep-group hidden>
+        <h4>UPKEEP <span>· Choose one for each feature</span></h4>
+        <div data-upkeep-rows></div>
+        <p class="ph5-small-note">Paid help adds an ongoing cost.</p>
+      </div>
+      <div class="ph5-group" data-use-group hidden>
+        <h4>INTENDED USE <span>· Select all that apply</span></h4>
+        <div data-use-rows></div>
+        <fieldset class="ph5-followup" data-followup="custom" hidden>
+          <legend class="ph5-sr">How would you use your additional feature?</legend>
+          <div class="ph5-row-inner">
+            <div class="ph5-row-copy"><strong data-custom-title>Another feature</strong><p>What would this feature help you do?</p></div>
+            <div class="ph5-answer-area"><label class="ph5-text-label">How would you use it?<textarea data-custom-use maxlength="240" rows="2" placeholder="Describe the use you have in mind"></textarea></label><button type="button" class="ph5-link ph5-row-unsure" data-use-unsure="custom" aria-pressed="false">I’m not sure yet</button></div>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+
+    <div class="ph5-bottom">
+      <div class="ph5-summary" role="status" aria-live="polite" aria-atomic="true"><strong data-summary>Choose the features you would use.</strong><span data-summary-detail>You can select more than one.</span></div>
+      <button type="button" class="ph5-save" data-save disabled>Save my features →</button>
+    </div>
+    <noscript><p>Enable JavaScript to choose your features and complete Q5.</p></noscript>
+  </div>
+</section>
+
+
+
+
+</div><div data-baseline-step="6" hidden>
+<section class="pcsu-requirements" data-pcsu-requirements>
+  <header class="ph6-header">
+    <div class="ph6-eyebrow">PCSUNITED / YOUR HOME BASELINE <span>06 / 06</span></div>
+    <h2>What must be true for this home to work?</h2>
+  </header>
+  <div class="ph6-body">
+    <div class="ph6-intro"><div><div class="ph6-step">YOUR HOUSEHOLD REQUIREMENTS</div><p>Set the minimums and limits your household needs. Choose “Unsure” where you still need to decide.</p></div><span class="ph6-progress" data-progress aria-live="polite">0 of 4 areas reviewed</span></div>
+    <div class="ph6-grid">
+      <section class="ph6-panel" data-area="space" aria-label="Minimum space">
+        <div class="ph6-panel-top"><span class="ph6-number" aria-hidden="true">01</span><h3>Minimum space</h3></div>
+        <p class="ph6-panel-intro">What is the smallest home that could work for your household?</p>
+        <fieldset class="ph6-field"><legend>Minimum bedrooms</legend><div class="ph6-options" data-options="bedrooms"></div>
+          <div class="ph6-details" data-details="bedrooms" hidden><label>Number of bedrooms<input type="text" inputmode="numeric" data-input="bedrooms" maxlength="9" autocomplete="off" placeholder="e.g., 3"></label><p class="ph6-hint">Enter 0 if a studio would meet your needs.</p><p class="ph6-error" data-error="bedrooms" hidden></p></div>
+        </fieldset>
+        <fieldset class="ph6-field"><legend>Additional enclosed rooms beyond bedrooms</legend><div class="ph6-options" data-options="rooms"></div>
+          <div class="ph6-details" data-details="rooms" hidden><label>How many additional rooms?<input type="text" inputmode="numeric" data-input="roomCount" maxlength="9" autocomplete="off" placeholder="e.g., 1"></label><p class="ph6-error" data-error="roomCount" hidden></p><label>What must these rooms support?<input type="text" data-input="roomPurpose" maxlength="160" autocomplete="off" placeholder="e.g., focused work or caregiving"></label><p class="ph6-error" data-error="roomPurpose" hidden></p></div>
+        </fieldset>
+      </section>
+
+      <section class="ph6-panel" data-area="access" aria-label="Access and layout">
+        <div class="ph6-panel-top"><span class="ph6-number" aria-hidden="true">02</span><h3>Access &amp; layout</h3></div>
+        <p class="ph6-panel-intro">Does the layout need to meet any specific requirements?</p>
+        <fieldset class="ph6-field"><legend>Required access or room arrangement</legend><div class="ph6-options" data-options="access"></div>
+          <div class="ph6-details" data-details="access" hidden><p class="ph6-hint">Select all that are required.</p><div class="ph6-access-grid" data-access-options></div><label data-access-other hidden>Describe the required layout<input type="text" data-input="accessOther" maxlength="200" autocomplete="off" placeholder="Describe what the home must accommodate"></label><p class="ph6-error" data-error="accessOther" hidden></p></div>
+        </fieldset>
+      </section>
+
+      <section class="ph6-panel" data-area="readiness" aria-label="Move-in readiness">
+        <div class="ph6-panel-top"><span class="ph6-number" aria-hidden="true">03</span><h3>Move-in readiness</h3></div>
+        <p class="ph6-panel-intro">Can your household wait while work is completed before moving in?</p>
+        <fieldset class="ph6-field"><legend>When must the home be usable?</legend><div class="ph6-options ph6-readiness" data-options="readiness"></div></fieldset>
+        <fieldset class="ph6-field" data-wait-field hidden><legend>Time you could allow before moving in</legend><div class="ph6-options" data-options="wait"></div>
+          <div class="ph6-details" data-details="wait" hidden><label>Maximum weeks you could wait<input type="text" inputmode="numeric" data-input="weeks" maxlength="9" autocomplete="off" placeholder="e.g., 4"></label><p class="ph6-error" data-error="weeks" hidden></p></div>
+        </fieldset>
+      </section>
+
+      <section class="ph6-panel" data-area="limits" aria-label="Firm limits">
+        <div class="ph6-panel-top"><span class="ph6-number" aria-hidden="true">04</span><h3>Firm limits</h3></div>
+        <p class="ph6-panel-intro">Record any ceiling you need a home to stay within.</p>
+        <fieldset class="ph6-field"><legend>Total monthly housing budget · USD</legend><p class="ph6-hint">Include mortgage or rent, taxes, insurance, HOA fees, utilities, and routine upkeep.</p>
+          <div class="ph6-known" data-known="housing" hidden><span data-known-text="housing"></span><button type="button" data-apply="housing">Use this limit</button></div>
+          <div class="ph6-options" data-options="housing"></div><div class="ph6-details" data-details="housing" hidden><label>Maximum total per month<span class="ph6-number-input"><span aria-hidden="true">$</span><input type="text" inputmode="decimal" data-input="housing" maxlength="24" autocomplete="off" placeholder="e.g., 2,500"></span></label><p class="ph6-error" data-error="housing" hidden></p></div>
+        </fieldset>
+        <fieldset class="ph6-field"><legend>Firm one-way commute limit</legend><p class="ph6-hint">Include usual traffic and base-gate delays. This is your maximum, rather than your preferred commute.</p>
+          <div class="ph6-known" data-known="commute" hidden><span data-known-text="commute"></span><button type="button" data-apply="commute">Use this limit</button></div>
+          <div class="ph6-options" data-options="commute"></div><div class="ph6-details" data-details="commute" hidden><label>Maximum minutes each way<input type="text" inputmode="numeric" data-input="commute" maxlength="4" autocomplete="off" placeholder="e.g., 35"></label><p class="ph6-error" data-error="commute" hidden></p></div>
+        </fieldset>
+      </section>
+    </div>
+    <section class="ph6-review" aria-label="Your requirements so far" hidden><h3>Your requirements so far</h3><ul data-review-list></ul></section>
+    <div class="ph6-bottom"><div class="ph6-status" role="status" aria-live="polite" aria-atomic="true"><strong data-status-title>Review your household requirements.</strong><span data-status-detail>“No firm requirement” and “Unsure” are valid responses.</span></div><button class="ph6-save" type="button" data-save disabled>Save my requirements →</button></div>
+    <noscript><p>Enable JavaScript to complete Q6.</p></noscript>
+  </div>
+</section>
+
+
+
+
+</div></div><div id="rp-baseline-actions" class="rp-actions" hidden><button id="rp-back" class="rp-button" type="button">← Previous</button><button id="rp-next" class="rp-button primary" type="button" disabled>Continue →</button></div>
+<section id="rp-followup-intro" class="rp-card" hidden><span class="pa-kicker">Your baseline is ready</span><h2 tabindex="-1">Now put your preferences to the test.</h2><p>We’ll start with the tradeoffs most relevant to your answers. A changed situation may change your choice—and that is useful to know.</p><ul id="rp-route-preview"></ul><p id="rp-conflict-note" class="rp-callout" hidden></p><p>Expect 6–15 short questions. “I need more information” is always a valid answer.</p><div class="rp-actions"><button id="rp-edit-baseline" class="rp-button" type="button">Review baseline</button><button id="rp-begin-followups" class="rp-button primary" type="button">Explore my tradeoffs →</button></div></section>
+<section id="rp-question" class="rp-card" hidden><div class="rp-time-track" aria-hidden="true"><span id="rp-time-fill"></span></div><p class="rp-kicker" id="rp-question-label"></p><h2 id="rp-question-title" tabindex="-1"></h2><p id="rp-question-context" class="rp-muted"></p><div id="rp-options" class="rp-options" role="group" aria-label="Choose your response"></div><p id="rp-timer-note" role="status">Choose the answer that fits. You can keep choosing after 10 seconds.</p><div class="rp-actions"><button id="rp-previous-question" class="rp-button" type="button">← Previous answer</button><button id="rp-skip" class="rp-button" type="button">Skip for now</button><button id="rp-timer-toggle" class="rp-button" type="button" aria-pressed="false">Turn off timer</button><button id="rp-confirm" class="rp-button primary" type="button" disabled>Confirm & continue →</button></div><button id="rp-finish-early" class="rp-link" type="button">Finish with what I’ve answered</button></section>
+<section id="rp-results" class="rp-card" hidden><span class="pa-kicker">Your home search brief</span><h2 id="rp-result-title" tabindex="-1">A clearer starting point for your search.</h2><p id="rp-coverage"></p><div id="rp-result-content"></div><div class="rp-actions"><button id="rp-download" class="rp-button primary" type="button">Download my brief</button><button id="rp-download-data" class="rp-button" type="button">Download answers (JSON)</button><button id="rp-edit-results" class="rp-button" type="button">Review my baseline</button><button id="rp-restart" class="rp-button" type="button">Start again</button></div><p id="rp-restart-confirm" hidden>Starting again clears this page’s answers. <button id="rp-restart-yes" class="rp-link" type="button">Clear and restart</button> <button id="rp-restart-no" class="rp-link" type="button">Keep my answers</button></p><p class="rp-muted">These are preference exercises, not a validated personality test or an affordability assessment. Confirm actual costs, routes, condition, and suitability for each real home.</p></section></div></div>
+  <div class="pa-action"><span id="pcsaiou-status">Six baseline questions · Tailored follow-ups</span><strong class="pa-clock" id="pcsaiou-clock" aria-label="Time remaining" role="timer">Ready</strong></div>
+  <footer class="pa-foot"><span id="pcsaiou-note">Your answers stay in this page session.</span><span>Powered by TheWing.ai</span></footer>
+</dialog>
+<noscript>Please enable JavaScript to use RE-Psych.</noscript><p class="page-footer">RE-Psych by PCSUnited · Powered by TheWing.ai</p></main></body></html>

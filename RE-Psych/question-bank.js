@@ -1,0 +1,56 @@
+/* Authored housing-preference probes. IDs retain the supplied Q7–Q36 bank. */
+(function(root,factory){const bank=factory();if(typeof module==='object'&&module.exports)module.exports=bank;else root.REPsychBank=bank;})(typeof window==='undefined'?globalThis:window,function(){
+'use strict';
+const options=texts=>texts.map((label,i)=>({id:String.fromCharCode(65+i),label}));
+const groups=[
+{id:'layout',label:'Space for everyday activities',baseline:['q5','q6'],first:7,
+ rationale:['When you picture your everyday living spaces, what matters most?',['Connection while people do different things','An uninterrupted view through living spaces','Closing off sound and distractions','Giving different activities their own places']],
+ experience:['In the last two weeks at home, which situation mattered more?',['Wanting more connection during separate activities','Wanting more separation during simultaneous activities','Both happened regularly','Neither fits, or I cannot recall']],
+ pair:[['Someone is watching television while another person needs to concentrate. Which arrangement would you choose?',['Connected shared spaces; sound carries between activities','Separate rooms; doors reduce the overlap']],['Now the connected layout includes one room with a door for work or quiet time. Which would you choose?',['Connected shared spaces plus a closable room','Several distinct rooms throughout the home']]],
+ context:'Both homes meet your essential room and access needs. Total floor area and cost are equal.',
+ confirmation:['Which layout should guide your search?',['Connected shared living spaces','Greater separation between activities','Connected spaces only with a closable retreat']],
+ findings:{A:'Connected shared living spaces remained your choice in both comparisons.',B:'You chose greater separation even when the connected layout included a closable room.',conditional:'You chose connected shared spaces when they included a closable retreat; without it, you chose separate rooms.'}},
+{id:'travel',label:'Usable space and the everyday journey',baseline:['q1','q2','q3','q6'],first:12,
+ rationale:['When balancing space and travel, what matters most?',['Space for activities that currently feel squeezed','Space for belongings, equipment, or occasional guests','Less time travelling to regular destinations','Less space to clean and manage']],
+ experience:['During the last month, which caused more frustration?',['Not enough usable space','Time spent travelling to regular destinations','Both','Neither, or my circumstances are changing']],
+ pair:[['Imagine making the journey five days each week, but using the extra living space mainly on weekends. Which would you choose?',['More usable space; {long} minutes one way','Less extra space; {short} minutes one way']],['Now imagine making that journey only once each week. Which would you choose?',['More usable space; {long} minutes one way','Less extra space; {short} minutes one way']]],
+ context:'Both homes meet your essential room and access needs at the same total cost. These are imagined commute times, not route estimates.',
+ confirmation:['Which should guide your search?',['Additional usable space','Shorter journeys to regular destinations','Extra space only when the journey is infrequent']],
+ findings:{A:'You chose additional usable space for both frequent and infrequent journeys.',B:'You chose the shorter journey even when travelling only once a week.',conditional:'You chose extra space for an infrequent journey, but the shorter commute for five journeys each week.'}},
+{id:'outdoors',label:'Outdoor space and upkeep',baseline:['q1','q2','q5'],first:17,
+ rationale:['What matters most about outdoor space?',['Room for outdoor activities','Greenery and a sense of retreat','Less ongoing work','An outdoor area that is easy to use often']],
+ experience:['Which best describes your recent approach to recurring upkeep?',['I do it myself and generally enjoy it','I arrange help and am comfortable managing it','I try to keep these responsibilities minimal','I have little comparable experience']],
+ pair:[['The large backyard needs two hours of your work each week; the small courtyard needs about 20 minutes. Which would you choose?',['Large backyard','Small courtyard']],['Now routine yard care is included for both at the same total cost. Which would you choose?',['Large backyard','Small courtyard']]],
+ context:'Assume equal privacy, housing cost, and fit with your essential needs. No paid maintenance is available in the first comparison; only the care arrangement changes in the second.',
+ confirmation:['Which outdoor arrangement should guide your search?',['A larger usable backyard','A smaller, compact outdoor area','A larger backyard only when routine care is handled']],
+ findings:{A:'You chose the larger backyard both with and without routine care included.',B:'You chose compact outdoor space even when routine care was included.',conditional:'You chose the larger backyard when routine care was handled; otherwise you chose the smaller courtyard.'}},
+{id:'condition',label:'Home condition and project disruption',baseline:['q2','q3','q4','q6'],first:22,
+ rationale:['What mattered most in your home-condition choice?',['Using the home comfortably from the start','Improving how the space works for daily life','Keeping projects and coordination manageable','Knowing the scope and cost before committing']],
+ experience:['Thinking about a home project you experienced, which fits best?',['I enjoyed both the result and participating in the work','I liked the result but found the process disruptive','I preferred to delegate or avoid the project','I have no comparable experience']],
+ pair:[['A home with extra useful space needs six weeks of cosmetic work after move-in. Another has less extra space and is ready now. Which would you choose?',['Extra useful space with the stated disruption','Less extra space, ready as shown']],['Now that same work will be finished before move-in, without delaying your move. Which would you choose?',['Extra useful space, with the work already completed','Less extra space, ready as shown']]],
+ context:'Both homes are structurally sound and usable, meet your essential room and access needs, and have the same total cost including the stated work. Essential rooms stay usable during the cosmetic work. This does not establish a renovation budget.',
+ confirmation:['How should condition and work affect your search?',['Consider projects for extra useful space','Prioritize a home that works as shown','Consider that home only with work finished before move-in']],
+ findings:{A:'You considered the home with extra useful space both during and after the stated cosmetic work.',B:'You kept choosing the home that works as shown, even when the other home’s work was completed before move-in.',conditional:'You chose the extra useful space only when work was complete before move-in. That supports the finished result, not living through the project.'}},
+{id:'control',label:'Control and coordination',baseline:['q5','q4'],first:27,
+ rationale:['When arranging home upkeep or changes, what matters most?',['Making permitted changes without an additional approval process','Choosing the people, timing, and standards','Having someone else coordinate covered tasks','A clear division of responsibilities']],
+ experience:['When a household task needed coordination, what felt most comfortable?',['Making decisions and arranging the work myself','Hiring someone while keeping control of decisions','Another responsible person managing the process','I have little comparable experience']],
+ pair:[['You want an exterior change that is permitted locally. Which arrangement would you choose?',['Arrange it yourself, subject to applicable requirements','Managed upkeep with an extra approval process that could decline the change']],['Now a covered exterior repair is needed. Which arrangement would you choose?',['Arrange quotes, access, scheduling, and follow-up yourself','Management coordinates the covered repair within its agreement']]],
+ context:'The managed option provides the stated upkeep services. Assume equal total cost and essential needs met. Actual rules and responsibilities depend on the specific agreement.',
+ confirmation:['Which arrangement should guide your search?',['Greater personal control over exterior decisions and services','More coordinated care under defined rules','Personal control over changes, help with routine coordination']],
+ findings:{A:'You chose personal control for both exterior changes and repair coordination.',B:'You chose the managed arrangement for both changes and covered repairs.',conditional:'You chose control over exterior changes but help with covered repair coordination. Review those responsibilities separately in each agreement.'}},
+{id:'money',label:'Valued features and money left available',baseline:['q2','q3','q5','q6'],first:32,
+ rationale:['What matters most when balancing optional features and money?',['Enjoyment during everyday activities','Feeling proud of the home when welcoming people','Money for activities and goals outside the home','Room for unexpected expenses']],
+ experience:['For your most recent substantial optional purchase, what most influenced you?',['How often I expected to use it','How well it expressed my taste','What remained available for other plans','I cannot recall a comparable purchase']],
+ pair:[['Both options meet your essential needs. Which would you choose at a $300 monthly difference?',['Preferred optional upgrades; $300 less for other uses','Standard features; keep the $300 available']],['Now the same optional upgrades cost $75 more each month instead of $300. Which would you choose?',['Preferred optional upgrades; $75 less for other uses','Standard features; keep the $75 available']]],
+ context:'Hypothetical comparison only: assume both options fit within a confirmed spending limit. Neither choice establishes an affordable payment, and essential or accessibility features are not optional upgrades.',
+ confirmation:['Which should guide your search?',['Particular features I value, within my confirmed limit','Money for other uses while meeting housing needs','Preferred upgrades only at the smaller tested premium']],
+ findings:{A:'You chose the optional upgrades at both tested monthly differences.',B:'You kept the money available at both tested monthly differences.',conditional:'You chose the optional upgrades at $75 more per month, but not at $300. This does not establish your maximum affordable payment.'}}
+];
+const questions=groups.flatMap(g=>[
+ {id:'q'+g.first,domain:g.id,kind:'rationale',text:g.rationale[0],options:options(g.rationale[1])},
+ {id:'q'+(g.first+1),domain:g.id,kind:'experience',text:g.experience[0],options:options(g.experience[1])},
+ ...g.pair.map((p,i)=>({id:'q'+(g.first+2+i),domain:g.id,kind:'comparison',text:p[0],context:g.context,options:[...options(p[1]),{id:'U',label:'I need more information / neither fits'}]})),
+ {id:'q'+(g.first+4),domain:g.id,kind:'confirmation',text:g.confirmation[0],options:[...options(g.confirmation[1]),{id:'U',label:'Still unsure / another condition matters'}]}
+]);
+return {version:'repsych.bank.v2',groups,questions};
+});
