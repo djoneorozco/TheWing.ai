@@ -70,7 +70,7 @@ function summarize(b,answers,stoppedEarly=false){
  return {version:'repsych.home-baseline.v2',createdAt:new Date().toISOString(),baseline:clone(b),followups:clone(answers),routing:ranked,
  evidence:tested,unexploredDomains:bank.groups.filter(g=>!tested.some(e=>e.domain===g.id)).map(g=>({id:g.id,label:g.label})),
  protectedRequirements:clone(q6),reviewBeforeSearching:review,clarify:clone(q6.clarify||[]),
- coverage:{baselineCompleted:Object.keys(b).length,followupsAnswered:Object.keys(answers).length,maximumFollowups:MAX_FOLLOWUPS,stopReason:stoppedEarly?'user-finished-early':Object.keys(answers).length>=MAX_FOLLOWUPS?'question-limit':'selected-domains-reviewed'},
+ coverage:{baselineCompleted:Object.keys(b).length,followupsReviewed:Object.keys(answers).length,followupsAnswered:Object.values(answers).filter(a=>a.status==='answered'&&a.choice!==null).length,maximumFollowups:MAX_FOLLOWUPS,stopReason:stoppedEarly?'user-finished-early':Object.keys(answers).length>=MAX_FOLLOWUPS?'question-limit':'selected-domains-reviewed'},
  interpretation:'Authored preference exercises, not a validated personality assessment, affordability calculation, or property recommendation. Unasked and unresolved preferences remain unknown.'};
 }
 return {MAX_FOLLOWUPS,route,evidence,next,materialize,conflicts,summarize};
