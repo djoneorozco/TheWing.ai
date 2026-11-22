@@ -36,7 +36,7 @@ assert.equal(await page.locator('[data-baseline-step="2"]').isVisible(),true);
 assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);count++;
 // Real iframe handshake keeps the existing Webflow protocol and rejects other origins.
 const embed=await browser.newPage();await embed.goto(new URL('tests/host.html',BASE).href);await embed.waitForFunction(()=>window.messages.some(x=>x.type==='ready'));
-const frame=embed.frames().find(f=>f.parentFrame()&&f.url().includes('/RE-Psych/'));await frame.waitForSelector('#pcsaiou-dialog[open]');
+const frame=embed.frames().find(f=>f.parentFrame()&&/\/re-psych\//i.test(f.url()));await frame.waitForSelector('#pcsaiou-dialog[open]');
 await frame.evaluate(()=>window.dispatchEvent(new MessageEvent('message',{source:window.parent,origin:'https://untrusted.invalid',data:{source:'re-psych-host',version:1,type:'visibility',visible:false}})));
 assert.equal(await frame.locator('#pcsaiou-dialog').evaluate(d=>d.open),true);
 await frame.locator('#pcsaiou-close').click();await embed.waitForFunction(()=>window.messages.some(x=>x.type==='close'));
