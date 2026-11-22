@@ -1,0 +1,235 @@
+
+.pcsu-q3 {
+  --q3-navy: #193650;
+  --q3-teal: #31887a;
+  --q3-line: #dfddd7;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #fcfaf7;
+  color: var(--q3-navy);
+  font-family: Arial, sans-serif;
+  text-align: left;
+  isolation: isolate;
+}
+
+.pcsu-q3 * {
+  box-sizing: border-box;
+}
+
+.pcsu-q3 h2 {
+  margin: 0 0 10px;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -.3px;
+  text-transform: none;
+  color: var(--q3-navy);
+}
+
+.pcsu-q3 .pcsu-q3-help {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #526775;
+}
+
+.pcsu-q3 .pcsu-q3-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pcsu-q3 .pcsu-q3-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid var(--q3-line);
+  border-radius: 14px;
+  list-style: none;
+}
+
+.pcsu-q3 .pcsu-q3-row.is-dragging {
+  background: #eef7f4;
+  border-color: var(--q3-teal);
+  box-shadow: 0 6px 18px #19365015;
+  position: relative;
+  z-index: 1;
+}
+
+.pcsu-q3 .pcsu-q3-number {
+  flex: 0 0 18px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #277f72;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.pcsu-q3 .pcsu-q3-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.pcsu-q3 button {
+  font-family: inherit;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.pcsu-q3 .pcsu-q3-handle {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8597a2;
+  font-size: 22px;
+  line-height: 1;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pcsu-q3 .pcsu-q3-row.is-dragging .pcsu-q3-handle {
+  cursor: grabbing;
+  color: var(--q3-teal);
+}
+
+.pcsu-q3 .pcsu-q3-arrows {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pcsu-q3 .pcsu-q3-arrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #d4dfe5;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--q3-navy);
+  font-size: 23px;
+  line-height: 1;
+}
+
+.pcsu-q3 .pcsu-q3-arrow:disabled {
+  color: #b8c3cb;
+  border-color: #edf0f2;
+  cursor: default;
+}
+
+.pcsu-q3 button:focus-visible {
+  outline: 3px solid var(--q3-teal);
+  outline-offset: 3px;
+}
+
+.pcsu-q3 .pcsu-q3-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin-top: 20px;
+}
+
+.pcsu-q3 .pcsu-q3-confirm {
+  min-height: 46px;
+  margin: 0;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 28px;
+  background: var(--q3-navy);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.pcsu-q3 .pcsu-q3-confirm:disabled {
+  background: #246d62;
+  cursor: default;
+}
+
+.pcsu-q3 .pcsu-q3-result {
+  flex: 1 1 220px;
+  margin: 0;
+  color: #375f59;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.pcsu-q3 .pcsu-q3-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (hover: hover) {
+  .pcsu-q3 .pcsu-q3-arrow:not(:disabled):hover {
+    background: #eef5f4;
+    border-color: #9bbfb7;
+  }
+
+  .pcsu-q3 .pcsu-q3-confirm:not(:disabled):hover {
+    background: #244863;
+  }
+}
+
+@media (max-width: 480px) {
+  .pcsu-q3 {
+    padding: 18px 12px;
+  }
+
+  .pcsu-q3 h2 {
+    font-size: 19px;
+  }
+
+  .pcsu-q3 .pcsu-q3-row {
+    gap: 7px;
+    padding: 8px;
+    min-height: 66px;
+  }
+
+  .pcsu-q3 .pcsu-q3-label {
+    font-size: 14px;
+  }
+
+  .pcsu-q3 .pcsu-q3-handle {
+    flex-basis: 24px;
+    width: 24px;
+  }
+
+  .pcsu-q3 .pcsu-q3-arrows {
+    gap: 5px;
+  }
+}
