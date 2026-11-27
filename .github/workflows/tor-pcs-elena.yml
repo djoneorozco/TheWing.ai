@@ -1,0 +1,16 @@
+name: TOR PCS Elena
+on:
+  pull_request:
+    paths: ['TOR-PCS-Elena/**', 'PCSU-Resources-Elena/**', 'scripts/*tor-pcs-elena*', 'scripts/test-pcsu-resources-elena.mjs', 'Webflow/TOR-PCS-Elena.html', 'netlify/functions/pcsu-resources-elena.js', 'netlify/functions/_share/pcsu-resources-context.js', '.github/workflows/tor-pcs-elena.yml']
+  workflow_dispatch:
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/build-tor-pcs-elena.mjs
+      - run: git diff --exit-code -- TOR-PCS-Elena/panel.js Webflow/TOR-PCS-Elena.html
+      - run: node --test scripts/test-tor-pcs-elena.mjs scripts/test-pcsu-resources-elena.mjs
