@@ -1,0 +1,460 @@
+#tor-ask-elena-command,#tor-ask-elena-command *{
+      box-sizing: border-box;
+      font-family: Barlow, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+#tor-ask-elena-command{
+      --ae-bg:#06070b;
+      --ae-bg2:#0b0d12;
+      --ae-bg3:#12151b;
+
+      --ae-card:rgba(15,17,22,.82);
+      --ae-card2:rgba(18,20,26,.90);
+      --ae-card3:rgba(22,24,31,.84);
+
+      --ae-ink:#f4efe6;
+      --ae-ink-soft:#e8dece;
+      --ae-muted:rgba(220,207,185,.72);
+      --ae-muted2:rgba(220,207,185,.52);
+
+      --ae-line:rgba(201,170,115,.16);
+      --ae-line2:rgba(201,170,115,.28);
+
+      --ae-gold:#c9aa73;
+      --ae-gold2:#e3c792;
+      --ae-gold3:#a88752;
+      --ae-bronze:#8d6a3d;
+      --ae-cream:#f7f0e3;
+
+      --ae-danger:#d78f97;
+      --ae-warn:#d7b06a;
+      --ae-mint:#9fe7d5;
+
+      --ae-radius:20px;
+      --ae-radius-lg:24px;
+      --ae-shadow:0 22px 55px rgba(0,0,0,.54);
+      --ae-shadow-soft:0 14px 28px rgba(0,0,0,.34);
+      --ae-shadow-deep:0 28px 70px rgba(0,0,0,.60);
+    }
+#tor-ask-elena-command{
+      display:flex;
+      justify-content:center;
+      padding:40px 20px;
+      background:
+        radial-gradient(1200px 720px at 14% 8%, rgba(201,170,115,.10), transparent 52%),
+        radial-gradient(980px 580px at 86% 14%, rgba(227,199,146,.06), transparent 42%),
+        radial-gradient(900px 700px at 52% 100%, rgba(110,89,55,.12), transparent 58%),
+        linear-gradient(180deg, #050608 0%, #090b10 34%, #07080c 100%);
+      color:var(--ae-ink);
+    }
+#tor-ask-elena-command #ae-container{
+      width:100%;
+      max-width:1400px;
+      display:grid;
+      grid-template-columns:280px minmax(0, 1fr);
+      gap:24px;
+      position:relative;
+      align-items:stretch;
+    }
+#tor-ask-elena-command #ae-left{
+      position:relative;
+      overflow:hidden;
+      border-radius:var(--ae-radius-lg);
+      padding:28px 24px;
+      background:
+        radial-gradient(700px 260px at 18% 10%, rgba(201,170,115,.10), transparent 60%),
+        radial-gradient(520px 200px at 82% 16%, rgba(227,199,146,.05), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+      background-color:var(--ae-card);
+      border:1px solid var(--ae-line);
+      box-shadow:var(--ae-shadow);
+      backdrop-filter:blur(14px) saturate(135%);
+      -webkit-backdrop-filter:blur(14px) saturate(135%);
+    }
+#tor-ask-elena-command #ae-left::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,.04), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0));
+      opacity:.72;
+    }
+#tor-ask-elena-command .ae-avatar-wrapper{
+      width:168px;
+      height:168px;
+      margin:0 auto 18px auto;
+      position:relative;
+      border-radius:50%;
+    }
+#tor-ask-elena-command .ae-avatar-wrapper::before{
+      content:"";
+      position:absolute;
+      inset:-30px;
+      border-radius:50%;
+      background:
+        radial-gradient(circle, rgba(201,170,115,.32), rgba(141,106,61,.20), transparent 72%);
+      filter:blur(26px);
+      z-index:0;
+    }
+#tor-ask-elena-command .ae-avatar{
+      position:relative;
+      z-index:2;
+      width:168px;
+      height:168px;
+      border-radius:50%;
+      background-image:url("https://cdn.prod.website-files.com/691facbe35fbba00c096f2b7/69d8372486a31818a04707cc_ElenaProfile.jpg");
+      background-size:cover;
+      background-position:center;
+      border:2px solid rgba(255,255,255,.14);
+      box-shadow:
+        0 0 0 8px rgba(255,255,255,.025),
+        0 18px 32px rgba(0,0,0,.34);
+    }
+#tor-ask-elena-command .ae-name{
+      text-align:center;
+      font-family:"Gilda Display", Georgia, serif;
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:.02em;
+      margin-top:10px;
+      color:var(--ae-cream);
+    }
+#tor-ask-elena-command .ae-sub{
+      text-align:center;
+      font-size:13px;
+      color:var(--ae-muted);
+      margin-top:6px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:800;
+    }
+#tor-ask-elena-command .ae-links{
+      margin-top:26px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      position:relative;
+      z-index:1;
+    }
+#tor-ask-elena-command .ae-link-btn{
+      display:block;
+      text-decoration:none;
+      padding:11px 14px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--ae-ink);
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--ae-line);
+      transition:.22s ease;
+      box-shadow:var(--ae-shadow-soft);
+    }
+#tor-ask-elena-command .ae-link-btn:hover{
+      transform:translateY(-1px);
+      border-color:var(--ae-line2);
+      background:rgba(201,170,115,.08);
+      color:var(--ae-cream);
+    }
+#tor-ask-elena-command .ae-badge{
+      margin-top:28px;
+      text-align:center;
+      font-size:11px;
+      line-height:1.45;
+      color:var(--ae-gold2);
+      opacity:.92;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:800;
+      position:relative;
+      z-index:1;
+    }
+#tor-ask-elena-command #ae-right{
+      position:relative;
+      overflow:hidden;
+      border-radius:var(--ae-radius-lg);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(201,170,115,.10), transparent 55%),
+        radial-gradient(800px 460px at 92% 12%, rgba(227,199,146,.05), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      background-color:var(--ae-card);
+      border:1px solid var(--ae-line);
+      box-shadow:var(--ae-shadow);
+      display:flex;
+      flex-direction:column;
+      height:760px;
+      min-height:760px;
+      max-height:760px;
+      min-width:0;
+      backdrop-filter:blur(14px) saturate(135%);
+      -webkit-backdrop-filter:blur(14px) saturate(135%);
+    }
+#tor-ask-elena-command #ae-right::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0));
+      opacity:.7;
+    }
+#tor-ask-elena-command .ae-topbar{
+      position:relative;
+      z-index:1;
+      flex:0 0 auto;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      padding:20px 20px 12px 20px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01));
+    }
+#tor-ask-elena-command .ae-topbar-copy h2{
+      margin:0;
+      font-family:"Gilda Display", Georgia, serif;
+      font-size:24px;
+      line-height:1.05;
+      color:var(--ae-cream);
+      letter-spacing:.02em;
+    }
+#tor-ask-elena-command .ae-topbar-copy p{
+      margin:6px 0 0 0;
+      font-size:13px;
+      line-height:1.4;
+      font-weight:700;
+      color:var(--ae-muted);
+      max-width:540px;
+    }
+#tor-ask-elena-command .ae-topbar-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      background:rgba(201,170,115,.08);
+      border:1px solid var(--ae-line);
+      font-size:11px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color:var(--ae-gold2);
+      white-space:nowrap;
+      box-shadow:var(--ae-shadow-soft);
+    }
+#tor-ask-elena-command .ae-top-controls{
+      position:relative;
+      z-index:1;
+      flex:0 0 auto;
+      padding:16px 18px 0 18px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+#tor-ask-elena-command .ae-control-input{
+      width:100%;
+      padding:13px 14px;
+      font-size:13px;
+      font-weight:800;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--ae-line);
+      color:var(--ae-cream) !important;
+      border-radius:14px;
+      outline:none;
+      transition:.16s ease;
+      box-shadow:inset 0 14px 28px rgba(0,0,0,.20);
+      min-width:0;
+    }
+#tor-ask-elena-command .ae-control-input:focus,#tor-ask-elena-command .ae-input:focus{
+      border-color:rgba(201,170,115,.52);
+      box-shadow:
+        inset 0 14px 28px rgba(0,0,0,.20),
+        0 0 0 4px rgba(201,170,115,.10);
+    }
+#tor-ask-elena-command .ae-chat{
+      position:relative;
+      z-index:1;
+      flex:1 1 auto;
+      min-height:0;
+      min-width:0;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:24px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      scroll-behavior:smooth;
+      overscroll-behavior:contain;
+    }
+#tor-ask-elena-command .ae-msg{
+      max-width:82%;
+      padding:13px 15px;
+      border-radius:16px;
+      font-size:14px;
+      line-height:1.55;
+      white-space:pre-wrap;
+      word-break:break-word;
+      overflow-wrap:anywhere;
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      color:var(--ae-cream) !important;
+      box-shadow:var(--ae-shadow-soft);
+      border:1px solid rgba(255,255,255,.10);
+      flex:0 0 auto;
+    }
+#tor-ask-elena-command .ae-user{
+      align-self:flex-end;
+      background:
+        radial-gradient(220px 110px at 20% 25%, rgba(201,170,115,.14), transparent 65%),
+        rgba(201,170,115,.08);
+      border-color:rgba(201,170,115,.24);
+      color:var(--ae-cream) !important;
+    }
+#tor-ask-elena-command .ae-bot{
+      align-self:flex-start;
+      background:
+        radial-gradient(220px 110px at 20% 25%, rgba(227,199,146,.10), transparent 65%),
+        rgba(255,255,255,.04);
+      border-color:rgba(255,255,255,.10);
+      color:var(--ae-cream) !important;
+    }
+#tor-ask-elena-command .ae-typing{
+      opacity:.92;
+      font-size:12px !important;
+      color:var(--ae-ink-soft) !important;
+    }
+#tor-ask-elena-command .ae-footer{
+      position:relative;
+      z-index:1;
+      flex:0 0 auto;
+      padding:18px;
+      border-top:1px solid rgba(255,255,255,.08);
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:10px;
+      background:rgba(0,0,0,.12);
+    }
+#tor-ask-elena-command .ae-input{
+      width:100%;
+      min-width:0;
+      padding:14px;
+      font-size:14px;
+      font-weight:800;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--ae-line);
+      color:var(--ae-cream) !important;
+      border-radius:14px;
+      outline:none;
+      transition:.16s ease;
+      box-shadow:inset 0 14px 28px rgba(0,0,0,.20);
+    }
+#tor-ask-elena-command .ae-input::placeholder,#tor-ask-elena-command .ae-control-input::placeholder{
+      color:rgba(231,214,186,.55);
+    }
+#tor-ask-elena-command .ae-btn{
+      padding:14px 20px;
+      background:linear-gradient(180deg, rgba(227,199,146,.98), rgba(169,135,82,.95));
+      color:#1b1308;
+      border-radius:14px;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      cursor:pointer;
+      border:none;
+      transition:.22s ease;
+      box-shadow:0 16px 30px rgba(0,0,0,.36);
+      flex:0 0 auto;
+    }
+#tor-ask-elena-command .ae-btn:hover{
+      filter:brightness(1.06);
+      transform:translateY(-1px);
+    }
+#tor-ask-elena-command .ae-btn[disabled]{
+      opacity:.6;
+      cursor:not-allowed;
+      transform:none;
+    }
+#tor-ask-elena-command .tw-caret{
+      display:inline-block;
+      width:1px;
+      height:1.2em;
+      background:currentColor;
+      margin-left:2px;
+      animation:tw-blink 1s steps(1,end) infinite;
+    }
+@media (max-width: 980px){#tor-ask-elena-command #ae-container{
+        grid-template-columns:1fr;
+      }
+#tor-ask-elena-command #ae-right{
+        height:680px;
+        min-height:680px;
+        max-height:680px;
+      }
+#tor-ask-elena-command .ae-topbar{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+}
+
+/* Only the floating shell and Amy's retained controls extend the supplied design. */
+#tor-ask-elena-command{display:block;position:relative;z-index:2147483000;padding:0;background:none;font:14px/1.55 Barlow,Arial,sans-serif;letter-spacing:normal}
+#tor-ask-elena-command [hidden]{display:none!important}
+#tor-ask-elena-command button,#tor-ask-elena-command textarea,#tor-ask-elena-command input{font-family:inherit}
+#tor-ask-elena-command button,#tor-ask-elena-command summary{cursor:pointer}
+#tor-ask-elena-command p{font:inherit;text-transform:none;letter-spacing:normal}
+#tor-ask-elena-command :is(button,a,input,textarea,summary):focus-visible{outline:3px solid var(--ae-gold2);outline-offset:3px}
+#tor-ask-elena-command .amy-launch{position:fixed;right:24px;bottom:48px;display:flex;align-items:center;gap:11px;padding:9px 23px 9px 10px;border:1px solid var(--ae-line2);border-radius:99px;background:linear-gradient(145deg,rgba(40,36,29,.96),rgba(15,17,22,.94));color:var(--ae-cream);box-shadow:var(--ae-shadow);backdrop-filter:blur(14px);text-align:left}
+#tor-ask-elena-command .elena-launch-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid var(--ae-line2);flex:none}
+#tor-ask-elena-command .amy-launch strong{display:block;font-size:16px}
+#tor-ask-elena-command .amy-launch small{display:block;color:var(--ae-gold2);font-size:11px}
+#tor-ask-elena-command #ae-container{position:fixed;right:22px;bottom:44px;width:min(980px,calc(100vw - 44px));height:min(760px,calc(100dvh - 88px));max-width:none;grid-template-columns:280px minmax(0,1fr);gap:20px;isolation:isolate}
+#tor-ask-elena-command #ae-left{min-height:0;overflow-y:auto;background-color:rgba(15,17,22,.94)}
+#tor-ask-elena-command #ae-right{height:100%;min-height:0;max-height:none;background-color:rgba(15,17,22,.94)}
+#tor-ask-elena-command .ae-name{font-family:"Gilda Display",Georgia,serif}
+#tor-ask-elena-command .ae-topbar-copy h2{font-family:"Gilda Display",Georgia,serif;font-weight:400;text-transform:none}
+#tor-ask-elena-command .ae-topbar-copy p{font-size:13px;line-height:1.4}
+#tor-ask-elena-command .elena-header-actions{display:flex;gap:10px;align-items:center;flex:none}
+#tor-ask-elena-command .amy-close{width:32px;height:32px;flex:none;border-radius:50%;border:1px solid var(--ae-line2);color:var(--ae-cream);background:rgba(255,255,255,.04);font-size:22px;line-height:1}
+#tor-ask-elena-command .elena-shortcuts{position:relative;z-index:1}
+#tor-ask-elena-command .elena-shortcuts>summary{display:none;color:var(--ae-gold2);font-size:12px;font-weight:800}
+#tor-ask-elena-command .ae-link-btn{width:100%;text-align:left;line-height:1.4}
+#tor-ask-elena-command .elena-context-card{padding:12px 14px;background:rgba(255,255,255,.05);border:1px solid var(--ae-line);border-radius:14px}
+#tor-ask-elena-command .amy-section{display:block;color:var(--ae-gold2);font-size:11px;letter-spacing:.03em}
+#tor-ask-elena-command .amy-context-text{margin:4px 0 0;color:var(--ae-ink-soft);font-size:12px;line-height:1.45}
+#tor-ask-elena-command .amy-prompts{position:relative;z-index:1;display:flex;gap:7px;flex-wrap:wrap;padding:12px 18px 0;flex:none}
+#tor-ask-elena-command .amy-prompts button{padding:7px 10px;border:1px solid var(--ae-line);border-radius:999px;background:rgba(255,255,255,.04);color:var(--ae-ink-soft);font-size:11px}
+#tor-ask-elena-command .ae-chat{scrollbar-width:thin;scrollbar-color:#c9aa7366 transparent}
+#tor-ask-elena-command .amy-message{max-width:92%;min-width:0;flex:none;align-self:flex-start;margin:0}
+#tor-ask-elena-command .amy-message>strong{display:block;color:var(--ae-gold2);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin:0 4px 6px}
+#tor-ask-elena-command .amy-copy{padding:13px 15px;border-radius:16px;background:radial-gradient(220px 110px at 20% 25%,rgba(227,199,146,.10),transparent 65%),rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);box-shadow:var(--ae-shadow-soft);font-size:14px;line-height:1.55;color:var(--ae-cream);overflow-wrap:anywhere}
+#tor-ask-elena-command .amy-copy>p{margin:0;white-space:pre-wrap}
+#tor-ask-elena-command .amy-message[data-role=user]{align-self:flex-end}
+#tor-ask-elena-command .amy-message[data-role=user] .amy-copy{background:radial-gradient(220px 110px at 20% 25%,rgba(201,170,115,.14),transparent 65%),rgba(201,170,115,.08);border-color:rgba(201,170,115,.24)}
+#tor-ask-elena-command .amy-message[data-role=user]>strong{text-align:right}
+#tor-ask-elena-command .amy-facts{margin:12px 0 0;padding-top:8px;border-top:1px solid var(--ae-line)}
+#tor-ask-elena-command .amy-facts>div{display:flex;justify-content:space-between;gap:16px;padding:6px 0}
+#tor-ask-elena-command .amy-facts dt{flex:1;font-size:12px;color:var(--ae-ink-soft);font-weight:400}
+#tor-ask-elena-command .amy-facts dd{margin:0;max-width:48%;text-align:right;font-size:12px;font-variant-numeric:tabular-nums}
+#tor-ask-elena-command .amy-scenario{margin-top:12px;padding:12px;border:1px solid var(--ae-line2);border-radius:14px;background:rgba(201,170,115,.04)}
+#tor-ask-elena-command .amy-scenario summary{color:var(--ae-gold2);font-size:12px}
+#tor-ask-elena-command .amy-scenario p{margin:9px 0 0;color:var(--ae-muted);font-size:11px}
+#tor-ask-elena-command .amy-sources{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#tor-ask-elena-command .amy-sources a{font-size:12px;color:var(--ae-gold2);text-underline-offset:3px}
+#tor-ask-elena-command .amy-composer{position:relative;z-index:1;flex:none;padding:12px 18px 15px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.12)}
+#tor-ask-elena-command .amy-status{font-size:11px;line-height:1.4;color:var(--ae-ink-soft);margin:0 0 7px;min-height:15px}
+#tor-ask-elena-command .ae-footer{padding:0;border:0;background:none;align-items:end}
+#tor-ask-elena-command textarea.ae-input{display:block;resize:none;margin:0;height:52px;max-height:108px;line-height:1.5;font-weight:500}
+#tor-ask-elena-command .ae-btn{height:52px;white-space:nowrap}
+#tor-ask-elena-command .amy-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;font-size:11px;color:var(--ae-ink-soft)}
+#tor-ask-elena-command .amy-controls label{display:flex;gap:7px;align-items:center;margin:0;font:inherit;text-transform:none;letter-spacing:normal;cursor:pointer}
+#tor-ask-elena-command .amy-share{width:14px;height:14px;min-width:14px;flex:none;margin:0;accent-color:var(--ae-gold)}
+#tor-ask-elena-command .amy-reset{padding:0;border:0;background:none;color:var(--ae-gold2);font-size:11px;text-decoration:underline;text-underline-offset:3px}
+#tor-ask-elena-command .amy-privacy{margin:9px 0 0;color:var(--ae-muted);font-size:10px;line-height:1.4}
+@media(min-width:761px){#tor-ask-elena-command .ae-topbar{flex-direction:row}#tor-ask-elena-command .elena-shortcuts:not([open])>.ae-links{display:flex}}
+@media(max-width:980px) and (min-width:761px){#tor-ask-elena-command #ae-container{grid-template-columns:240px minmax(0,1fr);gap:16px}#tor-ask-elena-command #ae-left{padding:24px 18px}#tor-ask-elena-command .ae-topbar-pill{display:none}}
+@media(max-width:760px){#tor-ask-elena-command #ae-container{inset:10px 10px max(40px,env(safe-area-inset-bottom));width:auto;height:auto;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:8px}#tor-ask-elena-command #ae-left{padding:12px 16px;border-radius:20px;overflow:visible}#tor-ask-elena-command .elena-profile{display:flex;align-items:center;gap:12px}#tor-ask-elena-command .ae-avatar-wrapper,#tor-ask-elena-command .ae-avatar{width:46px;height:46px;margin:0;flex:none}#tor-ask-elena-command .ae-avatar-wrapper:before{inset:-10px;filter:blur(14px)}#tor-ask-elena-command .ae-name{text-align:left;margin:0;font-size:23px}#tor-ask-elena-command .ae-sub{text-align:left;margin-top:4px;font-size:9px}#tor-ask-elena-command .ae-badge{display:none}#tor-ask-elena-command .elena-shortcuts>summary{display:block;margin-top:10px}#tor-ask-elena-command .ae-links{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:160px;overflow:auto}#tor-ask-elena-command .ae-link-btn{padding:9px;font-size:10px;letter-spacing:.03em}#tor-ask-elena-command .ae-topbar{flex-direction:row;padding:14px 16px 12px;gap:8px}#tor-ask-elena-command .ae-topbar-pill{display:none}#tor-ask-elena-command .ae-topbar-copy h2{font-size:24px}#tor-ask-elena-command .ae-top-controls{padding:10px 12px 0}#tor-ask-elena-command .elena-context-card{padding:9px 11px}#tor-ask-elena-command .amy-prompts{padding:9px 12px 0;gap:5px}#tor-ask-elena-command .amy-prompts button{font-size:10px;padding:6px 9px}#tor-ask-elena-command .ae-chat{padding:15px 12px;gap:12px}#tor-ask-elena-command .amy-message{max-width:96%}#tor-ask-elena-command .amy-copy{font-size:13px;padding:12px}#tor-ask-elena-command .amy-composer{padding:10px 12px 12px}#tor-ask-elena-command textarea.ae-input{font-size:16px;height:52px;padding:12px}#tor-ask-elena-command .ae-btn{padding:12px}#tor-ask-elena-command .amy-launch{right:14px;bottom:48px}}
+@media(max-height:600px){#tor-ask-elena-command #ae-container{top:8px;bottom:34px;height:auto}#tor-ask-elena-command .amy-context{display:none}#tor-ask-elena-command .amy-privacy{font-size:9px}#tor-ask-elena-command .amy-prompts{padding-top:6px}}
+@media(prefers-reduced-motion:reduce){#tor-ask-elena-command *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}

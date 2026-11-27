@@ -1,0 +1,592 @@
+<!-- TOR Ask Elena Command Center. Replace only the current Ask Amy embed. -->
+<link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+#tor-ask-elena-command,#tor-ask-elena-command *{
+      box-sizing: border-box;
+      font-family: Barlow, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+#tor-ask-elena-command{
+      --ae-bg:#06070b;
+      --ae-bg2:#0b0d12;
+      --ae-bg3:#12151b;
+
+      --ae-card:rgba(15,17,22,.82);
+      --ae-card2:rgba(18,20,26,.90);
+      --ae-card3:rgba(22,24,31,.84);
+
+      --ae-ink:#f4efe6;
+      --ae-ink-soft:#e8dece;
+      --ae-muted:rgba(220,207,185,.72);
+      --ae-muted2:rgba(220,207,185,.52);
+
+      --ae-line:rgba(201,170,115,.16);
+      --ae-line2:rgba(201,170,115,.28);
+
+      --ae-gold:#c9aa73;
+      --ae-gold2:#e3c792;
+      --ae-gold3:#a88752;
+      --ae-bronze:#8d6a3d;
+      --ae-cream:#f7f0e3;
+
+      --ae-danger:#d78f97;
+      --ae-warn:#d7b06a;
+      --ae-mint:#9fe7d5;
+
+      --ae-radius:20px;
+      --ae-radius-lg:24px;
+      --ae-shadow:0 22px 55px rgba(0,0,0,.54);
+      --ae-shadow-soft:0 14px 28px rgba(0,0,0,.34);
+      --ae-shadow-deep:0 28px 70px rgba(0,0,0,.60);
+    }
+#tor-ask-elena-command{
+      display:flex;
+      justify-content:center;
+      padding:40px 20px;
+      background:
+        radial-gradient(1200px 720px at 14% 8%, rgba(201,170,115,.10), transparent 52%),
+        radial-gradient(980px 580px at 86% 14%, rgba(227,199,146,.06), transparent 42%),
+        radial-gradient(900px 700px at 52% 100%, rgba(110,89,55,.12), transparent 58%),
+        linear-gradient(180deg, #050608 0%, #090b10 34%, #07080c 100%);
+      color:var(--ae-ink);
+    }
+#tor-ask-elena-command #ae-container{
+      width:100%;
+      max-width:1400px;
+      display:grid;
+      grid-template-columns:280px minmax(0, 1fr);
+      gap:24px;
+      position:relative;
+      align-items:stretch;
+    }
+#tor-ask-elena-command #ae-left{
+      position:relative;
+      overflow:hidden;
+      border-radius:var(--ae-radius-lg);
+      padding:28px 24px;
+      background:
+        radial-gradient(700px 260px at 18% 10%, rgba(201,170,115,.10), transparent 60%),
+        radial-gradient(520px 200px at 82% 16%, rgba(227,199,146,.05), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+      background-color:var(--ae-card);
+      border:1px solid var(--ae-line);
+      box-shadow:var(--ae-shadow);
+      backdrop-filter:blur(14px) saturate(135%);
+      -webkit-backdrop-filter:blur(14px) saturate(135%);
+    }
+#tor-ask-elena-command #ae-left::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,.04), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0));
+      opacity:.72;
+    }
+#tor-ask-elena-command .ae-avatar-wrapper{
+      width:168px;
+      height:168px;
+      margin:0 auto 18px auto;
+      position:relative;
+      border-radius:50%;
+    }
+#tor-ask-elena-command .ae-avatar-wrapper::before{
+      content:"";
+      position:absolute;
+      inset:-30px;
+      border-radius:50%;
+      background:
+        radial-gradient(circle, rgba(201,170,115,.32), rgba(141,106,61,.20), transparent 72%);
+      filter:blur(26px);
+      z-index:0;
+    }
+#tor-ask-elena-command .ae-avatar{
+      position:relative;
+      z-index:2;
+      width:168px;
+      height:168px;
+      border-radius:50%;
+      background-image:url("https://cdn.prod.website-files.com/691facbe35fbba00c096f2b7/69d8372486a31818a04707cc_ElenaProfile.jpg");
+      background-size:cover;
+      background-position:center;
+      border:2px solid rgba(255,255,255,.14);
+      box-shadow:
+        0 0 0 8px rgba(255,255,255,.025),
+        0 18px 32px rgba(0,0,0,.34);
+    }
+#tor-ask-elena-command .ae-name{
+      text-align:center;
+      font-family:"Gilda Display", Georgia, serif;
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:.02em;
+      margin-top:10px;
+      color:var(--ae-cream);
+    }
+#tor-ask-elena-command .ae-sub{
+      text-align:center;
+      font-size:13px;
+      color:var(--ae-muted);
+      margin-top:6px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:800;
+    }
+#tor-ask-elena-command .ae-links{
+      margin-top:26px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      position:relative;
+      z-index:1;
+    }
+#tor-ask-elena-command .ae-link-btn{
+      display:block;
+      text-decoration:none;
+      padding:11px 14px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--ae-ink);
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--ae-line);
+      transition:.22s ease;
+      box-shadow:var(--ae-shadow-soft);
+    }
+#tor-ask-elena-command .ae-link-btn:hover{
+      transform:translateY(-1px);
+      border-color:var(--ae-line2);
+      background:rgba(201,170,115,.08);
+      color:var(--ae-cream);
+    }
+#tor-ask-elena-command .ae-badge{
+      margin-top:28px;
+      text-align:center;
+      font-size:11px;
+      line-height:1.45;
+      color:var(--ae-gold2);
+      opacity:.92;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:800;
+      position:relative;
+      z-index:1;
+    }
+#tor-ask-elena-command #ae-right{
+      position:relative;
+      overflow:hidden;
+      border-radius:var(--ae-radius-lg);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(201,170,115,.10), transparent 55%),
+        radial-gradient(800px 460px at 92% 12%, rgba(227,199,146,.05), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      background-color:var(--ae-card);
+      border:1px solid var(--ae-line);
+      box-shadow:var(--ae-shadow);
+      display:flex;
+      flex-direction:column;
+      height:760px;
+      min-height:760px;
+      max-height:760px;
+      min-width:0;
+      backdrop-filter:blur(14px) saturate(135%);
+      -webkit-backdrop-filter:blur(14px) saturate(135%);
+    }
+#tor-ask-elena-command #ae-right::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0));
+      opacity:.7;
+    }
+#tor-ask-elena-command .ae-topbar{
+      position:relative;
+      z-index:1;
+      flex:0 0 auto;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      padding:20px 20px 12px 20px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01));
+    }
+#tor-ask-elena-command .ae-topbar-copy h2{
+      margin:0;
+      font-family:"Gilda Display", Georgia, serif;
+      font-size:24px;
+      line-height:1.05;
+      color:var(--ae-cream);
+      letter-spacing:.02em;
+    }
+#tor-ask-elena-command .ae-topbar-copy p{
+      margin:6px 0 0 0;
+      font-size:13px;
+      line-height:1.4;
+      font-weight:700;
+      color:var(--ae-muted);
+      max-width:540px;
+    }
+#tor-ask-elena-command .ae-topbar-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      background:rgba(201,170,115,.08);
+      border:1px solid var(--ae-line);
+      font-size:11px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color:var(--ae-gold2);
+      white-space:nowrap;
+      box-shadow:var(--ae-shadow-soft);
+    }
+#tor-ask-elena-command .ae-top-controls{
+      position:relative;
+      z-index:1;
+      flex:0 0 auto;
+      padding:16px 18px 0 18px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+#tor-ask-elena-command .ae-control-input{
+      width:100%;
+      padding:13px 14px;
+      font-size:13px;
+      font-weight:800;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--ae-line);
+      color:var(--ae-cream) !important;
+      border-radius:14px;
+      outline:none;
+      transition:.16s ease;
+      box-shadow:inset 0 14px 28px rgba(0,0,0,.20);
+      min-width:0;
+    }
+#tor-ask-elena-command .ae-control-input:focus,#tor-ask-elena-command .ae-input:focus{
+      border-color:rgba(201,170,115,.52);
+      box-shadow:
+        inset 0 14px 28px rgba(0,0,0,.20),
+        0 0 0 4px rgba(201,170,115,.10);
+    }
+#tor-ask-elena-command .ae-chat{
+      position:relative;
+      z-index:1;
+      flex:1 1 auto;
+      min-height:0;
+      min-width:0;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:24px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      scroll-behavior:smooth;
+      overscroll-behavior:contain;
+    }
+#tor-ask-elena-command .ae-msg{
+      max-width:82%;
+      padding:13px 15px;
+      border-radius:16px;
+      font-size:14px;
+      line-height:1.55;
+      white-space:pre-wrap;
+      word-break:break-word;
+      overflow-wrap:anywhere;
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      color:var(--ae-cream) !important;
+      box-shadow:var(--ae-shadow-soft);
+      border:1px solid rgba(255,255,255,.10);
+      flex:0 0 auto;
+    }
+#tor-ask-elena-command .ae-user{
+      align-self:flex-end;
+      background:
+        radial-gradient(220px 110px at 20% 25%, rgba(201,170,115,.14), transparent 65%),
+        rgba(201,170,115,.08);
+      border-color:rgba(201,170,115,.24);
+      color:var(--ae-cream) !important;
+    }
+#tor-ask-elena-command .ae-bot{
+      align-self:flex-start;
+      background:
+        radial-gradient(220px 110px at 20% 25%, rgba(227,199,146,.10), transparent 65%),
+        rgba(255,255,255,.04);
+      border-color:rgba(255,255,255,.10);
+      color:var(--ae-cream) !important;
+    }
+#tor-ask-elena-command .ae-typing{
+      opacity:.92;
+      font-size:12px !important;
+      color:var(--ae-ink-soft) !important;
+    }
+#tor-ask-elena-command .ae-footer{
+      position:relative;
+      z-index:1;
+      flex:0 0 auto;
+      padding:18px;
+      border-top:1px solid rgba(255,255,255,.08);
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:10px;
+      background:rgba(0,0,0,.12);
+    }
+#tor-ask-elena-command .ae-input{
+      width:100%;
+      min-width:0;
+      padding:14px;
+      font-size:14px;
+      font-weight:800;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--ae-line);
+      color:var(--ae-cream) !important;
+      border-radius:14px;
+      outline:none;
+      transition:.16s ease;
+      box-shadow:inset 0 14px 28px rgba(0,0,0,.20);
+    }
+#tor-ask-elena-command .ae-input::placeholder,#tor-ask-elena-command .ae-control-input::placeholder{
+      color:rgba(231,214,186,.55);
+    }
+#tor-ask-elena-command .ae-btn{
+      padding:14px 20px;
+      background:linear-gradient(180deg, rgba(227,199,146,.98), rgba(169,135,82,.95));
+      color:#1b1308;
+      border-radius:14px;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      cursor:pointer;
+      border:none;
+      transition:.22s ease;
+      box-shadow:0 16px 30px rgba(0,0,0,.36);
+      flex:0 0 auto;
+    }
+#tor-ask-elena-command .ae-btn:hover{
+      filter:brightness(1.06);
+      transform:translateY(-1px);
+    }
+#tor-ask-elena-command .ae-btn[disabled]{
+      opacity:.6;
+      cursor:not-allowed;
+      transform:none;
+    }
+#tor-ask-elena-command .tw-caret{
+      display:inline-block;
+      width:1px;
+      height:1.2em;
+      background:currentColor;
+      margin-left:2px;
+      animation:tw-blink 1s steps(1,end) infinite;
+    }
+@media (max-width: 980px){#tor-ask-elena-command #ae-container{
+        grid-template-columns:1fr;
+      }
+#tor-ask-elena-command #ae-right{
+        height:680px;
+        min-height:680px;
+        max-height:680px;
+      }
+#tor-ask-elena-command .ae-topbar{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+}
+
+/* Only the floating shell and Amy's retained controls extend the supplied design. */
+#tor-ask-elena-command{display:block;position:relative;z-index:2147483000;padding:0;background:none;font:14px/1.55 Barlow,Arial,sans-serif;letter-spacing:normal}
+#tor-ask-elena-command [hidden]{display:none!important}
+#tor-ask-elena-command button,#tor-ask-elena-command textarea,#tor-ask-elena-command input{font-family:inherit}
+#tor-ask-elena-command button,#tor-ask-elena-command summary{cursor:pointer}
+#tor-ask-elena-command p{font:inherit;text-transform:none;letter-spacing:normal}
+#tor-ask-elena-command :is(button,a,input,textarea,summary):focus-visible{outline:3px solid var(--ae-gold2);outline-offset:3px}
+#tor-ask-elena-command .amy-launch{position:fixed;right:24px;bottom:48px;display:flex;align-items:center;gap:11px;padding:9px 23px 9px 10px;border:1px solid var(--ae-line2);border-radius:99px;background:linear-gradient(145deg,rgba(40,36,29,.96),rgba(15,17,22,.94));color:var(--ae-cream);box-shadow:var(--ae-shadow);backdrop-filter:blur(14px);text-align:left}
+#tor-ask-elena-command .elena-launch-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid var(--ae-line2);flex:none}
+#tor-ask-elena-command .amy-launch strong{display:block;font-size:16px}
+#tor-ask-elena-command .amy-launch small{display:block;color:var(--ae-gold2);font-size:11px}
+#tor-ask-elena-command #ae-container{position:fixed;right:22px;bottom:44px;width:min(980px,calc(100vw - 44px));height:min(760px,calc(100dvh - 88px));max-width:none;grid-template-columns:280px minmax(0,1fr);gap:20px;isolation:isolate}
+#tor-ask-elena-command #ae-left{min-height:0;overflow-y:auto;background-color:rgba(15,17,22,.94)}
+#tor-ask-elena-command #ae-right{height:100%;min-height:0;max-height:none;background-color:rgba(15,17,22,.94)}
+#tor-ask-elena-command .ae-name{font-family:"Gilda Display",Georgia,serif}
+#tor-ask-elena-command .ae-topbar-copy h2{font-family:"Gilda Display",Georgia,serif;font-weight:400;text-transform:none}
+#tor-ask-elena-command .ae-topbar-copy p{font-size:13px;line-height:1.4}
+#tor-ask-elena-command .elena-header-actions{display:flex;gap:10px;align-items:center;flex:none}
+#tor-ask-elena-command .amy-close{width:32px;height:32px;flex:none;border-radius:50%;border:1px solid var(--ae-line2);color:var(--ae-cream);background:rgba(255,255,255,.04);font-size:22px;line-height:1}
+#tor-ask-elena-command .elena-shortcuts{position:relative;z-index:1}
+#tor-ask-elena-command .elena-shortcuts>summary{display:none;color:var(--ae-gold2);font-size:12px;font-weight:800}
+#tor-ask-elena-command .ae-link-btn{width:100%;text-align:left;line-height:1.4}
+#tor-ask-elena-command .elena-context-card{padding:12px 14px;background:rgba(255,255,255,.05);border:1px solid var(--ae-line);border-radius:14px}
+#tor-ask-elena-command .amy-section{display:block;color:var(--ae-gold2);font-size:11px;letter-spacing:.03em}
+#tor-ask-elena-command .amy-context-text{margin:4px 0 0;color:var(--ae-ink-soft);font-size:12px;line-height:1.45}
+#tor-ask-elena-command .amy-prompts{position:relative;z-index:1;display:flex;gap:7px;flex-wrap:wrap;padding:12px 18px 0;flex:none}
+#tor-ask-elena-command .amy-prompts button{padding:7px 10px;border:1px solid var(--ae-line);border-radius:999px;background:rgba(255,255,255,.04);color:var(--ae-ink-soft);font-size:11px}
+#tor-ask-elena-command .ae-chat{scrollbar-width:thin;scrollbar-color:#c9aa7366 transparent}
+#tor-ask-elena-command .amy-message{max-width:92%;min-width:0;flex:none;align-self:flex-start;margin:0}
+#tor-ask-elena-command .amy-message>strong{display:block;color:var(--ae-gold2);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin:0 4px 6px}
+#tor-ask-elena-command .amy-copy{padding:13px 15px;border-radius:16px;background:radial-gradient(220px 110px at 20% 25%,rgba(227,199,146,.10),transparent 65%),rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);box-shadow:var(--ae-shadow-soft);font-size:14px;line-height:1.55;color:var(--ae-cream);overflow-wrap:anywhere}
+#tor-ask-elena-command .amy-copy>p{margin:0;white-space:pre-wrap}
+#tor-ask-elena-command .amy-message[data-role=user]{align-self:flex-end}
+#tor-ask-elena-command .amy-message[data-role=user] .amy-copy{background:radial-gradient(220px 110px at 20% 25%,rgba(201,170,115,.14),transparent 65%),rgba(201,170,115,.08);border-color:rgba(201,170,115,.24)}
+#tor-ask-elena-command .amy-message[data-role=user]>strong{text-align:right}
+#tor-ask-elena-command .amy-facts{margin:12px 0 0;padding-top:8px;border-top:1px solid var(--ae-line)}
+#tor-ask-elena-command .amy-facts>div{display:flex;justify-content:space-between;gap:16px;padding:6px 0}
+#tor-ask-elena-command .amy-facts dt{flex:1;font-size:12px;color:var(--ae-ink-soft);font-weight:400}
+#tor-ask-elena-command .amy-facts dd{margin:0;max-width:48%;text-align:right;font-size:12px;font-variant-numeric:tabular-nums}
+#tor-ask-elena-command .amy-scenario{margin-top:12px;padding:12px;border:1px solid var(--ae-line2);border-radius:14px;background:rgba(201,170,115,.04)}
+#tor-ask-elena-command .amy-scenario summary{color:var(--ae-gold2);font-size:12px}
+#tor-ask-elena-command .amy-scenario p{margin:9px 0 0;color:var(--ae-muted);font-size:11px}
+#tor-ask-elena-command .amy-sources{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#tor-ask-elena-command .amy-sources a{font-size:12px;color:var(--ae-gold2);text-underline-offset:3px}
+#tor-ask-elena-command .amy-composer{position:relative;z-index:1;flex:none;padding:12px 18px 15px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.12)}
+#tor-ask-elena-command .amy-status{font-size:11px;line-height:1.4;color:var(--ae-ink-soft);margin:0 0 7px;min-height:15px}
+#tor-ask-elena-command .ae-footer{padding:0;border:0;background:none;align-items:end}
+#tor-ask-elena-command textarea.ae-input{display:block;resize:none;margin:0;height:52px;max-height:108px;line-height:1.5;font-weight:500}
+#tor-ask-elena-command .ae-btn{height:52px;white-space:nowrap}
+#tor-ask-elena-command .amy-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;font-size:11px;color:var(--ae-ink-soft)}
+#tor-ask-elena-command .amy-controls label{display:flex;gap:7px;align-items:center;margin:0;font:inherit;text-transform:none;letter-spacing:normal;cursor:pointer}
+#tor-ask-elena-command .amy-share{width:14px;height:14px;min-width:14px;flex:none;margin:0;accent-color:var(--ae-gold)}
+#tor-ask-elena-command .amy-reset{padding:0;border:0;background:none;color:var(--ae-gold2);font-size:11px;text-decoration:underline;text-underline-offset:3px}
+#tor-ask-elena-command .amy-privacy{margin:9px 0 0;color:var(--ae-muted);font-size:10px;line-height:1.4}
+@media(min-width:761px){#tor-ask-elena-command .ae-topbar{flex-direction:row}#tor-ask-elena-command .elena-shortcuts:not([open])>.ae-links{display:flex}}
+@media(max-width:980px) and (min-width:761px){#tor-ask-elena-command #ae-container{grid-template-columns:240px minmax(0,1fr);gap:16px}#tor-ask-elena-command #ae-left{padding:24px 18px}#tor-ask-elena-command .ae-topbar-pill{display:none}}
+@media(max-width:760px){#tor-ask-elena-command #ae-container{inset:10px 10px max(40px,env(safe-area-inset-bottom));width:auto;height:auto;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:8px}#tor-ask-elena-command #ae-left{padding:12px 16px;border-radius:20px;overflow:visible}#tor-ask-elena-command .elena-profile{display:flex;align-items:center;gap:12px}#tor-ask-elena-command .ae-avatar-wrapper,#tor-ask-elena-command .ae-avatar{width:46px;height:46px;margin:0;flex:none}#tor-ask-elena-command .ae-avatar-wrapper:before{inset:-10px;filter:blur(14px)}#tor-ask-elena-command .ae-name{text-align:left;margin:0;font-size:23px}#tor-ask-elena-command .ae-sub{text-align:left;margin-top:4px;font-size:9px}#tor-ask-elena-command .ae-badge{display:none}#tor-ask-elena-command .elena-shortcuts>summary{display:block;margin-top:10px}#tor-ask-elena-command .ae-links{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:160px;overflow:auto}#tor-ask-elena-command .ae-link-btn{padding:9px;font-size:10px;letter-spacing:.03em}#tor-ask-elena-command .ae-topbar{flex-direction:row;padding:14px 16px 12px;gap:8px}#tor-ask-elena-command .ae-topbar-pill{display:none}#tor-ask-elena-command .ae-topbar-copy h2{font-size:24px}#tor-ask-elena-command .ae-top-controls{padding:10px 12px 0}#tor-ask-elena-command .elena-context-card{padding:9px 11px}#tor-ask-elena-command .amy-prompts{padding:9px 12px 0;gap:5px}#tor-ask-elena-command .amy-prompts button{font-size:10px;padding:6px 9px}#tor-ask-elena-command .ae-chat{padding:15px 12px;gap:12px}#tor-ask-elena-command .amy-message{max-width:96%}#tor-ask-elena-command .amy-copy{font-size:13px;padding:12px}#tor-ask-elena-command .amy-composer{padding:10px 12px 12px}#tor-ask-elena-command textarea.ae-input{font-size:16px;height:52px;padding:12px}#tor-ask-elena-command .ae-btn{padding:12px}#tor-ask-elena-command .amy-launch{right:14px;bottom:48px}}
+@media(max-height:600px){#tor-ask-elena-command #ae-container{top:8px;bottom:34px;height:auto}#tor-ask-elena-command .amy-context{display:none}#tor-ask-elena-command .amy-privacy{font-size:9px}#tor-ask-elena-command .amy-prompts{padding-top:6px}}
+@media(prefers-reduced-motion:reduce){#tor-ask-elena-command *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+<div id="tor-ask-elena-command" data-endpoint="https://thewing.netlify.app/api/pcsu-ask-amy" data-tool-origin="https://thewing.netlify.app"></div>
+<script>
+/* PCSU-Ask-Elena: presentation + explicitly allowlisted Financial Guidance inputs. */
+(() => {
+  'use strict';
+  function boot(){
+    const root=document.getElementById('tor-ask-elena-command');if(!root||root.dataset.ready)return;root.dataset.ready='1';
+    root.innerHTML="<button class=\"amy-launch\" type=\"button\" aria-expanded=\"false\" aria-controls=\"ae-container\"><img class=\"elena-launch-avatar\" src=\"https://cdn.prod.website-files.com/691facbe35fbba00c096f2b7/69d8372486a31818a04707cc_ElenaProfile.jpg\" alt=\"\" width=\"44\" height=\"44\"><span><strong>Ask Elena</strong><small>Your financial guidance companion</small></span></button>\n<aside id=\"ae-container\" class=\"amy-panel\" aria-label=\"Ask Elena financial guidance\" hidden>\n  <section id=\"ae-left\" aria-label=\"Elena and helpful links\">\n    <div class=\"elena-profile\"><div class=\"ae-avatar-wrapper\"><div class=\"ae-avatar\" role=\"img\" aria-label=\"Elena\"></div></div><div class=\"elena-profile-copy\"><div class=\"ae-name\">Elena</div><div class=\"ae-sub\">A.I. Concierge • OrozcoRealty</div></div></div>\n    <details class=\"elena-shortcuts\" open><summary>Helpful links</summary><nav class=\"ae-links\" aria-label=\"Orozco Realty resources\">\n      <a class=\"ae-link-btn\" href=\"https://orozcorealty.webflow.io/military/va-homebuying-guide\" target=\"_blank\" rel=\"noopener noreferrer\">VA Homebuying Guide</a>\n      <a class=\"ae-link-btn\" href=\"https://orozcorealty.webflow.io/military/home-purchase\" target=\"_blank\" rel=\"noopener noreferrer\">Homebuying Process</a>\n      <a class=\"ae-link-btn\" href=\"https://orozcorealty.webflow.io/military/air-force-pcs-support\" target=\"_blank\" rel=\"noopener noreferrer\">PCS Support</a>\n      <button class=\"ae-link-btn elena-analysis\" type=\"button\">Financial Analysis ↗</button>\n      <a class=\"ae-link-btn\" href=\"https://orozcorealty.webflow.io/contact-orozco-realty\" target=\"_blank\" rel=\"noopener noreferrer\">Contact Orozco Realty</a>\n    </nav></details>\n    <div class=\"ae-badge\">OrozcoRealty • A.I.-Powered<br>Real Estate Intelligence</div>\n  </section>\n  <section id=\"ae-right\" aria-label=\"Chat with Elena\">\n    <header class=\"ae-topbar\"><div class=\"ae-topbar-copy\"><h2>Ask Elena</h2><p>Your real estate &amp; financial guide.</p></div><div class=\"elena-header-actions\"><span class=\"ae-topbar-pill\">The Orozco Realty</span><button type=\"button\" class=\"amy-close\" aria-label=\"Close Ask Elena\">×</button></div></header>\n    <section class=\"amy-context ae-top-controls\" aria-label=\"Connected page context\"><div class=\"elena-context-card\"><strong class=\"amy-section\">Financial Guidance</strong><p class=\"amy-context-text\">Connecting to your page…</p></div></section>\n    <div class=\"amy-prompts\" aria-label=\"Suggested questions\"><button type=\"button\" data-question=\"Help me understand my current financial picture.\">Explain my numbers</button><button type=\"button\" data-question=\"Explain what is included in my current mortgage payment.\">My mortgage</button><button type=\"button\" data-question=\"What information should I review next in my budget?\">What’s next?</button></div>\n    <div id=\"ae-chat\" class=\"amy-chat ae-chat\" role=\"log\" aria-label=\"Conversation with Elena\" aria-live=\"polite\" aria-relevant=\"additions\"></div>\n    <footer class=\"amy-composer\"><p class=\"amy-status\" role=\"status\"></p><form class=\"ae-footer\"><textarea id=\"ae-input\" class=\"ae-input\" maxlength=\"3000\" aria-label=\"Your question for Elena\" placeholder=\"Ask Elena anything…\" rows=\"2\"></textarea><button id=\"ae-send\" class=\"amy-send ae-btn\" type=\"submit\">Send ↗</button></form><div class=\"amy-controls\"><label><input type=\"checkbox\" class=\"amy-share\" checked>Use this page’s numbers</label><button class=\"amy-reset\" type=\"button\">New chat</button></div><p class=\"amy-privacy\">Sending shares connected inputs with TheWing for calculation and AI explanation. Chat clears on reload. Planning guidance, not loan approval.</p></footer>\n  </section>\n</aside>\n";
+    const $=s=>root.querySelector(s),panel=$('.amy-panel'),launch=$('.amy-launch'),chat=$('.amy-chat'),input=$('textarea'),send=$('.amy-send'),status=$('.amy-status'),share=$('.amy-share');
+    const endpoint=root.dataset.endpoint||'https://thewing.netlify.app/api/pcsu-ask-amy';
+    const toolOrigin=root.dataset.toolOrigin||'https://thewing.netlify.app';
+    const mortgageFrame=document.getElementById('pcsu-mortgage-frame'),budgetFrame=document.getElementById('pcsu-budget-frame');
+    const pick=(v,keys)=>Object.fromEntries(keys.filter(k=>v?.[k]!==undefined).map(k=>[k,v[k]]));
+    const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
+    const mortgageKeys=['ready','status','homePrice','downPayment','creditScore','interestRate','termYears','propertyTaxAnnual','insuranceAnnual','hoaMonthly','otherOwnershipMonthly','pmiMonthly','loanType','vaFeeStatus','feePayment','emergencyFund','emergencyFundBasis','emergencyFundUserEntered','hasUserInteracted','closingCosts','prepaidsEscrow','cashAvailable','moveInCosts'];
+    let mortgage=null,budget=null,mRevision=-1,bRevision=-1,section=null,busy=false,controller=null,generation=0,pendingSignature=null,history=[],focusBefore=null,lastIncome='';
+    function income(){
+      const value=window.PCSU_FINANCIAL_INCOME?.getSnapshot?.();if(!object(value))return null;
+      const result=pick(value,['schemaVersion','complete','status','containsEstimates','grossMonthlyIncome','monthlyDeductions','netMonthlyIncome','monthlySavingsContributions','capitalReservesTotal']);
+      result.sources=Array.isArray(value.sources)?value.sources.slice(0,50).map(s=>pick(s,['label','amount','basis'])):[];return result;
+    }
+    function context(){return share.checked?{version:1,income:income(),mortgage,budget}:{version:1};}
+    function signature(){return JSON.stringify(context());}
+    function renderContext(){
+      $('.amy-section').textContent=({income:'With you in · Income',mortgage:'With you in · Mortgage',budget:'With you in · Monthly expenses',analysis:'With you in · Financial analysis'})[section]||'Connected to Financial Guidance';
+      const connected=[];if(income()?.complete)connected.push('Income');if(mortgage?.ready&&mortgage.status==='ready')connected.push(mortgage.hasUserInteracted?'Mortgage':'Example mortgage');if(budget?.status==='ready')connected.push(budget.state?.reviewed?'Reviewed budget':'Draft budget');
+      $('.amy-context-text').textContent=!share.checked?'Page sharing is off. Ask a general question or supply a scenario.':connected.length?connected.join(' · ')+' connected. Updated inputs are used with your next question.':'Start with your income. I’ll help you work through the next step.';
+      if(busy&&pendingSignature!==null&&pendingSignature!==signature())controller?.abort('context_changed');
+    }
+    function trustedFrame(frame){try{return frame&&new URL(frame.src,location.href).origin===toolOrigin;}catch{return false;}}
+    function requestBudget(){if(trustedFrame(budgetFrame))budgetFrame.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:finance-analysis-request',requestId:'pcsu-amy-'+crypto.randomUUID()},toolOrigin);}
+    function requestFrames(){if(trustedFrame(mortgageFrame))mortgageFrame.contentWindow?.postMessage({source:'pcsu-finance-host',version:1,type:'pcsu:mortgage-budget-request'},toolOrigin);requestBudget();}
+    window.addEventListener('message',e=>{
+      const d=e.data;if(e.origin!==toolOrigin||!object(d)||d.version!==1)return;
+      if(e.source===mortgageFrame?.contentWindow&&trustedFrame(mortgageFrame)&&d.source==='pcsu-mortgage-budget'&&d.type==='pcsu:mortgage-budget-state'){
+        const s=d.snapshot;if(s!==null&&(!object(s)||!Number.isSafeInteger(s.revision)||s.revision<mRevision))return;
+        if(s)mRevision=s.revision;const next=s?pick(s,mortgageKeys):null;
+        if(JSON.stringify(next)!==JSON.stringify(mortgage)){mortgage=next;budget=null;requestBudget();}renderContext();
+      }
+      if(e.source===budgetFrame?.contentWindow&&trustedFrame(budgetFrame)&&d.source==='pcsu-finance'){
+        if(d.type==='pcsu:finance-ready'){requestBudget();return;}
+        const s=d.snapshot;if(d.type!=='pcsu:finance-analysis-state'||!object(s)||!Number.isSafeInteger(s.revision)||s.revision<bRevision)return;
+        try{if(JSON.stringify(s).length>50000)return;}catch{return;}
+        bRevision=s.revision;
+        budget={status:s.status,mortgageLinked:s.mortgageLinked,state:pick(s.state,['grossMonthly','netMonthly','savingsMonthly','emergencyFund','bufferMonthly','extraBufferMonthly','reviewed'])};
+        budget.state.items=Array.isArray(s.state?.items)?s.state.items.slice(0,120).map(r=>pick(r,['id','label','category','value','minimumPayment','essential','housing','continues'])):[];renderContext();
+      }
+    });
+    window.addEventListener('pcsu:financial-income-change',()=>{const next=JSON.stringify(income());if(next!==lastIncome){lastIncome=next;budget=null;requestBudget();renderContext();}});
+    mortgageFrame?.addEventListener('load',()=>{mRevision=-1;mortgage=null;budget=null;renderContext();requestFrames();});
+    budgetFrame?.addEventListener('load',()=>{bRevision=-1;budget=null;renderContext();requestBudget();});
+    const sections=[['income','#pcsf-launch'],['mortgage','#pcs1-compare'],['budget','#pcs1-move'],['analysis','#pcs1-plan']];
+    document.addEventListener('focusin',e=>{if(root.contains(e.target))return;for(const [name,selector] of sections)if(e.target.closest?.(selector)){section=name;renderContext();break;}});
+    if('IntersectionObserver'in window){const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){section=sections.find(x=>entry.target.matches(x[1]))?.[0]||section;renderContext();}},{rootMargin:'-20% 0px -60% 0px'});for(const [,s]of sections){const node=document.querySelector(s);if(node)observer.observe(node);}}
+    function open(){focusBefore=document.activeElement;panel.hidden=false;launch.hidden=true;launch.setAttribute('aria-expanded','true');requestFrames();renderContext();input.focus();}
+    function close(){panel.hidden=true;launch.hidden=false;launch.setAttribute('aria-expanded','false');(focusBefore?.isConnected?focusBefore:launch).focus({preventScroll:true});}
+    launch.addEventListener('click',open);$('.amy-close').addEventListener('click',close);panel.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close();}});
+    function message(text,role='assistant'){
+      const article=document.createElement('article');article.className='amy-message';article.dataset.role=role;
+      const who=document.createElement('strong');who.textContent=role==='user'?'You':'Elena';const copy=document.createElement('div');copy.className='amy-copy';const p=document.createElement('p');p.textContent=text;copy.append(p);article.append(who,copy);chat.append(article);chat.scrollTop=chat.scrollHeight;return article;
+    }
+    function facts(list,container){
+      if(!Array.isArray(list)||!list.length)return;const dl=document.createElement('dl');dl.className='amy-facts';
+      for(const f of list.slice(0,20)){if(typeof f?.label!=='string'||typeof f.value!=='number'||!Number.isFinite(f.value))continue;const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=f.label;
+        dd.textContent=(String(f.unit).startsWith('USD')?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(f.value):new Intl.NumberFormat('en-US',{maximumFractionDigits:4}).format(f.value))+(f.unit==='USD/month'?' / mo':f.unit==='%'?'%':f.unit==='years'?' years':'');row.append(dt,dd);dl.append(row);}container.append(dl);
+    }
+    function answer(data){
+      const article=message(data.reply),copy=article.querySelector('.amy-copy');facts(data.facts,copy);
+      for(const s of (Array.isArray(data.scenarios)?data.scenarios:[]).slice(0,3)){
+        const details=document.createElement('details');details.className='amy-scenario';details.open=true;
+        const title=document.createElement('summary');title.textContent=s.tool==='calculate_mortgage'?'What-if mortgage · page unchanged':'What-if budget · page unchanged';details.append(title);facts(s.facts,details);
+        const changes=document.createElement('p');changes.textContent='Changed inputs: '+Object.entries(s.changes||{}).map(([k,v])=>k.replace(/([A-Z])/g,' $1').toLowerCase()+': '+String(v)).join(' · ');details.append(changes);
+        const note=document.createElement('p');note.textContent=(s.assumptions||[]).filter(x=>typeof x==='string').join(' ');details.append(note);copy.append(details);
+      }
+      const links=document.createElement('nav');links.className='amy-sources';links.setAttribute('aria-label','Sources for this answer');
+      for(const s of (Array.isArray(data.citations)?data.citations:[]).slice(0,4)){try{const u=new URL(s.url);if(u.protocol!=='https:'||!['www.va.gov','www.consumerfinance.gov','www.dfas.mil'].includes(u.hostname))continue;const a=document.createElement('a');a.href=u.href;a.textContent=s.title;a.target='_blank';a.rel='noopener noreferrer';links.append(a);}catch{}}
+      if(links.childNodes.length)copy.append(links);chat.scrollTop=chat.scrollHeight;
+    }
+    function trimHistory(){while(history.length>12||JSON.stringify(history).length>18000)history.splice(0,2);}
+    async function settleInputs(signal){
+      // Opening/requesting frames can briefly invalidate the expense result.
+      // Wait for a stable source snapshot before spending an AI request.
+      requestFrames();let previous=signature(),stable=0;
+      for(let elapsed=0;elapsed<1800&&!signal.aborted;elapsed+=100){
+        await new Promise(resolve=>setTimeout(resolve,100));const next=signature();
+        stable=next===previous?stable+100:0;previous=next;
+        const updating=share.checked&&(budget?.status==='pending'||budget?.status==='loading'||mortgage?.status==='pending'||mortgage?.status==='loading');
+        if(stable>=200&&!updating)return;
+      }
+    }
+    async function ask(raw){
+      const question=raw.trim();if(busy||!question||question.length>3000)return;
+      busy=true;send.disabled=true;input.value='';const user=message(question,'user');status.textContent='Elena is reviewing your plan…';
+      controller=new AbortController();const active=controller,id=++generation;pendingSignature=null;const timer=setTimeout(()=>active.abort('timeout'),55000);
+      try{
+        await settleInputs(active.signal);if(id!==generation||active.signal.aborted)return;
+        pendingSignature=signature();const captured=context();
+        const response=await fetch(endpoint,{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json'},signal:active.signal,body:JSON.stringify({message:question,history,section,context:captured})});
+        const data=await response.json();if(id!==generation)return;
+        if(!response.ok||!data.ok||typeof data.reply!=='string')throw Error(data.code==='context_invalid'?'context_invalid':'unavailable');
+        if(pendingSignature!==signature())throw Error('context_changed');
+        answer(data);history.push({role:'user',content:question},{role:'assistant',content:(data.history_reply||data.reply).slice(0,3000)});trimHistory();
+        status.textContent=data.explanation_mode==='guided_fallback'?'Calculated summary · AI explanation is temporarily unavailable.':'Based on the inputs shared with this question.';
+      }catch(error){
+        if(id!==generation)return;user.remove();if(!input.value)input.value=question;
+        const changed=active.signal.reason==='context_changed'||error.message==='context_changed';
+        status.textContent=changed?'Your inputs changed. Send again to use your updated numbers.':error.message==='context_invalid'?'The calculators are updating or need review. Your question is ready to retry.':active.signal.reason==='timeout'?'Elena took too long. Your question is ready to retry.':'Elena could not connect. Your question is ready to retry.';
+        requestFrames();
+      }finally{clearTimeout(timer);if(id===generation){busy=false;send.disabled=false;pendingSignature=null;}}
+    }
+    $('form').addEventListener('submit',e=>{e.preventDefault();ask(input.value);});
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();ask(input.value);}});
+    root.querySelectorAll('[data-question]').forEach(b=>b.addEventListener('click',()=>{input.value=b.dataset.question;input.focus();}));
+    share.addEventListener('change',renderContext);
+    function greet(){message('Hi, I’m Elena. We can work through your income, home payment and monthly expenses together. Ask me what your numbers mean—or try a different payment or home price to see how the picture changes.');}
+    $('.amy-reset').addEventListener('click',()=>{generation++;controller?.abort();history=[];busy=false;pendingSignature=null;send.disabled=false;input.value='';chat.replaceChildren();status.textContent='Fresh conversation. Your page entries are still here.';greet();input.focus();});
+
+    const shortcuts=$('.elena-shortcuts');
+    if(window.matchMedia('(max-width:760px)').matches)shortcuts.open=false;
+    $('.elena-analysis').addEventListener('click',()=>{
+      const destination=document.getElementById('pcsu-analysis-link');
+      if(destination){destination.click();}else status.textContent='Use the Financial Analysis button on Financial Guidance to bring your figures with you.';
+    });
+    lastIncome=JSON.stringify(income());greet();requestFrames();renderContext();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
