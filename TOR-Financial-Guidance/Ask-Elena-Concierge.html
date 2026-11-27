@@ -243,7 +243,8 @@
     #ae-live-video{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;pointer-events:none}
     #ae-live-video.ae-playing{opacity:1}
     .ae-call-controls{position:relative;text-align:center;margin:14px 0}
-    #ae-call{border:1px solid var(--ae-line2);color:#1b1308;background:var(--ae-gold2);border-radius:999px;font:700 14px/1.25 Barlow,Arial,sans-serif;padding:10px 18px;cursor:pointer}
+    #ae-mic{display:block;margin:8px auto 0}
+    #ae-call,#ae-mic,#ae-sound{border:1px solid var(--ae-line2);color:#1b1308;background:var(--ae-gold2);border-radius:999px;font:700 14px/1.25 Barlow,Arial,sans-serif;padding:10px 18px;cursor:pointer}
     #ae-call-status{color:var(--ae-ink-soft);font-size:13px;line-height:1.4;margin-top:6px}
     #ae-call-status:empty{display:none}
     @media (max-width:1199px){#ae-side-panel .ae-side-panel-content{padding-top:0}#ae-side-panel #ae-side-panel-close{position:fixed;right:12px;top:12px;z-index:5}#ae-left .ae-links{margin:10px 0 0;display:flex;flex-direction:row;overflow-x:auto;padding:4px}#ae-left .ae-link-btn{white-space:nowrap;flex:none}#ae-left .ae-badge{margin-top:8px}#ae-side-panel #ae-container{gap:8px}#ae-side-panel #ae-right{height:55dvh;min-height:340px;max-height:650px}#ae-side-panel #ae-left{padding:18px 12px 8px}#ae-side-panel .ae-avatar-wrapper{margin-bottom:10px}}
@@ -588,7 +589,7 @@
       <div class="ae-name">Elena</div>
       <div class="ae-sub">A.I. Concierge • OrozcoRealty</div>
 
-      <div class="ae-call-controls"><button type="button" id="ae-call">Talk to Elena</button><div id="ae-call-status" role="status"></div></div>
+      <div class="ae-call-controls"><button type="button" id="ae-call">Talk to Elena</button><button id="ae-mic" type="button" aria-pressed="false" disabled>Microphone off</button><button id="ae-sound" type="button" hidden>Play Elena’s audio</button><div id="ae-call-status" role="status"></div></div>
       <div class="ae-links">
         <a class="ae-link-btn" href="https://orozcorealty.webflow.io/buy/home-page" target="_blank">Buy</a>
         <a class="ae-link-btn" href="https://orozcorealty.webflow.io/sell/home-page" target="_blank">Sell</a>
@@ -631,8 +632,9 @@
   const callButton = byId('ae-call'), faceButton = byId('ae-face-button');
   const status = byId('ae-call-status'), chat = byId('ae-chat');
   const input = byId('ae-input'), send = byId('ae-send');
+  const micButton = byId('ae-mic'), soundButton = byId('ae-sound');
   let current = null;
-  const hello = "Welcome to The Orozco Realty! I’m Elena. Are you looking to buy, sell, plan a military move, or learn about the platform? Choose a section, tap my portrait to talk, or type below. Anam processes voice and typed conversations.";
+  const hello = "Welcome to The Orozco Realty! I’m Elena. Are you looking to buy, sell, plan a military move, or learn about the platform? Choose a section, type below, or turn on your microphone to speak. Anam processes voice and typed conversations.";
   const destinations = new Map(Array.from(root.querySelectorAll('.ae-links a'), link =>
     [link.textContent.trim().toLowerCase(), link.href]));
   function writeMessage(line, role, text) {
@@ -660,6 +662,9 @@
     const label = current ? (current.ready ? 'End conversation' : 'Cancel connection') : 'Talk to Elena';
     callButton.textContent = label;
     faceButton.setAttribute('aria-label', label);
+    micButton.disabled = !current?.ready || !!current.micPending;
+    micButton.setAttribute('aria-pressed', String(!!current?.mic));
+    micButton.textContent = current?.mic ? 'Microphone on' : 'Microphone off';
     status.textContent = message;
     send.disabled = !!current && !current.ready;
   }
@@ -668,10 +673,14 @@
     current = null;
     if (call) {
       call.abort.abort();
+      call.source?.disconnect();
+      call.destination?.stream.getTracks().forEach(track => track.stop());
+      call.audio?.close().catch(() => {});
       clearTimeout(call.timer);
       call.mic?.getTracks().forEach(track => track.stop());
       if (call.client) Promise.resolve(call.client.stopStreaming()).catch(() => {});
     }
+    soundButton.hidden = true;
     video.pause(); video.srcObject = null;
     video.classList.remove('ae-playing');
     render(message);
@@ -683,18 +692,15 @@
     if (/403|origin/i.test(error.message)) return 'Anam could not authorize a call from this website.';
     return 'Elena couldn’t connect. Check your connection and try again.';
   }
-  async function start(useMic) {
+  async function start() {
     if (current || !dialog.open) return null;
     const call = {abort: new AbortController(), ready: false, mic: null, client: null, messages: new Map()};
     current = call;
-    render(useMic ? 'Allow your microphone to talk with Elena.' : 'Connecting to Elena…');
     try {
-      if (useMic) {
-        if (!navigator.mediaDevices?.getUserMedia) throw new Error('Microphone unavailable');
-        const mic = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true}, video: false});
-        if (current !== call) { mic.getTracks().forEach(track => track.stop()); return null; }
-        call.mic = mic;
-      }
+      // A silent input track lets the visitor attach a microphone later in the same session.
+      call.audio = new AudioContext();
+      call.destination = call.audio.createMediaStreamDestination();
+      void call.audio.resume().catch(() => {});
       render('Connecting to Elena…');
       call.timer = setTimeout(() => { if (current === call) stop('The connection timed out. Try again.'); }, 45000);
       const [sdk, response] = await Promise.all([
@@ -705,18 +711,13 @@
       const {sessionToken} = await response.json();
       if (current !== call) return null;
       if (!sessionToken) throw new Error('Missing session');
-      const client = call.client = sdk.createClient(sessionToken, {disableInputAudio: !useMic});
+      const client = call.client = sdk.createClient(sessionToken);
       // Wait for Anam's dialogue engine; the first video frame can arrive before it is ready for a question.
       const waitFor = register => new Promise(resolve => {
         register(resolve);
         call.abort.signal.addEventListener('abort', resolve, {once:true});
       });
       const engineReady = waitFor(done => client.addListener(sdk.AnamEvent.SESSION_READY, done));
-      const greeting = useMic ? Promise.resolve() : waitFor(done => {
-        client.addListener(sdk.AnamEvent.MESSAGE_HISTORY_UPDATED, history => {
-          if (history.some(item => item.role === 'persona' && item.content)) done();
-        });
-      });
       client.addListener(sdk.AnamEvent.CONNECTION_CLOSED, (reason, details) => {
         if (current === call) stop(call.ready ? 'Conversation ended.' : failMessage(new Error(String(reason)+' '+String(details || ''))));
       });
@@ -729,11 +730,12 @@
           else if (line.textContent !== item.content) writeMessage(line, item.role, item.content);
         }
       });
-      await Promise.all([client.streamToVideoElement(video.id, call.mic || undefined), engineReady, greeting]);
+      await Promise.all([client.streamToVideoElement(video.id, call.destination.stream), engineReady]);
       if (current !== call) { await client.stopStreaming(); return null; }
       clearTimeout(call.timer);
       call.ready = true;
-      render(useMic ? 'Microphone on · Speak to Elena' : 'Keyboard conversation · Microphone off');
+      call.timer = setTimeout(() => { if (current === call) stop('Your 60-second conversation has ended.'); }, 60000);
+      render('Type a question or turn on your microphone.');
       return client;
     } catch (error) {
       if (current === call) stop(failMessage(error));
@@ -744,13 +746,50 @@
   root.querySelector('.ae-links').addEventListener('click', event => {
     if (event.target.closest('a')) stop();
   });
-  function toggleCall() { if (current) stop('Conversation ended.'); else void start(true); }
+  dialog.addEventListener('elena-open', () => { void start(); });
+  video.addEventListener('loadedmetadata', () => {
+    const call = current;
+    if (call) video.play().catch(() => { if (current === call && video.paused) soundButton.hidden = false; });
+  });
+  video.addEventListener('playing', () => { soundButton.hidden = true; });
+  soundButton.addEventListener('click', () => { video.play().catch(() => render('Tap Play to hear Elena.')); });
+  micButton.addEventListener('click', async () => {
+    const call = current;
+    if (!call?.ready || call.micPending) return;
+    if (call.mic) {
+      call.source.disconnect();
+      call.mic.getTracks().forEach(track => track.stop());
+      call.mic = call.source = null;
+      render('You can keep typing.');
+      return;
+    }
+    call.micPending = true;
+    render('Allow microphone access to speak.');
+    let stream;
+    let message;
+    try {
+      await call.audio.resume();
+      if (current !== call) return;
+      stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true}, video: false});
+      if (current !== call) return;
+      call.source = call.audio.createMediaStreamSource(stream);
+      call.source.connect(call.destination);
+      call.mic = stream;
+      message = 'Speak to Elena or type below.';
+    } catch { message = 'Microphone unavailable. You can still type.'; }
+    finally {
+      if (stream !== call.mic) stream?.getTracks().forEach(track => track.stop());
+      call.micPending = false;
+      if (current === call) render(message);
+    }
+  });
+  function toggleCall() { if (current) stop('Conversation ended.'); else void start(); }
   faceButton.addEventListener('click', toggleCall);
   callButton.addEventListener('click', toggleCall);
   async function typeQuestion() {
     const message = input.value.trim();
     if (!message || send.disabled) return;
-    const client = current?.ready ? current.client : await start(false);
+    const client = current?.ready ? current.client : await start();
     if (!client || current?.client !== client) return;
     try { client.sendUserMessage(message); bubble('user', message); if (input.value.trim() === message) input.value = ''; }
     catch { status.textContent = 'Please try sending your question again.'; }
@@ -779,6 +818,7 @@
   button.addEventListener("click", () => {
     if (popup.open) return;
     popup.showModal();
+    popup.dispatchEvent(new Event("elena-open"));
     savedOverflow = {
       value:document.documentElement.style.getPropertyValue("overflow"),
       priority:document.documentElement.style.getPropertyPriority("overflow")
