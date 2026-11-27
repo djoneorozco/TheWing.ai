@@ -50,3 +50,9 @@ The existing civilian income utility already exposes `PCSU_FINANCIAL_INCOME` and
 Before publishing, compare the native Webflow element tree with the original and confirm only these three embed contents changed. Publish to staging, verify the income → mortgage → budget flow and Elena's explanation, sources, follow-up, opt-out, and what-if behavior. Leave headings, images, navigation, other embeds, and page metadata untouched.
 
 A branch preview, saved Designer edit, or merged PR does not establish Webflow publication.
+
+## Homepage Anam concierge
+
+Use `Ask-Elena-Concierge.html` in the homepage’s existing floating Ask Elena Code Embed. It includes the launcher, dialog, four section links, and Anam client. Replace the existing embed as a unit to avoid duplicate element IDs. The four anchors supply the destinations for linked section names in Elena’s transcript. Section buttons also work before a conversation starts.
+
+Apply the two fields in `anam-concierge.json` to the existing homepage Elena persona in Anam. The widget token uses that persona’s saved greeting and system prompt. A repository edit alone does not apply those settings or publish the Webflow embed. The financial calculator panel described above has its own separate client.

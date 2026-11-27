@@ -1,0 +1,829 @@
+<!-- ASK ELENA — floating button and right-side panel wrapper -->
+<style>
+  #ae-floating-chat-button {
+    position:fixed;
+    right:24px;
+    bottom:28px;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 22px 10px 10px;
+    border:1px solid #d7b87590;
+    border-radius:999px;
+    background:#151612;
+    color:#f2eee5;
+    box-shadow:0 10px 40px #0006;
+    text-align:left;
+    font:15px/1.5 Barlow,Arial,sans-serif;
+    text-transform:none;
+    letter-spacing:normal;
+    cursor:pointer;
+    box-sizing:border-box;
+  }
+  #ae-floating-chat-button:hover { border-color:#d7b875; background:#24261f; }
+  #ae-floating-chat-button:focus-visible,
+  #ae-side-panel-close:focus-visible { outline:2px solid #d7b875; outline-offset:4px; }
+  #ae-floating-chat-button img {
+    display:block;
+    width:42px;
+    height:42px;
+    border:1px solid #d7b875;
+    border-radius:50%;
+    object-fit:cover;
+    flex:none;
+    box-sizing:border-box;
+  }
+  #ae-floating-chat-button strong { display:block; font-size:17px; font-weight:600; }
+  #ae-floating-chat-button small { display:block; color:#d7b875; font-size:11px; letter-spacing:.06em; }
+
+  #ae-side-panel {
+    box-sizing:border-box;
+    position:fixed;
+    inset:0 0 0 auto;
+    margin:0;
+    width:45vw;
+    max-width:100vw;
+    height:100vh;
+    height:100dvh;
+    max-height:100vh;
+    max-height:100dvh;
+    padding:0;
+    border:0;
+    border-left:1px solid rgba(201,170,115,.28);
+    border-radius:0;
+    background:transparent;
+    color:#f4efe6;
+    box-shadow:none;
+    overflow:auto;
+    overscroll-behavior:contain;
+    scroll-padding:64px 0 24px;
+    scrollbar-color:#8d6a3d transparent;
+  }
+  #ae-side-panel:not([open]) { display:none; }
+  #ae-side-panel[open] { display:block; animation:aeSidePanelIn .24s ease-out; }
+  #ae-side-panel::backdrop { background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none; }
+  #ae-side-panel-close {
+    position:absolute;
+    top:20px;
+    right:12px;
+    z-index:2;
+    box-sizing:border-box;
+    width:44px;
+    height:44px;
+    padding:0;
+    border:1px solid rgba(201,170,115,.28);
+    border-radius:50%;
+    background:#151612;
+    color:#f2eee5;
+    font:24px/1 Arial,sans-serif;
+    cursor:pointer;
+  }
+  #ae-side-panel-close:hover { border-color:#d7b875; background:#24261f; }
+  #ae-side-panel .ae-side-panel-content { padding:56px 0 0; }
+  /* Fit the original two-column interface into the requested 45vw panel. */
+  #ae-side-panel #ae-container {
+    grid-template-columns:clamp(218px, 42%, 280px) minmax(0, 1fr);
+    gap:16px;
+  }
+  #ae-side-panel #ae-right {
+    height:calc(100vh - 56px);
+    height:calc(100dvh - 56px);
+    min-height:0;
+    max-height:none;
+  }
+  #ae-side-panel #ae-left {
+    max-height:calc(100vh - 56px);
+    max-height:calc(100dvh - 56px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  #ae-side-panel .ae-topbar { flex-wrap:wrap; padding-right:72px; }
+  /* Use the original stacked arrangement when the panel is too narrow
+     for both columns, while keeping all of its content available. */
+  @media (max-width:1199px) {
+    #ae-side-panel #ae-container { grid-template-columns:1fr; gap:24px; }
+    #ae-side-panel #ae-left { max-height:none; }
+    #ae-side-panel #ae-right { height:680px; min-height:680px; max-height:680px; }
+  }
+  @media (max-width:600px) {
+    #ae-floating-chat-button { right:16px; bottom:20px; padding-right:17px; }
+    #ae-side-panel {
+      width:100vw;
+      max-width:100vw;
+      border-left:0;
+    }
+    #ae-side-panel .ae-side-panel-content { padding-top:54px; }
+
+  }
+  @keyframes aeSidePanelIn {
+    from { transform:translateX(40px); opacity:0; }
+    to { transform:translateX(0); opacity:1; }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    #ae-side-panel[open] { animation:none; }
+  }
+</style>
+
+<button id="ae-floating-chat-button" type="button" aria-haspopup="dialog" aria-controls="ae-side-panel" aria-expanded="false">
+  <img src="https://cdn.prod.website-files.com/691facbe35fbba00c096f2b7/6adaa0ff7b79bf7cee392ec2_5247c7e0829f26f074b88dba680ef001_A.I%20Model.png" alt="" width="42" height="42">
+  <span><strong>Ask Elena</strong><small>Your TOR concierge</small></span>
+</button>
+
+<dialog id="ae-side-panel" aria-label="Ask Elena">
+  <div class="ae-side-panel-content">
+
+<!-- Ask Elena • Anam voice and video -->
+
+<div id="ask-elena-shell" style="all: initial;">
+  <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ============================================================
+       //#1 GLOBAL RESET + TOKENS
+    ============================================================ */
+    #ask-elena-shell,
+    #ask-elena-shell * {
+      box-sizing: border-box;
+      font-family: Barlow, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    #ask-elena-shell{
+      --ae-bg:#06070b;
+      --ae-bg2:#0b0d12;
+      --ae-bg3:#12151b;
+
+      --ae-card:rgba(15,17,22,.82);
+      --ae-card2:rgba(18,20,26,.90);
+      --ae-card3:rgba(22,24,31,.84);
+
+      --ae-ink:#f4efe6;
+      --ae-ink-soft:#e8dece;
+      --ae-muted:rgba(220,207,185,.72);
+      --ae-muted2:rgba(220,207,185,.52);
+
+      --ae-line:rgba(201,170,115,.16);
+      --ae-line2:rgba(201,170,115,.28);
+
+      --ae-gold:#c9aa73;
+      --ae-gold2:#e3c792;
+      --ae-gold3:#a88752;
+      --ae-bronze:#8d6a3d;
+      --ae-cream:#f7f0e3;
+
+      --ae-danger:#d78f97;
+      --ae-warn:#d7b06a;
+      --ae-mint:#9fe7d5;
+
+      --ae-radius:20px;
+      --ae-radius-lg:24px;
+      --ae-shadow:0 22px 55px rgba(0,0,0,.54);
+      --ae-shadow-soft:0 14px 28px rgba(0,0,0,.34);
+      --ae-shadow-deep:0 28px 70px rgba(0,0,0,.60);
+    }
+
+    /* ============================================================
+       //#2 OUTER SHELL
+    ============================================================ */
+    #ask-elena-shell {
+      display:flex;
+      justify-content:center;
+      padding:40px 20px;
+      background:
+        radial-gradient(1200px 720px at 14% 8%, rgba(201,170,115,.10), transparent 52%),
+        radial-gradient(980px 580px at 86% 14%, rgba(227,199,146,.06), transparent 42%),
+        radial-gradient(900px 700px at 52% 100%, rgba(110,89,55,.12), transparent 58%),
+        linear-gradient(180deg, #050608 0%, #090b10 34%, #07080c 100%);
+      color:var(--ae-ink);
+    }
+
+    #ae-container {
+      width:100%;
+      max-width:1400px;
+      display:grid;
+      grid-template-columns:280px minmax(0, 1fr);
+      gap:24px;
+      position:relative;
+      align-items:stretch;
+    }
+
+    /* ============================================================
+       //#3 LEFT PANEL
+    ============================================================ */
+    #ae-left {
+      position:relative;
+      overflow:hidden;
+      border-radius:var(--ae-radius-lg);
+      padding:28px 24px;
+      background:
+        radial-gradient(700px 260px at 18% 10%, rgba(201,170,115,.10), transparent 60%),
+        radial-gradient(520px 200px at 82% 16%, rgba(227,199,146,.05), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+      background-color:var(--ae-card);
+      border:1px solid var(--ae-line);
+      box-shadow:var(--ae-shadow);
+      backdrop-filter:blur(14px) saturate(135%);
+      -webkit-backdrop-filter:blur(14px) saturate(135%);
+    }
+
+    #ae-left::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,.04), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0));
+      opacity:.72;
+    }
+
+
+    #ae-face-button{display:block;padding:0;overflow:hidden;cursor:pointer;background-color:#302a22;isolation:isolate}
+    #ae-face-button:focus-visible,#ae-call:focus-visible{outline:2px solid var(--ae-gold2);outline-offset:4px}
+    #ae-live-video{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;pointer-events:none}
+    #ae-live-video.ae-playing{opacity:1}
+    .ae-call-controls{position:relative;text-align:center;margin:14px 0}
+    #ae-call{border:1px solid var(--ae-line2);color:#1b1308;background:var(--ae-gold2);border-radius:999px;font:700 14px/1.25 Barlow,Arial,sans-serif;padding:10px 18px;cursor:pointer}
+    #ae-call-status{color:var(--ae-ink-soft);font-size:13px;line-height:1.4;margin-top:6px}
+    #ae-call-status:empty{display:none}
+    @media (max-width:1199px){#ae-side-panel .ae-side-panel-content{padding-top:0}#ae-side-panel #ae-side-panel-close{position:fixed;right:12px;top:12px;z-index:5}#ae-left .ae-links{margin:10px 0 0;display:flex;flex-direction:row;overflow-x:auto;padding:4px}#ae-left .ae-link-btn{white-space:nowrap;flex:none}#ae-left .ae-badge{margin-top:8px}#ae-side-panel #ae-container{gap:8px}#ae-side-panel #ae-right{height:55dvh;min-height:340px;max-height:650px}#ae-side-panel #ae-left{padding:18px 12px 8px}#ae-side-panel .ae-avatar-wrapper{margin-bottom:10px}}
+
+    .ae-avatar-wrapper {
+      width:168px;
+      height:168px;
+      margin:0 auto 18px auto;
+      position:relative;
+      border-radius:50%;
+    }
+
+    .ae-avatar-wrapper::before {
+      content:"";
+      position:absolute;
+      inset:-30px;
+      border-radius:50%;
+      background:
+        radial-gradient(circle, rgba(201,170,115,.32), rgba(141,106,61,.20), transparent 72%);
+      filter:blur(26px);
+      z-index:0;
+    }
+
+    .ae-avatar {
+      position:relative;
+      z-index:2;
+      width:168px;
+      height:168px;
+      border-radius:50%;
+      background-image:url("https://cdn.prod.website-files.com/691facbe35fbba00c096f2b7/69dd8fca181814ed403a6fc4_525d99ea8c2a62bc9bd97a17394ce29d_Salma1.jpg");
+      background-size:cover;
+      background-position:center;
+      border:2px solid rgba(255,255,255,.14);
+      box-shadow:
+        0 0 0 8px rgba(255,255,255,.025),
+        0 18px 32px rgba(0,0,0,.34);
+    }
+
+    .ae-name {
+      text-align:center;
+      font-family:"Gilda Display", Georgia, serif;
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:.02em;
+      margin-top:10px;
+      color:var(--ae-cream);
+    }
+
+    .ae-sub {
+      text-align:center;
+      font-size:13px;
+      color:var(--ae-muted);
+      margin-top:6px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:800;
+    }
+
+    .ae-links {
+      margin-top:26px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      position:relative;
+      z-index:1;
+    }
+
+    .ae-link-btn {
+      display:block;
+      text-decoration:none;
+      padding:11px 14px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--ae-ink);
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--ae-line);
+      transition:.22s ease;
+      box-shadow:var(--ae-shadow-soft);
+    }
+
+    .ae-link-btn:hover {
+      transform:translateY(-1px);
+      border-color:var(--ae-line2);
+      background:rgba(201,170,115,.08);
+      color:var(--ae-cream);
+    }
+
+    .ae-badge {
+      margin-top:28px;
+      text-align:center;
+      font-size:11px;
+      line-height:1.45;
+      color:var(--ae-gold2);
+      opacity:.92;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:800;
+      position:relative;
+      z-index:1;
+    }
+
+    /* ============================================================
+       //#4 RIGHT PANEL
+    ============================================================ */
+    #ae-right {
+      position:relative;
+      overflow:hidden;
+      border-radius:var(--ae-radius-lg);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(201,170,115,.10), transparent 55%),
+        radial-gradient(800px 460px at 92% 12%, rgba(227,199,146,.05), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      background-color:var(--ae-card);
+      border:1px solid var(--ae-line);
+      box-shadow:var(--ae-shadow);
+      display:flex;
+      flex-direction:column;
+      height:760px;
+      min-height:760px;
+      max-height:760px;
+      min-width:0;
+      backdrop-filter:blur(14px) saturate(135%);
+      -webkit-backdrop-filter:blur(14px) saturate(135%);
+    }
+
+    #ae-right::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0));
+      opacity:.7;
+    }
+
+    .ae-topbar{
+      position:relative;
+      z-index:1;
+      flex:0 0 auto;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      padding:20px 20px 12px 20px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01));
+    }
+
+    .ae-topbar-copy h2{
+      margin:0;
+      font-family:"Gilda Display", Georgia, serif;
+      font-size:24px;
+      line-height:1.05;
+      color:var(--ae-cream);
+      letter-spacing:.02em;
+    }
+
+    .ae-topbar-copy p{
+      margin:6px 0 0 0;
+      font-size:13px;
+      line-height:1.4;
+      font-weight:700;
+      color:var(--ae-muted);
+      max-width:540px;
+    }
+
+    .ae-topbar-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      background:rgba(201,170,115,.08);
+      border:1px solid var(--ae-line);
+      font-size:11px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      color:var(--ae-gold2);
+      white-space:nowrap;
+      box-shadow:var(--ae-shadow-soft);
+    }
+
+    .ae-input:focus {
+      border-color:rgba(201,170,115,.52);
+      box-shadow:
+        inset 0 14px 28px rgba(0,0,0,.20),
+        0 0 0 4px rgba(201,170,115,.10);
+    }
+
+    .ae-chat {
+      position:relative;
+      z-index:1;
+      flex:1 1 auto;
+      min-height:0;
+      min-width:0;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:24px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      scroll-behavior:smooth;
+      overscroll-behavior:contain;
+    }
+
+    .ae-msg {
+      max-width:82%;
+      padding:13px 15px;
+      border-radius:16px;
+      font-size:14px;
+      line-height:1.55;
+      white-space:pre-wrap;
+      word-break:break-word;
+      overflow-wrap:anywhere;
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      color:var(--ae-cream) !important;
+      box-shadow:var(--ae-shadow-soft);
+      border:1px solid rgba(255,255,255,.10);
+      flex:0 0 auto;
+    }
+
+    .ae-user {
+      align-self:flex-end;
+      background:
+        radial-gradient(220px 110px at 20% 25%, rgba(201,170,115,.14), transparent 65%),
+        rgba(201,170,115,.08);
+      border-color:rgba(201,170,115,.24);
+      color:var(--ae-cream) !important;
+    }
+
+    .ae-bot {
+      align-self:flex-start;
+      background:
+        radial-gradient(220px 110px at 20% 25%, rgba(227,199,146,.10), transparent 65%),
+        rgba(255,255,255,.04);
+      border-color:rgba(255,255,255,.10);
+      color:var(--ae-cream) !important;
+    }
+
+    .ae-typing {
+      opacity:.92;
+      font-size:12px !important;
+      color:var(--ae-ink-soft) !important;
+    }
+
+    .ae-footer {
+      position:relative;
+      z-index:1;
+      flex:0 0 auto;
+      padding:18px;
+      border-top:1px solid rgba(255,255,255,.08);
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:10px;
+      background:rgba(0,0,0,.12);
+    }
+
+    .ae-input {
+      width:100%;
+      min-width:0;
+      padding:14px;
+      font-size:14px;
+      font-weight:800;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--ae-line);
+      color:var(--ae-cream) !important;
+      border-radius:14px;
+      outline:none;
+      transition:.16s ease;
+      box-shadow:inset 0 14px 28px rgba(0,0,0,.20);
+    }
+
+    .ae-input::placeholder {
+      color:rgba(231,214,186,.55);
+    }
+
+    .ae-btn {
+      padding:14px 20px;
+      background:linear-gradient(180deg, rgba(227,199,146,.98), rgba(169,135,82,.95));
+      color:#1b1308;
+      border-radius:14px;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      cursor:pointer;
+      border:none;
+      transition:.22s ease;
+      box-shadow:0 16px 30px rgba(0,0,0,.36);
+      flex:0 0 auto;
+    }
+
+    .ae-btn:hover {
+      filter:brightness(1.06);
+      transform:translateY(-1px);
+    }
+
+    .ae-btn[disabled] {
+      opacity:.6;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .tw-caret {
+      display:inline-block;
+      width:1px;
+      height:1.2em;
+      background:currentColor;
+      margin-left:2px;
+      animation:tw-blink 1s steps(1,end) infinite;
+    }
+
+    @keyframes tw-blink { 50% { opacity:0; } }
+
+    @media (max-width: 980px){
+      #ae-container{
+        grid-template-columns:1fr;
+      }
+      #ae-right{
+        height:680px;
+        min-height:680px;
+        max-height:680px;
+      }
+      .ae-topbar{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+    }
+  </style>
+
+  <div id="ae-container">
+
+    <div id="ae-left">
+      <div class="ae-avatar-wrapper">
+        <button type="button" id="ae-face-button" class="ae-avatar" aria-label="Talk to Elena"><video id="ae-live-video" autoplay playsinline disablepictureinpicture></video></button>
+      </div>
+      <div class="ae-name">Elena</div>
+      <div class="ae-sub">A.I. Concierge • OrozcoRealty</div>
+
+      <div class="ae-call-controls"><button type="button" id="ae-call">Talk to Elena</button><div id="ae-call-status" role="status"></div></div>
+      <div class="ae-links">
+        <a class="ae-link-btn" href="https://orozcorealty.webflow.io/buy/home-page" target="_blank">Buy</a>
+        <a class="ae-link-btn" href="https://orozcorealty.webflow.io/sell/home-page" target="_blank">Sell</a>
+        <a class="ae-link-btn" href="https://orozcorealty.webflow.io/military/air-force" target="_blank">Military</a>
+        <a class="ae-link-btn" href="https://orozcorealty.webflow.io/about-us" target="_blank">About Us</a>
+
+      </div>
+
+      <div class="ae-badge">OrozcoRealty • A.I.-Powered Real Estate Intelligence</div>
+    </div>
+
+    <div id="ae-right">
+      <div class="ae-topbar">
+        <button id="ae-side-panel-close" type="button" aria-label="Close Ask Elena" autofocus>×</button>
+        <div class="ae-topbar-copy">
+          <h2>Ask Elena</h2>
+          <p>Find your next step at The Orozco Realty.</p>
+        </div>
+        <div class="ae-topbar-pill">The Orozco Realty</div>
+      </div>
+
+      <div class="ae-chat" id="ae-chat" role="log" aria-live="polite" aria-label="Conversation with Elena"></div>
+
+      <div class="ae-footer">
+        <input id="ae-input" aria-label="Your question for Elena" maxlength="3000" class="ae-input" type="text" placeholder="Where would you like to go?" />
+        <button id="ae-send" type="button" class="ae-btn">Send</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+(() => {
+  'use strict';
+  const root = document.getElementById('ask-elena-shell');
+  if (!root || root.dataset.elenaEmbedReady === '1') return;
+  root.dataset.elenaEmbedReady = root.dataset.elenaReady = '1';
+  const byId = id => document.getElementById(id);
+  const dialog = byId('ae-side-panel'), video = byId('ae-live-video');
+  const callButton = byId('ae-call'), faceButton = byId('ae-face-button');
+  const status = byId('ae-call-status'), chat = byId('ae-chat');
+  const input = byId('ae-input'), send = byId('ae-send');
+  let current = null;
+  const hello = "Welcome to The Orozco Realty! I’m Elena. Are you looking to buy, sell, plan a military move, or learn about the platform? Choose a section, tap my portrait to talk, or type below. Anam processes voice and typed conversations.";
+  const destinations = new Map(Array.from(root.querySelectorAll('.ae-links a'), link =>
+    [link.textContent.trim().toLowerCase(), link.href]));
+  function writeMessage(line, role, text) {
+    line.replaceChildren();
+    if (role !== 'persona') { line.textContent = text; return; }
+    for (const part of text.split(/\b(About Us|Military|Buy|Sell)\b/gi)) {
+      const url = destinations.get(part.toLowerCase());
+      if (!url) { line.append(part); continue; }
+      const link = document.createElement('a');
+      link.href = url;
+      link.textContent = part;
+      link.style.color = 'inherit';
+      line.append(link);
+    }
+  }
+  function bubble(role, text) {
+    const line = document.createElement('div');
+    line.className = 'ae-msg ' + (role === 'user' ? 'ae-user' : 'ae-bot');
+    writeMessage(line, role, text);
+    chat.append(line);
+    chat.scrollTop = chat.scrollHeight;
+    return line;
+  }
+  function render(message = '') {
+    const label = current ? (current.ready ? 'End conversation' : 'Cancel connection') : 'Talk to Elena';
+    callButton.textContent = label;
+    faceButton.setAttribute('aria-label', label);
+    status.textContent = message;
+    send.disabled = !!current && !current.ready;
+  }
+  function stop(message = '') {
+    const call = current;
+    current = null;
+    if (call) {
+      call.abort.abort();
+      clearTimeout(call.timer);
+      call.mic?.getTracks().forEach(track => track.stop());
+      if (call.client) Promise.resolve(call.client.stopStreaming()).catch(() => {});
+    }
+    video.pause(); video.srcObject = null;
+    video.classList.remove('ae-playing');
+    render(message);
+  }
+  function failMessage(error) {
+    if (error.name === 'NotAllowedError' || /microphone_permission_denied/i.test(error.message)) return 'Allow microphone access to talk, or type a question below.';
+    if (error.name === 'NotFoundError') return 'No microphone was found. You can still type a question.';
+    if (/capacity|concurren|quota|credits|limit|429/i.test(error.message)) return 'Elena is at her call limit. Please try again later.';
+    if (/403|origin/i.test(error.message)) return 'Anam could not authorize a call from this website.';
+    return 'Elena couldn’t connect. Check your connection and try again.';
+  }
+  async function start(useMic) {
+    if (current || !dialog.open) return null;
+    const call = {abort: new AbortController(), ready: false, mic: null, client: null, messages: new Map()};
+    current = call;
+    render(useMic ? 'Allow your microphone to talk with Elena.' : 'Connecting to Elena…');
+    try {
+      if (useMic) {
+        if (!navigator.mediaDevices?.getUserMedia) throw new Error('Microphone unavailable');
+        const mic = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true}, video: false});
+        if (current !== call) { mic.getTracks().forEach(track => track.stop()); return null; }
+        call.mic = mic;
+      }
+      render('Connecting to Elena…');
+      call.timer = setTimeout(() => { if (current === call) stop('The connection timed out. Try again.'); }, 45000);
+      const [sdk, response] = await Promise.all([
+        import('https://cdn.jsdelivr.net/npm/@anam-ai/js-sdk@4.29.3/+esm'),
+        fetch('https://api.anam.ai/v1/auth/widget', {method:'POST', credentials:'omit', signal:call.abort.signal, headers:{'Content-Type':'application/json'}, body:JSON.stringify({agentId:'8a347f9e-a615-48fc-845f-7cdc81eb78d7'})})
+      ]);
+      if (!response.ok) throw new Error('Anam '+response.status);
+      const {sessionToken} = await response.json();
+      if (current !== call) return null;
+      if (!sessionToken) throw new Error('Missing session');
+      const client = call.client = sdk.createClient(sessionToken, {disableInputAudio: !useMic});
+      // Wait for Anam's dialogue engine; the first video frame can arrive before it is ready for a question.
+      const waitFor = register => new Promise(resolve => {
+        register(resolve);
+        call.abort.signal.addEventListener('abort', resolve, {once:true});
+      });
+      const engineReady = waitFor(done => client.addListener(sdk.AnamEvent.SESSION_READY, done));
+      const greeting = useMic ? Promise.resolve() : waitFor(done => {
+        client.addListener(sdk.AnamEvent.MESSAGE_HISTORY_UPDATED, history => {
+          if (history.some(item => item.role === 'persona' && item.content)) done();
+        });
+      });
+      client.addListener(sdk.AnamEvent.CONNECTION_CLOSED, (reason, details) => {
+        if (current === call) stop(call.ready ? 'Conversation ended.' : failMessage(new Error(String(reason)+' '+String(details || ''))));
+      });
+      client.addListener(sdk.AnamEvent.MESSAGE_HISTORY_UPDATED, history => {
+        if (current !== call) return;
+        for (const item of history) {
+          if (!item.content || !item.id || !['user','persona'].includes(item.role)) continue;
+          let line = call.messages.get(item.id);
+          if (!line) { line = bubble(item.role,item.content); call.messages.set(item.id,line); }
+          else if (line.textContent !== item.content) writeMessage(line, item.role, item.content);
+        }
+      });
+      await Promise.all([client.streamToVideoElement(video.id, call.mic || undefined), engineReady, greeting]);
+      if (current !== call) { await client.stopStreaming(); return null; }
+      clearTimeout(call.timer);
+      call.ready = true;
+      render(useMic ? 'Microphone on · Speak to Elena' : 'Keyboard conversation · Microphone off');
+      return client;
+    } catch (error) {
+      if (current === call) stop(failMessage(error));
+      return null;
+    }
+  }
+  video.addEventListener('playing', () => { if (current) video.classList.add('ae-playing'); });
+  root.querySelector('.ae-links').addEventListener('click', event => {
+    if (event.target.closest('a')) stop();
+  });
+  function toggleCall() { if (current) stop('Conversation ended.'); else void start(true); }
+  faceButton.addEventListener('click', toggleCall);
+  callButton.addEventListener('click', toggleCall);
+  async function typeQuestion() {
+    const message = input.value.trim();
+    if (!message || send.disabled) return;
+    const client = current?.ready ? current.client : await start(false);
+    if (!client || current?.client !== client) return;
+    try { client.sendUserMessage(message); bubble('user', message); if (input.value.trim() === message) input.value = ''; }
+    catch { status.textContent = 'Please try sending your question again.'; }
+  }
+  send.addEventListener('click', typeQuestion);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); void typeQuestion(); } });
+  function reset() { stop(); chat.replaceChildren(); input.value = ''; bubble('persona', hello); }
+  dialog.addEventListener('close', reset);
+  window.addEventListener('pagehide', () => stop());
+  window.OrozcoAskElena = {open: () => byId('ae-floating-chat-button').click(), close: () => dialog.close(), reset};
+  reset();
+})();
+</script>
+</div>
+  </div>
+</dialog>
+
+<script>
+(() => {
+  const button = document.getElementById("ae-floating-chat-button");
+  const popup = document.getElementById("ae-side-panel");
+  const closeButton = document.getElementById("ae-side-panel-close");
+  let savedOverflow = null;
+  let pressedOutside = false;
+
+  button.addEventListener("click", () => {
+    if (popup.open) return;
+    popup.showModal();
+    savedOverflow = {
+      value:document.documentElement.style.getPropertyValue("overflow"),
+      priority:document.documentElement.style.getPropertyPriority("overflow")
+    };
+    document.documentElement.style.setProperty("overflow", "hidden");
+    button.setAttribute("aria-expanded", "true");
+    const chat = document.getElementById("ae-chat");
+    if (chat) chat.scrollTop = chat.scrollHeight;
+  });
+
+  // Keep focused original controls visible when the popup needs to scroll.
+  popup.addEventListener("focusin", (event) => {
+    if (event.target !== closeButton) {
+      event.target.scrollIntoView({ behavior:"instant", block:"nearest", inline:"nearest" });
+    }
+  });
+
+  closeButton.addEventListener("click", () => popup.close());
+  // Escape uses the browser's native dialog behavior.
+  popup.addEventListener("close", () => {
+    button.setAttribute("aria-expanded", "false");
+    if (savedOverflow) {
+      if (savedOverflow.value) {
+        document.documentElement.style.setProperty("overflow", savedOverflow.value, savedOverflow.priority);
+      } else {
+        document.documentElement.style.removeProperty("overflow");
+      }
+      savedOverflow = null;
+    }
+    pressedOutside = false;
+    button.focus({ preventScroll:true });
+  });
+
+  function isOutside(event) {
+    const rect = popup.getBoundingClientRect();
+    return event.clientX < rect.left || event.clientX > rect.right ||
+      event.clientY < rect.top || event.clientY > rect.bottom;
+  }
+  popup.addEventListener("pointerdown", (event) => {
+    pressedOutside = event.target === popup && isOutside(event);
+  });
+  popup.addEventListener("pointercancel", () => { pressedOutside = false; });
+  popup.addEventListener("click", (event) => {
+    if (pressedOutside && event.target === popup && isOutside(event)) popup.close();
+    pressedOutside = false;
+  });
+})();
+</script>
