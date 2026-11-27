@@ -27,3 +27,43 @@ test('provider quota and authorization failures are distinct and sanitized',asyn
 test('malformed model output retains deterministic figures without pretending AI succeeded',async()=>{const r=request(),p=buildPacket(r.context);const result=await explain(r,p,{apiKey:'fake',fetchImpl:async()=>json(completed({...answer,answer:'$99999'}))});assert.equal(result.explanation_mode,'guided_fallback');assert.equal(result.service_status,'invalid_answer');assert(!JSON.stringify(result).includes('99999'));});
 test('endpoint validates method, content, size, origin and context with no caching',async()=>{assert.equal((await handler({httpMethod:'GET'})).statusCode,405);assert.equal((await handler({httpMethod:'OPTIONS'})).statusCode,204);assert.equal((await handler({httpMethod:'POST',headers:{origin:'https://evil.test'},body:'{}'})).statusCode,403);assert.equal((await handler({httpMethod:'POST',body:'x'.repeat(90001)})).statusCode,413);for(const body of ['{','[]',JSON.stringify({message:'x',context:{version:1,income:{complete:true,grossMonthlyIncome:-1}}})])assert.equal((await handler({httpMethod:'POST',body})).statusCode,400);const res=await handler({httpMethod:'OPTIONS',headers:{origin:'https://pcs-united-com.webflow.io'}});assert.equal(res.headers['Cache-Control'],'no-store');assert.equal(res.headers['Access-Control-Allow-Origin'],'https://pcs-united-com.webflow.io');});
 test('negative cash flow remains a real shortfall and format preserves cents',()=>{const c=fixture();c.income.netMonthlyIncome=1000;c.income.monthlyDeductions=7000;c.budget.state.netMonthly=1000;const p=buildPacket(c);assert.equal(p.facts['budget.cashFlow'].value,-1400.25);assert.match(formatFacts([p.facts['budget.cashFlow']]),/-\$1,400.25/);});
+
+test('duplicated TOR Financial Guidance has the same preflight and POST contract as PCSU',async t=>{
+  const previousKey=process.env.OPENAI_API_KEY;
+  process.env.OPENAI_API_KEY='fake-test-key';
+  const calls=[];
+  t.mock.method(globalThis,'fetch',async(_,options)=>{calls.push(JSON.parse(options.body));return json(completed(answer));});
+  try{
+    const results=[];
+    for(const origin of ['https://pcs-united-com.webflow.io','https://orozcorealty.webflow.io']){
+      const preflight=await handler({httpMethod:'OPTIONS',headers:{origin}});
+      assert.equal(preflight.statusCode,204);
+      assert.equal(preflight.headers['Access-Control-Allow-Origin'],origin);
+      assert.equal(preflight.headers.Vary,'Origin');
+      assert.equal(preflight.headers['Access-Control-Allow-Credentials'],undefined);
+      const response=await handler({httpMethod:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify({message:'Explain my plan',context:fixture(),history:[{role:'user',content:'Help me compare my options.'}]})});
+      assert.equal(response.statusCode,200);
+      assert.equal(response.headers['Access-Control-Allow-Origin'],origin);
+      const data=JSON.parse(response.body);
+      assert.equal(data.explanation_mode,'ai_grounded');
+      assert.equal(data.facts[0].value,3599.75);
+      assert.equal(data.citations[0].id,'budget');
+      assert.match(data.history_reply,/3,599.75/);
+      results.push(data);
+    }
+    assert.deepEqual(results[0],results[1]);
+    assert.deepEqual(calls[0],calls[1]);
+    assert.equal(calls[1].store,false);
+    assert.equal(JSON.parse(calls[1].input[1].content).recent_conversation[0].content,'Help me compare my options.');
+  }finally{if(previousKey===undefined)delete process.env.OPENAI_API_KEY;else process.env.OPENAI_API_KEY=previousKey;}
+});
+
+test('TOR origin support does not allow lookalike or unrelated sites',async()=>{
+  for(const origin of ['https://orozcorealty.webflow.io.evil.test','https://evil-orozcorealty.webflow.io','http://orozcorealty.webflow.io','https://orozcorealty.webflow.io:8443','https://other.webflow.io']){
+    for(const httpMethod of ['OPTIONS','POST']){
+      const response=await handler({httpMethod,headers:{origin},body:JSON.stringify({message:'Hello'})});
+      assert.equal(response.statusCode,403);
+      assert.equal(response.headers['Access-Control-Allow-Origin'],undefined);
+    }
+  }
+});

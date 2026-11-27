@@ -3,7 +3,7 @@ import { explain, historyReply } from './_share/pcsu-amy-model.js';
 
 function allowed(origin) {
   if(!origin)return true;
-  if(['https://pcs-united-com.webflow.io','https://pcsunited.com','https://www.pcsunited.com','https://thewing.netlify.app','https://thewing.ai','https://www.thewing.ai'].includes(origin))return true;
+  if(['https://pcs-united-com.webflow.io','https://orozcorealty.webflow.io','https://pcsunited.com','https://www.pcsunited.com','https://thewing.netlify.app','https://thewing.ai','https://www.thewing.ai'].includes(origin))return true;
   return /^https:\/\/deploy-preview-\d+--thewing\.netlify\.app$/.test(origin)||(process.env.CONTEXT!=='production'&&/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin));
 }
 export async function handler(event) {
