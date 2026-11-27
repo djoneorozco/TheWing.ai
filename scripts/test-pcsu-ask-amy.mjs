@@ -52,10 +52,26 @@ test('duplicated TOR Financial Guidance has the same preflight and POST contract
       results.push(data);
     }
     assert.deepEqual(results[0],results[1]);
-    assert.deepEqual(calls[0],calls[1]);
+    assert.match(calls[0].input[0].content,/You are Amy, PCSUnited/);
+    assert.match(calls[1].input[0].content,/You are Elena, The Orozco Realty/);
+    assert.equal(calls[0].input[0].content.split('\n').slice(1).join('\n'),calls[1].input[0].content.split('\n').slice(1).join('\n'));
+    assert.deepEqual({...calls[0],input:calls[0].input.slice(1)},{...calls[1],input:calls[1].input.slice(1)});
     assert.equal(calls[1].store,false);
     assert.equal(JSON.parse(calls[1].input[1].content).recent_conversation[0].content,'Help me compare my options.');
   }finally{if(previousKey===undefined)delete process.env.OPENAI_API_KEY;else process.env.OPENAI_API_KEY=previousKey;}
+});
+
+test('TOR fallback uses Elena while PCSU continues to use Amy',async()=>{
+  const previousKey=process.env.OPENAI_API_KEY;delete process.env.OPENAI_API_KEY;
+  try{
+    for(const [origin,name] of [['https://orozcorealty.webflow.io','Elena'],['https://pcs-united-com.webflow.io','Amy']]){
+      const response=await handler({httpMethod:'POST',headers:{origin},body:JSON.stringify({message:'Explain my plan',context:fixture(),name:'Ignored client name'})});
+      const data=JSON.parse(response.body);
+      assert.equal(data.explanation_mode,'guided_fallback');
+      assert.match(data.reply,new RegExp('^'+name+'’s AI'));
+      assert.equal(data.facts.find(f=>f.id==='budget.cashFlow').value,3599.75);
+    }
+  }finally{if(previousKey!==undefined)process.env.OPENAI_API_KEY=previousKey;}
 });
 
 test('TOR origin support does not allow lookalike or unrelated sites',async()=>{

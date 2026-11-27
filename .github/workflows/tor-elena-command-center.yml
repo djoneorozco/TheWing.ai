@@ -1,0 +1,16 @@
+name: TOR Elena Command Center
+on:
+  pull_request:
+    paths: ['TOR-Ask-Elena/**', 'PCSU-Ask-Amy/panel.js', 'scripts/*tor-elena-command-center*', 'Webflow/TOR-Ask-Elena-Command-Center.html', 'netlify/functions/pcsu-ask-amy.js', 'netlify/functions/_share/pcsu-amy-*.js', '.github/workflows/tor-elena-command-center.yml']
+  workflow_dispatch:
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/build-tor-elena-command-center.mjs
+      - run: git diff --exit-code -- TOR-Ask-Elena/panel.js TOR-Ask-Elena/panel.css Webflow/TOR-Ask-Elena-Command-Center.html
+      - run: node --test scripts/test-tor-elena-command-center.mjs scripts/test-pcsu-ask-amy.mjs scripts/test-financial-analysis.mjs scripts/test-finance-utility.mjs scripts/test-finance-mortgage-bridge.mjs scripts/test-military-mortgage.mjs

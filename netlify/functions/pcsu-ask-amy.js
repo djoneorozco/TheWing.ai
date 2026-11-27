@@ -20,6 +20,11 @@ export async function handler(event) {
   let request,packet;
   try{request=readRequest(JSON.parse(event.body));packet=buildPacket(request.context);}
   catch{return reply(400,{ok:false,code:'context_invalid',error:'Your calculator inputs are incomplete, invalid or still updating. Review the current entries and try again.'});}
-  const answer=await explain(request,packet);
+  // Presentation identity only. Both sites retain the same inputs, engines and tools.
+  const persona=origin==='https://orozcorealty.webflow.io'?{
+    name:'Elena',
+    identity:"You are Elena, The Orozco Realty's supportive financial guidance companion, powered by TheWing.ai. Help service members, veterans and families compare buying, renting, base housing or waiting without sales pressure."
+  }:{};
+  const answer=await explain(request,packet,persona);
   return reply(200,{ok:true,version:VERSION,...answer,history_reply:historyReply(answer),context_used:{section:request.section,state:packet.state,missing:packet.missing,warnings:packet.warnings},privacy:'Conversation stays in page memory. This endpoint does not save financial profiles or chat history.'});
 }
